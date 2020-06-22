@@ -899,13 +899,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // Check to make sure our participant subject name matches the grant we're looking at
     if (pgr_iter->subject == ac_iter->second.subject) {
 
+      Permissions::PublishSubscribe_t denied_type;
+      bool found_deny = false;
       // Iterate over allow / deny rules
       perm_topic_rules_iter ptr_iter;
       for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
-        // Check that our domain is listed and the permissions type is ALLOW before checking further
-        //TODO [now]: check Deny rules
-        if (ptr_iter->domain_list.count(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
+        if (ptr_iter->domain_list.count(domain_id)) {
 
           // Iterate over pub / sub rules
           perm_topic_ps_rules_iter tpsr_iter;
@@ -915,13 +915,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             // TODO Add support for relay permissions once relay only key exchange is supported
             if (tpsr_iter->ps_type == Permissions::PUBLISH || tpsr_iter->ps_type == Permissions::SUBSCRIBE) {
 
-              // Iterate over topics
               std::vector<std::string>::iterator tl_iter;
               for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
 
-                // If we have a match, we're ok to allow topic creation
-                if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false)) {
-                  return true;
+                if (::ACE::wild_match(topic_data.name, tl_iter->c_str(), true, false)) {
+                  if (ptr_iter->ad_type == Permissions::ALLOW) {
+                    return true;
+                  }
+                  if (found_deny && denied_type != tpsr_iter->ps_type) {
+                    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Both publish and subscribe are denied for this topic.");
+                  } else if (!found_deny) {
+                    found_deny = true;
+                    denied_type = tpsr_iter->ps_type;
+                  }
                 }
               }
             }
@@ -1175,7 +1181,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       }
     }
   }
-  
+
   CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::get_topic_sec_attributes: No matching domain/topic in governance");
   return false;
 }
