@@ -8,28 +8,33 @@
 
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/SubjectName.h"
-#include "Governance.h"
 
-#include <list>
+#include "dds/DdsDcpsCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityParamsC.h"
+
+#include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/RcObject.h"
+
+#include <set>
+#include <string>
+#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
-class Permissions : public DCPS::RcObject {
-public:
+struct Permissions : DCPS::RcObject {
 
   typedef DCPS::RcHandle<Permissions> shared_ptr;
 
-  enum AllowDeny_t
-  {
+  enum AllowDeny_t {
     ALLOW,
     DENY
   };
 
-  enum PublishSubscribe_t
-  {
+  enum PublishSubscribe_t {
     PUBLISH,
     SUBSCRIBE
   };
@@ -48,17 +53,17 @@ public:
     bool partitions_match(const DDS::StringSeq& entity_partitions, AllowDeny_t allow_or_deny) const;
   };
 
-  typedef std::list<Action> Actions;
+  typedef std::vector<Action> Actions;
 
   struct Rule {
     AllowDeny_t ad_type;
-    std::set< ::DDS::Security::DomainId_t > domain_list;
+    std::set<DDS::Security::DomainId_t> domains;
     Actions actions;
   };
 
-  typedef std::list<Rule> Rules;
+  typedef std::vector<Rule> Rules;
 
-  struct Grant {
+  struct Grant : DCPS::RcObject {
     std::string name;
     SSL::SubjectName subject;
     Validity_t validity;
@@ -66,28 +71,17 @@ public:
     Rules rules;
   };
 
-  typedef std::vector<Grant> Grants;
+  typedef DCPS::RcHandle<Grant> Grant_rch;
 
-  struct AcPerms {
-    Grants grants;
-    DDS::Security::PermissionsToken perm_token;
-    DDS::Security::PermissionsCredentialToken perm_cred_token;
-  };
-
-  Permissions();
+  typedef std::vector<Grant_rch> Grants;
 
   int load(const SSL::SignedDocument& doc);
 
-  AcPerms& data()
-  {
-    return perm_data_;
-  }
+  bool find_grant(const SSL::SubjectName& name, Grant_rch* found = 0) const;
 
-  bool find_grant(const SSL::SubjectName& name, Grant* found = 0) const;
-
-private:
-
-  AcPerms perm_data_;
+  Grants grants_;
+  DDS::Security::PermissionsToken perm_token_;
+  DDS::Security::PermissionsCredentialToken perm_cred_token_;
 };
 
 }

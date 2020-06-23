@@ -230,6 +230,7 @@ public:
     const DDS::Security::EndpointSecurityAttributes& attributes,
     DDS::Security::SecurityException& ex);
 
+  static bool pattern_match(const char* string, const char* pattern);
 
 private:
 
@@ -285,7 +286,7 @@ private:
 
   time_t convert_permissions_time(const std::string& timeString);
 
-  bool validate_date_time(ACPermsMap::iterator ac_iter,
+  bool validate_date_time(const Permissions::Validity_t& validity,
                           DCPS::TimeDuration& delta_time,
                           DDS::Security::SecurityException& ex);
 

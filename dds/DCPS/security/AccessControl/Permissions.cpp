@@ -5,12 +5,13 @@
 
 #include "Permissions.h"
 
+#include "dds/DCPS/security/AccessControlBuiltInImpl.h"
+
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
 #include "xercesc/sax/HandlerBase.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
 
-#include "ace/ACE.h"
 #include "ace/OS_NS_strings.h"
 #include "ace/XML_Utils/XercesString.h"
 
@@ -20,11 +21,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
-
-Permissions::Permissions()
-  : perm_data_()
-{
-}
 
 namespace {
   std::string toString(const XMLCh* in)
@@ -91,18 +87,20 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
   xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
   if (!elementRoot) {
-    throw std::runtime_error("empty XML document");
+    ACE_ERROR((LM_ERROR, ACE_TEXT(
+        "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Empty XML document\n")));
+    return -1;
   }
 
   // Find the validity rules
   xercesc::DOMNodeList* grantRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("grant")));
 
   for (XMLSize_t r = 0; r < grantRules->getLength(); ++r) {
-    Grant grant;
+    Grant_rch grant = DCPS::make_rch<Grant>();
 
     // Pull out the grant name for this grant
     xercesc::DOMNamedNodeMap* rattrs = grantRules->item(r)->getAttributes();
-    grant.name = toString(rattrs->item(0)->getTextContent());
+    grant->name = toString(rattrs->item(0)->getTextContent());
 
     // Pull out subject name, validity, and default
     xercesc::DOMNodeList* grantNodes = grantRules->item(r)->getChildNodes();
@@ -112,7 +110,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
       const XStr g_tag = grantNodes->item(gn)->getNodeName();
 
       if (g_tag == ACE_TEXT("subject_name")) {
-        valid_subject = (grant.subject.parse(toString(grantNodes->item(gn)->getTextContent())) == 0);
+        valid_subject = (grant->subject.parse(toString(grantNodes->item(gn)->getTextContent())) == 0);
       } else if (g_tag == ACE_TEXT("validity")) {
         xercesc::DOMNodeList* validityNodes = grantNodes->item(gn)->getChildNodes();
 
@@ -120,20 +118,18 @@ int Permissions::load(const SSL::SignedDocument& doc)
           const XStr v_tag = validityNodes->item(vn)->getNodeName();
 
           if (v_tag == ACE_TEXT("not_before")) {
-            grant.validity.not_before = toString(
-                      (validityNodes->item(vn)->getTextContent()));
+            grant->validity.not_before = toString((validityNodes->item(vn)->getTextContent()));
           } else if (v_tag == ACE_TEXT("not_after")) {
-            grant.validity.not_after = toString(
-                      (validityNodes->item(vn)->getTextContent()));
+            grant->validity.not_after = toString((validityNodes->item(vn)->getTextContent()));
           }
         }
       } else if (g_tag == ACE_TEXT("default")) {
         const std::string def = toString(grantNodes->item(gn)->getTextContent());
         valid_default = true;
         if (def == "ALLOW") {
-          grant.default_permission = ALLOW;
+          grant->default_permission = ALLOW;
         } else if (def == "DENY") {
-          grant.default_permission = DENY;
+          grant->default_permission = DENY;
         } else {
           ACE_ERROR((LM_ERROR, ACE_TEXT(
             "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: <default> must be ALLOW or DENY\n")));
@@ -169,7 +165,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
             for (XMLSize_t did = 0; did < domainIdNodes->getLength(); ++did) {
               if (ACE_TEXT("id") == XStr(domainIdNodes->item(did)->getNodeName())) {
-                rule.domain_list.insert(toInt(domainIdNodes->item(did)->getTextContent()));
+                rule.domains.insert(toInt(domainIdNodes->item(did)->getTextContent()));
               } else if (ACE_TEXT("id_range") == XStr(domainIdNodes->item(did)->getNodeName())) {
                 int min_value = 0;
                 int max_value = 0;
@@ -181,14 +177,14 @@ int Permissions::load(const SSL::SignedDocument& doc)
                   } else if (ACE_TEXT("max") == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
                     max_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
 
-                    if (min_value == 0 || min_value > max_value) {
+                    if (min_value > max_value) {
                       ACE_ERROR((LM_ERROR, ACE_TEXT(
                           "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Permission XML Domain Range invalid.\n")));
                       return -1;
                     }
 
                     for (int i = min_value; i <= max_value; ++i) {
-                      rule.domain_list.insert(i);
+                      rule.domains.insert(i);
                     }
                   }
                 }
@@ -226,7 +222,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
           }
         }
 
-        grant.rules.push_back(rule);
+        grant->rules.push_back(rule);
       }
     }
 
@@ -236,24 +232,24 @@ int Permissions::load(const SSL::SignedDocument& doc)
           ACE_TEXT("AccessControlBuiltInImpl::load_permissions_file: ")
           ACE_TEXT("Unable to parse subject name, ignoring grant.\n")));
       }
-    } else if (find_grant(grant.subject)) {
+    } else if (find_grant(grant->subject)) {
       if (DCPS::security_debug.access_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {access_warn} ")
           ACE_TEXT("AccessControlBuiltInImpl::load_permissions_file: ")
           ACE_TEXT("Ignoring grant with duplicate subject name.\n")));
       }
     } else {
-      perm_data_.grants.push_back(grant);
+      grants_.push_back(grant);
     }
   } // grant_rules
 
   return 0;
 }
 
-bool Permissions::find_grant(const SSL::SubjectName& name, Grant* found) const
+bool Permissions::find_grant(const SSL::SubjectName& name, Grant_rch* found) const
 {
-  for (Grants::const_iterator it = perm_data_.grants.begin(); it != perm_data_.grants.end(); ++it) {
-    if (name == it->subject) {
+  for (Grants::const_iterator it = grants_.begin(); it != grants_.end(); ++it) {
+    if (name == (*it)->subject) {
       if (found) {
         *found = *it;
       }
@@ -267,16 +263,18 @@ namespace {
   typedef std::vector<std::string>::const_iterator vsiter_t;
 }
 
-bool Permissions::Action::topic_matches(const char* topic) const {
+bool Permissions::Action::topic_matches(const char* topic) const
+{
   for (vsiter_t it = topics.begin(); it != topics.end(); ++it) {
-    if (ACE::wild_match(topic, it->c_str(), true, true)) {
+    if (AccessControlBuiltInImpl::pattern_match(topic, it->c_str())) {
       return true;
     }
   }
   return false;
 }
 
-bool Permissions::Action::partitions_match(const DDS::StringSeq& entity_partitions, AllowDeny_t allow_or_deny) const {
+bool Permissions::Action::partitions_match(const DDS::StringSeq& entity_partitions, AllowDeny_t allow_or_deny) const
+{
   const unsigned int n_entity_names = entity_partitions.length();
   if (partitions.empty()) {
     if (allow_or_deny == DENY) {
@@ -298,7 +296,7 @@ bool Permissions::Action::partitions_match(const DDS::StringSeq& entity_partitio
   for (unsigned int i = 0; i < n_entity_names; ++i) {
     bool found = false;
     for (vsiter_t perm_it = partitions.begin(); !found && perm_it != partitions.end(); ++perm_it) {
-      if (ACE::wild_match(entity_partitions[i], perm_it->c_str(), true, true)) {
+      if (AccessControlBuiltInImpl::pattern_match(entity_partitions[i], perm_it->c_str())) {
         found = true;
       }
     }
@@ -313,8 +311,8 @@ bool Permissions::Action::partitions_match(const DDS::StringSeq& entity_partitio
     if (allow_or_deny == DENY && found) {
       // DDS-Security v1.1 9.4.1.3.2.3.2.4
       // In order for an action to be denied it must meet the denied partitions condition.
-      // For this to happen one [or] more of the partition names associated with the DDS Entity ...
-      // must match one [of] the partitions ... listed in the partitions condition section.
+      // For this to happen one [or] more of the partition names associated with the DDS Entity
+      // ... must match one [of] the partitions ... listed in the partitions condition section.
       return true; // i'th QoS partition name matches some <partition> in Permissons
     }
   }
