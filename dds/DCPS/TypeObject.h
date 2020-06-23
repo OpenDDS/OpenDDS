@@ -225,15 +225,15 @@ namespace XTypes {
   const MemberFlag IS_KEY = 1 << 5;             // K  StructMember, UnionDiscriminator
   const MemberFlag IS_DEFAULT = 1 << 6;         // D  UnionMember, EnumerationLiteral
 
-  typedef MemberFlag   CollectionElementFlag;   // T1, T2, X
-  typedef MemberFlag   StructMemberFlag;        // T1, T2, O, M, K, X
-  typedef MemberFlag   UnionMemberFlag;         // T1, T2, D, X
-  typedef MemberFlag   UnionDiscriminatorFlag;  // T1, T2, K
-  typedef MemberFlag   EnumeratedLiteralFlag;   // D
-  typedef MemberFlag   AnnotationParameterFlag; // Unused. No flags apply
-  typedef MemberFlag   AliasMemberFlag;         // Unused. No flags apply
-  typedef MemberFlag   BitflagFlag;             // Unused. No flags apply
-  typedef MemberFlag   BitsetMemberFlag;        // Unused. No flags apply
+  typedef MemberFlag CollectionElementFlag;   // T1, T2, X
+  typedef MemberFlag StructMemberFlag;        // T1, T2, O, M, K, X
+  typedef MemberFlag UnionMemberFlag;         // T1, T2, D, X
+  typedef MemberFlag UnionDiscriminatorFlag;  // T1, T2, K
+  typedef MemberFlag EnumeratedLiteralFlag;   // D
+  typedef MemberFlag AnnotationParameterFlag; // Unused. No flags apply
+  typedef MemberFlag AliasMemberFlag;         // Unused. No flags apply
+  typedef MemberFlag BitflagFlag;             // Unused. No flags apply
+  typedef MemberFlag BitsetMemberFlag;        // Unused. No flags apply
 
   // Mask used to remove the flags that do not affect assignability
   // Selects  T1, T2, O, M, K, D
@@ -250,14 +250,14 @@ namespace XTypes {
   const TypeFlag IS_NESTED = 1 << 3;       // N     Struct, Union
   const TypeFlag IS_AUTOID_HASH = 1 << 4;  // H     Struct
 
-  typedef TypeFlag   StructTypeFlag;      // All flags apply
-  typedef TypeFlag   UnionTypeFlag;       // All flags apply
-  typedef TypeFlag   CollectionTypeFlag;  // Unused. No flags apply
-  typedef TypeFlag   AnnotationTypeFlag;  // Unused. No flags apply
-  typedef TypeFlag   AliasTypeFlag;       // Unused. No flags apply
-  typedef TypeFlag   EnumTypeFlag;        // Unused. No flags apply
-  typedef TypeFlag   BitmaskTypeFlag;     // Unused. No flags apply
-  typedef TypeFlag   BitsetTypeFlag;      // Unused. No flags apply
+  typedef TypeFlag StructTypeFlag;      // All flags apply
+  typedef TypeFlag UnionTypeFlag;       // All flags apply
+  typedef TypeFlag CollectionTypeFlag;  // Unused. No flags apply
+  typedef TypeFlag AnnotationTypeFlag;  // Unused. No flags apply
+  typedef TypeFlag AliasTypeFlag;       // Unused. No flags apply
+  typedef TypeFlag EnumTypeFlag;        // Unused. No flags apply
+  typedef TypeFlag BitmaskTypeFlag;     // Unused. No flags apply
+  typedef TypeFlag BitsetTypeFlag;      // Unused. No flags apply
 
   // Mask used to remove the flags that do no affect assignability
   const TypeFlag TypeFlagMinimalMask = 0x0007; // Selects  M, A, F
@@ -267,7 +267,7 @@ namespace XTypes {
 
   // 1 Byte
   struct StringSTypeDefn {
-    SBound                  bound;
+    SBound bound;
 
     StringSTypeDefn() {}
 
@@ -278,7 +278,7 @@ namespace XTypes {
 
   // 4 Bytes
   struct StringLTypeDefn {
-    LBound                  bound;
+    LBound bound;
 
     StringLTypeDefn() {}
 
@@ -288,8 +288,8 @@ namespace XTypes {
   };
 
   struct PlainCollectionHeader {
-    EquivalenceKind        equiv_kind;
-    CollectionElementFlag  element_flags;
+    EquivalenceKind equiv_kind;
+    CollectionElementFlag element_flags;
 
     PlainCollectionHeader() {}
 
@@ -301,8 +301,8 @@ namespace XTypes {
   };
 
   struct PlainSequenceSElemDefn {
-    PlainCollectionHeader  header;
-    SBound                 bound;
+    PlainCollectionHeader header;
+    SBound bound;
     External<TypeIdentifier> element_identifier;
 
     PlainSequenceSElemDefn() {}
@@ -317,8 +317,8 @@ namespace XTypes {
   };
 
   struct PlainSequenceLElemDefn {
-    PlainCollectionHeader  header;
-    LBound                 bound;
+    PlainCollectionHeader header;
+    LBound bound;
     External<TypeIdentifier> element_identifier;
 
     PlainSequenceLElemDefn() {}
@@ -333,8 +333,8 @@ namespace XTypes {
   };
 
   struct PlainArraySElemDefn {
-    PlainCollectionHeader  header;
-    SBoundSeq              array_bound_seq;
+    PlainCollectionHeader header;
+    SBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
 
     PlainArraySElemDefn() {}
@@ -349,8 +349,8 @@ namespace XTypes {
   };
 
   struct PlainArrayLElemDefn {
-    PlainCollectionHeader  header;
-    LBoundSeq              array_bound_seq;
+    PlainCollectionHeader header;
+    LBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
 
     PlainArrayLElemDefn() {}
@@ -365,18 +365,18 @@ namespace XTypes {
   };
 
   struct PlainMapSTypeDefn {
-    PlainCollectionHeader  header;
-    SBound                 bound;
+    PlainCollectionHeader header;
+    SBound bound;
     External<TypeIdentifier> element_identifier;
-    CollectionElementFlag  key_flags;
+    CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
     PlainMapSTypeDefn() {}
 
-    PlainMapSTypeDefn(const PlainCollectionHeader&  a_header,
-                      const SBound&                 a_bound,
+    PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
+                      const SBound& a_bound,
                       const TypeIdentifier& a_element_identifier,
-                      const CollectionElementFlag&  a_key_flags,
+                      const CollectionElementFlag& a_key_flags,
                       const TypeIdentifier& a_key_identifier)
       : header(a_header)
       , bound(a_bound)
@@ -387,18 +387,18 @@ namespace XTypes {
   };
 
   struct PlainMapLTypeDefn {
-    PlainCollectionHeader  header;
-    LBound                 bound;
+    PlainCollectionHeader header;
+    LBound bound;
     External<TypeIdentifier> element_identifier;
-    CollectionElementFlag  key_flags;
+    CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
     PlainMapLTypeDefn() {}
 
-    PlainMapLTypeDefn(const PlainCollectionHeader&  a_header,
-                      const LBound&                 a_bound,
+    PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
+                      const LBound& a_bound,
                       const TypeIdentifier& a_element_identifier,
-                      const CollectionElementFlag&  a_key_flags,
+                      const CollectionElementFlag& a_key_flags,
                       const TypeIdentifier& a_key_identifier)
       : header(a_header)
       , bound(a_bound)
@@ -408,11 +408,11 @@ namespace XTypes {
     {}
   };
 
-  // Used for Types that have cyclic depencencies with other types
+  // Used for Types that have cyclic dependencies with other types
   struct StronglyConnectedComponentId {
     TypeObjectHashId sc_component_id; // Hash StronglyConnectedComponent
-    ACE_CDR::Long   scc_length; // StronglyConnectedComponent.length
-    ACE_CDR::Long   scc_index ; // identify type in Strongly Connected Comp.
+    ACE_CDR::Long scc_length; // StronglyConnectedComponent.length
+    ACE_CDR::Long scc_index; // identify type in Strongly Connected Comp.
 
     StronglyConnectedComponentId() {}
 
@@ -730,36 +730,36 @@ namespace XTypes {
 
   struct AnnotationParameterValue {
     ACE_CDR::Octet kind;
-    ACE_CDR::Boolean             boolean_value;
-    ACE_CDR::Octet               byte_value;
-    ACE_CDR::Short               int16_value;
-    ACE_CDR::UShort              uint_16_value;
-    ACE_CDR::Long                int32_value;
-    ACE_CDR::ULong               uint32_value;
-    ACE_CDR::LongLong            int64_value;
-    ACE_CDR::ULongLong           uint64_value;
-    ACE_CDR::Float               float32_value;
-    ACE_CDR::Double              float64_value;
-    ACE_CDR::LongDouble          float128_value;
-    ACE_CDR::Char                char_value;
-    ACE_CDR::WChar               wchar_value;
-    ACE_CDR::Long                enumerated_value;
-    OPENDDS_STRING               string8_value;
-    OPENDDS_WSTRING              string16_value;
-    ExtendedAnnotationParameterValue      extended_value;
+    ACE_CDR::Boolean boolean_value;
+    ACE_CDR::Octet byte_value;
+    ACE_CDR::Short int16_value;
+    ACE_CDR::UShort uint_16_value;
+    ACE_CDR::Long int32_value;
+    ACE_CDR::ULong uint32_value;
+    ACE_CDR::LongLong int64_value;
+    ACE_CDR::ULongLong uint64_value;
+    ACE_CDR::Float float32_value;
+    ACE_CDR::Double float64_value;
+    ACE_CDR::LongDouble float128_value;
+    ACE_CDR::Char char_value;
+    ACE_CDR::WChar wchar_value;
+    ACE_CDR::Long enumerated_value;
+    OPENDDS_STRING string8_value;
+    OPENDDS_WSTRING string16_value;
+    ExtendedAnnotationParameterValue extended_value;
   };
 
   // The application of an annotation to some type or type member
   struct AppliedAnnotationParameter {
-    NameHash                  paramname_hash;
-    AnnotationParameterValue  value;
+    NameHash paramname_hash;
+    AnnotationParameterValue value;
   };
   // Sorted by AppliedAnnotationParameter.paramname_hash
   typedef Sequence<AppliedAnnotationParameter> AppliedAnnotationParameterSeq;
 
   struct AppliedAnnotation {
-    TypeIdentifier                   annotation_typeid;
-    Optional<AppliedAnnotationParameterSeq>    param_seq;
+    TypeIdentifier annotation_typeid;
+    Optional<AppliedAnnotationParameterSeq> param_seq;
   };
   // Sorted by AppliedAnnotation.annotation_typeid
   typedef Sequence<AppliedAnnotation> AppliedAnnotationSeq;
@@ -774,16 +774,16 @@ namespace XTypes {
 
   // --- Aggregate types: ------------------------------------------------
   struct AppliedBuiltinMemberAnnotations {
-    Optional<OPENDDS_STRING>                  unit; // @unit("<unit>")
-    Optional<AnnotationParameterValue>      min; // @min , @range
-    Optional<AnnotationParameterValue>      max; // @max , @range
-    Optional<OPENDDS_STRING>               hash_id; // @hash_id("<membername>")
+    Optional<OPENDDS_STRING> unit; // @unit("<unit>")
+    Optional<AnnotationParameterValue> min; // @min , @range
+    Optional<AnnotationParameterValue> max; // @max , @range
+    Optional<OPENDDS_STRING> hash_id; // @hash_id("<membername>")
   };
 
   struct CommonStructMember {
-    MemberId                                   member_id;
-    StructMemberFlag                           member_flags;
-    TypeIdentifier                   member_type_id;
+    MemberId member_id;
+    StructMemberFlag member_flags;
+    TypeIdentifier member_type_id;
 
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
@@ -796,14 +796,14 @@ namespace XTypes {
 
   // COMPLETE Details for a member of an aggregate type
   struct CompleteMemberDetail {
-    MemberName                                 name;
-    Optional<AppliedBuiltinMemberAnnotations>  ann_builtin;
-    Optional<AppliedAnnotationSeq>             ann_custom;
+    MemberName name;
+    Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
+    Optional<AppliedAnnotationSeq> ann_custom;
   };
 
   // MINIMAL Details for a member of an aggregate type
   struct OpenDDS_Dcps_Export MinimalMemberDetail {
-    NameHash                                  name_hash;
+    NameHash name_hash;
 
     MinimalMemberDetail() {}
     explicit MinimalMemberDetail(const OPENDDS_STRING& name);
@@ -811,16 +811,16 @@ namespace XTypes {
 
   // Member of an aggregate type
   struct CompleteStructMember {
-    CommonStructMember                         common;
-    CompleteMemberDetail                       detail;
+    CommonStructMember common;
+    CompleteMemberDetail detail;
   };
   // Ordered by the member_index
   typedef Sequence<CompleteStructMember> CompleteStructMemberSeq;
 
   // Member of an aggregate type
   struct MinimalStructMember {
-    CommonStructMember                         common;
-    MinimalMemberDetail                        detail;
+    CommonStructMember common;
+    MinimalMemberDetail detail;
 
     MinimalStructMember(const CommonStructMember& a_common,
                         const MinimalMemberDetail& a_detail)
@@ -845,19 +845,19 @@ namespace XTypes {
   };
 
   struct CompleteTypeDetail {
-    Optional<AppliedBuiltinTypeAnnotations>  ann_builtin;
-    Optional<AppliedAnnotationSeq>           ann_custom;
-    QualifiedTypeName                        type_name;
+    Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
+    Optional<AppliedAnnotationSeq> ann_custom;
+    QualifiedTypeName type_name;
   };
 
   struct CompleteStructHeader {
-    TypeIdentifier                 base_type;
-    CompleteTypeDetail                       detail;
+    TypeIdentifier base_type;
+    CompleteTypeDetail detail;
   };
 
   struct MinimalStructHeader {
-    TypeIdentifier                 base_type;
-    MinimalTypeDetail                        detail;
+    TypeIdentifier base_type;
+    MinimalTypeDetail detail;
 
     MinimalStructHeader() {}
 
@@ -869,15 +869,15 @@ namespace XTypes {
   };
 
   struct CompleteStructType {
-    StructTypeFlag             struct_flags;
-    CompleteStructHeader       header;
-    CompleteStructMemberSeq    member_seq;
+    StructTypeFlag struct_flags;
+    CompleteStructHeader header;
+    CompleteStructMemberSeq member_seq;
   };
 
   struct MinimalStructType {
-    StructTypeFlag             struct_flags;
-    MinimalStructHeader        header;
-    MinimalStructMemberSeq     member_seq;
+    StructTypeFlag struct_flags;
+    MinimalStructHeader header;
+    MinimalStructMemberSeq member_seq;
 
     MinimalStructType() {}
 
@@ -897,10 +897,10 @@ namespace XTypes {
   typedef Sequence<ACE_CDR::Long> UnionCaseLabelSeq;
 
   struct CommonUnionMember {
-    MemberId                    member_id;
-    UnionMemberFlag             member_flags;
-    TypeIdentifier    type_id;
-    UnionCaseLabelSeq           label_seq;
+    MemberId member_id;
+    UnionMemberFlag member_flags;
+    TypeIdentifier type_id;
+    UnionCaseLabelSeq label_seq;
 
     CommonUnionMember() {}
 
@@ -917,15 +917,15 @@ namespace XTypes {
 
   // Member of a union type
   struct CompleteUnionMember {
-    CommonUnionMember      common;
-    CompleteMemberDetail   detail;
+    CommonUnionMember common;
+    CompleteMemberDetail detail;
   };
   // Ordered by member_index
   typedef Sequence<CompleteUnionMember> CompleteUnionMemberSeq;
 
   // Member of a union type
   struct MinimalUnionMember {
-    CommonUnionMember   common;
+    CommonUnionMember common;
     MinimalMemberDetail detail;
 
     MinimalUnionMember() {}
@@ -945,8 +945,8 @@ namespace XTypes {
   typedef Sequence<MinimalUnionMember> MinimalUnionMemberSeq;
 
   struct CommonDiscriminatorMember {
-    UnionDiscriminatorFlag       member_flags;
-    TypeIdentifier     type_id;
+    UnionDiscriminatorFlag member_flags;
+    TypeIdentifier type_id;
 
     CommonDiscriminatorMember() {}
 
@@ -959,14 +959,14 @@ namespace XTypes {
 
   // Member of a union type
   struct CompleteDiscriminatorMember {
-    CommonDiscriminatorMember                common;
-    Optional<AppliedBuiltinTypeAnnotations>  ann_builtin;
-    Optional<AppliedAnnotationSeq>           ann_custom;
+    CommonDiscriminatorMember common;
+    Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
+    Optional<AppliedAnnotationSeq> ann_custom;
   };
 
   // Member of a union type
   struct MinimalDiscriminatorMember {
-    CommonDiscriminatorMember   common;
+    CommonDiscriminatorMember common;
 
     MinimalDiscriminatorMember() {}
 
@@ -976,11 +976,11 @@ namespace XTypes {
   };
 
   struct CompleteUnionHeader {
-    CompleteTypeDetail          detail;
+    CompleteTypeDetail detail;
   };
 
   struct MinimalUnionHeader {
-    MinimalTypeDetail           detail;
+    MinimalTypeDetail detail;
 
     MinimalUnionHeader() {}
 
@@ -990,17 +990,17 @@ namespace XTypes {
   };
 
   struct CompleteUnionType {
-    UnionTypeFlag                union_flags;
-    CompleteUnionHeader          header;
-    CompleteDiscriminatorMember  discriminator;
-    CompleteUnionMemberSeq       member_seq;
+    UnionTypeFlag union_flags;
+    CompleteUnionHeader header;
+    CompleteDiscriminatorMember discriminator;
+    CompleteUnionMemberSeq member_seq;
   };
 
   struct MinimalUnionType {
-    UnionTypeFlag                union_flags;
-    MinimalUnionHeader           header;
-    MinimalDiscriminatorMember   discriminator;
-    MinimalUnionMemberSeq        member_seq;
+    UnionTypeFlag union_flags;
+    MinimalUnionHeader header;
+    MinimalDiscriminatorMember discriminator;
+    MinimalUnionMemberSeq member_seq;
 
     MinimalUnionType() {}
 
@@ -1017,29 +1017,29 @@ namespace XTypes {
 
   // --- Annotation: ----------------------------------------------------
   struct CommonAnnotationParameter {
-    AnnotationParameterFlag      member_flags;
-    TypeIdentifier     member_type_id;
+    AnnotationParameterFlag member_flags;
+    TypeIdentifier member_type_id;
   };
 
   // Member of an annotation type
   struct CompleteAnnotationParameter {
-    CommonAnnotationParameter  common;
-    MemberName                 name;
-    AnnotationParameterValue   default_value;
+    CommonAnnotationParameter common;
+    MemberName name;
+    AnnotationParameterValue default_value;
   };
   // Ordered by CompleteAnnotationParameter.name
   typedef Sequence<CompleteAnnotationParameter> CompleteAnnotationParameterSeq;
 
   struct MinimalAnnotationParameter {
-    CommonAnnotationParameter  common;
-    NameHash                   name_hash;
-    AnnotationParameterValue   default_value;
+    CommonAnnotationParameter common;
+    NameHash name_hash;
+    AnnotationParameterValue default_value;
   };
   // Ordered by MinimalAnnotationParameter.name_hash
   typedef Sequence<MinimalAnnotationParameter> MinimalAnnotationParameterSeq;
 
   struct CompleteAnnotationHeader {
-    QualifiedTypeName         annotation_name;
+    QualifiedTypeName annotation_name;
   };
 
   struct MinimalAnnotationHeader {
@@ -1047,20 +1047,20 @@ namespace XTypes {
   };
 
   struct CompleteAnnotationType {
-    AnnotationTypeFlag             annotation_flag;
-    CompleteAnnotationHeader       header;
+    AnnotationTypeFlag annotation_flag;
+    CompleteAnnotationHeader header;
     CompleteAnnotationParameterSeq member_seq;
   };
 
   struct MinimalAnnotationType {
-    AnnotationTypeFlag             annotation_flag;
-    MinimalAnnotationHeader        header;
-    MinimalAnnotationParameterSeq  member_seq;
+    AnnotationTypeFlag annotation_flag;
+    MinimalAnnotationHeader header;
+    MinimalAnnotationParameterSeq member_seq;
   };
 
   // --- Alias: ----------------------------------------------------------
   struct CommonAliasBody {
-    AliasMemberFlag          related_flags;
+    AliasMemberFlag related_flags;
     TypeIdentifier related_type;
 
     CommonAliasBody() {}
@@ -1073,13 +1073,13 @@ namespace XTypes {
   };
 
   struct CompleteAliasBody {
-    CommonAliasBody       common;
-    Optional<AppliedBuiltinMemberAnnotations>  ann_builtin;
-    Optional<AppliedAnnotationSeq>             ann_custom;
+    CommonAliasBody common;
+    Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
+    Optional<AppliedAnnotationSeq> ann_custom;
   };
 
   struct MinimalAliasBody {
-    CommonAliasBody       common;
+    CommonAliasBody common;
 
     MinimalAliasBody() {}
 
@@ -1089,7 +1089,7 @@ namespace XTypes {
   };
 
   struct CompleteAliasHeader {
-    CompleteTypeDetail    detail;
+    CompleteTypeDetail detail;
   };
 
   struct MinimalAliasHeader {
@@ -1097,15 +1097,15 @@ namespace XTypes {
   };
 
   struct CompleteAliasType {
-    AliasTypeFlag         alias_flags;
-    CompleteAliasHeader   header;
-    CompleteAliasBody     body;
+    AliasTypeFlag alias_flags;
+    CompleteAliasHeader header;
+    CompleteAliasBody body;
   };
 
   struct MinimalAliasType {
-    AliasTypeFlag         alias_flags;
-    MinimalAliasHeader    header;
-    MinimalAliasBody      body;
+    AliasTypeFlag alias_flags;
+    MinimalAliasHeader header;
+    MinimalAliasBody body;
 
     MinimalAliasType() {}
 
@@ -1120,89 +1120,89 @@ namespace XTypes {
 
   // --- Collections: ----------------------------------------------------
   struct CompleteElementDetail {
-    Optional<AppliedBuiltinMemberAnnotations>  ann_builtin;
-    Optional<AppliedAnnotationSeq>             ann_custom;
+    Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
+    Optional<AppliedAnnotationSeq> ann_custom;
   };
 
   struct CommonCollectionElement {
-    CollectionElementFlag     element_flags;
-    TypeIdentifier  type;
+    CollectionElementFlag element_flags;
+    TypeIdentifier type;
   };
 
   struct CompleteCollectionElement {
-    CommonCollectionElement   common;
-    CompleteElementDetail     detail;
+    CommonCollectionElement common;
+    CompleteElementDetail detail;
   };
 
   struct MinimalCollectionElement {
-    CommonCollectionElement   common;
+    CommonCollectionElement common;
   };
 
   struct CommonCollectionHeader {
-    LBound                    bound;
+    LBound bound;
   };
 
   struct CompleteCollectionHeader {
-    CommonCollectionHeader        common;
-    Optional<CompleteTypeDetail>  detail; // not present for anonymous
+    CommonCollectionHeader common;
+    Optional<CompleteTypeDetail> detail; // not present for anonymous
   };
 
   struct MinimalCollectionHeader {
-    CommonCollectionHeader        common;
+    CommonCollectionHeader common;
   };
 
   // --- Sequence: ------------------------------------------------------
   struct CompleteSequenceType {
-    CollectionTypeFlag         collection_flag;
-    CompleteCollectionHeader   header;
-    CompleteCollectionElement  element;
+    CollectionTypeFlag collection_flag;
+    CompleteCollectionHeader header;
+    CompleteCollectionElement element;
   };
 
   struct MinimalSequenceType {
-    CollectionTypeFlag         collection_flag;
-    MinimalCollectionHeader    header;
-    MinimalCollectionElement   element;
+    CollectionTypeFlag collection_flag;
+    MinimalCollectionHeader header;
+    MinimalCollectionElement element;
   };
 
   // --- Array: ------------------------------------------------------
   struct CommonArrayHeader {
-    LBoundSeq           bound_seq;
+    LBoundSeq bound_seq;
   };
 
   struct CompleteArrayHeader {
-    CommonArrayHeader   common;
-    CompleteTypeDetail  detail;
+    CommonArrayHeader common;
+    CompleteTypeDetail detail;
   };
 
   struct MinimalArrayHeader {
-    CommonArrayHeader   common;
+    CommonArrayHeader common;
   };
 
   struct CompleteArrayType  {
-    CollectionTypeFlag          collection_flag;
-    CompleteArrayHeader         header;
-    CompleteCollectionElement   element;
+    CollectionTypeFlag collection_flag;
+    CompleteArrayHeader header;
+    CompleteCollectionElement element;
   };
 
   struct MinimalArrayType  {
-    CollectionTypeFlag         collection_flag;
-    MinimalArrayHeader         header;
-    MinimalCollectionElement   element;
+    CollectionTypeFlag collection_flag;
+    MinimalArrayHeader header;
+    MinimalCollectionElement element;
   };
 
   // --- Map: ------------------------------------------------------
   struct CompleteMapType {
-    CollectionTypeFlag            collection_flag;
-    CompleteCollectionHeader      header;
-    CompleteCollectionElement     key;
-    CompleteCollectionElement     element;
+    CollectionTypeFlag collection_flag;
+    CompleteCollectionHeader header;
+    CompleteCollectionElement key;
+    CompleteCollectionElement element;
   };
 
   struct MinimalMapType {
-    CollectionTypeFlag          collection_flag;
-    MinimalCollectionHeader     header;
-    MinimalCollectionElement    key;
-    MinimalCollectionElement    element;
+    CollectionTypeFlag collection_flag;
+    MinimalCollectionHeader header;
+    MinimalCollectionElement key;
+    MinimalCollectionElement element;
   };
 
   // --- Enumeration: ----------------------------------------------------
@@ -1210,8 +1210,8 @@ namespace XTypes {
 
   // Constant in an enumerated type
   struct CommonEnumeratedLiteral {
-    ACE_CDR::Long                     value;
-    EnumeratedLiteralFlag    flags;
+    ACE_CDR::Long value;
+    EnumeratedLiteralFlag flags;
 
     CommonEnumeratedLiteral() {}
 
@@ -1224,16 +1224,16 @@ namespace XTypes {
 
   // Constant in an enumerated type
   struct CompleteEnumeratedLiteral {
-    CommonEnumeratedLiteral  common;
-    CompleteMemberDetail     detail;
+    CommonEnumeratedLiteral common;
+    CompleteMemberDetail detail;
   };
   // Ordered by EnumeratedLiteral.common.value
   typedef Sequence<CompleteEnumeratedLiteral> CompleteEnumeratedLiteralSeq;
 
   // Constant in an enumerated type
   struct MinimalEnumeratedLiteral {
-    CommonEnumeratedLiteral  common;
-    MinimalMemberDetail      detail;
+    CommonEnumeratedLiteral common;
+    MinimalMemberDetail detail;
 
     MinimalEnumeratedLiteral() {}
 
@@ -1251,7 +1251,7 @@ namespace XTypes {
   typedef Sequence<MinimalEnumeratedLiteral> MinimalEnumeratedLiteralSeq;
 
   struct CommonEnumeratedHeader {
-    BitBound                bit_bound;
+    BitBound bit_bound;
 
     CommonEnumeratedHeader() {}
 
@@ -1261,12 +1261,12 @@ namespace XTypes {
   };
 
   struct CompleteEnumeratedHeader {
-    CommonEnumeratedHeader  common;
-    CompleteTypeDetail      detail;
+    CommonEnumeratedHeader common;
+    CompleteTypeDetail detail;
   };
 
   struct MinimalEnumeratedHeader {
-    CommonEnumeratedHeader  common;
+    CommonEnumeratedHeader common;
 
     MinimalEnumeratedHeader() {}
 
@@ -1277,16 +1277,16 @@ namespace XTypes {
 
   // Enumerated type
   struct CompleteEnumeratedType  {
-    EnumTypeFlag                    enum_flags; // unused
-    CompleteEnumeratedHeader        header;
-    CompleteEnumeratedLiteralSeq    literal_seq;
+    EnumTypeFlag enum_flags; // unused
+    CompleteEnumeratedHeader header;
+    CompleteEnumeratedLiteralSeq literal_seq;
   };
 
   // Enumerated type
   struct MinimalEnumeratedType  {
-    EnumTypeFlag                  enum_flags; // unused
-    MinimalEnumeratedHeader       header;
-    MinimalEnumeratedLiteralSeq   literal_seq;
+    EnumTypeFlag enum_flags; // unused
+    MinimalEnumeratedHeader header;
+    MinimalEnumeratedLiteralSeq literal_seq;
 
     MinimalEnumeratedType() {}
 
@@ -1302,68 +1302,68 @@ namespace XTypes {
   // --- Bitmask: --------------------------------------------------------
   // Bit in a bit mask
   struct CommonBitflag {
-    ACE_CDR::UShort        position;
-    BitflagFlag            flags;
+    ACE_CDR::UShort position;
+    BitflagFlag flags;
   };
 
   struct CompleteBitflag {
-    CommonBitflag          common;
-    CompleteMemberDetail   detail;
+    CommonBitflag common;
+    CompleteMemberDetail detail;
   };
   // Ordered by Bitflag.position
   typedef Sequence<CompleteBitflag> CompleteBitflagSeq;
 
   struct MinimalBitflag {
-    CommonBitflag        common;
-    MinimalMemberDetail  detail;
+    CommonBitflag common;
+    MinimalMemberDetail detail;
   };
   // Ordered by Bitflag.position
   typedef Sequence<MinimalBitflag> MinimalBitflagSeq;
 
   struct CommonBitmaskHeader {
-    BitBound             bit_bound;
+    BitBound bit_bound;
   };
 
   typedef CompleteEnumeratedHeader CompleteBitmaskHeader;
 
-  typedef MinimalEnumeratedHeader  MinimalBitmaskHeader;
+  typedef MinimalEnumeratedHeader MinimalBitmaskHeader;
 
   struct CompleteBitmaskType {
-    BitmaskTypeFlag          bitmask_flags; // unused
-    CompleteBitmaskHeader    header;
-    CompleteBitflagSeq       flag_seq;
+    BitmaskTypeFlag bitmask_flags; // unused
+    CompleteBitmaskHeader header;
+    CompleteBitflagSeq flag_seq;
   };
 
   struct MinimalBitmaskType {
-    BitmaskTypeFlag          bitmask_flags; // unused
-    MinimalBitmaskHeader     header;
-    MinimalBitflagSeq        flag_seq;
+    BitmaskTypeFlag bitmask_flags; // unused
+    MinimalBitmaskHeader header;
+    MinimalBitflagSeq flag_seq;
   };
 
   // --- Bitset: ----------------------------------------------------------
   struct CommonBitfield {
-    ACE_CDR::UShort       position;
-    BitsetMemberFlag      flags;
-    ACE_CDR::Octet        bitcount;
-    TypeKind              holder_type; // Must be primitive integer type
+    ACE_CDR::UShort position;
+    BitsetMemberFlag flags;
+    ACE_CDR::Octet bitcount;
+    TypeKind holder_type; // Must be primitive integer type
   };
 
   struct CompleteBitfield {
-    CommonBitfield           common;
-    CompleteMemberDetail     detail;
+    CommonBitfield common;
+    CompleteMemberDetail detail;
   };
   // Ordered by Bitfield.position
   typedef Sequence<CompleteBitfield> CompleteBitfieldSeq;
 
   struct MinimalBitfield {
-    CommonBitfield       common;
-    NameHash             name_hash;
+    CommonBitfield common;
+    NameHash name_hash;
   };
   // Ordered by Bitfield.position
   typedef Sequence<MinimalBitfield> MinimalBitfieldSeq;
 
   struct CompleteBitsetHeader {
-    CompleteTypeDetail   detail;
+    CompleteTypeDetail detail;
   };
 
   struct MinimalBitsetHeader {
@@ -1371,15 +1371,15 @@ namespace XTypes {
   };
 
   struct CompleteBitsetType  {
-    BitsetTypeFlag         bitset_flags; // unused
-    CompleteBitsetHeader   header;
-    CompleteBitfieldSeq    field_seq;
+    BitsetTypeFlag bitset_flags; // unused
+    CompleteBitsetHeader header;
+    CompleteBitfieldSeq field_seq;
   };
 
   struct MinimalBitsetType  {
-    BitsetTypeFlag       bitset_flags; // unused
-    MinimalBitsetHeader  header;
-    MinimalBitfieldSeq   field_seq;
+    BitsetTypeFlag bitset_flags; // unused
+    MinimalBitsetHeader header;
+    MinimalBitfieldSeq field_seq;
   };
 
   // --- Type Object: ---------------------------------------------------
@@ -1420,19 +1420,19 @@ namespace XTypes {
 
   struct CompleteTypeObject {
     ACE_CDR::Octet kind;
-    CompleteAliasType      alias_type;
+    CompleteAliasType alias_type;
     CompleteAnnotationType annotation_type;
-    CompleteStructType     struct_type;
-    CompleteUnionType      union_type;
-    CompleteBitsetType     bitset_type;
-    CompleteSequenceType   sequence_type;
-    CompleteArrayType      array_type;
-    CompleteMapType        map_type;
+    CompleteStructType struct_type;
+    CompleteUnionType union_type;
+    CompleteBitsetType bitset_type;
+    CompleteSequenceType sequence_type;
+    CompleteArrayType array_type;
+    CompleteMapType map_type;
     CompleteEnumeratedType enumerated_type;
-    CompleteBitmaskType    bitmask_type;
+    CompleteBitmaskType bitmask_type;
 
     // ===================  Future extensibility  ============
-    CompleteExtendedType   extended_type;
+    CompleteExtendedType extended_type;
   };
 
   struct MinimalExtendedType {
@@ -1469,19 +1469,19 @@ namespace XTypes {
 
   struct MinimalTypeObject {
     ACE_CDR::Octet kind;
-    MinimalAliasType       alias_type;
-    MinimalAnnotationType  annotation_type;
-    MinimalStructType      struct_type;
-    MinimalUnionType       union_type;
-    MinimalBitsetType      bitset_type;
-    MinimalSequenceType    sequence_type;
-    MinimalArrayType       array_type;
-    MinimalMapType         map_type;
-    MinimalEnumeratedType  enumerated_type;
-    MinimalBitmaskType     bitmask_type;
+    MinimalAliasType alias_type;
+    MinimalAnnotationType annotation_type;
+    MinimalStructType struct_type;
+    MinimalUnionType union_type;
+    MinimalBitsetType bitset_type;
+    MinimalSequenceType sequence_type;
+    MinimalArrayType array_type;
+    MinimalMapType map_type;
+    MinimalEnumeratedType enumerated_type;
+    MinimalBitmaskType bitmask_type;
 
     // ===================  Future extensibility  ============
-    MinimalExtendedType    extended_type;
+    MinimalExtendedType extended_type;
 
     MinimalTypeObject() {}
 
@@ -1546,8 +1546,8 @@ namespace XTypes {
 
   struct TypeObject {
     ACE_CDR::Octet kind;
-    CompleteTypeObject   complete;
-    MinimalTypeObject    minimal;
+    CompleteTypeObject complete;
+    MinimalTypeObject minimal;
 
     TypeObject(const CompleteTypeObject& a_complete)
       : kind(EK_COMPLETE)
@@ -1566,23 +1566,23 @@ namespace XTypes {
   // for the Strong Connectivity relationship (mutual reachability between
   // types).
   // Ordered by fully qualified typename lexicographic order
-  typedef TypeObjectSeq        StronglyConnectedComponent;
+  typedef TypeObjectSeq StronglyConnectedComponent;
 
   struct TypeIdentifierTypeObjectPair {
-    TypeIdentifier  type_identifier;
-    TypeObject      type_object;
+    TypeIdentifier type_identifier;
+    TypeObject type_object;
   };
   typedef Sequence<TypeIdentifierTypeObjectPair> TypeIdentifierTypeObjectPairSeq;
 
   struct TypeIdentifierPair {
-    TypeIdentifier  type_identifier1;
-    TypeIdentifier  type_identifier2;
+    TypeIdentifier type_identifier1;
+    TypeIdentifier type_identifier2;
   };
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
   struct TypeIdentifierWithSize {
-    TypeIdentifier  type_id;
-    ACE_CDR::ULong  typeobject_serialized_size;
+    TypeIdentifier type_id;
+    ACE_CDR::ULong typeobject_serialized_size;
   };
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
 
@@ -1595,8 +1595,8 @@ namespace XTypes {
 
   typedef Sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
 
-  // // This appears in the builtin DDS topics PublicationBuiltinTopicData
-  // // and SubscriptionBuiltinTopicData
+  // This appears in the builtin DDS topics PublicationBuiltinTopicData
+  // and SubscriptionBuiltinTopicData
 
   struct TypeInformation {
     TypeIdentifierWithDependencies minimal;
