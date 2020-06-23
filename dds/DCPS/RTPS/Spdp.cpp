@@ -1408,7 +1408,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     // TODO:  Will association_complete be called before this?
     send_participant_crypto_tokens(src_participant);
     sedp_.send_builtin_crypto_tokens(dp.pdata_);
-    // TODO: Send keys for the non-builtin readers and writers.
+    sedp_.resend_user_crypto_tokens(src_participant);
   }
 }
 

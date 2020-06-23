@@ -968,7 +968,7 @@ void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
     ACE_DEBUG((LM_DEBUG, "Sedp::rekey_volatile calling send_participant_crypto_token\n"));
     spdp_.send_participant_crypto_tokens(part_guid);
     send_builtin_crypto_tokens(pdata);
-    // TODO: Send keys for the non-builtin readers and writers.
+    resend_user_crypto_tokens(part_guid);
   }
 }
 
@@ -4832,6 +4832,48 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
 
 DDS::DomainId_t Sedp::get_domain_id() const {
   return spdp_.get_domain_id();
+}
+
+void Sedp::resend_user_crypto_tokens(const RepoId& remote_participant)
+{
+  ACE_DEBUG((LM_DEBUG, "resend_user_crypto_tokens(%C)\n",
+  // TODO(iguessthislldo): Simplify this, maybe with new or existing functions?
+  DCPS::LogGuid(remote_participant).c_str()));
+  const DCPS::DatareaderCryptoHandleMap::iterator lrchm_end =
+    local_reader_crypto_handles_.end();
+  for (DCPS::DatareaderCryptoHandleMap::iterator lrchmi =
+        local_reader_crypto_handles_.begin();
+      lrchmi != lrchm_end; ++lrchmi) {
+    const RepoId& reader = lrchmi->first;
+    const DDS::Security::DatareaderCryptoHandle reader_ch = lrchmi->second;
+    if (DCPS::GuidConverter(reader).isUserDomainEntity()) {
+      ACE_DEBUG((LM_DEBUG, "  Reader %C ch %u\n", DCPS::LogGuid(reader).c_str(), reader_ch));
+      const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+      if (lsi != local_subscriptions_.end()) {
+        const DCPS::RepoIdSet::iterator me_end = lsi->second.matched_endpoints_.end();
+        for (DCPS::RepoIdSet::iterator mei = lsi->second.matched_endpoints_.begin();
+            mei != me_end; ++mei) {
+          const RepoId& writer = *mei;
+          const DCPS::LogGuid log_guid(writer);
+          ACE_DEBUG((LM_DEBUG, "    %C is a matched endpoint\n", log_guid.c_str()));
+          if (DCPS::GuidPrefixEqual()(
+              writer.guidPrefix, remote_participant.guidPrefix)) {
+            ACE_DEBUG((LM_DEBUG, "      %C part of participant\n", log_guid.c_str()));
+            const DCPS::DatawriterCryptoHandleMap::iterator rwchmi =
+              remote_writer_crypto_handles_.find(writer);
+            if (lrchmi != remote_writer_crypto_handles_.end()) {
+              const DDS::Security::DatawriterCryptoHandle writer_ch = rwchmi->second;
+              ACE_DEBUG((LM_DEBUG, "      Sending to %C ch %u\n",
+                log_guid.c_str(), writer_ch));
+              create_and_send_datareader_crypto_tokens(
+                reader_ch, reader, writer_ch, writer);
+            }
+          }
+        }
+      }
+    }
+  }
+  // TODO(iguessthislldo): Local Writer Crypto Tokens
 }
 #endif
 
