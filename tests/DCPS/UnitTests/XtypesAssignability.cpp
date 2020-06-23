@@ -2665,6 +2665,7 @@ TEST(StructTypeTest, Assignable)
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
   // Union key members
+  MinimalStructType a2, b2;
   MinimalUnionType uni_a, uni_b;
   uni_a.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
@@ -2692,9 +2693,9 @@ TEST(StructTypeTest, Assignable)
   MinimalStructMember mb9(CommonStructMember(9, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
   TypeLookup::insert_entry(*mb9.common.member_type_id, MinimalTypeObject(uni_b));
-  a.member_seq.append(ma9);
-  b.member_seq.append(mb9);
-  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+  a2.member_seq.append(ma9);
+  b2.member_seq.append(mb9);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a2)), TypeObject(MinimalTypeObject(b2))));
 }
 
 void expect_false_different_extensibilities()
