@@ -99,7 +99,7 @@ int Subscriber::Reader::wait()
       }
     }
     DataReaderListenerImpl* listener = dynamic_cast<DataReaderListenerImpl*>(listener_.in());
-    if(!listener || !listener->valid()) { ret = 1; }
+    if (!listener || !listener->valid()) { ret = 1; }
   } catch (...) { ret = 1; }
   waitSet->detach_condition(statusCondition);
   return ret;

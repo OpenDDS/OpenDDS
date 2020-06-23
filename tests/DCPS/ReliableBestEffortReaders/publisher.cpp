@@ -56,10 +56,12 @@ int Publisher::run()
 {
   if (waitForSubscriber() != DDS::RETCODE_OK) return 1;
 
-
   Messenger::Message msg = {"", "", 1, "test", 0, 0, 0};
   DDS::InstanceHandle_t handle = writer_->register_instance(msg);
   for (CORBA::Long i = 1; i <= Domain::N_MSG; ++i) {
+    if (i > 1) {
+      ACE_OS::sleep(ACE_Time_Value(0, 300000)); // sleep 300 ms
+    }
     msg.count = i;
     DDS::ReturnCode_t r = writer_->write(msg, handle);
     if (r != ::DDS::RETCODE_OK) {
