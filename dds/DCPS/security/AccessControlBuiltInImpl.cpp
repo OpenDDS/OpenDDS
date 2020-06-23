@@ -460,7 +460,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
-  
+
   Permissions::Grant grant;
   if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
