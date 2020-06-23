@@ -896,8 +896,7 @@ namespace OpenDDS {
   {
     //!!! caller should already have the sample_lock_
     const bool cdr_header = sample.header_.cdr_encapsulation_;
-    OpenDDS::DCPS::Serializer ser(
-      sample.sample_.get(), cdr_header, sample.header_.byte_order_);
+    OpenDDS::DCPS::Serializer ser(sample.sample_.get(), cdr_header, sample.header_.byte_order_);
     if (cdr_header && !ser.good_bit()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
         ACE_TEXT("%CDataReaderImpl::lookup_instance: ")

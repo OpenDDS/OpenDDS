@@ -340,7 +340,8 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     const Message_Block_Ptr& data,
     bool swap_bytes)
 {
-  Serializer serializer_read(data.get(), swap_bytes);
+  Serializer serializer_read(data.get(), Encoding::KIND_CDR_UNALIGNED,
+                             swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
   MulticastPeer local_peer;
   serializer_read >> local_peer;
@@ -359,7 +360,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
 
   Message_Block_Ptr synack_data(new ACE_Message_Block(sizeof(MulticastPeer)));
 
-  Serializer serializer_write(synack_data.get());
+  Serializer serializer_write(synack_data.get(), Encoding::KIND_CDR_UNALIGNED);
   serializer_write << source;
 
   DataSampleHeader header;

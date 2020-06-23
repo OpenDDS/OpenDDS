@@ -98,7 +98,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
   ACE_TCHAR ebuffer[51200];
   ebuffer[0] = ACE_TEXT('\0');
 
-  OpenDDS::DCPS::Serializer ss(&mb);
+  OpenDDS::DCPS::Serializer ss(&mb, unaligned_encoding);
 
   if (dump_buffer) {
     ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
@@ -120,7 +120,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
                name, mb.length(), ebuffer));
   }
 
-  OpenDDS::DCPS::Serializer ss2(&mb);
+  OpenDDS::DCPS::Serializer ss2(&mb, unaligned_encoding);
 
   if (!(ss2 >> out_foo)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%C: Deserializing failed\n"), name));

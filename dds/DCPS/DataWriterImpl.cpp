@@ -1270,7 +1270,7 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
+  if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), true)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -2284,8 +2284,8 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
       get_db_lock()));
 
   Serializer serializer(
-    data.get(),
-    this->swap_bytes());
+    data.get(), Encoding::KIND_CDR_UNALIGNED,
+    this->swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
   serializer << end_msg;
 

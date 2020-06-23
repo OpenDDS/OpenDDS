@@ -45,11 +45,11 @@ void run_test(const Encoding& encoding)
     KeyOnly<const Messenger1::Message> ko_message(message);
     const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb);
+    Serializer out_serializer(&mb, encoding);
     TEST_CHECK(out_serializer << ko_message);
     size_t key_length = mb.length();
     TEST_CHECK(key_length == 0);
-    Serializer in_serializer(&mb);
+    Serializer in_serializer(&mb, encoding);
     Messenger1::Message dm_message;
     dm_message.subject_id = 0; // avoid unitialized data
     dm_message.count = 0;
@@ -75,10 +75,10 @@ void run_test(const Encoding& encoding)
       // Use normal messaging (all fields should be equal).
       const size_t size = serialized_size(encoding, message);
       ACE_Message_Block mb(size);
-      Serializer out_serializer(&mb);
+      Serializer out_serializer(&mb, encoding);
       TEST_CHECK(out_serializer << message);
       full_length = mb.length();
-      Serializer in_serializer(&mb);
+      Serializer in_serializer(&mb, encoding);
       Messenger2::Message dm_message;
       TEST_CHECK(in_serializer >> dm_message);
       TEST_CHECK(strcmp(message.from, dm_message.from) == 0);
@@ -94,10 +94,10 @@ void run_test(const Encoding& encoding)
       KeyOnly<const Messenger2::Message> ko_message(mess_const_ref);
       const size_t size = serialized_size(encoding, ko_message);
       ACE_Message_Block mb(size);
-      Serializer out_serializer(&mb);
+      Serializer out_serializer(&mb, encoding);
       TEST_CHECK(out_serializer << ko_message);
       key_length = mb.length();
-      Serializer in_serializer(&mb);
+      Serializer in_serializer(&mb, encoding);
       Messenger2::Message dm_message;
       dm_message.subject_id=0;  // avoid unitialized data
       dm_message.count=0;
@@ -135,9 +135,9 @@ void run_test(const Encoding& encoding)
     KeyOnly<const Messenger4::Message> ko_message(message);
     const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb);
+    Serializer out_serializer(&mb, encoding);
     TEST_CHECK(out_serializer << ko_message);
-    Serializer in_serializer(&mb);
+    Serializer in_serializer(&mb, encoding);
     Messenger4::Message dm_message;
     dm_message.short_field = 0;
     dm_message.unsigned_short_field = 0;
@@ -196,9 +196,9 @@ void run_test(const Encoding& encoding)
     KeyOnly<const Messenger4::NestedMessage> ko_message(message);
     const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb);
+    Serializer out_serializer(&mb, encoding);
     TEST_CHECK(out_serializer << ko_message);
-    Serializer in_serializer(&mb);
+    Serializer in_serializer(&mb, encoding);
     Messenger4::NestedMessage dm_message;
     dm_message.mess.short_field = 0;
     dm_message.mess.unsigned_short_field = 0;
@@ -248,9 +248,9 @@ void run_test(const Encoding& encoding)
     KeyOnly<const Messenger7::Message> ko_message(message);
     const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb);
+    Serializer out_serializer(&mb, encoding);
     TEST_CHECK(out_serializer << ko_message);
-    Serializer in_serializer(&mb);
+    Serializer in_serializer(&mb, encoding);
     Messenger7::Message dm_message;
     dm_message.header.subject_id = 0;
     dm_message.count = 0;
@@ -283,9 +283,9 @@ void run_test(const Encoding& encoding)
     KeyOnly<const Messenger9::Message> ko_message(message);
     const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb);
+    Serializer out_serializer(&mb, encoding);
     TEST_CHECK(out_serializer << ko_message);
-    Serializer in_serializer(&mb);
+    Serializer in_serializer(&mb, encoding);
     Messenger9::Message dm_message;
     dm_message.headers[0].subject_id = 0;
     dm_message.headers[1].subject_id = 0;
