@@ -149,6 +149,8 @@ public:
                                const DCPS::RepoId& guid);
 
   bool remote_is_requester(const DCPS::RepoId& guid) const;
+  const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
+
 #endif
 
   DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }

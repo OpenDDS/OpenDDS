@@ -210,7 +210,7 @@ GuidConverter::uniqueId() const
 bool
 GuidConverter::isSecure() const
 {
-  return guid_.entityId.entityKey[0] == 0xff;
+  return isBuiltinDomainEntity() && guid_.entityId.entityKey[0] == 0xff;
 }
 #endif
 

@@ -1405,9 +1405,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
 
   if (!dp.is_requester_) {
-    // TODO:  Will association_complete be called before this?
     send_participant_crypto_tokens(src_participant);
     sedp_.send_builtin_crypto_tokens(dp.pdata_);
+    sedp_.send_datawriter_crypto_tokens(src_participant);
+    sedp_.send_datareader_crypto_tokens(src_participant);
     sedp_.resend_user_crypto_tokens(src_participant);
   }
 }
@@ -3460,6 +3461,12 @@ bool Spdp::remote_is_requester(const DCPS::RepoId& guid) const
     return iter->second.is_requester_;
   }
   return false;
+}
+
+const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) const
+{
+  DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
+  return iter->second.pdata_;
 }
 
 #endif

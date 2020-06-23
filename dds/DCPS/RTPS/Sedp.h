@@ -116,6 +116,10 @@ public:
                                   const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src);
 
   void resend_user_crypto_tokens(const DCPS::RepoId& remote_participant);
+
+  void send_datareader_crypto_tokens(const DCPS::RepoId& remote_participant);
+  void send_datawriter_crypto_tokens(const DCPS::RepoId& remote_participant);
+
 #endif
 
   bool disassociate(const ParticipantData_t& pdata);

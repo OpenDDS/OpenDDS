@@ -968,6 +968,8 @@ void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
     ACE_DEBUG((LM_DEBUG, "Sedp::rekey_volatile calling send_participant_crypto_token\n"));
     spdp_.send_participant_crypto_tokens(part_guid);
     send_builtin_crypto_tokens(pdata);
+    send_datawriter_crypto_tokens(part_guid);
+    send_datareader_crypto_tokens(part_guid);
     resend_user_crypto_tokens(part_guid);
   }
 }
@@ -1232,6 +1234,33 @@ Sedp::send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& 
                                subscriptions_secure_writer_->get_repo_id());
   }
 }
+
+void
+Sedp::send_datawriter_crypto_tokens(const DCPS::RepoId& remote_participant)
+{
+  RemoteReaderVectors::iterator reader_map_iter = datawriter_crypto_tokens_.find(remote_participant);
+  if (reader_map_iter != datawriter_crypto_tokens_.end()) {
+    typedef RemoteReaderVector::iterator iter_t;
+    for (iter_t i = reader_map_iter->second.begin(); i != reader_map_iter->second.end(); ++i) {
+      send_datawriter_crypto_tokens(i->local_writer, i->remote_reader, i->writer_tokens);
+    }
+    datawriter_crypto_tokens_.erase(reader_map_iter);
+  }
+}
+
+void
+Sedp::send_datareader_crypto_tokens(const DCPS::RepoId& remote_participant)
+{
+  RemoteWriterVectors::iterator writer_map_iter = datareader_crypto_tokens_.find(remote_participant);
+  if (writer_map_iter != datareader_crypto_tokens_.end()) {
+    typedef RemoteWriterVector::iterator iter_t;
+    for (iter_t i = writer_map_iter->second.begin(); i != writer_map_iter->second.end(); ++i) {
+      send_datareader_crypto_tokens(i->local_reader, i->remote_writer, i->reader_tokens);
+    }
+    datareader_crypto_tokens_.erase(writer_map_iter);
+  }
+}
+
 #endif
 
 void
@@ -1297,13 +1326,6 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
 
   proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
   sedp_->associated_participants_.insert(proto.remote_id_);
-
-#ifdef OPENDDS_SECURITY
-  if (sedp_->is_security_enabled()) {
-    sedp_->send_builtin_crypto_tokens(*pdata);
-  }
-#endif
-
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2834,28 +2856,12 @@ Sedp::association_complete(const RepoId& localId,
   } else if (remoteId.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER) {
     write_durable_dcps_participant_secure(remoteId);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER) {
-
     if (associated_volatile_readers_.insert(remoteId).second && spdp_.remote_is_requester(remoteId)) {
-      // TODO: Will reliability resend these?
       spdp_.send_participant_crypto_tokens(remoteId);
-
-      RemoteReaderVectors::iterator reader_map_iter = datawriter_crypto_tokens_.find(remoteId);
-      if (reader_map_iter != datawriter_crypto_tokens_.end()) {
-        typedef RemoteReaderVector::iterator iter_t;
-        for (iter_t i = reader_map_iter->second.begin(); i != reader_map_iter->second.end(); ++i) {
-          send_datawriter_crypto_tokens(i->local_writer, i->remote_reader, i->writer_tokens);
-        }
-        datawriter_crypto_tokens_.erase(reader_map_iter);
-      }
-
-      RemoteWriterVectors::iterator writer_map_iter = datareader_crypto_tokens_.find(remoteId);
-      if (writer_map_iter != datareader_crypto_tokens_.end()) {
-        typedef RemoteWriterVector::iterator iter_t;
-        for (iter_t i = writer_map_iter->second.begin(); i != writer_map_iter->second.end(); ++i) {
-          send_datareader_crypto_tokens(i->local_reader, i->remote_writer, i->reader_tokens);
-        }
-        datareader_crypto_tokens_.erase(writer_map_iter);
-      }
+      send_builtin_crypto_tokens(spdp_.get_participant_data(remoteId));
+      send_datawriter_crypto_tokens(remoteId);
+      send_datareader_crypto_tokens(remoteId);
+      resend_user_crypto_tokens(remoteId);
     }
   }
 #endif
