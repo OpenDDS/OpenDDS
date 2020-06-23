@@ -9,7 +9,7 @@
 #define marshal_generator_H
 
 #include "dds_generator.h"
-#include "anonymous.h"
+#include "field_info.h"
 
 class marshal_generator : public dds_generator {
 public:
@@ -27,7 +27,7 @@ public:
                  AST_Type* discriminator,
                  const char* repoid);
 private:
-  Field::SeqLenSet seqLen_;
+  FieldInfo::SeqLenSet seqLen_;
 };
 
 #endif

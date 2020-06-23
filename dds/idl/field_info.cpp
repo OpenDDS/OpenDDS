@@ -5,38 +5,38 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "anonymous.h"
+#include "field_info.h"
 
 using namespace AstTypeClassification;
 
-Field::SeqLen::SeqLen(Field& af) : seq_(af.ast_elem_), len_(0)
+FieldInfo::SeqLen::SeqLen(FieldInfo& af) : seq_(af.ast_elem_), len_(0)
 {
   if (!af.seq_->unbounded()) {
     len_ = af.seq_->max_size()->ev()->u.ulval;
   }
 }
 
-bool Field::SeqLen::Cmp::operator()(const SeqLen& a, const SeqLen& b) const
+bool FieldInfo::SeqLen::Cmp::operator()(const SeqLen& a, const SeqLen& b) const
 {
   return a.seq_ != b.seq_ || a.len_ != b.len_;
 }
 
-bool Field::is_anonymous_array(AST_Type& field)
+bool FieldInfo::is_anonymous_array(AST_Type& field)
 {
   return field.node_type() == AST_Decl::NT_array;
 }
 
-bool Field::is_anonymous_sequence(AST_Type& field)
+bool FieldInfo::is_anonymous_sequence(AST_Type& field)
 {
   return field.node_type() == AST_Decl::NT_sequence;
 }
 
-bool Field::is_anonymous_type(AST_Type& field)
+bool FieldInfo::is_anonymous_type(AST_Type& field)
 {
   return is_anonymous_array(field) || is_anonymous_sequence(field);
 }
 
-std::string Field::get_type_name(AST_Type& field)
+std::string FieldInfo::get_type_name(AST_Type& field)
 {
   std::string n = scoped(field.name());
   if (!is_anonymous_type(field)) {
@@ -52,7 +52,7 @@ std::string Field::get_type_name(AST_Type& field)
 }
 
 // for anonymous types
-Field::Field(AST_Field& field) :
+FieldInfo::FieldInfo(AST_Field& field) :
   ast_type_(field.field_type()),
   arr_(AST_Array::narrow_from_decl(ast_type_)),
   seq_(AST_Sequence::narrow_from_decl(ast_type_)),
@@ -71,7 +71,7 @@ Field::Field(AST_Field& field) :
   init();
 }
 
-Field::Field(UTL_ScopedName* sn, AST_Type* base) :
+FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
   ast_type_(base),
   arr_(AST_Array::narrow_from_decl(ast_type_)),
   seq_(AST_Sequence::narrow_from_decl(ast_type_)),
@@ -84,7 +84,7 @@ Field::Field(UTL_ScopedName* sn, AST_Type* base) :
   init();
 }
 
-void Field::init()
+void FieldInfo::init()
 {
   set_element();
   if (arr_) {
@@ -111,7 +111,7 @@ void Field::init()
   }
 }
 
-void Field::set_element()
+void FieldInfo::set_element()
 {
   if (ast_elem_) {
     cls_ = classify(ast_elem_);
@@ -142,7 +142,7 @@ void Field::set_element()
   }
 }
 
-std::string Field::string_type(Classification c)
+std::string FieldInfo::string_type(Classification c)
 {
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
     ((c & CL_WIDE) ? "std::wstring" : "std::string") :

@@ -7,10 +7,7 @@
 
 #include "metaclass_generator.h"
 #include "be_extern.h"
-#include "anonymous.h"
-
 #include "utl_identifier.h"
-
 #include "topic_keys.h"
 
 using namespace AstTypeClassification;
@@ -65,7 +62,7 @@ namespace {
     const std::string& firstArg, bool skip = false)
   {
     const size_t n = fieldName.size() + 1 /* 1 for the dot */;
-    const std::string fieldType = Field::get_type_name(*field->field_type());
+    const std::string fieldType = FieldInfo::get_type_name(*field->field_type());
     be_global->impl_ <<
       "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
       << ") == 0) {\n"
@@ -183,7 +180,7 @@ namespace {
         break;
       }
     }
-    return Field::get_type_name(*type);
+    return FieldInfo::get_type_name(*type);
   }
 
   void
@@ -249,8 +246,8 @@ namespace {
         pre = "IDL::DistinctType<";
         post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
       }
-      if (Field::is_anonymous_sequence(*(field->field_type()))) {
-        Field f(*field);
+      if (FieldInfo::is_anonymous_sequence(*(field->field_type()))) {
+        FieldInfo f(*field);
         be_global->impl_ <<
           "    if (!gen_skip_over(ser, static_cast<" << f.scoped_type_
           << "*>(0))) {\n"
@@ -283,7 +280,7 @@ namespace {
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
-      std::string fieldType = Field::get_type_name(*(field->field_type()));
+      std::string fieldType = FieldInfo::get_type_name(*(field->field_type()));
       be_global->impl_ <<
         "    if (std::strncmp(field, \"" << fieldName << ".\", " << n <<
         ") == 0) {\n"
@@ -323,11 +320,11 @@ namespace {
     const char* fieldName = field->local_name()->get_string();
     const std::string fieldType = (cls & CL_STRING) ?
       string_type(cls)
-      : Field::get_type_name(*(field->field_type()));
+      : FieldInfo::get_type_name(*(field->field_type()));
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
-      if (Field::is_anonymous_sequence(*(field->field_type()))) {
-        Field af(*field);
+      if (FieldInfo::is_anonymous_sequence(*(field->field_type()))) {
+        FieldInfo af(*field);
         be_global->impl_ <<
           "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
           "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name_ <<
@@ -625,16 +622,16 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 
   // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
-    if (Field::is_anonymous_array(*(fields[i]->field_type()))) {
-      Field af(*(fields[i]));
+    if (FieldInfo::is_anonymous_array(*(fields[i]->field_type()))) {
+      FieldInfo af(*(fields[i]));
       Function f("gen_skip_over", "bool");
       f.addArg("ser", "Serializer&");
       f.addArg("", af.scoped_type_ + "_forany*");
       f.endArgs();
       be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
-    } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
-      Field af(*(fields[i]));
-      if (seqLen_.insert(Field::SeqLen(af)).second) {
+    } else if (FieldInfo::is_anonymous_sequence(*(fields[i]->field_type()))) {
+      FieldInfo af(*(fields[i]));
+      if (seqLen_.insert(FieldInfo::SeqLen(af)).second) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");
         f.addArg("", af.scoped_type_ + "*");

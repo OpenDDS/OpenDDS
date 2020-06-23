@@ -14,11 +14,11 @@
 
 #include <string>
 
-struct Field {
+struct FieldInfo {
   struct SeqLen {
     AST_Type* seq_;
     std::size_t len_;
-    SeqLen(Field& af);
+    SeqLen(FieldInfo& af);
     struct Cmp { bool operator()(const SeqLen& a, const SeqLen& b) const; };
   };
   typedef std::set<SeqLen, SeqLen::Cmp> SeqLenSet;
@@ -48,8 +48,8 @@ struct Field {
   std::string unwrap_;
   std::string const_unwrap_;
 
-  explicit Field(AST_Field& field); //for anonymous types
-  Field(UTL_ScopedName* sn, AST_Type* base);
+  explicit FieldInfo(AST_Field& field); //for anonymous types
+  FieldInfo(UTL_ScopedName* sn, AST_Type* base);
   void init();
   void set_element();
   std::string string_type(AstTypeClassification::Classification c);

@@ -389,7 +389,7 @@ namespace {
     return arg.str();
   }
 
-  void gen_sequence(const Field& sf)
+  void gen_sequence(const FieldInfo& sf)
   {
     string cxx = sf.scoped_type_;
     for (size_t i = 0; i < LENGTH(special_sequences); ++i) {
@@ -640,7 +640,7 @@ namespace {
     }
   }
 
-  void gen_array(const Field& af)
+  void gen_array(const FieldInfo& af)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* elem = resolveActualType(af.ast_elem_);
@@ -1076,7 +1076,7 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     {
       be_global->add_include("dds/DCPS/Serializer.h");
       NamespaceGuard ng;
-      Field sf(name, base);
+      FieldInfo sf(name, base);
       gen_sequence(sf);
     }
     break;
@@ -1089,7 +1089,7 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
         const string underscores = dds_generator::scoped_helper(name, "_");
         be_global->header_ << "struct " << underscores << "_tag {};\n\n";
       }
-      Field af(name, base);
+      FieldInfo af(name, base);
       gen_array(af);
     }
     break;
@@ -1147,7 +1147,7 @@ namespace {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
-      string tdname = Field::get_type_name(*typedeff);
+      string tdname = FieldInfo::get_type_name(*typedeff);
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         intro += "  " + getArrayForany(prefix.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
@@ -1202,7 +1202,7 @@ namespace {
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
-      string tdname = Field::get_type_name(*typedeff);
+      string tdname = FieldInfo::get_type_name(*typedeff);
       const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         string pre = prefix;
@@ -1614,12 +1614,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
-    if (Field::is_anonymous_array(*(fields[i]->field_type()))) {
-      Field af(*(fields[i]));
+    if (FieldInfo::is_anonymous_array(*(fields[i]->field_type()))) {
+      FieldInfo af(*(fields[i]));
       gen_array(af);
-    } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
-      Field sf(*(fields[i]));
-      if (seqLen_.insert(Field::SeqLen(sf)).second) {
+    } else if (FieldInfo::is_anonymous_sequence(*(fields[i]->field_type()))) {
+      FieldInfo sf(*(fields[i]));
+      if (seqLen_.insert(FieldInfo::SeqLen(sf)).second) {
         gen_sequence(sf);
       }
     }
