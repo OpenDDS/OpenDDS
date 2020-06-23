@@ -896,15 +896,6 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 
       reader->remove_writer(remote_id);
 
-      if (reader->writer_count() == 0) {
-        {
-          ACE_GUARD(ACE_Thread_Mutex, h, readers_lock_);
-          rr = readers_.find(local_id);
-          if (rr != readers_.end()) {
-            readers_.erase(rr);
-          }
-        }
-      }
     } else {
       WriterToSeqReadersMap::iterator w = writer_to_seq_best_effort_readers_.find(remote_id);
       if (w != writer_to_seq_best_effort_readers_.end()) {
@@ -2916,6 +2907,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       // Count increased but ack decreased.  Replay durable data for the reader.
       ACE_DEBUG((LM_DEBUG, "Enqueuing ReplayDurableData\n"));
       link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
+      ri->second.durable_timestamp_ = MonotonicTimePoint::zero_value;
     }
   }
 
