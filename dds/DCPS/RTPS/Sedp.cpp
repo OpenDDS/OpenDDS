@@ -1127,6 +1127,14 @@ Sedp::create_and_send_datareader_crypto_tokens(
   const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader,
   const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer)
 {
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+      ACE_TEXT("Sedp::create_and_send_datareader_crypto_tokens() - ")
+      ACE_TEXT("sending tokens for local reader %C (ch %d) to remote writer %C (ch %d)\n"),
+      DCPS::LogGuid(local_reader).c_str(), drch,
+      DCPS::LogGuid(remote_writer).c_str(), dwch));
+  }
+
   DCPS::RepoId remote_volatile_reader;
   assign(remote_volatile_reader.guidPrefix, remote_writer.guidPrefix);
   remote_volatile_reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
@@ -1149,6 +1157,14 @@ Sedp::create_and_send_datawriter_crypto_tokens(
   const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer,
   const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader)
 {
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+      ACE_TEXT("Sedp::create_and_send_datawriter_crypto_tokens() - ")
+      ACE_TEXT("sending tokens for local writer %C (ch %d) to remote reader %C (ch %d)\n"),
+      DCPS::LogGuid(local_writer).c_str(), dwch,
+      DCPS::LogGuid(remote_reader).c_str(), drch));
+  }
+
   DCPS::RepoId remote_volatile_reader;
   assign(remote_volatile_reader.guidPrefix, remote_reader.guidPrefix);
   remote_volatile_reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
@@ -4842,44 +4858,77 @@ DDS::DomainId_t Sedp::get_domain_id() const {
 
 void Sedp::resend_user_crypto_tokens(const RepoId& remote_participant)
 {
-  ACE_DEBUG((LM_DEBUG, "resend_user_crypto_tokens(%C)\n",
-  // TODO(iguessthislldo): Simplify this, maybe with new or existing functions?
-  DCPS::LogGuid(remote_participant).c_str()));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+      ACE_TEXT("Sedp::resend_user_crypto_tokens(%C)\n"),
+      DCPS::LogGuid(remote_participant).c_str()));
+  }
+
+  /*
+   * For each user DataReader that has a crypto handle, send tokens to matched
+   * DataWriters that have a crypto handle.
+   */
   const DCPS::DatareaderCryptoHandleMap::iterator lrchm_end =
     local_reader_crypto_handles_.end();
   for (DCPS::DatareaderCryptoHandleMap::iterator lrchmi =
         local_reader_crypto_handles_.begin();
       lrchmi != lrchm_end; ++lrchmi) {
-    const RepoId& reader = lrchmi->first;
-    const DDS::Security::DatareaderCryptoHandle reader_ch = lrchmi->second;
-    if (DCPS::GuidConverter(reader).isUserDomainEntity()) {
-      ACE_DEBUG((LM_DEBUG, "  Reader %C ch %u\n", DCPS::LogGuid(reader).c_str(), reader_ch));
-      const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+    const RepoId& local_reader = lrchmi->first;
+    const DDS::Security::DatareaderCryptoHandle local_reader_ch = lrchmi->second;
+    if (DCPS::GuidConverter(local_reader).isUserDomainEntity()) {
+      const LocalSubscriptionIter lsi = local_subscriptions_.find(local_reader);
       if (lsi != local_subscriptions_.end()) {
         const DCPS::RepoIdSet::iterator me_end = lsi->second.matched_endpoints_.end();
         for (DCPS::RepoIdSet::iterator mei = lsi->second.matched_endpoints_.begin();
             mei != me_end; ++mei) {
-          const RepoId& writer = *mei;
-          const DCPS::LogGuid log_guid(writer);
-          ACE_DEBUG((LM_DEBUG, "    %C is a matched endpoint\n", log_guid.c_str()));
-          if (DCPS::GuidPrefixEqual()(
-              writer.guidPrefix, remote_participant.guidPrefix)) {
-            ACE_DEBUG((LM_DEBUG, "      %C part of participant\n", log_guid.c_str()));
-            const DCPS::DatawriterCryptoHandleMap::iterator rwchmi =
-              remote_writer_crypto_handles_.find(writer);
-            if (lrchmi != remote_writer_crypto_handles_.end()) {
-              const DDS::Security::DatawriterCryptoHandle writer_ch = rwchmi->second;
-              ACE_DEBUG((LM_DEBUG, "      Sending to %C ch %u\n",
-                log_guid.c_str(), writer_ch));
+          const RepoId& remote_writer = *mei;
+          if (DCPS::GuidPrefixEqual()(remote_writer.guidPrefix, remote_participant.guidPrefix)) {
+            const DCPS::DatawriterCryptoHandleMap::iterator rdwchmi =
+              remote_writer_crypto_handles_.find(remote_writer);
+            if (rdwchmi != remote_writer_crypto_handles_.end()) {
+              const DDS::Security::DatawriterCryptoHandle remote_writer_ch = rdwchmi->second;
               create_and_send_datareader_crypto_tokens(
-                reader_ch, reader, writer_ch, writer);
+                local_reader_ch, local_reader,
+                remote_writer_ch, remote_writer);
             }
           }
         }
       }
     }
   }
-  // TODO(iguessthislldo): Local Writer Crypto Tokens
+
+  /*
+   * For each user DataWriter that has a crypto handle, send tokens to matched
+   * DataReaders that have a crypto handle.
+   */
+  const DCPS::DatawriterCryptoHandleMap::iterator lwchm_end =
+    local_writer_crypto_handles_.end();
+  for (DCPS::DatawriterCryptoHandleMap::iterator lwchmi =
+        local_writer_crypto_handles_.begin();
+      lwchmi != lwchm_end; ++lwchmi) {
+    const RepoId& local_writer = lwchmi->first;
+    const DDS::Security::DatawriterCryptoHandle local_writer_ch = lwchmi->second;
+    if (DCPS::GuidConverter(local_writer).isUserDomainEntity()) {
+      const LocalPublicationIter lpi = local_publications_.find(local_writer);
+      if (lpi != local_publications_.end()) {
+        const DCPS::RepoIdSet::iterator me_end = lpi->second.matched_endpoints_.end();
+        for (DCPS::RepoIdSet::iterator mei = lpi->second.matched_endpoints_.begin();
+            mei != me_end; ++mei) {
+          const RepoId& remote_reader = *mei;
+          if (DCPS::GuidPrefixEqual()(remote_reader.guidPrefix, remote_participant.guidPrefix)) {
+            const DCPS::DatareaderCryptoHandleMap::iterator rdrchmi =
+              remote_reader_crypto_handles_.find(remote_reader);
+            if (rdrchmi != remote_reader_crypto_handles_.end()) {
+              const DDS::Security::DatareaderCryptoHandle remote_reader_ch = rdrchmi->second;
+              create_and_send_datawriter_crypto_tokens(
+                local_writer_ch, local_writer,
+                remote_reader_ch, remote_reader);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 #endif
 
