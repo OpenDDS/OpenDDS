@@ -976,8 +976,7 @@ void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::U
                                const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
 {
   if (avail & flags) {
-    RepoId temp = id;
-    temp.entityId = ent;
+    const RepoId temp = make_id(id, ent);
 
 #ifdef OPENDDS_SECURITY
     const DCPS::GuidConverter traits(temp);
@@ -988,23 +987,25 @@ void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::U
       DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
 
       if (traits.isReader()) {
-        DatareaderCryptoHandle& drch = remote_reader_crypto_handles_[temp];
+        const DatareaderCryptoHandle drch = remote_reader_crypto_handles_[temp];
         if (!key_factory->unregister_datareader(drch, se)) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::dissociate_volatile() - ")
                      ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
         }
-        drch = DDS::HANDLE_NIL;
+        // TODO: Return handle.
+        remote_reader_crypto_handles_.erase(temp);
       }
 
       if (traits.isWriter()) {
-        DatawriterCryptoHandle& dwch = remote_writer_crypto_handles_[temp];
+        const DatawriterCryptoHandle dwch = remote_writer_crypto_handles_[temp];
         if (!key_factory->unregister_datawriter(dwch, se)) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::dissociate_volatile() - ")
                      ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
         }
-        dwch = DDS::HANDLE_NIL;
+        // TODO: Return handle.
+        remote_writer_crypto_handles_.erase(temp);
       }
     }
 #endif
@@ -1382,10 +1383,22 @@ Sedp::disassociate(const ParticipantData_t& pdata)
   }
 
 #ifdef OPENDDS_SECURITY
-  RepoId remote_volatile(part);
-  remote_volatile.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+  const RepoId remote_volatile = make_id(part, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
   associated_volatile_readers_.erase(remote_volatile);
   pending_volatile_readers_.erase(remote_volatile);
+
+  const RepoId key = make_id(part, ENTITYID_UNKNOWN);
+  for (DCPS::DatareaderCryptoHandleMap::iterator pos = remote_reader_crypto_handles_.lower_bound(key);
+       pos != remote_reader_crypto_handles_.end() && std::memcmp(pos->first.guidPrefix, pdata.participantProxy.guidPrefix, sizeof(pdata.participantProxy.guidPrefix)) == 0;) {
+    // TODO: Return the handle.
+    remote_reader_crypto_handles_.erase(pos++);
+  }
+  for (DCPS::DatawriterCryptoHandleMap::iterator pos = remote_writer_crypto_handles_.lower_bound(key);
+       pos != remote_writer_crypto_handles_.end() && std::memcmp(pos->first.guidPrefix, pdata.participantProxy.guidPrefix, sizeof(pdata.participantProxy.guidPrefix)) == 0;) {
+    // TODO: Return the handle.
+    remote_writer_crypto_handles_.erase(pos++);
+  }
+
 #endif
 
   if (spdp_.has_discovered_participant(part)) {
@@ -4644,7 +4657,6 @@ Sedp::create_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandl
       ACE_TEXT("Sedp::create_datareader_crypto_tokens() - ")
       ACE_TEXT("Unable to create local datareader crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
-    return;
   }
 }
 
@@ -4669,10 +4681,10 @@ Sedp::send_datareader_crypto_tokens(const RepoId& local_reader,
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datareader_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
-      return;
     }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "DataReader has zero crypto tokens\n"));
   }
-  return;
 }
 
 void
@@ -4688,7 +4700,6 @@ Sedp::create_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandl
       ACE_TEXT("Sedp::create_datawriter_crypto_tokens() - ")
       ACE_TEXT("Unable to create local datawriter crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
-    return;
   }
 }
 
@@ -4713,10 +4724,8 @@ Sedp::send_datawriter_crypto_tokens(const RepoId& local_writer,
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datawriter_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
-      return;
     }
   }
-  return;
 }
 
 void
@@ -4765,7 +4774,6 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
 
 void
 Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg) {
-  ACE_DEBUG((LM_DEBUG, "Sedp::handle_datareader_crypto_tokens\n"));
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
@@ -4797,6 +4805,10 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
       ACE_TEXT("received tokens for unknown local writer. Ignoring.\n")));
     return;
   }
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Sedp::handle_datareader_crypto_tokens() from %C dwch %d drch %d count %d\n"),
+             DCPS::LogGuid(msg.source_endpoint_guid).c_str(), w_iter->second, r_iter->second, drcts.length()));
 
   if (!key_exchange->set_remote_datareader_crypto_tokens(w_iter->second, r_iter->second, drcts, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: ")
