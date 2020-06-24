@@ -109,7 +109,7 @@ public:
   void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
 
   /// Create and send keys the first time
-  void send_builtin_crypto_tokens(const DCPS::RepoId& remote_participant);
+  void send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& pdata);
 
   /// Create and send keys for individual endpoints.
   void send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant,
@@ -764,9 +764,29 @@ protected:
   void handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
+  void send_cached_crypto_tokens(const DCPS::RepoId& remote_participant);
+
   DDS::DomainId_t get_domain_id() const;
 
   DCPS::RepoIdSet associated_volatile_readers_;
+
+  struct RemoteWriter {
+    DCPS::RepoId local_reader, remote_writer;
+    DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
+  };
+  typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
+  typedef OPENDDS_MAP_CMP(
+    DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
+  RemoteWriterVectors datareader_crypto_tokens_;
+
+  struct RemoteReader {
+    DCPS::RepoId local_writer, remote_reader;
+    DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
+  };
+  typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
+  typedef OPENDDS_MAP_CMP(
+    DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
+  RemoteReaderVectors datawriter_crypto_tokens_;
   DCPS::RepoIdSet pending_volatile_readers_;
 
 #endif
