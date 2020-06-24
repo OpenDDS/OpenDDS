@@ -309,7 +309,7 @@ private:
 
   class ReplayDurableData : public JobQueue::Job {
   public:
-    ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const RepoId& local_pub_id, const RepoId remote_sub_id)
+    ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const RepoId& local_pub_id, const RepoId& remote_sub_id)
       : link_(link)
       , local_pub_id_(local_pub_id)
       , remote_sub_id_(remote_sub_id)
