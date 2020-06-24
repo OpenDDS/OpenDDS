@@ -1760,6 +1760,18 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
     DDS::Security::SecurityException se = {"", 0, 0};
     DDS::Security::Authentication_var auth = security_config_->get_authentication();
 
+    if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
+      if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Unable to return identity handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
+
     if (iter->second.handshake_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
@@ -1787,6 +1799,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
 
   // TODO:  What other security related clean up needs to be performed? (is every register unregistered)
   // TODO:  Is a local participant that is destroyed being cleaned up?
+  // TODO:  How should this be split between here and DiscoveryBase?
 #endif
 }
 
