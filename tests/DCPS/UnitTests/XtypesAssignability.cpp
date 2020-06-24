@@ -3095,6 +3095,111 @@ TEST(StructTypeTest, NotAssignable)
   expect_false_key_holder();
 }
 
+TEST(UnionTypeTest, Assignable)
+{
+  TypeAssignability test;
+  MinimalUnionType a, b;
+
+  // Extensibility
+  a.union_flags = IS_FINAL;
+  b.union_flags = a.union_flags;
+
+  // Discriminator type must be strongly assignable
+  a.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+
+  // Either the discriminators of both are keys or neither are keys
+  a.discriminator.common.member_flags = IS_KEY;
+  b.discriminator.common.member_flags = IS_KEY;
+
+  // Members that have the same ID also have the same name and vice versa
+  MinimalUnionMember ma1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(10).append(20)),
+                         MinimalMemberDetail("m1"));
+  MinimalUnionMember ma2(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(30)),
+                         MinimalMemberDetail("m2"));
+  MinimalUnionMember mb1(CommonUnionMember(1, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(20).append(30)),
+                         MinimalMemberDetail("m1"));
+  MinimalUnionMember mb2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(10)),
+                         MinimalMemberDetail("m2"));
+  a.member_seq.append(ma1).append(ma2);
+  b.member_seq.append(mb1).append(mb2);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // Non-default labels in T2 that select some member in T1
+  MinimalUnionType a2, b2;
+  a2.union_flags = IS_MUTABLE;
+  b2.union_flags = a2.union_flags;
+  a2.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
+  b2.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
+  MinimalUnionMember ma2_1(CommonUnionMember(1, UnionMemberFlag(),
+                                             TypeIdentifier::makeString(true, StringSTypeDefn(60)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb2_1(CommonUnionMember(1, UnionMemberFlag(),
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(100)),
+                                             UnionCaseLabelSeq().append(10)),
+                           MinimalMemberDetail("member1"));
+  a2.member_seq.append(ma2_1);
+  b2.member_seq.append(mb2_1);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a2)), TypeObject(MinimalTypeObject(b2))));
+
+  // Non-default labels in T1 that select the default member in T2
+  MinimalUnionType a3, b3;
+  a3.union_flags = IS_APPENDABLE;
+  b3.union_flags = IS_APPENDABLE;
+  a3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
+  b3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
+  MinimalUnionMember ma3_1(CommonUnionMember(1, UnionMemberFlag(),
+                                             TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma3_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb3_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(false, StringLTypeDefn(100)),
+                                             UnionCaseLabelSeq().append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb3_2(CommonUnionMember(4, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member4"));
+  a3.member_seq.append(ma3_1).append(ma3_2);
+  b3.member_seq.append(mb3_1).append(mb3_2);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a3)), TypeObject(MinimalTypeObject(b3))));
+
+  // T1 and T2 both have default labels
+  MinimalUnionType a4, b4;
+  a4.union_flags = IS_APPENDABLE;
+  b4.union_flags = IS_APPENDABLE;
+  a4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  MinimalUnionMember ma4_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma4_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT128),
+                                             UnionCaseLabelSeq().append(40)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb4_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(120)),
+                                             UnionCaseLabelSeq().append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb4_2(CommonUnionMember(5, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT128),
+                                             UnionCaseLabelSeq().append(40)),
+                           MinimalMemberDetail("member5"));
+  a4.member_seq.append(ma4_1).append(ma4_2);
+  b4.member_seq.append(mb4_1).append(mb4_2);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a4)), TypeObject(MinimalTypeObject(b4))));
+}
+
+TEST(UnionTypeTest, NotAssignable)
+{
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
