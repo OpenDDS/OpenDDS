@@ -140,10 +140,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    std::string dw_participant_id = "part_w";
-    std::string dr_participant_id = "part_r";
-    std::string reader_id = "reader";
-    std::string writer_id = "writer";
+    std::string reader_id;
+    std::string writer_id;
     bool reliable = true;
 
     {
@@ -165,6 +163,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         it != domains.end(); ++it)
   {
     DDS::DomainId_t domain = *it;
+
+    reader_id = "reader " + std::to_string(domain);
+    writer_id = "writer " + std::to_string(domain);
 
     // Create DomainParticipant
     DDS::DomainParticipantQos dr_dp_qos;
@@ -264,7 +265,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" create_publisher failed!\n")),
                        -1);
     }
-    writer_id.resize(6);
+    //writer_id.resize(6);
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writer_id.c_str()));
 
@@ -299,7 +300,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     const int n_msgs = reliable ? MSGS_PER_WRITER * TOTAL_WRITERS : 0;
 
     // Create DataReaders
-    reader_id.resize(6);
+    //reader_id.resize(6);
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id, n_msgs, reader_done_callback));
 
     DDS::DataReaderQos dr_qos;

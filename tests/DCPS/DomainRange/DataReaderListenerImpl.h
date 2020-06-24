@@ -27,7 +27,7 @@ public:
     , received_samples_(0)
     , done_callback_(done_callback)
   {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %C using writer with id: %C\n", id.c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %C\n", id.c_str()));
   }
 
   ~DataReaderListenerImpl();
