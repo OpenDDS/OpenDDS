@@ -631,7 +631,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
     } else if (FieldInfo::is_anonymous_sequence(*(fields[i]->field_type()))) {
       FieldInfo af(*(fields[i]));
-      if (seqLen_.insert(FieldInfo::SeqLen(af)).second) {
+      if (eleLen_.insert(FieldInfo::EleLen(af)).second) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");
         f.addArg("", af.scoped_type_ + "*");

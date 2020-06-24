@@ -9,16 +9,13 @@
 
 using namespace AstTypeClassification;
 
-FieldInfo::SeqLen::SeqLen(FieldInfo& af) : seq_(af.ast_elem_), len_(0)
+FieldInfo::EleLen::EleLen(FieldInfo& af) : ele_(af.ast_elem_), len_(af.n_elems_)
 {
-  if (!af.seq_->unbounded()) {
-    len_ = af.seq_->max_size()->ev()->u.ulval;
-  }
 }
 
-bool FieldInfo::SeqLen::Cmp::operator()(const SeqLen& a, const SeqLen& b) const
+bool FieldInfo::EleLen::Cmp::operator()(const EleLen& a, const EleLen& b) const
 {
-  return a.seq_ != b.seq_ || a.len_ != b.len_;
+  return a.ele_ != b.ele_ || a.len_ != b.len_;
 }
 
 bool FieldInfo::is_anonymous_array(AST_Type& field)
@@ -86,13 +83,14 @@ void FieldInfo::init()
     scoped_type_ = struct_name_ + "::" + type_;
   } else if (!scoped_type_.empty()) {
     //name_
-    //type_
+    type_ = scoped_type_;
     //struct_name_
   } else {
     throw std::invalid_argument("Both field name and scoped_type are empty.");
   }
 
   set_element();
+  n_elems_ = 1;
   if (arr_) {
     for (size_t i = 0; i < arr_->n_dims(); ++i) {
       n_elems_ *= arr_->dims()[i]->ev()->u.ulval;
@@ -100,6 +98,7 @@ void FieldInfo::init()
     length_ = std::to_string(n_elems_);
     arg_ = "arr";
   } else if (seq_) {
+    n_elems_ = !seq_->unbounded() ? seq_->max_size()->ev()->u.ulval : 0;
     length_ = "length";
     arg_ = "seq";
   }
@@ -120,7 +119,6 @@ void FieldInfo::init()
 void FieldInfo::set_element()
 {
   elem_sz_ = 0;
-  n_elems_ = 1; //?? 0
   if (ast_elem_) {
     if (cls_ & CL_ENUM) {
       elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
@@ -145,6 +143,7 @@ void FieldInfo::set_element()
       default: break;
       }
     }
+    elem_ = get_type_name(*act_);
   }
 }
 

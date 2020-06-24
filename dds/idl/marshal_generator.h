@@ -27,7 +27,7 @@ public:
                  AST_Type* discriminator,
                  const char* repoid);
 private:
-  FieldInfo::SeqLenSet seqLen_;
+  FieldInfo::EleLenSet eleLen_;
 };
 
 #endif

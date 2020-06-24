@@ -32,7 +32,7 @@ public:
 
 private:
   bool first_struct_;
-  FieldInfo::SeqLenSet seqLen_;
+  FieldInfo::EleLenSet eleLen_;
 };
 
 #endif
