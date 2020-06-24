@@ -399,11 +399,13 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
       return DDS::HANDLE_NIL;
     }
     if (security_debug.bookkeeping && !security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_remote_datareader ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader ")
         ACE_TEXT("created volatile key for RDRCH %d\n"), h));
     }
     if (security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_remote_datareader ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader ")
         ACE_TEXT("created volatile key for RDRCH %d:\n%C"), h,
         to_dds_string(dr_keys[0]).c_str()));
     }
@@ -548,11 +550,13 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
       return DDS::HANDLE_NIL;
     }
     if (security_debug.bookkeeping && !security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_remote_datawriter ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter ")
         ACE_TEXT("created volatile key for RDWCH %d\n"), h));
     }
     if (security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_remote_datawriter ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter ")
         ACE_TEXT("created volatile key for RDWCH %d:\n%C"), h,
         to_dds_string(dw_keys[0]).c_str()));
     }
