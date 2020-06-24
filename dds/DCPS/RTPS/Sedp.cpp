@@ -3011,6 +3011,7 @@ ICE::Endpoint* Sedp::get_ice_endpoint() {
 Sedp::Endpoint::~Endpoint()
 {
   remove_all_msgs();
+  transport_stop();
 }
 
 //---------------------------------------------------------------

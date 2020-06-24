@@ -160,6 +160,8 @@ public:
   void unregister_for_writer(const RepoId& readerid,
                              const RepoId& writerid);
 
+  void client_stop(const RepoId& localId);
+
   virtual void pre_stop_i();
 
   virtual void send_final_acks(const RepoId& readerid);
@@ -331,7 +333,7 @@ private:
   };
 
   class RtpsWriter : public RcObject {
-  protected:
+  private:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
@@ -361,7 +363,7 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc, size_t capacity);
+    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -374,7 +376,7 @@ private:
     bool has_reader(const RepoId& id) const;
     bool remove_reader(const RepoId& id);
     size_t reader_count() const;
-    CORBA::Long get_heartbeat_count() const { return heartbeat_count_; }
+    int inc_heartbeat_count();
 
     bool is_reader_handshake_done(const RepoId& id) const;
     void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
@@ -446,7 +448,7 @@ private:
 
     void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
 
-  protected:
+  private:
     void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
     void generate_nack_frags_i(NackFragSubmessageVec& nack_frags,
                                WriterInfo& wi, const RepoId& pub_id);
@@ -488,7 +490,7 @@ private:
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
   /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
   ///   writer_to_seq_best_effort_readers_ along with anything else that fits the 'reader side activity' of the datalink
-  /// - writers_lock_ protects writers_, heartbeat_counts_, best_effort_heartbeat_count_, and interesting_readers_
+  /// - writers_lock_ protects writers_, best_effort_heartbeat_count_, and interesting_readers_
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
   ///   for both remote writers and remote readers
@@ -657,9 +659,6 @@ private:
 
   void send_heartbeats_manual_i(const TransportSendControlElement* tsce,
                                 MetaSubmessageVec& meta_submessages);
-
-  typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
-  HeartBeatCountMapType heartbeat_counts_;
 
   struct InterestingAckNack {
     RepoId writerid;
