@@ -47,6 +47,7 @@ struct FieldInfo {
   std::string length_;
   std::string ref_;
   std::string const_ref_;
+  std::string ptr_;
   std::string arg_;
   std::string unwrap_;
   std::string const_unwrap_;

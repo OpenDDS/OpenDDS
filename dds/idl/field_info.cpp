@@ -113,6 +113,7 @@ void FieldInfo::init()
   } else {
     ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
     const_ref_ = "const " + ref_;
+    ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
   }
 }
 
@@ -140,10 +141,10 @@ void FieldInfo::set_element()
       case AST_PredefinedType::PT_wchar: elem_sz_ = 1; elem_ = "ACE_CDR::WChar"; return; // encoding of wchar length is 1 byte
       case AST_PredefinedType::PT_boolean: elem_sz_ = 1; elem_ = "ACE_CDR::Boolean"; return;
       case AST_PredefinedType::PT_octet: elem_sz_ = 1; elem_ = "ACE_CDR::Octet"; return;
-      default: break;
+      default: elem_ = get_type_name(*act_); return;
       }
     }
-    elem_ = get_type_name(*act_);
+    elem_ = get_type_name(*ast_type_);
   }
 }
 

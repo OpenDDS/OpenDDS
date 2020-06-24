@@ -62,7 +62,7 @@ namespace {
     const std::string& firstArg, bool skip = false)
   {
     const size_t n = fieldName.size() + 1 /* 1 for the dot */;
-    const std::string fieldType = FieldInfo::get_type_name(*field->field_type());
+    const std::string fieldType = scoped(field->field_type()->name());
     be_global->impl_ <<
       "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
       << ") == 0) {\n"
@@ -180,7 +180,7 @@ namespace {
         break;
       }
     }
-    return FieldInfo::get_type_name(*type);
+    return scoped(type->name());
   }
 
   void
@@ -246,11 +246,10 @@ namespace {
         pre = "IDL::DistinctType<";
         post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
       }
-      if (FieldInfo::is_anonymous_sequence(*(field->field_type()))) {
+      if (FieldInfo::is_anonymous_type(*(field->field_type()))) {
         FieldInfo f(*field);
         be_global->impl_ <<
-          "    if (!gen_skip_over(ser, static_cast<" << f.scoped_type_
-          << "*>(0))) {\n"
+          "    if (!gen_skip_over(ser, static_cast<" << f.ptr_ << ">(0))) {\n"
           "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
           " could not be skipped\");\n"
           "    }\n";
@@ -280,7 +279,7 @@ namespace {
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
-      std::string fieldType = FieldInfo::get_type_name(*(field->field_type()));
+      std::string fieldType = scoped(field->field_type()->name());
       be_global->impl_ <<
         "    if (std::strncmp(field, \"" << fieldName << ".\", " << n <<
         ") == 0) {\n"
