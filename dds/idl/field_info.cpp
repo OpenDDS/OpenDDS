@@ -54,30 +54,14 @@ std::string FieldInfo::get_type_name(AST_Type& field)
 // for anonymous types
 FieldInfo::FieldInfo(AST_Field& field) :
   ast_type_(field.field_type()),
-  arr_(AST_Array::narrow_from_decl(ast_type_)),
-  seq_(AST_Sequence::narrow_from_decl(ast_type_)),
-  ast_elem_(arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr)),
-  name_(field.local_name()->get_string()),
-  cls_(CL_UNKNOWN), elem_sz_(0), n_elems_(1)
+  name_(field.local_name()->get_string())
 {
-  type_ = ast_elem_ ? ("_" + name_) : name_;
-  if (seq_) { type_ += "_seq"; }
-
-  const std::string ftn = scoped(ast_type_->name());
-  struct_name_ = ftn.substr(0, ftn.find("::"));
-  scoped_type_ = struct_name_ + "::" + type_;
-  //const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
-  //underscores_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
   init();
 }
 
 FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
   ast_type_(base),
-  arr_(AST_Array::narrow_from_decl(ast_type_)),
-  seq_(AST_Sequence::narrow_from_decl(ast_type_)),
-  ast_elem_(arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr)),
-  scoped_type_(scoped(sn)),
-  cls_(CL_UNKNOWN), elem_sz_(0), n_elems_(1)
+  scoped_type_(scoped(sn))
 {
   const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
   underscores_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
@@ -86,6 +70,28 @@ FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
 
 void FieldInfo::init()
 {
+  arr_ = AST_Array::narrow_from_decl(ast_type_);
+  seq_ = AST_Sequence::narrow_from_decl(ast_type_);
+  ast_elem_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr);
+  act_ = ast_elem_ ? resolveActualType(ast_elem_) : nullptr;
+  cls_ = act_ ? classify(act_) : CL_UNKNOWN;
+  if (!act_) {
+    throw std::invalid_argument("ast_elem_ is null.");
+  }
+  if (!name_.empty()) {
+    type_ = ast_elem_ ? ("_" + name_) : name_;
+    if (seq_) { type_ += "_seq"; }
+    const std::string ftn = scoped(ast_type_->name());
+    struct_name_ = ftn.substr(0, ftn.find("::"));
+    scoped_type_ = struct_name_ + "::" + type_;
+  } else if (!scoped_type_.empty()) {
+    //name_
+    //type_
+    //struct_name_
+  } else {
+    throw std::invalid_argument("Both field name and scoped_type are empty.");
+  }
+
   set_element();
   if (arr_) {
     for (size_t i = 0; i < arr_->n_dims(); ++i) {
@@ -113,15 +119,15 @@ void FieldInfo::init()
 
 void FieldInfo::set_element()
 {
+  elem_sz_ = 0;
+  n_elems_ = 1; //?? 0
   if (ast_elem_) {
-    cls_ = classify(ast_elem_);
     if (cls_ & CL_ENUM) {
       elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
     } else if (cls_ & CL_STRING) {
       elem_sz_ = 4; elem_ = string_type(cls_); return; // encoding of str length is 4 bytes
     } else if (cls_ & CL_PRIMITIVE) {
-      AST_Type* type = resolveActualType(ast_elem_);
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(act_);
       switch (p->pt()) {
       case AST_PredefinedType::PT_long: elem_sz_ = 4; elem_ = "ACE_CDR::Long"; return;
       case AST_PredefinedType::PT_ulong: elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;

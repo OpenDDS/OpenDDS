@@ -32,12 +32,15 @@ struct FieldInfo {
   AST_Array* arr_;
   AST_Sequence* seq_;
   AST_Type* ast_elem_;
+  AST_Type* act_;
+  AstTypeClassification::Classification cls_;
+
+  std::string name_;
+  std::string type_;
   std::string struct_name_;
   std::string scoped_type_;
   std::string underscores_;
-  std::string name_;
-  std::string type_;
-  AstTypeClassification::Classification cls_;
+
   std::size_t elem_sz_;
   std::string elem_;
   std::size_t n_elems_;
