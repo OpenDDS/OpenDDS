@@ -124,8 +124,7 @@ struct TestParticipant: ACE_Event_Handler {
       0, DATA_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq, ParameterList()
     };
 
-    const Encoding encoding(
-      Encoding::KIND_CDR_PLAIN, OpenDDS::DCPS::ENDIAN_LITTLE);
+    const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
 
     size_t size = 0;
     serialized_size(encoding, size, hdr_);

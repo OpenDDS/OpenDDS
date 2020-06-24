@@ -20,14 +20,15 @@
 
 #include <cstdlib>
 
-namespace {
-  const OpenDDS::DCPS::Encoding encoding_unaligned_native(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED);
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+  const Encoding encoding_unaligned_native(encoding_kind);
+}
 
 NakWatchdog::NakWatchdog(ACE_Reactor* reactor,
                          ACE_thread_t owner,
@@ -520,8 +521,7 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED,
-                        header.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -622,8 +622,7 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED,
-                        header.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
 
   SequenceNumber low;
   serializer >> low;

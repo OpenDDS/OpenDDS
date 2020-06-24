@@ -1717,7 +1717,7 @@ namespace {
      * This is just for the base type, nested types can have different
      * extensibilities.
      */
-      "  static Encoding::Extensibility extensibility() { return Encoding::";
+      "  static Extensibility extensibility() { return ";
     switch (exten) {
     case extensibilitykind_final:
       be_global->header_ << "FINAL";
@@ -2358,7 +2358,7 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  if (post_pad < 4 && outer_strm.encoding().alignment() != "
-        "Serializer::ALIGN_NONE) {\n"
+        "Encoding::ALIGN_NONE) {\n"
         "    static const ACE_CDR::Octet padding[3] = {0};\n"
         "    return outer_strm.write_octet_array(padding, "
         "ACE_CDR::ULong(post_pad));\n"
@@ -2395,7 +2395,7 @@ namespace {
         "  }\n"
         "  param.wr_ptr(size);\n"
         "  const Encoding encoding(\n"
-        "    Encoding::KIND_CDR_PARAMLIST, outer_strm.swap_bytes());\n"
+        "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
         "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
       generateSwitchBody(streamCommon, branches, discriminator,

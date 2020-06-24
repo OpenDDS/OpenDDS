@@ -11,8 +11,8 @@
 
 using OpenDDS::DCPS::Encoding;
 
-const Encoding encoding_plain_native(Encoding::KIND_CDR_PLAIN);
-const Encoding encoding_unaligned_native(Encoding::KIND_CDR_UNALIGNED);
+const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
+const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
 
 namespace {
   unsigned int bcd(unsigned int i)

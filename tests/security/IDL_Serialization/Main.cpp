@@ -1,9 +1,9 @@
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-
-const OpenDDS::DCPS::Encoding encoding_plain_big(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN, OpenDDS::DCPS::ENDIAN_BIG);
+using OpenDDS::DCPS::Encoding;
+const Encoding encoding_plain_big(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_BIG);
 
 void serializePropertySeq(ACE_Message_Block& mb, const char* str) {
   mb.init(100);

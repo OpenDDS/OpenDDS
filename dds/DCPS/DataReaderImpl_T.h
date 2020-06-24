@@ -37,6 +37,7 @@ namespace OpenDDS {
   public:
     typedef DDSTraits<MessageType> TraitsType;
     typedef typename TraitsType::MessageSequenceType MessageSequenceType;
+    typedef MarshalTraits<MessageType> MarshalTraitsType;
 
     typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
                               typename TraitsType::LessThanType) InstanceMap;
@@ -895,14 +896,26 @@ namespace OpenDDS {
                                OpenDDS::DCPS::SubscriptionInstance_rch& instance)
   {
     //!!! caller should already have the sample_lock_
-    const bool cdr_header = sample.header_.cdr_encapsulation_;
-    OpenDDS::DCPS::Serializer ser(sample.sample_.get(), cdr_header, sample.header_.byte_order_);
-    if (cdr_header && !ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
-        ACE_TEXT("deserialization of CDR header failed.\n"),
-        TraitsType::type_name()));
-      return;
+    const bool encapsulated = sample.header_.cdr_encapsulation_;
+    OpenDDS::DCPS::Serializer ser(
+      sample.sample_.get(),
+      encapsulated ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
+      static_cast<Endianness>(sample.header_.byte_order_));
+
+    if (encapsulated) {
+      EncapsulationHeader encap;
+      if (!(ser >> encap)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+          ACE_TEXT("deserialization of encapsulation header failed.\n"),
+          TraitsType::type_name()));
+        return;
+      }
+      Encoding encoding;
+      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+        return;
+      }
+      ser.encoding(encoding);
     }
 
     MessageType data;
@@ -961,15 +974,26 @@ protected:
                              bool& filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    const bool cdr_header = sample.header_.cdr_encapsulation_;
+    const bool encapsulated = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
-      sample.sample_.get(), cdr_header, sample.header_.byte_order_);
-    if (cdr_header && !ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-        ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-        ACE_TEXT("deserialization of CDR header failed.\n"),
-        TraitsType::type_name()));
-      return;
+      sample.sample_.get(),
+      encapsulated ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
+      static_cast<Endianness>(sample.header_.byte_order_));
+
+    if (encapsulated) {
+      EncapsulationHeader encap;
+      if (!(ser >> encap)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+          ACE_TEXT("deserialization of encapsulation header failed.\n"),
+          TraitsType::type_name()));
+        return;
+      }
+      Encoding encoding;
+      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+        return;
+      }
+      ser.encoding(encoding);
     }
 
     unique_ptr<MessageTypeWithAllocator> data(

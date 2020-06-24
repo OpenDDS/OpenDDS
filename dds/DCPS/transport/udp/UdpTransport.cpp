@@ -25,6 +25,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+}
+
 UdpTransport::UdpTransport(UdpInst& inst)
   : TransportImpl(inst)
 {
@@ -255,7 +259,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   CORBA::ULong octet_size =
     static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
   Priority priority;
-  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED);
+  Serializer serializer(data.get(), encoding_kind);
   serializer >> priority;
   TransportBLOB blob(octet_size);
   blob.length(octet_size);

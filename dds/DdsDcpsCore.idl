@@ -575,7 +575,7 @@ module OpenDDS {
             DDS::Time_t relay6_timestamp;
     };
 
-    // Represents Encoding::KIND_CDR_UNALIGNED
+    // Represents Encoding::KIND_UNALIGNED_CDR
     const DDS::DataRepresentationId_t UNALIGNED_CDR_DATA_REPRESENTATION =
       -12140;
 

@@ -19,7 +19,7 @@ bool serialization_test()
     seq[1] = "314612157238794.12";
     M1::S1 str = {1, M1::f1, {"123.45", 678.90, 123}, seq};
 
-    const Encoding encoding(Encoding::KIND_CDR_PLAIN);
+    const Encoding encoding(Encoding::KIND_XCDR1);
     size_t size = 0;
     OpenDDS::DCPS::serialized_size(encoding, size, str);
     ACE_Message_Block mb(size);

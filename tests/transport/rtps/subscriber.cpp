@@ -29,7 +29,7 @@
 
 using namespace OpenDDS::DCPS;
 
-const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
