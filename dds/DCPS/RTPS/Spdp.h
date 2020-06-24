@@ -107,7 +107,7 @@ public:
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
-  void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
   void handle_participant_data(DCPS::MessageId id,

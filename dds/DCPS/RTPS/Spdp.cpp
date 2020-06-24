@@ -1361,23 +1361,23 @@ Spdp::process_auth_resends(const DCPS::MonotonicTimePoint& now)
   }
 }
 
-void
+bool
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg) {
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
 
   // If this message wasn't intended for us, ignore volatile message
   if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
-    return;
+    return false;
   }
 
   const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   if (crypto_handle_ == DDS::HANDLE_NIL) {
     // not configured for RTPS Protection, therefore doesn't support participant crypto tokens
-    return;
+    return false;
   }
 
   // If discovery hasn't initialized / validated this participant yet, ignore volatile message
@@ -1389,7 +1389,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
         ACE_TEXT("received tokens for undiscovered participant %C. Ignoring.\n"),
         OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
     }
-    return;
+    return false;
   }
   DiscoveredParticipant& dp = iter->second;
 
@@ -1401,16 +1401,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
       ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
-    return;
+    return false;
   }
 
-  if (!dp.is_requester_) {
-    send_participant_crypto_tokens(src_participant);
-    sedp_.send_builtin_crypto_tokens(dp.pdata_);
-    sedp_.send_datawriter_crypto_tokens(src_participant);
-    sedp_.send_datareader_crypto_tokens(src_participant);
-    sedp_.resend_user_crypto_tokens(src_participant);
-  }
+  return !dp.is_requester_;
 }
 
 DDS::ReturnCode_t
@@ -3045,8 +3039,7 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
-  DCPS::RepoId peer = id;
-  peer.entityId = ENTITYID_PARTICIPANT;
+  const DCPS::RepoId peer = make_id(id, ENTITYID_PARTICIPANT);
   const DiscoveredParticipantConstIter iter = participants_.find(peer);
   if (iter == participants_.end()) {
     const DCPS::GuidConverter conv(peer);
