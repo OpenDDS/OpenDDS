@@ -2669,6 +2669,9 @@ TEST(StructTypeTest, Assignable)
   MinimalUnionType uni_a, uni_b;
   uni_a.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
   uni_b.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
+  uni_a.discriminator.common.member_flags = 0;
+  uni_b.discriminator.common.member_flags = 0;
+
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
                                                                TypeIdentifier::makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
@@ -3050,6 +3053,7 @@ void expect_false_key_holder()
   MinimalStructType a2, b2;
   MinimalUnionType uni_a, uni_b;
   uni_a.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
+  uni_a.discriminator.common.member_flags = 0;
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
                                                                TypeIdentifier::makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
@@ -3059,6 +3063,7 @@ void expect_false_key_holder()
                                                                UnionCaseLabelSeq().append(4).append(5).append(6)),
                                              MinimalMemberDetail("inner2")));
   uni_b.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
+  uni_b.discriminator.common.member_flags = 0;
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(1, IS_DEFAULT,
                                                                TypeIdentifier::makeString(false, StringSTypeDefn(130)),
                                                                UnionCaseLabelSeq().append(10).append(20)),
@@ -3136,6 +3141,8 @@ TEST(UnionTypeTest, Assignable)
   b2.union_flags = a2.union_flags;
   a2.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
   b2.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
+  a2.discriminator.common.member_flags = 0;
+  b2.discriminator.common.member_flags = 0;
   MinimalUnionMember ma2_1(CommonUnionMember(1, UnionMemberFlag(),
                                              TypeIdentifier::makeString(true, StringSTypeDefn(60)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3154,6 +3161,8 @@ TEST(UnionTypeTest, Assignable)
   b3.union_flags = IS_APPENDABLE;
   a3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
   b3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
+  a3.discriminator.common.member_flags = IS_KEY;
+  b3.discriminator.common.member_flags = IS_KEY;
   MinimalUnionMember ma3_1(CommonUnionMember(1, UnionMemberFlag(),
                                              TypeIdentifier::makeString(false, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3178,6 +3187,8 @@ TEST(UnionTypeTest, Assignable)
   b4.union_flags = IS_APPENDABLE;
   a4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a4.discriminator.common.member_flags = 0;
+  b4.discriminator.common.member_flags = 0;
   MinimalUnionMember ma4_1(CommonUnionMember(1, IS_DEFAULT,
                                              TypeIdentifier::makeString(true, StringLTypeDefn(220)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3232,6 +3243,8 @@ TEST(UnionTypeTest, NotAssignable)
   b2.union_flags = IS_FINAL;
   a2.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b2.discriminator.common.type_id = TypeIdentifier::make(TK_UINT64);
+  a2.discriminator.common.member_flags = 0;
+  b2.discriminator.common.member_flags = 0;
 
   MinimalUnionMember ma2_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3256,6 +3269,7 @@ TEST(UnionTypeTest, NotAssignable)
   a3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   a3.discriminator.common.member_flags = IS_KEY;
+  b3.discriminator.common.member_flags = 0;
 
   MinimalUnionMember ma3_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3279,6 +3293,8 @@ TEST(UnionTypeTest, NotAssignable)
   b4.union_flags = IS_MUTABLE;
   a4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a4.discriminator.common.member_flags = 0;
+  b4.discriminator.common.member_flags = 0;
 
   MinimalUnionMember ma4_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3302,6 +3318,8 @@ TEST(UnionTypeTest, NotAssignable)
   b5.union_flags = IS_MUTABLE;
   a5.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b5.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a5.discriminator.common.member_flags = IS_KEY;
+  b5.discriminator.common.member_flags = IS_KEY;
 
   MinimalUnionMember ma5_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3325,6 +3343,8 @@ TEST(UnionTypeTest, NotAssignable)
   b6.union_flags = a6.union_flags;
   a6.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
   b6.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
+  a6.discriminator.common.member_flags = IS_KEY;
+  b6.discriminator.common.member_flags = IS_KEY;
   MinimalUnionMember ma6_1(CommonUnionMember(1, UnionMemberFlag(),
                                              TypeIdentifier::makeString(true, StringSTypeDefn(60)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3349,6 +3369,8 @@ TEST(UnionTypeTest, NotAssignable)
   b7.union_flags = IS_APPENDABLE;
   a7.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
   b7.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
+  a7.discriminator.common.member_flags = 0;
+  b7.discriminator.common.member_flags = 0;
   MinimalUnionMember ma7_1(CommonUnionMember(1, UnionMemberFlag(),
                                              TypeIdentifier::makeString(false, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3373,6 +3395,8 @@ TEST(UnionTypeTest, NotAssignable)
   b8.union_flags = IS_APPENDABLE;
   a8.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b8.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a8.discriminator.common.member_flags = IS_KEY;
+  b8.discriminator.common.member_flags = IS_KEY;
   MinimalUnionMember ma8_1(CommonUnionMember(1, IS_DEFAULT,
                                              TypeIdentifier::makeString(true, StringLTypeDefn(220)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3397,6 +3421,8 @@ TEST(UnionTypeTest, NotAssignable)
   b9.union_flags = IS_FINAL;
   a9.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b9.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a9.discriminator.common.member_flags = 0;
+  b9.discriminator.common.member_flags = 0;
   MinimalUnionMember ma9_1(CommonUnionMember(1, IS_DEFAULT,
                                              TypeIdentifier::makeString(true, StringLTypeDefn(220)),
                                              UnionCaseLabelSeq().append(10).append(20)),
@@ -3421,6 +3447,8 @@ TEST(UnionTypeTest, NotAssignable)
   b10.union_flags = IS_MUTABLE;
   a10.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
   b10.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a10.discriminator.common.member_flags = 0;
+  b10.discriminator.common.member_flags = 0;
   MinimalUnionMember ma10_1(CommonUnionMember(1, IS_DEFAULT,
                                               TypeIdentifier::makeString(true, StringLTypeDefn(220)),
                                               UnionCaseLabelSeq().append(10).append(20)),
