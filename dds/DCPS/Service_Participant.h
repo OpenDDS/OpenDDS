@@ -466,7 +466,7 @@ private:
    * Process the domain range template and activate the
    * domain for the given domain ID
    */
-  int configure_domain_range(DDS::DomainId_t domainId, ACE_Configuration_Heap &);
+  int configure_domain_range(DDS::DomainId_t domainId);
 
   /**
    * Load the discovery configuration to the Service_Participant
