@@ -2668,6 +2668,7 @@ TEST(StructTypeTest, Assignable)
   MinimalStructType a2, b2;
   MinimalUnionType uni_a, uni_b;
   uni_a.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
+  uni_b.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
                                                                TypeIdentifier::makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
