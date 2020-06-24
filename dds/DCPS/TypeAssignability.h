@@ -110,6 +110,7 @@ private:
   // Helpers for assignability of struct
   void erase_key(MinimalTypeObject& type) const;
   void hold_key(MinimalTypeObject& type) const;
+  bool hold_key(const TypeIdentifier& ti, MinimalTypeObject& to) const;
   bool struct_rule_enum_key(const MinimalTypeObject& tb, const CommonStructMember& ma) const;
   bool get_sequence_bound(LBound& b, const CommonStructMember& m) const;
   bool get_map_bound(LBound& b, const CommonStructMember& m) const;
