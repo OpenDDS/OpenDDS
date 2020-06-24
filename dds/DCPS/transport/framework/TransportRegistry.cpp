@@ -313,26 +313,33 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 }
 
 int
-TransportRegistry::load_transport_template_configuration(ACE_Configuration_Heap& cf,
-                                                         const ACE_TCHAR* section_name)
+TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 {
-const ACE_Configuration_Section_Key& root = cf.root_section();
+  const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key transport_sect;
 
-  if (cf.open_section(root, section_name, 0, transport_sect) != 0) {
+
+  if (cf.open_section(root, TRANSPORT_TEMPLATE_SECTION_NAME, 0, transport_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
       ACE_DEBUG((LM_NOTICE,
                  ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_template_configuration ")
                  ACE_TEXT("failed to open [%s] section.\n"),
-                 section_name));
+                 TRANSPORT_TEMPLATE_SECTION_NAME));
     }
 
     return 0;
 
   } else {
-  // Ensure there are no properties in this section
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_templates ")
+                   ACE_TEXT("config has %s sections.\n"),
+                   TRANSPORT_TEMPLATE_SECTION_NAME));
+    }
+
+    // Ensure there are no properties in this section
     ValueMap vm;
     if (pullValues(cf, transport_sect, vm) > 0) {
       // There are values inside [domain]

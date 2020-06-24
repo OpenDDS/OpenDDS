@@ -1404,25 +1404,6 @@ Service_Participant::load_configuration(
   int ret = 0;
   int idx = 0;
   ACE_TString section_name;
-  while (ret == 0) {
-    ret = config.enumerate_sections(config.root_section(), idx++, section_name);
-    if (section_name == DOMAIN_RANGE_SECTION_NAME) {
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
-                   ACE_TEXT("found config template identifier %s\n"),
-                   DOMAIN_RANGE_SECTION_NAME));
-      }
-    }
-    else if (section_name == TRANSPORT_TEMPLATE_SECTION_NAME) {
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
-                   ACE_TEXT("found config template identifier %s\n"),
-                   TRANSPORT_TEMPLATE_SECTION_NAME));
-      }
-    }
-  }
 
   int status = 0;
 
@@ -1443,6 +1424,7 @@ Service_Participant::load_configuration(
   // this will populate the domain_range_templates_
   status = this->load_domain_ranges(config);
 
+  // load any rtps_discovery templates
   status = this->load_discovery_templates(config);
 
   if (status != 0) {
@@ -1489,7 +1471,7 @@ Service_Participant::load_configuration(
   }
 
   // load any transport configuration templates
-  status = TransportRegistry::instance()->load_transport_template_configuration(config, TRANSPORT_TEMPLATE_SECTION_NAME);
+  status = TransportRegistry::instance()->load_transport_templates(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1973,7 +1955,14 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
     return 0;
 
   } else {
-  // Ensure there are no properties in this section
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges ")
+                   ACE_TEXT("config has %s sections.\n"),
+                   DOMAIN_RANGE_SECTION_NAME));
+    }
+
+    // Ensure there are no properties in this section
     ValueMap vm;
     if (pullValues(cf, domain_range_sect, vm) > 0) {
       // There are values inside [domain]
@@ -2013,7 +2002,7 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
       range_element.range_end = range_end;
 
       ValueMap values;
-      pullValues(cf, it->second, values);
+      if (pullValues(cf, it->second, values) > 0) {
       OPENDDS_STRING dt_name;
       OPENDDS_STRING customization;
 
@@ -2054,7 +2043,7 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
           range_element.domain_info[it->first] = it->second;
         }
       }
-
+      }
       domain_ranges_.push_back(range_element);
     }
   }
@@ -2087,6 +2076,40 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId, ACE_Co
 
       if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
         ValueMap vm;
+
+        if (pullValues(cf, rtps_sect, vm) > 0) {
+        // There are values inside [rtps_discovery]
+        ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::configure_domainRange(): ")
+                        ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
+                       -1);
+        }
+
+        // Process the subsections of this section (the individual domains)
+        KeyList keys;
+        if (processSections(cf, rtps_sect, keys) != 0) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range(): ")
+                        ACE_TEXT("too many nesting layers in the [rtps_discovery] section.\n")),
+                       -1);
+        }
+
+        // Loop through the [rtps_discovery/*] sections looking for template
+        bool flag = false;
+        for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+          if (dr_inst.discovery_template_name == it->first) {
+
+
+            flag = true;
+            break;
+          }
+        }
+
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range(): ")
+                     ACE_TEXT("No [rtps_discovery/%s] section exists."), dr_inst.discovery_template_name.c_str()));
+        }
 
       } else {
         if (DCPS_debug_level > 4) {
@@ -2176,13 +2199,55 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
 {
   if (has_domain_range())
   {
-    // open the rtps_discovery config section
+    // open the rtps_discovery config sections
     cf.open();
+    const ACE_Configuration_Section_Key& root = cf.root_section();
+    ACE_Configuration_Section_Key rtps_sect;
 
-    for (std::vector<DomainRange>::iterator it = domain_ranges_.begin();
-         it != domain_ranges_.end(); ++it)
-    {
+    if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
+      ValueMap vm;
 
+      if (pullValues(cf, rtps_sect, vm) > 0) {
+      // There are values inside [rtps_discovery]
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::configure_domainRange(): ")
+                        ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
+                        -1);
+      }
+
+      // Process the subsections of this section (the individual domains)
+      KeyList keys;
+      if (processSections(cf, rtps_sect, keys) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range(): ")
+                          ACE_TEXT("too many nesting layers in the [rtps_discovery] section.\n")),
+                          -1);
+      }
+
+      // copy the discovery information to the domain_range struct
+      for (std::vector<DomainRange>::iterator dr_it = domain_ranges_.begin();
+         dr_it != domain_ranges_.end(); ++dr_it)
+      {
+        // Loop through the [rtps_discovery/*] sections looking for template
+        bool flag = false;
+        for (KeyList::const_iterator disc_it = keys.begin(); disc_it != keys.end(); ++disc_it) {
+          if (dr_it->discovery_template_name == disc_it->first) {
+            if (DCPS_debug_level > 0) {
+             ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                       ACE_TEXT("Found DomainRange DiscoveryTemplate match for [rtps_discovery/%s]"), disc_it->first.c_str()));
+            }
+
+            ValueMap values;
+            if (pullValues(cf, disc_it->second, values) > 0) {
+
+              for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+                dr_it->disc_info[it->first] = it->second;
+              }
+            }
+          }
+        }
+      }
     }
   }
 

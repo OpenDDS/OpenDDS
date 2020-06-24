@@ -462,7 +462,6 @@ private:
    */
   int load_discovery_templates(ACE_Configuration_Heap& cf);
 
-
   /**
    * Process the domain range template and activate the
    * domain for the given domain ID

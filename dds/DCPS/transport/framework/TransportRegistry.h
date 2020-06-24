@@ -104,8 +104,7 @@ public:
   /// Process the transport_template configuration in the
   /// ACE_Configuration_Heap object.
   /// Called by the Service_Participant at initialization time.
-  int load_transport_template_configuration(ACE_Configuration_Heap& cf,
-                                            const ACE_TCHAR* section_name);
+  int load_transport_templates(ACE_Configuration_Heap& cf);
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -150,10 +149,25 @@ private:
     OPENDDS_STRING transport_template_name;
     bool instantiate_per_participant;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+
+    TransportInst_rch transport_inst;
+/**--cj
+  ** transport registry: line 156 and line 165
+  ** create_inst and inst_load
+  ** on demand createion of tranport happens in transport client.
+  ** may need new clone or copy methods on in trnaport inst
+  ** and may no op or erros for all instances other than rtps
+
+    ** withing transport registry process the template using standard load, it will ignore the
+    ** unrecognized keys and give an rtps_inst which we can store hewre
+    ** and use via a clone
+    **--cj
+    **/
   };
 
   std::vector<transport_template> transport_templates_;
 
+  bool has_transport_template();
 };
 
 } // namespace DCPS
