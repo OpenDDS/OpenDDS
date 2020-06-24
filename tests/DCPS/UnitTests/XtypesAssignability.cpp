@@ -3198,6 +3198,239 @@ TEST(UnionTypeTest, Assignable)
 
 TEST(UnionTypeTest, NotAssignable)
 {
+  TypeAssignability test;
+  MinimalUnionType a, b;
+
+  // Different extensibility kinds
+  a.union_flags = IS_FINAL;
+  b.union_flags = IS_APPENDABLE;
+  a.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a.discriminator.common.member_flags = IS_KEY;
+  b.discriminator.common.member_flags = IS_KEY;
+
+  MinimalUnionMember ma1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(10).append(20)),
+                         MinimalMemberDetail("m1"));
+  MinimalUnionMember ma2(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(30)),
+                         MinimalMemberDetail("m2"));
+  MinimalUnionMember mb1(CommonUnionMember(1, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(20).append(30)),
+                         MinimalMemberDetail("m1"));
+  MinimalUnionMember mb2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                           UnionCaseLabelSeq().append(10)),
+                         MinimalMemberDetail("m2"));
+  a.member_seq.append(ma1).append(ma2);
+  b.member_seq.append(mb1).append(mb2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // T1's discriminator type is not strongly assignable from T2's discriminator type
+  MinimalUnionType a2, b2;
+  a2.union_flags = IS_FINAL;
+  b2.union_flags = IS_FINAL;
+  a2.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b2.discriminator.common.type_id = TypeIdentifier::make(TK_UINT64);
+
+  MinimalUnionMember ma2_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("m1"));
+  MinimalUnionMember ma2_2(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("m2"));
+  MinimalUnionMember mb2_1(CommonUnionMember(1, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(20).append(30)),
+                           MinimalMemberDetail("m1"));
+  MinimalUnionMember mb2_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10)),
+                           MinimalMemberDetail("m2"));
+  a2.member_seq.append(ma2_1).append(ma2_2);
+  b2.member_seq.append(mb2_1).append(mb2_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a2)), TypeObject(MinimalTypeObject(b2))));
+
+  // One discriminator is key, the other is not key
+  MinimalUnionType a3, b3;
+  a3.union_flags = IS_MUTABLE;
+  b3.union_flags = IS_MUTABLE;
+  a3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b3.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  a3.discriminator.common.member_flags = IS_KEY;
+
+  MinimalUnionMember ma3_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("m1"));
+  MinimalUnionMember ma3_2(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("m2"));
+  MinimalUnionMember mb3_1(CommonUnionMember(1, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(20).append(30)),
+                           MinimalMemberDetail("m1"));
+  MinimalUnionMember mb3_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10)),
+                           MinimalMemberDetail("m2"));
+  a3.member_seq.append(ma3_1).append(ma3_2);
+  b3.member_seq.append(mb3_1).append(mb3_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a3)), TypeObject(MinimalTypeObject(b3))));
+
+  // Some members with the same name have different IDs
+  MinimalUnionType a4, b4;
+  a4.union_flags = IS_MUTABLE;
+  b4.union_flags = IS_MUTABLE;
+  a4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b4.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+
+  MinimalUnionMember ma4_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma4_2(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb4_1(CommonUnionMember(10, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(20).append(30)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb4_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10)),
+                           MinimalMemberDetail("member2"));
+  a4.member_seq.append(ma4_1).append(ma4_2);
+  b4.member_seq.append(mb4_1).append(mb4_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a4)), TypeObject(MinimalTypeObject(b4))));
+
+  // Some members with the same ID have different names
+  MinimalUnionType a5, b5;
+  a5.union_flags = IS_MUTABLE;
+  b5.union_flags = IS_MUTABLE;
+  a5.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b5.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+
+  MinimalUnionMember ma5_1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma5_2(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb5_1(CommonUnionMember(1, IS_DEFAULT, TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(20).append(30)),
+                           MinimalMemberDetail("member100"));
+  MinimalUnionMember mb5_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(10)),
+                           MinimalMemberDetail("member2"));
+  a5.member_seq.append(ma5_1).append(ma5_2);
+  b5.member_seq.append(mb5_1).append(mb5_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a5)), TypeObject(MinimalTypeObject(b5))));
+
+  // Non-default labels in T2 that select some member in T1
+  MinimalUnionType a6, b6;
+  a6.union_flags = IS_MUTABLE;
+  b6.union_flags = a6.union_flags;
+  a6.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
+  b6.discriminator.common.type_id = TypeIdentifier::make(TK_BYTE);
+  MinimalUnionMember ma6_1(CommonUnionMember(1, UnionMemberFlag(),
+                                             TypeIdentifier::makeString(true, StringSTypeDefn(60)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma6_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb6_1(CommonUnionMember(1, UnionMemberFlag(),
+                                             TypeIdentifier::makeString(false, StringLTypeDefn(100)),
+                                             UnionCaseLabelSeq().append(10)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb6_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_INT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member2"));
+  a6.member_seq.append(ma6_1).append(ma6_2);
+  b6.member_seq.append(mb6_1).append(mb6_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a6)), TypeObject(MinimalTypeObject(b6))));
+
+  // Non-default labels in T1 that select the default member in T2
+  MinimalUnionType a7, b7;
+  a7.union_flags = IS_APPENDABLE;
+  b7.union_flags = IS_APPENDABLE;
+  a7.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
+  b7.discriminator.common.type_id = TypeIdentifier::make(TK_UINT32);
+  MinimalUnionMember ma7_1(CommonUnionMember(1, UnionMemberFlag(),
+                                             TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma7_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb7_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(100)),
+                                             UnionCaseLabelSeq().append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb7_2(CommonUnionMember(4, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT32),
+                                             UnionCaseLabelSeq().append(30)),
+                           MinimalMemberDetail("member4"));
+  a7.member_seq.append(ma7_1).append(ma7_2);
+  b7.member_seq.append(mb7_1).append(mb7_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a7)), TypeObject(MinimalTypeObject(b7))));
+
+  // T1 and T2 both have default labels
+  MinimalUnionType a8, b8;
+  a8.union_flags = IS_APPENDABLE;
+  b8.union_flags = IS_APPENDABLE;
+  a8.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b8.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  MinimalUnionMember ma8_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma8_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT128),
+                                             UnionCaseLabelSeq().append(40)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb8_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                             UnionCaseLabelSeq().append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb8_2(CommonUnionMember(5, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT128),
+                                             UnionCaseLabelSeq().append(40)),
+                           MinimalMemberDetail("member5"));
+  a8.member_seq.append(ma8_1).append(ma8_2);
+  b8.member_seq.append(mb8_1).append(mb8_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a8)), TypeObject(MinimalTypeObject(b8))));
+
+  // Extensibility is final
+  MinimalUnionType a9, b9;
+  a9.union_flags = IS_FINAL;
+  b9.union_flags = IS_FINAL;
+  a9.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b9.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  MinimalUnionMember ma9_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                             UnionCaseLabelSeq().append(10).append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember ma9_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT128),
+                                             UnionCaseLabelSeq().append(40)),
+                           MinimalMemberDetail("member2"));
+  MinimalUnionMember mb9_1(CommonUnionMember(1, IS_DEFAULT,
+                                             TypeIdentifier::makeString(true, StringLTypeDefn(120)),
+                                             UnionCaseLabelSeq().append(20)),
+                           MinimalMemberDetail("member1"));
+  MinimalUnionMember mb9_2(CommonUnionMember(5, UnionMemberFlag(), TypeIdentifier::make(TK_FLOAT128),
+                                             UnionCaseLabelSeq().append(50)),
+                           MinimalMemberDetail("member5"));
+  a9.member_seq.append(ma9_1).append(ma9_2);
+  b9.member_seq.append(mb9_1).append(mb9_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a9)), TypeObject(MinimalTypeObject(b9))));
+
+  // Extensibility is not final
+  MinimalUnionType a10, b10;
+  a10.union_flags = IS_MUTABLE;
+  b10.union_flags = IS_MUTABLE;
+  a10.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  b10.discriminator.common.type_id = TypeIdentifier::make(TK_UINT16);
+  MinimalUnionMember ma10_1(CommonUnionMember(1, IS_DEFAULT,
+                                              TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                              UnionCaseLabelSeq().append(10).append(20)),
+                            MinimalMemberDetail("member1"));
+  MinimalUnionMember mb10_1(CommonUnionMember(1, IS_DEFAULT,
+                                              TypeIdentifier::makeString(true, StringLTypeDefn(120)),
+                                              UnionCaseLabelSeq().append(20)),
+                            MinimalMemberDetail("member1"));
+  a10.member_seq.append(ma10_1);
+  b10.member_seq.append(mb10_1);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a10)), TypeObject(MinimalTypeObject(b10))));
 }
 
 int main(int argc, char* argv[])
