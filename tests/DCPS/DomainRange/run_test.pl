@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 my $result = 0;
-my $dcps_debug_lvl = 0;
+my $dcps_debug_lvl = 1;
 
 sub runTest {
     my $delay = shift;
@@ -20,8 +20,9 @@ sub runTest {
     $test->enable_console_logging();
 
     print "*********************************\n";
-    print "DomainRangeTest creates a single process with DW and DR in one several domains.\n";
-    print "Domains and transports are dynamically configured from the templates in config.ini\n";
+    print "DomainRangeTest creates a single process with DWs and DRs\n"; 
+    print "in several domains. Domains and transports are dynamically\n";
+    print "configured from the templates in config.ini\n";
     print "The DW in each domain sends 10 messages to its DR.\n";
     print "*********************************\n";
 
