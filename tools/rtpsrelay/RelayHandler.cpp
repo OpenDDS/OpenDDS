@@ -23,11 +23,6 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
 #endif
 
-namespace {
-  const OpenDDS::DCPS::Encoding encoding_unaligned_big(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
-                                                       OpenDDS::DCPS::ENDIAN_BIG);
-}
-
 namespace RtpsRelay {
 
 bool
@@ -623,7 +618,7 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
 {
   using namespace OpenDDS::DCPS;
 
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN);
+  const Encoding encoding(Encoding::KIND_XCDR1);
 
   // Determine how many guids we can pack into a single UDP message.
   const auto max_guids_per_message =
@@ -890,7 +885,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
                                   const OpenDDS::DCPS::MonotonicTimePoint&,
                                   const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  OpenDDS::DCPS::Serializer serializer(msg.get(), encoding_unaligned_big);
+  OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::STUN::encoding);
   OpenDDS::STUN::Message message;
   message.block = msg.get();
   if (!(serializer >> message)) {
@@ -948,7 +943,7 @@ void StunHandler::send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message
   using namespace OpenDDS::DCPS;
   using namespace OpenDDS::STUN;
   Message_Block_Shared_Ptr block(new ACE_Message_Block(HEADER_SIZE + message.length()));
-  Serializer serializer(block.get(), encoding_unaligned_big);
+  Serializer serializer(block.get(), encoding);
   message.block = block.get();
   serializer << message;
   enqueue_message(addr, block);

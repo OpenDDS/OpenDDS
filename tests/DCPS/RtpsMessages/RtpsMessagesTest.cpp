@@ -14,8 +14,7 @@ using OpenDDS::DCPS::Encoding;
 using namespace OpenDDS::RTPS;
 
 Encoding get_encoding(OpenDDS::DCPS::Endianness endianness) {
-  Encoding encoding(Encoding::KIND_CDR_PLAIN, endianness);
-  encoding.zero_init_padding(true);
+  Encoding encoding(Encoding::KIND_XCDR1, endianness);
   return encoding;
 }
 const Encoding le_encoding = get_encoding(OpenDDS::DCPS::ENDIAN_LITTLE);

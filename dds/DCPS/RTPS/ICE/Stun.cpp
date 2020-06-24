@@ -14,11 +14,6 @@
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
-namespace {
-const OpenDDS::DCPS::Encoding encoding_unaligned_big(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
-                                       OpenDDS::DCPS::ENDIAN_BIG);
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -697,7 +692,7 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, encoding_unaligned_big);
+  DCPS::Serializer serializer(block, encoding);
 
   // Write the length and resize for hashing.
   block->wr_ptr(block->base() + 2);
@@ -786,7 +781,7 @@ ACE_UINT32 Message::compute_fingerprint() const
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, encoding_unaligned_big);
+  DCPS::Serializer serializer(block, encoding);
 
   // Resize for hashing.
   block->wr_ptr(block->base() + HEADER_SIZE + length() - 8);

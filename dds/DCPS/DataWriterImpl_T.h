@@ -50,8 +50,7 @@ public:
   class EncodingMode {
   public:
     EncodingMode()
-    : encoding_(Encoding::KIND_UNKNOWN)
-    , valid_(false)
+    : valid_(false)
     , bounded_(false)
     , buffer_size_(0)
     , key_only_bounded_(false)
@@ -62,26 +61,26 @@ public:
 
     EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
     : encoding_(kind, swap_the_bytes)
-    , valid_(encoding_.kind() != Encoding::KIND_UNKNOWN)
+    , valid_(true)
     , bounded_(MarshalTraitsType::gen_is_bounded_size())
     , buffer_size_(0)
     , key_only_bounded_(MarshalTraitsType::gen_is_bounded_key_size())
     , key_only_buffer_size_(0)
     , header_size_(0)
     {
-      if (valid_) {
-        max_serialized_size(encoding_, header_size_, encoding_);
-        MessageType x;
-        if (bounded_) {
-          buffer_size_ = header_size_;
-          TraitsType::max_serialized_size(encoding_, buffer_size_, x);
-        }
-        if (key_only_bounded_) {
-          const KeyOnlyType key_only_x(x);
-          key_only_buffer_size_ = header_size_;
-          TraitsType::max_serialized_size(
-            encoding_, key_only_buffer_size_, key_only_x);
-        }
+      if (encoding_.is_encapsulated()) {
+        header_size_ = EncapsulationHeader::serialized_size;
+      }
+      MessageType x;
+      if (bounded_) {
+        TraitsType::max_serialized_size(encoding_, buffer_size_, x);
+        buffer_size_ += header_size_;
+      }
+      if (key_only_bounded_) {
+        const KeyOnlyType key_only_x(x);
+        TraitsType::max_serialized_size(
+          encoding_, key_only_buffer_size_, key_only_x);
+        key_only_buffer_size_ += header_size_;
       }
     }
 
@@ -348,17 +347,8 @@ public:
      */
     encoding_mode_ = EncodingMode(
       cdr_encapsulation() ?
-        Encoding::KIND_CDR_PLAIN : Encoding::KIND_CDR_UNALIGNED,
+        Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
       swap_bytes());
-    if (!encoding_mode_.valid()) {
-      if (::OpenDDS::DCPS::DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-          ACE_TEXT("Invalid Encoding Mode\n"),
-          TraitsType::type_name()));
-      }
-      return DDS::RETCODE_ERROR;
-    }
 #if 0
     /*
      * We need to get the encoding kinds for encapsulated and non-encapsulated
@@ -465,7 +455,7 @@ private:
   ACE_Message_Block* dds_marshal(const MessageType& instance_data,
                                  OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    const bool has_cdr_header = cdr_encapsulation();
+    const bool encapsulated = cdr_encapsulation();
     const Encoding& encoding = encoding_mode_.encoding();
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
@@ -486,12 +476,18 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      if (has_cdr_header && !(serializer << encoding)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-          ACE_TEXT("key only data encoding header serialization error.\n"),
-          TraitsType::type_name()));
-        return 0;
+      if (encapsulated) {
+        EncapsulationHeader encap;
+        if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
+          return 0;
+        }
+        if (!(serializer << encap)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+            ACE_TEXT("key only data encapsulation header serialization error.\n"),
+            TraitsType::type_name()));
+          return 0;
+        }
       }
       if (!(serializer << ko_instance_data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -521,12 +517,18 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      if (has_cdr_header && !(serializer << encoding)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-          ACE_TEXT("data encoding header serialization error.\n"),
-          TraitsType::type_name()));
-        return 0;
+      if (encapsulated) {
+        EncapsulationHeader encap;
+        if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
+          return 0;
+        }
+        if (!(serializer << encap)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+            ACE_TEXT("data encapsulation header serialization error.\n"),
+            TraitsType::type_name()));
+          return 0;
+        }
       }
       if (!(serializer << instance_data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")

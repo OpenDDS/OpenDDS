@@ -19,7 +19,7 @@
 
 using namespace OpenDDS::DCPS;
 
-const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
 void print_hex(void* d)
 {
@@ -515,9 +515,9 @@ void run_test(const Encoding& encoding)
 }
 
 const Encoding encodings[] = {
-  Encoding(Encoding::KIND_CDR_UNALIGNED),
-  Encoding(Encoding::KIND_CDR_PLAIN),
-  Encoding(Encoding::KIND_XCDR2_PLAIN)
+  Encoding(Encoding::KIND_UNALIGNED_CDR),
+  Encoding(Encoding::KIND_XCDR1),
+  Encoding(Encoding::KIND_XCDR2)
 };
 const size_t encoding_count = sizeof(encodings) / sizeof(encodings[0]);
 

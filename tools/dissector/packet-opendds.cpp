@@ -186,7 +186,7 @@ namespace OpenDDS
       return instance_;
     }
 
-    const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+    const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
     template<typename T>
     T
@@ -620,7 +620,7 @@ namespace OpenDDS
         Wireshark_Bundle params(
           (char *) data, size,
           header.byte_order_ != ACE_CDR_BYTE_ORDER,
-          Serializer::ALIGN_NONE // For now alignment is not supported
+          Encoding::ALIGN_NONE // For now alignment is not supported
         );
         params.tvb = tvb_;
         params.info = pinfo_;

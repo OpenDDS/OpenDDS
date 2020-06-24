@@ -21,8 +21,7 @@ namespace XTypes {
 
 const Encoding& get_typeobject_encoding()
 {
-  static const Encoding encoding(
-    Encoding::KIND_XCDR2_PLAIN, DCPS::ENDIAN_LITTLE);
+  static const Encoding encoding(Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
   return encoding;
 }
 
