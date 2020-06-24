@@ -2903,7 +2903,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     if (ack >= ri->second.cur_cumulative_ack_) {
       ri->second.cur_cumulative_ack_ = ack;
-    } else {
+    } else if (ri->second.durable_ && !ri->second.expecting_durable_data()) {
       // Count increased but ack decreased.  Replay durable data for the reader.
       ACE_DEBUG((LM_DEBUG, "Enqueuing ReplayDurableData\n"));
       link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
