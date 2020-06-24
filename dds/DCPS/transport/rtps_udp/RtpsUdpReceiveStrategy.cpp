@@ -96,7 +96,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
       bytes -= block_size;
     }
 
-    DCPS::Serializer serializer(head, Encoding::KIND_CDR_UNALIGNED, ENDIAN_BIG);
+    DCPS::Serializer serializer(head, STUN::encoding);
     STUN::Message message;
     message.block = head;
     if (serializer >> message) {
@@ -629,7 +629,7 @@ void
 RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
                                              const RTPS::Submessage& postfix)
 {
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_BIG);
   size_t size = serialized_size(encoding, secure_prefix_);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
@@ -690,8 +690,8 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
     i += static_cast<unsigned int>(mb->length());
   }
 
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN,
-    ACE_CDR_BYTE_ORDER != (submsg.smHeader.flags & 1));
+  const Encoding encoding(Encoding::KIND_XCDR1,
+    static_cast<Endianness>(submsg.smHeader.flags & 1));
   size_t iQosSize = 0;
   serialized_size(encoding, iQosSize, submsg.inlineQos);
   iQos.length(static_cast<unsigned int>(iQosSize));

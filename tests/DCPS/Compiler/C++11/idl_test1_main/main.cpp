@@ -13,7 +13,7 @@ using OpenDDS::DCPS::max_serialized_size;
 using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 
-const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
 bool idl2cxx11_test()
 {

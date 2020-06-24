@@ -48,7 +48,7 @@ OPENDDS_STRING endianness_to_string(Endianness endianness)
 Encoding::Encoding()
 : endianness_(ENDIAN_NATIVE)
 {
-  kind(KIND_UNKNOWN);
+  kind(KIND_XCDR1);
 }
 
 Encoding::Encoding(Encoding::Kind kind, Endianness endianness)
@@ -63,64 +63,185 @@ Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
   this->kind(kind);
 }
 
-bool operator>>(Serializer& s, Encoding& encoding)
+EncapsulationHeader::EncapsulationHeader()
+: kind_(KIND_CDR_BE)
+, options_(0)
 {
-  ACE_CDR::Octet data[4];
-  if (!s.read_octet_array(&data[0], sizeof(data))) {
+}
+
+// TODO(iguessthidlldo) Support End Padding Described By XTypes 7.6.3.1.2
+bool EncapsulationHeader::from_encoding(
+  const Encoding& encoding, Extensibility extensibility)
+{
+  const bool big = encoding.endianness() == ENDIAN_BIG;
+  switch (encoding.kind()) {
+  case Encoding::KIND_XCDR1:
+    switch (extensibility) {
+    case FINAL:
+    case APPENDABLE:
+      kind_ = big ? KIND_CDR_BE : KIND_CDR_LE;
+      break;
+    case MUTABLE:
+      kind_ = big ? KIND_PL_CDR_BE : KIND_PL_CDR_LE;
+      break;
+    }
+    break;
+  case Encoding::KIND_XCDR2:
+    switch (extensibility) {
+    case FINAL:
+      kind_ = big ? KIND_CDR2_BE : KIND_CDR2_LE;
+      break;
+    case APPENDABLE:
+      kind_ = big ? KIND_D_CDR2_BE : KIND_D_CDR2_LE;
+      break;
+    case MUTABLE:
+      kind_ = big ? KIND_PL_CDR2_BE : KIND_PL_CDR2_LE;
+      break;
+    }
+    break;
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::from_encoding: ")
+      ACE_TEXT("Got Encoding With Unsupported Kind: %C\n"),
+      Encoding::kind_to_string(encoding.kind()).c_str()));
     return false;
   }
-  const ACE_CDR::UShort raw_kind =
-    (static_cast<ACE_CDR::UShort>(data[0]) << 8) | data[1];
-  /**
-   * Assume we can ignore last bit except for endianness on kinds that need
-   * them.
-   */
-  const Encoding::Kind kind = static_cast<Encoding::Kind>(raw_kind & 0xfffe);
-  if (!Encoding::has_cdr_header(kind) || !Encoding::supported(kind)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-      ACE_TEXT("operator>>(Serializer&, Encoding&): ")
-      ACE_TEXT("Unsupported Encoding Kind: %C\n"),
-      Encoding::kind_to_string(kind).c_str()));
+  return true;
+}
+
+// TODO(iguessthidlldo) Support End Padding Described By XTypes 7.6.3.1.2
+bool EncapsulationHeader::to_encoding(
+  Encoding& encoding, Extensibility expected_extensibility)
+{
+  bool wrong_extensibility = true;
+  switch (kind_) {
+  case KIND_CDR_BE:
+    encoding.kind(Encoding::KIND_XCDR1);
+    encoding.endianness(ENDIAN_BIG);
+    wrong_extensibility = expected_extensibility == MUTABLE;
+    break;
+
+  case KIND_CDR_LE:
+    encoding.kind(Encoding::KIND_XCDR1);
+    encoding.endianness(ENDIAN_LITTLE);
+    wrong_extensibility = expected_extensibility == MUTABLE;
+    break;
+
+  case KIND_PL_CDR_BE:
+    encoding.kind(Encoding::KIND_XCDR1);
+    encoding.endianness(ENDIAN_BIG);
+    wrong_extensibility = expected_extensibility != MUTABLE;
+    break;
+
+  case KIND_PL_CDR_LE:
+    encoding.kind(Encoding::KIND_XCDR1);
+    encoding.endianness(ENDIAN_LITTLE);
+    wrong_extensibility = expected_extensibility != MUTABLE;
+    break;
+
+  case KIND_CDR2_BE:
+    encoding.kind(Encoding::KIND_XCDR2);
+    encoding.endianness(ENDIAN_BIG);
+    wrong_extensibility = expected_extensibility != FINAL;
+    break;
+
+  case KIND_CDR2_LE:
+    encoding.kind(Encoding::KIND_XCDR2);
+    encoding.endianness(ENDIAN_LITTLE);
+    wrong_extensibility = expected_extensibility != FINAL;
+    break;
+
+  case KIND_D_CDR2_BE:
+    encoding.kind(Encoding::KIND_XCDR2);
+    encoding.endianness(ENDIAN_BIG);
+    wrong_extensibility = expected_extensibility != APPENDABLE;
+    break;
+
+  case KIND_D_CDR2_LE:
+    encoding.kind(Encoding::KIND_XCDR2);
+    encoding.endianness(ENDIAN_LITTLE);
+    wrong_extensibility = expected_extensibility != APPENDABLE;
+    break;
+
+  case KIND_PL_CDR2_BE:
+    encoding.kind(Encoding::KIND_XCDR2);
+    encoding.endianness(ENDIAN_BIG);
+    wrong_extensibility = expected_extensibility != MUTABLE;
+    break;
+
+  case KIND_PL_CDR2_LE:
+    encoding.kind(Encoding::KIND_XCDR2);
+    encoding.endianness(ENDIAN_LITTLE);
+    wrong_extensibility = expected_extensibility != MUTABLE;
+    break;
+
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
+      ACE_TEXT("Unsupported Encoding: %C\n"), to_string().c_str()));
     return false;
   }
-  if (Encoding::has_endianness(kind)) {
-    encoding.endianness(static_cast<Endianness>(raw_kind & 1));
+
+  if (wrong_extensibility) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
+      ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
+      to_string().c_str()));
+    return false;
   }
-  encoding.kind(kind);
-  if (DCPS_debug_level && (data[2] || data[3])) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
-      ACE_TEXT("operator>>(Serializer&, Encoding&): ")
-      ACE_TEXT("Unexpected non-zero CDR header options: %C\n"),
-      to_hex_dds_string(&data[2], 2).c_str()));
+
+  return true;
+}
+
+OPENDDS_STRING EncapsulationHeader::to_string() const
+{
+  switch (kind_) {
+  case KIND_CDR_BE:
+    return "CDR/XCDR1 Big Endian Plain";
+  case KIND_CDR_LE:
+    return "CDR/XCDR1 Little Endian Plain";
+  case KIND_PL_CDR_BE:
+    return "CDR/XCDR1 Big Endian Parameter List";
+  case KIND_PL_CDR_LE:
+    return "CDR/XCDR1 Little Endian Parameter List";
+  case KIND_CDR2_BE:
+    return "XCDR2 Big Endian Plain";
+  case KIND_CDR2_LE:
+    return "XCDR2 Little Endian Plain";
+  case KIND_D_CDR2_BE:
+    return "XCDR2 Big Endian Delimited";
+  case KIND_D_CDR2_LE:
+    return "XCDR2 Little Endian Delimited";
+  case KIND_PL_CDR2_BE:
+    return "XCDR2 Big Endian Parameter List";
+  case KIND_PL_CDR2_LE:
+    return "XCDR2 Little Endian Parameter List";
+  case KIND_XML:
+    return "XML";
+  default:
+    return "Unknown: " + to_dds_string(static_cast<unsigned>(kind_), true);
   }
+}
+
+bool operator>>(Serializer& s, EncapsulationHeader& value)
+{
+  ACE_CDR::Octet data[EncapsulationHeader::serialized_size];
+  if (!s.read_octet_array(&data[0], EncapsulationHeader::serialized_size)) {
+    return false;
+  }
+  value.kind(static_cast<EncapsulationHeader::Kind>(
+    (static_cast<ACE_UINT16>(data[0]) << 8) | data[1]));
+  value.options((static_cast<ACE_UINT16>(data[2]) << 8) | data[3]);
   s.reset_alignment();
   return true;
 }
 
-bool operator<<(Serializer& s, const Encoding& encoding)
+bool operator<<(Serializer& s, const EncapsulationHeader& value)
 {
-  ACE_CDR::Octet data[4];
-  Encoding::Kind k = encoding.kind();
-  if (!Encoding::has_cdr_header(k)) {
-    if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-        ACE_TEXT("operator<<(Serializer&, Encoding&): ")
-        ACE_TEXT("Trying to write a CDR Header for an encoding that shouldn't ")
-        ACE_TEXT("have one or is unsupported: %C\n"),
-        Encoding::kind_to_string(k).c_str()));
-    }
-    return false;
-  }
-  data[0] = (k >> 8) & 0xff;
-  data[1] = k & 0xff;
-  if (encoding.has_endianness()) {
-    data[1] &= 0xfe;
-    data[1] |= encoding.endianness();
-  }
-  // Encoding "Options" Currently Reserved, Set to Zero
-  data[2] = 0;
-  data[3] = 0;
-  const bool ok = s.write_octet_array(&data[0], sizeof(data));
+  ACE_CDR::Octet data[EncapsulationHeader::serialized_size];
+  data[0] = (value.kind() >> 8) & 0xff;
+  data[1] = value.kind() & 0xff;
+  data[2] = (value.options() >> 8) & 0xff;
+  data[3] = value.options() & 0xff;
+  const bool ok = s.write_octet_array(&data[0],
+    EncapsulationHeader::serialized_size);
   s.reset_alignment();
   return ok;
 }
@@ -128,24 +249,14 @@ bool operator<<(Serializer& s, const Encoding& encoding)
 OPENDDS_STRING Encoding::kind_to_string(Kind value)
 {
   switch (value) {
-  case KIND_CDR_PLAIN:
-    return "CDR/XCDR1 Plain";
-  case KIND_CDR_PARAMLIST:
-    return "CDR/XCDR1 Parameter List";
-  case KIND_XCDR2_PLAIN:
-    return "XCDR2 Plain";
-  case KIND_XCDR2_PARAMLIST:
-    return "XCDR2 Parameter List";
-  case KIND_XCDR2_DELIMITED:
-    return "XCDR2 Delimited";
-  case KIND_XML:
-    return "XML";
-  case KIND_UNKNOWN:
-    return "<UNKNOWN>";
-  case KIND_CDR_UNALIGNED:
+  case KIND_XCDR1:
+    return "CDR/XCDR1";
+  case KIND_XCDR2:
+    return "XCDR2";
+  case KIND_UNALIGNED_CDR:
     return "Unaligned CDR";
   default:
-    return to_dds_string(static_cast<unsigned>(value), true);
+    return "Unknown: " + to_dds_string(static_cast<unsigned>(value), true);
   }
 }
 
@@ -182,25 +293,15 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   reset_alignment();
 }
 
-Serializer::Serializer(ACE_Message_Block* chain, bool has_cdr_header,
-  bool is_little_endian)
+Serializer::Serializer(ACE_Message_Block* chain,
+  Encoding::Kind kind, bool swap_bytes)
   : current_(chain)
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
 {
-  Encoding enc;
-  bool ok = true;
-  if (has_cdr_header) {
-    ok = *this >> enc;
-  } else {
-    enc.kind(Encoding::KIND_CDR_UNALIGNED);
-    enc.endianness(is_little_endian ? ENDIAN_LITTLE : ENDIAN_BIG);
-  }
-  if (ok) {
-    encoding(enc);
-    reset_alignment();
-  }
+  encoding(Encoding(kind, swap_bytes));
+  reset_alignment();
 }
 
 Serializer::~Serializer()

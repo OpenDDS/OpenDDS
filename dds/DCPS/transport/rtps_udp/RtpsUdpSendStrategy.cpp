@@ -28,14 +28,14 @@
 
 #include <cstring>
 
-namespace {
-  const OpenDDS::DCPS::Encoding encoding_unaligned_native(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED);
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+namespace {
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
+}
 
 RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
                                          const GuidPrefix_t& local_prefix)
@@ -356,8 +356,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
           const bool swapPl = iQos[iQosLen - 4] != ACE_CDR_BYTE_ORDER;
           const char* rawIQos = reinterpret_cast<const char*>(iQos.get_buffer());
           ACE_Message_Block mbIQos(rawIQos, iQosLen);
-          Serializer ser(&mbIQos, Encoding::KIND_CDR_PLAIN,
-                         swapPl ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+          Serializer ser(&mbIQos, Encoding::KIND_XCDR1, swapPl);
 
           RTPS::DataSubmessage& data = submessages[i].data_sm();
           if (!(ser >> data.inlineQos)) { // appends to any existing inlineQos

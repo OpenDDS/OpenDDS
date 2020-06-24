@@ -42,7 +42,7 @@ using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 using OpenDDS::DCPS::security_debug;
 
-const Encoding common_encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+const Encoding common_encoding(Encoding::KIND_XCDR1, ENDIAN_BIG);
 
 namespace OpenDDS {
 namespace Security {
@@ -1073,7 +1073,7 @@ namespace {
     ACE_Message_Block mb_in(to_mb(original.get_buffer() + offset), origLength);
     mb_in.wr_ptr(origLength);
 
-    Serializer ser_in(&mb_in, Encoding::KIND_CDR_UNALIGNED);
+    Serializer ser_in(&mb_in, common_encoding);
     ser_in.skip(1); // submessageId
 
     unsigned char flags;
@@ -1823,7 +1823,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
   CryptoHeader ch;
-  de_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   de_ser >> ch;
   de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
   if (!de_ser.good_bit()) {
@@ -1855,7 +1855,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_CDR::UShort postfixOctetsToNext;
   post_ser >> postfixOctetsToNext;
   CryptoFooter cf;
-  post_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   post_ser >> cf;
   if (!post_ser.good_bit()) {
     ACE_ERROR((LM_ERROR,

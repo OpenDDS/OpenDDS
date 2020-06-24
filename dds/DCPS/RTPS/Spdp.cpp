@@ -12,43 +12,33 @@
 #include "ParameterListConverter.h"
 #include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsDiscovery.h"
-
-#include "dds/DdsDcpsGuidC.h"
-
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Qos_Helper.h"
-
 #ifdef OPENDDS_SECURITY
-#include "SecurityHelpers.h"
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
+#  include "SecurityHelpers.h"
 #endif
 
-#include "ace/Reactor.h"
-#include "ace/OS_NS_sys_socket.h" // For setsockopt()
-#include "ace/OS_NS_strings.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Qos_Helper.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/SecurityRegistry.h>
+#endif
+
+#include <dds/DdsDcpsGuidC.h>
+
+#include <ace/Reactor.h>
+#include <ace/OS_NS_sys_socket.h> // For setsockopt()
+#include <ace/OS_NS_strings.h>
+#include <ace/Auto_Ptr.h>
 
 #include <cstring>
 #include <stdexcept>
 
-#include "ace/Auto_Ptr.h"
-
-namespace {
-  const OpenDDS::DCPS::Encoding encoding_plain_big(
-    OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN,
-    OpenDDS::DCPS::ENDIAN_BIG);
-  const OpenDDS::DCPS::Encoding encoding_plain_native(
-    OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN);
-  const OpenDDS::DCPS::Encoding encoding_unaligned_big(
-    OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
-    OpenDDS::DCPS::ENDIAN_BIG);
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
 namespace RTPS {
 using DCPS::RepoId;
 using DCPS::MonotonicTimePoint;
@@ -57,11 +47,13 @@ using DCPS::Serializer;
 using DCPS::Encoding;
 using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
-using DCPS::ENDIAN_NATIVE;
 
 namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
   const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
+
+  const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
+  const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
 
   bool disposed(const ParameterList& inlineQos)
   {
@@ -2271,7 +2263,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
 #ifdef OPENDDS_SECURITY
     // Assume STUN
-    DCPS::Serializer serializer(&buff_, encoding_unaligned_big);
+    DCPS::Serializer serializer(&buff_, STUN::encoding);
     STUN::Message message;
     message.block = &buff_;
     if (serializer >> message) {
@@ -2457,7 +2449,7 @@ Spdp::SendStun::execute()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, tport_->outer_->lock_);
   tport_->wbuff_.reset();
-  DCPS::Serializer serializer(&tport_->wbuff_, encoding_unaligned_big);
+  Serializer serializer(&tport_->wbuff_, STUN::encoding);
   const_cast<STUN::Message&>(message_).block = &tport_->wbuff_;
   serializer << message_;
 

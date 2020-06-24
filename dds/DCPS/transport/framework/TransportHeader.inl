@@ -90,7 +90,7 @@ TransportHeader::init(ACE_Message_Block* buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","init",6);
 
-  Serializer reader(buffer, Encoding::KIND_CDR_UNALIGNED);
+  Serializer reader(buffer, Encoding::KIND_UNALIGNED_CDR);
 
   if (!reader.read_octet_array(this->protocol_, sizeof(this->protocol_)))
     return false;

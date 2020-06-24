@@ -125,8 +125,9 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
     return iter->second;
   }
   Message_Block_Ptr mb (serialized_->duplicate());
-  Serializer ser(mb.get(), cdr_ ? Encoding::KIND_CDR_PLAIN : Encoding::KIND_CDR_UNALIGNED,
-                 swap_ ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+  // TODO(iguessthislldo): Use Encap
+  Serializer ser(mb.get(),
+    cdr_ ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR, swap_);
   if (cdr_) {
     ser.skip(4); // CDR encapsulation header
   }

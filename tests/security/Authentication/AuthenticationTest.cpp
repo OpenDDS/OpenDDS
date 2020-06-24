@@ -219,7 +219,7 @@ struct AuthenticationTest : public ::testing::Test
 
     ACE_Message_Block buffer(1024);
     //buffer.wr_ptr(cpdata.length());
-    OpenDDS::DCPS::Serializer serializer(&buffer, Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+    OpenDDS::DCPS::Serializer serializer(&buffer, Encoding::KIND_XCDR1, ENDIAN_BIG);
 
     OpenDDS::RTPS::ParameterList params;
     OpenDDS::RTPS::Parameter p;

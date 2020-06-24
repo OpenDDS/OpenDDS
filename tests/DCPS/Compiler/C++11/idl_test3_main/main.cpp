@@ -16,8 +16,8 @@ bool dump_buffer = false;
 #define DONT_CHECK_MS 0
 
 using OpenDDS::DCPS::Encoding;
-const Encoding unaligned_encoding(Encoding::KIND_CDR_UNALIGNED);
-const Encoding aligned_encoding(Encoding::KIND_CDR_PLAIN);
+const Encoding unaligned_encoding(Encoding::KIND_UNALIGNED_CDR);
+const Encoding aligned_encoding(Encoding::KIND_XCDR1);
 
 template<typename FOO>
 int try_marshaling(const FOO& in_foo, FOO& out_foo,
