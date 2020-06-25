@@ -599,14 +599,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     if (is_security_enabled()) {
       // Associate the stateless reader / writer for handshakes & auth requests
       sedp_.associate_preauth(iter->second.pdata_);
-
-      // If we've gotten auth requests for this (previously undiscovered) participant,
-      // pull in the tokens now
-      PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-      if (token_iter != pending_remote_auth_tokens_.end()) {
-        iter->second.remote_auth_request_token_ = token_iter->second;
-        pending_remote_auth_tokens_.erase(token_iter);
-      }
     }
 #endif
 
@@ -859,21 +851,11 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
+  pending_remote_auth_tokens_[guid] = msg.message_data[0];
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
-  if (iter == participants_.end()) {
-    // We're simply caching this for later, since we can't actually do much without the SPDP announcement itself
-    pending_remote_auth_tokens_[guid] = msg.message_data[0];
-  } else {
-    DiscoveredParticipant& dp = iter->second;
-    if (!(dp.remote_auth_request_token_ == msg.message_data[0])) {
-      dp.remote_auth_request_token_ = msg.message_data[0];
-      if (dp.is_requester_) {
-        dp.handshake_state_= DCPS::HANDSHAKE_STATE_EXPECTING_REQUEST;
-      } else {
-        send_handshake_request(guid, dp);
-      }
-    }
+  if (iter != participants_.end()) {
+    attempt_authentication(iter->first, iter->second);
   }
 }
 
@@ -923,7 +905,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   set_participant_guid(guid_, plist);
 
   if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
                ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
     return;
   }
@@ -931,7 +913,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   ACE_Message_Block temp_buff(64 * 1024);
   DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_INITIALIZE);
   if (!(ser << plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
                ACE_TEXT("Failed to serialize parameter list.\n")));
     return;
   }
@@ -958,7 +940,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_,
                                     local_participant, se)
       != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
                ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
                se.code, se.minor_code, se.message.in()));
     return;
@@ -976,12 +958,12 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   msg.message_data[0] = hs_mt;
 
   if (send_stateless_message(guid, dp, msg, true) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
                ACE_TEXT("Unable to write stateless message (handshake).\n")));
     return;
   } else {
     if (DCPS::security_debug.auth_debug) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::send_handshake_request() - ")
                  ACE_TEXT("Sent handshake request message for participant: %C\n"),
                  OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
     }
@@ -1607,6 +1589,15 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 {
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se = {"", 0, 0};
+
+  // TODO: Put this in the right place.
+  // If we've gotten auth requests for this (previously undiscovered) participant,
+  // pull in the tokens now
+  PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
+  if (token_iter != pending_remote_auth_tokens_.end()) {
+    iter->second.remote_auth_request_token_ = token_iter->second;
+    pending_remote_auth_tokens_.erase(token_iter);
+  }
 
   if (dp.auth_state_ == DCPS::AUTH_STATE_UNKNOWN) {
     dp.auth_deadline_ = DCPS::MonotonicTimePoint::now() + config_->max_auth_time();
