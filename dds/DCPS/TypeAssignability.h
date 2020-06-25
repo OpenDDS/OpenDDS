@@ -22,12 +22,12 @@ class OpenDDS_Dcps_Export TypeLookup {
 public:
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
-    return table_[hash_to_unsigned(ti.equivalence_hash)];
+    return table_[hash_to_unsigned(ti.equivalence_hash())];
   }
 
   static void insert_entry(const TypeIdentifier& ti, const MinimalTypeObject& tobj)
   {
-    table_[hash_to_unsigned(ti.equivalence_hash)] = tobj;
+    table_[hash_to_unsigned(ti.equivalence_hash())] = tobj;
   }
 
   static void get_equivalence_hash(EquivalenceHash& out)

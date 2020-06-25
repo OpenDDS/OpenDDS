@@ -478,15 +478,16 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
 
-#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, const std::string& x);
+  bool operator<<(Serializer& s, const OPENDDS_STRING& x);
 
   template <typename CharT>
   struct FromBoundedString {
-    FromBoundedString(const std::basic_string<CharT>& str, ACE_CDR::ULong bound)
+    typedef std::basic_string<CharT, std::char_traits<CharT>,
+                              OPENDDS_ALLOCATOR(CharT) > string_t;
+    FromBoundedString(const string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
-    const std::basic_string<CharT>& str_;
+    const string_t& str_;
     ACE_CDR::ULong bound_;
   };
 
@@ -495,12 +496,11 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, const std::wstring& x);
+  bool operator<<(Serializer& s, const OPENDDS_WSTRING& x);
 
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
   // Extraction operators.
   friend OpenDDS_Dcps_Export
@@ -547,15 +547,16 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
 
-#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, std::string& x);
+  bool operator>>(Serializer& s, OPENDDS_STRING& x);
 
   template <typename CharT>
   struct ToBoundedString {
-    ToBoundedString(std::basic_string<CharT>& str, ACE_CDR::ULong bound)
+    typedef std::basic_string<CharT, std::char_traits<CharT>,
+                              OPENDDS_ALLOCATOR(CharT) > string_t;
+    ToBoundedString(string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
-    std::basic_string<CharT>& str_;
+    string_t& str_;
     ACE_CDR::ULong bound_;
   };
 
@@ -564,12 +565,11 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, std::wstring& x);
+  bool operator>>(Serializer& s, OPENDDS_WSTRING& x);
 
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ToBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
   /// Read from the chain into a destination buffer.
   // This method doesn't respect alignment, so use with care.
