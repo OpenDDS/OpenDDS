@@ -1606,7 +1606,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   } else {
     dp.remote_auth_request_token_ = token_iter->second;
     pending_remote_auth_tokens_.erase(token_iter);
-    ACE_DEBUG((LM_DEBUG, "remote auth request token found changed=%d\n", auth_request_token_changed));
+    ACE_DEBUG((LM_DEBUG, "remote auth request token found changed?\n"/*, auth_request_token_changed*/));
   }
 
   if (dp.auth_state_ == DCPS::AUTH_STATE_VALIDATING_REMOTE) {
