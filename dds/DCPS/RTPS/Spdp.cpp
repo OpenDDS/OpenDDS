@@ -1597,16 +1597,19 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     tport_->auth_deadline_processor_->schedule(config_->max_auth_time());
   }
 
-  bool auth_request_token_changed = false;
+  bool start_from_auth_request = false;
   PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-  if (token_iter != pending_remote_auth_tokens_.end()) {
-    auth_request_token_changed = !(dp.remote_auth_request_token_ == token_iter->second);
+  if (token_iter == pending_remote_auth_tokens_.end()) {
+    dp.remote_auth_request_token_ = DDS::Security::Token();
+  } else {
+    start_from_auth_request = true;
     dp.remote_auth_request_token_ = token_iter->second;
     pending_remote_auth_tokens_.erase(token_iter);
   }
 
-  if (dp.auth_state_ == DCPS::AUTH_STATE_VALIDATING_REMOTE || auth_request_token_changed) {
-    DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
+  if (dp.auth_state_ == DCPS::AUTH_STATE_VALIDATING_REMOTE || start_from_auth_request) {
+    const DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_,
+      dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
 
     // Take care of any auth tokens that need to be sent before handling return value
     dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
