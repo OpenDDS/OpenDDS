@@ -629,13 +629,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsWriterMap::iterator rw = writers_.find(local_id);
       if (rw == writers_.end()) {
         RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
-        CORBA::Long hb_start = 0;
-        HeartBeatCountMapType::iterator hbc_it = heartbeat_counts_.find(local_id);
-        if (hbc_it != heartbeat_counts_.end()) {
-          hb_start = hbc_it->second;
-          heartbeat_counts_.erase(hbc_it);
-        }
-        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start, multi_buff_.capacity());
+        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, multi_buff_.capacity());
         rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
       RtpsWriter_rch writer = rw->second;
@@ -717,14 +711,11 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
-  bool enableheartbeat = interesting_readers_.empty();
+  const bool enableheartbeat = interesting_readers_.empty();
   interesting_readers_.insert(
     InterestingRemoteMapType::value_type(
       readerid,
       InterestingRemote(writerid, address, listener)));
-  if (heartbeat_counts_.find(writerid) == heartbeat_counts_.end()) {
-    heartbeat_counts_[writerid] = 0;
-  }
   g.release();
   if (enableheartbeat) {
     heartbeat_.enable(quick_heartbeat_delay_);
@@ -783,6 +774,31 @@ RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
   }
 }
 
+void RtpsUdpDataLink::client_stop(const RepoId& localId)
+{
+  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
+  const GuidConverter conv(localId);
+
+  if (conv.isReader()) {
+    ACE_GUARD(ACE_Thread_Mutex, gr, readers_lock_);
+    readers_.erase(localId);
+
+  } else {
+    ACE_GUARD(ACE_Thread_Mutex, gw, writers_lock_);
+    const RtpsWriterMap::iterator iter = writers_.find(localId);
+    if (iter == writers_.end()) {
+      return;
+    }
+    iter->second->pre_stop_helper(to_drop);
+    writers_.erase(iter);
+  }
+
+  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
+  for (tqe_iter drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
+    (*drop_it)->data_dropped(true);
+  }
+}
+
 void
 RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop)
 {
@@ -823,7 +839,6 @@ RtpsUdpDataLink::pre_stop_i()
       writer->pre_stop_helper(to_drop);
       RtpsWriterMap::iterator last = iter;
       ++iter;
-      heartbeat_counts_.erase(last->first);
       writers_.erase(last);
     }
   }
@@ -849,7 +864,6 @@ void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
-  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
   using std::pair;
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
@@ -860,20 +874,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       RtpsWriter_rch writer = rw->second;
       g.release();
       writer->remove_reader(remote_id);
-
-      if (writer->reader_count() == 0) {
-        writer->pre_stop_helper(to_drop);
-        const CORBA::ULong hbc = writer->get_heartbeat_count();
-
-        ACE_GUARD(ACE_Thread_Mutex, h, writers_lock_);
-        rw = writers_.find(local_id);
-        if (rw != writers_.end()) {
-          heartbeat_counts_[rw->first] = hbc;
-          writers_.erase(rw);
-        }
-      } else {
-        writer->process_acked_by_all();
-      }
+      writer->process_acked_by_all();
     }
 
   } else if (conv.isReader()) {
@@ -908,13 +909,6 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         }
       }
     }
-  }
-
-  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  tqe_iter drop_it = to_drop.begin();
-  while (drop_it != to_drop.end()) {
-    (*drop_it)->data_dropped(true);
-    ++drop_it;
   }
 }
 
@@ -3404,7 +3398,7 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
       pos->first.entityId,
       {SN.getHigh(), SN.getLow()},
       {lastSN.getHigh(), lastSN.getLow()},
-      {++heartbeat_counts_[pos->first]}
+      {writers[pos->first]->inc_heartbeat_count()}
     };
 
     MetaSubmessage meta_submessage(pos->first, GUID_UNKNOWN, pos->second);
@@ -3654,9 +3648,6 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
     return;
   }
 
-  SequenceNumber firstSN, lastSN;
-  CORBA::Long counter;
-
   const bool has_data = !send_buff_.is_nil() && !send_buff_->empty();
   SequenceNumber durable_max;
   const MonotonicTimePoint now = MonotonicTimePoint::now();
@@ -3672,9 +3663,9 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
     }
   }
 
-  firstSN = (durable_ || !has_data) ? 1 : send_buff_->low();
-  lastSN = std::max(durable_max, has_data ? send_buff_->high() : 1);
-  counter = ++heartbeat_count_;
+  const SequenceNumber firstSN = (durable_ || !has_data) ? 1 : send_buff_->low();
+  const SequenceNumber lastSN = std::max(durable_max, has_data ? send_buff_->high() : 1);
+  const int counter = ++heartbeat_count_;
 
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
@@ -3807,12 +3798,12 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
      || !durable_data_.empty()); // DW resent, not sent to reader
 }
 
-RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc, size_t capacity)
+RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, size_t capacity)
  : send_buff_(make_rch<SingleSendBuffer>(capacity, ONE_SAMPLE_PER_PACKET))
  , link_(link)
  , id_(id)
  , durable_(durable)
- , heartbeat_count_(hbc)
+ , heartbeat_count_(0)
 {
   send_buff_->bind(link->send_strategy());
 }
@@ -3827,6 +3818,12 @@ RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
       ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
       elems_not_acked_.size()));
   }
+}
+
+int RtpsUdpDataLink::RtpsWriter::inc_heartbeat_count()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  return ++heartbeat_count_;
 }
 
 SequenceNumber

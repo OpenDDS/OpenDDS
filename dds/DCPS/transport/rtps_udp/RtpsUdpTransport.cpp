@@ -472,6 +472,16 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   return true;
 }
 
+void RtpsUdpTransport::client_stop(const RepoId& localId)
+{
+  GuardThreadType guard_links(links_lock_);
+  const RtpsUdpDataLink_rch link = link_;
+  guard_links.release();
+  if (link) {
+    link->client_stop(localId);
+  }
+}
+
 void
 RtpsUdpTransport::shutdown_i()
 {

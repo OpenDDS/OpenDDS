@@ -1600,20 +1600,18 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   ACE_DEBUG((LM_DEBUG, "pre local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
   ACE_DEBUG((LM_DEBUG, "pre remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
 
-  bool auth_request_token_changed = false;
   PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-  if (token_iter != pending_remote_auth_tokens_.end()) {
-    auth_request_token_changed = !(dp.remote_auth_request_token_ == token_iter->second);
+  if (token_iter == pending_remote_auth_tokens_.end()) {
+    dp.remote_auth_request_token_ = DDS::Security::Token();
+  } else {
     dp.remote_auth_request_token_ = token_iter->second;
     pending_remote_auth_tokens_.erase(token_iter);
     ACE_DEBUG((LM_DEBUG, "remote auth request token found changed=%d\n", auth_request_token_changed));
   }
 
-  ACE_DEBUG((LM_DEBUG, "post local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
-  ACE_DEBUG((LM_DEBUG, "post remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
-
-  if (dp.auth_state_ == DCPS::AUTH_STATE_VALIDATING_REMOTE || auth_request_token_changed) {
-    DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
+  if (dp.auth_state_ == DCPS::AUTH_STATE_VALIDATING_REMOTE) {
+    const DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_,
+      dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
 
   ACE_DEBUG((LM_DEBUG, "post validate local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
   ACE_DEBUG((LM_DEBUG, "post validate remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
