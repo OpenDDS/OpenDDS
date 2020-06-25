@@ -120,6 +120,8 @@ namespace {
     seq.length(i + 1);
     seq[i] = t;
   }
+
+  const unsigned submessage_key_index = 0;
 }
 
 ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
@@ -449,8 +451,7 @@ bool CryptoBuiltInImpl::rekey_remote_datareader(
     return DDS::HANDLE_NIL;
   }
 
-  static const unsigned int SUBMSG_KEY_IDX = 0;
-  const KeyId_t sKey = std::make_pair(remote_datareader_crypto_handle, SUBMSG_KEY_IDX);
+  const KeyId_t sKey = std::make_pair(remote_datareader_crypto_handle, submessage_key_index);
   sessions_.erase(sKey);
 
   if (security_debug.bookkeeping && !security_debug.showkeys) {
@@ -600,8 +601,7 @@ bool CryptoBuiltInImpl::rekey_remote_datawriter(
     return DDS::HANDLE_NIL;
   }
 
-  static const unsigned int SUBMSG_KEY_IDX = 0;
-  const KeyId_t sKey = std::make_pair(remote_datawriter_crypto_handle, SUBMSG_KEY_IDX);
+  const KeyId_t sKey = std::make_pair(remote_datawriter_crypto_handle, submessage_key_index);
   sessions_.erase(sKey);
 
   if (security_debug.bookkeeping && !security_debug.showkeys) {
@@ -1218,22 +1218,21 @@ bool CryptoBuiltInImpl::encode_submessage(
   CryptoFooter footer;
   DDS::OctetSeq out;
   const DDS::OctetSeq* pOut = &plain_rtps_submessage;
-  static const unsigned int SUBMSG_KEY_IDX = 0;
-  const KeyId_t sKey = std::make_pair(sender_handle, SUBMSG_KEY_IDX);
+  const KeyId_t sKey = std::make_pair(sender_handle, submessage_key_index);
   bool authOnly = false;
 
-  if (encrypts(keyseq[SUBMSG_KEY_IDX])) {
-    ok = encrypt(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], plain_rtps_submessage,
+  if (encrypts(keyseq[submessage_key_index])) {
+    ok = encrypt(keyseq[submessage_key_index], sessions_[sKey], plain_rtps_submessage,
                  header, footer, out, ex);
     pOut = &out;
 
-  } else if (authenticates(keyseq[SUBMSG_KEY_IDX])) {
+  } else if (authenticates(keyseq[submessage_key_index])) {
     // the original submessage may have octetsToNextHeader = 0 which isn't
     // legal when appending SEC_POSTFIX, patch in the actual submsg length
     if (setOctetsToNextHeader(out, plain_rtps_submessage)) {
       pOut = &out;
     }
-    ok = authtag(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], *pOut,
+    ok = authtag(keyseq[submessage_key_index], sessions_[sKey], *pOut,
                  header, footer, ex);
     authOnly = true;
 

@@ -786,21 +786,18 @@ void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
 
       size_t size = 0, padding = 0;
       gen_find_size(remote_id, size, padding);
-      Message_Block_Ptr data(
-                             new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
+      Message_Block_Ptr data(new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
                                                    get_db_lock()));
       Serializer ser(data.get());
       ser << remote_id;
 
       DataSampleHeader header;
-      Message_Block_Ptr end_historic_samples(
-                                             create_control_message(
-                                                                    END_HISTORIC_SAMPLES, header, move(data),
+      Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, move(data),
                                                                     SystemTimePoint::now().to_dds_time()));
 
       this->controlTracker.message_sent();
       guard.release();
-      SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
+      const SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("DataWriterImpl::replay_durable_data_for: ")

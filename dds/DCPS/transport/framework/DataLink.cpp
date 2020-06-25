@@ -1178,13 +1178,9 @@ DataLink::replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_s
 {
   GuidConverter local(local_pub_id);
   GuidConverter remote(remote_sub_id);
-  ACE_DEBUG((LM_DEBUG, "Replay durable data %C -> %C\n", OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
   TransportSendListener_rch send_listener = send_listener_for(local_pub_id);
   if (send_listener) {
-    ACE_DEBUG((LM_DEBUG, "Replay durable data %C -> %C\n", OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
     send_listener->replay_durable_data_for(remote_sub_id);
-  } else {
-    ACE_DEBUG((LM_DEBUG, "Replay durable data %C -> %C no send_listener\n", OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
   }
 }
 

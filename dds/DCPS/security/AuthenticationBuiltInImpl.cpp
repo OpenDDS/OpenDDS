@@ -95,7 +95,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   LocalAuthCredentialData::shared_ptr credentials = DCPS::make_rch<LocalAuthCredentialData>();
-  if (! credentials->load_credentials(participant_qos.property.value, ex)) {
+  if (!credentials->load_credentials(participant_qos.property.value, ex)) {
     return result;
   }
 
@@ -105,7 +105,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       int err = SSL::make_adjusted_guid(candidate_participant_guid,
                                         adjusted_participant_guid,
                                         credentials->get_participant_cert());
-      if (! err) {
+      if (!err) {
         local_identity_handle = get_next_handle();
 
         LocalParticipantData::shared_ptr local_participant = DCPS::make_rch<LocalParticipantData>();
@@ -124,11 +124,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       }
 
     } else {
-        set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
+      set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
     }
 
   } else {
-      set_security_error(ex, -1, 0, "local-credential-data failed validation");
+    set_security_error(ex, -1, 0, "local-credential-data failed validation");
   }
 
   return result;
