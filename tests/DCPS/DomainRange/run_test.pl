@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 my $result = 0;
-my $dcps_debug_lvl = 10;
+my $dcps_debug_lvl = 1;
 
 sub runTest {
     my $delay = shift;
@@ -30,7 +30,7 @@ sub runTest {
     my $dr_static = 1;
     my $origin = 1;
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -domain 2 -domain 4 -domain 7 -domain 4");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -domain 2 -domain 4 -domain 7");
     $test->start_process("alpha");
     sleep $delay;
 

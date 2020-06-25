@@ -2063,13 +2063,12 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainId)
 {
   OpenDDS::DCPS::Discovery::RepoKey name = get_discovery_template_instance_name(domainId);
-  DomainRange dr_inst;
-
-  // TODO: Add CF error checking
 
   if (this->discoveryMap_.find(name) == this->discoveryMap_.end()) {
     // create a cf that has [rtps_discovery/name+domainId]
     // copy sections adding customization
+    DomainRange dr_inst;
+
     if (get_domain_range_info(domainId, dr_inst)) {
       ACE_Configuration_Heap dcf;
       dcf.open();
@@ -2089,9 +2088,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
         // create transport instance add default transport config
-        TransportRegistry::instance()->create_transport_template_instance(domainId);
+        TransportRegistry::instance()->create_transport_template_instance(domainId, dr_inst.discovery_template_name);
 
-        dcf.set_string_value(dsub_sect, "DefaultTransportConfig", TransportRegistry::instance()->get_transport_template_instance_name(domainId).c_str());
+        dcf.set_string_value(dsub_sect, "DefaultTransportConfig", TransportRegistry::instance()->get_config_instance_name(domainId).c_str());
       }
 
       //create matching discovery instance
@@ -2160,8 +2159,6 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
                           status),
                           -1);
       }
-
-      // TODO: load transport
 
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
@@ -2277,7 +2274,7 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
   return 0;
 }
 
-int Service_Participant::parse_domain_range(OPENDDS_STRING& range, int& start, int& end) {
+int Service_Participant::parse_domain_range(const OPENDDS_STRING range, int& start, int& end) {
   std::size_t dash_pos = range.find("-", 0);
 
   if (dash_pos == std::string::npos || dash_pos == range.length() - 1) {

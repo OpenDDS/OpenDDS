@@ -641,15 +641,97 @@ TransportRegistry::get_transport_template_instance_name(const DDS::DomainId_t id
   return configured_name;
 }
 
-bool
-TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain)
+OPENDDS_STRING
+TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
 {
-  bool ret = false;
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = CONFIG_INSTANCE_PREFIX;
+  configured_name += std::to_string(id);
+  return configured_name;
+}
+
+int
+TransportRegistry::create_transport_template_instance(const DDS::DomainId_t domain, const OPENDDS_STRING transport_template_name)
+{
+  OPENDDS_STRING transport_inst_name = get_transport_template_instance_name(domain);
+  OPENDDS_STRING config_inst_name = get_config_instance_name(domain);
+
   if (has_transport_template()) {
+    TransportTemplate tr_inst;
+
+    if (get_transport_template_info(transport_template_name.c_str(), tr_inst)) {
+      ACE_Configuration_Heap tcf;
+      tcf.open();
+      const ACE_Configuration_Section_Key& root = tcf.root_section();
+
+      // create config
+      ACE_Configuration_Section_Key csect;
+      tcf.open_section(root, "config", 1 /* create */, csect);
+      ACE_Configuration_Section_Key csub_sect;
+      tcf.open_section(csect, config_inst_name.c_str(), 1 /* create */, csub_sect);
+      tcf.set_string_value(csub_sect, "transports", transport_inst_name.c_str());
+
+      // create matching transport section
+      ACE_Configuration_Section_Key tsect;
+      tcf.open_section(root, "transport", 1 /* create */, tsect);
+      ACE_Configuration_Section_Key tsub_sect;
+      tcf.open_section(tsect, transport_inst_name.c_str(), 1 /* create */, tsub_sect);
+
+      for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
+           it != tr_inst.transport_info.end();
+           ++it)
+      {
+        // customization.
+        OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator idx = tr_inst.customizations.find(it->first);
+        if (idx != tr_inst.customizations.end()) {
+          // only AddDomainID is supported at this time.
+          if (idx->second == "AddDomainId") {
+            OPENDDS_STRING addr = it->second;
+            size_t pos = addr.find_last_of(".");
+            if (pos != OPENDDS_STRING::npos) {
+              OPENDDS_STRING custom = addr.substr(pos + 1);
+              int val = std::stoi(custom) + domain;
+              addr = addr.substr(0, pos);
+              addr += "." + std::to_string(val);
+            } else {
+              ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                        ACE_TEXT("configure_domain_range_instance ")
+                        ACE_TEXT("could not AddDomainId for %s\n"),
+                        idx->second.c_str()),
+                       -1);
+            }
+
+            tcf.set_string_value(tsub_sect, idx->first.c_str(), addr.c_str());
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                        ACE_TEXT("configure_domain_range_instance ")
+                        ACE_TEXT("No support for %s customization\n"),
+                        idx->second.c_str()),
+                       -1);
+          }
+
+        } else {
+          tcf.set_string_value(tsub_sect, it->first.c_str(), it->second.c_str());
+        }
+      }
+
+      // load transport
+      int status = this->load_transport_configuration("", tcf);
+
+      if (status != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
+                          ACE_TEXT("load_discovery_configuration() returned %d\n"),
+                          status),
+                          -1);
+      }
+
+    }
 
   }
 
-  return ret;
+  return 0;
 }
 
 bool
@@ -692,7 +774,6 @@ TransportRegistry::get_transport_template_info(const ACE_TString config_name, Tr
   }
   return ret;
 }
-
 
 }
 }

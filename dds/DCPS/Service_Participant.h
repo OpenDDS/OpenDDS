@@ -588,7 +588,7 @@ private:
 
   std::vector<DomainRange> domain_ranges_;
 
-  int parse_domain_range(OPENDDS_STRING& range, int& start, int& end);
+  int parse_domain_range(const OPENDDS_STRING range, int& start, int& end);
 
   bool has_domain_range() const;
 

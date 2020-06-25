@@ -119,9 +119,11 @@ public:
 
   bool config_has_transport_template(const ACE_TString config_name) const;
 
-  bool create_transport_template_instance(DDS::DomainId_t domain);
+  int create_transport_template_instance(const DDS::DomainId_t domain, const OPENDDS_STRING transport_template_name);
 
   OPENDDS_STRING get_transport_template_instance_name(const DDS::DomainId_t id);
+
+  OPENDDS_STRING get_config_instance_name(const DDS::DomainId_t id);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
