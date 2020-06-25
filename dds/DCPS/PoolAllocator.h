@@ -101,8 +101,11 @@ struct add_const { typedef const T type; };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#define OPENDDS_ALLOCATOR(T) OpenDDS::DCPS::PoolAllocator<T >
 #define OPENDDS_STRING std::basic_string<char, std::char_traits<char>, \
-          OpenDDS::DCPS::PoolAllocator<char> >
+                                         OPENDDS_ALLOCATOR(char) >
+#define OPENDDS_WSTRING std::basic_string<wchar_t, std::char_traits<wchar_t>, \
+                                          OPENDDS_ALLOCATOR(wchar_t) >
 #define OPENDDS_MAP(K, V) std::map<K, V, std::less<K >, \
           OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, V > > >
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C, \
@@ -135,7 +138,9 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
           OpenDDS::DCPS::PoolAllocator<T > > >
 
 #else
+#define OPENDDS_ALLOCATOR(T) std::allocator<T >
 #define OPENDDS_STRING std::string
+#define OPENDDS_WSTRING std::wstring
 #define OPENDDS_MAP(K, V) std::map<K, V >
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C >
 #define OPENDDS_MULTIMAP(K, T) std::multimap<K, T >

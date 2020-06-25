@@ -1422,15 +1422,9 @@ DataWriterImpl::enable()
   publisher->get_qos(pub_qos);
 
   TypeSupportImpl* const typesupport =
-      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-  const XTypes::TypeObject& type_object = typesupport->getMinimalTypeObject();
-  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(type_object);
+    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
   XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.type_id = type_iden;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size =
-    serialized_size(XTypes::get_typeobject_encoding(), type_object);
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  typesupport->to_type_info(type_info);
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,

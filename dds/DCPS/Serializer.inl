@@ -1058,9 +1058,8 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
   return s.good_bit();
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE bool
-operator<<(Serializer& s, const std::string& x)
+operator<<(Serializer& s, const OPENDDS_STRING& x)
 {
   return s << x.c_str();
 }
@@ -1073,7 +1072,7 @@ operator<<(Serializer& s, Serializer::FromBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator<<(Serializer& s, const std::wstring& x)
+operator<<(Serializer& s, const OPENDDS_WSTRING& x)
 {
   return s << x.c_str();
 }
@@ -1084,7 +1083,6 @@ operator<<(Serializer& s, Serializer::FromBoundedString<wchar_t> x)
   return (x.bound_ == 0 || x.str_.size() <= x.bound_) && s << x.str_;
 }
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_OutputCDR::from_octet x)
@@ -1310,9 +1308,8 @@ operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
          && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE bool
-operator>>(Serializer& s, std::string& x)
+operator>>(Serializer& s, OPENDDS_STRING& x)
 {
   char* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1329,7 +1326,7 @@ operator>>(Serializer& s, Serializer::ToBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator>>(Serializer& s, std::wstring& x)
+operator>>(Serializer& s, OPENDDS_WSTRING& x)
 {
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1344,7 +1341,6 @@ operator>>(Serializer& s, Serializer::ToBoundedString<wchar_t> x)
   return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
 }
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
 //----------------------------------------------------------------------------
 // predefined type methods
