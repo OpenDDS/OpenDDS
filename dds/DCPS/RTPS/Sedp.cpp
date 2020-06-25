@@ -928,47 +928,54 @@ void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
 {
   using namespace DDS::Security;
 
-  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
-
-  DDS::Security::SecurityException se = {"", 0, 0};
-  DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+  CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
   const DCPS::RepoId part_guid = make_id(pdata.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
+  const Spdp::ParticipantCryptoInfoPair peer_participant = spdp_.lookup_participant_crypto_info(part_guid);
+  if (peer_participant.first != DDS::HANDLE_NIL && peer_participant.second) {
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
+               ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
+    return;
+  }
 
+  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
-    Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(part_guid);
-    if (info.first != DDS::HANDLE_NIL && info.second) {
-      const DCPS::RepoId writer_guid = make_id(part_guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
-      if (!key_factory->rekey_remote_datawriter(remote_writer_crypto_handles_[writer_guid], info.second, se)) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
-                   ACE_TEXT("Failure calling rekey_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
-      }
-    } else {
+    const DCPS::RepoId writer_guid = make_id(part_guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
+    const DatareaderCryptoHandle local_drch = participant_volatile_message_secure_reader_->get_endpoint_crypto_handle();
+    SecurityException se = {"", 0, 0};
+    const DatawriterCryptoHandle remote_dwch =
+      key_factory->register_matched_remote_datawriter(local_drch, peer_participant.first, peer_participant.second, se);
+    if (remote_dwch == DDS::HANDLE_NIL) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
-                 ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
-    }
-  }
-  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
-    Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(part_guid);
-    if (info.first != DDS::HANDLE_NIL && info.second) {
-      const DCPS::RepoId reader_guid = make_id(part_guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
-      if (!key_factory->rekey_remote_datareader(remote_reader_crypto_handles_[reader_guid], info.second, se)) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_voltatile() - ")
-                   ACE_TEXT("Failure calling rekey_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
-      }
-    } else {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
-                 ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
+                 ACE_TEXT("Failure calling register_matched_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+    } else if (remote_writer_crypto_handles_[writer_guid] != remote_dwch) {
+      key_factory->unregister_datawriter(remote_dwch, se);
     }
   }
 
-  if (spdp_.remote_is_requester(part_guid)) {
-    // Send immediately because the remote has installed the shared secret.
-    ACE_DEBUG((LM_DEBUG, "Sedp::rekey_volatile calling send_participant_crypto_token\n"));
-    spdp_.send_participant_crypto_tokens(part_guid);
-    send_builtin_crypto_tokens(pdata);
-    resend_user_crypto_tokens(part_guid);
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+    const DCPS::RepoId reader_guid = make_id(part_guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
+    const DatawriterCryptoHandle local_dwch = participant_volatile_message_secure_writer_->get_endpoint_crypto_handle();
+    SecurityException se = {"", 0, 0};
+    static const bool relay_only = false; // never used for the built-in participant volatile endpoints
+    const DatareaderCryptoHandle remote_drch =
+      key_factory->register_matched_remote_datareader(local_dwch, peer_participant.first,
+                                                      peer_participant.second, relay_only, se);
+    if (remote_drch == DDS::HANDLE_NIL) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
+                 ACE_TEXT("Failure calling register_matched_remote_datareader(). Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+    } else if (remote_reader_crypto_handles_[reader_guid] != remote_drch) {
+      key_factory->unregister_datareader(remote_drch, se);
+    }
+
+    if (spdp_.remote_is_requester(part_guid)) {
+      // Send immediately because the remote has installed the shared secret.
+      ACE_DEBUG((LM_DEBUG, "Sedp::rekey_volatile calling send_participant_crypto_token\n"));
+      spdp_.send_participant_crypto_tokens(part_guid);
+      send_builtin_crypto_tokens(pdata);
+      resend_user_crypto_tokens(part_guid);
+    }
   }
 }
 

@@ -374,16 +374,24 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
     return DDS::HANDLE_NIL;
   }
 
-  const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(local_datawriter_crypto_handle);
   if (iter == keys_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  const KeySeq& dw_keys = iter->second;
 
-  if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
+  const KeySeq& dw_keys = iter->second;
+  const bool use_derived_key = dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0]);
+
+  const HandlePair_t input_handles = std::make_pair(remote_participant_crypto, local_datawriter_crypto_handle);
+  const DerivedKeyIndex_t::iterator existing_handle_iter =
+    use_derived_key ? derived_key_handles_.find(input_handles) : derived_key_handles_.end();
+  const DatareaderCryptoHandle h =
+    (existing_handle_iter == derived_key_handles_.end())
+    ? generate_handle() : existing_handle_iter->second;
+
+  if (use_derived_key) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
     KeySeq dr_keys(1);
     dr_keys.length(1);
@@ -408,62 +416,16 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
         to_dds_string(dr_keys[0]).c_str()));
     }
     keys_[h] = dr_keys;
+    if (existing_handle_iter != derived_key_handles_.end()) {
+      return h;
+    }
+    derived_key_handles_[input_handles] = h;
   }
 
   const EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
   encrypt_options_[h] = encrypt_options_[local_datawriter_crypto_handle];
   return h;
-}
-
-bool CryptoBuiltInImpl::rekey_remote_datareader(
-  DatareaderCryptoHandle remote_datareader_crypto_handle,
-  SharedSecretHandle* shared_secret,
-  SecurityException& ex)
-{
-  if (DDS::HANDLE_NIL == remote_datareader_crypto_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataReader Crypto Handle");
-    return false;
-  }
-  if (!shared_secret) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret Handle");
-    return false;
-  }
-
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-
-  const KeyTable_t::iterator iter = keys_.find(remote_datareader_crypto_handle);
-  if (iter == keys_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataReader Crypto Handle");
-    return DDS::HANDLE_NIL;
-  }
-
-  KeySeq& dr_keys = iter->second;
-  dr_keys[0] = make_volatile_key(shared_secret->challenge1(),
-                                 shared_secret->challenge2(),
-                                 shared_secret->sharedSecret());
-  if (!dr_keys[0].master_salt.length()
-      || !dr_keys[0].master_sender_key.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Couldn't create key for "
-                                        "volatile remote reader");
-    return DDS::HANDLE_NIL;
-  }
-
-  static const unsigned int SUBMSG_KEY_IDX = 0;
-  const KeyId_t sKey = std::make_pair(remote_datareader_crypto_handle, SUBMSG_KEY_IDX);
-  sessions_.erase(sKey);
-
-  if (security_debug.bookkeeping && !security_debug.showkeys) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::rekey_remote_datareader ")
-               ACE_TEXT("created volatile key for RDRCH %d\n"), remote_datareader_crypto_handle));
-  }
-  if (security_debug.showkeys) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::rekey_remote_datareader ")
-               ACE_TEXT("created volatile key for RDRCH %d:\n%C"), remote_datareader_crypto_handle,
-               to_dds_string(dr_keys[0]).c_str()));
-  }
-
-  return true;
 }
 
 DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
@@ -525,16 +487,24 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
     return DDS::HANDLE_NIL;
   }
 
-  const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(local_datareader_crypto_handle);
   if (iter == keys_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataReader Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  const KeySeq& dr_keys = iter->second;
 
-  if (dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0])) {
+  const KeySeq& dr_keys = iter->second;
+  const bool use_derived_key = dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0]);
+
+  const HandlePair_t input_handles = std::make_pair(remote_participant_crypto, local_datareader_crypto_handle);
+  const DerivedKeyIndex_t::iterator existing_handle_iter =
+    use_derived_key ? derived_key_handles_.find(input_handles) : derived_key_handles_.end();
+  const DatareaderCryptoHandle h =
+    (existing_handle_iter == derived_key_handles_.end())
+    ? generate_handle() : existing_handle_iter->second;
+
+  if (use_derived_key) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
     KeySeq dw_keys(1);
     dw_keys.length(1);
@@ -559,62 +529,16 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
         to_dds_string(dw_keys[0]).c_str()));
     }
     keys_[h] = dw_keys;
+    if (existing_handle_iter != derived_key_handles_.end()) {
+      return h;
+    }
+    derived_key_handles_[input_handles] = h;
   }
 
   const EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
   encrypt_options_[h] = encrypt_options_[local_datareader_crypto_handle];
   return h;
-}
-
-bool CryptoBuiltInImpl::rekey_remote_datawriter(
-  DatawriterCryptoHandle remote_datawriter_crypto_handle,
-  SharedSecretHandle* shared_secret,
-  SecurityException& ex)
-{
-  if (DDS::HANDLE_NIL == remote_datawriter_crypto_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataWriter Crypto Handle");
-    return false;
-  }
-  if (!shared_secret) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret Handle");
-    return false;
-  }
-
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-
-  const KeyTable_t::iterator iter = keys_.find(remote_datawriter_crypto_handle);
-  if (iter == keys_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataWriter Crypto Handle");
-    return DDS::HANDLE_NIL;
-  }
-
-  KeySeq& dr_keys = iter->second;
-  dr_keys[0] = make_volatile_key(shared_secret->challenge1(),
-                                 shared_secret->challenge2(),
-                                 shared_secret->sharedSecret());
-  if (!dr_keys[0].master_salt.length()
-      || !dr_keys[0].master_sender_key.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Couldn't create key for "
-                                        "volatile remote writer");
-    return DDS::HANDLE_NIL;
-  }
-
-  static const unsigned int SUBMSG_KEY_IDX = 0;
-  const KeyId_t sKey = std::make_pair(remote_datawriter_crypto_handle, SUBMSG_KEY_IDX);
-  sessions_.erase(sKey);
-
-  if (security_debug.bookkeeping && !security_debug.showkeys) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::rekey_remote_datawriter ")
-               ACE_TEXT("created volatile key for RDWCH %d\n"), remote_datawriter_crypto_handle));
-  }
-  if (security_debug.showkeys) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::rekey_remote_datawriter ")
-               ACE_TEXT("created volatile key for RDWCH %d:\n%C"), remote_datawriter_crypto_handle,
-               to_dds_string(dr_keys[0]).c_str()));
-  }
-
-  return true;
 }
 
 bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, SecurityException& ex)
@@ -625,6 +549,9 @@ bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, S
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   clear_common_data(handle);
+  for (DerivedKeyIndex_t::iterator it = derived_key_handles_.lower_bound(std::make_pair(handle, 0));
+       it != derived_key_handles_.end() && it->first.first == handle; derived_key_handles_.erase(it++)) {
+  }
   return true;
 }
 

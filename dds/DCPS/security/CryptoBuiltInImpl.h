@@ -77,11 +77,6 @@ private:
     bool relay_only,
     DDS::Security::SecurityException& ex);
 
-  virtual bool rekey_remote_datareader(
-    DDS::Security::DatareaderCryptoHandle remote_datawriter_crypto_handle,
-    DDS::Security::SharedSecretHandle* shared_secret,
-    DDS::Security::SecurityException& ex);
-
   virtual DDS::Security::DatareaderCryptoHandle register_local_datareader(
     DDS::Security::ParticipantCryptoHandle participant_crypto,
     const DDS::PropertySeq& datareader_properties,
@@ -91,11 +86,6 @@ private:
   virtual DDS::Security::DatawriterCryptoHandle register_matched_remote_datawriter(
     DDS::Security::DatareaderCryptoHandle local_datareader_crypto_handle,
     DDS::Security::ParticipantCryptoHandle remote_participant_crypt,
-    DDS::Security::SharedSecretHandle* shared_secret,
-    DDS::Security::SecurityException& ex);
-
-  virtual bool rekey_remote_datawriter(
-    DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto_handle,
     DDS::Security::SharedSecretHandle* shared_secret,
     DDS::Security::SecurityException& ex);
 
@@ -261,6 +251,10 @@ private:
   };
   std::multimap<DDS::Security::ParticipantCryptoHandle,
                 EntityInfo> participant_to_entity_;
+
+  typedef std::pair<DDS::Security::NativeCryptoHandle, DDS::Security::NativeCryptoHandle> HandlePair_t;
+  typedef std::map<HandlePair_t, DDS::Security::NativeCryptoHandle> DerivedKeyIndex_t;
+  DerivedKeyIndex_t derived_key_handles_;
 
   struct Session {
     SessionIdType id_;
