@@ -466,7 +466,7 @@ private:
    * Process the domain range template and activate the
    * domain for the given domain ID
    */
-  int configure_domain_range(DDS::DomainId_t domainId);
+  int configure_domain_range_instance(DDS::DomainId_t domainId);
 
   /**
    * Load the discovery configuration to the Service_Participant
@@ -590,7 +590,7 @@ private:
 
   int parse_domain_range(OPENDDS_STRING& range, int& start, int& end);
 
-  bool has_domain_range();
+  bool has_domain_range() const;
 
   bool get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst);
 

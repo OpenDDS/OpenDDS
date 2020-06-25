@@ -232,6 +232,15 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                 configInfo.second.push_back(token);
                 value.erase(0, pos + 1);
               }
+
+              // does this config specify a transport_template?
+              for (std::vector<TransportTemplate>::iterator it = transport_templates_.begin(); it != transport_templates_.end(); ++it) {
+                if (it->transport_template_name == value) {
+                  it->config_name = config_id;
+                  break;
+                }
+              }
+
               configInfo.second.push_back(value);
 
               configInfoVec.push_back(configInfo);
@@ -318,7 +327,6 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key transport_sect;
 
-
   if (cf.open_section(root, TRANSPORT_TEMPLATE_SECTION_NAME, 0, transport_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
@@ -359,7 +367,7 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 
     // Loop through the [transport_template/*] sections
     for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-      transport_template element;
+      TransportTemplate element;
       element.instantiate_per_participant = false;
       element.transport_template_name = it->first;
 
@@ -409,18 +417,8 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
           OPENDDS_STRING val = customization.substr(pos + 1);
 
           element.customizations[key] = val;
-
-          // the transport_template should have already been processed by load_transport.
-          element.transport_inst = get_inst(element.transport_template_name);
-
-          if (!element.transport_inst) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
-                              ACE_TEXT("missing [transport_template/%C] section.\n"),
-                              element.transport_template_name.c_str()),
-                              -1);
-          }
-
+        } else {
+          element.transport_info[it->first] = it->second;
         }
       }
 
@@ -604,7 +602,7 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
   return type_map_.count(name);
 }
 
-bool TransportRegistry::has_transport_template()
+bool TransportRegistry::has_transport_template() const
 {
   return transport_templates_.size() > 0;
 }
@@ -620,6 +618,7 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
+  transport_templates_.clear();
   type_map_.clear();
   inst_map_.clear();
   config_map_.clear();
@@ -633,6 +632,67 @@ TransportRegistry::released() const
   GuardType guard(lock_);
   return released_;
 }
+
+OPENDDS_STRING
+TransportRegistry::get_transport_template_instance_name(const DDS::DomainId_t id)
+{
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = TRANSPORT_TEMPLATE_INSTANCE_PREFIX;
+  configured_name += std::to_string(id);
+  return configured_name;
+}
+
+bool
+TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain)
+{
+  bool ret = false;
+  if (has_transport_template()) {
+
+  }
+
+  return ret;
+}
+
+bool
+TransportRegistry::config_has_transport_template(const ACE_TString config_name) const
+{
+  for (std::vector<TransportTemplate>::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+    if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool
+TransportRegistry::get_transport_template_info(const ACE_TString config_name, TransportTemplate& inst)
+{
+  bool ret = false;
+  if (has_transport_template()) {
+    for (std::vector<TransportTemplate>::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+      if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
+        inst.transport_template_name = i->transport_template_name;
+        inst.config_name = i->config_name;
+        inst.instantiate_per_participant = i->instantiate_per_participant;
+        inst.customizations = i->customizations;
+        inst.transport_info = i->transport_info;
+
+        ret = true;
+
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
+                     ACE_TEXT("found config %s\n"),
+                     config_name));
+        }
+
+        break;
+      }
+    }
+  }
+  return ret;
+}
+
 
 }
 }

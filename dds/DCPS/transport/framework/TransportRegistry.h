@@ -117,6 +117,12 @@ public:
 
   bool released() const;
 
+  bool config_has_transport_template(const ACE_TString config_name) const;
+
+  bool create_transport_template_instance(DDS::DomainId_t domain);
+
+  OPENDDS_STRING get_transport_template_instance_name(const DDS::DomainId_t id);
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
@@ -144,30 +150,20 @@ private:
   mutable LockType lock_;
 
   // transport template support
-  struct transport_template
+  struct TransportTemplate
   {
     OPENDDS_STRING transport_template_name;
+    OPENDDS_STRING config_name;
     bool instantiate_per_participant;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
-
-    TransportInst_rch transport_inst;
-/**--cj
-  ** transport registry: line 156 and line 165
-  ** create_inst and inst_load
-  ** on demand createion of tranport happens in transport client.
-  ** may need new clone or copy methods on in trnaport inst
-  ** and may no op or erros for all instances other than rtps
-
-    ** withing transport registry process the template using standard load, it will ignore the
-    ** unrecognized keys and give an rtps_inst which we can store hewre
-    ** and use via a clone
-    **--cj
-    **/
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) transport_info;
   };
 
-  std::vector<transport_template> transport_templates_;
+  std::vector<TransportTemplate> transport_templates_;
 
-  bool has_transport_template();
+  bool get_transport_template_info(const ACE_TString config_name, TransportTemplate& inst);
+
+  bool has_transport_template() const;
 };
 
 } // namespace DCPS

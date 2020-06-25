@@ -286,6 +286,8 @@ Service_Participant::shutdown()
         }
       }
 
+      domain_ranges_.clear();
+
       reactor_task_.stop();
 
       discoveryMap_.clear();
@@ -1189,7 +1191,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
   if (location == this->discoveryMap_.end()) {
     if (in_range) {
-      int ret = configure_domain_range(domain);
+      int ret = configure_domain_range_instance(domain);
 
       // return the newly configured domain and return it
       if (!ret) {
@@ -1453,22 +1455,7 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  status = TransportRegistry::instance()->load_transport_configuration(
-             ACE_TEXT_ALWAYS_CHAR(filename), config);
-  if (this->global_transport_config_ != ACE_TEXT("")) {
-    TransportConfig_rch config = TransportRegistry::instance()->get_config(
-      ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
-    if (!config) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                        ACE_TEXT("Unable to locate specified global transport config: %s\n"),
-                        this->global_transport_config_.c_str()),
-                       -1);
-    }
-    TransportRegistry::instance()->global_config(config);
-  }
-
-  // load any transport configuration templates
+  // load any transport configuration templates before the transport config
   status = TransportRegistry::instance()->load_transport_templates(config);
 
   if (status != 0) {
@@ -1477,6 +1464,30 @@ Service_Participant::load_configuration(
                       ACE_TEXT("load_transport_template_configuration() returned %d\n"),
                       status),
                      -1);
+  }
+
+  status = TransportRegistry::instance()->load_transport_configuration(
+             ACE_TEXT_ALWAYS_CHAR(filename), config);
+  if (this->global_transport_config_ != ACE_TEXT("")) {
+    TransportConfig_rch config = TransportRegistry::instance()->get_config(
+      ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
+    if (config) {
+      TransportRegistry::instance()->global_config(config);
+    } else if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
+      if (DCPS_debug_level > 0) {
+        // This is not an error.
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
+                   ACE_TEXT("DCPSGlobalTransportConfig %s is a transport_template\n"),
+                   this->global_transport_config_));
+      }
+    } else {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+                        ACE_TEXT("Unable to locate specified global transport config: %s\n"),
+                        this->global_transport_config_.c_str()),
+                       -1);
+    }
   }
 
   if (status != 0) {
@@ -2049,7 +2060,7 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
   return 0;
 }
 
-int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
+int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainId)
 {
   OpenDDS::DCPS::Discovery::RepoKey name = get_discovery_template_instance_name(domainId);
   DomainRange dr_inst;
@@ -2066,7 +2077,7 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
 
       // create domain instance
       ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, "domain", 1 /* creeate */, dsect);
+      dcf.open_section(root, "domain", 1 /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
       dcf.open_section(dsect, std::to_string(domainId).c_str(), 1 /* create */, dsub_sect);
       dcf.set_string_value(dsub_sect, "DiscoveryConfig", name.c_str());
@@ -2076,8 +2087,12 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
         dcf.set_string_value(dsub_sect, it->first.c_str(), it->second.c_str());
       }
 
-      // TODO: add default transport config
-      // dcf.set_string_value(dsub_sect, "DefaultTransportConfig", name.c_str());
+      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
+        // create transport instance add default transport config
+        TransportRegistry::instance()->create_transport_template_instance(domainId);
+
+        dcf.set_string_value(dsub_sect, "DefaultTransportConfig", TransportRegistry::instance()->get_transport_template_instance_name(domainId).c_str());
+      }
 
       //create matching discovery instance
       ACE_Configuration_Section_Key sect;
@@ -2094,7 +2109,7 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
           // only AddDomainID is supported at this time.
           if (idx->second == "AddDomainId") {
             OPENDDS_STRING addr = it->second;
-            int pos = addr.find_last_of(".");
+            size_t pos = addr.find_last_of(".");
             if (pos != OPENDDS_STRING::npos) {
               OPENDDS_STRING custom = addr.substr(pos + 1);
               int val = std::stoi(custom) + domainId;
@@ -2103,7 +2118,7 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range ")
+                        ACE_TEXT("configure_domain_range_instance ")
                         ACE_TEXT("could not AddDomainId for %s\n"),
                         idx->second.c_str()),
                        -1);
@@ -2113,7 +2128,7 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range ")
+                        ACE_TEXT("configure_domain_range_instance ")
                         ACE_TEXT("No support for %s customization\n"),
                         idx->second.c_str()),
                        -1);
@@ -2129,7 +2144,7 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
                           ACE_TEXT("load_discovery_configuration() returned %d\n"),
                           status),
                           -1);
@@ -2140,7 +2155,7 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
                           ACE_TEXT("load_domain_configuration() returned %d\n"),
                           status),
                           -1);
@@ -2150,8 +2165,8 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
 
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range: ")
-                     ACE_TEXT("configure domain %d.\n"),
+                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance: ")
+                 ACE_TEXT("configure domain %d.\n"),
                  domainId));
       }
     }
@@ -2160,8 +2175,8 @@ int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
     // > 9 to limit number of messages.
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range: ")
-                     ACE_TEXT("domain %d already configured.\n"),
+                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance: ")
+                 ACE_TEXT("domain %d already configured.\n"),
                  domainId));
     }
   }
@@ -2217,7 +2232,7 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
       if (pullValues(cf, rtps_sect, vm) > 0) {
       // There are values inside [rtps_discovery]
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::configure_domainRange(): ")
+                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
                         ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
                         -1);
       }
@@ -2226,7 +2241,7 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
       KeyList keys;
       if (processSections(cf, rtps_sect, keys) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range(): ")
+                          ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
                           ACE_TEXT("too many nesting layers in the [rtps_discovery] section.\n")),
                           -1);
       }
@@ -2241,7 +2256,8 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
             if (DCPS_debug_level > 0) {
              ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                       ACE_TEXT("Found DomainRange DiscoveryTemplate match for [rtps_discovery/%s]"), disc_it->first.c_str()));
+                       ACE_TEXT("Found DomainRange DiscoveryTemplate match for [rtps_discovery/%s]\n"),
+                       disc_it->first.c_str()));
             }
 
             ValueMap values;
@@ -2315,7 +2331,7 @@ int Service_Participant::parse_domain_range(OPENDDS_STRING& range, int& start, i
 }
 
 bool
-Service_Participant::has_domain_range()
+Service_Participant::has_domain_range() const
 {
   return domain_ranges_.size() > 0;
 }
