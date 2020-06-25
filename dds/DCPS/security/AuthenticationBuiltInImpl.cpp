@@ -238,8 +238,33 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
                                      end = local_data->validated_remotes.end(),
                                      found = std::find_if(begin, end,
                                                           was_guid_validated(remote_participant_guid));
+      TokenReader remote_request(remote_auth_request_token);
+
       if (found != end) {
+
         remote_identity_handle = found->first;
+        found->second->remote_auth_request = remote_auth_request_token;
+
+        TokenReader local_request(found->second->local_auth_request);
+
+        if (remote_request.is_nil() &&
+            local_request.is_nil()) {
+          // This is strange and shouldn't be possible.
+          // In any case, we need a local token.
+          DDS::OctetSeq nonce;
+          int err = SSL::make_nonce_256(nonce);
+          if (! err) {
+            TokenWriter auth_req_wrapper(found->second->local_auth_request, build_class_id(Auth_Request_Class_Ext));
+            auth_req_wrapper.add_bin_property("future_challenge", nonce);
+          } else {
+            set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for future_challenge property");
+            result = DDS::Security::VALIDATION_FAILED;
+          }
+        } else if (!remote_request.is_nil() &&
+                   !local_request.is_nil()) {
+          found->second->local_auth_request = DDS::Security::Token();
+        }
+
         local_auth_request_token = found->second->local_auth_request;
 
         if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
@@ -250,8 +275,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         }
 
       } else {
-
-        TokenReader remote_request(remote_auth_request_token);
         if (remote_request.is_nil()) {
 
           DDS::OctetSeq nonce;

@@ -1597,16 +1597,26 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     tport_->auth_deadline_processor_->schedule(config_->max_auth_time());
   }
 
+  ACE_DEBUG((LM_DEBUG, "pre local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
+  ACE_DEBUG((LM_DEBUG, "pre remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
+
   bool auth_request_token_changed = false;
   PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
   if (token_iter != pending_remote_auth_tokens_.end()) {
     auth_request_token_changed = !(dp.remote_auth_request_token_ == token_iter->second);
     dp.remote_auth_request_token_ = token_iter->second;
     pending_remote_auth_tokens_.erase(token_iter);
+    ACE_DEBUG((LM_DEBUG, "remote auth request token found changed=%d\n", auth_request_token_changed));
   }
+
+  ACE_DEBUG((LM_DEBUG, "post local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
+  ACE_DEBUG((LM_DEBUG, "post remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
 
   if (dp.auth_state_ == DCPS::AUTH_STATE_VALIDATING_REMOTE || auth_request_token_changed) {
     DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
+
+  ACE_DEBUG((LM_DEBUG, "post validate local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
+  ACE_DEBUG((LM_DEBUG, "post validate remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
 
     // Take care of any auth tokens that need to be sent before handling return value
     dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
@@ -1620,6 +1630,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       dp.auth_req_msg_.related_message_identity.sequence_number = 0;
       dp.auth_req_msg_.message_data.length(1);
       dp.auth_req_msg_.message_data[0] = dp.local_auth_request_token_;
+      // TODO: Don't send immediately.
       if (send_stateless_message(guid, dp, dp.auth_req_msg_, true) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
                    ACE_TEXT("Unable to write stateless message (auth request).\n")));
