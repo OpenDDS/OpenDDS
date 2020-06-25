@@ -1616,30 +1616,8 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   ACE_DEBUG((LM_DEBUG, "post validate local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
   ACE_DEBUG((LM_DEBUG, "post validate remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
 
-    // Take care of any auth tokens that need to be sent before handling return value
     dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
-    if (dp.have_auth_req_msg_) {
-      dp.auth_req_msg_.message_identity.source_guid = guid_;
-      dp.auth_req_msg_.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST;
-      dp.auth_req_msg_.destination_participant_guid = guid;
-      dp.auth_req_msg_.destination_endpoint_guid = GUID_UNKNOWN;
-      dp.auth_req_msg_.source_endpoint_guid = GUID_UNKNOWN;
-      dp.auth_req_msg_.related_message_identity.source_guid = GUID_UNKNOWN;
-      dp.auth_req_msg_.related_message_identity.sequence_number = 0;
-      dp.auth_req_msg_.message_data.length(1);
-      dp.auth_req_msg_.message_data[0] = dp.local_auth_request_token_;
-      // TODO: Don't send immediately.
-      if (send_stateless_message(guid, dp, dp.auth_req_msg_, true) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-                   ACE_TEXT("Unable to write stateless message (auth request).\n")));
-      } else {
-        if (DCPS::security_debug.auth_debug) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
-                     ACE_TEXT("Sent auth request message for participant: %C\n"),
-                     OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
-        }
-      }
-    }
+
     switch (vr) {
       case DDS::Security::VALIDATION_OK: {
         dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
