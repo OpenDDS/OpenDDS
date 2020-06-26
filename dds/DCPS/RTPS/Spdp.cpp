@@ -917,7 +917,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
                ACE_TEXT("Failed to serialize parameter list.\n")));
     return DDS::OctetSeq();
   }
- 
+
   DDS::OctetSeq seq(static_cast<unsigned int>(temp_buff.length()));
   seq.length(seq.maximum());
   std::memcpy(seq.get_buffer(), temp_buff.rd_ptr(), temp_buff.length());
