@@ -419,6 +419,8 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
     }
     keys_[h] = dr_keys;
     if (existing_handle_iter != derived_key_handles_.end()) {
+      static const unsigned int SUBMSG_KEY_IDX = 0;
+      sessions_.erase(std::make_pair(h, SUBMSG_KEY_IDX));
       return h;
     }
     derived_key_handles_[input_handles] = h;
@@ -532,6 +534,8 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
     }
     keys_[h] = dw_keys;
     if (existing_handle_iter != derived_key_handles_.end()) {
+      static const unsigned int SUBMSG_KEY_IDX = 0;
+      sessions_.erase(std::make_pair(h, SUBMSG_KEY_IDX));
       return h;
     }
     derived_key_handles_[input_handles] = h;
