@@ -222,8 +222,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" create_subscriber failed!\n")), -1);
     }
 
-    // Setup Writer Side
-    bool cleanup_participant = false;
+    // writer uses same participant
     DDS::DomainParticipant_var pub_side_participant = participant_reading;
 
     // Register TypeSupport
@@ -344,12 +343,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(3);
     }
 
-      if (cleanup_participant) {
-      // Clean-up! (Writer has own participant it needs to clean up before finishing)
-      // otherwise using same participant as subscriber, so let sub cleanup
-      pub_side_participant->delete_contained_entities();
-      dpf->delete_participant(pub_side_participant);
-    }
     // Clean-up!
     participant_reading->delete_contained_entities();
     dpf->delete_participant(participant_reading);
