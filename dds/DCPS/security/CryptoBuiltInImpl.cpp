@@ -138,7 +138,9 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
     return DDS::HANDLE_NIL;
   }
 
-  // unconditionally generate key so that key exchange has at least one thing to send
+  if (!participant_security_attributes.is_rtps_protected) {
+    return DDS::HANDLE_NIL;
+  }
 
   const NativeCryptoHandle h = generate_handle();
   const KeyMaterial key = make_key(h,
@@ -675,11 +677,13 @@ bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(local_participant_crypto);
-  if (iter == keys_.end()) {
-    return CommonUtilities::set_security_error(ex, -1, 1, "Local participant handle not registered");
+  if (iter != keys_.end()) {
+    local_participant_crypto_tokens = keys_to_tokens(iter->second);
+  } else {
+    // There may not be any keys_ for this participant (depends on config)
+    local_participant_crypto_tokens.length(0);
   }
 
-  local_participant_crypto_tokens = keys_to_tokens(iter->second);
   return true;
 }
 
