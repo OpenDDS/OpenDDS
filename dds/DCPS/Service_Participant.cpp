@@ -1479,13 +1479,13 @@ Service_Participant::load_configuration(
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
                    ACE_TEXT("DCPSGlobalTransportConfig %s is a transport_template\n"),
-                   this->global_transport_config_));
+                   ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str())));
       }
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                         ACE_TEXT("Unable to locate specified global transport config: %s\n"),
-                        this->global_transport_config_.c_str()),
+                        ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str())),
                        -1);
     }
   }

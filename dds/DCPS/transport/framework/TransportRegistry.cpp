@@ -765,7 +765,7 @@ TransportRegistry::get_transport_template_info(const ACE_TString config_name, Tr
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
                      ACE_TEXT("found config %s\n"),
-                     config_name));
+                     ACE_TEXT_ALWAYS_CHAR(config_name.c_str())));
         }
 
         break;
