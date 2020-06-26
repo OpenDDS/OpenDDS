@@ -870,11 +870,8 @@ namespace {
   }
 }
 
-void
-Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
+DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 {
-  dp.handshake_state_ = DCPS::HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL;
-
   DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
     {
       {
@@ -905,18 +902,32 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   set_participant_guid(guid_, plist);
 
   if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::local_participant_data_as_octets() - ")
                ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
-    return;
+    return DDS::OctetSeq();
   }
 
-  ACE_Message_Block temp_buff(64 * 1024);
+  size_t size = 0, padding = 0;
+  DCPS::gen_find_size(plist, size, padding);
+
+  ACE_Message_Block temp_buff(size + padding);
   DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_INITIALIZE);
   if (!(ser << plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::local_participant_data_as_octets() - ")
                ACE_TEXT("Failed to serialize parameter list.\n")));
-    return;
+    return DDS::OctetSeq();
   }
+ 
+  DDS::OctetSeq seq(static_cast<unsigned int>(temp_buff.length()));
+  seq.length(seq.maximum());
+  std::memcpy(seq.get_buffer(), temp_buff.rd_ptr(), temp_buff.length());
+  return seq;
+}
+
+void
+Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
+{
+  dp.handshake_state_ = DCPS::HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL;
 
   Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se = {"", 0, 0};
@@ -935,8 +946,12 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     dp.handshake_handle_ = DDS::HANDLE_NIL;
   }
 
+  const DDS::OctetSeq local_participant = local_participant_data_as_octets();
+  if (!local_participant.length()) {
+    return; // already logged in local_participant_data_as_octets()
+  }
+
   DDS::Security::HandshakeMessageToken hs_mt;
-  const DDS::OctetSeq local_participant(static_cast<unsigned int>(temp_buff.length()), &temp_buff);
   if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_,
                                     local_participant, se)
       != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
@@ -1123,44 +1138,6 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
 
     {
-      DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-        {
-          {
-            DDS::BuiltinTopicKey_t() /*ignored*/,
-            qos_.user_data
-          },
-          identity_token_,
-          permissions_token_,
-          qos_.property,
-          {0, 0}
-        },
-        identity_status_token_
-      };
-
-      pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-      pbtds.base.security_info.participant_security_attributes = security_attributes_to_bitmask(participant_sec_attr_);
-
-      ParameterList plist;
-      set_participant_guid(guid_, plist);
-
-      if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
-        if (DCPS::security_debug.auth_warn) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
-                     ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
-        }
-        return;
-      }
-
-      ACE_Message_Block temp_buff(64 * 1024);
-      DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_INITIALIZE);
-      if (!(ser << plist)) {
-        if (DCPS::security_debug.auth_warn) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
-                     ACE_TEXT("Failed to serialize parameter list.\n")));
-        }
-        return;
-      }
-
       DDS::Security::ParticipantStatelessMessage reply;
       reply.message_identity.source_guid = guid_;
       reply.message_identity.sequence_number = 0;
@@ -1187,7 +1164,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         dp.handshake_handle_ = DDS::HANDLE_NIL;
       }
 
-      const DDS::OctetSeq local_participant(static_cast<unsigned int>(temp_buff.length()), &temp_buff);
+      const DDS::OctetSeq local_participant = local_participant_data_as_octets();
+      if (!local_participant.length()) {
+        return; // already logged in local_participant_data_as_octets()
+      }
       const DDS::Security::ValidationResult_t vr =
         auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_,
                                     identity_handle_, local_participant, se);
@@ -3477,7 +3457,6 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 
 bool Spdp::remote_is_requester(const DCPS::RepoId& guid) const
 {
-  // TODO:  Locking?
   DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
   if (iter != participants_.end()) {
     return iter->second.is_requester_;

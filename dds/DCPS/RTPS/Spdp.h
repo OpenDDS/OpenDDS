@@ -109,6 +109,7 @@ public:
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
                                         bool& remote_is_replier);
+  DDS::OctetSeq local_participant_data_as_octets() const;
 #endif
 
   void handle_participant_data(DCPS::MessageId id,
