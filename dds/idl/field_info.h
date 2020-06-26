@@ -23,9 +23,6 @@ struct FieldInfo {
   };
   typedef std::set<EleLen, EleLen::Cmp> EleLenSet;
 
-  static bool is_anonymous_array(AST_Type& field);
-  static bool is_anonymous_sequence(AST_Type& field);
-  static bool is_anonymous_type(AST_Type& field);
   static std::string get_type_name(AST_Type& field);
 
   AST_Type* ast_type_;

@@ -1610,13 +1610,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
-    if (FieldInfo::is_anonymous_array(*(fields[i]->field_type()))) {
+    if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
-      gen_array(af);
-    } else if (FieldInfo::is_anonymous_sequence(*(fields[i]->field_type()))) {
-      FieldInfo sf(*(fields[i]));
-      if (eleLen_.insert(FieldInfo::EleLen(sf)).second) {
-        gen_sequence(sf);
+      if (af.arr_) {
+        gen_array(af);
+      } else if (af.seq_ && eleLen_.insert(FieldInfo::EleLen(af)).second) {
+        gen_sequence(af);
       }
     }
   }

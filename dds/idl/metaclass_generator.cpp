@@ -246,7 +246,7 @@ namespace {
         pre = "IDL::DistinctType<";
         post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
       }
-      if (FieldInfo::is_anonymous_type(*(field->field_type()))) {
+      if (field->field_type()->anonymous()) {
         FieldInfo f(*field);
         be_global->impl_ <<
           "    if (!gen_skip_over(ser, static_cast<" << f.ptr_ << ">(0))) {\n"
@@ -322,7 +322,7 @@ namespace {
       : FieldInfo::get_type_name(*(field->field_type()));
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
-      if (FieldInfo::is_anonymous_sequence(*(field->field_type()))) {
+      if (field->field_type()->anonymous()) {
         FieldInfo af(*field);
         be_global->impl_ <<
           "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
@@ -621,24 +621,20 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 
   // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
-    if (FieldInfo::is_anonymous_array(*(fields[i]->field_type()))) {
+    if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
-      Function f("gen_skip_over", "bool");
-      f.addArg("ser", "Serializer&");
-      f.addArg("", af.scoped_type_ + "_forany*");
-      f.endArgs();
-      be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
-    } else if (FieldInfo::is_anonymous_sequence(*(fields[i]->field_type()))) {
-      FieldInfo af(*(fields[i]));
-      if (eleLen_.insert(FieldInfo::EleLen(af)).second) {
+      if (af.arr_ || (af.seq_ && eleLen_.insert(FieldInfo::EleLen(af)).second)) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");
-        f.addArg("", af.scoped_type_ + "*");
+        f.addArg("", af.ptr_);
         f.endArgs();
+        if (af.seq_) {
+          be_global->impl_ <<
+          "  ACE_CDR::ULong length;\n" <<
+          "  if (!(ser >> length)) return false;\n";
+        }
         be_global->impl_ <<
-        "  ACE_CDR::ULong length;\n" <<
-        "  if (!(ser >> length)) return false;\n" <<
-        "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
+          "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
       }
     }
   }

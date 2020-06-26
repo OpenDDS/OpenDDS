@@ -18,34 +18,14 @@ bool FieldInfo::EleLen::Cmp::operator()(const EleLen& a, const EleLen& b) const
   return a.ele_ != b.ele_ || a.len_ != b.len_;
 }
 
-bool FieldInfo::is_anonymous_array(AST_Type& field)
-{
-  return field.node_type() == AST_Decl::NT_array;
-}
-
-bool FieldInfo::is_anonymous_sequence(AST_Type& field)
-{
-  return field.node_type() == AST_Decl::NT_sequence;
-}
-
-bool FieldInfo::is_anonymous_type(AST_Type& field)
-{
-  return is_anonymous_array(field) || is_anonymous_sequence(field);
-}
-
 std::string FieldInfo::get_type_name(AST_Type& field)
 {
   std::string n = scoped(field.name());
-  if (!is_anonymous_type(field)) {
+  if (!field.anonymous()) {
     return n;
   }
-  const std::string scope = n.substr(0, n.find("::") + 2);
-  const std::string name = field.local_name()->get_string();
-  n = scope + "_" + name;
-  if (is_anonymous_sequence(field)) {
-    return n + "_seq";
-  }
-  return n;
+  n = n.substr(0, n.find("::") + 2) + "_" + field.local_name()->get_string();
+  return (field.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
 }
 
 // for anonymous types
@@ -70,23 +50,23 @@ void FieldInfo::init()
   arr_ = AST_Array::narrow_from_decl(ast_type_);
   seq_ = AST_Sequence::narrow_from_decl(ast_type_);
   ast_elem_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr);
-  act_ = ast_elem_ ? resolveActualType(ast_elem_) : nullptr;
-  cls_ = act_ ? classify(act_) : CL_UNKNOWN;
-  if (!act_) {
-    throw std::invalid_argument("ast_elem_ is null.");
-  }
+  act_ = resolveActualType(ast_elem_ ? ast_elem_ : ast_type_);
+  cls_ = classify(act_);
   if (!name_.empty()) {
-    type_ = ast_elem_ ? ("_" + name_) : name_;
-    if (seq_) { type_ += "_seq"; }
-    const std::string ftn = scoped(ast_type_->name());
-    struct_name_ = ftn.substr(0, ftn.find("::"));
-    scoped_type_ = struct_name_ + "::" + type_;
+    scoped_type_ = scoped(ast_type_->name());
+    std::size_t i = scoped_type_.find("::");
+    struct_name_ = scoped_type_.substr(0, i);
+    if (ast_elem_) {
+      type_ = "_" + name_;
+      if (seq_) { type_ += "_seq"; }
+      scoped_type_ = struct_name_ + "::" + type_;
+    } else {
+      type_ = scoped_type_.substr(i + 2);
+    }
   } else if (!scoped_type_.empty()) {
     //name_
     type_ = scoped_type_;
     //struct_name_
-  } else {
-    throw std::invalid_argument("Both field name and scoped_type are empty.");
   }
 
   set_element();
@@ -113,8 +93,8 @@ void FieldInfo::init()
   } else {
     ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
     const_ref_ = "const " + ref_;
-    ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
   }
+  ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
 }
 
 void FieldInfo::set_element()
@@ -141,11 +121,11 @@ void FieldInfo::set_element()
       case AST_PredefinedType::PT_wchar: elem_sz_ = 1; elem_ = "ACE_CDR::WChar"; return; // encoding of wchar length is 1 byte
       case AST_PredefinedType::PT_boolean: elem_sz_ = 1; elem_ = "ACE_CDR::Boolean"; return;
       case AST_PredefinedType::PT_octet: elem_sz_ = 1; elem_ = "ACE_CDR::Octet"; return;
-      default: elem_ = get_type_name(*act_); return;
+      default: break;
       }
     }
-    elem_ = get_type_name(*ast_type_);
   }
+  elem_ = scoped(act_->name());
 }
 
 std::string FieldInfo::string_type(Classification c)

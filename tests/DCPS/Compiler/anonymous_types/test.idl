@@ -7,8 +7,17 @@ typedef double Double2x3x4Array[2][3][4];
 typedef sequence<long> LongSequence;
 typedef sequence<long, 3> Long3Sequence;
 
+typedef struct XYZ_ {
+  double x;
+  double y;
+  double z;
+} XYZ;
+
 @topic
 struct TestStruct {
+  float f;
+  XYZ position;
+
   Short3Array s3arr;
   Short2x3Array s2x3arr;
   Double2x3x4Array d2x3x4arr;
