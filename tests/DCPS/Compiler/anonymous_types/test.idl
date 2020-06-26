@@ -6,6 +6,7 @@ typedef double Double2x3x4Array[2][3][4];
 
 typedef sequence<long> LongSequence;
 typedef sequence<long, 3> Long3Sequence;
+typedef string<100> BoundedString;
 
 typedef struct XYZ_ {
   double x;
@@ -15,7 +16,9 @@ typedef struct XYZ_ {
 
 @topic
 struct TestStruct {
+  char  c;
   float f;
+  string str;
   XYZ position;
 
   Short3Array s3arr;
@@ -24,6 +27,7 @@ struct TestStruct {
 
   LongSequence lseq;
   Long3Sequence l3seq;
+  BoundedString bstr;
 
   // prefix a_ denotes anonymous type fields
 
@@ -37,4 +41,5 @@ struct TestStruct {
   sequence<long, 3> a_l3seq;
   sequence<long, 3> a_l3seq_2nd;
   sequence<long, 5> a_l5seq;
+  string<200> a_bstr;
 };

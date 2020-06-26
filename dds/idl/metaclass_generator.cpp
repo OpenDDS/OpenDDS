@@ -317,29 +317,22 @@ namespace {
     Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
     const char* fieldName = field->local_name()->get_string();
-    const std::string fieldType = (cls & CL_STRING) ?
+    std::string fieldType = (cls & CL_STRING) ?
       string_type(cls)
-      : FieldInfo::get_type_name(*(field->field_type()));
+      : scoped(field->field_type()->name());
+    FieldInfo af(*field);
+    if (af.ast_elem_ && field->field_type()->anonymous()) {
+      fieldType = af.scoped_type_;
+    }
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
-      if (field->field_type()->anonymous()) {
-        FieldInfo af(*field);
-        be_global->impl_ <<
-          "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
-          "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name_ <<
-          " = *static_cast<const " << af.scoped_type_ <<
-          "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
-          "      return;\n"
-          "    }\n";
-      } else {
-        be_global->impl_ <<
-          "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-          "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << fieldName <<
-          " = *static_cast<const " << fieldType <<
-          "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
-          "      return;\n"
-          "    }\n";
-      }
+      be_global->impl_ <<
+        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << fieldName <<
+        " = *static_cast<const " << fieldType <<
+        "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
+        "      return;\n"
+        "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_ARRAY) {
       AST_Type* unTD = resolveActualType(field->field_type());
