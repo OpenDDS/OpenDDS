@@ -961,12 +961,10 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_handshake_request() - ")
                ACE_TEXT("Unable to write stateless message (handshake).\n")));
     return;
-  } else {
-    if (DCPS::security_debug.auth_debug) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::send_handshake_request() - ")
-                 ACE_TEXT("Sent handshake request message for participant: %C\n"),
-                 OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
-    }
+  } else if (DCPS::security_debug.auth_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::send_handshake_request() - ")
+               ACE_TEXT("Sent handshake request message for participant: %C\n"),
+               OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
   }
 }
 
@@ -1603,9 +1601,6 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   ACE_DEBUG((LM_DEBUG, "attempt_authentication starting auth_state %d\n", dp.auth_state_));
 
-  ACE_DEBUG((LM_DEBUG, "pre local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
-  ACE_DEBUG((LM_DEBUG, "pre remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
-
   PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
   bool started_from_discovery = false;
   if (token_iter == pending_remote_auth_tokens_.end()) {
@@ -1614,7 +1609,6 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   } else {
     dp.remote_auth_request_token_ = token_iter->second;
     pending_remote_auth_tokens_.erase(token_iter);
-    ACE_DEBUG((LM_DEBUG, "remote auth request token found changed?\n"/*, auth_request_token_changed*/));
   }
 
   if (dp.auth_state_ == DCPS::AUTH_STATE_UNKNOWN || !started_from_discovery) {
@@ -1629,9 +1623,6 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
 
     ACE_DEBUG((LM_DEBUG, "post validate sfd=%d vr=%d\n", started_from_discovery, vr));
-    ACE_DEBUG((LM_DEBUG, "post validate local_auth_request_token is nil %d\n", dp.local_auth_request_token_ == DDS::Security::Token()));
-    ACE_DEBUG((LM_DEBUG, "post validate remote_auth_request_token is nil %d\n", dp.remote_auth_request_token_ == DDS::Security::Token()));
-
     dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
     if (dp.have_auth_req_msg_) {
       dp.auth_req_msg_.message_identity.source_guid = guid_;

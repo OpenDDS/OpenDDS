@@ -62,10 +62,10 @@ namespace OpenDDS {
     };
 
     enum HandshakeState {
-      // Requester/Replier
+      // State of Requester waiting for reply and Replier waiting for final
       HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL,
 
-      // Replier
+      // State of Replier waiting for request
       HANDSHAKE_STATE_EXPECTING_REQUEST
     };
 #endif
