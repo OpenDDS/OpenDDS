@@ -31,6 +31,7 @@
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
 #include "TypeObject.h"
+#include "TypeAssignability.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #include <dds/DdsDcpsCoreTypeSupportC.h>
@@ -303,6 +304,29 @@ DataReaderImpl::add_association(const RepoId& yourId,
       }
     }
   }
+
+  //get message block from octet seq then deser to a type info
+  ACE_Data_Block db(writer.serializedTypeInfo.length(), ACE_Message_Block::MB_DATA,
+                    reinterpret_cast<const char*>(writer.serializedTypeInfo.get_buffer()),
+                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+  ACE_Message_Block data_mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  data_mb.wr_ptr(data_mb.space());
+  DCPS::Serializer serializer(&data_mb, XTypes::get_typeobject_encoding());
+  XTypes::TypeInformation type_info;
+  if (!(serializer >> type_info)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) extract_type_info_param ")
+              ACE_TEXT("deserialization type information failed.\n")));
+  }
+
+  TypeSupportImpl* const typesupport =
+    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+  XTypes::TypeInformation type_info_local;
+  type_info_local.minimal.typeid_with_size.type_id = type_iden;
+  type_info_local.minimal.typeid_with_size.typeobject_serialized_size =
+    serialized_size(XTypes::get_typeobject_encoding(), typesupport->getMinimalTypeObject());
+  type_info_local.minimal.dependent_typeid_count = 0;
+  type_info_local.complete.dependent_typeid_count = 0;
 
   // Propagate the add_associations processing down into the Transport
   // layer here.  This will establish the transport support and reserve

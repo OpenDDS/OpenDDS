@@ -126,7 +126,8 @@ struct ParticipantStrt<QosSeq> {
 
 template<>
 struct ActorStrt<QosSeq, QosSeq,
-                 ACE_CString, BinSeq, ContentSubscriptionBin> {
+                 ACE_CString, BinSeq, ContentSubscriptionBin,
+                 BinSeq> {
   DDS::DomainId_t   domainId;
   IdType            actorId;
   IdType            topicId;
@@ -136,6 +137,7 @@ struct ActorStrt<QosSeq, QosSeq,
   QosSeq            pubsubQos;
   QosSeq            drdwQos;
   BinSeq            transportInterfaceInfo;
+  BinSeq     serializedTypeInfo;
   ContentSubscriptionBin contentSubscriptionProfile;
 
   ActorStrt(const DActor& actor,
@@ -517,6 +519,19 @@ PersistenceUpdater::requestImage()
 
     BinSeq in_transport_seq(transport_len, buf);
 
+    size_t ti_len = actor->serializedTypeInfo.first;
+    ACE_NEW_NORETURN(buf, char[ti_len]);
+    qos_sequences.push_back(ArrDelAdapter<char>(buf));
+
+    if (buf == 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation failed.\n")));
+      return;
+    }
+    ACE_OS::memcpy(buf, actor->serializedTypeInfo.second, ti_len);
+
+    BinSeq in_type_info(ti_len, buf);
+
     ContentSubscriptionBin in_csp_bin;
     if (actor->type == DataReader) {
       in_csp_bin.filterClassName = actor->contentSubscriptionProfile.filterClassName;
@@ -537,7 +552,8 @@ PersistenceUpdater::requestImage()
     DActor dActor(actor->domainId, actor->actorId, actor->topicId
                   , actor->participantId
                   , actor->type, actor->callback.c_str()
-                  , pubsub_qos, drdw_qos, in_transport_seq, in_csp_bin);
+                  , pubsub_qos, drdw_qos, in_transport_seq, in_csp_bin
+                  , in_type_info);
     image.actors.push_back(dActor);
   }
 
@@ -718,10 +734,30 @@ PersistenceUpdater::create(const URActor& actor)
   csp_bin.filterExpr = actor.contentSubscriptionProfile.filterExpr;
   csp_bin.exprParams = std::make_pair(len, buf4);
 
+
+ outCdr.reset();
+  outCdr << actor.serializedTypeInfo;
+  ACE_Message_Block dst5;
+  ACE_CDR::consolidate(&dst5, outCdr.begin());
+
+  len = dst5.length();
+  char *buf5 = new (std::nothrow) char[len];
+
+  if (buf5 == 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( subscription) allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard5(buf5);
+
+  ACE_OS::memcpy(buf5, dst5.base(), len);
+  BinSeq ti_seq(len, buf5);
+
+
   DActor actor_data(actor.domainId, actor.actorId, actor.topicId
                     , actor.participantId
                     , DataReader, actor.callback.c_str(), pubsub_qos
-                    , dwdr_qos, tr_bin, csp_bin);
+                    , dwdr_qos, tr_bin, csp_bin, ti_seq);
 
   // allocate memory for ActorData
   void* buffer;
@@ -803,10 +839,30 @@ PersistenceUpdater::create(const UWActor& actor)
   ACE_OS::memcpy(buf3, dst3.base(), len);
   BinSeq tr_bin(len, buf3);
 
+  outCdr.reset();
+  outCdr << actor.serializedTypeInfo;
+  ACE_Message_Block dst4;
+  ACE_CDR::consolidate(&dst4, outCdr.begin());
+
+  len = dst4.length();
+  char *buf4 = new (std::nothrow) char[len];
+
+  if (buf4 == 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( publication): allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard4(buf4);
+
+  ACE_OS::memcpy(buf4, dst4.base(), len);
+  BinSeq ti_seq(len, buf4);
+
+
   DActor actor_data(actor.domainId, actor.actorId, actor.topicId
                     , actor.participantId
                     , DataWriter, actor.callback.c_str(), pubsub_qos
-                    , dwdr_qos, tr_bin, ContentSubscriptionBin());
+                    , dwdr_qos, tr_bin, ContentSubscriptionBin()
+                    , ti_seq);
 
   // allocate memory for ActorData
   void* buffer;

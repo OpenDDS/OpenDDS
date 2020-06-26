@@ -619,9 +619,22 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     //this is the client reference to the DataWriterRemoteImpl
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_);
+    //turn into a octet seq to pass through generated files
+    const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
+    DCPS::Message_Block_Ptr data(new ACE_Message_Block(
+      DCPS::serialized_size(encoding, type_info)));
+    DCPS::Serializer serializer(data.get(), encoding);
+    if (!(serializer << type_info)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_publication ")
+                ACE_TEXT("serialization type information failed.\n")));
+    }
+    ssize_t size = data->length();
+    DDS::OctetSeq serializedTypeInfo(size);
+    serializedTypeInfo.length(size);
+    std::memcpy(serializedTypeInfo.get_buffer(), data->rd_ptr(), size);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
-      dr_remote_obj, qos, transInfo, publisherQos);
+      dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above
@@ -715,10 +728,24 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     //this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
+    //turn into a octet seq to pass through generated files
+    const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
+    DCPS::Message_Block_Ptr data(new ACE_Message_Block(
+      DCPS::serialized_size(encoding, type_info)));
+    DCPS::Serializer serializer(data.get(), encoding);
+    if (!(serializer << type_info)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_publication ")
+                ACE_TEXT("serialization type information failed.\n")));
+    }
+    ssize_t size = data->length();
+    DDS::OctetSeq serializedTypeInfo(size);
+    serializedTypeInfo.length(size);
+    std::memcpy(serializedTypeInfo.get_buffer(), data->rd_ptr(), size);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,
-                                              filterClassName, filterExpr, params);
+                                              filterClassName, filterExpr, params,
+                                              serializedTypeInfo);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above
