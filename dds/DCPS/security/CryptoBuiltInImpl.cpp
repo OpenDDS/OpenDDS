@@ -73,6 +73,11 @@ bool CryptoBuiltInImpl::marshal(TAO_OutputCDR&)
 NativeCryptoHandle CryptoBuiltInImpl::generate_handle()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return generate_handle_i();
+}
+
+NativeCryptoHandle CryptoBuiltInImpl::generate_handle_i()
+{
   return CommonUtilities::increment_handle(next_handle_);
 }
 
@@ -393,7 +398,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
     use_derived_key ? derived_key_handles_.find(input_handles) : derived_key_handles_.end();
   const DatareaderCryptoHandle h =
     (existing_handle_iter == derived_key_handles_.end())
-    ? generate_handle() : existing_handle_iter->second;
+    ? generate_handle_i() : existing_handle_iter->second;
 
   if (use_derived_key) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
@@ -507,7 +512,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
     use_derived_key ? derived_key_handles_.find(input_handles) : derived_key_handles_.end();
   const DatareaderCryptoHandle h =
     (existing_handle_iter == derived_key_handles_.end())
-    ? generate_handle() : existing_handle_iter->second;
+    ? generate_handle_i() : existing_handle_iter->second;
 
   if (use_derived_key) {
     // Create a key from SharedSecret and track it as if Key Exchange happened

@@ -219,6 +219,7 @@ private:
   CryptoBuiltInImpl& operator=(const CryptoBuiltInImpl&);
 
   DDS::Security::NativeCryptoHandle generate_handle();
+  DDS::Security::NativeCryptoHandle generate_handle_i();
 
   ACE_Thread_Mutex mutex_;
   int next_handle_;
