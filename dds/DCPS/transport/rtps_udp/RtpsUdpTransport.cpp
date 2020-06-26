@@ -267,11 +267,15 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
     if (locator_to_address(addr, locators[i], false) == 0) {
       // if this is a unicast address, or if we are allowing multicast
       if (!addr.is_multicast()) {
-        uc_addr = addr;
-        uc_addr_valid = true;
+        if (uc_addr == ACE_INET_Addr()) {
+          uc_addr = addr;
+          uc_addr_valid = true;
+        }
       } else {
-        mc_addr = addr;
-        mc_addr_valid = true;
+        if (mc_addr == ACE_INET_Addr()) {
+          mc_addr = addr;
+          mc_addr_valid = true;
+        }
       }
       if (uc_addr_valid && (!config().use_multicast_ || mc_addr_valid)) {
         return std::make_pair(uc_addr, config().use_multicast_ ? mc_addr : uc_addr);

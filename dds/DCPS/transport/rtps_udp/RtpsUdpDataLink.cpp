@@ -3988,7 +3988,7 @@ RtpsUdpDataLink::AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
   AddrSet retval;
 
-  accumulate_addresses(local, remote, retval);
+  accumulate_addresses(local, remote, retval, true);
 
   return retval;
 }
