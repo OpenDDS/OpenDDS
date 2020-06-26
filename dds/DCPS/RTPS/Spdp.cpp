@@ -1084,11 +1084,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                        OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
           }
         }
+        dp.handshake_state_ = DCPS::HANDSHAKE_STATE_EXPECTING_REQUEST;
         return;
       case DDS::Security::VALIDATION_OK:
         dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
         purge_auth_deadlines(iter);
         match_authenticated(src_participant, iter);
+        dp.handshake_state_ = DCPS::HANDSHAKE_STATE_EXPECTING_REQUEST;
         return;
       }
     }
