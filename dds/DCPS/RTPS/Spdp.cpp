@@ -997,6 +997,23 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   DiscoveredParticipant& dp = iter->second;
 
+  switch (dp.auth_state_) {
+  case DCPS::AUTH_STATE_AUTHENTICATED:
+    dp.auth_state_ = DCPS::AUTH_STATE_UNKNOWN;
+    attempt_authentication(src_participant, dp);
+    break;
+  case DCPS::AUTH_STATE_HANDSHAKE:
+    break;
+  default:
+    if (DCPS::security_debug.auth_warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+                 ACE_TEXT("Dropping handshake message from %C, auth_state_ %d not expected\n"),
+                 OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str(),
+                 dp.auth_state_));
+    }
+    return;
+  }
+
   switch (dp.handshake_state_) {
   case DCPS::HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL:
     if (msg.related_message_identity.source_guid != guid_) {
@@ -1611,7 +1628,8 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     pending_remote_auth_tokens_.erase(token_iter);
   }
 
-  if (dp.auth_state_ == DCPS::AUTH_STATE_UNKNOWN || !started_from_discovery) {
+  if (dp.auth_state_ == DCPS::AUTH_STATE_UNKNOWN ||
+      (dp.auth_state_ != DCPS::AUTH_STATE_HANDSHAKE && !started_from_discovery)) {
     dp.auth_deadline_ = DCPS::MonotonicTimePoint::now() + config_->max_auth_time();
     dp.auth_state_ = DCPS::AUTH_STATE_VALIDATING_REMOTE;
     auth_deadlines_.insert(std::make_pair(dp.auth_deadline_, guid));
