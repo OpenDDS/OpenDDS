@@ -107,7 +107,8 @@ public:
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
-  bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                        bool& remote_is_replier);
 #endif
 
   void handle_participant_data(DCPS::MessageId id,
@@ -208,10 +209,11 @@ private:
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
 #ifdef OPENDDS_SECURITY
-  DDS::ReturnCode_t send_stateless_message(const DCPS::RepoId& guid,
+  DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
                                            DDS::Security::ParticipantStatelessMessage& msg,
                                            bool resend);
+  DCPS::MonotonicTimePoint schedule_auth_resend(const DCPS::TimeDuration& time, const DCPS::RepoId& guid);
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
