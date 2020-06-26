@@ -30,7 +30,7 @@ sub runTest {
     my $dr_static = 1;
     my $origin = 1;
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -domain 2 -domain 4 -domain 7");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -domain 2 -domain 15 -domain 4 -domain 7");
     $test->start_process("alpha");
     sleep $delay;
 
