@@ -987,6 +987,8 @@ void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
   ACE_DEBUG((LM_DEBUG, "Sedp::rekey_volatile complete\n"));
 }
 
+#endif // OPENDDS_SECURITY
+
 void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
                                const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
 {
@@ -1028,6 +1030,8 @@ void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::U
     client.disassociate(temp);
   }
 }
+
+#ifdef OPENDDS_SECURITY
 
 void Sedp::associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata)
 {

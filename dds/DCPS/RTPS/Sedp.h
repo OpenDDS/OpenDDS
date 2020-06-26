@@ -789,9 +789,6 @@ protected:
   RemoteReaderVectors datawriter_crypto_tokens_;
   DCPS::RepoIdSet pending_volatile_readers_;
 
-#endif
-
-#ifdef OPENDDS_SECURITY
   struct PublicationAgentInfoListener : public ICE::AgentInfoListener
   {
     Sedp& sedp;
