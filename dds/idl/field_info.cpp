@@ -87,12 +87,6 @@ void FieldInfo::init()
   }
 
   if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-    if (underscored_.empty()) {
-      underscored_ = scoped_type_;
-      for (std::size_t i = underscored_.find("::"); i != underscored_.npos; i = underscored_.find("::", i + 2)) {
-        underscored_.replace(i, 2, "_");
-      }
-    }
     be_global->header_ << "struct " << underscored_ << "_tag {};\n\n";
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";
     const_unwrap_ = "  const " + unwrap_;

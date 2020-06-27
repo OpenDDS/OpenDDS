@@ -1858,7 +1858,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
       }
 
-      if (first) {
+      if (first) { //??
         be_global->impl_ << intro << "  return true;\n";
       } else {
         be_global->impl_ << intro << "  return " << expr << ";\n";
@@ -1930,7 +1930,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
       }
 
-      if (first) {
+      if (first) { //??
         be_global->impl_ << intro << "  return true;\n";
       } else {
         be_global->impl_ << intro << "  return " << expr << ";\n";
