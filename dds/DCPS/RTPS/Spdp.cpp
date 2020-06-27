@@ -1582,12 +1582,24 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   sedp_.associate_volatile(iter->second.pdata_);
   sedp_.associate_secure_writers_to_readers(iter->second.pdata_);
   sedp_.associate_secure_readers_to_writers(iter->second.pdata_);
+  iter->second.security_builtins_associated_ = true;
 
   iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
   process_location_updates_i(iter);
 #endif
   return true;
+}
+
+bool Spdp::security_builtins_associated(const DCPS::RepoId& remoteParticipant) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  if (!security_enabled_) {
+    return false;
+  }
+
+  const DiscoveredParticipantConstIter iter = participants_.find(remoteParticipant);
+  return iter == participants_.end() ? false : iter->second.security_builtins_associated_;
 }
 
 void

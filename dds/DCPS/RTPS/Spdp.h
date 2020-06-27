@@ -132,6 +132,7 @@ public:
   void write_secure_updates();
   void write_secure_disposes();
   bool is_security_enabled() const { return security_enabled_; }
+  bool security_builtins_associated(const DCPS::RepoId& remoteParticipant) const;
 #endif
 
   bool is_expectant_opendds(const GUID_t& participant) const;

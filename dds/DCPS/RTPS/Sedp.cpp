@@ -993,45 +993,48 @@ void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::U
                                const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
 {
   if (avail & flags) {
-    const RepoId temp = make_id(id, ent);
-
-#ifdef OPENDDS_SECURITY
-    const DCPS::GuidConverter traits(temp);
-    if (traits.isSecure()) {
-      using namespace DDS::Security;
-
-      DDS::Security::SecurityException se = {"", 0, 0};
-      DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
-
-      if (traits.isReader()) {
-        const DatareaderCryptoHandle drch = remote_reader_crypto_handles_[temp];
-        if (!key_factory->unregister_datareader(drch, se)) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::disassociate_helper() - ")
-                     ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
-                     se.code, se.minor_code, se.message.in()));
-        }
-        // TODO: Return handle.
-        remote_reader_crypto_handles_.erase(temp);
-      }
-
-      if (traits.isWriter()) {
-        const DatawriterCryptoHandle dwch = remote_writer_crypto_handles_[temp];
-        if (!key_factory->unregister_datawriter(dwch, se)) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::disassociate_helper() - ")
-                     ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
-                     se.code, se.minor_code, se.message.in()));
-        }
-        // TODO: Return handle.
-        remote_writer_crypto_handles_.erase(temp);
-      }
-    }
-#endif
-
-    client.disassociate(temp);
+    client.disassociate(make_id(id, ent));
   }
 }
 
 #ifdef OPENDDS_SECURITY
+
+void Sedp::remove_remote_crypto_handle(const RepoId& participant, const EntityId_t& entity)
+{
+  using namespace DDS::Security;
+  using DCPS::DatareaderCryptoHandleMap;
+  using DCPS::DatawriterCryptoHandleMap;
+
+  const RepoId remote = make_id(participant, entity);
+  SecurityException se = {"", 0, 0};
+  CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+
+  const DCPS::GuidConverter traits(remote);
+  if (traits.isReader()) {
+    const DatareaderCryptoHandleMap::iterator iter = remote_reader_crypto_handles_.find(remote);
+    if (iter == remote_reader_crypto_handles_.end()) {
+      return;
+    }
+    if (!key_factory->unregister_datareader(iter->second, se)) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::remove_remote_crypto_handle() - ")
+                 ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+    }
+    remote_reader_crypto_handles_.erase(iter);
+
+  } else if (traits.isWriter()) {
+    const DatawriterCryptoHandleMap::iterator iter = remote_writer_crypto_handles_.find(remote);
+    if (iter == remote_writer_crypto_handles_.end()) {
+      return;
+    }
+    if (!key_factory->unregister_datawriter(iter->second, se)) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::remove_remote_crypto_handle() - ")
+                 ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+    }
+    remote_writer_crypto_handles_.erase(iter);
+  }
+}
 
 void Sedp::associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata)
 {
@@ -1408,68 +1411,61 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     //FUTURE: if/when topic propagation is supported, add it here
 
 #ifdef OPENDDS_SECURITY
-    using namespace DDS::Security;
-
-    if (local_avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
-      disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
-                          ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, *publications_secure_writer_);
+    if (spdp_.security_builtins_associated(part)) {
+      disassociate_security_builtins(local_avail, avail, part);
     }
-    disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, part,
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, *publications_secure_reader_);
-
-    if (local_avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
-      disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
-                          ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, *subscriptions_secure_writer_);
-    }
-    disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, part,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, *subscriptions_secure_reader_);
-
-    if (local_avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
-      disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
-                          ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, *participant_message_secure_writer_);
-    }
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, *participant_message_secure_reader_);
-
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER, *participant_stateless_message_writer_);
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER, *participant_stateless_message_reader_);
-
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER, *participant_volatile_message_secure_writer_);
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER, *participant_volatile_message_secure_reader_);
-
-    disassociate_helper(avail, SPDP_BUILTIN_PARTICIPANT_SECURE_READER, part,
-      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER, *dcps_participant_secure_writer_);
-    disassociate_helper(avail, SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER, part,
-      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER, *dcps_participant_secure_reader_);
 #endif
-
   }
 
 #ifdef OPENDDS_SECURITY
-  const RepoId remote_volatile = make_id(part, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
-  associated_volatile_readers_.erase(remote_volatile);
-  pending_volatile_readers_.erase(remote_volatile);
+  if (spdp_.is_security_enabled()) {
+    static const EntityId_t secure_entities[] = {
+      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
+      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER,
+      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
+      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER,
+      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER,
+      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER,
+    };
+    for (size_t i = 0; i < sizeof secure_entities / sizeof secure_entities[0]; ++i) {
+      remove_remote_crypto_handle(part, secure_entities[i]);
+    }
 
-  const RepoId key = make_id(part, ENTITYID_UNKNOWN);
-  for (DCPS::DatareaderCryptoHandleMap::iterator pos = remote_reader_crypto_handles_.lower_bound(key);
-       pos != remote_reader_crypto_handles_.end() &&
-        std::memcmp(pos->first.guidPrefix, pdata.participantProxy.guidPrefix,
-          sizeof(pdata.participantProxy.guidPrefix)) == 0;) {
-    // TODO: Return the handle.
-    remote_reader_crypto_handles_.erase(pos++);
-  }
-  for (DCPS::DatawriterCryptoHandleMap::iterator pos = remote_writer_crypto_handles_.lower_bound(key);
-       pos != remote_writer_crypto_handles_.end() &&
-        std::memcmp(pos->first.guidPrefix, pdata.participantProxy.guidPrefix,
-          sizeof(pdata.participantProxy.guidPrefix)) == 0;) {
-    // TODO: Return the handle.
-    remote_writer_crypto_handles_.erase(pos++);
-  }
+    const RepoId remote_volatile = make_id(part, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
+    associated_volatile_readers_.erase(remote_volatile);
+    pending_volatile_readers_.erase(remote_volatile);
+  
+    const DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+    DDS::Security::SecurityException se;
 
+    const RepoId key = make_id(part, ENTITYID_UNKNOWN);
+    for (DCPS::DatareaderCryptoHandleMap::iterator pos = remote_reader_crypto_handles_.lower_bound(key);
+         pos != remote_reader_crypto_handles_.end() &&
+         std::memcmp(pos->first.guidPrefix, pdata.participantProxy.guidPrefix,
+                     sizeof(pdata.participantProxy.guidPrefix)) == 0;) {
+      if (!key_factory->unregister_datareader(pos->second, se)) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::disassociate() - ")
+                   ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+      remote_reader_crypto_handles_.erase(pos++);
+    }
+    for (DCPS::DatawriterCryptoHandleMap::iterator pos = remote_writer_crypto_handles_.lower_bound(key);
+         pos != remote_writer_crypto_handles_.end() &&
+         std::memcmp(pos->first.guidPrefix, pdata.participantProxy.guidPrefix,
+                     sizeof(pdata.participantProxy.guidPrefix)) == 0;) {
+      if (!key_factory->unregister_datawriter(pos->second, se)) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::disassociate() - ")
+                   ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+      remote_writer_crypto_handles_.erase(pos++);
+    }
+  }
 #endif
 
   if (spdp_.has_discovered_participant(part)) {
@@ -1480,6 +1476,50 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     return false;
   }
 }
+
+#ifdef OPENDDS_SECURITY
+void Sedp::disassociate_security_builtins(BuiltinEndpointSet_t local_avail, BuiltinEndpointSet_t avail,
+                                          const RepoId& part)
+{
+  using namespace DDS::Security;
+
+  if (local_avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
+                        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, *publications_secure_writer_);
+  }
+  disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, part,
+    ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, *publications_secure_reader_);
+
+  if (local_avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
+                        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, *subscriptions_secure_writer_);
+  }
+  disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, part,
+    ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, *subscriptions_secure_reader_);
+
+  if (local_avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
+                        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, *participant_message_secure_writer_);
+  }
+  disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, part,
+    ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, *participant_message_secure_reader_);
+
+  disassociate_helper(avail, BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER, part,
+    ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER, *participant_stateless_message_writer_);
+  disassociate_helper(avail, BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER, part,
+    ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER, *participant_stateless_message_reader_);
+
+  disassociate_helper(avail, BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER, part,
+    ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER, *participant_volatile_message_secure_writer_);
+  disassociate_helper(avail, BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER, part,
+    ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER, *participant_volatile_message_secure_reader_);
+
+  disassociate_helper(avail, SPDP_BUILTIN_PARTICIPANT_SECURE_READER, part,
+    ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER, *dcps_participant_secure_writer_);
+  disassociate_helper(avail, SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER, part,
+    ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER, *dcps_participant_secure_reader_);
+}
+#endif
 
 void
 Sedp::replay_durable_data_for(const DCPS::RepoId& remote_sub_id)

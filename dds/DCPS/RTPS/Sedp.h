@@ -107,6 +107,9 @@ public:
   void rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
+  void disassociate_security_builtins(BuiltinEndpointSet_t local_avail, BuiltinEndpointSet_t avail,
+                                      const DCPS::RepoId& part);
+  void remove_remote_crypto_handle(const DCPS::RepoId& participant, const EntityId_t& entity);
 
   /// Create and send keys the first time
   void send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& pdata);
