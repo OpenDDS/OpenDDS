@@ -776,7 +776,6 @@ RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
 
 void RtpsUdpDataLink::client_stop(const RepoId& localId)
 {
-  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
   const GuidConverter conv(localId);
 
   if (conv.isReader()) {
@@ -785,17 +784,7 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
 
   } else {
     ACE_GUARD(ACE_Thread_Mutex, gw, writers_lock_);
-    const RtpsWriterMap::iterator iter = writers_.find(localId);
-    if (iter == writers_.end()) {
-      return;
-    }
-    iter->second->pre_stop_helper(to_drop);
-    writers_.erase(iter);
-  }
-
-  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  for (tqe_iter drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
-    (*drop_it)->data_dropped(true);
+    writers_.erase(localId);
   }
 }
 
@@ -864,6 +853,7 @@ void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
+  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
   using std::pair;
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
@@ -874,6 +864,9 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       RtpsWriter_rch writer = rw->second;
       g.release();
       writer->remove_reader(remote_id);
+      if (writer->reader_count() == 0) {
+        writer->pre_stop_helper(to_drop);
+      }
       writer->process_acked_by_all();
     }
 
@@ -909,6 +902,11 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         }
       }
     }
+  }
+
+  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
+  for (tqe_iter drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
+    (*drop_it)->data_dropped(true);
   }
 }
 
