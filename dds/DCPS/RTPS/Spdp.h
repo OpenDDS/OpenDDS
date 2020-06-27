@@ -108,7 +108,8 @@ public:
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                        bool& remote_is_replier);
+                                        bool& send_our_tokens);
+  bool seen_crypto_tokens_from(const DCPS::RepoId& sender);
   DDS::OctetSeq local_participant_data_as_octets() const;
 #endif
 

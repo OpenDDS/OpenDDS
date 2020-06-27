@@ -1595,6 +1595,7 @@ namespace OpenDDS {
         , auth_state_(AUTH_STATE_UNKNOWN)
         , is_requester_(false)
         , security_builtins_associated_(false)
+        , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1623,6 +1624,7 @@ namespace OpenDDS {
         , auth_state_(AUTH_STATE_UNKNOWN)
         , is_requester_(false)
         , security_builtins_associated_(false)
+        , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1685,6 +1687,7 @@ namespace OpenDDS {
         HandshakeState handshake_state_;
         bool is_requester_;
         bool security_builtins_associated_;
+        bool seen_some_crypto_tokens_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;

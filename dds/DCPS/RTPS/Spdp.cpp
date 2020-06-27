@@ -1100,6 +1100,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         // Install the shared secret before sending the final so that
         // we are prepared to receive the crypto tokens from the
         // replier.
+        dp.seen_some_crypto_tokens_ = false;
         match_authenticated(src_participant, iter);
         if (send_handshake_message(src_participant, dp, reply, false) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_warn) {
@@ -1342,7 +1343,7 @@ Spdp::process_auth_resends(const DCPS::MonotonicTimePoint& now)
 
 bool
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                       bool& remote_is_replier)
+                                       bool& send_our_tokens)
 {
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
@@ -1385,8 +1386,22 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
-  remote_is_replier = !dp.is_requester_;
+  send_our_tokens = !dp.is_requester_ && !dp.seen_some_crypto_tokens_;
+  dp.seen_some_crypto_tokens_ = true;
   return true;
+}
+
+bool Spdp::seen_crypto_tokens_from(const RepoId& sender)
+{
+  const RepoId src_participant = make_id(sender.guidPrefix, ENTITYID_PARTICIPANT);
+  const DiscoveredParticipantIter iter = participants_.find(src_participant);
+  if (iter == participants_.end()) {
+    return false;
+  }
+  DiscoveredParticipant& dp = iter->second;
+  const bool send_our_tokens = !dp.is_requester_ && !dp.seen_some_crypto_tokens_;
+  dp.seen_some_crypto_tokens_ = true;
+  return send_our_tokens;
 }
 
 DDS::ReturnCode_t

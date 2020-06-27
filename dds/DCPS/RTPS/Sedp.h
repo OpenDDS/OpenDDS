@@ -764,8 +764,10 @@ protected:
     const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer,
     const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader);
 
-  void handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
-  void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  bool handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                       bool& send_our_tokens);
+  bool handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                       bool& send_our_tokens);
 
   void send_cached_crypto_tokens(const DCPS::RepoId& remote_participant);
 
