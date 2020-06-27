@@ -629,7 +629,14 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsWriterMap::iterator rw = writers_.find(local_id);
       if (rw == writers_.end()) {
         RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
-        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, multi_buff_.capacity());
+        int hb_start = 0;
+        HeartBeatCountMapType::iterator hbc_it = heartbeat_counts_.find(local_id);
+        if (hbc_it != heartbeat_counts_.end()) {
+          hb_start = hbc_it->second;
+          heartbeat_counts_.erase(hbc_it);
+        }
+        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable,
+                                                     hb_start, multi_buff_.capacity());
         rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
       RtpsWriter_rch writer = rw->second;
@@ -716,6 +723,9 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
     InterestingRemoteMapType::value_type(
       readerid,
       InterestingRemote(writerid, address, listener)));
+  if (heartbeat_counts_.find(writerid) == heartbeat_counts_.end()) {
+    heartbeat_counts_[writerid] = 0;
+  }
   g.release();
   if (enableheartbeat) {
     heartbeat_.enable(quick_heartbeat_delay_);
@@ -828,6 +838,7 @@ RtpsUdpDataLink::pre_stop_i()
       writer->pre_stop_helper(to_drop);
       RtpsWriterMap::iterator last = iter;
       ++iter;
+      heartbeat_counts_.erase(last->first);
       writers_.erase(last);
     }
   }
@@ -3385,18 +3396,21 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
     }
   }
 
+  ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_); // heartbeat_counts_
   for (WtaMap::const_iterator pos = writers_to_advertise.begin(),
          limit = writers_to_advertise.end();
        pos != limit;
        ++pos) {
     const SequenceNumber SN = 1, lastSN = SequenceNumber::ZERO();
+    const rw_iter rw = writers.find(pos->first);
+    const int count = rw == writers.end() ? ++heartbeat_counts_[pos->first] : rw->second->inc_heartbeat_count();
     const HeartBeatSubmessage hb = {
       {HEARTBEAT, FLAG_E, HEARTBEAT_SZ},
       ENTITYID_UNKNOWN, // any matched reader may be interested in this
       pos->first.entityId,
       {SN.getHigh(), SN.getLow()},
       {lastSN.getHigh(), lastSN.getLow()},
-      {writers[pos->first]->inc_heartbeat_count()}
+      {count}
     };
 
     MetaSubmessage meta_submessage(pos->first, GUID_UNKNOWN, pos->second);
@@ -3404,6 +3418,7 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
 
     meta_submessages.push_back(meta_submessage);
   }
+  g.release();
 
   send_bundled_submessages(meta_submessages);
 
@@ -3796,12 +3811,13 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
      || !durable_data_.empty()); // DW resent, not sent to reader
 }
 
-RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, size_t capacity)
+RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id,
+                                        bool durable, int heartbeat_count, size_t capacity)
  : send_buff_(make_rch<SingleSendBuffer>(capacity, ONE_SAMPLE_PER_PACKET))
  , link_(link)
  , id_(id)
  , durable_(durable)
- , heartbeat_count_(0)
+ , heartbeat_count_(heartbeat_count)
 {
   send_buff_->bind(link->send_strategy());
 }

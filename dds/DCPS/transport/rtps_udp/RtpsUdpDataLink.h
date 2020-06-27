@@ -363,7 +363,8 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, size_t capacity);
+    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
+               int heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -490,7 +491,7 @@ private:
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
   /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
   ///   writer_to_seq_best_effort_readers_ along with anything else that fits the 'reader side activity' of the datalink
-  /// - writers_lock_ protects writers_, best_effort_heartbeat_count_, and interesting_readers_
+  /// - writers_lock_ protects writers_, heartbeat_counts_ best_effort_heartbeat_count_, and interesting_readers_
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
   ///   for both remote writers and remote readers
@@ -660,6 +661,9 @@ private:
   void send_heartbeats_manual_i(const TransportSendControlElement* tsce,
                                 MetaSubmessageVec& meta_submessages);
 
+  typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
+  HeartBeatCountMapType heartbeat_counts_;
+  
   struct InterestingAckNack {
     RepoId writerid;
     RepoId readerid;
