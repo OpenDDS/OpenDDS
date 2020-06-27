@@ -663,7 +663,7 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
   HeartBeatCountMapType heartbeat_counts_;
-  
+
   struct InterestingAckNack {
     RepoId writerid;
     RepoId readerid;

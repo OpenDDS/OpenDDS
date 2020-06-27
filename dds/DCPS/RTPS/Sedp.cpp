@@ -1438,7 +1438,7 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     const RepoId remote_volatile = make_id(part, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
     associated_volatile_readers_.erase(remote_volatile);
     pending_volatile_readers_.erase(remote_volatile);
-  
+
     const DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
     DDS::Security::SecurityException se;
 
