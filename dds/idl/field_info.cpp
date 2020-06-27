@@ -9,7 +9,7 @@
 
 using namespace AstTypeClassification;
 
-FieldInfo::EleLen::EleLen(FieldInfo& af) : ele_(af.ast_elem_), len_(af.n_elems_)
+FieldInfo::EleLen::EleLen(FieldInfo& af) : ele_(af.as_base_), len_(af.n_elems_)
 {
 }
 
@@ -30,42 +30,45 @@ std::string FieldInfo::get_type_name(AST_Type& field)
 
 // for anonymous types
 FieldInfo::FieldInfo(AST_Field& field) :
-  ast_type_(field.field_type()),
+  type_(field.field_type()),
   name_(field.local_name()->get_string())
 {
   init();
 }
 
 FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
-  ast_type_(base),
+  type_(base),
   scoped_type_(scoped(sn))
 {
   const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
-  underscores_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
+  underscored_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
   init();
 }
 
 void FieldInfo::init()
 {
-  arr_ = AST_Array::narrow_from_decl(ast_type_);
-  seq_ = AST_Sequence::narrow_from_decl(ast_type_);
-  ast_elem_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr);
-  act_ = resolveActualType(ast_elem_ ? ast_elem_ : ast_type_);
+  act_ = resolveActualType(type_);
   cls_ = classify(act_);
+  arr_ = AST_Array::narrow_from_decl(type_);
+  seq_ = AST_Sequence::narrow_from_decl(type_);
+  as_base_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr);
+  as_act_ = as_base_ ? resolveActualType(as_base_) : nullptr;
+  as_cls_ = as_act_ ? classify(as_act_) : CL_UNKNOWN;
+
   if (!name_.empty()) {
-    scoped_type_ = scoped(ast_type_->name());
+    scoped_type_ = scoped(type_->name());
     std::size_t i = scoped_type_.find("::");
     struct_name_ = scoped_type_.substr(0, i);
-    if (ast_elem_) {
-      type_ = "_" + name_;
-      if (seq_) { type_ += "_seq"; }
-      scoped_type_ = struct_name_ + "::" + type_;
+    if (as_base_) {
+      type_name_ = "_" + name_;
+      if (seq_) { type_name_ += "_seq"; }
+      scoped_type_ = struct_name_ + "::" + type_name_;
     } else {
-      type_ = scoped_type_.substr(i + 2);
+      type_name_ = scoped_type_.substr(i + 2);
     }
   } else if (!scoped_type_.empty()) {
     //name_
-    type_ = scoped_type_;
+    type_name_ = scoped_type_;
     //struct_name_
   }
 
@@ -82,14 +85,21 @@ void FieldInfo::init()
     length_ = "length";
     arg_ = "seq";
   }
+
   if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-    be_global->header_ << "struct " << underscores_ << "_tag {};\n\n";
+    if (underscored_.empty()) {
+      underscored_ = scoped_type_;
+      for (std::size_t i = underscored_.find("::"); i != underscored_.npos; i = underscored_.find("::", i + 2)) {
+        underscored_.replace(i, 2, "_");
+      }
+    }
+    be_global->header_ << "struct " << underscored_ << "_tag {};\n\n";
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";
     const_unwrap_ = "  const " + unwrap_;
     unwrap_ = "  " + unwrap_;
     arg_ = "wrap";
-    ref_       = "IDL::DistinctType<"       + scoped_type_ + ", " + underscores_ + "_tag>";
-    const_ref_ = "IDL::DistinctType<const " + scoped_type_ + ", " + underscores_ + "_tag>";
+    ref_       = "IDL::DistinctType<"       + scoped_type_ + ", " + underscored_ + "_tag>";
+    const_ref_ = "IDL::DistinctType<const " + scoped_type_ + ", " + underscored_ + "_tag>";
   } else {
     ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
     const_ref_ = "const " + ref_;
@@ -100,13 +110,13 @@ void FieldInfo::init()
 void FieldInfo::set_element()
 {
   elem_sz_ = 0;
-  if (ast_elem_) {
-    if (cls_ & CL_ENUM) {
+  if (as_base_) {
+    if (as_cls_ & CL_ENUM) {
       elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
-    } else if (cls_ & CL_STRING) {
-      elem_sz_ = 4; elem_ = string_type(cls_); return; // encoding of str length is 4 bytes
-    } else if (cls_ & CL_PRIMITIVE) {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(act_);
+    } else if (as_cls_ & CL_STRING) {
+      elem_sz_ = 4; elem_ = string_type(as_cls_); return; // encoding of str length is 4 bytes
+    } else if (as_cls_ & CL_PRIMITIVE) {
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(as_act_);
       switch (p->pt()) {
       case AST_PredefinedType::PT_long: elem_sz_ = 4; elem_ = "ACE_CDR::Long"; return;
       case AST_PredefinedType::PT_ulong: elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
@@ -124,8 +134,8 @@ void FieldInfo::set_element()
       default: break;
       }
     }
+    elem_ = scoped(as_act_->name());
   }
-  elem_ = scoped(act_->name());
 }
 
 std::string FieldInfo::string_type(Classification c)
@@ -133,4 +143,32 @@ std::string FieldInfo::string_type(Classification c)
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
     ((c & CL_WIDE) ? "std::wstring" : "std::string") :
     (c & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
+}
+
+std::string FieldInfo::to_cxx_type(AST_Type* type, std::size_t& size)
+{
+  const Classification cls = classify(type);
+  if (cls & CL_ENUM) { size = 4; return "ACE_CDR::ULong"; }
+  if (cls & CL_STRING) { size = 4; return string_type(cls); } // encoding of str length is 4 bytes
+  if (cls & CL_PRIMITIVE) {
+    type = resolveActualType(type);
+    AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+    switch (p->pt()) {
+    case AST_PredefinedType::PT_long: size = 4; return "ACE_CDR::Long";
+    case AST_PredefinedType::PT_ulong: size = 4; return "ACE_CDR::ULong";
+    case AST_PredefinedType::PT_longlong: size = 8; return "ACE_CDR::LongLong";
+    case AST_PredefinedType::PT_ulonglong: size = 8; return "ACE_CDR::ULongLong";
+    case AST_PredefinedType::PT_short: size = 2; return "ACE_CDR::Short";
+    case AST_PredefinedType::PT_ushort: size = 2; return "ACE_CDR::UShort";
+    case AST_PredefinedType::PT_float: size = 4; return "ACE_CDR::Float";
+    case AST_PredefinedType::PT_double: size = 8; return "ACE_CDR::Double";
+    case AST_PredefinedType::PT_longdouble: size = 16; return "ACE_CDR::LongDouble";
+    case AST_PredefinedType::PT_char: size = 1; return "ACE_CDR::Char";
+    case AST_PredefinedType::PT_wchar: size = 1; return "ACE_CDR::WChar"; // encoding of wchar length is 1 byte
+    case AST_PredefinedType::PT_boolean: size = 1; return "ACE_CDR::Boolean";
+    case AST_PredefinedType::PT_octet: size = 1; return "ACE_CDR::Octet";
+    default: break;
+    }
+  }
+  return scoped(type->name());
 }

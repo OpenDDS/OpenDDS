@@ -114,75 +114,6 @@ namespace {
     }
   }
 
-  std::string string_type(Classification cls)
-  {
-    return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
-      ((cls & CL_WIDE) ? "std::wstring" : "std::string") :
-      (cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
-  }
-
-  std::string
-  to_cxx_type(AST_Type* type, int& size)
-  {
-    const Classification cls = classify(type);
-    if (cls & CL_ENUM) {
-      size = 4;
-      return "ACE_CDR::ULong";
-    }
-    if (cls & CL_STRING) {
-      size = 4; // encoding of str length is 4 bytes
-      return string_type(cls);
-    }
-    if (cls & CL_PRIMITIVE) {
-      type = resolveActualType(type);
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-      switch (p->pt()) {
-      case AST_PredefinedType::PT_long:
-        size = 4;
-        return "ACE_CDR::Long";
-      case AST_PredefinedType::PT_ulong:
-        size = 4;
-        return "ACE_CDR::ULong";
-      case AST_PredefinedType::PT_longlong:
-        size = 8;
-        return "ACE_CDR::LongLong";
-      case AST_PredefinedType::PT_ulonglong:
-        size = 8;
-        return "ACE_CDR::ULongLong";
-      case AST_PredefinedType::PT_short:
-        size = 2;
-        return "ACE_CDR::Short";
-      case AST_PredefinedType::PT_ushort:
-        size = 2;
-        return "ACE_CDR::UShort";
-      case AST_PredefinedType::PT_float:
-        size = 4;
-        return "ACE_CDR::Float";
-      case AST_PredefinedType::PT_double:
-        size = 8;
-        return "ACE_CDR::Double";
-      case AST_PredefinedType::PT_longdouble:
-        size = 16;
-        return "ACE_CDR::LongDouble";
-      case AST_PredefinedType::PT_char:
-        size = 1;
-        return "ACE_CDR::Char";
-      case AST_PredefinedType::PT_wchar:
-        size = 1; // encoding of wchar length is 1 byte
-        return "ACE_CDR::WChar";
-      case AST_PredefinedType::PT_boolean:
-        size = 1;
-        return "ACE_CDR::Boolean";
-      case AST_PredefinedType::PT_octet:
-        size = 1;
-        return "ACE_CDR::Octet";
-      default:
-        break;
-      }
-    }
-    return scoped(type->name());
-  }
-
   void
   gen_field_getValueFromSerialized(AST_Field* field)
   {
@@ -190,8 +121,8 @@ namespace {
     AST_Type* type = field->field_type();
     const Classification cls = classify(type);
     const std::string fieldName = field->local_name()->get_string();
-    int size = 0;
-    const std::string cxx_type = to_cxx_type(type, size);
+    std::size_t size = 0;
+    const std::string cxx_type = FieldInfo::to_cxx_type(type, size);
     if (cls & CL_SCALAR) {
       type = resolveActualType(type);
       const std::string val = (cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
@@ -316,19 +247,18 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
-    const char* fieldName = field->local_name()->get_string();
     std::string fieldType = (cls & CL_STRING) ?
-      string_type(cls)
+      FieldInfo::string_type(cls)
       : scoped(field->field_type()->name());
     FieldInfo af(*field);
-    if (af.ast_elem_ && field->field_type()->anonymous()) {
+    if (af.as_base_ && field->field_type()->anonymous()) {
       fieldType = af.scoped_type_;
     }
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
       be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << fieldName <<
+        "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
+        "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name_ <<
         " = *static_cast<const " << fieldType <<
         "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
         "      return;\n"
@@ -338,9 +268,8 @@ namespace {
       AST_Type* unTD = resolveActualType(field->field_type());
       AST_Array* arr = AST_Array::narrow_from_decl(unTD);
       be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" <<
-        fieldName << ";\n"
+        "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
+        "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" << af.name_ << ";\n"
         "      const " << fieldType << "* rhsArr = static_cast<const " <<
         fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
@@ -694,8 +623,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
   if ((elem_cls & (CL_PRIMITIVE | CL_ENUM)) && !(elem_cls & CL_WIDE)) {
     // fixed-length sequence/array element -> skip all elements at once
-    int sz = 1;
-    to_cxx_type(elem, sz);
+    std::size_t sz = 0;
+    FieldInfo::to_cxx_type(elem, sz);
     be_global->impl_ <<
       "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
   } else {
@@ -750,8 +679,8 @@ func(const std::string&, AST_Type* br_type, const std::string&,
       "    if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
       "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
-    int sz = 1;
-    to_cxx_type(br_type, sz);
+    std::size_t sz = 0;
+    FieldInfo::to_cxx_type(br_type, sz);
     ss <<
       "    if (!ser.skip(1, " << sz << ")) return false;\n";
   } else {
