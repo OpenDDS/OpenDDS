@@ -137,7 +137,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create DataReader
-    DataReaderListenerImpl* listener_svt = new DataReaderListenerImpl;
+    DataReaderListenerImpl* listener_svt = new DataReaderListenerImpl(num_messages_expected);
     DDS::DataReaderListener_var listener(listener_svt);
 
     DDS::DataReaderQos qos;

@@ -18,9 +18,10 @@
 
 #include <iostream>
 
-DataReaderListenerImpl::DataReaderListenerImpl()
+DataReaderListenerImpl::DataReaderListenerImpl(unsigned int PARAM_NUM_SAMPLES_PER_WRITER)
   : num_samples_(0)
   , valid_(true)
+  , NUM_SAMPLES_PER_WRITER(PARAM_NUM_SAMPLES_PER_WRITER)
 {
 }
 

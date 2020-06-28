@@ -14,7 +14,7 @@ use strict;
 my $pub_opts = "";
 my $sub_opts = "";
 my $reliable = 1;
-my $num_msgs = 10;
+my $num_msgs = 200;
 
 my $test = new PerlDDS::TestFramework();
 # $test->{dcps_transport_debug_level} = 10;
@@ -30,34 +30,38 @@ elsif ($test->flag('multicast_async')) {
     $sub_opts .= "-DCPSConfigFile multicast.ini ";
 }
 
-my($pub1opts) =
+my($pub1opts, $pub2opts) =
     $PerlDDS::SafetyProfile ? ('-p 1') : ('');
 
 $pub_opts .= " -r $reliable -n $num_msgs";
-$sub_opts .= " -r $reliable -n $num_msgs";
+$sub_opts .= " -r $reliable -n " . ($num_msgs);
 
 $test->report_unused_flags();
 # use tcp if no transport is set on command line
 $test->default_transport("tcp");
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -DCPSDebugLevel 1");
 
-$test->process("subscriber #1", "subscriber", $sub_opts);
-#$test->process("subscriber #2", "subscriber", $sub_opts);
-#$test->process("subscriber #3", "subscriber", $sub_opts);
-#$test->process("subscriber #4", "subscriber", $sub_opts);
-#$test->process("subscriber #5", "subscriber", $sub_opts);
-#$test->process("subscriber #6", "subscriber", $sub_opts);
+$test->process("subscriber", "subscriber", $sub_opts);
+$test->process("subscriber #2", "subscriber", $sub_opts);
+$test->process("subscriber #3", "subscriber", $sub_opts);
+$test->process("subscriber #4", "subscriber", $sub_opts);
+$test->process("subscriber #5", "subscriber", $sub_opts);
+$test->process("subscriber #6", "subscriber", $sub_opts);
+$test->process("subscriber #7", "subscriber", $sub_opts);
+$test->process("subscriber #8", "subscriber", $sub_opts);
 $test->process("publisher #1", "publisher", "$pub_opts $pub1opts");
 #$test->process("publisher #2", "publisher", "$pub_opts $pub2opts");
 
 $test->start_process("publisher #1");
 #$test->start_process("publisher #2");
-$test->start_process("subscriber #1");
-#$test->start_process("subscriber #2");
-#$test->start_process("subscriber #3");
-#$test->start_process("subscriber #4");
-#$test->start_process("subscriber #5");
-#$test->start_process("subscriber #6");
+$test->start_process("subscriber");
+$test->start_process("subscriber #2");
+$test->start_process("subscriber #3");
+$test->start_process("subscriber #4");
+$test->start_process("subscriber #5");
+$test->start_process("subscriber #6");
+$test->start_process("subscriber #7");
+$test->start_process("subscriber #8");
 
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");

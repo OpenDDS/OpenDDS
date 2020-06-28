@@ -19,7 +19,7 @@
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl();
+  DataReaderListenerImpl(unsigned int PARAM_NUM_SAMPLES_PER_WRITER);
 
   virtual ~DataReaderListenerImpl();
 
@@ -58,7 +58,7 @@ public:
 
   static const unsigned int NUM_PROCESSES = 1;
   static const unsigned int NUM_WRITERS_PER_PROCESS = 1;
-  static const unsigned int NUM_SAMPLES_PER_WRITER = 10;
+  const unsigned int NUM_SAMPLES_PER_WRITER = 10;
 
 private:
   DDS::DataReader_var  reader_;
