@@ -2892,7 +2892,7 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
     return;
   }
 
-  bool send_tokens;
+  bool send_tokens = false;
   if (0 == std::strcmp(msg.message_class_id,
                        DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS)) {
     if (!spdp_.handle_participant_crypto_tokens(msg, send_tokens)) {
@@ -2911,6 +2911,8 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
       ACE_DEBUG((LM_DEBUG, "Sedp::received_volatile_message_secure handle_datareader_crypto_tokens failed\n"));
       return;
     }
+  } else {
+    return;
   }
 
   if (!send_tokens) {
