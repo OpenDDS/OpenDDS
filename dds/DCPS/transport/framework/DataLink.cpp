@@ -1173,6 +1173,17 @@ DataLink::network_change() const
   }
 }
 
+void
+DataLink::replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_sub_id) const
+{
+  GuidConverter local(local_pub_id);
+  GuidConverter remote(remote_sub_id);
+  TransportSendListener_rch send_listener = send_listener_for(local_pub_id);
+  if (send_listener) {
+    send_listener->replay_durable_data_for(remote_sub_id);
+  }
+}
+
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)

@@ -45,6 +45,7 @@ public:
   void notify_publication_reconnected(const ReaderIdSeq&) {}
   void notify_publication_lost(const ReaderIdSeq&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
+  void replay_durable_data_for(const RepoId&) {}
 
   void track_message();
 
