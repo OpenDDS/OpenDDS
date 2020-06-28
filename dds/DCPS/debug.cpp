@@ -31,6 +31,7 @@ OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
 #ifdef OPENDDS_SECURITY
 SecurityDebug::SecurityDebug()
   : fake_encryption(false)
+  , force_auth_role(FORCE_AUTH_ROLE_NORMAL)
 {
   set_all_flags_to(false);
 }

@@ -115,13 +115,14 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
 #ifdef OPENDDS_SECURITY
 namespace {
-  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, bool& stop)
+  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
     if (security_debug.encdec_error) {
       ACE_TCHAR addr_buff[256] = {};
       remote.addr_to_string(addr_buff, 256);
+      GuidConverter gc(peer);
       ACE_ERROR((LM_ERROR, "(%P|%t) {encdec_error} RtpsUdpReceiveStrategy::receive_bytes - "
-                 "from %s secure RTPS processing failed: %C\n", addr_buff, msg));
+                 "from %s %C secure RTPS processing failed: %C\n", addr_buff, OPENDDS_STRING(gc).c_str(), msg));
     }
     stop = true;
     return 0;
@@ -182,13 +183,15 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   if (ret > 0 && receiver != DDS::HANDLE_NIL) {
     encoded_rtps_ = false;
 
+    GUID_t peer = GUID_UNKNOWN;
+
     const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
     if (!crypto) {
-      return recv_err("no crypto plugin", remote_address, stop);
+      return recv_err("no crypto plugin", remote_address, peer, stop);
     }
 
     if (ret < RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ) {
-      return recv_err("message too short", remote_address, stop);
+      return recv_err("message too short", remote_address, peer, stop);
     }
 
     const unsigned int encLen = static_cast<unsigned int>(ret);
@@ -204,14 +207,13 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     }
 
     if (copied != encLen) {
-      return recv_err("received bytes didn't fit in iovec array", remote_address, stop);
+      return recv_err("received bytes didn't fit in iovec array", remote_address, peer, stop);
     }
 
     if (encoded[RTPS::RTPSHDR_SZ] != RTPS::SRTPS_PREFIX) {
       return ret;
     }
 
-    GUID_t peer;
     static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
     std::memcpy(peer.guidPrefix, encBuf + GuidPrefixOffset, sizeof peer.guidPrefix);
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
@@ -241,7 +243,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
         stop = true;
         return ret;
       }
-      return recv_err("decode_rtps_message failed", remote_address, stop);
+      return recv_err("decode_rtps_message failed", remote_address, peer, stop);
     }
 
     copied = 0;
@@ -255,7 +257,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     }
 
     if (copied != plainLen) {
-      return recv_err("plaintext doesn't fit in iovec array", remote_address, stop);
+      return recv_err("plaintext doesn't fit in iovec array", remote_address, peer, stop);
     }
 
     encoded_rtps_ = true;
@@ -582,8 +584,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   } else {
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
-                 ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
-                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
+                 ACE_TEXT("preprocess_secure_submsg failed remote %C RPCH %d, [%d.%d]: %C\n"),
+                 OPENDDS_STRING(GuidConverter(peer)).c_str(), peer_pch, ex.code, ex.minor_code, ex.message.in()));
     }
     return;
   }

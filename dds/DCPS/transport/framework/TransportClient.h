@@ -80,6 +80,7 @@ public:
   void stop_associating();
   void stop_associating(const GUID_t* repos, CORBA::ULong length);
   void send_final_acks();
+  void transport_stop();
 
   // Discovery:
   void register_for_reader(const RepoId& participant,
