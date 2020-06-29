@@ -180,7 +180,7 @@ public:
   /**
    * Align "value" to "by" and according to the stream's alignment.
    */
-  void align(size_t& value, size_t by = std::numeric_limits<size_t>::max()) const;
+  void align(size_t& value, size_t by = (std::numeric_limits<size_t>::max)()) const;
 
   /// Return XCDR behavior being used.
   XcdrVersion xcdr_version() const;
