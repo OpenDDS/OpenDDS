@@ -19,7 +19,7 @@ struct DataTypeBase {
 
   size_t alignment(const Encoding& encoding)
   {
-    return std::min(encoding.max_align(), _alignment());
+    return (std::min)(encoding.max_align(), _alignment());
   }
 
   virtual size_t _alignment() { return space(); }

@@ -33,6 +33,9 @@ three-way handshake using the "builtin SDP participant" readers and writers.
   - Finally the leader will verify the follower and send a "final" message
     back, signaling that association can continue.
 
+The role taken in the authentication handshake can be overridden using
+`OpenDDS::DCPS::security_debug.force_auth_role`.
+
 <!-- TODO: List OMG authentication states and what they actually mean -->
 
 ## Key Exchange

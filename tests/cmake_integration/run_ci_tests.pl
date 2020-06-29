@@ -8,6 +8,7 @@
 
 use Getopt::Long;
 use Cwd;
+use strict;
 
 sub run_command ($) {
   my $command = shift;
@@ -35,46 +36,64 @@ my $build_config = "";
 my $generator = "";
 my $arch = "";
 my $skip_run_test;
+my $skip_cxx11;
+my $no_shared;
 
 exit 1 if !GetOptions(
     "build-config=s" => \$build_config,
     "generator=s" => \$generator,
     "arch=s" => \$arch,
-    "skip-run-test" => \$skip_run_test);
+    "skip-run-test" => \$skip_run_test,
+    "skip-cxx11" => \$skip_cxx11,
+    "no-shared" => \$no_shared,
+    );
 
-for my $x (qw(Messenger_1 Messenger_2)) {
-  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
+my @dirs = ('Messenger_1', 'Messenger_2');
+push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+
+my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
+my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
+
+for my $dir (@dirs) {
+  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$dir/build";
   mkdir($build_dir) or die "ERROR '$!': failed to make directory $build_dir";
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 
-  my @cmds = (["cmake",
-               "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
-               "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON", ".."],
-              ["cmake", "--build", "."]);
+  my @generate_cmd = ("cmake",
+		      "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
+		      "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+  my @build_cmd = ("cmake", "--build", ".");
 
   if ($generator ne "") {
-    splice @{$cmds[0]}, 1, 0, ("-G", qq("$generator"));
+    splice @generate_cmd, 1, 0, ("-G", qq("$generator"));
   }
 
   if ($arch ne "") {
-    splice @{$cmds[0]}, 1, 0, ("-A", "$arch");
+    splice @generate_cmd, 1, 0, ("-A", "$arch");
   }
 
   if ($build_config ne "") {
-    push @{$cmds[1]}, ("--config", "$build_config");
+    push @build_cmd, ("--config", "$build_config");
   }
 
-  for my $cmd (@cmds) {
-    run_command("@{$cmd}");
-  }
+  my @lib_options = ($builds_lib{$dir} && !$no_shared) ? ('OFF', 'ON') : ('');
+  for my $lib_option (@lib_options) {
 
-  if (! $skip_run_test) {
-    if ($build_config ne "") {
-      my $run_dir = getcwd() . "/$build_config";
-      print "Switching to '$run_dir' to run tests\n";
-      print "$run_dir";
-      chdir($run_dir) or die "ERROR: '$!'";
+    my $lib_opt = $lib_option ? "-D BUILD_SHARED_LIBS=$lib_option" : '';
+    run_command("@generate_cmd $lib_opt ..");
+    run_command("@build_cmd");
+
+    if (! $skip_run_test) {
+      if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
+        my $run_dir = getcwd() . "/$build_config";
+        print "Switching to '$run_dir' to run tests\n";
+        chdir($run_dir) or die "ERROR: '$!'";
+      }
+      my $args = $build_config ? "-ExeSubDir $build_config -Config ARCH" : '';
+      run_command("perl run_test.pl $args");
+      if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
+        chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
+      }
     }
-    run_command("perl run_test.pl");
   }
 }

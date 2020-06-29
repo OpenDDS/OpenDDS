@@ -265,13 +265,15 @@ DataReaderImpl::add_association(const RepoId& yourId,
           writer_id,
           info));
 
-      // Schedule timer if necessary
-      //   - only need to check reader qos - we know the writer must be >= reader
-      if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        info->waiting_for_end_historic_samples_ = true;
-      }
+    // Schedule timer if necessary
+    //   - only need to check reader qos - we know the writer must be >= reader
+    if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+      info->waiting_for_end_historic_samples_ = true;
+    }
 
-      this->statistics_.insert(
+    remove_association_sweeper_->cancel_timer(writer_id);
+
+    this->statistics_.insert(
         StatsMapType::value_type(
             writer_id,
             WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
@@ -693,6 +695,8 @@ DataReaderImpl::remove_all_associations()
                ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::remove_all_associations() - ")
                ACE_TEXT("caught exception from remove_associations.\n")));
   }
+
+  transport_stop();
 }
 
 void
@@ -1270,13 +1274,8 @@ DataReaderImpl::enable()
 
     TypeSupportImpl* const typesupport =
       dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
     XTypes::TypeInformation type_info;
-    type_info.minimal.typeid_with_size.type_id = type_iden;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size =
-      serialized_size(XTypes::get_typeobject_encoding(), typesupport->getMinimalTypeObject());
-    type_info.minimal.dependent_typeid_count = 0;
-    type_info.complete.dependent_typeid_count = 0;
+    typesupport->to_type_info(type_info);
 
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,

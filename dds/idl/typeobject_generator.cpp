@@ -69,7 +69,7 @@ call_get_minimal_type_identifier(AST_Type* type)
   }
 
   if (fld_cls & CL_SEQUENCE) {
-    // TODO: Is an anonymous sequence always plain?
+    // TODO [anonymous]: Is an anonymous sequence always plain?
     AST_Sequence* sequence = AST_Sequence::narrow_from_decl(type);
     ACE_CDR::ULong size = 0;
 
@@ -92,7 +92,7 @@ call_get_minimal_type_identifier(AST_Type* type)
   }
 
   if (fld_cls & CL_ARRAY) {
-    // TODO: Is an anonymous array always plain?
+    // TODO [anonymous]: Is an anonymous array always plain?
     AST_Array* array = AST_Array::narrow_from_decl(type);
 
     ACE_CDR::ULong max_bound = 0;
@@ -130,7 +130,7 @@ call_get_minimal_type_identifier(AST_Type* type)
   }
 
   // Anonymous.  Construct type object and hash to get type identifier.
-  // TODO
+  // TODO [anonymous]:
   be_global->impl_ << "ANONYMOUS";
   return;
 }
@@ -204,10 +204,10 @@ typeobject_generator::gen_enum(AST_Enum* node, UTL_ScopedName* name,
   }
   {
     const string decl_gti = "getMinimalTypeIdentifier<" + clazz + ">";
-    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    Function gti(decl_gti.c_str(), "XTypes::TypeIdentifier", "");
     gti.endArgs();
     be_global->impl_ <<
-      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
+      "  static const XTypes::TypeIdentifier ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
       "  return ti;\n";
   }
   return true;
@@ -284,10 +284,10 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   }
   {
     const string decl_gti = "getMinimalTypeIdentifier<" + clazz + ">";
-    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    Function gti(decl_gti.c_str(), "XTypes::TypeIdentifier", "");
     gti.endArgs();
     be_global->impl_ <<
-      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
+      "  static const XTypes::TypeIdentifier ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
       "  return ti;\n";
   }
   return true;
@@ -329,10 +329,10 @@ typeobject_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name,
   }
   {
     const string decl_gti = "getMinimalTypeIdentifier<" + clazz + ">";
-    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    Function gti(decl_gti.c_str(), "XTypes::TypeIdentifier", "");
     gti.endArgs();
     be_global->impl_ <<
-      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
+      "  static const XTypes::TypeIdentifier ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
       "  return ti;\n";
   }
 
@@ -445,10 +445,10 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   }
   {
     const string decl_gti = "getMinimalTypeIdentifier<" + clazz + ">";
-    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    Function gti(decl_gti.c_str(), "XTypes::TypeIdentifier", "");
     gti.endArgs();
     be_global->impl_ <<
-      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
+      "  static const XTypes::TypeIdentifier ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<" << clazz << ">());\n"
       "  return ti;\n";
   }
   return true;

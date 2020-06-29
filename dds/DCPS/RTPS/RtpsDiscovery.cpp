@@ -125,16 +125,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       RtpsDiscoveryConfig_rch config = discovery->config();
 
       // spdpaddr defaults to DCPSDefaultAddress if set
-      if (!TheServiceParticipant->default_address().empty()) {
-        ACE_INET_Addr addr;
-        if (addr.set(TheServiceParticipant->default_address().c_str())) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                            ACE_TEXT("failed to parse Service Participant default address %C\n"),
-                            TheServiceParticipant->default_address().c_str()),
-                           -1);
-        }
-        config->spdp_local_address(addr);
+      if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+        config->spdp_local_address(TheServiceParticipant->default_address());
       }
 
       DCPS::ValueMap values;
@@ -288,7 +280,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->sedp_local_address(addr);
         } else if (name == "SpdpLocalAddress") {
           ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
+          if (addr.set(u_short(0), it->second.c_str())) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
                               ACE_TEXT("failed to parse SpdpLocalAddress %C\n"),
