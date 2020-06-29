@@ -69,6 +69,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
     association.filterExpression = sub->get_filter_expression().c_str();
     association.exprParams = sub->get_expr_params();
     association.serializedTypeInfo = sub->get_serialized_type_info();
+
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -495,7 +496,6 @@ DDS::DataWriterQos* DCPS_IR_Publication::get_datawriter_qos()
 {
   return &qos_;
 }
-
 
 using OpenDDS::DCPS::operator==;
 
