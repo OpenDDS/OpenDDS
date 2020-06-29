@@ -30,7 +30,7 @@ DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                                          const DDS::DataWriterQos& qos,
                                          const OpenDDS::DCPS::TransportLocatorSeq& info,
                                          const DDS::PublisherQos& publisherQos,
-                                         const DDS::OctetSeq & serializedTypeInfo)
+                                         const DDS::OctetSeq& serializedTypeInfo)
   : id_(id),
     participant_(participant),
     topic_(topic),
@@ -790,7 +790,7 @@ DCPS_IR_Publication::dump_to_string(const std::string& prefix, int depth) const
   return str;
 }
 
-DDS::OctetSeq
+const DDS::OctetSeq&
 DCPS_IR_Publication::get_serialized_type_info() const
 {
   return serializedTypeInfo_;

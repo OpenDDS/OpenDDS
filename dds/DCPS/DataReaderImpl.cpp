@@ -314,7 +314,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   DCPS::Serializer serializer(&data_mb, XTypes::get_typeobject_encoding());
   XTypes::TypeInformation type_info;
   if (!(serializer >> type_info)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) extract_type_info_param ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_association ")
               ACE_TEXT("deserialization type information failed.\n")));
   }
 

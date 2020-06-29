@@ -32,7 +32,7 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
                                            const char* filterClassName,
                                            const char* filterExpression,
                                            const DDS::StringSeq& exprParams,
-                                           const DDS::OctetSeq & serializedTypeInfo)
+                                           const DDS::OctetSeq& serializedTypeInfo)
   : id_(id),
     participant_(participant),
     topic_(topic),
@@ -807,7 +807,7 @@ DCPS_IR_Subscription::dump_to_string(const std::string& prefix, int depth) const
   return str;
 }
 
-DDS::OctetSeq
+const DDS::OctetSeq&
 DCPS_IR_Subscription::get_serialized_type_info() const
 {
   return serializedTypeInfo_;

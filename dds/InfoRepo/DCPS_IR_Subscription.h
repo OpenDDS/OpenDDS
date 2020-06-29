@@ -188,7 +188,7 @@ public:
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
 
-  DDS::OctetSeq get_serialized_type_info() const;
+  const DDS::OctetSeq& get_serialized_type_info() const;
 
 private:
   OpenDDS::DCPS::RepoId id_;
@@ -205,7 +205,7 @@ private:
   std::string filterClassName_;
   std::string filterExpression_;
   DDS::StringSeq exprParams_;
-  const DDS::OctetSeq & serializedTypeInfo_;
+  DDS::OctetSeq serializedTypeInfo_;
   DCPS_IR_Publication_Set associations_;
   DCPS_IR_Publication_Set defunct_;
 
