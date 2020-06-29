@@ -2340,7 +2340,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                                 , sub->contentSubscriptionProfile.filterClassName
                                 , sub->contentSubscriptionProfile.filterExpr
                                 , sub->contentSubscriptionProfile.exprParams
-                                , sub->serializedTypeInfo)) { //TODO Figure out if changes are needed here other path is focus
+                                , sub->serializedTypeInfo)) {
       OpenDDS::DCPS::RepoIdConverter sub_converter(sub->actorId);
       OpenDDS::DCPS::RepoIdConverter part_converter(sub->participantId);
       ACE_ERROR((LM_ERROR,
