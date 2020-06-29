@@ -3,6 +3,14 @@
 typedef short Short3Array[3];
 typedef short Short2x3Array[2][3];
 typedef double Double2x3x4Array[2][3][4];
+typedef string Str2x3x4x5Array[2][3][4][5];
+
+typedef Short3Array Short3Array_x2[2];
+
+struct StructOfMultiDimArray {
+  Str2x3x4x5Array str2x3x4x5arr;
+  Short3Array_x2 s3arr_x2arr;
+};
 
 typedef sequence<long> LongSequence;
 typedef sequence<long, 3> Long3Sequence;
@@ -24,6 +32,7 @@ struct TestStruct {
   Short3Array s3arr;
   Short2x3Array s2x3arr;
   Double2x3x4Array d2x3x4arr;
+  StructOfMultiDimArray smda;
 
   LongSequence lseq;
   Long3Sequence l3seq;
