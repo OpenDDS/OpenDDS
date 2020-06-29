@@ -6,6 +6,7 @@
  */
 
 #include "field_info.h"
+#include <sstream>
 
 using namespace AstTypeClassification;
 
@@ -51,8 +52,8 @@ void FieldInfo::init()
   cls_ = classify(act_);
   arr_ = AST_Array::narrow_from_decl(type_);
   seq_ = AST_Sequence::narrow_from_decl(type_);
-  as_base_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr);
-  as_act_ = as_base_ ? resolveActualType(as_base_) : nullptr;
+  as_base_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : 0);
+  as_act_ = as_base_ ? resolveActualType(as_base_) : 0;
   as_cls_ = as_act_ ? classify(as_act_) : CL_UNKNOWN;
 
   if (!name_.empty()) {
@@ -78,7 +79,9 @@ void FieldInfo::init()
     for (size_t i = 0; i < arr_->n_dims(); ++i) {
       n_elems_ *= arr_->dims()[i]->ev()->u.ulval;
     }
-    length_ = std::to_string(n_elems_);
+    std::ostringstream os;
+    os << n_elems_;
+    length_ = os.str();
     arg_ = "arr";
   } else if (seq_) {
     n_elems_ = !seq_->unbounded() ? seq_->max_size()->ev()->u.ulval : 0;
