@@ -600,7 +600,7 @@ module DDS {
 
       DatareaderCryptoHandle
       register_matched_remote_datareader(
-        in    DatawriterCryptoHandle   local_datawritert_crypto_handle,
+        in    DatawriterCryptoHandle   local_datawriter_crypto_handle,
         in    ParticipantCryptoHandle  remote_participant_crypto,
         in    SharedSecretHandle       shared_secret,
         in    boolean                  relay_only,

@@ -303,6 +303,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     sdr.disassociate(publication.remote_id_);
+    sdr.transport_stop();
 
     TheServiceParticipant->shutdown();
     ACE_Thread_Manager::instance()->wait();

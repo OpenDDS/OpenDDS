@@ -160,10 +160,9 @@ UdpTransport::configure_i(UdpInst& config)
   create_reactor_task();
 
   // Override with DCPSDefaultAddress.
-  if (config.local_address() == ACE_INET_Addr () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-
-    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
+  if (config.local_address() == ACE_INET_Addr() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    config.local_address(TheServiceParticipant->default_address());
   }
 
   // Our "server side" data link is created here, similar to the acceptor_

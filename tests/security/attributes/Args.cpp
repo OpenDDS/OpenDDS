@@ -1,15 +1,15 @@
 #include "Args.h"
 
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
 #include <ace/Argv_Type_Converter.h>
-#include "ace/Arg_Shifter.h"
+#include <ace/Arg_Shifter.h>
 #include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+
 #include <iostream>
 
 namespace SecurityAttributes
@@ -33,14 +33,17 @@ Args::Args()
 {
 }
 
+#ifdef ACE_USES_WCHAR
 namespace {
-std::string operator+(const std::string& str, const wchar_t* app) {
+std::string operator+(const std::string& str, const wchar_t* app)
+{
   return str + ACE_Wide_To_Ascii(app).char_rep();
 }
 }
+#endif
 
 //static
-int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
+int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
 {
   ACE_Arg_Shifter arg_shifter(argc, argv);
 

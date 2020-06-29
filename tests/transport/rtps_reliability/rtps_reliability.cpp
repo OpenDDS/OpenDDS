@@ -994,6 +994,8 @@ bool run_test()
   // cleanup
   sdw2.disassociate(reader1);
   sdr2.disassociate(writer1);
+  sdw2.transport_stop();
+  sdr2.transport_stop();
   return true;
 }
 

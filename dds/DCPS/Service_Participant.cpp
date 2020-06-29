@@ -597,7 +597,13 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_log_verbose = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
-      this->default_address_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
+      if (default_address_.set(u_short(0), currentArg)) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::parse_args: ")
+                          ACE_TEXT("failed to parse default address %C\n"),
+                          currentArg),
+                         -1);
+      }
       arg_shifter.consume_arg();
       got_default_address = true;
 
@@ -1685,7 +1691,16 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     if (got_default_address) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSDefaultAddress")));
     } else {
-      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
+      ACE_TString default_address_str;
+      GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), default_address_str);
+      if (!default_address_str.empty() &&
+          default_address_.set(u_short(0), default_address_str.c_str())) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_common_configuration: ")
+                          ACE_TEXT("failed to parse default address %C\n"),
+                          default_address_str.c_str()),
+                         -1);
+      }
     }
 
     if (got_monitor) {
