@@ -717,7 +717,7 @@ TransportRegistry::create_transport_template_instance(const DDS::DomainId_t doma
       }
 
       // load transport
-      int status = this->load_transport_configuration("", tcf);
+      int status = this->load_transport_configuration("transport_config_" + std::to_string(domain), tcf);
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
