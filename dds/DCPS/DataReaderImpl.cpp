@@ -318,15 +318,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
               ACE_TEXT("deserialization type information failed.\n")));
   }
 
-  TypeSupportImpl* const typesupport =
-    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
-  XTypes::TypeInformation type_info_local;
-  type_info_local.minimal.typeid_with_size.type_id = type_iden;
-  type_info_local.minimal.typeid_with_size.typeobject_serialized_size =
-    serialized_size(XTypes::get_typeobject_encoding(), typesupport->getMinimalTypeObject());
-  type_info_local.minimal.dependent_typeid_count = 0;
-  type_info_local.complete.dependent_typeid_count = 0;
+  // TODO: CLAYTON Assignability
 
   // Propagate the add_associations processing down into the Transport
   // layer here.  This will establish the transport support and reserve
