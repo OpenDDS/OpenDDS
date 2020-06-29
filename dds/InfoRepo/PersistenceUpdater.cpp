@@ -137,7 +137,7 @@ struct ActorStrt<QosSeq, QosSeq,
   QosSeq            pubsubQos;
   QosSeq            drdwQos;
   BinSeq            transportInterfaceInfo;
-  BinSeq     serializedTypeInfo;
+  BinSeq            serializedTypeInfo;
   ContentSubscriptionBin contentSubscriptionProfile;
 
   ActorStrt(const DActor& actor,
