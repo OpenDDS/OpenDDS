@@ -1761,7 +1761,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
   const bool may_be_delimited = not_final && repr.xcdr2;
   const bool not_only_delimited = not_final && repr.not_only_xcdr2();
-  const bool get_serialized_size = may_be_parameter_list || may_be_delimited;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1825,18 +1824,20 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
 
-    // Get CDR Size if we need it.
-    if (get_serialized_size) {
+    if (may_be_delimited || may_be_parameter_list) {
       be_global->impl_ <<
-        "  size_t total_size = 0;\n"
-        "  serialized_size(strm.encoding(), total_size, stru);\n";
+        "  const Encoding& encoding = strm.encoding();\n";
     }
 
     // Write the CDR Size if delimited.
     if (may_be_delimited) {
       be_global->impl_ <<
-        "  if (!strm.write_delimiter(total_size)) {\n"
-        "    return false;\n"
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+        "    size_t total_size = 0;\n"
+        "    serialized_size(encoding, total_size, stru);\n"
+        "    if (!strm.write_delimiter(total_size)) {\n"
+        "      return false;\n"
+        "    }\n"
         "  }\n";
     }
 
@@ -1844,25 +1845,22 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     string intro = rtpsCustom.preamble_;
     if (may_be_parameter_list) {
       be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n";
+        "  size_t size = 0;\n";
       std::ostringstream fields_encode;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], i);
         const string field_name = fields[i]->local_name()->get_string();
         fields_encode <<
-          "\n"
-          "  {\n"
-          "    size_t size = 0;\n" <<
-            // TODO(iguessthislldo): Fix indent
+          "\n" <<
             findSizeCommon(field_name, fields[i]->field_type(), "stru", intro) <<
-          "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
-          "      return false;\n"
-          "    }\n"
-          "    if (!" <<
+          "  if (!strm.write_parameter_id(" << id << ", size)) {\n"
+          "    return false;\n"
+          "  }\n"
+          "  size = 0;\n"
+          "  if (!" <<
             streamCommon(field_name, fields[i]->field_type(),
               "<< stru", intro, cxx) << ") {\n"
-          "      return false;\n"
-          "    }\n"
+          "    return false;\n"
           "  }\n";
       }
       string pl_sentinal;
