@@ -121,7 +121,7 @@ int Governance::load(const SSL::SignedDocument& doc)
               } else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
                 max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
 
-                if ((min_value == 0) || (min_value > max_value)) {
+                if (min_value > max_value) {
                   ACE_DEBUG((LM_ERROR, ACE_TEXT(
                       "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Governance XML Domain Range invalid.\n")));
                   return -1;
