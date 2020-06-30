@@ -537,6 +537,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   // 3. cleanup
 
   sdw.disassociate(subscription.remote_id_);
+  sdw.transport_stop();
 
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();

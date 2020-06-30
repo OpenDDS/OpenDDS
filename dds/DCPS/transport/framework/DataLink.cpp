@@ -1156,20 +1156,38 @@ DataLink::ImmediateStart::execute() {
 void
 DataLink::network_change() const
 {
-  for (IdToSendListenerMap::const_iterator itr = send_listeners_.begin();
-       itr != send_listeners_.end(); ++itr) {
+  IdToSendListenerMap send_listeners;
+  IdToRecvListenerMap recv_listeners;
+  {
+    GuardType guard(pub_sub_maps_lock_);
+    send_listeners = send_listeners_;
+    recv_listeners = recv_listeners_;
+  }
+  for (IdToSendListenerMap::const_iterator itr = send_listeners.begin();
+       itr != send_listeners.end(); ++itr) {
     TransportSendListener_rch tsl = itr->second.lock();
     if (tsl) {
       tsl->transport_discovery_change();
     }
   }
 
-  for (IdToRecvListenerMap::const_iterator itr = recv_listeners_.begin();
-       itr != recv_listeners_.end(); ++itr) {
+  for (IdToRecvListenerMap::const_iterator itr = recv_listeners.begin();
+       itr != recv_listeners.end(); ++itr) {
     TransportReceiveListener_rch trl = itr->second.lock();
     if (trl) {
       trl->transport_discovery_change();
     }
+  }
+}
+
+void
+DataLink::replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_sub_id) const
+{
+  GuidConverter local(local_pub_id);
+  GuidConverter remote(remote_sub_id);
+  TransportSendListener_rch send_listener = send_listener_for(local_pub_id);
+  if (send_listener) {
+    send_listener->replay_durable_data_for(remote_sub_id);
   }
 }
 

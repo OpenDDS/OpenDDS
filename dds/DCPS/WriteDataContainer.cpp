@@ -634,6 +634,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   } else {
 
     if (max_durable_per_instance_) {
+      const_cast<DataSampleElement*>(sample)->get_header().historic_sample_ = true;
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
       sent_data_.enqueue_tail(sample);
 

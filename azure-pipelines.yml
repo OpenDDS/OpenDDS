@@ -36,7 +36,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
@@ -94,7 +94,7 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - script: |
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
+      perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
@@ -127,7 +127,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
@@ -186,7 +186,7 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - script: |
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
+      perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
@@ -241,6 +241,7 @@ jobs:
       GCC6_CPP03:
         ConfigOpts: --compiler=g++-6 --std=c++03
         PackageDeps: g++-6
+        CMakeTestOpts: --skip-cxx11
       GCC6:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
@@ -269,8 +270,8 @@ jobs:
     displayName: Compile
   - script: |
       set -e
-      source $(Build.SourcesDirectory)/setenv.sh
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
+      source setenv.sh
+      tests/cmake_integration/run_ci_tests.pl $(CMakeTestOpts)
     displayName: Compile and run CMake tests
     condition: >
       and(succeeded(),
@@ -348,14 +349,14 @@ jobs:
         ConfigOpts: --no-debug --optimize
   steps:
   - script: |
-      ./configure -v --ace-github-latest --tests $(ConfigOpts)
+      ./configure -v --std=c++11 --ace-github-latest --tests $(ConfigOpts)
       tools/scripts/show_build_config.pl
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
   - script: >
-      source $(Build.SourcesDirectory)/setenv.sh &&
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
+      source setenv.sh &&
+      tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
   - script: |
       source setenv.sh

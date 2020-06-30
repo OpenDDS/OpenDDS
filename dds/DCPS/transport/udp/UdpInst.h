@@ -40,7 +40,8 @@ public:
   ACE_INET_Addr local_address() const { return local_address_; }
   void local_address(const ACE_INET_Addr& addr)
   {
-    local_address_config_str_ = addr.get_host_name();
+    char buffer[INET6_ADDRSTRLEN];
+    local_address_config_str_ = addr.get_host_addr(buffer, sizeof buffer);
     local_address_config_str_ += ':' + to_dds_string(addr.get_port_number());
     local_address_ = addr;
   }

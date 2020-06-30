@@ -105,8 +105,12 @@ public:
   DDS::Security::ParticipantCryptoHandle remote_crypto_handle(const DCPS::RepoId& remote_participant) const;
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
+  void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
-  void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                        bool& send_our_tokens);
+  bool seen_crypto_tokens_from(const DCPS::RepoId& sender);
+  DDS::OctetSeq local_participant_data_as_octets() const;
 #endif
 
   void handle_participant_data(DCPS::MessageId id,
@@ -129,6 +133,7 @@ public:
   void write_secure_updates();
   void write_secure_disposes();
   bool is_security_enabled() const { return security_enabled_; }
+  bool security_builtins_associated(const DCPS::RepoId& remoteParticipant) const;
 #endif
 
   bool is_expectant_opendds(const GUID_t& participant) const;
@@ -146,6 +151,10 @@ public:
   void process_participant_ice(const ParameterList& plist,
                                const ParticipantData_t& pdata,
                                const DCPS::RepoId& guid);
+
+  bool remote_is_requester(const DCPS::RepoId& guid) const;
+  const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
+
 #endif
 
   DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }
@@ -175,6 +184,7 @@ public:
                                       );
 protected:
   Sedp& endpoint_manager() { return sedp_; }
+  void remove_discovered_participant_i(DiscoveredParticipantIter iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
@@ -202,7 +212,12 @@ private:
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
 #ifdef OPENDDS_SECURITY
-  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
+  DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
+                                           DiscoveredParticipant& dp,
+                                           DDS::Security::ParticipantStatelessMessage& msg,
+                                           bool resend);
+  DCPS::MonotonicTimePoint schedule_auth_resend(const DCPS::TimeDuration& time, const DCPS::RepoId& guid);
+  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif

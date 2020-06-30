@@ -34,7 +34,7 @@ Writer::start()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l: start()")
                ACE_TEXT(" activate failed!\n")));
-    ACE_OS::exit(-1);
+    ACE_OS::exit(1);
   }
 }
 
@@ -68,14 +68,14 @@ Writer::svc()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(1);
       }
 
       if (writer_->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(1);
       }
 
     } while (matches.current_count < 1);
@@ -90,7 +90,7 @@ Writer::svc()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: _narrow failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(1);
     }
 
     SecurityAttributes::Message message;
