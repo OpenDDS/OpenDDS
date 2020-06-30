@@ -1174,7 +1174,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   // changed defaultDiscovery_ using the API or config file
   Discovery::RepoKey repo = defaultDiscovery_;
   bool in_range = false;
-  const OpenDDS::DCPS::Discovery::RepoKey instance_name = get_discovery_template_instance_name(domain);
+  const Discovery::RepoKey instance_name = get_discovery_template_instance_name(domain);
   DomainRange dr_inst;
 
   // Find if this domain has a repo key (really a discovery key)
@@ -1191,7 +1191,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
   if (location == this->discoveryMap_.end()) {
     if (in_range) {
-      int ret = configure_domain_range_instance(domain);
+      const int ret = configure_domain_range_instance(domain);
 
       // return the newly configured domain and return it
       if (!ret) {

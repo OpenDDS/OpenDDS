@@ -583,18 +583,18 @@ private:
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) domain_info;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) disc_info;
 
-    DomainRange() : range_start(-1), range_end(-1) {};
+    DomainRange() : range_start(-1), range_end(-1) {}
   };
 
-  std::vector<DomainRange> domain_ranges_;
+  OPENDDS_VECTOR(DomainRange) domain_ranges_;
 
   int parse_domain_range(const OPENDDS_STRING range, int& start, int& end);
 
   bool has_domain_range() const;
 
-  bool get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst);
+  bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
 
-  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(const DDS::DomainId_t id);
+  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
 
 public:
   /// Pointer to the monitor factory that is used to create

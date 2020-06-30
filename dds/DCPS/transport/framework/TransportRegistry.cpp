@@ -234,7 +234,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
               }
 
               // does this config specify a transport_template?
-              for (std::vector<TransportTemplate>::iterator it = transport_templates_.begin(); it != transport_templates_.end(); ++it) {
+              for (OPENDDS_VECTOR(TransportTemplate)::iterator it = transport_templates_.begin(); it != transport_templates_.end(); ++it) {
                 if (it->transport_template_name == value) {
                   it->config_name = config_id;
                   break;
@@ -650,7 +650,7 @@ TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
 }
 
 int
-TransportRegistry::create_transport_template_instance(const DDS::DomainId_t domain, const OPENDDS_STRING transport_template_name)
+TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, const OPENDDS_STRING& transport_template_name)
 {
   OPENDDS_STRING transport_inst_name = get_transport_template_instance_name(domain);
   OPENDDS_STRING config_inst_name = get_config_instance_name(domain);
@@ -735,7 +735,7 @@ TransportRegistry::create_transport_template_instance(const DDS::DomainId_t doma
 }
 
 bool
-TransportRegistry::config_has_transport_template(const ACE_TString config_name) const
+TransportRegistry::config_has_transport_template(const ACE_TString& config_name) const
 {
   for (std::vector<TransportTemplate>::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
     if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
@@ -747,7 +747,7 @@ TransportRegistry::config_has_transport_template(const ACE_TString config_name) 
 }
 
 bool
-TransportRegistry::get_transport_template_info(const ACE_TString config_name, TransportTemplate& inst)
+TransportRegistry::get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst)
 {
   bool ret = false;
   if (has_transport_template()) {

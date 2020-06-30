@@ -117,13 +117,13 @@ public:
 
   bool released() const;
 
-  bool config_has_transport_template(const ACE_TString config_name) const;
+  bool config_has_transport_template(const ACE_TString& config_name) const;
 
-  int create_transport_template_instance(const DDS::DomainId_t domain, const OPENDDS_STRING transport_template_name);
+  int create_transport_template_instance(DDS::DomainId_t domain, const OPENDDS_STRING& transport_template_name);
 
-  OPENDDS_STRING get_transport_template_instance_name(const DDS::DomainId_t id);
+  OPENDDS_STRING get_transport_template_instance_name(DDS::DomainId_t id);
 
-  OPENDDS_STRING get_config_instance_name(const DDS::DomainId_t id);
+  OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -161,9 +161,9 @@ private:
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) transport_info;
   };
 
-  std::vector<TransportTemplate> transport_templates_;
+  OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
-  bool get_transport_template_info(const ACE_TString config_name, TransportTemplate& inst);
+  bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
 
   bool has_transport_template() const;
 };
