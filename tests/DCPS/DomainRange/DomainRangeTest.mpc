@@ -1,7 +1,6 @@
-project: dcpsexe, dcps_test, dcps_transports_for_test {
+project: dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps {
   exename = DomainRangeTest
-  idlflags += -SS
-  TypeSupport_Files {
-    TestMsg.idl
+
+  IDL_FILES {
   }
 }

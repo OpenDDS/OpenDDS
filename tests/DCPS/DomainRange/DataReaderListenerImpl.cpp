@@ -9,8 +9,8 @@
 #include "dds/DCPS/WaitSet.h"
 
 #include "DataReaderListenerImpl.h"
-#include "TestMsgTypeSupportC.h"
-#include "TestMsgTypeSupportImpl.h"
+#include "MessengerTypeSupportC.h"
+#include "MessengerTypeSupportImpl.h"
 
 #include <iostream>
 
@@ -58,8 +58,8 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::DomainId_t domain = reader->get_subscriber()->get_participant()->get_domain_id();
 
-  TestMsgDataReader_var reader_i =
-    TestMsgDataReader::_narrow(reader);
+  Messenger::MessageDataReader_var reader_i =
+    Messenger::MessageDataReader::_narrow(reader);
 
   if (!reader_i) {
     ACE_ERROR((LM_ERROR,
@@ -68,14 +68,14 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ACE_OS::exit(EXIT_FAILURE);
   }
 
-  TestMsg message;
+  Messenger::Message message;
   DDS::SampleInfo info;
 
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
 
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Domain: %d. %C has received message: %d from %C\n", domain, id_.c_str(), message.value, std::string(message.from).c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Domain: %d. %C has received message: %d from %C\n", domain, id_.c_str(), message.count, std::string(message.from).c_str()));
 
       if (++received_samples_ == expected_samples_) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C has received expected number of samples\n", id_.c_str()));

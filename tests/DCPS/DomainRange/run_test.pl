@@ -10,6 +10,8 @@ use PerlDDS::Run_Test;
 use strict;
 use warnings;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $result = 0;
 my $dcps_debug_lvl = 1;
 

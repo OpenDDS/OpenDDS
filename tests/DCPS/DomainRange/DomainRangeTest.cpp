@@ -1,4 +1,4 @@
-#include "TestMsgTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "DataReaderListenerImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -45,8 +45,8 @@ public:
   {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) WriterTask::svc - starting for writer_id: %C\n", writer_id_.c_str()));
 
-    TestMsgDataWriter_var message_writer =
-      TestMsgDataWriter::_narrow(writer_);
+    Messenger::MessageDataWriter_var message_writer =
+      Messenger::MessageDataWriter::_narrow(writer_);
 
     if (!message_writer) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -89,12 +89,15 @@ public:
     ws->detach_condition(condition);
 
     // Write samples
-    TestMsg message;
+    Messenger::Message message;
     message.from = writer_id_.c_str();
-    message.value = 0;
+    message.subject = "Test Message";
+    message.subject_id = 1;
+    message.text = "Testing...";
+    message.count = 0;
     for (int i = 0; i < MSGS_PER_WRITER; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
-      ++message.value;
+      ++message.count;
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
@@ -184,8 +187,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Register TypeSupport
-    TestMsgTypeSupport_var ts =
-      new TestMsgTypeSupportImpl;
+    Messenger::MessageTypeSupport_var ts =
+      new Messenger::MessageTypeSupportImpl();
 
     if (ts->register_type(participant_reading, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -226,8 +229,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipant_var pub_side_participant = participant_reading;
 
     // Register TypeSupport
-    TestMsgTypeSupport_var dw_ts =
-      new TestMsgTypeSupportImpl;
+    Messenger::MessageTypeSupport_var dw_ts =
+      new Messenger::MessageTypeSupportImpl();
+
 
     if (dw_ts->register_type(pub_side_participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -318,8 +322,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" create_datareader failed!\n")), -1);
     }
 
-    TestMsgDataReader_var reader_i =
-      TestMsgDataReader::_narrow(reader);
+    Messenger::MessageDataReader_var reader_i =
+      Messenger::MessageDataReader::_narrow(reader);
 
     if (!reader_i) {
       ACE_ERROR_RETURN((LM_ERROR,
