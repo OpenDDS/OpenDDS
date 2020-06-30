@@ -1473,7 +1473,7 @@ Service_Participant::load_configuration(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
     if (config) {
       TransportRegistry::instance()->global_config(config);
-    } else if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
+    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_)) {
       if (DCPS_debug_level > 0) {
         // This is not an error.
         ACE_DEBUG((LM_NOTICE,
@@ -2062,9 +2062,9 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 
 int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainId)
 {
-  OpenDDS::DCPS::Discovery::RepoKey name = get_discovery_template_instance_name(domainId);
+  Discovery::RepoKey name = get_discovery_template_instance_name(domainId);
 
-  if (this->discoveryMap_.find(name) == this->discoveryMap_.end()) {
+  if (discoveryMap_.find(name) == discoveryMap_.end()) {
     // create a cf that has [rtps_discovery/name+domainId]
     // copy sections adding customization
     DomainRange dr_inst;
@@ -2216,8 +2216,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 
 int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
 {
-  if (has_domain_range())
-  {
+  if (has_domain_range()) {
     // open the rtps_discovery config sections
     cf.open();
     const ACE_Configuration_Section_Key& root = cf.root_section();
@@ -2245,8 +2244,7 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
 
       // copy the discovery information to the domain_range struct
       for (std::vector<DomainRange>::iterator dr_it = domain_ranges_.begin();
-         dr_it != domain_ranges_.end(); ++dr_it)
-      {
+         dr_it != domain_ranges_.end(); ++dr_it) {
         // Loop through the [rtps_discovery/*] sections looking for template
         for (KeyList::const_iterator disc_it = keys.begin(); disc_it != keys.end(); ++disc_it) {
           if (dr_it->discovery_template_name == disc_it->first) {
@@ -2259,7 +2257,6 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
 
             ValueMap values;
             if (pullValues(cf, disc_it->second, values) > 0) {
-
               for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
                 dr_it->disc_info[it->first] = it->second;
               }
@@ -2274,7 +2271,7 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
   return 0;
 }
 
-int Service_Participant::parse_domain_range(const OPENDDS_STRING range, int& start, int& end) {
+int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& start, int& end) {
   std::size_t dash_pos = range.find("-", 0);
 
   if (dash_pos == std::string::npos || dash_pos == range.length() - 1) {
@@ -2338,8 +2335,7 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
   bool ret = false;
   if (has_domain_range()) {
     for (std::vector<DomainRange>::iterator it = domain_ranges_.begin();
-         it != domain_ranges_.end(); ++it)
-    {
+         it != domain_ranges_.end(); ++it) {
       if (id >= it->range_start && id <= it->range_end) {
         inst.range_start = it->range_start;
         inst.range_end = it->range_end;
@@ -2364,7 +2360,7 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
   return ret;
 }
 
-OpenDDS::DCPS::Discovery::RepoKey
+Discovery::RepoKey
 Service_Participant::get_discovery_template_instance_name(const DDS::DomainId_t id)
 {
   OpenDDS::DCPS::Discovery::RepoKey configured_name = RTPS_TEMPLATE_INSTANCE_PREFIX;
