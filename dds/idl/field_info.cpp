@@ -19,13 +19,15 @@ bool FieldInfo::EleLen::Cmp::operator()(const EleLen& a, const EleLen& b) const
   return a.ele_ != b.ele_ || a.len_ != b.len_;
 }
 
+const std::string FieldInfo::scope_op = "::";
+
 std::string FieldInfo::get_type_name(AST_Type& field)
 {
   std::string n = scoped(field.name());
   if (!field.anonymous()) {
     return n;
   }
-  n = n.substr(0, n.find("::") + 2) + "_" + field.local_name()->get_string();
+  n = n.substr(0, n.rfind(scope_op) + 2) + "_" + field.local_name()->get_string();
   return (field.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
 }
 
@@ -56,18 +58,21 @@ void FieldInfo::init()
   as_act_ = as_base_ ? resolveActualType(as_base_) : 0;
   as_cls_ = as_act_ ? classify(as_act_) : CL_UNKNOWN;
 
-  if (!name_.empty()) {
+  if (type_->anonymous() && as_base_) {
     scoped_type_ = scoped(type_->name());
-    std::size_t i = scoped_type_.find("::");
+    std::size_t i = scoped_type_.rfind(scope_op);
     struct_name_ = scoped_type_.substr(0, i);
-    if (as_base_) {
+    if (!name_.empty()) {
       type_name_ = "_" + name_;
       if (seq_) { type_name_ += "_seq"; }
       scoped_type_ = struct_name_ + "::" + type_name_;
     } else {
       type_name_ = scoped_type_.substr(i + 2);
     }
-  } else if (!scoped_type_.empty()) {
+  } else {
+    if (scoped_type_.empty()) {
+      scoped_type_ = scoped(type_->name());
+    }
     //name_
     type_name_ = scoped_type_;
     //struct_name_

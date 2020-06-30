@@ -23,6 +23,7 @@ struct FieldInfo {
   };
   typedef std::set<EleLen, EleLen::Cmp> EleLenSet;
 
+  static const std::string scope_op;
   static std::string get_type_name(AST_Type& field);
   static std::string string_type(AstTypeClassification::Classification c);
   static std::string to_cxx_type(AST_Type* type, std::size_t& size);
