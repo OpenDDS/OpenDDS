@@ -77,7 +77,8 @@ struct Permissions : DCPS::RcObject {
 
   int load(const SSL::SignedDocument& doc);
 
-  bool find_grant(const SSL::SubjectName& name, Grant_rch* found = 0) const;
+  bool has_grant(const SSL::SubjectName& name) const;
+  Grant_rch find_grant(const SSL::SubjectName& name) const;
 
   Grants grants_;
   DDS::Security::PermissionsToken perm_token_;

@@ -246,17 +246,24 @@ int Permissions::load(const SSL::SignedDocument& doc)
   return 0;
 }
 
-bool Permissions::find_grant(const SSL::SubjectName& name, Grant_rch* found) const
+bool Permissions::has_grant(const SSL::SubjectName& name) const
 {
   for (Grants::const_iterator it = grants_.begin(); it != grants_.end(); ++it) {
     if (name == (*it)->subject) {
-      if (found) {
-        *found = *it;
-      }
       return true;
     }
   }
   return false;
+}
+
+Permissions::Grant_rch Permissions::find_grant(const SSL::SubjectName& name) const
+{
+  for (Grants::const_iterator it = grants_.begin(); it != grants_.end(); ++it) {
+    if (name == (*it)->subject) {
+      return *it;
+    }
+  }
+  return Grant_rch();
 }
 
 namespace {

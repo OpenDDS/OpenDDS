@@ -128,7 +128,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   OpenDDS::Security::SSL::SubjectName sn_id;
 
-  if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->find_grant(sn_id)) {
+  if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->has_grant(sn_id)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: No permissions subject name matches identity subject name");
     return DDS::HANDLE_NIL;
   }
@@ -251,7 +251,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   SSL::SubjectName sn_id_remote;
 
-  if (remote_identity_sn.empty() || sn_id_remote.parse(remote_identity_sn) != 0 || !remote_permissions->find_grant(sn_id_remote)) {
+  if (remote_identity_sn.empty() || sn_id_remote.parse(remote_identity_sn) != 0 || !remote_permissions->has_grant(sn_id_remote)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: "
                                         "Remote identity subject name does not match any subject name in remote permissions grants");
     return DDS::HANDLE_NIL;
@@ -388,8 +388,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant not found");
   }
 
@@ -456,8 +456,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
   }
 
@@ -527,8 +527,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: grant not found");
   }
 
@@ -676,8 +676,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID major versions do not match");
   }
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Permissions grant not found");
   }
 
@@ -734,8 +734,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant not found");
   }
 
@@ -797,8 +797,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant not found");
   }
 
@@ -901,8 +901,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  Permissions::Grant_rch grant;
-  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+  const Permissions::Grant_rch grant = ac_iter->second.perm->find_grant(ac_iter->second.subject);
+  if (!grant) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: grant not found");
   }
 
@@ -1377,7 +1377,7 @@ bool AccessControlBuiltInImpl::validate_date_time(
   const time_t before_time = convert_permissions_time(validity.not_before);
 
   if (before_time == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_before time is invalid.");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions not_before time is invalid.");
     return false;
   }
 
@@ -1386,19 +1386,19 @@ bool AccessControlBuiltInImpl::validate_date_time(
   cur_utc_time = mktime(current_time_tm);
 
   if (cur_utc_time < before_time) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant hasn't started yet.");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions grant hasn't started yet.");
     return false;
   }
 
   after_time = convert_permissions_time(validity.not_after);
 
   if (after_time == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_after time is invalid.");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions not_after time is invalid.");
     return false;
   }
 
   if (cur_utc_time > after_time) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant has expired.");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions grant has expired.");
     return false;
   }
 
