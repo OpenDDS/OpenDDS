@@ -65,7 +65,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("ERROR: %N:%l: on_data_available() -")
                ACE_TEXT(" _narrow failed!\n")));
-    ACE_OS::exit(-1);
+    ACE_OS::exit(EXIT_FAILURE);
   }
 
   TestMsg message;

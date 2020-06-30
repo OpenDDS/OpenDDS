@@ -1478,14 +1478,14 @@ Service_Participant::load_configuration(
         // This is not an error.
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
-                   ACE_TEXT("DCPSGlobalTransportConfig %s is a transport_template\n"),
-                   ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str())));
+                   ACE_TEXT("DCPSGlobalTransportConfig %C is a transport_template\n"),
+                   this->global_transport_config_));
       }
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                        ACE_TEXT("Unable to locate specified global transport config: %s\n"),
-                        ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str())),
+                        ACE_TEXT("Unable to locate specified global transport config: %C\n"),
+                        this->global_transport_config_),
                        -1);
     }
   }
@@ -1974,23 +1974,23 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
     // Ensure there are no properties in this section
     ValueMap vm;
     if (pullValues(cf, domain_range_sect, vm) > 0) {
-      // There are values inside [domain]
+      // There are values inside [DomainRange]
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                        ACE_TEXT("domain sections must have a subsection name\n")),
+                        ACE_TEXT("[DomainRange] sections must have a subsection range\n")),
                        -1);
     }
 
-    // Process the subsections of this section (the individual domains)
+    // Process the subsections of this section (the ranges, m-n)
     KeyList keys;
     if (processSections(cf, domain_range_sect, keys) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [domainRange] section.\n")),
+                        ACE_TEXT("too many nesting layers in the [DomainRange] section.\n")),
                        -1);
     }
 
-    // Loop through the [domainRange/*] sections
+    // Loop through the [DomainRange/*] sections
     for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
       OPENDDS_STRING domain_range = it->first;
 
@@ -2012,46 +2012,46 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 
       ValueMap values;
       if (pullValues(cf, it->second, values) > 0) {
-      OPENDDS_STRING dt_name;
-      OPENDDS_STRING customization;
+        OPENDDS_STRING dt_name;
+        OPENDDS_STRING customization;
 
-      for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-        OPENDDS_STRING name = it->first;
-        if (name == "DiscoveryTemplate") {
-          dt_name = it->second;
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [DomainRange/%C]: DiscoveryTemplate name == %C\n"),
-                       domain_range.c_str(), dt_name.c_str()));
+        for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+          OPENDDS_STRING name = it->first;
+          if (name == "DiscoveryTemplate") {
+            dt_name = it->second;
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) [DomainRange/%C]: DiscoveryTemplate name == %C\n"),
+                         domain_range.c_str(), dt_name.c_str()));
+            }
+            range_element.discovery_template_name = dt_name;
+          } else if (name.find("DiscoveryCustomization") != std::string::npos) {
+            customization = it->second;
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) [DomainRange/%C]: DiscoveryCustomization == %C\n"),
+                         domain_range.c_str(), customization.c_str()));
+            }
+            // split customization string
+            std::size_t pos = customization.find(":", 0);
+
+            if (pos == std::string::npos || pos == customization.length() - 1) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
+                                    ACE_TEXT("DiscoveryCustomization %C missing ':' in [DomainRange/%C] section.\n"),
+                                customization.c_str(), domain_range.c_str()),
+                               -1);
+            }
+
+            OPENDDS_STRING key = customization.substr(0, pos);
+            OPENDDS_STRING val = customization.substr(pos + 1);
+
+            range_element.customizations[key] = val;
+          } else {
+            // key=val domain config option
+            range_element.domain_info[it->first] = it->second;
           }
-          range_element.discovery_template_name = dt_name;
-        } else if (name.find("DiscoveryCustomization") != std::string::npos) {
-          customization = it->second;
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [DomainRange/%C]: DiscoveryCustomization == %C\n"),
-                       domain_range.c_str(), customization.c_str()));
-          }
-          // split customization string
-          std::size_t pos = customization.find(":", 0);
-
-          if (pos == std::string::npos || pos == customization.length() - 1) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                              ACE_TEXT("DiscoveryCustomization %C missing ':' in [DomainRange/%C] section.\n"),
-                              customization.c_str(), domain_range.c_str()),
-                              -1);
-          }
-
-          OPENDDS_STRING key = customization.substr(0, pos);
-          OPENDDS_STRING val = customization.substr(pos + 1);
-
-          range_element.customizations[key] = val;
-        } else {
-          // key=val domain config option
-          range_element.domain_info[it->first] = it->second;
         }
-      }
       }
       domain_ranges_.push_back(range_element);
     }
