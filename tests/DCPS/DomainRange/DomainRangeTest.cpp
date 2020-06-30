@@ -11,6 +11,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -167,8 +168,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   {
     DDS::DomainId_t domain = *it;
 
-    reader_id = "reader " + std::to_string(domain);
-    writer_id = "writer " + std::to_string(domain);
+    reader_id = "reader " + to_dds_string(domain);
+    writer_id = "writer " + to_dds_string(domain);
 
     // Create DomainParticipant
     DDS::DomainParticipantQos dr_dp_qos;

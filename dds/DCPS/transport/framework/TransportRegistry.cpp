@@ -637,7 +637,7 @@ OPENDDS_STRING
 TransportRegistry::get_transport_template_instance_name(const DDS::DomainId_t id)
 {
   OpenDDS::DCPS::Discovery::RepoKey configured_name = TRANSPORT_TEMPLATE_INSTANCE_PREFIX;
-  configured_name += std::to_string(id);
+  configured_name += to_dds_string(id);
   return configured_name;
 }
 
@@ -645,7 +645,7 @@ OPENDDS_STRING
 TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
 {
   OpenDDS::DCPS::Discovery::RepoKey configured_name = CONFIG_INSTANCE_PREFIX;
-  configured_name += std::to_string(id);
+  configured_name += to_dds_string(id);
   return configured_name;
 }
 
@@ -696,7 +696,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
               }
               int val = std::stoi(custom) + domain;
               addr = addr.substr(0, pos);
-              addr += "." + std::to_string(val);
+              addr += "." + to_dds_string(val);
               addr += port;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
@@ -717,7 +717,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
               const uint16_t DG = 250;
               const uint16_t D2 = 1;
               int rtpsPort = PB + DG * domain + D2;
-              addr += ":" + std::to_string(rtpsPort);
+              addr += ":" + to_dds_string(rtpsPort);
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -743,7 +743,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
       }
 
       // load transport
-      int status = this->load_transport_configuration("transport_config_" + std::to_string(domain), tcf);
+      int status = this->load_transport_configuration("transport_config_" + to_dds_string(domain), tcf);
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,

@@ -2078,7 +2078,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       ACE_Configuration_Section_Key dsect;
       dcf.open_section(root, "domain", 1 /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, std::to_string(domainId).c_str(), 1 /* create */, dsub_sect);
+      dcf.open_section(dsect, to_dds_string(domainId).c_str(), 1 /* create */, dsub_sect);
       dcf.set_string_value(dsub_sect, "DiscoveryConfig", name.c_str());
       for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = dr_inst.domain_info.begin();
            it != dr_inst.domain_info.end();
@@ -2113,7 +2113,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
               OPENDDS_STRING custom = addr.substr(pos + 1);
               int val = std::stoi(custom) + domainId;
               addr = addr.substr(0, pos);
-              addr += "." + std::to_string(val);
+              addr += "." + to_dds_string(val);
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -2200,6 +2200,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 
     if (iter != this->discovery_types_.end()) {
       // discovery code is loaded, process options
+      // --cj this object
       return iter->second->discovery_config(cf);
     } else {
       // No discovery code can be loaded, report an error
@@ -2361,7 +2362,7 @@ Discovery::RepoKey
 Service_Participant::get_discovery_template_instance_name(const DDS::DomainId_t id)
 {
   OpenDDS::DCPS::Discovery::RepoKey configured_name = RTPS_TEMPLATE_INSTANCE_PREFIX;
-  configured_name += std::to_string(id);
+  configured_name += to_dds_string(id);
   return configured_name;
 }
 
