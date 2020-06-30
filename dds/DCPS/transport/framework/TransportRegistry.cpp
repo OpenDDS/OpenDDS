@@ -683,20 +683,46 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
         // customization.
         OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator idx = tr_inst.customizations.find(it->first);
         if (idx != tr_inst.customizations.end()) {
-          // only AddDomainID is supported at this time.
-          if (idx->second == "AddDomainId") {
+          // only add_domain_id_to_ip_addr and add_domain_id_to_port are supported at this time.
+          if (idx->second == "add_domain_id_to_ip_addr") {
             OPENDDS_STRING addr = it->second;
             size_t pos = addr.find_last_of(".");
             if (pos != OPENDDS_STRING::npos) {
               OPENDDS_STRING custom = addr.substr(pos + 1);
+              size_t cpos = custom.find(":");
+              OPENDDS_STRING port= "";
+              if (cpos != OPENDDS_STRING::npos) {
+                port = custom.substr(cpos);
+              }
               int val = std::stoi(custom) + domain;
               addr = addr.substr(0, pos);
               addr += "." + std::to_string(val);
+              addr += port;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range_instance ")
-                        ACE_TEXT("could not AddDomainId for %s\n"),
+                        ACE_TEXT("create_transport_template_instance ")
+                        ACE_TEXT("could not add_domain_id_to_ip_addr for address %s\n"),
+                        idx->second.c_str()),
+                       -1);
+            }
+
+            tcf.set_string_value(tsub_sect, idx->first.c_str(), addr.c_str());
+          } else if (idx->second == "add_domain_id_to_port") {
+            OPENDDS_STRING addr = it->second;
+            size_t pos = addr.find_last_of(":");
+            if (pos == OPENDDS_STRING::npos) {
+              // See 9.6.1.3 in the RTPS 2.2 protocol specification.
+              const uint16_t PB = 7400;
+              const uint16_t DG = 250;
+              const uint16_t D2 = 1;
+              int rtpsPort = PB + DG * domain + D2;
+              addr += ":" + std::to_string(rtpsPort);
+            } else {
+              ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                        ACE_TEXT("create_transport_template_instance ")
+                        ACE_TEXT("could not add_domain_id_to_port for %s since port exists.\n"),
                         idx->second.c_str()),
                        -1);
             }
