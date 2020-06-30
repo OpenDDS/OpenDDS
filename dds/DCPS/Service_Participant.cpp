@@ -2332,7 +2332,6 @@ Service_Participant::has_domain_range() const
 
 bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)
 {
-  bool ret = false;
   if (has_domain_range()) {
     for (std::vector<DomainRange>::iterator it = domain_ranges_.begin();
          it != domain_ranges_.end(); ++it) {
@@ -2344,8 +2343,6 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
         inst.disc_info = it->disc_info;
         inst.domain_info = it->domain_info;
 
-        ret = true;
-
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
@@ -2353,11 +2350,11 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
                      id, it->range_start, it->range_end));
         }
 
-        break;
+        return true;
       }
     }
   }
-  return ret;
+  return false;
 }
 
 Discovery::RepoKey
