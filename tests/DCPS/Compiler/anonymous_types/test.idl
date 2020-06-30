@@ -22,6 +22,8 @@ typedef struct XYZ_ {
   double z;
 } XYZ;
 
+typedef sequence<XYZ> XYZSequence;
+
 @topic
 struct TestStruct {
   char  c;
@@ -37,6 +39,7 @@ struct TestStruct {
   LongSequence lseq;
   Long3Sequence l3seq;
   BoundedString bstr;
+  XYZSequence xyzseq;
 
   // prefix a_ denotes anonymous type fields
 
@@ -51,4 +54,57 @@ struct TestStruct {
   sequence<long, 3> a_l3seq_2nd;
   sequence<long, 5> a_l5seq;
   string<200> a_bstr;
+  sequence<XYZ> a_xyzseq;
 };
+
+// ========== ========== ========== ========== ==========
+//from Relay.idl
+#include "dds/DdsDcpsCore.idl"
+
+module RtpsRelay {
+  typedef octet GuidPrefix_t[12]; //GUID prefix bytes - uniquely specify the participant
+  typedef octet EntityKey_t[3];   //Key portion of Entity identifier
+
+  struct EntityId_t { //Uniquely identify each entity within a participant
+    @key EntityKey_t entityKey;
+    @key octet entityKind;
+  };
+
+  struct GUID_t {
+    @key GuidPrefix_t guidPrefix;
+    @key EntityId_t entityId;
+  };
+
+  @topic
+  struct WriterEntry {
+    @key GUID_t guid;
+    string topic_name;
+    string type_name;
+    DDS::DataWriterQos data_writer_qos;
+    DDS::PublisherQos publisher_qos;
+  };
+
+  @topic
+  struct ReaderEntry {
+    @key GUID_t guid;
+    string topic_name;
+    string type_name;
+    DDS::DataReaderQos data_reader_qos;
+    DDS::SubscriberQos subscriber_qos;
+  };
+
+  @topic
+  struct GuidNameAddress {
+    @key GUID_t guid;
+    @key string name;
+    string address;
+  };
+
+  typedef sequence<GUID_t> GuidSequence;
+
+  struct RelayHeader {
+    GuidSequence to;
+  };
+//...
+};
+// ========== ========== ========== ========== ==========

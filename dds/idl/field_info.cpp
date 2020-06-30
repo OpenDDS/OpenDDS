@@ -31,20 +31,26 @@ std::string FieldInfo::get_type_name(AST_Type& field)
   return (field.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
 }
 
+std::string FieldInfo::underscored_type_name(UTL_ScopedName* sn)
+{
+  const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
+  return use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
+}
+
 // for anonymous types
 FieldInfo::FieldInfo(AST_Field& field) :
   type_(field.field_type()),
-  name_(field.local_name()->get_string())
+  name_(field.local_name()->get_string()),
+  underscored_(underscored_type_name(type_->name()))
 {
   init();
 }
 
 FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
   type_(base),
+  underscored_(underscored_type_name(sn)),
   scoped_type_(scoped(sn))
 {
-  const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
-  underscored_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
   init();
 }
 
@@ -66,6 +72,7 @@ void FieldInfo::init()
       type_name_ = "_" + name_;
       if (seq_) { type_name_ += "_seq"; }
       scoped_type_ = struct_name_ + "::" + type_name_;
+      set_underscored(scoped_type_);
     } else {
       type_name_ = scoped_type_.substr(i + 2);
     }
@@ -137,6 +144,15 @@ void FieldInfo::set_element()
       }
     }
     elem_ = scoped(as_act_->name());
+  }
+}
+
+void FieldInfo::set_underscored(const std::string& scoped_type)
+{
+  underscored_ = scoped_type;
+  for (std::size_t i = underscored_.find(scope_op); i != underscored_.npos;
+       i = underscored_.find(scope_op, i + 2)) {
+    underscored_.replace(i, 2, "_");
   }
 }
 
