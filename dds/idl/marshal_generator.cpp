@@ -661,6 +661,9 @@ namespace {
     const string check_empty = use_cxx11 ? "seq.empty()" : "seq.length() == 0";
     const string get_length = use_cxx11 ? "static_cast<uint32_t>(seq.size())" : "seq.length()";
     const string get_buffer = use_cxx11 ? "seq.data()" : "seq.get_buffer()";
+    if(use_cxx11) {
+      be_global->header_ << "struct " << sf.underscored_ << "_tag {};\n\n";
+    }
 
     {
       Function find_size("gen_find_size", "void");
@@ -1063,6 +1066,9 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     if (!af.as_act_->in_main_file() && af.as_act_->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(af.as_act_->file_name().c_str());
+    }
+    if(use_cxx11) {
+      be_global->header_ << "struct " << af.underscored_ << "_tag {};\n\n";
     }
 
     {

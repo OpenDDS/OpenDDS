@@ -102,7 +102,6 @@ void FieldInfo::init()
   }
 
   if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-    be_global->header_ << "struct " << underscored_ << "_tag {};\n\n";
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";
     const_unwrap_ = "  const " + unwrap_;
     unwrap_ = "  " + unwrap_;
