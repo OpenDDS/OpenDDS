@@ -339,8 +339,8 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 TAO_END_VERSIONED_NAMESPACE_DECL
 
 
-#if defined (__ACE_INLINE__)
-#include "i3C.inl"
-#endif /* defined INLINE */
+//#if defined (__ACE_INLINE__)
+//#include "i3C.inl"
+//#endif /* defined INLINE */
 
 #endif /* ifndef _TYPE_LOOKUP_GET_DEPENDENCIES_IN_H_ */

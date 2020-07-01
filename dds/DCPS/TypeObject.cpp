@@ -2865,43 +2865,45 @@ struct MetaStructImpl<XTypes::TypeIdentifier> : MetaStruct {
     //if (std::strcmp(field, "count") == 0) {
     //  return typed.count;
     //}
-    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    //throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    return 0;
   }
 
   Value getValue(Serializer& ser, const char* field) const
   {
-    if (std::strcmp(field, "from") == 0) {
-      TAO::String_Manager val;
-      if (!(ser >> val.out())) {
-        throw std::runtime_error("Field 'from' could not be deserialized");
-      }
-      return val;
-    }
-    else {
-      ACE_CDR::ULong len;
-      if (!(ser >> len)) {
-        throw std::runtime_error("String 'from' length could not be deserialized");
-      }
-      if (!ser.skip(static_cast<ACE_UINT16>(len))) {
-        throw std::runtime_error("String 'from' contents could not be skipped");
-      }
-    }
-    if (std::strcmp(field, "count") == 0) {
-      ACE_CDR::Long val;
-      if (!(ser >> val)) {
-        throw std::runtime_error("Field 'count' could not be deserialized");
-      }
-      return val;
-    }
-    else {
-      if (!ser.skip(1, 4)) {
-        throw std::runtime_error("Field 'count' could not be skipped");
-      }
-    }
-    if (!field[0]) {
-      return 0;
-    }
-    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not valid for struct XTypes::TypeIdentifier");
+    //if (std::strcmp(field, "from") == 0) {
+    //  TAO::String_Manager val;
+    //  if (!(ser >> val.out())) {
+    //    throw std::runtime_error("Field 'from' could not be deserialized");
+    //  }
+    //  return val;
+    //}
+    //else {
+    //  ACE_CDR::ULong len;
+    //  if (!(ser >> len)) {
+    //    throw std::runtime_error("String 'from' length could not be deserialized");
+    //  }
+    //  if (!ser.skip(static_cast<ACE_UINT16>(len))) {
+    //    throw std::runtime_error("String 'from' contents could not be skipped");
+    //  }
+    //}
+    //if (std::strcmp(field, "count") == 0) {
+    //  ACE_CDR::Long val;
+    //  if (!(ser >> val)) {
+    //    throw std::runtime_error("Field 'count' could not be deserialized");
+    //  }
+    //  return val;
+    //}
+    //else {
+    //  if (!ser.skip(1, 4)) {
+    //    throw std::runtime_error("Field 'count' could not be skipped");
+    //  }
+    //}
+    //if (!field[0]) {
+    //  return 0;
+    //}
+    //throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not valid for struct XTypes::TypeIdentifier");
+    return 0;
   }
 
   ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
@@ -2913,7 +2915,8 @@ struct MetaStructImpl<XTypes::TypeIdentifier> : MetaStruct {
     //if (std::strcmp(field, "count") == 0) {
     //  return make_field_cmp(&T::count, next);
     //}
-    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    //throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    return *(new OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::ComparatorBase>);
   }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
@@ -2931,7 +2934,8 @@ struct MetaStructImpl<XTypes::TypeIdentifier> : MetaStruct {
     //if (std::strcmp(field, "count") == 0) {
     //  return &static_cast<const T*>(stru)->count;
     //}
-    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    //throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    return 0;
   }
 
   void assign(void* lhs, const char* field, const void* rhs,
@@ -2950,7 +2954,8 @@ struct MetaStructImpl<XTypes::TypeIdentifier> : MetaStruct {
     //  static_cast<T*>(lhs)->count = *static_cast<const CORBA::Long*>(rhsMeta.getRawField(rhs, rhsFieldSpec));
     //  return;
     //}
-    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    //throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    return;
   }
 #endif /* OPENDDS_NO_MULTI_TOPIC */
 
@@ -2965,7 +2970,8 @@ struct MetaStructImpl<XTypes::TypeIdentifier> : MetaStruct {
     //if (std::strcmp(field, "count") == 0) {
     //  return static_cast<const T*>(lhs)->count == static_cast<const T*>(rhs)->count;
     //}
-    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    //throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+    return false;
   }
 };
 
