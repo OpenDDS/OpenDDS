@@ -109,10 +109,10 @@ jobs:
   strategy:
     matrix:
       Debug:
-        ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
+        ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
         TEST_MESSENGER: true
       Release:
-        ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
+        ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
         DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
