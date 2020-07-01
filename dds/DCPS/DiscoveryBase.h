@@ -897,6 +897,7 @@ namespace OpenDDS {
         const DDS::DataWriterQos* dwQos = 0;
         const DDS::PublisherQos* pubQos = 0;
         TransportLocatorSeq* wTls = 0;
+        XTypes::TypeInformation* writer_type_info = 0;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
         DiscoveredPublicationIter dpi;
@@ -907,9 +908,11 @@ namespace OpenDDS {
           pubQos = &lpi->second.publisher_qos_;
           wTls = &lpi->second.trans_info_;
           already_matched = lpi->second.matched_endpoints_.count(reader);
+          writer_type_info = &lpi->second.type_info_;
         } else if ((dpi = discovered_publications_.find(writer))
                    != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
+          writer_type_info = &dpi->second.type_info_;
         } else {
           return; // Possible and ok, since lock is released
         }
@@ -919,6 +922,7 @@ namespace OpenDDS {
         const DDS::SubscriberQos* subQos = 0;
         TransportLocatorSeq* rTls = 0;
         const ContentFilterProperty_t* cfProp = 0;
+        XTypes::TypeInformation* reader_type_info = 0;
 
         const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
         DiscoveredSubscriptionIter dsi;
@@ -928,6 +932,7 @@ namespace OpenDDS {
           drQos = &lsi->second.qos_;
           subQos = &lsi->second.subscriber_qos_;
           rTls = &lsi->second.trans_info_;
+          reader_type_info = &lsi->second.type_info_;
           if (lsi->second.filterProperties.filterExpression[0] != 0) {
             tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
             tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
@@ -971,6 +976,7 @@ namespace OpenDDS {
             TheServiceParticipant->initial_EntityFactoryQosPolicy();
           subQos = &tempSubQos;
           cfProp = &dsi->second.reader_data_.contentFilterProperty;
+          reader_type_info = &dsi->second.type_info_;
         } else {
           return; // Possible and ok, since lock is released
         }
@@ -1137,12 +1143,16 @@ namespace OpenDDS {
           ra.filterClassName = cfProp->filterClassName;
           ra.filterExpression = cfProp->filterExpression;
           ra.exprParams = cfProp->expressionParameters;
+          XTypes::serialize_type_info(reader_type_info, ra.serializedTypeInfo);
           WriterAssociation wa;
           wa.writerTransInfo = *wTls;
           wa.writerId = writer;
           wa.pubQos = *pubQos;
           wa.writerQos = *dwQos;
+          XTypes::serialize_type_info(writer_type_info, wa.serializedTypeInfo);
 #else
+          DDS::OctetSeq octet_seq_type_info_reader;
+          XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
           const ReaderAssociation ra =
             {add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1150,10 +1160,12 @@ namespace OpenDDS {
 #else
              "", "",
 #endif
-             cfProp->expressionParameters};
+             cfProp->expressionParameters, octet_seq_type_info_reader};
 
+          DDS::OctetSeq octet_seq_type_info_writer;
+          XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
           const WriterAssociation wa =
-            {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos};
+            {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos, octet_seq_type_info_writer};
 #endif
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
