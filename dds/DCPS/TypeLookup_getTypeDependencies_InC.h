@@ -36,7 +36,7 @@ namespace XTypes
 #if !defined (_XTYPES_TYPEIDENTIFIERSEQ_CH_)
 #define _XTYPES_TYPEIDENTIFIERSEQ_CH_
 
-  //class TypeIdentifierSeq;
+  class TypeIdentifierSeq;
 
   typedef
     ::TAO_VarSeq_Var_T<
@@ -50,33 +50,35 @@ namespace XTypes
       >
     TypeIdentifierSeq_out;
 
-//  class  TypeIdentifierSeq
-//    : public
-//        ::TAO::unbounded_value_sequence<
-//            TypeIdentifier
-//          >
-//  {
-//  public:
-//    TypeIdentifierSeq (void);
-//    TypeIdentifierSeq ( ::CORBA::ULong max);
-//    TypeIdentifierSeq (
-//      ::CORBA::ULong max,
-//      ::CORBA::ULong length,
-//      TypeIdentifier* buffer,
-//      ::CORBA::Boolean release = false);
-//#if defined (ACE_HAS_CPP11)
-//    TypeIdentifierSeq (const TypeIdentifierSeq &) = default;
-//    TypeIdentifierSeq (TypeIdentifierSeq &&) = default;
-//    TypeIdentifierSeq& operator= (const TypeIdentifierSeq &) = default;
-//    TypeIdentifierSeq& operator= (TypeIdentifierSeq &&) = default;
-//#endif /* ACE_HAS_CPP11 */
-//    virtual ~TypeIdentifierSeq (void);
-//    
-//    typedef TypeIdentifierSeq_var _var_type;
-//    typedef TypeIdentifierSeq_out _out_type;
-//
-//    static void _tao_any_destructor (void *);
-//  };
+  class  TypeIdentifierSeq
+    : public
+        ::TAO::unbounded_value_sequence<
+            TypeIdentifier
+          >
+  {
+  public:
+    TypeIdentifierSeq(void) {}
+    // TODO: is implementation needed (from *C.cpp)?
+    //TypeIdentifierSeq ( ::CORBA::ULong max);
+    //TypeIdentifierSeq (
+    //  ::CORBA::ULong max,
+    //  ::CORBA::ULong length,
+    //  TypeIdentifier* buffer,
+    //  ::CORBA::Boolean release = false);
+#if defined (ACE_HAS_CPP11)
+    TypeIdentifierSeq (const TypeIdentifierSeq &) = default;
+    TypeIdentifierSeq (TypeIdentifierSeq &&) = default;
+    TypeIdentifierSeq& operator= (const TypeIdentifierSeq &) = default;
+    TypeIdentifierSeq& operator= (TypeIdentifierSeq &&) = default;
+#endif /* ACE_HAS_CPP11 */
+    virtual ~TypeIdentifierSeq(void) {}
+
+    typedef TypeIdentifierSeq_var _var_type;
+    typedef TypeIdentifierSeq_out _out_type;
+
+    // TODO: is implementation needed (from *C.cpp)?
+    //static void _tao_any_destructor (void *);
+  };
 
 #endif /* end #if !defined */
 
@@ -121,7 +123,7 @@ namespace XTypes
     continuation_point_Seq& operator= (continuation_point_Seq &&) = default;
 #endif /* ACE_HAS_CPP11 */
     virtual ~continuation_point_Seq(void) {}
-    
+
     typedef continuation_point_Seq_var _var_type;
     typedef continuation_point_Seq_out _out_type;
 
@@ -148,12 +150,12 @@ namespace XTypes
     TypeLookup_getTypeDependencies_In_out;
 
   struct  TypeLookup_getTypeDependencies_In
-  {   
+  {
     typedef TypeLookup_getTypeDependencies_In_var _var_type;
     typedef TypeLookup_getTypeDependencies_In_out _out_type;
 
     static void _tao_any_destructor (void *);
-    
+
     XTypes::TypeIdentifierSeq type_ids;
     XTypes::continuation_point_Seq continuation_point;
   };

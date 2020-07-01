@@ -674,7 +674,7 @@ namespace XTypes {
     void reset();
   };
 
-  typedef Sequence<TypeIdentifier> TypeIdentifierSeq;
+  // typedef Sequence<TypeIdentifier> TypeIdentifierSeq;
 
   // --- Annotation usage: -----------------------------------------------
 
