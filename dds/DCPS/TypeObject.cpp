@@ -4,8 +4,11 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "dds/DCPS/Message_Block_Ptr.h"
 
 #include "TypeObject.h"
+
+#include "dds/DdsDcpsCoreC.h"
 
 #include "Hash.h"
 
@@ -56,6 +59,36 @@ TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
   }
 
   return TypeIdentifierPtr();
+}
+
+void
+serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
+{
+  const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
+  DCPS::Message_Block_Ptr data(new ACE_Message_Block(
+    DCPS::serialized_size(encoding, type_info)));
+  DCPS::Serializer serializer(data.get(), encoding);
+  if (!(serializer << type_info)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_publication ")
+              ACE_TEXT("serialization type information failed.\n")));
+  }
+  ssize_t size = data->length();
+  seq.length(size);
+  std::memcpy(seq.get_buffer(), data->rd_ptr(), size);
+}
+
+void
+deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq){
+  ACE_Data_Block db(seq.length(), ACE_Message_Block::MB_DATA,
+                    reinterpret_cast<const char*>(seq.get_buffer()),
+                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+  ACE_Message_Block data_mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  data_mb.wr_ptr(data_mb.space());
+  DCPS::Serializer serializer(&data_mb, XTypes::get_typeobject_encoding());
+  if (!(serializer >> type_info)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_association ")
+              ACE_TEXT("deserialization type information failed.\n")));
+  }
 }
 
 } // namespace XTypes

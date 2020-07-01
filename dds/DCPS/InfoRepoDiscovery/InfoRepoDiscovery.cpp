@@ -620,18 +620,8 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_);
     //turn into a octet seq to pass through generated files
-    const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
-    DCPS::Message_Block_Ptr data(new ACE_Message_Block(
-      DCPS::serialized_size(encoding, type_info)));
-    DCPS::Serializer serializer(data.get(), encoding);
-    if (!(serializer << type_info)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_publication ")
-                ACE_TEXT("serialization type information failed.\n")));
-    }
-    ssize_t size = data->length();
-    DDS::OctetSeq serializedTypeInfo(size);
-    serializedTypeInfo.length(size);
-    std::memcpy(serializedTypeInfo.get_buffer(), data->rd_ptr(), size);
+    DDS::OctetSeq serializedTypeInfo;
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
       dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
@@ -729,18 +719,8 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
     //turn into a octet seq to pass through generated files
-    const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
-    DCPS::Message_Block_Ptr data(new ACE_Message_Block(
-      DCPS::serialized_size(encoding, type_info)));
-    DCPS::Serializer serializer(data.get(), encoding);
-    if (!(serializer << type_info)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_publication ")
-                ACE_TEXT("serialization type information failed.\n")));
-    }
-    ssize_t size = data->length();
-    DDS::OctetSeq serializedTypeInfo(size);
-    serializedTypeInfo.length(size);
-    std::memcpy(serializedTypeInfo.get_buffer(), data->rd_ptr(), size);
+    DDS::OctetSeq serializedTypeInfo;
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,

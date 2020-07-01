@@ -39,7 +39,7 @@ DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
     qos_(qos),
     info_(info),
     publisherQos_(publisherQos),
-    serializedTypeInfo_(serializedTypeInfo_)
+    serializedTypeInfo_(serializedTypeInfo)
 {
   writer_ =  OpenDDS::DCPS::DataWriterRemote::_duplicate(writer);
 

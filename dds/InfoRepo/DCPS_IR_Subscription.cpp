@@ -44,7 +44,7 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
     filterClassName_(filterClassName),
     filterExpression_(filterExpression),
     exprParams_(exprParams),
-    serializedTypeInfo_(serializedTypeInfo_)
+    serializedTypeInfo_(serializedTypeInfo)
 {
   reader_ =  OpenDDS::DCPS::DataReaderRemote::_duplicate(reader);
 

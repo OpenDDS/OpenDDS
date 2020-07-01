@@ -37,34 +37,14 @@ namespace {
   }
 
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info) {
-    ACE_Data_Block db(param.type_information().length(), ACE_Message_Block::MB_DATA,
-                      reinterpret_cast<const char*>(param.type_information().get_buffer()),
-                      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
-    ACE_Message_Block data(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-    data.wr_ptr(data.space());
-    DCPS::Serializer serializer(&data, XTypes::get_typeobject_encoding());
-    if (!(serializer >> type_info)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) extract_type_info_param ")
-                ACE_TEXT("deserialization type information failed.\n")));
-    }
+    XTypes::deserialize_type_info(type_info, param.type_information());
   }
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
     Parameter param;
-    const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
-    DCPS::Message_Block_Ptr data(new ACE_Message_Block(
-      DCPS::serialized_size(encoding, type_info)));
-    DCPS::Serializer serializer(data.get(), encoding);
-    if (!(serializer << type_info)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_type_info_param ")
-                ACE_TEXT("serialization type information failed.\n")));
-    }
-    //copy serialized data into octet sequence
-    ssize_t size = data->length();
-    param.type_information(DDS::OctetSeq(size));
-    param.type_information().length(size);
-    //due to memcpy being a c function the char* needs to be taken out of the message block
-    std::memcpy(param.type_information().get_buffer(), data->rd_ptr(), size);
+    DDS::OctetSeq seq;
+    XTypes::serialize_type_info(type_info, seq);
+    param.type_information(seq);
     //discriminator set to PID_XTYPES... which tells us what is in the discriminating union
     param._d(PID_XTYPES_TYPE_INFORMATION);
     add_param(param_list, param);

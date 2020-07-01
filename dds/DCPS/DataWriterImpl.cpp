@@ -226,19 +226,8 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   //get message block from octet seq then deser to a type info
-  ACE_Data_Block db(reader.serializedTypeInfo.length(), ACE_Message_Block::MB_DATA,
-                    reinterpret_cast<const char*>(reader.serializedTypeInfo.get_buffer()),
-                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
-  ACE_Message_Block data_mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-  data_mb.wr_ptr(data_mb.space());
-  DCPS::Serializer serializer(&data_mb, XTypes::get_typeobject_encoding());
-  XTypes::TypeInformation type_info;
-  if (!(serializer >> type_info)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_association ")
-              ACE_TEXT("deserialization type information failed.\n")));
-  }
-
-  // TODO: CLAYTON Assignability
+  XTypes::TypeInformation ti;
+  XTypes::deserialize_type_info(ti, reader.serializedTypeInfo);
 
   AssociationData data;
   data.remote_id_ = reader.readerId;

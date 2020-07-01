@@ -16,6 +16,10 @@
 #include <string>
 #include <vector>
 
+namespace DDS {
+  class OctetSeq;
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -1569,6 +1573,13 @@ const DCPS::Encoding& get_typeobject_encoding();
 
   OpenDDS_Dcps_Export
   TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
+
+  OpenDDS_Dcps_Export
+  void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq);
+
+  OpenDDS_Dcps_Export
+  void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq);
+
 } // namespace XTypes
 
 namespace DCPS {
