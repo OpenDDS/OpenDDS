@@ -5,6 +5,8 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "dds/DCPS/FilterEvaluator.h"
+
 #include "TypeObject.h"
 
 #include "Hash.h"
@@ -2824,6 +2826,204 @@ template<>
 XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::WChar*>()
 {
   static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(true, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
+  return ti;
+}
+
+///
+//
+// TODO: Functions below are stubs for TypeIdentifier type support
+// Implement
+//
+///
+
+template<>
+struct MetaStructImpl<XTypes::TypeIdentifier> : MetaStruct {
+  typedef XTypes::TypeIdentifier T;
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  void* allocate() const { return new T; }
+
+  void deallocate(void* stru) const { delete static_cast<T*>(stru); }
+
+  size_t numDcpsKeys() const { return 0; }
+
+#endif /* OPENDDS_NO_MULTI_TOPIC */
+
+  bool isDcpsKey(const char* field) const
+  {
+    ACE_UNUSED_ARG(field);
+    return false;
+  }
+
+  Value getValue(const void* stru, const char* field) const
+  {
+    const XTypes::TypeIdentifier& typed = *static_cast<const XTypes::TypeIdentifier*>(stru);
+    ACE_UNUSED_ARG(typed);
+    //if (std::strcmp(field, "from") == 0) {
+    //  return typed.from.in();
+    //}
+    //if (std::strcmp(field, "count") == 0) {
+    //  return typed.count;
+    //}
+    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+  }
+
+  Value getValue(Serializer& ser, const char* field) const
+  {
+    if (std::strcmp(field, "from") == 0) {
+      TAO::String_Manager val;
+      if (!(ser >> val.out())) {
+        throw std::runtime_error("Field 'from' could not be deserialized");
+      }
+      return val;
+    }
+    else {
+      ACE_CDR::ULong len;
+      if (!(ser >> len)) {
+        throw std::runtime_error("String 'from' length could not be deserialized");
+      }
+      if (!ser.skip(static_cast<ACE_UINT16>(len))) {
+        throw std::runtime_error("String 'from' contents could not be skipped");
+      }
+    }
+    if (std::strcmp(field, "count") == 0) {
+      ACE_CDR::Long val;
+      if (!(ser >> val)) {
+        throw std::runtime_error("Field 'count' could not be deserialized");
+      }
+      return val;
+    }
+    else {
+      if (!ser.skip(1, 4)) {
+        throw std::runtime_error("Field 'count' could not be skipped");
+      }
+    }
+    if (!field[0]) {
+      return 0;
+    }
+    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not valid for struct XTypes::TypeIdentifier");
+  }
+
+  ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
+  {
+    ACE_UNUSED_ARG(next);
+    //if (std::strcmp(field, "from") == 0) {
+    //  return make_field_cmp(&T::from, next);
+    //}
+    //if (std::strcmp(field, "count") == 0) {
+    //  return make_field_cmp(&T::count, next);
+    //}
+    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+  }
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  const char** getFieldNames() const
+  {
+    static const char* names[] = { "from", "count", 0 };
+    return names;
+  }
+
+  const void* getRawField(const void* stru, const char* field) const
+  {
+    //if (std::strcmp(field, "from") == 0) {
+    //  return &static_cast<const T*>(stru)->from;
+    //}
+    //if (std::strcmp(field, "count") == 0) {
+    //  return &static_cast<const T*>(stru)->count;
+    //}
+    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+  }
+
+  void assign(void* lhs, const char* field, const void* rhs,
+    const char* rhsFieldSpec, const MetaStruct& rhsMeta) const
+  {
+    ACE_UNUSED_ARG(lhs);
+    ACE_UNUSED_ARG(field);
+    ACE_UNUSED_ARG(rhs);
+    ACE_UNUSED_ARG(rhsFieldSpec);
+    ACE_UNUSED_ARG(rhsMeta);
+    //if (std::strcmp(field, "from") == 0) {
+    //  static_cast<T*>(lhs)->from = *static_cast<const TAO::String_Manager*>(rhsMeta.getRawField(rhs, rhsFieldSpec));
+    //  return;
+    //}
+    //if (std::strcmp(field, "count") == 0) {
+    //  static_cast<T*>(lhs)->count = *static_cast<const CORBA::Long*>(rhsMeta.getRawField(rhs, rhsFieldSpec));
+    //  return;
+    //}
+    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+  }
+#endif /* OPENDDS_NO_MULTI_TOPIC */
+
+  bool compare(const void* lhs, const void* rhs, const char* field) const
+  {
+    ACE_UNUSED_ARG(lhs);
+    ACE_UNUSED_ARG(field);
+    ACE_UNUSED_ARG(rhs);
+    //if (std::strcmp(field, "from") == 0) {
+    //  return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->from.in(), static_cast<const T*>(rhs)->from.in());
+    //}
+    //if (std::strcmp(field, "count") == 0) {
+    //  return static_cast<const T*>(lhs)->count == static_cast<const T*>(rhs)->count;
+    //}
+    throw std::runtime_error("Field " + OPENDDS_STRING(field) + " not found or its type is not supported (in struct XTypes::TypeIdentifier)");
+  }
+};
+
+template<>
+const MetaStruct& getMetaStruct<XTypes::TypeIdentifier>()
+{
+  static MetaStructImpl<XTypes::TypeIdentifier> msi;
+  return msi;
+}
+
+bool gen_skip_over(Serializer& ser, XTypes::TypeIdentifier*)
+{
+  ACE_UNUSED_ARG(ser);
+  MetaStructImpl<XTypes::TypeIdentifier>().getValue(ser, "");
+  return true;
+}
+
+template<> const XTypes::TypeObject& getMinimalTypeObject<XTypes_TypeIdentifier_xtag>()
+{
+  static const XTypes::TypeObject to = XTypes::TypeObject(
+    XTypes::MinimalTypeObject(
+      XTypes::MinimalStructType(
+        XTypes::StructTypeFlag(XTypes::IS_APPENDABLE | XTypes::IS_NESTED),
+        XTypes::MinimalStructHeader(
+          getMinimalTypeIdentifier<void>(),
+          XTypes::MinimalTypeDetail()
+        ),
+        XTypes::MinimalStructMemberSeq()
+        .append(
+          XTypes::MinimalStructMember(
+            XTypes::CommonStructMember(
+              0,
+              XTypes::StructMemberFlag(0),
+              getMinimalTypeIdentifier<char*>()
+            ),
+            XTypes::MinimalMemberDetail("from")
+          )
+        )
+        .append(
+          XTypes::MinimalStructMember(
+            XTypes::CommonStructMember(
+              1,
+              XTypes::StructMemberFlag(0),
+              getMinimalTypeIdentifier<CORBA::Long>()
+            ),
+            XTypes::MinimalMemberDetail("count")
+          )
+        )
+        .sort()
+      )
+    )
+  );
+  return to;
+}
+
+template<> XTypes::TypeIdentifier getMinimalTypeIdentifier<XTypes_TypeIdentifier_xtag>()
+{
+  static const XTypes::TypeIdentifier ti = XTypes::makeTypeIdentifier(getMinimalTypeObject<XTypes_TypeIdentifier_xtag>());
   return ti;
 }
 

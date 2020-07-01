@@ -2271,7 +2271,22 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::TypeObjectHashId& stru);
 bool operator>>(Serializer& strm, XTypes::TypeObjectHashId& stru);
 
+///
+// TypeIdentifier type support
+///
+class MetaStruct;
 
+template<typename T>
+const MetaStruct& getMetaStruct();
+
+template<>
+const MetaStruct& getMetaStruct<XTypes::TypeIdentifier>();
+bool gen_skip_over(Serializer& ser, XTypes::TypeIdentifier*);
+
+struct XTypes_TypeIdentifier_xtag {};
+template<> const XTypes::TypeObject& getMinimalTypeObject<XTypes_TypeIdentifier_xtag>();
+
+template<> XTypes::TypeIdentifier getMinimalTypeIdentifier<XTypes_TypeIdentifier_xtag>();
 } // namespace DCPS
 } // namespace OpenDDS
 
