@@ -148,8 +148,8 @@ int main(int argc, char* argv[])
     if (argument == "--help" || argument == "-h") {
       std::cout << usage;
       return EXIT_SUCCESS;
-    } else if (argument == "--secure") {
 #ifdef OPENDDS_SECURITY
+    } else if (argument == "--secure") {
       TheServiceParticipant->set_security(true);
 #endif
     }
@@ -158,18 +158,14 @@ int main(int argc, char* argv[])
   try {
     {
       Application a1;
-      ACE_OS::sleep(1);
       {
         Application a2;
-        ACE_OS::sleep(1);
       }
       {
         Application a3;
-        ACE_OS::sleep(1);
       }
     }
     Application a4;
-    ACE_OS::sleep(1);
   } catch (const std::string& error) {
     ACE_ERROR((LM_ERROR, "Caught Error: %C\n", error.c_str()));
     return EXIT_FAILURE;
