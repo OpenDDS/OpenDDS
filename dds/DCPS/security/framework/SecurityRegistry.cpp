@@ -6,19 +6,22 @@
  */
 
 #include "DCPS/DdsDcps_pch.h"
-#include "SecurityRegistry.h"
-#include "SecurityConfig.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/EntityImpl.h"
-#include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
 
-#include "ace/Singleton.h"
-#include "ace/OS_NS_strings.h"
-#include "ace/Service_Config.h"
+#include "SecurityRegistry.h"
+
+#include "SecurityConfig.h"
+
+#include <dds/DCPS/transport/framework/EntryExit.h>
+#include <dds/DCPS/Util.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/EntityImpl.h>
+#include <dds/DCPS/ConfigUtils.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+
+#include <ace/Singleton.h>
+#include <ace/OS_NS_strings.h>
+#include <ace/Service_Config.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -427,14 +430,14 @@ SecurityRegistry::add_config(const OPENDDS_STRING& name, SecurityConfig_rch& con
   return added_config;
 }
 
-SecurityPluginInst_rch
-SecurityRegistry::get_plugin_inst(const OPENDDS_STRING& plugin_name)
+SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(
+  const OPENDDS_STRING& plugin_name, bool attempt_fix)
 {
   GuardType guard(lock_);
 
   SecurityPluginInst_rch plugin_inst;
 
-  if (find(registered_plugins_, plugin_name, plugin_inst) != 0) {
+  if (find(registered_plugins_, plugin_name, plugin_inst) != 0 && attempt_fix) {
 #if !defined(ACE_AS_STATIC_LIBS)
     guard.release();
     // Not present, try to load library
@@ -442,23 +445,20 @@ SecurityRegistry::get_plugin_inst(const OPENDDS_STRING& plugin_name)
     guard.acquire();
 
     // Try to find it again
-    if (find(registered_plugins_, plugin_name, plugin_inst) != 0) {
-#endif
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) SecurityRegistry::create_inst: ")
-                 ACE_TEXT("plugin_type=%C is not registered.\n"),
-                 plugin_name.c_str()));
-      return SecurityPluginInst_rch();
-#if !defined(ACE_AS_STATIC_LIBS)
-    }
+    find(registered_plugins_, plugin_name, plugin_inst);
 #endif
   }
 
   return plugin_inst;
 }
 
+bool SecurityRegistry::has_no_configs() const
+{
+  GuardType guard(lock_);
+  return config_map_.empty();
+}
 
-}
-}
+} // namespace OpenDDS
+} // namespace Security
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

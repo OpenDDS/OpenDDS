@@ -8,16 +8,13 @@
 #ifndef OPENDDS_DCPS_SECURITYREGISTRY_H
 #define OPENDDS_DCPS_SECURITYREGISTRY_H
 
-#include "dds/DCPS/dcps_export.h"
+#include "SecurityPluginInst_rch.h"
+#include "SecurityConfig_rch.h"
+#include "SecurityConfigPropertyList.h"
 
-#include "dds/DdsDcpsDomainC.h"
-
-#include "dds/DCPS/PoolAllocator.h"
-
-#include "dds/DCPS/security/framework/SecurityPluginInst_rch.h"
-#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
-#include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
-
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DdsDcpsDomainC.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
@@ -50,6 +47,13 @@ public:
   /// Client Application calls this method to tear down the security framework.
   void release();
 
+  /**
+   * If the plugin is registered then return it. If it's not and attempt_fix is
+   * true, then try to load and return the plugin, otherwise return a nil rch.
+   */
+  SecurityPluginInst_rch get_plugin_inst(
+    const OPENDDS_STRING& plugin_name, bool attempt_fix = true);
+
   // Called by plugins to register their factory interface
   void register_plugin(const OPENDDS_STRING& plugin_name,
                        SecurityPluginInst_rch plugin);
@@ -60,6 +64,8 @@ public:
 
   SecurityConfig_rch create_config(const OPENDDS_STRING& config_name,
                                    SecurityPluginInst_rch plugin);
+
+  bool has_no_configs() const;
 
   SecurityConfig_rch get_config(const OPENDDS_STRING& config_name) const;
 
@@ -132,7 +138,6 @@ private:
   /// Dynamically load the library for the supplied security plugin type.
   void load_security_plugin_lib(const OPENDDS_STRING& security_plugin_type);
 
-  SecurityPluginInst_rch get_plugin_inst(const OPENDDS_STRING& plugin_name);
   bool find_config(const OPENDDS_STRING& name, SecurityConfig_rch& config);
   bool add_config(const OPENDDS_STRING& name, SecurityConfig_rch& config);
 
