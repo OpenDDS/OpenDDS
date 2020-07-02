@@ -707,6 +707,21 @@ TransportClient::disassociate(const RepoId& peerId)
   }
 }
 
+void TransportClient::transport_stop()
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  const ImplsType impls = impls_;
+  const RepoId repo_id = repo_id_;
+  guard.release();
+
+  for (size_t i = 0; i < impls.size(); ++i) {
+    const RcHandle<TransportImpl> impl = impls[i].lock();
+    if (impl) {
+      impl->client_stop(repo_id);
+    }
+  }
+}
+
 void
 TransportClient::register_for_reader(const RepoId& participant,
                                      const RepoId& writerid,

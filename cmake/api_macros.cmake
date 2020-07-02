@@ -3,16 +3,6 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake)
 
-function(opendds_include_dirs_once)
-  get_directory_property(includes INCLUDE_DIRECTORIES)
-
-  foreach (i ${OPENDDS_INCLUDE_DIRS})
-    if (NOT "${i}" IN_LIST includes)
-      include_directories(${i})
-    endif()
-  endforeach()
-endfunction()
-
 macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   src_prefix
   idl_prefix
@@ -27,6 +17,7 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
 
   # Handle explicit sources per scope
+  set(_non_idl_file_warning ON)
   foreach (scope PUBLIC PRIVATE INTERFACE)
     set(${src_prefix}_${scope})
     set(${idl_prefix}_${scope})
@@ -38,6 +29,12 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
         if("${src}" MATCHES "\\.idl$")
           list(APPEND ${idl_prefix}_${scope} ${src})
         else()
+          if(${_non_idl_file_warning})
+            message(DEPRECATION "Passing files that aren't IDL files to "
+              "OPENDDS_TARGET_SOURCES is deprecated")
+            set(_non_idl_file_warning OFF)
+          endif()
+
           list(APPEND ${src_prefix}_${scope} ${src})
         endif()
       endforeach()
@@ -57,6 +54,12 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
       list(APPEND ${idl_prefix}_PRIVATE ${arg})
 
     else()
+      if(${_non_idl_file_warning})
+        message(DEPRECATION "Passing files that aren't IDL files to "
+          "OPENDDS_TARGET_SOURCES is deprecated")
+        set(_non_idl_file_warning OFF)
+      endif()
+
       list(APPEND ${src_prefix}_PRIVATE ${arg})
     endif()
   endforeach()
@@ -88,8 +91,6 @@ macro(OPENDDS_TARGET_SOURCES target)
   if (NOT TARGET ${target})
     message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_TARGET_SOURCES")
   endif()
-
-  opendds_include_dirs_once()
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
@@ -141,16 +142,14 @@ macro(OPENDDS_TARGET_SOURCES target)
     if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
       list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
     endif()
+
+    if(NOT "${_opendds_options}" MATCHES "-Wb,export_include")
+      list(APPEND _opendds_options "-Wb,export_include=${_export_generated}")
+    endif()
   endif()
 
   if(NOT "${_tao_options}" MATCHES "-SS")
     list(APPEND _tao_options "-SS")
-  endif()
-
-  if (OPENDDS_DCPS_COMPILE_DEFS)
-    target_compile_definitions(${target}
-      PUBLIC
-        ${OPENDDS_DCPS_COMPILE_DEFS})
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)

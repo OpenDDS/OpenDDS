@@ -86,6 +86,16 @@ public:
 
   /// Disable all encryption for security, even the required builtin encryption.
   bool fake_encryption;
+
+  /**
+   * Force role in authentication handshake. Like fake encryption this will
+   * break everything if applied inconsistently.
+   */
+  enum ForceAuthRole {
+    FORCE_AUTH_ROLE_NORMAL,
+    FORCE_AUTH_ROLE_LEADER,
+    FORCE_AUTH_ROLE_FOLLOWER
+  } force_auth_role;
 };
 extern OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif

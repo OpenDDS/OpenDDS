@@ -230,6 +230,7 @@ public:
     const DDS::Security::EndpointSecurityAttributes& attributes,
     DDS::Security::SecurityException& ex);
 
+  static bool pattern_match(const char* string, const char* pattern);
 
 private:
 
@@ -285,7 +286,7 @@ private:
 
   time_t convert_permissions_time(const std::string& timeString);
 
-  bool validate_date_time(ACPermsMap::iterator ac_iter,
+  bool validate_date_time(const Permissions::Validity_t& validity,
                           DCPS::TimeDuration& delta_time,
                           DDS::Security::SecurityException& ex);
 
@@ -296,18 +297,12 @@ private:
                           DDS::Security::EndpointSecurityAttributes& attributes,
                           DDS::Security::SecurityException& ex);
 
-  bool search_local_permissions(const char* topic_name,
-                                DDS::Security::DomainId_t domain_id,
-                                const DDS::PartitionQosPolicy& partition,
-                                Permissions::PublishSubscribe_t pub_or_sub,
-                                ACPermsMap::iterator ac_iter,
-                                DDS::Security::SecurityException& ex);
-
-  bool search_remote_permissions(const char* topic_name,
-                                 DDS::Security::DomainId_t domain_id,
-                                 ACPermsMap::iterator ac_iter,
-                                 Permissions::PublishSubscribe_t pub_or_sub,
-                                 DDS::Security::SecurityException& ex);
+  bool search_permissions(const char* topic_name,
+                          DDS::Security::DomainId_t domain_id,
+                          const DDS::PartitionQosPolicy& partition,
+                          Permissions::PublishSubscribe_t pub_or_sub,
+                          const Permissions::Grant& grant,
+                          DDS::Security::SecurityException& ex);
 
   void parse_class_id(const std::string& class_id,
                       std::string& plugin_class_name,

@@ -8,11 +8,53 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "NetworkConfigMonitor.h"
+#include "Service_Participant.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+void NetworkInterface::add_default_addrs()
+{
+  const ACE_INET_Addr sp_default = TheServiceParticipant->default_address();
+  if (sp_default != ACE_INET_Addr()) {
+    addresses.insert(sp_default);
+    return;
+  }
+  static const u_short port_zero = 0;
+  ACE_INET_Addr addr(port_zero, "0.0.0.0");
+  addresses.insert(addr);
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr addr2(port_zero, "::");
+  addresses.insert(addr2);
+#endif
+}
+
+bool NetworkInterface::has(const ACE_INET_Addr& addr) const
+{
+  for (AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
+    if (*pos == addr) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool NetworkInterface::exclude_from_multicast(const char* configured_interface) const
+{
+  if ((*configured_interface && name_ != configured_interface)
+      || addresses.empty() || !can_multicast_) {
+    return true;
+  }
+
+  const ACE_INET_Addr sp_default = TheServiceParticipant->default_address();
+  if (sp_default != ACE_INET_Addr() && !has(sp_default)) {
+    return true;
+  }
+
+  return false;
+}
 
 void NetworkConfigMonitor::add_listener(NetworkConfigListener_wrch listener)
 {
