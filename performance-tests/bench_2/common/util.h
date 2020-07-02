@@ -1,6 +1,7 @@
 #ifndef BENCH_UTIL_HEADER
 #define BENCH_UTIL_HEADER
 
+#include <chrono>
 #include <string>
 #include <vector>
 
