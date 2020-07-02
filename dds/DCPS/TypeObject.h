@@ -1609,7 +1609,7 @@ namespace XTypes {
   typedef Sequence<TypeInformation> TypeInformationSeq;
 
   OpenDDS_Dcps_Export
-  TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
+  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
 
   OpenDDS_Dcps_Export
   void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq);
