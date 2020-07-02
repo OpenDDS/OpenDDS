@@ -367,10 +367,9 @@ bool
 RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
   // Override with DCPSDefaultAddress.
-  if (config.local_address() == ACE_INET_Addr () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-    ACE_INET_Addr addr(u_short(0), TheServiceParticipant->default_address().c_str());
-    config.local_address(addr);
+  if (config.local_address() == ACE_INET_Addr() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    config.local_address(TheServiceParticipant->default_address());
   }
 
   // Open the socket here so that any addresses/ports left
@@ -470,6 +469,16 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
 
   return true;
+}
+
+void RtpsUdpTransport::client_stop(const RepoId& localId)
+{
+  GuardThreadType guard_links(links_lock_);
+  const RtpsUdpDataLink_rch link = link_;
+  guard_links.release();
+  if (link) {
+    link->client_stop(localId);
+  }
 }
 
 void
@@ -622,7 +631,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
-  DCPS::Serializer serializer(&block, Encoding::KIND_CDR_UNALIGNED, ENDIAN_BIG);
+  DCPS::Serializer serializer(&block, STUN::encoding);
   const_cast<STUN::Message&>(message).block = &block;
   serializer << message;
 

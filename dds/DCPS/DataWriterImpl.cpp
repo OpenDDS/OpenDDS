@@ -544,8 +544,6 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       for (SendStateDataSampleList::iterator list_el = list.begin();
            list_el != list.end(); ++list_el) {
-        list_el->get_header().historic_sample_ = true;
-
         if (list_el->get_header().sequence_ > seq) {
           seq = list_el->get_header().sequence_;
         }
@@ -561,7 +559,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_INFO, "(%P|%t) Sending historic samples\n"));
       }
 
-      const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+      const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
       size_t size = 0;
       serialized_size(encoding, size, remote_id);
       Message_Block_Ptr data(
@@ -720,6 +718,103 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 }
 
+void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
+{
+  DBG_ENTRY_LVL("DataWriterImpl", "replay_durable_data_for", 6);
+
+  bool reader_durable = false;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  OPENDDS_STRING filterClassName;
+  RcHandle<FilterEvaluator> eval;
+  DDS::StringSeq expression_params;
+#endif
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
+    RepoIdToReaderInfoMap::const_iterator it = reader_info_.find(remote_id);
+
+    if (it != reader_info_.end()) {
+      reader_durable = it->second.durable_;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+      filterClassName = it->second.filter_class_name_;
+      eval = it->second.eval_;
+      expression_params = it->second.expression_params_;
+#endif
+    }
+  }
+
+  // Support DURABILITY QoS
+  if (reader_durable) {
+    // Tell the WriteDataContainer to resend all sending/sent
+    // samples.
+    this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                                         , filterClassName, eval.in(), expression_params
+#endif
+                                         );
+
+    // Acquire the data writer container lock to avoid deadlock. The
+    // thread calling association_complete() has to acquire lock in the
+    // same order as the write()/register() operation.
+
+    // Since the thread calling association_complete() is the ORB
+    // thread, it may have some performance penalty. If the
+    // performance is an issue, we may need a new thread to handle the
+    // data_available() calls.
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+              guard,
+              this->get_lock());
+
+    SendStateDataSampleList list = this->get_resend_data();
+    {
+      ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
+      // Update the reader's expected sequence
+      SequenceNumber& seq =
+        reader_info_.find(remote_id)->second.expected_sequence_;
+
+      for (SendStateDataSampleList::iterator list_el = list.begin();
+           list_el != list.end(); ++list_el) {
+        if (list_el->get_header().sequence_ > seq) {
+          seq = list_el->get_header().sequence_;
+        }
+      }
+    }
+
+    RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+    if (!publisher || publisher->is_suspended()) {
+      this->available_data_list_.enqueue_tail(list);
+
+    } else {
+      if (DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataWriterImpl::replay_durable_data_for: Sending historic samples\n")));
+      }
+
+      const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+      size_t size = 0;
+      serialized_size(encoding, size, remote_id);
+      Message_Block_Ptr data(
+        new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
+                              get_db_lock()));
+      Serializer ser(data.get(), encoding);
+      ser << remote_id;
+
+      DataSampleHeader header;
+      Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, move(data),
+                                                                    SystemTimePoint::now().to_dds_time()));
+
+      this->controlTracker.message_sent();
+      guard.release();
+      const SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
+      if (ret == SEND_CONTROL_ERROR) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DataWriterImpl::replay_durable_data_for: ")
+                   ACE_TEXT("send_w_control failed.\n")));
+        this->controlTracker.message_dropped();
+      }
+    }
+  }
+}
+
 void DataWriterImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataWriterImpl", "remove_all_associations", 6);
@@ -769,6 +864,8 @@ void DataWriterImpl::remove_all_associations()
                  ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
                  ACE_TEXT("caught exception from remove_associations.\n")));
   }
+
+  transport_stop();
 }
 
 void
@@ -1426,15 +1523,9 @@ DataWriterImpl::enable()
   publisher->get_qos(pub_qos);
 
   TypeSupportImpl* const typesupport =
-      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-  const XTypes::TypeObject& type_object = typesupport->getMinimalTypeObject();
-  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(type_object);
+    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
   XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.type_id = type_iden;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size =
-    serialized_size(XTypes::get_typeobject_encoding(), type_object);
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  typesupport->to_type_info(type_info);
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
@@ -2287,9 +2378,8 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
       0, // alloc_strategy
       get_db_lock()));
 
-  Serializer serializer(
-    data.get(), Encoding::KIND_CDR_UNALIGNED,
-    this->swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+  Serializer serializer(data.get(), Encoding::KIND_UNALIGNED_CDR,
+    this->swap_bytes());
 
   serializer << end_msg;
 

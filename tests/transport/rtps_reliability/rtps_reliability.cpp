@@ -39,8 +39,7 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
-const Encoding encoding(
-  Encoding::KIND_CDR_PLAIN, OpenDDS::DCPS::ENDIAN_LITTLE);
+const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
 const Encoding& blob_encoding = get_locators_encoding();
 
 struct SimpleTC: TransportClient {
@@ -995,6 +994,8 @@ bool run_test()
   // cleanup
   sdw2.disassociate(reader1);
   sdr2.disassociate(writer1);
+  sdw2.transport_stop();
+  sdr2.transport_stop();
   return true;
 }
 

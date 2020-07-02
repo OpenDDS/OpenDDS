@@ -5,17 +5,18 @@
 
 #include "BaseMessageUtils.h"
 
-#include "dds/DCPS/Time_Helper.h"
-
-namespace {
-  const OpenDDS::DCPS::Encoding encoding_plain_native(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN,
-                                                       OpenDDS::DCPS::ENDIAN_NATIVE);
-}
+#include <dds/DCPS/Time_Helper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+
+using DCPS::Encoding;
+
+namespace {
+  const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
+}
 
 int locator_to_address(ACE_INET_Addr& dest,
                        const DCPS::Locator_t& locator,
@@ -56,8 +57,7 @@ int locator_to_address(ACE_INET_Addr& dest,
 
 const DCPS::Encoding& get_locators_encoding()
 {
-  using namespace OpenDDS::DCPS;
-  static const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  static const Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
   return encoding;
 }
 

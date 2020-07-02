@@ -320,7 +320,7 @@ public:
     bit_enabled_ = b;
   }
 
-  ACE_CString default_address() const;
+  const ACE_INET_Addr& default_address() const { return default_address_; }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
@@ -547,7 +547,7 @@ private:
   int bit_lookup_duration_msec_;
 
   /// The default network address to use.
-  ACE_CString default_address_;
+  ACE_INET_Addr default_address_;
 
   /// The configuration object that imports the configuration
   /// file.

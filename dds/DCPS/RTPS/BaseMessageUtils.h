@@ -42,8 +42,7 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   static const size_t hash_limit = 16;
   std::memset(hash.value, 0, hash_limit);
 
-  Encoding encoding(Encoding::KIND_CDR_PLAIN, DCPS::ENDIAN_BIG);
-  encoding.zero_init_padding(true);
+  Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
 
   size_t max_key_size = 0;
   max_serialized_size(encoding, max_key_size, ko);

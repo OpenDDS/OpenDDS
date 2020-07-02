@@ -29,7 +29,7 @@
 
 using namespace OpenDDS::DCPS;
 
-const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
@@ -303,6 +303,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     sdr.disassociate(publication.remote_id_);
+    sdr.transport_stop();
 
     TheServiceParticipant->shutdown();
     ACE_Thread_Manager::instance()->wait();

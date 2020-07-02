@@ -360,23 +360,12 @@ ReplayerImpl::enable()
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
 
-  TypeSupportImpl* const typesupport =
-    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-  XTypes::TypeInformation type_info;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
-  if (typesupport) {
-    const XTypes::TypeObject& type_object = typesupport->getMinimalTypeObject();
-    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(type_object);
-    type_info.minimal.typeid_with_size.type_id = type_iden;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size =
-      serialized_size(XTypes::get_typeobject_encoding(), type_object);
-  } else {
-    type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-    //TODO : How is XTypes going work with recorder replayer?
-    // Should it publish the type_info that the recorder saved?
-  }
 
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.complete.dependent_typeid_count = 0;
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
@@ -800,6 +789,8 @@ void ReplayerImpl::remove_all_associations()
 
   } catch (const CORBA::Exception&) {
   }
+
+  transport_stop();
 }
 
 void

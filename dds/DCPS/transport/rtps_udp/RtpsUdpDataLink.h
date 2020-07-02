@@ -160,6 +160,8 @@ public:
   void unregister_for_writer(const RepoId& readerid,
                              const RepoId& writerid);
 
+  void client_stop(const RepoId& localId);
+
   virtual void pre_stop_i();
 
   virtual void send_final_acks(const RepoId& readerid);
@@ -293,6 +295,7 @@ private:
       : acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , requires_heartbeat_(false)
+      , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
       , handshake_done_(false)
       , durable_(durable)
     {}
@@ -304,8 +307,33 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) ReaderInfoMap;
 
+  class ReplayDurableData : public JobQueue::Job {
+  public:
+    ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const RepoId& local_pub_id, const RepoId& remote_sub_id)
+      : link_(link)
+      , local_pub_id_(local_pub_id)
+      , remote_sub_id_(remote_sub_id)
+    {}
+
+  private:
+    WeakRcHandle<RtpsUdpDataLink> link_;
+    const RepoId local_pub_id_;
+    const RepoId remote_sub_id_;
+
+    void execute() {
+      RtpsUdpDataLink_rch link = link_.lock();
+
+      if (!link) {
+        return;
+      }
+
+      ACE_DEBUG((LM_DEBUG, "Calling replay_durable_data on datalink\n"));
+      link->replay_durable_data(local_pub_id_, remote_sub_id_);
+    }
+  };
+
   class RtpsWriter : public RcObject {
-  protected:
+  private:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
@@ -335,7 +363,8 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc, size_t capacity);
+    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
+               int heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -348,7 +377,7 @@ private:
     bool has_reader(const RepoId& id) const;
     bool remove_reader(const RepoId& id);
     size_t reader_count() const;
-    CORBA::Long get_heartbeat_count() const { return heartbeat_count_; }
+    int inc_heartbeat_count();
 
     bool is_reader_handshake_done(const RepoId& id) const;
     void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
@@ -385,12 +414,11 @@ private:
     SequenceRange hb_range_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool ack_pending_, first_activity_, first_valid_hb_, first_delivered_data_;
-    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
-      acknack_count_, nackfrag_count_;
+    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
 
     WriterInfo()
       : ack_pending_(false), first_activity_(true), first_valid_hb_(true), first_delivered_data_(true)
-      , heartbeat_recvd_count_(0), hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0)
+      , heartbeat_recvd_count_(0), hb_frag_recvd_count_(0), nackfrag_count_(0)
     { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
@@ -402,7 +430,7 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false) {}
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false), acknack_count_(0) {}
 
     bool add_writer(const RepoId& id, const WriterInfo& info);
     bool has_writer(const RepoId& id) const;
@@ -421,7 +449,7 @@ private:
 
     void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
 
-  protected:
+  private:
     void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
     void generate_nack_frags_i(NackFragSubmessageVec& nack_frags,
                                WriterInfo& wi, const RepoId& pub_id);
@@ -432,6 +460,7 @@ private:
     bool durable_;
     WriterInfoMap remote_writers_;
     bool stopping_;
+    CORBA::Long acknack_count_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
@@ -464,7 +493,7 @@ private:
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
   /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
   ///   writer_to_seq_best_effort_readers_ along with anything else that fits the 'reader side activity' of the datalink
-  /// - writers_lock_ protects writers_, heartbeat_counts_, best_effort_heartbeat_count_, and interesting_readers_
+  /// - writers_lock_ protects writers_, heartbeat_counts_ best_effort_heartbeat_count_, and interesting_readers_
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
   ///   for both remote writers and remote readers

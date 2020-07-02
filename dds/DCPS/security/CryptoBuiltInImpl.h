@@ -219,6 +219,7 @@ private:
   CryptoBuiltInImpl& operator=(const CryptoBuiltInImpl&);
 
   DDS::Security::NativeCryptoHandle generate_handle();
+  DDS::Security::NativeCryptoHandle generate_handle_i();
 
   ACE_Thread_Mutex mutex_;
   int next_handle_;
@@ -251,6 +252,10 @@ private:
   };
   std::multimap<DDS::Security::ParticipantCryptoHandle,
                 EntityInfo> participant_to_entity_;
+
+  typedef std::pair<DDS::Security::NativeCryptoHandle, DDS::Security::NativeCryptoHandle> HandlePair_t;
+  typedef std::map<HandlePair_t, DDS::Security::NativeCryptoHandle> DerivedKeyIndex_t;
+  DerivedKeyIndex_t derived_key_handles_;
 
   struct Session {
     SessionIdType id_;

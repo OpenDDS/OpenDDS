@@ -21,9 +21,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 
 namespace OpenDDS {
-namespace XTypes{
-class TypeObject;
+
+namespace XTypes {
+  struct TypeInformation;
+  struct TypeObject;
 }
+
 namespace DCPS {
 
 class MetaStruct;
@@ -56,6 +59,8 @@ public:
     DDS::DataRepresentationIdSeq& seq) = 0;
 
   virtual const XTypes::TypeObject& getMinimalTypeObject() const = 0;
+
+  void to_type_info(XTypes::TypeInformation& type_info) const;
 
 private:
   virtual const char* default_type_name() const = 0;

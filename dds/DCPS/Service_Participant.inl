@@ -356,13 +356,6 @@ Service_Participant::is_shut_down() const
 }
 
 ACE_INLINE
-ACE_CString
-Service_Participant::default_address() const
-{
-  return this->default_address_;
-}
-
-ACE_INLINE
 bool
 Service_Participant::use_bidir_giop() const
 {

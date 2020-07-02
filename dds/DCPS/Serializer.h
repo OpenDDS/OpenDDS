@@ -80,6 +80,12 @@ enum Endianness {
 OpenDDS_Dcps_Export
 OPENDDS_STRING endianness_to_string(Endianness endianness);
 
+enum Extensibility {
+  FINAL,
+  APPENDABLE,
+  MUTABLE
+};
+
 const size_t boolean_cdr_size = 1;
 const size_t byte_cdr_size = 1;
 const size_t int8_cdr_size = 1;
@@ -109,33 +115,24 @@ void align(size_t& value, size_t by);
 class OpenDDS_Dcps_Export Encoding {
 public:
   /**
-   * Encoding Kinds.
-   *
-   * TODO(iguessthislldo) Separate this into real encoding and the
-   * encapsulation header encoding values.
-   *
-   * For encapsulation header encoding kinds that can have an endianness on the
-   * LSB, define them with the LSB set to 0 (even). If this assumption can't be
-   * true anymore, please update this class and remove this paragraph.
+   * The encoding kinds represent the possible compatible encoding sets used
+   * for serialization.
    */
   enum Kind {
-    KIND_CDR_PLAIN = 0x0000,
-    KIND_CDR_PARAMLIST = 0x0002,
-    KIND_XCDR2_PLAIN = 0x0010,
-    KIND_XCDR2_PARAMLIST = 0x0012,
-    KIND_XCDR2_DELIMITED = 0x0014,
-    KIND_XML = 0x0100,
-    // TODO(iguessthislldo): XTypes spec also mentions a XML value of 0004!?!
-
-    // Implementation specific encoding kinds with CDR headers, if we have any,
-    // go after 0xC0000 and 0xFFFF.
-
-    // Values below are OpenDDS specific that don't don't have a encapsulation
-    // header value, so they are put above the 2 byte value limit.
-    KIND_CUSTOM = 0x10000,
-    KIND_UNKNOWN = KIND_CUSTOM + 0,
-    /// This is unaligned CDR with no XCDR behavior.
-    KIND_CDR_UNALIGNED = KIND_CUSTOM + 2,
+    /**
+     * Extendible CDR version 1 from XTypes.
+     * This represents standard non-XTypes CDR if the type is final.
+     */
+    KIND_XCDR1,
+    /**
+     * Extendible CDR version 2 from XTypes.
+     */
+    KIND_XCDR2,
+    /**
+     * This is the classic encoding of OpenDDS used when there is no RTPS
+     * transport being used. It has no padding bytes and no XCDR behavior.
+     */
+    KIND_UNALIGNED_CDR,
   };
 
   enum Alignment {
@@ -143,12 +140,6 @@ public:
     ALIGN_CDR = 8, // Align for CDR and XCDR1
     ALIGN_XCDR2 = 4, // Align for XCDR2
     ALIGN_MAX = ALIGN_CDR // For Serializer::ALIGN_PAD
-  };
-
-  enum Extensibility {
-    FINAL,
-    APPENDABLE,
-    MUTABLE
   };
 
   /**
@@ -160,8 +151,7 @@ public:
     XCDR2
   };
 
-  /// Use KIND_UNKNOWN and ENDIAN_NATIVE
-  /// TODO(iguessthislldo) Change to KIND_CDR_PLAIN?
+  // Encoding with KIND_XCDR1 and ENDIAN_NATIVE
   Encoding();
 
   explicit Encoding(Kind kind, Endianness endianness = ENDIAN_NATIVE);
@@ -190,35 +180,22 @@ public:
   /**
    * Align "value" to "by" and according to the stream's alignment.
    */
-  void align(size_t& value, size_t by = std::numeric_limits<size_t>::max()) const;
+  void align(size_t& value, size_t by = (std::numeric_limits<size_t>::max)()) const;
 
-  /// Return XCDR version based what encoding is being used.
+  /// Return XCDR behavior being used.
   XcdrVersion xcdr_version() const;
+
+  /// Set XCDR behavior to use
+  void xcdr_version(XcdrVersion value);
 
   /**
    * Returns true if the encoding kind is excepted to have a header for RTPS
    * serialized data payloads.
    */
-  static bool has_cdr_header(Kind kind);
+  static bool is_encapsulated(Kind kind);
 
-  /// Returns has_cdr_header(this->kind_)
-  bool has_cdr_header() const;
-
-  /**
-   * Returns true if the encoding kind is supported by OpenDDS.
-   */
-  static bool supported(Kind kind);
-
-  /// Returns supported(this->kind_)
-  bool supported() const;
-
-  /**
-   * Returns true if the endianness applies to this Encoding kind.
-   */
-  static bool has_endianness(Kind kind);
-
-  /// Returns has_endianness(this->kind_)
-  bool has_endianness() const;
+  /// Returns is_encapsulated(this->kind_)
+  bool is_encapsulated() const;
 
   OPENDDS_STRING to_string() const;
 
@@ -229,23 +206,73 @@ private:
   Endianness endianness_;
   Alignment alignment_;
   bool zero_init_padding_;
+  XcdrVersion xcdr_version_;
+};
+
+/**
+ * Represents the RTPS encapsulation header for serialized data.
+ *
+ * This consists of 4 bytes that appear in front of the data. The first two
+ * bytes represents the kind of the encoding the data uses and the last two
+ * bytes are traditionally reserved.
+ *
+ * See XTypes 1.3 7.6.3.1.2
+ */
+class OpenDDS_Dcps_Export EncapsulationHeader {
+public:
+  /**
+   * The known possible values of the first 2 bytes represented as big endian
+   * integers.
+   */
+  enum Kind {
+    KIND_CDR_BE = 0x0000,
+    KIND_CDR_LE = 0x0001,
+    KIND_PL_CDR_BE = 0x0002,
+    KIND_PL_CDR_LE = 0x0003,
+    KIND_CDR2_BE = 0x0006,
+    KIND_CDR2_LE = 0x0007,
+    KIND_D_CDR2_BE = 0x0008,
+    KIND_D_CDR2_LE = 0x0009,
+    KIND_PL_CDR2_BE = 0x000a,
+    KIND_PL_CDR2_LE = 0x000b,
+    KIND_XML = 0x0004,
+  };
+
+  const static size_t serialized_size = 4;
+
+  EncapsulationHeader();
+
+  Kind kind() const;
+  void kind(Kind value);
+  ACE_UINT16 options() const;
+  void options(ACE_UINT16 value);
+
+  /**
+   * Translate from an encoding, returns false if it failed.
+   */
+  bool from_encoding(const Encoding& encoding, Extensibility extensibility);
+
+  /**
+   * Translate to an encoding, returns false if it failed.
+   */
+  bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
+
+  OPENDDS_STRING to_string() const;
+
+private:
+  /// The first two bytes as a big endian integer
+  Kind kind_;
+  /// The last two bytes as a big endian integer
+  ACE_UINT16 options_;
 };
 
 class Serializer;
 
 OpenDDS_Dcps_Export
-bool operator>>(Serializer& s, Encoding& encoding);
+bool operator>>(Serializer& s, EncapsulationHeader& value);
 
 OpenDDS_Dcps_Export
-bool operator<<(Serializer& s, const Encoding& encoding);
-
-OpenDDS_Dcps_Export
-bool max_serialized_size(
-  const Encoding& encoding, size_t& size, const Encoding&);
-
-OpenDDS_Dcps_Export
-void serialized_size(
-  const Encoding& encoding, size_t& size, const Encoding& value);
+bool operator<<(Serializer& s, const EncapsulationHeader& value);
 
 /**
  * Convenience function for the max_serialized_size of a single value with no
@@ -283,10 +310,14 @@ size_t serialized_size(const Encoding& encoding, const T& value)
 class OpenDDS_Dcps_Export Serializer {
 public:
 
-  // Alias Alignment for Backwards Compatibility
-  typedef Encoding::Alignment Alignment;
-  static const Alignment ALIGN_NONE = Encoding::ALIGN_NONE;
-  static const Alignment ALIGN_CDR = Encoding::ALIGN_CDR;
+  // Flags and reserved ids used in parameter list ids.
+  static const ACE_CDR::UShort pid_extended = 0x3f01;
+  static const ACE_CDR::UShort pid_list_end = 0x3f02;
+  static const ACE_CDR::UShort pid_impl_extension = 0x8000;
+  static const ACE_CDR::UShort pid_must_understand = 0x4000;
+
+  // EMHEADER must understand flag
+  static const ACE_CDR::ULong emheader_must_understand = 1 << 31;
 
   /**
    * Constructor with a message block chain.  This installs the
@@ -309,20 +340,9 @@ public:
     Endianness endianness = ENDIAN_NATIVE);
 
   /**
-   * This constructor is for reading a stream that might or might not have a
-   * RTPS CDR header. If has_cdr_header is true, the Serializer will attempt to
-   * read and set itself up using the header. Use good_bit() to see if it
-   * succeeded. If has_cdr_header is false it will use
-   * Encoding::KIND_CDR_UNALIGNED and is_little_endian to create the Encoding
-   * object. is_little_endian is made to be used with "byte_order" values
-   * littered around OpenDDS, which correspond to ACE_CDR_BYTE_ORDER in
-   * ace/CDR_Base.h.
-   *
-   * TODO(iguessthislldo): Remove this constructor? It's probably less useful
-   * than I originally thought, as I think it's only useful in DataReader.
+   * Equivalent to: Serializer(chain, kind, swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
    */
-  Serializer(ACE_Message_Block* chain, bool has_cdr_header,
-    bool is_little_endian);
+  Serializer(ACE_Message_Block* chain, Encoding::Kind kind, bool swap_bytes);
 
   virtual ~Serializer();
 
@@ -342,8 +362,8 @@ public:
   void endianness(Endianness value);
 
   /// Examine alignment behavior.
-  Alignment alignment() const;
-  void alignment(Alignment value);
+  Encoding::Alignment alignment() const;
+  void alignment(Encoding::Alignment value);
 
   /// Reset alignment as if a new instance were created
   void reset_alignment();
@@ -458,15 +478,16 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
 
-#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, const std::string& x);
+  bool operator<<(Serializer& s, const OPENDDS_STRING& x);
 
   template <typename CharT>
   struct FromBoundedString {
-    FromBoundedString(const std::basic_string<CharT>& str, ACE_CDR::ULong bound)
+    typedef std::basic_string<CharT, std::char_traits<CharT>,
+                              OPENDDS_ALLOCATOR(CharT) > string_t;
+    FromBoundedString(const string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
-    const std::basic_string<CharT>& str_;
+    const string_t& str_;
     ACE_CDR::ULong bound_;
   };
 
@@ -475,12 +496,11 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, const std::wstring& x);
+  bool operator<<(Serializer& s, const OPENDDS_WSTRING& x);
 
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
   // Extraction operators.
   friend OpenDDS_Dcps_Export
@@ -527,15 +547,16 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
 
-#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, std::string& x);
+  bool operator>>(Serializer& s, OPENDDS_STRING& x);
 
   template <typename CharT>
   struct ToBoundedString {
-    ToBoundedString(std::basic_string<CharT>& str, ACE_CDR::ULong bound)
+    typedef std::basic_string<CharT, std::char_traits<CharT>,
+                              OPENDDS_ALLOCATOR(CharT) > string_t;
+    ToBoundedString(string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
-    std::basic_string<CharT>& str_;
+    string_t& str_;
     ACE_CDR::ULong bound_;
   };
 
@@ -544,12 +565,11 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, std::wstring& x);
+  bool operator>>(Serializer& s, OPENDDS_WSTRING& x);
 
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ToBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
   /// Read from the chain into a destination buffer.
   // This method doesn't respect alignment, so use with care.
@@ -660,22 +680,6 @@ private:
 
   /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];
-
-public:
-#if defined ACE_LITTLE_ENDIAN
-  static const bool SWAP_BE = true;
-#else
-  static const bool SWAP_BE = false;
-#endif
-
-  // Flags and reserved ids used in parameter list ids.
-  static const ACE_CDR::UShort pid_extended = 0x3f01;
-  static const ACE_CDR::UShort pid_list_end = 0x3f02;
-  static const ACE_CDR::UShort pid_impl_extension = 0x8000;
-  static const ACE_CDR::UShort pid_must_understand = 0x4000;
-
-  // EMHEADER must understand flag
-  static const ACE_CDR::ULong emheader_must_understand = 1 << 31;
 };
 
 template<typename T> struct KeyOnly {

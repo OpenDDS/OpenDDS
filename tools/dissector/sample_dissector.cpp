@@ -89,11 +89,10 @@ namespace OpenDDS
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
-      char* data, size_t size, bool swap_bytes, Serializer::Alignment align
+      char* data, size_t size, bool swap_bytes, Encoding::Alignment align
     ) :
       block(data, size),
-      serializer(&block, Encoding::KIND_CDR_UNALIGNED,
-                 swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+      serializer(&block, Encoding::KIND_UNALIGNED_CDR, swap_bytes)
     {
       block.wr_ptr(data + size);
       get_size_only = false;

@@ -51,7 +51,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
-      ACE_OS::exit(-1);
+      ACE_OS::exit(1);
     }
 
     SecurityAttributes::Message message;
@@ -116,7 +116,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
-    ACE_OS::exit(-1);
+    ACE_OS::exit(1);
   }
 }
 

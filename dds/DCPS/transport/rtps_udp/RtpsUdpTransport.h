@@ -52,6 +52,8 @@ private:
 
   bool configure_i(RtpsUdpInst& config);
 
+  void client_stop(const RepoId& localId);
+
   virtual void shutdown_i();
 
   virtual void register_for_reader(const RepoId& participant,

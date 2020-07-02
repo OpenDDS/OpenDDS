@@ -16,6 +16,7 @@
 macro(_OPENDDS_APPEND_DEF)
   foreach(_def ${ARGN})
     list(APPEND OPENDDS_DCPS_COMPILE_DEFS ${_def})
+    # TODO(iguessthislldo): Does every macro have to be added to IDL flags?
     foreach(_defines_list
               OPENDDS_DDS_BASE_IDL_FLAGS
               OPENDDS_TAO_BASE_IDL_FLAGS)
@@ -77,6 +78,10 @@ if (OPENDDS_SUPPRESS_ANYS)
 endif()
 
 # ACE defines.
+
+# TODO(iguessthislldo): Separate ACE and TAO (maybe more) definitions lists
+# that get added to their actual libraries and inherited by other targets
+# properly.
 
 if (OPENDDS_NO_DEBUG AND UNIX)
   _OPENDDS_APPEND_DEF(ACE_NDEBUG NDEBUG)

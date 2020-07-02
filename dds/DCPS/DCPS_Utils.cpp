@@ -383,39 +383,22 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
   return false;
 }
 
-Encoding::Kind repr_ext_to_encoding_kind(
-  DDS::DataRepresentationId_t repr, Encoding::Extensibility ext)
+bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind)
 {
   switch(repr) {
   case UNALIGNED_CDR_DATA_REPRESENTATION:
-    return Encoding::KIND_CDR_UNALIGNED;
-
+    kind = Encoding::KIND_UNALIGNED_CDR;
+    break;
   case DDS::XCDR_DATA_REPRESENTATION:
-    switch (ext) {
-    case Encoding::FINAL:
-    case Encoding::APPENDABLE:
-      return Encoding::KIND_CDR_PLAIN;
-    case Encoding::MUTABLE:
-      return Encoding::KIND_CDR_PARAMLIST;
-    }
+    kind = Encoding::KIND_XCDR1;
     break;
-
   case DDS::XCDR2_DATA_REPRESENTATION:
-    switch (ext) {
-    case Encoding::FINAL:
-      return Encoding::KIND_XCDR2_PLAIN;
-    case Encoding::APPENDABLE:
-      return Encoding::KIND_XCDR2_DELIMITED;
-    case Encoding::MUTABLE:
-      return Encoding::KIND_XCDR2_PARAMLIST;
-    }
+    kind = Encoding::KIND_XCDR2;
     break;
-
-  case DDS::XML_DATA_REPRESENTATION:
-    return Encoding::KIND_XML;
+  default:
+    return true;
   }
-
-  return Encoding::KIND_UNKNOWN;
+  return false;
 }
 
 DDS::DataRepresentationIdSeq get_effective_data_rep_qos(DDS::DataRepresentationIdSeq qos) {

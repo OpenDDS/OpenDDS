@@ -336,6 +336,8 @@ protected:
 
   void network_change() const;
 
+  void replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_sub_id) const;
+
 private:
 
   /// Helper function to output the enum as a string to help debugging.

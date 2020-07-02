@@ -41,38 +41,30 @@ Encoding::Kind Encoding::kind() const
 ACE_INLINE
 void Encoding::kind(Encoding::Kind value)
 {
-  kind_ = value;
+  zero_init_padding(true);
 
   switch (value) {
-  case KIND_CDR_PARAMLIST:
-  case KIND_CDR_PLAIN:
+  case KIND_XCDR1:
     alignment(ALIGN_CDR);
-    zero_init_padding(true);
+    xcdr_version(XCDR1);
     break;
-  case KIND_XCDR2_PARAMLIST:
-  case KIND_XCDR2_DELIMITED:
-  case KIND_XCDR2_PLAIN:
-    alignment(ALIGN_XCDR2);
-    zero_init_padding(true);
-    return;
 
-  case KIND_CDR_UNALIGNED:
+  case KIND_XCDR2:
+    alignment(ALIGN_XCDR2);
+    xcdr_version(XCDR2);
+    break;
+
+  case KIND_UNALIGNED_CDR:
     alignment(ALIGN_NONE);
+    xcdr_version(XCDR_NONE);
     break;
 
   default:
-    kind_ = KIND_UNKNOWN;
-    alignment(ALIGN_NONE);
-    break;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Encoding::kind: Invalid Argument: %u\n"), value));
   }
 
-  zero_init_padding(
-#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
-    true
-#else
-    false
-#endif
-  );
+  kind_ = value;
 }
 
 ACE_INLINE
@@ -129,93 +121,80 @@ void Encoding::align(size_t& value, size_t by) const
 ACE_INLINE
 Encoding::XcdrVersion Encoding::xcdr_version() const
 {
-  switch (kind_) {
-  case KIND_CDR_PLAIN:
-  case KIND_CDR_PARAMLIST:
-    return XCDR1;
-  case KIND_XCDR2_PLAIN:
-  case KIND_XCDR2_PARAMLIST:
-  case KIND_XCDR2_DELIMITED:
-    return XCDR2;
-  default:
-    return XCDR_NONE;
-  }
+  return xcdr_version_;
 }
 
 ACE_INLINE
-bool Encoding::has_cdr_header(Kind kind)
+void Encoding::xcdr_version(Encoding::XcdrVersion value)
 {
-  return kind < KIND_CUSTOM;
+  xcdr_version_ = value;
 }
 
 ACE_INLINE
-bool Encoding::has_cdr_header() const
-{
-  return has_cdr_header(kind_);
-}
-
-ACE_INLINE
-bool Encoding::supported(Kind kind)
+bool Encoding::is_encapsulated(Kind kind)
 {
   switch (kind) {
-  case KIND_CDR_PARAMLIST:
-  case KIND_CDR_PLAIN:
-  case KIND_XCDR2_PARAMLIST:
-  case KIND_XCDR2_DELIMITED:
-  case KIND_XCDR2_PLAIN:
-  case KIND_CDR_UNALIGNED:
+  case KIND_XCDR1:
+  case KIND_XCDR2:
     return true;
+  case KIND_UNALIGNED_CDR:
+    return false;
   default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Encoding::is_encapsulated: ")
+      ACE_TEXT("Invalid Argument: %u\n"), kind));
     return false;
   }
 }
 
 ACE_INLINE
-bool Encoding::supported() const
+bool Encoding::is_encapsulated() const
 {
-  return supported(kind_);
+  return is_encapsulated(kind_);
 }
 
 ACE_INLINE
-bool Encoding::has_endianness(Kind kind)
+EncapsulationHeader::Kind EncapsulationHeader::kind() const
 {
-  switch (kind) {
-  case KIND_CDR_PARAMLIST:
-  case KIND_CDR_PLAIN:
-  case KIND_XCDR2_PARAMLIST:
-  case KIND_XCDR2_DELIMITED:
-  case KIND_XCDR2_PLAIN:
-    return true;
-  default:
-    return false;
-  }
+  return kind_;
 }
 
 ACE_INLINE
-bool Encoding::has_endianness() const
+void EncapsulationHeader::kind(EncapsulationHeader::Kind value)
 {
-  return has_endianness(kind_);
+  kind_ = value;
+}
+
+ACE_INLINE
+ACE_UINT16 EncapsulationHeader::options() const
+{
+  return options_;
+}
+
+ACE_INLINE
+void EncapsulationHeader::options(ACE_UINT16 value)
+{
+  options_ = value;
+}
+
+ACE_INLINE
+bool max_serialized_size(const Encoding& /*encoding*/, size_t& size,
+  const EncapsulationHeader& /*value*/)
+{
+  size += 4;
+  return true;
+}
+
+ACE_INLINE
+void serialized_size(const Encoding& encoding, size_t& size,
+  const EncapsulationHeader& value)
+{
+  max_serialized_size(encoding, size, value);
 }
 
 ACE_INLINE
 const Encoding& Serializer::encoding() const
 {
   return encoding_;
-}
-
-ACE_INLINE
-bool max_serialized_size(const Encoding& encoding, size_t& size,
-  const Encoding& /*value*/)
-{
-  size += encoding.has_cdr_header() ? 4 : 0;
-  return true;
-}
-
-ACE_INLINE
-void serialized_size(const Encoding& encoding, size_t& size,
-  const Encoding& value)
-{
-  max_serialized_size(encoding, size, value);
 }
 
 ACE_INLINE
@@ -419,13 +398,13 @@ Serializer::swap_bytes() const
 }
 
 ACE_INLINE
-Serializer::Alignment Serializer::alignment() const
+Encoding::Alignment Serializer::alignment() const
 {
   return encoding().alignment();
 }
 
 ACE_INLINE
-void Serializer::alignment(Serializer::Alignment value)
+void Serializer::alignment(Encoding::Alignment value)
 {
   Encoding enc = encoding_;
   enc.alignment(value);
@@ -1079,9 +1058,8 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
   return s.good_bit();
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE bool
-operator<<(Serializer& s, const std::string& x)
+operator<<(Serializer& s, const OPENDDS_STRING& x)
 {
   return s << x.c_str();
 }
@@ -1094,7 +1072,7 @@ operator<<(Serializer& s, Serializer::FromBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator<<(Serializer& s, const std::wstring& x)
+operator<<(Serializer& s, const OPENDDS_WSTRING& x)
 {
   return s << x.c_str();
 }
@@ -1105,7 +1083,6 @@ operator<<(Serializer& s, Serializer::FromBoundedString<wchar_t> x)
   return (x.bound_ == 0 || x.str_.size() <= x.bound_) && s << x.str_;
 }
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_OutputCDR::from_octet x)
@@ -1331,9 +1308,8 @@ operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
          && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE bool
-operator>>(Serializer& s, std::string& x)
+operator>>(Serializer& s, OPENDDS_STRING& x)
 {
   char* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1350,7 +1326,7 @@ operator>>(Serializer& s, Serializer::ToBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator>>(Serializer& s, std::wstring& x)
+operator>>(Serializer& s, OPENDDS_WSTRING& x)
 {
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1365,7 +1341,6 @@ operator>>(Serializer& s, Serializer::ToBoundedString<wchar_t> x)
   return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
 }
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
 //----------------------------------------------------------------------------
 // predefined type methods
