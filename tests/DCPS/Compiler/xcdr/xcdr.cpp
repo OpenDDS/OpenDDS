@@ -133,7 +133,7 @@ bool operator==(const DataView& a, const DataView& b)
 
 template<typename TypeA, typename TypeB>
 void amalgam_serializer_test(
-  const Encoding& encoding, const std::string expected_cdr, TypeA& value, TypeB& result)
+  const Encoding& encoding, const std::string& expected_cdr, TypeA& value, TypeB& result)
 {
   ACE_Message_Block buffer(1024);
 

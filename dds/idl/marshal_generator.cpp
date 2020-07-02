@@ -1042,6 +1042,7 @@ namespace {
   void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type)
   {
     type = resolveActualType(type);
+    const ExtensibilityKind exten = be_global->extensibility(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -1101,7 +1102,6 @@ namespace {
     case AST_Decl::NT_struct: {
       const Fields fields(dynamic_cast<AST_Structure*>(type));
       const Fields::Iterator fields_end = fields.end();
-      const ExtensibilityKind exten = be_global->extensibility(type);
       idl_max_serialized_size_dheader(encoding, exten, size);
       // TODO(iguessthislldo) Handle Parameter List
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
@@ -1112,7 +1112,6 @@ namespace {
     case AST_Decl::NT_sequence: {
       AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
       AST_Type* base_node = seq_node->base_type();
-      const ExtensibilityKind exten = be_global->extensibility(type);
       idl_max_serialized_size_dheader(encoding, exten, size);
       size_t bound = seq_node->max_size()->ev()->u.ulval;
       align(encoding, size, 4);
@@ -1123,7 +1122,6 @@ namespace {
     case AST_Decl::NT_array: {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       AST_Type* base_node = array_node->base_type();
-      const ExtensibilityKind exten = be_global->extensibility(type);
       idl_max_serialized_size_dheader(encoding, exten, size);
       size_t array_size = 1;
       AST_Expression** dims = array_node->dims();
@@ -1135,7 +1133,6 @@ namespace {
     }
     case AST_Decl::NT_union: {
       AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-      const ExtensibilityKind exten = be_global->extensibility(type);
       idl_max_serialized_size_dheader(encoding, exten, size);
       // TODO(iguessthislldo) Handle Parameter List
       idl_max_serialized_size(encoding, size, union_node->disc_type());
@@ -1778,9 +1775,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     serialized_size.endArgs();
 
     if (may_be_parameter_list) {
+      /*
+       * For XCDR1 parameter lists this is used to hold the total size while
+       * size is hijacked for field sizes because of alignment resets.
+       */
       be_global->impl_ <<
-        "  // For XCDR1 parameter lists this is used to hold the total size while size is\n"
-        "  // hijacked for field sizes because of alignment resets.\n"
         "  size_t xcdr1_pl_running_total = 0;\n";
     }
 
