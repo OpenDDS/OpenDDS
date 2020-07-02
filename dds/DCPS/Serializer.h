@@ -608,13 +608,15 @@ public:
   /**
    * Read a delimiter used for XCDR2 delimited data.
    *
-   * Returns true if successful.
+   * Returns true if successful and size will be set to the size of the CDR
+   * value excluding the delimiter.
    */
   bool read_delimiter(size_t& size);
 
   /**
    * Write a delimiter used for XCDR2 delimited data.
    *
+   * Size is assumed to include the delimiter as serialized_size would return.
    * Returns true if successful.
    */
   bool write_delimiter(size_t size);
