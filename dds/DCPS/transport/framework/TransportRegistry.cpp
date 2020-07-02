@@ -763,7 +763,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 bool
 TransportRegistry::config_has_transport_template(const ACE_TString& config_name) const
 {
-  for (std::vector<TransportTemplate>::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+  for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
     if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
       return true;
     }
@@ -777,7 +777,7 @@ TransportRegistry::get_transport_template_info(const ACE_TString& config_name, T
 {
   bool ret = false;
   if (has_transport_template()) {
-    for (std::vector<TransportTemplate>::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+    for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
       if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
         inst.transport_template_name = i->transport_template_name;
         inst.config_name = i->config_name;

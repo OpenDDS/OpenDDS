@@ -2244,7 +2244,7 @@ int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
       }
 
       // copy the discovery information to the domain_range struct
-      for (std::vector<DomainRange>::iterator dr_it = domain_ranges_.begin();
+      for (OPENDDS_VECTOR(DomainRange)::iterator dr_it = domain_ranges_.begin();
          dr_it != domain_ranges_.end(); ++dr_it) {
         // Loop through the [rtps_discovery/*] sections looking for template
         for (KeyList::const_iterator disc_it = keys.begin(); disc_it != keys.end(); ++disc_it) {
@@ -2334,7 +2334,7 @@ Service_Participant::has_domain_range() const
 bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)
 {
   if (has_domain_range()) {
-    for (std::vector<DomainRange>::iterator it = domain_ranges_.begin();
+    for (OPENDDS_VECTOR(DomainRange)::iterator it = domain_ranges_.begin();
          it != domain_ranges_.end(); ++it) {
       if (id >= it->range_start && id <= it->range_end) {
         inst.range_start = it->range_start;
