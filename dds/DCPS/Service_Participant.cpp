@@ -1479,13 +1479,13 @@ Service_Participant::load_configuration(
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
                    ACE_TEXT("DCPSGlobalTransportConfig %C is a transport_template\n"),
-                   this->global_transport_config_));
+                   this->global_transport_config_.c_str()));
       }
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                         ACE_TEXT("Unable to locate specified global transport config: %C\n"),
-                        this->global_transport_config_),
+                        this->global_transport_config_.c_str()),
                        -1);
     }
   }
@@ -2076,32 +2076,31 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       // create domain instance
       ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, "domain", 1 /* create */, dsect);
+      dcf.open_section(root, DOMAIN_SECTION_NAME, 1 /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, to_dds_string(domainId).c_str(), 1 /* create */, dsub_sect);
-      dcf.set_string_value(dsub_sect, "DiscoveryConfig", name.c_str());
+      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), 1 /* create */, dsub_sect);
+      dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
       for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = dr_inst.domain_info.begin();
            it != dr_inst.domain_info.end();
            ++it) {
-        dcf.set_string_value(dsub_sect, it->first.c_str(), it->second.c_str());
+        dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
       }
 
       if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
         // create transport instance add default transport config
         TransportRegistry::instance()->create_transport_template_instance(domainId, dr_inst.discovery_template_name);
-
-        dcf.set_string_value(dsub_sect, "DefaultTransportConfig", TransportRegistry::instance()->get_config_instance_name(domainId).c_str());
+        dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
+                             ACE_TEXT_CHAR_TO_TCHAR(TransportRegistry::instance()->get_config_instance_name(domainId).c_str()));
       }
 
       //create matching discovery instance
       ACE_Configuration_Section_Key sect;
       dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, name.c_str(), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT(name.c_str()), 1, sub_sect);
       for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = dr_inst.disc_info.begin();
            it != dr_inst.disc_info.end();
            ++it) {
-
         // customization.
         OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator idx = dr_inst.customizations.find(it->first);
         if (idx != dr_inst.customizations.end()) {
@@ -2111,7 +2110,16 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
             size_t pos = addr.find_last_of(".");
             if (pos != OPENDDS_STRING::npos) {
               OPENDDS_STRING custom = addr.substr(pos + 1);
-              int val = std::stoi(custom) + domainId;
+              int val = 0;
+              if (!convertToInteger(custom, val)) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                        ACE_TEXT("configure_domain_range_instance ")
+                        ACE_TEXT("could not convert %s to integer\n"),
+                        custom.c_str()),
+                       -1);
+              }
+              val += domainId;
               addr = addr.substr(0, pos);
               addr += "." + to_dds_string(val);
             } else {
@@ -2122,8 +2130,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
                         idx->second.c_str()),
                        -1);
             }
-
-            dcf.set_string_value(sub_sect, idx->first.c_str(), addr.c_str());
+            dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -2134,7 +2141,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
           }
 
         } else {
-          dcf.set_string_value(sub_sect, it->first.c_str(), it->second.c_str());
+          dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
         }
       }
 

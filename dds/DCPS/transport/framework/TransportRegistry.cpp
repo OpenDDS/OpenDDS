@@ -104,7 +104,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0) {
       // found the [transport/*] section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
+      if (cf.open_section(root, ACE_TEXT(sect_name.c_str()), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("failed to open section %s\n"),
@@ -665,16 +665,16 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 
       // create config
       ACE_Configuration_Section_Key csect;
-      tcf.open_section(root, "config", 1 /* create */, csect);
+      tcf.open_section(root, ACE_TEXT("config"), 1 /* create */, csect);
       ACE_Configuration_Section_Key csub_sect;
       tcf.open_section(csect, config_inst_name.c_str(), 1 /* create */, csub_sect);
-      tcf.set_string_value(csub_sect, "transports", transport_inst_name.c_str());
+      tcf.set_string_value(csub_sect, ACE_TEXT("transports"), ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()));
 
       // create matching transport section
       ACE_Configuration_Section_Key tsect;
-      tcf.open_section(root, "transport", 1 /* create */, tsect);
+      tcf.open_section(root, ACE_TEXT("transport"), 1 /* create */, tsect);
       ACE_Configuration_Section_Key tsub_sect;
-      tcf.open_section(tsect, transport_inst_name.c_str(), 1 /* create */, tsub_sect);
+      tcf.open_section(tsect, ACE_TEXT(transport_inst_name.c_str()), 1 /* create */, tsub_sect);
 
       for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
            it != tr_inst.transport_info.end();
@@ -707,7 +707,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
                        -1);
             }
 
-            tcf.set_string_value(tsub_sect, idx->first.c_str(), addr.c_str());
+            tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(idx->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
           } else if (idx->second == "add_domain_id_to_port") {
             OPENDDS_STRING addr = it->second;
             size_t pos = addr.find_last_of(":");
@@ -727,7 +727,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
                        -1);
             }
 
-            tcf.set_string_value(tsub_sect, idx->first.c_str(), addr.c_str());
+            tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(idx->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -738,7 +738,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
           }
 
         } else {
-          tcf.set_string_value(tsub_sect, it->first.c_str(), it->second.c_str());
+          tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
         }
       }
 
