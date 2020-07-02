@@ -116,6 +116,8 @@ namespace {
 }
 
 void ScenarioManager::customize_configs(std::map<std::string, std::string>& worker_configs) {
+  using namespace std::chrono;
+  system_clock::time_point cnow = system_clock::now();
   Builder::TimeStamp now = Builder::get_sys_time();
 
   for (auto it = worker_configs.begin(); it != worker_configs.end(); ++it) {
@@ -150,23 +152,45 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
         }
       }
     }
+
+    std::cout << "Processing Overrides for config '" << it->first << "'" << std::endl;
+
     if (overrides_.create_time_delta) {
       wc.create_time = now + Builder::from_seconds(overrides_.create_time_delta);
+      std::cout << "- Overriding create_time to be "
+                << overrides_.create_time_delta << " seconds from now: "
+                << iso8601(cnow + seconds(overrides_.create_time_delta)) << std::endl;
     } else {
       // TODO FIXME This won't be right for all test scenarios, but not sure how else to avoid uninitialized values for now
       wc.create_time = Builder::ZERO;
     }
+
     if (overrides_.enable_time_delta) {
       wc.enable_time = now + Builder::from_seconds(overrides_.enable_time_delta);
+      std::cout << "- Overriding enable_time to be "
+                << overrides_.enable_time_delta << " seconds from now: "
+                << iso8601(cnow + seconds(overrides_.enable_time_delta)) << std::endl;
     }
+
     if (overrides_.start_time_delta) {
       wc.start_time = now + Builder::from_seconds(overrides_.start_time_delta);
+      std::cout << "- Overriding start_time to be "
+                << overrides_.start_time_delta << " seconds from now: "
+                << iso8601(cnow + seconds(overrides_.start_time_delta)) << std::endl;
     }
+
     if (overrides_.stop_time_delta) {
       wc.stop_time = now + Builder::from_seconds(overrides_.stop_time_delta);
+      std::cout << "- Overriding stop_time to be "
+                << overrides_.stop_time_delta << " seconds from now: "
+                << iso8601(cnow + seconds(overrides_.stop_time_delta)) << std::endl;
     }
+
     if (overrides_.destruction_time_delta) {
       wc.destruction_time = now + Builder::from_seconds(overrides_.destruction_time_delta);
+      std::cout << "- Overriding destruction_time to be "
+                << overrides_.destruction_time_delta << " seconds from now: "
+                << iso8601(cnow + seconds(overrides_.destruction_time_delta)) << std::endl;
     }
 
     // Convert back to JSON
@@ -295,6 +319,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(
 
 std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allocated_scenario)
 {
+  using namespace std::chrono;
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(allocated_scenario, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     throw std::runtime_error("Config Write Failed!");
@@ -308,10 +333,16 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   AllocatedScenario temp = allocated_scenario;
   temp.configs.length(0);
   temp.launch_time = Builder::get_sys_time() + Builder::from_seconds(3);
+  std::cout << "Setting scenario launch_time to be 3 seconds from now: "
+            << iso8601(system_clock::now() + seconds(3)) << std::endl;
 
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(temp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     throw std::runtime_error("Config Write Failed!");
+  }
+
+  if (dds_entities_.scenario_writer_impl_->wait_for_acknowledgments(delay) != DDS::RETCODE_OK) {
+    throw std::runtime_error("Wait For 'Launch Time' Ack Failed");
   }
 
   // Set up Waiting for Reading Reports or the Scenario Timeout
@@ -329,9 +360,9 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   const std::chrono::seconds timeout(allocated_scenario.timeout);
   std::shared_ptr<std::thread> timeout_thread;
   if (timeout.count() > 0) {
-    timeout_thread.reset(new std::thread([&reports_left, &reports_left_mutex, &timeout_cv, &timeout, &guard_condition]  {
+    timeout_thread.reset(new std::thread([&] {
       std::unique_lock<std::mutex> lock(reports_left_mutex);
-      if (!timeout_cv.wait_for(lock, timeout, [&reports_left] {return reports_left == 0;})) {
+      if (!timeout_cv.wait_for(lock, timeout, [&] {return reports_left == 0;})) {
         guard_condition->set_trigger_value(true);
       }
     }));
@@ -346,7 +377,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 
     while (!read_condition->get_trigger_value()) {
       DDS::ConditionSeq active;
-      const DDS::Duration_t wake_interval = { 3, 0 };
+      const DDS::Duration_t wake_interval = { 0, 500000000 };
       rc = wait_set->wait(active, wake_interval);
       if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
         throw std::runtime_error("Error while waiting for reports");

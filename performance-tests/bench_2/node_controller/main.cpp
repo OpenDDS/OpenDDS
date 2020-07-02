@@ -582,7 +582,7 @@ bool wait_for_scenario_data(AllocatedScenarioDataReader_var config_reader_impl) 
 
   while (!read_condition->get_trigger_value()) {
     DDS::ConditionSeq active;
-    const DDS::Duration_t wake_interval = { 3, 0 };
+    const DDS::Duration_t wake_interval = { 0, 500000000 };
     DDS::ReturnCode_t rc = ws->wait(active, wake_interval);
     if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
       std::cerr << "Wait for node config failed" << std::endl;
@@ -719,7 +719,7 @@ int run_cycle(
     return 1;
   }
 
-  std::this_thread::sleep_for(std::chrono::seconds(10));
+  std::this_thread::sleep_for(std::chrono::seconds(3));
 
   return 0;
 }
