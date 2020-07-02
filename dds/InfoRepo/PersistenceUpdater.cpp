@@ -735,7 +735,7 @@ PersistenceUpdater::create(const URActor& actor)
   csp_bin.exprParams = std::make_pair(len, buf4);
 
 
- outCdr.reset();
+  outCdr.reset();
   outCdr << actor.serializedTypeInfo;
   ACE_Message_Block dst5;
   ACE_CDR::consolidate(&dst5, outCdr.begin());
