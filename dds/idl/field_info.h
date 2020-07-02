@@ -61,6 +61,7 @@ struct FieldInfo {
   void init();
   void set_element();
   void set_underscored(const std::string& scoped_type);
+  std::string elem_underscored() const;
 };
 
 #endif

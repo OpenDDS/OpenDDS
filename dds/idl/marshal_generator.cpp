@@ -715,7 +715,7 @@ namespace {
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
             "    gen_find_size(IDL::DistinctType<const " << sf.elem_ << ", " <<
-            sf.underscored_ << "_tag>(seq[i]), size, padding);\n";
+            sf.elem_underscored() << "_tag>(seq[i]), size, padding);\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
             "    gen_find_size(seq[i], size, padding);\n";
@@ -778,7 +778,7 @@ namespace {
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
             streamAndCheck("<< IDL::DistinctType<const " + sf.elem_ + ", " +
-                           sf.underscored_ + "_tag>(seq[i])", 4);
+                           sf.elem_underscored() + "_tag>(seq[i])", 4);
         } else {
           be_global->impl_ << streamAndCheck("<< seq[i]", 4);
         }
@@ -853,7 +853,7 @@ namespace {
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
             streamAndCheck(">> IDL::DistinctType<" + sf.elem_ + ", " +
-                           sf.underscored_ + "_tag>(seq[i])", 4);
+                           sf.elem_underscored() + "_tag>(seq[i])", 4);
         } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
         }

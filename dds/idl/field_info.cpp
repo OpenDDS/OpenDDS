@@ -155,6 +155,11 @@ void FieldInfo::set_underscored(const std::string& scoped_type)
   }
 }
 
+std::string FieldInfo::elem_underscored() const
+{
+  return as_base_ ? underscored_type_name(as_base_->name()) : "";
+}
+
 std::string FieldInfo::string_type(Classification c)
 {
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
