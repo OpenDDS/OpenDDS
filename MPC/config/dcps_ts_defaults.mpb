@@ -31,7 +31,7 @@ project : dds_macros, taobaseidldefaults {
   // Also To avoid multiple unnecessary warnings, have tao_idl ignore
   // any OpenDDS annotations, all other unknown annotations will be caught by
   // opendds_idl.
-  idlflags += --idl-version 4 --unknown-annotations ignore
+  idlflags += --idl-version 4 --unknown-annotations ignore -as
 }
 
 feature(!no_opendds_safety_profile): taobaseidldefaults {

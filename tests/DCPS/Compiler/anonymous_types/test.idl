@@ -55,6 +55,12 @@ struct TestStruct {
   sequence<long, 5> a_l5seq;
   string<200> a_bstr;
   sequence<XYZ> a_xyzseq;
+
+  //test C++ keyword used as anonymous type field
+  //to see all escaping is done correctly
+  sequence<long, 3> _long; // _tao_seq_CORBA_Long__3 _cxx_long;
+  sequence<long, 3> break; // _tao_seq_CORBA_Long__3 _cxx_break;
+  sequence<long, 3> class; // _tao_seq_CORBA_Long__3 _cxx_class;
 };
 
 // ========== ========== ========== ========== ==========

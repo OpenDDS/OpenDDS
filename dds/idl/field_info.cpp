@@ -37,6 +37,15 @@ std::string FieldInfo::underscored_type_name(UTL_ScopedName* sn)
   return use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
 }
 
+std::string FieldInfo::underscore(const std::string& scoped_type)
+{
+  std::string s = scoped_type;
+  for (std::size_t i = s.find(scope_op); i != s.npos; i = s.find(scope_op, i + 2)) {
+    s.replace(i, 2, "_");
+  }
+  return s;
+}
+
 // for anonymous types
 FieldInfo::FieldInfo(AST_Field& field) :
   type_(field.field_type()),
@@ -63,6 +72,8 @@ void FieldInfo::init()
   as_base_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : 0);
   as_act_ = as_base_ ? resolveActualType(as_base_) : 0;
   as_cls_ = as_act_ ? classify(as_act_) : CL_UNKNOWN;
+  scoped_elem_ = as_base_ ? scoped(as_base_->name()) : "";
+  underscored_elem_ = as_base_ ? underscore(scoped_elem_) : "";
 
   if (type_->anonymous() && as_base_) {
     scoped_type_ = scoped(type_->name());
@@ -72,7 +83,7 @@ void FieldInfo::init()
       type_name_ = "_" + name_;
       if (seq_) { type_name_ += "_seq"; }
       scoped_type_ = struct_name_ + "::" + type_name_;
-      set_underscored(scoped_type_);
+      underscored_ = underscore(scoped_type_);
     } else {
       type_name_ = scoped_type_.substr(i + 2);
     }
@@ -144,20 +155,6 @@ void FieldInfo::set_element()
     }
     elem_ = scoped(as_act_->name());
   }
-}
-
-void FieldInfo::set_underscored(const std::string& scoped_type)
-{
-  underscored_ = scoped_type;
-  for (std::size_t i = underscored_.find(scope_op); i != underscored_.npos;
-       i = underscored_.find(scope_op, i + 2)) {
-    underscored_.replace(i, 2, "_");
-  }
-}
-
-std::string FieldInfo::elem_underscored() const
-{
-  return as_base_ ? underscored_type_name(as_base_->name()) : "";
 }
 
 std::string FieldInfo::string_type(Classification c)

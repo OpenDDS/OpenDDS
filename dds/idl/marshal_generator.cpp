@@ -708,14 +708,13 @@ namespace {
           }
         } else if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
-            "    " << sf.elem_ << "_var tmp_var = " << sf.elem_
-            << "_dup(seq[i]);\n"
+            "    " << sf.elem_ << "_var tmp_var = " << sf.elem_ << "_dup(seq[i]);\n"
             "    " << sf.elem_ << "_forany tmp = tmp_var.inout();\n"
             "    gen_find_size(tmp, size, padding);\n";
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
             "    gen_find_size(IDL::DistinctType<const " << sf.elem_ << ", " <<
-            sf.elem_underscored() << "_tag>(seq[i]), size, padding);\n";
+            sf.underscored_elem_ << "_tag>(seq[i]), size, padding);\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
             "    gen_find_size(seq[i], size, padding);\n";
@@ -765,11 +764,9 @@ namespace {
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
         if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
-          const string typedefname = scoped(sf.seq_->base_type()->name());
           be_global->impl_ <<
-            "    " << typedefname << "_var tmp_var = " << typedefname
-            << "_dup(seq[i]);\n"
-            "    " << typedefname << "_forany tmp = tmp_var.inout();\n"
+            "    " << sf.scoped_elem_ << "_var tmp_var = " << sf.scoped_elem_ << "_dup(seq[i]);\n"
+            "    " << sf.scoped_elem_ << "_forany tmp = tmp_var.inout();\n"
             << streamAndCheck("<< tmp", 4);
         } else if ((sf.as_cls_ & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
           const string args = "seq[i], " + bounded_arg(sf.as_act_);
@@ -778,7 +775,7 @@ namespace {
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
             streamAndCheck("<< IDL::DistinctType<const " + sf.elem_ + ", " +
-                           sf.elem_underscored() + "_tag>(seq[i])", 4);
+                           sf.underscored_elem_ + "_tag>(seq[i])", 4);
         } else {
           be_global->impl_ << streamAndCheck("<< seq[i]", 4);
         }
@@ -831,13 +828,11 @@ namespace {
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
         if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
-          const string typedefname = scoped(sf.seq_->base_type()->name());
           be_global->impl_ <<
-            "    " << typedefname << "_var tmp = " << typedefname
-            << "_alloc();\n"
-            "    " << typedefname << "_forany fa = tmp.inout();\n"
+            "    " << sf.scoped_elem_ << "_var tmp = " << sf.scoped_elem_ << "_alloc();\n"
+            "    " << sf.scoped_elem_ << "_forany fa = tmp.inout();\n"
             << streamAndCheck(">> fa", 4) <<
-            "    " << typedefname << "_copy(seq[i], tmp.in());\n";
+            "    " << sf.scoped_elem_ << "_copy(seq[i], tmp.in());\n";
         } else if (sf.as_cls_ & CL_STRING) {
           if (sf.as_cls_ & CL_BOUNDED) {
             const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ")
@@ -853,7 +848,7 @@ namespace {
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
             streamAndCheck(">> IDL::DistinctType<" + sf.elem_ + ", " +
-                           sf.elem_underscored() + "_tag>(seq[i])", 4);
+                           sf.underscored_elem_ + "_tag>(seq[i])", 4);
         } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
         }
@@ -1114,15 +1109,15 @@ namespace {
             : " + 1;\n");
         } else if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
-            indent << af.scoped_type_ << "_var tmp_var = " << af.scoped_type_
+            indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
             << "_dup(arr" << nfl.index_ << ");\n" <<
-            indent << af.scoped_type_ << "_forany tmp = tmp_var.inout();\n" <<
+            indent << af.scoped_elem_ << "_forany tmp = tmp_var.inout();\n" <<
             indent << "gen_find_size(tmp, size, padding);\n";
         } else { // Struct, Sequence, Union, C++11 Array
           string pre, post;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<const " + af.scoped_type_ + ", " +
-              dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
+            pre = "IDL::DistinctType<const " + af.scoped_elem_ + ", " +
+              af.underscored_elem_ + "_tag>(";
             post = ')';
           }
           be_global->impl_ <<
@@ -1150,16 +1145,16 @@ namespace {
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
         if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
-            indent << af.scoped_type_ << "_var tmp_var = " << af.scoped_type_
+            indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
             << "_dup(arr" << nfl.index_ << ");\n" <<
-            indent << af.scoped_type_ << "_forany tmp = tmp_var.inout();\n" <<
+            indent << af.scoped_elem_ << "_forany tmp = tmp_var.inout();\n" <<
             streamAndCheck("<< tmp", indent.size());
         } else {
           string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
           string pre;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<const " + af.scoped_type_ + ", " +
-              dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
+            pre = "IDL::DistinctType<const " + af.scoped_elem_ + ", " +
+              af.underscored_elem_ + "_tag>(";
             suffix += ')';
           }
           be_global->impl_ <<
@@ -1186,20 +1181,19 @@ namespace {
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
         if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
-          const string typedefname = scoped(af.as_base_->name());
           be_global->impl_ <<
-            indent << typedefname << "_var tmp = " << typedefname
+            indent << af.scoped_elem_ << "_var tmp = " << af.scoped_elem_
             << "_alloc();\n"
-            << indent << typedefname << "_forany fa = tmp.inout();\n"
+            << indent << af.scoped_elem_ << "_forany fa = tmp.inout();\n"
             << streamAndCheck(">> fa", indent.size()) <<
-            indent << typedefname << "_copy(arr" << nfl.index_ <<
+            indent << af.scoped_elem_ << "_copy(arr" << nfl.index_ <<
             ", tmp.in());\n";
         } else {
           string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
           string pre;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<" + af.scoped_type_ + ", " +
-              dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
+            pre = "IDL::DistinctType<" + af.scoped_elem_ + ", " +
+              af.underscored_elem_ + "_tag>(";
             suffix += ')';
           }
           be_global->impl_ <<
