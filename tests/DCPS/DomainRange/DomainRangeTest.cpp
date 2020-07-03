@@ -144,8 +144,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    std::string reader_id;
-    std::string writer_id;
+    OPENDDS_STRING reader_id = "Reader";
+    OPENDDS_STRING writer_id = "Writer";
     bool reliable = true;
 
     int num_participants = 1;
@@ -176,9 +176,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         it != domains.end(); ++it)
   {
     DDS::DomainId_t domain = *it;
-
-    reader_id = "reader " + OpenDDS::DCPS::to_dds_string(domain);
-    writer_id = "writer " + OpenDDS::DCPS::to_dds_string(domain);
 
     // Create DomainParticipant
     DDS::DomainParticipantQos dr_dp_qos;
