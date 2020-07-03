@@ -117,7 +117,7 @@ public:
 
   bool released() const;
 
-  bool config_has_transport_template(const ACE_TString& config_name) const;
+  bool config_has_transport_template(const OPENDDS_STRING& config_name) const;
 
   int create_transport_template_instance(DDS::DomainId_t domain, const OPENDDS_STRING& transport_template_name);
 
@@ -163,7 +163,7 @@ private:
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
-  bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
+  bool get_transport_template_info(const OPENDDS_STRING& config_name, TransportTemplate& inst);
 
   bool has_transport_template() const;
 };

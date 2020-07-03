@@ -104,7 +104,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0) {
       // found the [transport/*] section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, ACE_TEXT(sect_name.c_str()), 0, sect) != 0) {
+      if (cf.open_section(root, ACE_TEXT_CHAR_TO_TCHAR(sect_name.c_str()), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("failed to open section %s\n"),
@@ -636,7 +636,7 @@ TransportRegistry::released() const
 OPENDDS_STRING
 TransportRegistry::get_transport_template_instance_name(const DDS::DomainId_t id)
 {
-  OpenDDS::DCPS::Discovery::RepoKey configured_name = TRANSPORT_TEMPLATE_INSTANCE_PREFIX;
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = "transport_template_instance_";
   configured_name += to_dds_string(id);
   return configured_name;
 }
@@ -644,7 +644,7 @@ TransportRegistry::get_transport_template_instance_name(const DDS::DomainId_t id
 OPENDDS_STRING
 TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
 {
-  OpenDDS::DCPS::Discovery::RepoKey configured_name = CONFIG_INSTANCE_PREFIX;
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = "templ_config_";
   configured_name += to_dds_string(id);
   return configured_name;
 }
@@ -694,7 +694,16 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
               if (cpos != OPENDDS_STRING::npos) {
                 port = custom.substr(cpos);
               }
-              int val = std::stoi(custom) + domain;
+              int val = 0;
+              if (!convertToInteger(custom, val)) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                        ACE_TEXT("create_transport_template_instance ")
+                        ACE_TEXT("could not convert %s to integer\n"),
+                        custom.c_str()),
+                       -1);
+              }
+              val += domain;
               addr = addr.substr(0, pos);
               addr += "." + to_dds_string(val);
               addr += port;
@@ -761,10 +770,10 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 }
 
 bool
-TransportRegistry::config_has_transport_template(const ACE_TString& config_name) const
+TransportRegistry::config_has_transport_template(const OPENDDS_STRING& config_name) const
 {
   for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-    if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
+    if (config_name == i->config_name) {
       return true;
     }
   }
@@ -773,12 +782,12 @@ TransportRegistry::config_has_transport_template(const ACE_TString& config_name)
 }
 
 bool
-TransportRegistry::get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst)
+TransportRegistry::get_transport_template_info(const OPENDDS_STRING& config_name, TransportTemplate& inst)
 {
   bool ret = false;
   if (has_transport_template()) {
     for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-      if (ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
+      if (config_name == i->config_name) {
         inst.transport_template_name = i->transport_template_name;
         inst.config_name = i->config_name;
         inst.instantiate_per_participant = i->instantiate_per_participant;

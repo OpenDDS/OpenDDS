@@ -121,7 +121,6 @@ static const char DEFAULT_PERSISTENT_DATA_DIR[] = "OpenDDS-durable-data-dir";
 static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
 static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
 static const ACE_TCHAR DOMAIN_RANGE_SECTION_NAME[] = ACE_TEXT("DomainRange");
-static const ACE_TCHAR RTPS_TEMPLATE_INSTANCE_PREFIX[] = ACE_TEXT("rtps_template_instance_");
 static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
 static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
 
@@ -1473,7 +1472,7 @@ Service_Participant::load_configuration(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
     if (config) {
       TransportRegistry::instance()->global_config(config);
-    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_)) {
+    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_.c_str())) {
       if (DCPS_debug_level > 0) {
         // This is not an error.
         ACE_DEBUG((LM_NOTICE,
@@ -2086,7 +2085,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
       }
 
-      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
+      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_.c_str())) {
         // create transport instance add default transport config
         TransportRegistry::instance()->create_transport_template_instance(domainId, dr_inst.discovery_template_name);
         dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
@@ -2097,7 +2096,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       ACE_Configuration_Section_Key sect;
       dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
       for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = dr_inst.disc_info.begin();
            it != dr_inst.disc_info.end();
            ++it) {
@@ -2368,7 +2367,7 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
 Discovery::RepoKey
 Service_Participant::get_discovery_template_instance_name(const DDS::DomainId_t id)
 {
-  OpenDDS::DCPS::Discovery::RepoKey configured_name = RTPS_TEMPLATE_INSTANCE_PREFIX;
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = "rtps_template_instance_";
   configured_name += to_dds_string(id);
   return configured_name;
 }

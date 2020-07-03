@@ -170,9 +170,7 @@ namespace DCPS {
 // The transport and configuration section name used in the config file format
 static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
 static const ACE_TCHAR TRANSPORT_TEMPLATE_SECTION_NAME[] = ACE_TEXT("transport_template");
-static const ACE_TCHAR TRANSPORT_TEMPLATE_INSTANCE_PREFIX[] = ACE_TEXT("transport_template_instance_");
 static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
-static const ACE_TCHAR CONFIG_INSTANCE_PREFIX[] = ACE_TEXT("templ_config_");
 
 /// Identifier type for DataLink objects.
 typedef ACE_UINT64  DataLinkIdType;
