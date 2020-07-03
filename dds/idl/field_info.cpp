@@ -46,6 +46,11 @@ std::string FieldInfo::underscore(const std::string& scoped_type)
   return s;
 }
 
+std::string FieldInfo::ref(const std::string& scoped_t, const std::string& underscored_t, const std::string& const_s)
+{
+  return "IDL::DistinctType<" + const_s + scoped_t + ", " + underscored_t + "_tag>";
+}
+
 // for anonymous types
 FieldInfo::FieldInfo(AST_Field& field) :
   type_(field.field_type()),
@@ -74,6 +79,10 @@ void FieldInfo::init()
   as_cls_ = as_act_ ? classify(as_act_) : CL_UNKNOWN;
   scoped_elem_ = as_base_ ? scoped(as_base_->name()) : "";
   underscored_elem_ = as_base_ ? underscore(scoped_elem_) : "";
+  if (!scoped_elem_.empty() && !underscored_elem_.empty()) {
+    elem_ref_ = ref(scoped_elem_, underscored_elem_, "");
+    elem_const_ref_ = ref(scoped_elem_, underscored_elem_);
+  }
 
   if (type_->anonymous() && as_base_) {
     scoped_type_ = scoped(type_->name());
@@ -117,8 +126,8 @@ void FieldInfo::init()
     const_unwrap_ = "  const " + unwrap_;
     unwrap_ = "  " + unwrap_;
     arg_ = "wrap";
-    ref_       = "IDL::DistinctType<"       + scoped_type_ + ", " + underscored_ + "_tag>";
-    const_ref_ = "IDL::DistinctType<const " + scoped_type_ + ", " + underscored_ + "_tag>";
+    ref_ = ref(scoped_type_, underscored_, "");
+    const_ref_ = ref(scoped_type_, underscored_);
   } else {
     ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
     const_ref_ = "const " + ref_;

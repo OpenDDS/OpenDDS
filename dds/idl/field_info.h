@@ -27,6 +27,7 @@ struct FieldInfo {
   static std::string get_type_name(AST_Type& field);
   static std::string underscored_type_name(UTL_ScopedName* sn);
   static std::string underscore(const std::string& scoped_type);
+  static std::string ref(const std::string& scoped_t, const std::string& underscored_t, const std::string& const_s = "const ");
   static std::string string_type(AstTypeClassification::Classification c);
   static std::string to_cxx_type(AST_Type* type, std::size_t& size);
 
@@ -42,6 +43,8 @@ struct FieldInfo {
   AstTypeClassification::Classification as_cls_;
   std::string scoped_elem_;
   std::string underscored_elem_;
+  std::string elem_ref_;
+  std::string elem_const_ref_;
 
   std::string scoped_type_;
   std::string struct_name_;

@@ -695,8 +695,7 @@ namespace {
           be_global->impl_ <<
             "    find_size_ulong(size, padding);\n";
           const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-            : " + 1;\n";
+            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n" : " + 1;\n";
           if (use_cxx11) {
             be_global->impl_ <<
               "    size += seq[i].size()" << strlen_suffix;
@@ -708,13 +707,12 @@ namespace {
           }
         } else if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
-            "    " << sf.elem_ << "_var tmp_var = " << sf.elem_ << "_dup(seq[i]);\n"
-            "    " << sf.elem_ << "_forany tmp = tmp_var.inout();\n"
+            "    " << sf.scoped_elem_ << "_var tmp_var = " << sf.scoped_elem_ << "_dup(seq[i]);\n"
+            "    " << sf.scoped_elem_ << "_forany tmp = tmp_var.inout();\n"
             "    gen_find_size(tmp, size, padding);\n";
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            "    gen_find_size(IDL::DistinctType<const " << sf.elem_ << ", " <<
-            sf.underscored_elem_ << "_tag>(seq[i]), size, padding);\n";
+            "    gen_find_size(" << sf.elem_const_ref_ << "(seq[i]), size, padding);\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
             "    gen_find_size(seq[i], size, padding);\n";
@@ -774,8 +772,7 @@ namespace {
             streamAndCheck("<< " + getWrapper(args, sf.as_act_, WD_OUTPUT), 4);
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            streamAndCheck("<< IDL::DistinctType<const " + sf.elem_ + ", " +
-                           sf.underscored_elem_ + "_tag>(seq[i])", 4);
+            streamAndCheck("<< " + sf.elem_const_ref_ + "(seq[i])", 4);
         } else {
           be_global->impl_ << streamAndCheck("<< seq[i]", 4);
         }
@@ -805,8 +802,7 @@ namespace {
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
-            "    bool b;\n" <<
-            streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
+            "    bool b;\n" << streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
             "    seq[i] = b;\n"
             "  }\n"
             "  return true;\n";
@@ -847,8 +843,7 @@ namespace {
           }
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            streamAndCheck(">> IDL::DistinctType<" + sf.elem_ + ", " +
-                           sf.underscored_elem_ + "_tag>(seq[i])", 4);
+            streamAndCheck(">> " + sf.elem_ref_ + "(seq[i])", 4);
         } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
         }
@@ -1085,13 +1080,11 @@ namespace {
         if (!align.empty()) {
           be_global->impl_ <<
             "  if ((size + padding) % " << align << ") {\n"
-            "    padding += " << align << " - ((size + padding) % " << align
-            << ");\n"
+            "    padding += " << align << " - ((size + padding) % " << align << ");\n"
             "  }\n";
         }
-        be_global->impl_
-          << "  size += " << af.n_elems_ << " * " << getMaxSizeExprPrimitive(af.as_act_)
-          << ";\n";
+        be_global->impl_ <<
+          "  size += " << af.n_elems_ << " * " << getMaxSizeExprPrimitive(af.as_act_) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
@@ -1105,8 +1098,7 @@ namespace {
             be_global->impl_ << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())";
           }
           be_global->impl_ << ((af.as_cls_ & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-            : " + 1;\n");
+            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n" : " + 1;\n");
         } else if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
             indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
@@ -1116,13 +1108,11 @@ namespace {
         } else { // Struct, Sequence, Union, C++11 Array
           string pre, post;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<const " + af.scoped_elem_ + ", " +
-              af.underscored_elem_ + "_tag>(";
+            pre = af.elem_const_ref_ + "(";
             post = ')';
           }
           be_global->impl_ <<
-            indent << "gen_find_size(" << pre << "arr" << nfl.index_
-            << post << ", size, padding);\n";
+            indent << "gen_find_size(" << pre << "arr" << nfl.index_ << post << ", size, padding);\n";
         }
       }
     }
@@ -1153,8 +1143,7 @@ namespace {
           string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
           string pre;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<const " + af.scoped_elem_ + ", " +
-              af.underscored_elem_ + "_tag>(";
+            pre = af.elem_const_ref_ + "(";
             suffix += ')';
           }
           be_global->impl_ <<
@@ -1182,18 +1171,15 @@ namespace {
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
         if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
-            indent << af.scoped_elem_ << "_var tmp = " << af.scoped_elem_
-            << "_alloc();\n"
-            << indent << af.scoped_elem_ << "_forany fa = tmp.inout();\n"
-            << streamAndCheck(">> fa", indent.size()) <<
-            indent << af.scoped_elem_ << "_copy(arr" << nfl.index_ <<
-            ", tmp.in());\n";
+            indent << af.scoped_elem_ << "_var tmp = " << af.scoped_elem_ << "_alloc();\n" <<
+            indent << af.scoped_elem_ << "_forany fa = tmp.inout();\n" <<
+            streamAndCheck(">> fa", indent.size()) <<
+            indent << af.scoped_elem_ << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
         } else {
           string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
           string pre;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<" + af.scoped_elem_ + ", " +
-              af.underscored_elem_ + "_tag>(";
+            pre = af.elem_ref_ + "(";
             suffix += ')';
           }
           be_global->impl_ <<
