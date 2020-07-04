@@ -104,7 +104,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0) {
       // found the [transport/*] section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, ACE_TEXT_CHAR_TO_TCHAR(sect_name.c_str()), 0, sect) != 0) {
+      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("failed to open section %s\n"),
@@ -667,14 +667,14 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
       ACE_Configuration_Section_Key csect;
       tcf.open_section(root, ACE_TEXT("config"), 1 /* create */, csect);
       ACE_Configuration_Section_Key csub_sect;
-      tcf.open_section(csect, config_inst_name.c_str(), 1 /* create */, csub_sect);
+      tcf.open_section(csect, ACE_TEXT_CHAR_TO_TCHAR(config_inst_name.c_str()), 1 /* create */, csub_sect);
       tcf.set_string_value(csub_sect, ACE_TEXT("transports"), ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()));
 
       // create matching transport section
       ACE_Configuration_Section_Key tsect;
       tcf.open_section(root, ACE_TEXT("transport"), 1 /* create */, tsect);
       ACE_Configuration_Section_Key tsub_sect;
-      tcf.open_section(tsect, ACE_TEXT(transport_inst_name.c_str()), 1 /* create */, tsub_sect);
+      tcf.open_section(tsect, ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()), 1 /* create */, tsub_sect);
 
       for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
            it != tr_inst.transport_info.end();
@@ -770,10 +770,10 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 }
 
 bool
-TransportRegistry::config_has_transport_template(const OPENDDS_STRING& config_name) const
+TransportRegistry::config_has_transport_template(const ACE_TString& config_name) const
 {
   for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-    if (config_name == i->config_name) {
+    if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
       return true;
     }
   }
@@ -787,7 +787,7 @@ TransportRegistry::get_transport_template_info(const OPENDDS_STRING& config_name
   bool ret = false;
   if (has_transport_template()) {
     for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-      if (config_name == i->config_name) {
+      if (!ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
         inst.transport_template_name = i->transport_template_name;
         inst.config_name = i->config_name;
         inst.instantiate_per_participant = i->instantiate_per_participant;
@@ -799,8 +799,8 @@ TransportRegistry::get_transport_template_info(const OPENDDS_STRING& config_name
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
-                     ACE_TEXT("found config %s\n"),
-                     ACE_TEXT_ALWAYS_CHAR(config_name.c_str())));
+                     ACE_TEXT("found config %C\n"),
+                     config_name.c_str()));
         }
 
         break;

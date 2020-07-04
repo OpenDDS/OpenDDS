@@ -1472,7 +1472,7 @@ Service_Participant::load_configuration(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
     if (config) {
       TransportRegistry::instance()->global_config(config);
-    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_.c_str())) {
+    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_)) {
       if (DCPS_debug_level > 0) {
         // This is not an error.
         ACE_DEBUG((LM_NOTICE,
@@ -2085,7 +2085,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
       }
 
-      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_.c_str())) {
+      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
         // create transport instance add default transport config
         TransportRegistry::instance()->create_transport_template_instance(domainId, dr_inst.discovery_template_name);
         dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
