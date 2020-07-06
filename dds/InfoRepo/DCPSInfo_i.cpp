@@ -459,11 +459,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
 
     Update::UWActor actor(domainId, pubId, topicId, participantId, Update::DataWriter
                           , callback.in()
-                          , const_cast<DDS::PublisherQos &>(publisherQos)
-                          , const_cast<DDS::DataWriterQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>(transInfo)
+                          , const_cast<DDS::PublisherQos&>(publisherQos)
+                          , const_cast<DDS::DataWriterQos&>(qos)
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
                           , csi
-                          , const_cast<DDS::OctetSeq &>(serializedTypeInfo));
+                          , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
     this->um_->create(actor);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -774,11 +774,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
 
     Update::URActor actor(domainId, subId, topicId, participantId, Update::DataReader
                           , callback.in()
-                          , const_cast<DDS::SubscriberQos &>(subscriberQos)
-                          , const_cast<DDS::DataReaderQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>(transInfo)
+                          , const_cast<DDS::SubscriberQos&>(subscriberQos)
+                          , const_cast<DDS::DataReaderQos&>(qos)
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
                           , csi
-                          , const_cast<DDS::OctetSeq &>(serializedTypeInfo));
+                          , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
 
     this->um_->create(actor);
 
