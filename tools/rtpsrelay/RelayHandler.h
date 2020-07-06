@@ -34,6 +34,7 @@ public:
     , lifespan_(60) // 1 minute
     , application_domain_(1)
     , publish_participant_statistics_(true)
+    , application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
   {}
 
   void statistics_interval(const OpenDDS::DCPS::TimeDuration& flag)
