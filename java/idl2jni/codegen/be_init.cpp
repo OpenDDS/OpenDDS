@@ -23,6 +23,7 @@ BE_init(int &, ACE_TCHAR *[])
 {
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
   idl_global->default_idl_version_ = IDL_VERSION_4;
+  idl_global->anon_type_diagnostic(IDL_GlobalData::ANON_TYPE_SILENT);
   return 0;
 }
 
