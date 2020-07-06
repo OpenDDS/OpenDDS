@@ -463,7 +463,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                           , const_cast<DDS::DataWriterQos &>(qos)
                           , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>(transInfo)
                           , csi
-                          , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
+                          , const_cast<DDS::OctetSeq &>(serializedTypeInfo));
     this->um_->create(actor);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -2372,6 +2372,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                                , pub->callback.c_str() , pub->drdwQos
                                , pub->transportInterfaceInfo
                                , pub->pubsubQos
+                               , pub->serializedTypeInfo
                                , true)) {
       OpenDDS::DCPS::RepoIdConverter pub_converter(pub->actorId);
       OpenDDS::DCPS::RepoIdConverter part_converter(pub->participantId);

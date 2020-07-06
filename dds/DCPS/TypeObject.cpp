@@ -180,12 +180,13 @@ void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
               ACE_TEXT("serialization of type information failed.\n")));
   }
-  ssize_t size = data->length();
+  const size_t size = data->length();
   seq.length(size);
   std::memcpy(seq.get_buffer(), data->rd_ptr(), size);
 }
 
-void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq){
+void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq)
+{
   ACE_Data_Block db(seq.length(), ACE_Message_Block::MB_DATA,
                     reinterpret_cast<const char*>(seq.get_buffer()),
                     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
