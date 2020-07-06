@@ -79,9 +79,11 @@ bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
 std::ostream&
 operator<<(std::ostream& out, const TimeStamp& ts)
 {
-  std::streamsize ssize = out.precision();
+  const std::ios_base::fmtflags out_flags(out.flags());
+  const std::streamsize ssize = out.precision();
   out << std::setprecision(3) << std::fixed <<
     static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::setprecision(ssize) << std::flush;
+  out.flags(out_flags);
   return out;
 }
 
