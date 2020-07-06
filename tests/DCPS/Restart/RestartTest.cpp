@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <stdexcept>
 
 #ifdef OPENDDS_SECURITY
 const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
@@ -65,6 +66,9 @@ struct Application {
 #endif
 
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
+    if (!dpf) {
+      throw std::runtime_error("Failed to get participant factory");
+    }
     DDS::DomainParticipantFactoryQos factory_qos;
     dpf->get_qos(factory_qos);
     factory_qos.entity_factory.autoenable_created_entities = false;
@@ -86,7 +90,7 @@ struct Application {
 #endif
     participant_ = dpf->create_participant(4, participant_qos, 0, 0);
     if (!participant_) {
-      throw std::string("Failed to create participant");
+      throw std::runtime_error("Failed to create participant");
     }
     TheTransportRegistry->bind_config(cfg, participant_);
     participant_->enable();
@@ -155,6 +159,8 @@ int main(int argc, char* argv[])
     }
   }
 
+  int status = EXIT_SUCCESS;
+
   try {
     {
       Application a1;
@@ -166,10 +172,13 @@ int main(int argc, char* argv[])
       }
     }
     Application a4;
-  } catch (const std::string& error) {
-    ACE_ERROR((LM_ERROR, "Caught Error: %C\n", error.c_str()));
-    return EXIT_FAILURE;
+  } catch (const std::exception& error) {
+    ACE_ERROR((LM_ERROR, "Caught Standard Exception: %C\n", error.what()));
+    status = EXIT_FAILURE;
+  } catch (const CORBA::Exception& error) {
+    error._tao_print_exception("Caught CORBA Exception:");
+    status = EXIT_FAILURE;
   }
 
-  return EXIT_SUCCESS;
+  return status;
 }
