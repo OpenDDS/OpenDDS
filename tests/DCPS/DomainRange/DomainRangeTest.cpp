@@ -34,7 +34,7 @@ const int TOTAL_WRITERS = 1, TOTAL_READERS = 1;
 
 class WriterTask : public ACE_Task_Base {
 public:
-  WriterTask (std::string& writer_id,
+  WriterTask (const std::string& writer_id,
               DDS::DataWriter_var writer,
               int total_readers)
     : writer_id_(writer_id)
@@ -144,8 +144,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    OPENDDS_STRING reader_id = "Reader";
-    OPENDDS_STRING writer_id = "Writer";
+    const std::string reader_id = "Reader";
+    const std::string writer_id = "Writer";
     bool reliable = true;
 
     int num_participants = 1;
