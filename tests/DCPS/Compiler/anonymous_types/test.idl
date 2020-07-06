@@ -45,7 +45,7 @@ struct TestStruct {
 
   short a_s3arr[3];
   short a_s3arr_2nd[3];
-  short a_s2x3arr[2][3];
+  @key short a_s2x3arr[2][3];
   double a_d2x3x4arr[2][3][4];
 
   sequence<long> a_lseq;
@@ -65,7 +65,7 @@ struct TestStruct {
 
 // ========== ========== ========== ========== ==========
 //from Relay.idl
-#include "dds/DdsDcpsCore.idl"
+#include <dds/DdsDcpsCore.idl>
 
 module RtpsRelay {
   typedef octet GuidPrefix_t[12]; //GUID prefix bytes - uniquely specify the participant

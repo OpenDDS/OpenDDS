@@ -65,7 +65,6 @@ struct FieldInfo {
   explicit FieldInfo(AST_Field& field); //for anonymous types
   FieldInfo(UTL_ScopedName* sn, AST_Type* base);
   void init();
-  void set_element();
 };
 
 #endif

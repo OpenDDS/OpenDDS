@@ -105,7 +105,11 @@ void FieldInfo::init()
     //struct_name_
   }
 
-  set_element();
+  elem_sz_ = 0;
+  if (as_base_) {
+    elem_ = to_cxx_type(as_act_, elem_sz_);
+  }
+
   n_elems_ = 1;
   if (arr_) {
     for (size_t i = 0; i < arr_->n_dims(); ++i) {
@@ -135,37 +139,6 @@ void FieldInfo::init()
   ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
 }
 
-void FieldInfo::set_element()
-{
-  elem_sz_ = 0;
-  if (as_base_) {
-    if (as_cls_ & CL_ENUM) {
-      elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
-    } else if (as_cls_ & CL_STRING) {
-      elem_sz_ = 4; elem_ = string_type(as_cls_); return; // encoding of str length is 4 bytes
-    } else if (as_cls_ & CL_PRIMITIVE) {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(as_act_);
-      switch (p->pt()) {
-      case AST_PredefinedType::PT_long: elem_sz_ = 4; elem_ = "ACE_CDR::Long"; return;
-      case AST_PredefinedType::PT_ulong: elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
-      case AST_PredefinedType::PT_longlong: elem_sz_ = 8; elem_ = "ACE_CDR::LongLong"; return;
-      case AST_PredefinedType::PT_ulonglong: elem_sz_ = 8; elem_ = "ACE_CDR::ULongLong"; return;
-      case AST_PredefinedType::PT_short: elem_sz_ = 2; elem_ = "ACE_CDR::Short"; return;
-      case AST_PredefinedType::PT_ushort: elem_sz_ = 2; elem_ = "ACE_CDR::UShort"; return;
-      case AST_PredefinedType::PT_float: elem_sz_ = 4; elem_ = "ACE_CDR::Float"; return;
-      case AST_PredefinedType::PT_double: elem_sz_ = 8; elem_ = "ACE_CDR::Double"; return;
-      case AST_PredefinedType::PT_longdouble: elem_sz_ = 16; elem_ = "ACE_CDR::LongDouble"; return;
-      case AST_PredefinedType::PT_char: elem_sz_ = 1; elem_ = "ACE_CDR::Char"; return;
-      case AST_PredefinedType::PT_wchar: elem_sz_ = 1; elem_ = "ACE_CDR::WChar"; return; // encoding of wchar length is 1 byte
-      case AST_PredefinedType::PT_boolean: elem_sz_ = 1; elem_ = "ACE_CDR::Boolean"; return;
-      case AST_PredefinedType::PT_octet: elem_sz_ = 1; elem_ = "ACE_CDR::Octet"; return;
-      default: break;
-      }
-    }
-    elem_ = scoped(as_act_->name());
-  }
-}
-
 std::string FieldInfo::string_type(Classification c)
 {
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
@@ -179,8 +152,8 @@ std::string FieldInfo::to_cxx_type(AST_Type* type, std::size_t& size)
   if (cls & CL_ENUM) { size = 4; return "ACE_CDR::ULong"; }
   if (cls & CL_STRING) { size = 4; return string_type(cls); } // encoding of str length is 4 bytes
   if (cls & CL_PRIMITIVE) {
-    type = resolveActualType(type);
-    AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+    AST_Type* t = resolveActualType(type);
+    AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(t);
     switch (p->pt()) {
     case AST_PredefinedType::PT_long: size = 4; return "ACE_CDR::Long";
     case AST_PredefinedType::PT_ulong: size = 4; return "ACE_CDR::ULong";
@@ -195,7 +168,7 @@ std::string FieldInfo::to_cxx_type(AST_Type* type, std::size_t& size)
     case AST_PredefinedType::PT_wchar: size = 1; return "ACE_CDR::WChar"; // encoding of wchar length is 1 byte
     case AST_PredefinedType::PT_boolean: size = 1; return "ACE_CDR::Boolean";
     case AST_PredefinedType::PT_octet: size = 1; return "ACE_CDR::Octet";
-    default: break;
+    default: throw std::invalid_argument("Unknown PRIMITIVE type");
     }
   }
   return scoped(type->name());
