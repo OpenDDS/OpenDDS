@@ -12,6 +12,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
 #include "LocalObject.h"
+#include "Serializer.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -30,6 +31,7 @@ namespace XTypes {
 namespace DCPS {
 
 class MetaStruct;
+enum Extensibility;
 
 template <typename Message> struct DDSTraits;
 
@@ -59,6 +61,8 @@ public:
     DDS::DataRepresentationIdSeq& seq) = 0;
 
   virtual const XTypes::TypeObject& getMinimalTypeObject() const = 0;
+
+  virtual Extensibility getExtensibility() const = 0;
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 

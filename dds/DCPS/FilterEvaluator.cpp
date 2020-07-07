@@ -125,11 +125,21 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
     return iter->second;
   }
   Message_Block_Ptr mb (serialized_->duplicate());
-  // TODO(iguessthislldo): Use Encap
   Serializer ser(mb.get(),
     cdr_ ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR, swap_);
   if (cdr_) {
-    ser.skip(4); // CDR encapsulation header
+    char buffer[4];
+    ser.buffer_read(buffer, 4, false);
+    EncapsulationHeader encap;
+    ACE_UINT16 kind = (ACE_UINT16(buffer[0]) << 8) | ACE_UINT16(buffer[1]);
+    encap.kind(EncapsulationHeader::Kind(kind));
+    ACE_UINT16 options = (ACE_UINT16(buffer[2]) << 8) | ACE_UINT16(buffer[3]);
+    encap.options(options);
+    Encoding encoding;
+    //if(!encap.to_encoding(encoding, expected_extensibility)){
+      //return error
+    //}
+    //change encoding of serializer
   }
   const Value v = meta_.getValue(ser, field);
   cache_.insert(std::make_pair(OPENDDS_STRING(field), v));

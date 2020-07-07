@@ -118,10 +118,10 @@ public:
    */
   bool eval(ACE_Message_Block* serializedSample, bool swap_bytes,
             bool cdr_encap, const MetaStruct& meta,
-            const DDS::StringSeq& params) const
+            const DDS::StringSeq& params, DCPS::Extensibility exten) const
   {
     SerializedForEval data(serializedSample, meta, params,
-                           swap_bytes, cdr_encap);
+                           swap_bytes, cdr_encap, exten);
     return eval_i(data);
   }
 
@@ -129,7 +129,7 @@ public:
   class Operand;
 
   struct OpenDDS_Dcps_Export DataForEval {
-    DataForEval(const MetaStruct& meta, const DDS::StringSeq& params)
+    DataForEval(const MetaStruct& meta, const DDS::StringSeq& params, DCPS::Extensibility exten)
       : meta_(meta), params_(params) {}
     virtual ~DataForEval();
     virtual Value lookup(const char* field) const = 0;
@@ -149,8 +149,8 @@ private:
 
   struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
-                        const DDS::StringSeq& params)
-      : DataForEval(meta, params), deserialized_(data) {}
+                        const DDS::StringSeq& params, DCPS::Extensibility exten = APPENDABLE) //TODO: CLAYTON FIGURE OUT HOW TO GET EXTENSIBILITY HERE
+      : DataForEval(meta, params, exten), deserialized_(data) {}
     virtual ~DeserializedForEval();
     Value lookup(const char* field) const;
     const void* const deserialized_;
@@ -158,8 +158,8 @@ private:
 
   struct SerializedForEval : DataForEval {
     SerializedForEval(ACE_Message_Block* data, const MetaStruct& meta,
-                      const DDS::StringSeq& params, bool swap, bool cdr)
-      : DataForEval(meta, params), serialized_(data), swap_(swap), cdr_(cdr) {}
+                      const DDS::StringSeq& params, bool swap, bool cdr, DCPS::Extensibility exten)
+      : DataForEval(meta, params, exten), serialized_(data), swap_(swap), cdr_(cdr) {}
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
