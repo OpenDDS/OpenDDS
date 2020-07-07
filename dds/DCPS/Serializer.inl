@@ -858,7 +858,7 @@ bool Serializer::write_delimiter(size_t size)
 }
 
 ACE_INLINE
-bool Serializer::write_sentinel_parameter_id()
+bool Serializer::write_list_end_parameter_id()
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_1) {
     return align_w(xcdr1_pid_alignment) && *this << pid_list_end && *this << ACE_CDR::UShort(0);
@@ -1558,7 +1558,7 @@ void serialized_size_parameter_id(
 }
 
 ACE_INLINE
-void serialized_size_sentinel_parameter_id(
+void serialized_size_list_end_parameter_id(
   const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {

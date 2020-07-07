@@ -311,6 +311,10 @@ public:
 
   // Flags and reserved ids used in parameter list ids.
   static const ACE_CDR::UShort pid_extended = 0x3f01;
+  /**
+   * Note that this is different than OpenDDS::RTPS::PID_SENTINEL(0x0001). See
+   * XTypes 1.3 Table 34 for details.
+   */
   static const ACE_CDR::UShort pid_list_end = 0x3f02;
   static const ACE_CDR::UShort pid_impl_extension = 0x8000;
   static const ACE_CDR::UShort pid_must_understand = 0x4000;
@@ -599,11 +603,11 @@ public:
   bool write_parameter_id(unsigned id, size_t size);
 
   /**
-   * Write a sentinal parameter ID used in XCDR1 parameter lists.
+   * Write the parameter ID that marks the end of XCDR1 parameter lists.
    *
    * Returns true if successful.
    */
-  bool write_sentinel_parameter_id();
+  bool write_list_end_parameter_id();
 
   /**
    * Read a delimiter used for XCDR2 delimited data.
@@ -794,7 +798,7 @@ void serialized_size_parameter_id(
   const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
 
 OpenDDS_Dcps_Export
-void serialized_size_sentinel_parameter_id(
+void serialized_size_list_end_parameter_id(
   const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
 
 } // namespace DCPS

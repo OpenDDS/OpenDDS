@@ -1813,7 +1813,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     if (repr.xcdr1 && may_be_parameter_list) {
       be_global->impl_ <<
-        "  serialized_size_sentinel_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+        "  serialized_size_list_end_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
     }
   }
 
@@ -1862,11 +1862,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    return false;\n"
           "  }\n";
       }
-      string pl_sentinal;
       if (repr.xcdr1 && may_be_parameter_list) {
         fields_encode <<
           "\n"
-          "  if (!strm.write_sentinel_parameter_id()) {\n"
+          "  if (!strm.write_list_end_parameter_id()) {\n"
           "    return false;\n"
           "  }\n";
       }
@@ -1918,8 +1917,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     if (may_be_parameter_list) {
       if (repr.xcdr2) {
         /**
-         * We don't have a sentinel pid in XCDR2 parameter lists, but we have
-         * the size, so we need to stop after we hit this offset.
+         * We don't have a PID marking the end in XCDR2 parameter lists, but we
+         * have the size, so we need to stop after we hit this offset.
+         *
+         * TODO(iguessthislldo): Replace this with a cleaner mechanism where
+         * the Serializer keeps track of the stream offset.
+         * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447056830
          */
         be_global->impl_ <<
           "  const char* end_of_fields = strm.pos_rd() + total_size;\n";
