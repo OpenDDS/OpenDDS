@@ -10,10 +10,13 @@
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 #include "CoherentChangeControl.h"
+
 #include "Serializer.h"
 #include "GuidConverter.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
+#include "RestoreOutputStreamState.h"
+
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
 #include <iomanip>
 #include <iostream>
@@ -100,6 +103,8 @@ operator>>(Serializer& serializer, CoherentChangeControl& value)
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
 {
+  RestoreOutputStreamState stream_state(str);
+
   str << "num_samples: " << std::dec << value.coherent_samples_.num_samples_
       << ", last_sample: " << value.coherent_samples_.last_sample_.getValue()
       << ", ";
