@@ -541,11 +541,10 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     return false;
   }
 
-  // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
-      if (af.arr_ || (af.seq_ && eleLen_.insert(FieldInfo::EleLen(af)).second)) {
+      if (af.arr_ || (af.seq_ && anonymous_seq_generated_.insert(FieldInfo::EleLen(af)).second)) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");
         f.addArg("", af.ptr_);

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef anonymous_H
-#define anonymous_H
+#ifndef FIELD_INFO_H
+#define FIELD_INFO_H
 
 #include "dds_generator.h"
 #include <utl_scoped_name.h>
@@ -18,7 +18,7 @@ struct FieldInfo {
   struct EleLen {
     AST_Type* ele_;
     std::size_t len_;
-    EleLen(FieldInfo& af);
+    explicit EleLen(FieldInfo& af);
     struct Cmp { bool operator()(const EleLen& a, const EleLen& b) const; };
   };
   typedef std::set<EleLen, EleLen::Cmp> EleLenSet;

@@ -637,14 +637,6 @@ namespace {
 
   void gen_anonymous_sequence(const FieldInfo& sf)
   {
-    string cxx = sf.scoped_type_;
-    for (size_t i = 0; i < LENGTH(special_sequences); ++i) {
-      if (special_sequences[i].check(cxx)) {
-        special_sequences[i].gen(cxx);
-        return;
-      }
-    }
-
     if (!sf.as_act_->in_main_file()) {
       if (sf.as_act_->node_type() == AST_Decl::NT_pre_defined) {
         if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
@@ -661,7 +653,7 @@ namespace {
     const string check_empty = use_cxx11 ? "seq.empty()" : "seq.length() == 0";
     const string get_length = use_cxx11 ? "static_cast<uint32_t>(seq.size())" : "seq.length()";
     const string get_buffer = use_cxx11 ? "seq.data()" : "seq.get_buffer()";
-    if(use_cxx11) {
+    if (use_cxx11) {
       be_global->header_ << "struct " << sf.underscored_ << "_tag {};\n\n";
     }
 
@@ -1057,7 +1049,7 @@ namespace {
     if (!af.as_act_->in_main_file() && af.as_act_->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(af.as_act_->file_name().c_str());
     }
-    if(use_cxx11) {
+    if (use_cxx11) {
       be_global->header_ << "struct " << af.underscored_ << "_tag {};\n\n";
     }
 
@@ -1999,13 +1991,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
   }
 
-  // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
       if (af.arr_) {
         gen_anonymous_array(af);
-      } else if (af.seq_ && eleLen_.insert(FieldInfo::EleLen(af)).second) {
+      } else if (af.seq_ && anonymous_seq_generated_.insert(FieldInfo::EleLen(af)).second) {
         gen_anonymous_sequence(af);
       }
     }
