@@ -354,31 +354,6 @@ private:
                      DCPS::SequenceNumber& sequence,
                      bool historic = false);
 
-    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
-                                           const DCPS::RepoId& reader,
-                                           DCPS::SequenceNumber& sequence);
-
-    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
-                                                const DCPS::RepoId& reader,
-                                                DCPS::SequenceNumber& sequence);
-
-#ifdef OPENDDS_SECURITY
-    DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                              const DCPS::RepoId& reader,
-                                              DCPS::SequenceNumber& sequence);
-
-    DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                                    const DCPS::RepoId& reader,
-                                                    DCPS::SequenceNumber& sequence);
-
-    DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                    const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
-#endif
-
-    DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
-
-    void end_historic_samples(const DCPS::RepoId& reader);
-
     const DCPS::SequenceNumber& get_seq() const
     {
       return seq_;
@@ -389,11 +364,7 @@ private:
     Header header_;
     DCPS::SequenceNumber seq_;
 
-    void write_control_msg(DCPS::Message_Block_Ptr payload,
-                           size_t size,
-                           DCPS::MessageId id,
-                           DCPS::SequenceNumber seq = DCPS::SequenceNumber());
-
+  protected:
     void set_header_fields(DCPS::DataSampleHeader& dsh,
                            size_t size,
                            const DCPS::RepoId& reader,
@@ -403,7 +374,48 @@ private:
 
   };
 
-  typedef DCPS::RcHandle<Writer> Writer_rch;
+  class SedpWriter : public Writer {
+  public:
+    SedpWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : Writer(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~SedpWriter();
+
+    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+
+    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+
+#ifdef OPENDDS_SECURITY
+    DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+
+    DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+
+    DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
+      const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
+#endif
+
+    DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
+
+    void end_historic_samples(const DCPS::RepoId& reader);
+
+  private:
+    void write_control_msg(DCPS::Message_Block_Ptr payload,
+      size_t size,
+      DCPS::MessageId id,
+      DCPS::SequenceNumber seq = DCPS::SequenceNumber());
+
+  };
+
+  typedef DCPS::RcHandle<SedpWriter> Writer_rch;
 
   Writer_rch publications_writer_;
 
@@ -426,6 +438,55 @@ private:
 
   Writer_rch participant_volatile_message_secure_writer_;
 #endif
+
+  // Temporary forward declaration. TODO: remove when type support is implemented
+  struct TypeLookup_Request;
+  struct TypeLookup_Reply;
+
+  class TypeLookupWriter : public Writer {
+  public:
+    TypeLookupWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : Writer(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~TypeLookupWriter();
+  };
+
+  typedef DCPS::RcHandle<TypeLookupWriter> TL_Writer_rch;
+
+  class TypeLookupRequestWriter : public TypeLookupWriter {
+  public:
+    TypeLookupRequestWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : TypeLookupWriter(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~TypeLookupRequestWriter();
+
+    DDS::ReturnCode_t send_type_lookup_request(const TypeLookup_Request& type_lookup_request,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+  };
+
+  typedef DCPS::RcHandle<TypeLookupRequestWriter> TL_Request_Writer_rch;
+
+  TL_Request_Writer_rch type_lookup_request_writer_;
+
+  class TypeLookupReplyWriter : public TypeLookupWriter {
+  public:
+    TypeLookupReplyWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : TypeLookupWriter(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~TypeLookupReplyWriter();
+
+    DDS::ReturnCode_t send_type_lookup_reply(const TypeLookup_Reply& type_lookup_reply,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+  };
+
+  typedef DCPS::RcHandle<TypeLookupReplyWriter> TL_Reply_Writer_rch;
+
+  TL_Reply_Writer_rch type_lookup_reply_writer_;
 
   class Reader
     : public DCPS::TransportReceiveListener
@@ -472,6 +533,45 @@ private:
   Reader_rch participant_volatile_message_secure_reader_;
   Reader_rch dcps_participant_secure_reader_;
 #endif
+
+  class TypeLookupReader : public Reader {
+  public:
+    TypeLookupReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~TypeLookupReader();
+  };
+
+  typedef DCPS::RcHandle<TypeLookupReader> TL_Reader_rch;
+
+
+  class TypeLookupRequestReader : public TypeLookupReader {
+  public:
+    TypeLookupRequestReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : TypeLookupReader(sub_id, sedp)
+    {}
+
+    virtual ~TypeLookupRequestReader();
+  };
+
+  typedef DCPS::RcHandle<TypeLookupRequestReader> TL_Request_Reader_rch;
+
+
+  TL_Request_Reader_rch type_lookup_request_reader_;
+
+  class TypeLookupReplyReader : public TypeLookupReader {
+  public:
+    TypeLookupReplyReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : TypeLookupReader(sub_id, sedp)
+    {}
+
+    virtual ~TypeLookupReplyReader();
+  };
+
+  typedef DCPS::RcHandle<TypeLookupReplyReader> TL_Reply_Reader_rch;
+
+  TL_Reply_Reader_rch type_lookup_reply_reader_;
 
   static const size_t TASK_MQ_BYTES = sizeof(Msg) * 1024 * 32;
 

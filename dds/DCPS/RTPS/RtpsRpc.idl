@@ -1,0 +1,44 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_RTPS_RPC_IDL
+#define OPENDDS_RTPS_RPC_IDL
+
+
+#include "dds/DdsDcpsGuid.idl"
+#include "dds/DCPS/RTPS/RtpsCore.idl"
+
+module DDS {
+
+module rpc {
+struct SampleIdentity {
+  OpenDDS::DCPS::GUID_t writer_guid;
+  OpenDDS::RTPS::SequenceNumber_t sequence_number;
+};
+
+typedef string<255> InstanceName;
+enum RemoteExceptionCode_t
+{
+  REMOTE_EX_OK,
+  REMOTE_EX_UNSUPPORTED,
+  REMOTE_EX_INVALID_ARGUMENT,
+  REMOTE_EX_OUT_OF_RESOURCES,
+  REMOTE_EX_UNKNOWN_OPERATION,
+  REMOTE_EX_UNKNOWN_EXCEPTION
+};
+
+struct RequestHeader {
+  SampleIdentity request_id;
+  InstanceName instance_name;
+};
+struct ResponseHeader {
+  SampleIdentity related_request_id;
+  RemoteExceptionCode_t remote_ex;
+};
+
+}; // module rpc
+}; // module DDS
+
+#endif /* OPENDDS_RTPS_RPC_IDL */
