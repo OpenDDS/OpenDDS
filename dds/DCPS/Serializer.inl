@@ -861,7 +861,7 @@ ACE_INLINE
 bool Serializer::write_sentinel_parameter_id()
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_1) {
-    return align_w(4) && *this << pid_list_end && *this << ACE_CDR::UShort(0);
+    return align_w(xcdr1_pid_alignment) && *this << pid_list_end && *this << ACE_CDR::UShort(0);
   }
   return true;
 }
@@ -1543,7 +1543,7 @@ void serialized_size_parameter_id(
 {
   const Encoding::XcdrVersion xcdr = encoding.xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
-    encoding.align(size, pid_alignment);
+    encoding.align(size, xcdr1_pid_alignment);
     size += uint16_cdr_size * 2;
     // TODO(iguessthislldo): Extended PID
 
@@ -1566,7 +1566,7 @@ void serialized_size_sentinel_parameter_id(
      * TODO(iguessthislldo): See how DDSXTY14-23 is resolved.
      * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447165924
      */
-    encoding.align(size, pid_alignment);
+    encoding.align(size, xcdr1_pid_alignment);
     size += uint16_cdr_size * 2;
 
     // Restore Saved Totals from Alignment Resets

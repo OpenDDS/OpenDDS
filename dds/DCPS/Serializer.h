@@ -99,7 +99,7 @@ const size_t float64_cdr_size = 8;
 const size_t float128_cdr_size = 16;
 const size_t char8_cdr_size = 1;
 const size_t char16_cdr_size = 2;
-const size_t pid_alignment = 4;
+const size_t xcdr1_pid_alignment = 4;
 
 /**
  * Align "value" by "by" if it's not already.

@@ -510,7 +510,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
     // Get the "short" id and size
-    if (!align_r(4)) {
+    if (!align_r(xcdr1_pid_alignment)) {
       return false;
     }
     ACE_CDR::UShort pid;
