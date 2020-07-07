@@ -16,7 +16,7 @@ FieldInfo::EleLen::EleLen(FieldInfo& af) : ele_(af.as_base_), len_(af.n_elems_)
 
 bool FieldInfo::EleLen::Cmp::operator()(const EleLen& a, const EleLen& b) const
 {
-  return a.ele_ != b.ele_ || a.len_ != b.len_;
+  return a.ele_ < b.ele_ || b.ele_ < a.ele_ || a.len_ < b.len_ || b.len_ < a.len_;
 }
 
 const std::string FieldInfo::scope_op = "::";
