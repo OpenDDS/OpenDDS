@@ -31,10 +31,10 @@ public:
     : statistics_interval_(60) // 1 minute
     , handler_statistics_writer_(nullptr)
     , domain_statistics_writer_(nullptr)
+    , application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
     , application_domain_(1)
     , publish_participant_statistics_(true)
-    , application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
   {}
 
   void statistics_interval(const OpenDDS::DCPS::TimeDuration& flag)
