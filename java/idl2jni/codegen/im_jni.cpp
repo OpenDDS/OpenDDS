@@ -32,7 +32,7 @@ string append_var(const string &str)
 //add in "_forany" if it's not already there
 string append_forany(const string &str)
 {
-  if (str.size() <= 4 || str.substr(str.size() - 7) != "_forany") {
+  if (str.size() <= 7 || str.substr(str.size() - 7) != "_forany") {
     return str + "_forany";
   }
 
