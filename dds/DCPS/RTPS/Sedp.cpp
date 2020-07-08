@@ -3045,8 +3045,8 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
 
 DDS::ReturnCode_t
 Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
-                                   const RepoId& reader,
-                                   DCPS::SequenceNumber& sequence)
+                                       const RepoId& reader,
+                                       DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
@@ -3075,8 +3075,8 @@ Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
 
 DDS::ReturnCode_t
 Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
-                                        const RepoId& reader,
-                                        DCPS::SequenceNumber& sequence)
+                                            const RepoId& reader,
+                                            DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
@@ -3106,8 +3106,8 @@ Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
 Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                      const RepoId& reader,
-                                      DCPS::SequenceNumber& sequence)
+                                          const RepoId& reader,
+                                          DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
@@ -3135,8 +3135,8 @@ Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatel
 
 DDS::ReturnCode_t
 Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                            const RepoId& reader,
-                                            DCPS::SequenceNumber& sequence)
+                                                const RepoId& reader,
+                                                DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
@@ -3164,7 +3164,7 @@ Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::Participant
 
 DDS::ReturnCode_t
 Sedp::SedpWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                            const RepoId& reader, DCPS::SequenceNumber& sequence)
+                                                const RepoId& reader, DCPS::SequenceNumber& sequence)
 {
   ParameterList plist;
 
@@ -3268,9 +3268,9 @@ Sedp::SedpWriter::end_historic_samples(const RepoId& reader)
 
 void
 Sedp::SedpWriter::write_control_msg(DCPS::Message_Block_Ptr payload,
-                                size_t size,
-                                DCPS::MessageId id,
-                                DCPS::SequenceNumber seq)
+                                    size_t size,
+                                    DCPS::MessageId id,
+                                    DCPS::SequenceNumber seq)
 {
   DCPS::DataSampleHeader header;
   Writer::set_header_fields(header, size, GUID_UNKNOWN, seq, false, id);
@@ -3343,9 +3343,9 @@ Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
 
 DDS::ReturnCode_t
 Sedp::TypeLookupRequestWriter::send_type_lookup_request(const TypeLookup_Request& type_lookup_request,
-                                                      const RepoId& reader,
-                                                      DCPS::SequenceNumber& sequence)
-  {
+                                                        const RepoId& reader,
+                                                        DCPS::SequenceNumber& sequence)
+ {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
@@ -3376,8 +3376,8 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const TypeLookup_Request
 
 DDS::ReturnCode_t
 Sedp::TypeLookupReplyWriter::send_type_lookup_reply(const TypeLookup_Reply& type_lookup_reply,
-  const RepoId& reader,
-  DCPS::SequenceNumber& sequence)
+                                                    const RepoId& reader,
+                                                    DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);

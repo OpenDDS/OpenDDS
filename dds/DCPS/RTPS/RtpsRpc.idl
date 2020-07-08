@@ -7,8 +7,9 @@
 #define OPENDDS_RTPS_RPC_IDL
 
 
-#include "dds/DdsDcpsGuid.idl"
-#include "dds/DCPS/RTPS/RtpsCore.idl"
+#include "RtpsCore.idl"
+
+#include <dds/DdsDcpsGuid.idl>
 
 module DDS {
 
