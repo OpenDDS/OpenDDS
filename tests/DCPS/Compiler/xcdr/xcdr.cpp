@@ -38,8 +38,7 @@ void set_values<AdditionalFieldMutableStruct>(
 }
 
 template<typename TypeA, typename TypeB>
-void expect_values_equal_base(
-  const TypeA& a, const TypeB& b)
+void expect_values_equal_base(const TypeA& a, const TypeB& b)
 {
   EXPECT_EQ(a.short_field, b.short_field);
   EXPECT_EQ(a.long_field, b.long_field);
@@ -48,8 +47,7 @@ void expect_values_equal_base(
 }
 
 template<typename TypeA, typename TypeB>
-void expect_values_equal(
-  const TypeA& a, const TypeB& b)
+void expect_values_equal(const TypeA& a, const TypeB& b)
 {
   expect_values_equal_base(a, b);
 }
@@ -67,9 +65,10 @@ template<typename TypeA, typename TypeB>
 }
 
 struct DataView {
-  DataView(const std::string& s)
-  : data(s.data())
-  , size(s.size())
+  template <size_t ARRAY_SIZE>
+  DataView(const unsigned char (&array)[ARRAY_SIZE])
+  : data(reinterpret_cast<const char*>(&array[0]))
+  , size(ARRAY_SIZE)
   {
   }
 
@@ -79,8 +78,8 @@ struct DataView {
   {
   }
 
-  const char* data;
-  size_t size;
+  const char* const data;
+  const size_t size;
 };
 
 bool operator==(const DataView& a, const DataView& b)
@@ -133,7 +132,7 @@ bool operator==(const DataView& a, const DataView& b)
 
 template<typename TypeA, typename TypeB>
 void amalgam_serializer_test(
-  const Encoding& encoding, const std::string& expected_cdr, TypeA& value, TypeB& result)
+  const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
 {
   ACE_Message_Block buffer(1024);
 
@@ -153,7 +152,7 @@ void amalgam_serializer_test(
 }
 
 template<typename TypeA, typename TypeB>
-void amalgam_serializer_test(const Encoding& encoding, const std::string expected_cdr)
+void amalgam_serializer_test(const Encoding& encoding, const DataView& expected_cdr)
 {
   TypeA value;
   set_values(value);
@@ -162,217 +161,153 @@ void amalgam_serializer_test(const Encoding& encoding, const std::string expecte
 }
 
 template<typename Type>
-void serializer_test(const Encoding& encoding, const std::string expected_cdr)
+void serializer_test(const Encoding& encoding, const DataView& expected_cdr)
 {
   amalgam_serializer_test<Type, Type>(encoding, expected_cdr);
 }
 
+template<typename Type>
+void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
+{
+  Type value;
+  EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
+
+  serializer_test<Type>(encoding, expected_cdr);
+}
+
 // XCDR1 =====================================================================
 
-const std::string xcdr1_non_mutable_expected(
+const unsigned char final_xcdr1_struct_expected[] = {
   // short_field
-  "\x7f\xff" // +2 = 2
+  0x7f, 0xff, // +2 = 2
   // long_field
-  "\x00\x00" // +2 pad = 4
-  "\x7f\xff\xff\xff" // +4 = 8
+  0x00, 0x00, // +2 pad = 4
+  0x7f, 0xff, 0xff, 0xff, // +4 = 8
   // octet_field
-  "\x01" // +1 = 9
+  0x01, // +1 = 9
   // long_long_field
-  "\x00\x00\x00\x00\x00\x00\x00" // +7 pad = 16
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
-  , 24);
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // +7 pad = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
+};
 
-// FinalXcdr1Struct ----------------------------------------------------------
-
-TEST(FinalXcdr1Struct_tests, serialized_size_test)
+TEST(basic_tests, FinalXcdr1Struct)
 {
-  FinalXcdr1Struct value;
-  EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_non_mutable_expected.size());
+  baseline_checks<FinalXcdr1Struct>(xcdr1, final_xcdr1_struct_expected);
 }
 
-TEST(FinalXcdr1Struct_tests, serializer_test)
+const DataView appendable_xcdr1_struct_expected(final_xcdr1_struct_expected);
+
+TEST(basic_tests, AppendableXcdr1Struct)
 {
-  serializer_test<FinalXcdr1Struct>(xcdr1, xcdr1_non_mutable_expected);
+  baseline_checks<AppendableXcdr1Struct>(xcdr1, appendable_xcdr1_struct_expected);
 }
 
-// AppendableXcdr1Struct -----------------------------------------------------
-
-TEST(AppendableXcdr1Struct_tests, serialized_size_test)
-{
-  AppendableXcdr1Struct value;
-  EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_non_mutable_expected.size());
-}
-
-TEST(AppendableXcdr1Struct_tests, serializer_test)
-{
-  serializer_test<AppendableXcdr1Struct>(xcdr1, xcdr1_non_mutable_expected);
-}
-
-// MutableXcdr1Struct --------------------------------------------------------
-
-const std::string xcdr1_mutable_expected(
+const unsigned char mutable_xcdr1_struct_expected[] = {
   // short_field
-  "\xc0\x00\x00\x02" // PID +4 = 4
-  "\x7f\xff" // +2 = 6
+  0xc0, 0x00, 0x00, 0x02, // PID +4 = 4
+  0x7f, 0xff, // +2 = 6
   // long_field
-  "\x00\x00" // +2 pad = 8
-  "\xc0\x01\x00\x04" // PID +4 = 12
-  "\x7f\xff\xff\xff" // +4 = 16
+  0x00, 0x00, // +2 pad = 8
+  0xc0, 0x01, 0x00, 0x04, // PID +4 = 12
+  0x7f, 0xff, 0xff, 0xff, // +4 = 16
   // octet_field
-  "\xc0\x02\x00\x01" // PID +4 = 20
-  "\x01" // +1 = 21
+  0xc0, 0x02, 0x00, 0x01, // PID +4 = 20
+  0x01, // +1 = 21
   // long_long_field
-  "\x00\x00\x00" // +3 pad = 24
-  "\xc0\x03\x00\x08" // PID +4 = 28
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 36
-  // Sentinel
-  "\x3f\x02\x00\x00" // +4 = 40
-  , 40);
+  0x00, 0x00, 0x00, // +3 pad = 24
+  0xc0, 0x03, 0x00, 0x08, // PID +4 = 28
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 36
+  // End of List
+  0x3f, 0x02, 0x00, 0x00 // +4 = 40
+};
 
-TEST(MutableXcdr1Struct_tests, serialized_size_test)
+TEST(basic_tests, MutableXcdr1Struct)
 {
-  MutableXcdr1Struct value;
-  EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_mutable_expected.size());
-}
-
-TEST(MutableXcdr1Struct_tests, serializer_test)
-{
-  serializer_test<MutableXcdr1Struct>(xcdr1, xcdr1_mutable_expected);
+  baseline_checks<MutableXcdr1Struct>(xcdr1, mutable_xcdr1_struct_expected);
 }
 
 // XCDR2 =====================================================================
 
-const std::string xcdr2_final_expected(
+const unsigned char final_xcdr2_struct_expected[] = {
   // short_field
-  "\x7f\xff" // +2 = 2
+  0x7f, 0xff, // +2 = 2
   // long_field
-  "\x00\x00" // +2 pad = 4
-  "\x7f\xff\xff\xff" // +4 = 8
+  0x00, 0x00, // +2 pad = 4
+  0x7f, 0xff, 0xff, 0xff, // +4 = 8
   // octet_field
-  "\x01" // +1 = 9
+  0x01, // +1 = 9
   // long_long_field
-  "\x00\x00\x00" // +3 pad = 12
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 20
-  , 20);
+  0x00, 0x00, 0x00, // +3 pad = 12
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 20
+};
 
-// FinalXcdr2Struct ----------------------------------------------------------
-
-TEST(FinalXcdr2Struct_tests, serialized_size_test)
+TEST(basic_tests, FinalXcdr2Struct)
 {
-  FinalXcdr2Struct value;
-  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_final_expected.size());
+  baseline_checks<FinalXcdr2Struct>(xcdr2, final_xcdr2_struct_expected);
 }
 
-TEST(FinalXcdr2Struct_tests, serializer_test)
-{
-  serializer_test<FinalXcdr2Struct>(xcdr2, xcdr2_final_expected);
-}
-
-// AppendableXcdr2Struct -----------------------------------------------------
-
-const std::string xcdr2_appendable_expected(
+const unsigned char appendable_xcdr2_struct_expected[] = {
   // Delimiter
-  "\x00\x00\x00\x14" // +4 = 4
+  0x00, 0x00, 0x00, 0x14, // +4 = 4
   // short_field
-  "\x7f\xff" // +2 = 6
+  0x7f, 0xff, // +2 = 6
   // long_field
-  "\x00\x00" // +2 pad = 8
-  "\x7f\xff\xff\xff" // +4 = 12
+  0x00, 0x00, // +2 pad = 8
+  0x7f, 0xff, 0xff, 0xff, // +4 = 12
   // octet_field
-  "\x01" // +1 = 13
+  0x01, // +1 = 13
   // long_long_field
-  "\x00\x00\x00" // +3 pad = 16
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
-  , 24);
+  0x00, 0x00, 0x00, // +3 pad = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 24
+};
 
-TEST(AppendableXcdr2Struct_tests, serialized_size_test)
+TEST(basic_tests, AppendableXcdr2Struct)
 {
-  AppendableXcdr2Struct value;
-  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_appendable_expected.size());
+  baseline_checks<AppendableXcdr2Struct>(xcdr2, appendable_xcdr2_struct_expected);
 }
 
-TEST(AppendableXcdr2Struct_tests, serializer_test)
-{
-  serializer_test<AppendableXcdr2Struct>(xcdr2, xcdr2_appendable_expected);
-}
-
-// MutableXcdr2Struct --------------------------------------------------------
-
-const std::string xcdr2_mutable_expected(
+const unsigned char mutable_xcdr2_struct_expected[] = {
   // Delimiter
-  "\x00\x00\x00\x24" // +4 = 4
+  0x00, 0x00, 0x00, 0x24, // +4 = 4
   // short_field
-  "\x00\x00\x00\x00" // PID  +4 = 8
-  "\x7f\xff" // +2 = 10
+  0x00, 0x00, 0x00, 0x00, // PID  +4 = 8
+  0x7f, 0xff, // +2 = 10
   // long_field
-  "\x00\x00" // +2 pad = 12
-  "\x00\x00\x00\x01" // PID  +4 = 16
-  "\x7f\xff\xff\xff" // +4 = 20
+  0x00, 0x00, // +2 pad = 12
+  0x00, 0x00, 0x00, 0x01, // PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff, // +4 = 20
   // octet_field
-  "\x00\x00\x00\x02" // PID  +4 = 24
-  "\x01" // +1 = 25
+  0x00, 0x00, 0x00, 0x02, // PID  +4 = 24
+  0x01, // +1 = 25
   // long_long_field
-  "\x00\x00\x00" // +3 pad = 28
-  "\x00\x00\x00\x03" // PID  +4 = 32
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 40
-  , 40);
+  0x00, 0x00, 0x00, // +3 pad = 28
+  0x00, 0x00, 0x00, 0x03, // PID  +4 = 32
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 40
+};
 
-TEST(MutableXcdr2Struct_tests, serialized_size_test)
+TEST(basic_tests, MutableXcdr2Struct)
 {
-  MutableXcdr2Struct value;
-  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_mutable_expected.size());
-}
-
-TEST(MutableXcdr2Struct_tests, serializer_test)
-{
-  serializer_test<MutableXcdr2Struct>(xcdr2, xcdr2_mutable_expected);
+  baseline_checks<MutableXcdr2Struct>(xcdr2, mutable_xcdr2_struct_expected);
 }
 
 // XCDR1 and XCDR2 ===========================================================
 
-// FinalXcdr12Struct ---------------------------------------------------------
-
-TEST(FinalXcdr12Struct_tests, serialized_size_test)
+TEST(basic_tests, FinalXcdr12Struct)
 {
-  FinalXcdr12Struct value;
-  EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_non_mutable_expected.size());
-  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_final_expected.size());
+  baseline_checks<FinalXcdr12Struct>(xcdr1, final_xcdr1_struct_expected);
+  baseline_checks<FinalXcdr12Struct>(xcdr2, final_xcdr2_struct_expected);
 }
 
-TEST(FinalXcdr12Struct_tests, serializer_test)
+TEST(basic_tests, AppendableXcdr12Struct)
 {
-  serializer_test<FinalXcdr12Struct>(xcdr1, xcdr1_non_mutable_expected);
-  serializer_test<FinalXcdr12Struct>(xcdr2, xcdr2_final_expected);
+  baseline_checks<AppendableXcdr12Struct>(xcdr1, appendable_xcdr1_struct_expected);
+  baseline_checks<AppendableXcdr12Struct>(xcdr2, appendable_xcdr2_struct_expected);
 }
 
-// AppendableXcdr12Struct ----------------------------------------------------
-
-TEST(AppendableXcdr12Struct_tests, serialized_size_test)
+TEST(basic_tests, MutableXcdr12Struct)
 {
-  AppendableXcdr12Struct value;
-  EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_non_mutable_expected.size());
-  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_appendable_expected.size());
-}
-
-TEST(AppendableXcdr12Struct_tests, serializer_test)
-{
-  serializer_test<AppendableXcdr12Struct>(xcdr1, xcdr1_non_mutable_expected);
-  serializer_test<AppendableXcdr12Struct>(xcdr2, xcdr2_appendable_expected);
-}
-
-// MutableXcdr12Struct -------------------------------------------------------
-
-TEST(MutableXcdr12Struct_tests, serialized_size_test)
-{
-  MutableXcdr12Struct value;
-  EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_mutable_expected.size());
-  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_mutable_expected.size());
-}
-
-TEST(MutableXcdr12Struct_tests, serializer_test)
-{
-  serializer_test<MutableXcdr12Struct>(xcdr1, xcdr1_mutable_expected);
-  serializer_test<MutableXcdr12Struct>(xcdr2, xcdr2_mutable_expected);
+  baseline_checks<MutableXcdr12Struct>(xcdr1, mutable_xcdr1_struct_expected);
+  baseline_checks<MutableXcdr12Struct>(xcdr2, mutable_xcdr2_struct_expected);
 }
 
 // Appendable Tests ==========================================================
@@ -380,54 +315,54 @@ TEST(MutableXcdr12Struct_tests, serializer_test)
 
 // Mutable Tests =============================================================
 
-const std::string mutable_struct_expected_xcdr1(
+const unsigned char mutable_struct_expected_xcdr1[] = {
   // short_field
-  "\xc0\x04\x00\x02" // PID +4 = 4
-  "\x7f\xff" // +2 = 6
+  0xc0, 0x04, 0x00, 0x02, // PID +4 = 4
+  0x7f, 0xff, // +2 = 6
   // long_field
-  "\x00\x00" // +2 pad = 8
-  "\xc0\x06\x00\x04" // PID +4 = 12
-  "\x7f\xff\xff\xff" // +4 = 16
+  0x00, 0x00, // +2 pad = 8
+  0xc0, 0x06, 0x00, 0x04, // PID +4 = 12
+  0x7f, 0xff, 0xff, 0xff, // +4 = 16
   // octet_field
-  "\xc0\x08\x00\x01" // PID +4 = 20
-  "\x01" // +1 = 21
+  0xc0, 0x08, 0x00, 0x01, // PID +4 = 20
+  0x01, // +1 = 21
   // long_long_field
-  "\x00\x00\x00" // +3 pad = 24
-  "\xc0\x0a\x00\x08" // PID +4 = 28
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 36
-  // Sentinel
-  "\x3f\x02\x00\x00" // +4 = 40
-  , 40);
+  0x00, 0x00, 0x00, // +3 pad = 24
+  0xc0, 0x0a, 0x00, 0x08, // PID +4 = 28
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 36
+  // End of List
+  0x3f, 0x02, 0x00, 0x00 // +4 = 40
+};
 
-const std::string mutable_struct_expected_xcdr2(
+const unsigned char mutable_struct_expected_xcdr2[] = {
   // Delimiter
-  "\x00\x00\x00\x24" // +4 = 4
+  0x00, 0x00, 0x00, 0x24, // +4 = 4
   // short_field
-  "\x00\x00\x00\x04" // PID +4 = 8
-  "\x7f\xff" // +2 = 10
+  0x00, 0x00, 0x00, 0x04, // PID +4 = 8
+  0x7f, 0xff, // +2 = 10
   // long_field
-  "\x00\x00" // +2 pad = 12
-  "\x00\x00\x00\x06" // PID +4 = 16
-  "\x7f\xff\xff\xff" // +4 = 20
+  0x00, 0x00, // +2 pad = 12
+  0x00, 0x00, 0x00, 0x06, // PID +4 = 16
+  0x7f, 0xff, 0xff, 0xff, // +4 = 20
   // octet_field
-  "\x00\x00\x00\x08" // PID +4 = 24
-  "\x01" // +1 = 25
+  0x00, 0x00, 0x00, 0x08, // PID +4 = 24
+  0x01, // +1 = 25
   // long_long_field
-  "\x00\x00\x00" // +3 pad = 28
-  "\x00\x00\x00\x0a" // PID +4 = 32
-  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 40
-  , 40);
+  0x00, 0x00, 0x00, // +3 pad = 28
+  0x00, 0x00, 0x00, 0x0a, // PID +4 = 32
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 40
+};
 
 // Baseline ------------------------------------------------------------------
 
 TEST(mutable_tests, baseline_xcdr1_test)
 {
-  serializer_test<MutableStruct>(xcdr1, mutable_struct_expected_xcdr1);
+  baseline_checks<MutableStruct>(xcdr1, mutable_struct_expected_xcdr1);
 }
 
 TEST(mutable_tests, baseline_xcdr2_test)
 {
-  serializer_test<MutableStruct>(xcdr2, mutable_struct_expected_xcdr2);
+  baseline_checks<MutableStruct>(xcdr2, mutable_struct_expected_xcdr2);
 }
 
 // Reordered Tests -----------------------------------------------------------
@@ -441,25 +376,25 @@ TEST(mutable_tests, to_reordered_xcdr1_test)
 
 TEST(mutable_tests, from_reordered_xcdr1_test)
 {
-  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(
-    xcdr1, std::string(
-      // long_field
-      "\xc0\x06\x00\x04" // PID +4 = 4
-      "\x7f\xff\xff\xff" // +4 = 8
-      // long_long_field
-      "\xc0\x0a\x00\x08" // PID +4 = 12
-      "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 20
-      // octet_field
-      "\xc0\x08\x00\x01" // PID +4 = 24
-      "\x01" // +1 = 25
-      // short_field
-      "\x00\x00\x00" // +3 pad = 28
-      "\xc0\x04\x00\x02" // PID +4 = 32
-      "\x7f\xff" // +2 = 34
-      // Sentinel
-      "\x00\x00" // +2 pad = 36
-      "\x3f\x02\x00\x00" // +4 = 40
-      , 40));
+  const unsigned char expected[] = {
+    // long_field
+    0xc0, 0x06, 0x00, 0x04, // PID +4 = 4
+    0x7f, 0xff, 0xff, 0xff, // +4 = 8
+    // long_long_field
+    0xc0, 0x0a, 0x00, 0x08, // PID +4 = 12
+    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 20
+    // octet_field
+    0xc0, 0x08, 0x00, 0x01, // PID +4 = 24
+    0x01, // +1 = 25
+    // short_field
+    0x00, 0x00, 0x00, // +3 pad = 28
+    0xc0, 0x04, 0x00, 0x02, // PID +4 = 32
+    0x7f, 0xff, // +2 = 34
+    // End of List
+    0x00, 0x00, // +2 pad = 36
+    0x3f, 0x02, 0x00, 0x00 // +4 = 40
+  };
+  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr1, expected);
 }
 
 TEST(mutable_tests, to_reordered_xcdr2_test)
@@ -470,24 +405,24 @@ TEST(mutable_tests, to_reordered_xcdr2_test)
 
 TEST(mutable_tests, from_reordered_xcdr2_test)
 {
-  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(
-    xcdr2, std::string(
-      // Delimiter
-      "\x00\x00\x00\x22" // +4 = 4
-      // long_field
-      "\x00\x00\x00\x06" // PID +4 = 8
-      "\x7f\xff\xff\xff" // +4 = 12
-      // long_long_field
-      "\x00\x00\x00\x0a" // PID +4 = 16
-      "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
-      // octet_field
-      "\x00\x00\x00\x08" // PID +4 = 28
-      "\x01" // +1 = 29
-      // short_field
-      "\x00\x00\x00" // +3 pad = 32
-      "\x00\x00\x00\x04" // PID +4 = 36
-      "\x7f\xff" // +2 = 38
-      , 38));
+  const unsigned char expected[] = {
+    // Delimiter
+    0x00, 0x00, 0x00, 0x22, // +4 = 4
+    // long_field
+    0x00, 0x00, 0x00, 0x06, // PID +4 = 8
+    0x7f, 0xff, 0xff, 0xff, // +4 = 12
+    // long_long_field
+    0x00, 0x00, 0x00, 0x0a, // PID +4 = 16
+    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
+    // octet_field
+    0x00, 0x00, 0x00, 0x08, // PID +4 = 28
+    0x01, // +1 = 29
+    // short_field
+    0x00, 0x00, 0x00, // +3 pad = 32
+    0x00, 0x00, 0x00, 0x04, // PID +4 = 36
+    0x7f, 0xff // +2 = 38
+  };
+  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr2, expected);
 }
 
 // Additional Field Tests ----------------------------------------------------
@@ -499,34 +434,34 @@ TEST(mutable_tests, to_additional_field_xcdr1_test)
   set_values(value);
   AdditionalFieldMutableStruct result;
   amalgam_serializer_test(xcdr1, mutable_struct_expected_xcdr1, value, result);
-  /// TODO(iguessthidlldo): Test that additional_field has been defaulted
-  /* EXPECT_EQ(0, result.additional_field); */
+  /// TODO(iguessthidlldo): Test for correct try construct behavior (default
+  /// value?) if we decide on that.
 }
 
 TEST(mutable_tests, from_additional_field_xcdr1_test)
 {
-  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(
-    xcdr1, std::string(
-      // long_field
-      "\xc0\x06\x00\x04" // PID +4 = 4
-      "\x7f\xff\xff\xff" // +4 = 8
-      // additional_field
-      "\xc0\x01\x00\x04" // PID +4 = 12
-      "\x12\x34\x56\x78" // +4 = 16
-      // long_long_field
-      "\xc0\x0a\x00\x08" // PID +4 = 20
-      "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 28
-      // octet_field
-      "\xc0\x08\x00\x01" // PID +4 = 32
-      "\x01" // +1 = 33
-      // short_field
-      "\x00\x00\x00" // +3 pad = 36
-      "\xc0\x04\x00\x02" // PID +4 = 40
-      "\x7f\xff" // +2 = 42
-      // Sentinel
-      "\x00\x00" // +2 pad = 44
-      "\x3f\x02\x00\x00" // +4 = 48
-      , 48));
+  const unsigned char expected[] = {
+    // long_field
+    0xc0, 0x06, 0x00, 0x04, // PID +4 = 4
+    0x7f, 0xff, 0xff, 0xff, // +4 = 8
+    // additional_field
+    0xc0, 0x01, 0x00, 0x04, // PID +4 = 12
+    0x12, 0x34, 0x56, 0x78, // +4 = 16
+    // long_long_field
+    0xc0, 0x0a, 0x00, 0x08, // PID +4 = 20
+    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 28
+    // octet_field
+    0xc0, 0x08, 0x00, 0x01, // PID +4 = 32
+    0x01, // +1 = 33
+    // short_field
+    0x00, 0x00, 0x00, // +3 pad = 36
+    0xc0, 0x04, 0x00, 0x02, // PID +4 = 40
+    0x7f, 0xff, // +2 = 42
+    // End of List
+    0x00, 0x00, // +2 pad = 44
+    0x3f, 0x02, 0x00, 0x00 // +4 = 48
+  };
+  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr1, expected);
 }
 
 TEST(mutable_tests, to_additional_field_xcdr2_test)
@@ -535,33 +470,33 @@ TEST(mutable_tests, to_additional_field_xcdr2_test)
   set_values(value);
   AdditionalFieldMutableStruct result;
   amalgam_serializer_test(xcdr2, mutable_struct_expected_xcdr2, value, result);
-  /// TODO(iguessthidlldo): Test that additional_field has been defaulted
-  /* EXPECT_EQ(0, result.additional_field); */
+  /// TODO(iguessthidlldo): Test for correct try construct behavior (default
+  /// value?) if we decide on that.
 }
 
 TEST(mutable_tests, from_additional_field_xcdr2_test)
 {
-  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(
-    xcdr2, std::string(
-      // Delimiter
-      "\x00\x00\x00\x2a" // +4 = 4
-      // long_field
-      "\x00\x00\x00\x06" // PID +4 = 8
-      "\x7f\xff\xff\xff" // +4 = 12
-      // additional_field
-      "\x00\x00\x00\x01" // PID +4 = 16
-      "\x12\x34\x56\x78" // PID +4 = 20
-      // long_long_field
-      "\x00\x00\x00\x0a" // PID +4 = 24
-      "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 32
-      // octet_field
-      "\x00\x00\x00\x08" // PID +4 = 36
-      "\x01" // +1 = 37
-      // short_field
-      "\x00\x00\x00" // +3 pad = 40
-      "\x00\x00\x00\x04" // PID +4 = 44
-      "\x7f\xff" // +2 = 46
-      , 46));
+  const unsigned char expected[] = {
+    // Delimiter
+    0x00, 0x00, 0x00, 0x2a, // +4 = 4
+    // long_field
+    0x00, 0x00, 0x00, 0x06, // PID +4 = 8
+    0x7f, 0xff, 0xff, 0xff, // +4 = 12
+    // additional_field
+    0x00, 0x00, 0x00, 0x01, // PID +4 = 16
+    0x12, 0x34, 0x56, 0x78, // PID +4 = 20
+    // long_long_field
+    0x00, 0x00, 0x00, 0x0a, // PID +4 = 24
+    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 32
+    // octet_field
+    0x00, 0x00, 0x00, 0x08, // PID +4 = 36
+    0x01, // +1 = 37
+    // short_field
+    0x00, 0x00, 0x00, // +3 pad = 40
+    0x00, 0x00, 0x00, 0x04, // PID +4 = 44
+    0x7f, 0xff // +2 = 46
+  };
+  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2, expected);
 }
 
 int main(int argc, char* argv[])
