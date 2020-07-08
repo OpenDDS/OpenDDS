@@ -341,82 +341,40 @@ public:
 
   DDS::ReturnCode_t setup_serialization()
   {
-    /**
-     * TODO(iguessthislldo): Update when we can determine what encoding we need
-     * to use from from a data representation QoS.
-     */
-    encoding_mode_ = EncodingMode(
-      cdr_encapsulation() ?
-        Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
-      swap_bytes());
-#if 0
-    /*
-     * We need to get the encoding kinds for encapsulated and non-encapsulated
-     * encoding modes. We do this by picking the first supported representation
-     * that is supported by the mode, which is sorta what the XTypes spec says
-     * to do, except it only assumes one mode. One mode (but not both) may be
-     * left set to KIND_UNKNOWN, disabling it and preventing it from matching
-     * with readers just available through that mode.
-     */
-    Encoding::Kind encap_kind = Encoding::KIND_UNKNOWN;
-    Encoding::Kind nonencap_kind = Encoding::KIND_UNKNOWN;
-    DDS::DataRepresentationIdSeq repIds =
-      get_effective_data_rep_qos(qos_.representation.value);
-    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-      const DDS::DataRepresentationId_t repr = repIds[i];
-      const Encoding::Kind kind =
-        repr_ext_to_encoding_kind(repr, MarshalTraitsType::extensibility());
-      switch (kind) {
-      case Encoding::KIND_CDR_UNALIGNED:
-        if (nonencap_kind == Encoding::KIND_UNKNOWN) {
-          nonencap_kind = kind;
+    DDS::DataRepresentationIdSeq reqIds = get_effective_data_rep_qos(qos_.representation.value);
+    bool success = false;
+    Encoding::Kind encoding_kind;
+    if (cdr_encapsulation()) {
+      for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+        // TODO(sonndinh): Do we need to return failure when encountering an invalid representation
+        if (repr_to_encoding_kind(repIds[i], encoding_kind) &&
+            (Encoding::KIND_XCDR1 == encoding_kind ||
+             Encoding::KIND_XCDR2 == encoding_kind)) {
+          encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
+          success = true;
+          break;
         }
-        break;
-
-      case Encoding::KIND_CDR_PLAIN:
-      case Encoding::KIND_CDR_PARAMLIST:
-      case Encoding::KIND_XCDR2_PLAIN:
-      case Encoding::KIND_XCDR2_PARAMLIST:
-      case Encoding::KIND_XCDR2_DELIMITED:
-        if (encap_kind == Encoding::KIND_UNKNOWN) {
-          encap_kind = kind;
-        }
-        break;
-
-      case Encoding::KIND_XML:
-        // Not Supported, Ignore
-        break;
-
-      case Encoding::KIND_UNKNOWN:
-        if (::OpenDDS::DCPS::DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-            ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-            ACE_TEXT("Encountered unknown DataRepresentationId_t value: %d\n"),
-            TraitsType::type_name(), repr));
-        }
-        return DDS::RETCODE_ERROR;
       }
-      if (encap_kind != Encoding::KIND_UNKNOWN &&
-          nonencap_kind != Encoding::KIND_UNKNOWN) {
-        break;
+    } else { // Non-encapsulation
+      for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+        if (repr_to_encoding_kind(repIds[i], encoding_kind) &&
+            Encoding::KIND_UNALIGNED_CDR == encoding_kind) {
+          encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
+          success = true;
+          break;
+        }
       }
     }
-
-    // Try to Setup Encoding Modes
-    const bool swap_the_bytes = swap_bytes();
-    encapsulated_encoding_mode_ = EncodingMode(encap_kind, swap_the_bytes);
-    non_encapsulated_encoding_mode_ = EncodingMode(nonencap_kind, swap_the_bytes);
-    if (!encapsulated_encoding_mode_.valid() &&
-        !non_encapsulated_encoding_mode_.valid()) {
+    if (!success) {
       if (::OpenDDS::DCPS::DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-          ACE_TEXT("None of allowed data representations are supported!\n"),
-          TraitsType::type_name()));
+                   ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                   ACE_TEXT("Could not find a valid data representation\n"),
+                   TraitsType::type_name()));
       }
+      // TODO(sonndinh): Return error when fail to set the encoding mode?
       return DDS::RETCODE_ERROR;
     }
-#endif
 
     // Set up allocator with reserved space for data if it is bounded
     if (MarshalTraitsType::gen_is_bounded_size()) {
