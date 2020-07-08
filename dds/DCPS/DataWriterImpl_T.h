@@ -341,7 +341,7 @@ public:
 
   DDS::ReturnCode_t setup_serialization()
   {
-    DDS::DataRepresentationIdSeq reqIds = get_effective_data_rep_qos(qos_.representation.value);
+    DDS::DataRepresentationIdSeq repIds = get_effective_data_rep_qos(qos_.representation.value);
     bool success = false;
     Encoding::Kind encoding_kind;
     if (cdr_encapsulation()) {
