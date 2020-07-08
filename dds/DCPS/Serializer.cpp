@@ -264,7 +264,7 @@ OPENDDS_STRING Encoding::to_string() const
 {
   OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
     endianness_to_string(endianness_);
-  if (!zero_init_padding_ ) {
+  if (!zero_init_padding_) {
     rv += ", non-initialized padding";
   }
   return rv;
@@ -580,7 +580,7 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
-    if (!align_w(4)) {
+    if (!align_w(xcdr1_pid_alignment)) {
       return false;
     }
 
