@@ -65,10 +65,10 @@ template<typename TypeA, typename TypeB>
 }
 
 struct DataView {
-  template <size_t ARRAY_SIZE>
-  DataView(const unsigned char (&array)[ARRAY_SIZE])
+  template <size_t array_size>
+  DataView(const unsigned char (&array)[array_size])
   : data(reinterpret_cast<const char*>(&array[0]))
-  , size(ARRAY_SIZE)
+  , size(array_size)
   {
   }
 
@@ -171,6 +171,8 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
 {
   Type value;
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
+  // TODO(iguessthislldo): Does not work for XCDR1 and XCDR2 Mutable and XCDR2 Appendable
+  /* EXPECT_EQ(max_serialized_size(encoding, value), expected_cdr.size); */
 
   serializer_test<Type>(encoding, expected_cdr);
 }
