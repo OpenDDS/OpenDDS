@@ -7,21 +7,18 @@
 
 // Generic XCDR1 Tests =======================================================
 
-@topic
 @final
 @OpenDDS::data_representation(XCDR1)
 struct FinalXcdr1Struct {
   COMMON_FIELDS
 };
 
-@topic
 @appendable
 @OpenDDS::data_representation(XCDR1)
 struct AppendableXcdr1Struct {
   COMMON_FIELDS
 };
 
-@topic
 @mutable
 @OpenDDS::data_representation(XCDR1)
 struct MutableXcdr1Struct {
@@ -30,21 +27,18 @@ struct MutableXcdr1Struct {
 
 // Generic XCDR2 Tests =======================================================
 
-@topic
 @final
 @OpenDDS::data_representation(XCDR2)
 struct FinalXcdr2Struct {
   COMMON_FIELDS
 };
 
-@topic
 @appendable
 @OpenDDS::data_representation(XCDR2)
 struct AppendableXcdr2Struct {
   COMMON_FIELDS
 };
 
-@topic
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct MutableXcdr2Struct {
@@ -53,7 +47,6 @@ struct MutableXcdr2Struct {
 
 // Generic XCDR1/2 Tests =====================================================
 
-@topic
 @final
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
@@ -61,7 +54,6 @@ struct FinalXcdr12Struct {
   COMMON_FIELDS
 };
 
-@topic
 @appendable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
@@ -69,7 +61,6 @@ struct AppendableXcdr12Struct {
   COMMON_FIELDS
 };
 
-@topic
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
@@ -83,7 +74,6 @@ struct MutableXcdr12Struct {
 // Mutable Tests =============================================================
 // TODO(iguessthislldo): Add more fields
 
-@topic
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
@@ -94,7 +84,6 @@ struct MutableStruct {
   @id(10) long long long_long_field;
 };
 
-@topic
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
@@ -105,7 +94,6 @@ struct ReorderedMutableStruct {
   @id(4) short short_field;
 };
 
-@topic
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
