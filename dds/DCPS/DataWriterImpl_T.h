@@ -341,29 +341,37 @@ public:
 
   DDS::ReturnCode_t setup_serialization()
   {
-    DDS::DataRepresentationIdSeq repIds = get_effective_data_rep_qos(qos_.representation.value);
+    const DDS::DataRepresentationIdSeq repIds =
+      get_effective_data_rep_qos(qos_.representation.value);
     bool success = false;
     Encoding::Kind encoding_kind;
     if (cdr_encapsulation()) {
       for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-        // TODO(sonndinh): Do we need to return failure when encountering an invalid representation
-        if (repr_to_encoding_kind(repIds[i], encoding_kind) &&
-            (Encoding::KIND_XCDR1 == encoding_kind ||
-             Encoding::KIND_XCDR2 == encoding_kind)) {
-          encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-          success = true;
-          break;
+        if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+          if (Encoding::KIND_XCDR1 == encoding_kind ||
+              Encoding::KIND_XCDR2 == encoding_kind) {
+            encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
+            success = true;
+            break;
+          } else { // Valid but not supported representations
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+                       ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                       ACE_TEXT("Skip %C data representation\n"),
+                       TraitsType::type_name(),
+                       Encoding::kind_to_string(encoding_kind)));
+          }
+        } else { // Invalid data representations
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                     ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                     ACE_TEXT("Encounter invalid data representation\n"),
+                     TraitsType::type_name()));
+          return DDS::RETCODE_ERROR;
         }
       }
-    } else { // Non-encapsulation
-      for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-        if (repr_to_encoding_kind(repIds[i], encoding_kind) &&
-            Encoding::KIND_UNALIGNED_CDR == encoding_kind) {
-          encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-          success = true;
-          break;
-        }
-      }
+    } else {
+      // Pick unaligned CDR as it is the implicit representation for non-encapsulated
+      encoding_mode_ = EncodingMode(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+      success = true;
     }
     if (!success) {
       if (::OpenDDS::DCPS::DCPS_debug_level) {
@@ -372,7 +380,6 @@ public:
                    ACE_TEXT("Could not find a valid data representation\n"),
                    TraitsType::type_name()));
       }
-      // TODO(sonndinh): Return error when fail to set the encoding mode?
       return DDS::RETCODE_ERROR;
     }
 

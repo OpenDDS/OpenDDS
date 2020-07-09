@@ -386,7 +386,7 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind)
 {
   switch(repr) {
-  case UNALIGNED_CDR_DATA_REPRESENTATION:
+  case DDS::UNALIGNED_CDR_DATA_REPRESENTATION:
     kind = Encoding::KIND_UNALIGNED_CDR;
     break;
   case DDS::XCDR_DATA_REPRESENTATION:
