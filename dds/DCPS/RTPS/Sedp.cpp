@@ -2778,11 +2778,11 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
 
-  const GUID_t src_endpoint = msg.source_endpoint_guid;
-  const GUID_t dst_endpoint = msg.destination_endpoint_guid;
-  const GUID_t this_endpoint = participant_stateless_message_reader_->get_repo_id();
-  const GUID_t dst_participant = msg.destination_participant_guid;
-  const GUID_t this_participant = participant_id_;
+  const GUID_t& src_endpoint = msg.source_endpoint_guid;
+  const GUID_t& dst_endpoint = msg.destination_endpoint_guid;
+  const GUID_t& this_endpoint = participant_stateless_message_reader_->get_repo_id();
+  const GUID_t& dst_participant = msg.destination_participant_guid;
+  const GUID_t& this_participant = participant_id_;
 
   if (ignoring(src_endpoint)) {
     return true;
@@ -2793,6 +2793,10 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
   }
 
   if (dst_endpoint != GUID_UNKNOWN && dst_endpoint != this_endpoint) {
+    return true;
+  }
+
+  if (!spdp_.new_stateless_message(msg)) {
     return true;
   }
 
@@ -3969,10 +3973,9 @@ Sedp::write_durable_participant_message_data(const RepoId& reader)
 
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
-Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
+Sedp::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                               const RepoId& reader)
 {
-  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_stateless_message_writer_->get_seq().getValue());
   DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_stateless_message_writer_->write_stateless_message(msg, reader, sequence);
 }
