@@ -1,0 +1,106 @@
+// TODO(iguessthislldo): Add more fields
+#define COMMON_FIELDS \
+  short short_field; \
+  long long_field; \
+  octet octet_field; \
+  long long long_long_field; \
+
+// Generic XCDR1 Tests =======================================================
+
+@final
+@OpenDDS::data_representation(XCDR1)
+struct FinalXcdr1Struct {
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR1)
+struct AppendableXcdr1Struct {
+  COMMON_FIELDS
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+struct MutableXcdr1Struct {
+  COMMON_FIELDS
+};
+
+// Generic XCDR2 Tests =======================================================
+
+@final
+@OpenDDS::data_representation(XCDR2)
+struct FinalXcdr2Struct {
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableXcdr2Struct {
+  COMMON_FIELDS
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct MutableXcdr2Struct {
+  COMMON_FIELDS
+};
+
+// Generic XCDR1/2 Tests =====================================================
+
+@final
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct FinalXcdr12Struct {
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct AppendableXcdr12Struct {
+  COMMON_FIELDS
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct MutableXcdr12Struct {
+  COMMON_FIELDS
+};
+
+// Appendable Tests ==========================================================
+// TODO(iguessthislldo)
+
+// Mutable Tests =============================================================
+// TODO(iguessthislldo): Add more fields
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct MutableStruct {
+  @id(4) short short_field;
+  @id(6) long long_field;
+  @id(8) octet octet_field;
+  @id(10) long long long_long_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct ReorderedMutableStruct {
+  @id(6) long long_field;
+  @id(10) long long long_long_field;
+  @id(8) octet octet_field;
+  @id(4) short short_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldMutableStruct {
+  @id(6) long long_field;
+  @id(1) long additional_field;
+  @id(10) long long long_long_field;
+  @id(8) octet octet_field;
+  @id(4) short short_field;
+};

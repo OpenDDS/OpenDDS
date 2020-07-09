@@ -11,9 +11,6 @@
 
 #include <ace/Message_Block.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include <string>
-#endif
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -46,17 +43,17 @@ void Encoding::kind(Encoding::Kind value)
   switch (value) {
   case KIND_XCDR1:
     alignment(ALIGN_CDR);
-    xcdr_version(XCDR1);
+    xcdr_version(XCDR_VERSION_1);
     break;
 
   case KIND_XCDR2:
     alignment(ALIGN_XCDR2);
-    xcdr_version(XCDR2);
+    xcdr_version(XCDR_VERSION_2);
     break;
 
   case KIND_UNALIGNED_CDR:
     alignment(ALIGN_NONE);
-    xcdr_version(XCDR_NONE);
+    xcdr_version(XCDR_VERSION_NONE);
     break;
 
   default:
@@ -841,18 +838,32 @@ Serializer::align_cont_w()
 ACE_INLINE
 bool Serializer::read_delimiter(size_t& size)
 {
-  ACE_CDR::ULong dheader;
-  if (!(*this >> dheader)) {
-    return false;
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    ACE_CDR::ULong dheader;
+    if (!(*this >> dheader)) {
+      return false;
+    }
+    size = dheader;
   }
-  size = dheader;
   return true;
 }
 
 ACE_INLINE
 bool Serializer::write_delimiter(size_t size)
 {
-  return *this << static_cast<ACE_CDR::ULong>(size);
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    return *this << static_cast<ACE_CDR::ULong>(size - uint32_cdr_size);
+  }
+  return true;
+}
+
+ACE_INLINE
+bool Serializer::write_list_end_parameter_id()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_1) {
+    return align_w(xcdr1_pid_alignment) && *this << pid_list_end && *this << ACE_CDR::UShort(0);
+  }
+  return true;
 }
 
 //
@@ -1516,6 +1527,51 @@ ACE_INLINE
 void serialized_size_ulong(const Encoding& encoding, size_t& size, size_t count)
 {
   max_serialized_size_ulong(encoding, size, count);
+}
+
+ACE_INLINE
+void serialized_size_delimiter(const Encoding& encoding, size_t& size)
+{
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+    max_serialized_size_ulong(encoding, size);
+  }
+}
+
+ACE_INLINE
+void serialized_size_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
+{
+  const Encoding::XcdrVersion xcdr = encoding.xcdr_version();
+  if (xcdr == Encoding::XCDR_VERSION_1) {
+    encoding.align(size, xcdr1_pid_alignment);
+    size += uint16_cdr_size * 2;
+    // TODO(iguessthislldo): Extended PID
+
+    // Save and Zero Size to Reset the Alignment
+    xcdr1_running_size += size;
+    size = 0;
+  } else if (xcdr == Encoding::XCDR_VERSION_2) {
+    encoding.align(size, uint32_cdr_size);
+    size += uint32_cdr_size;
+    // TODO(iguessthislldo) LC
+  }
+}
+
+ACE_INLINE
+void serialized_size_list_end_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
+{
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
+    /*
+     * TODO(iguessthislldo): See how DDSXTY14-23 is resolved.
+     * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447165924
+     */
+    encoding.align(size, xcdr1_pid_alignment);
+    size += uint16_cdr_size * 2;
+
+    // Restore Saved Totals from Alignment Resets
+    size += xcdr1_running_size;
+  }
 }
 
 } // namespace DCPS
