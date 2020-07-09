@@ -102,7 +102,8 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
        ++index) {
     if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0 ||
         ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0) {
-      // found the [transport/*] section, now iterate through subsections...
+      // found the [transport/*] or [transport_template/*] section,
+      // now iterate through subsections...
       ACE_Configuration_Section_Key sect;
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -717,6 +718,12 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
             }
 
             tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(idx->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) TransportRegistry::")
+                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_ip_addr: %s=%s\n"),
+                         it->first.c_str(), addr.c_str()));
+            }
           } else if (idx->second == "add_domain_id_to_port") {
             OPENDDS_STRING addr = it->second;
             size_t pos = addr.find_last_of(":");
@@ -735,8 +742,13 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
                         idx->second.c_str()),
                        -1);
             }
-
             tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(idx->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) TransportRegistry::")
+                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_port: %s=%s\n"),
+                         it->first.c_str(), addr.c_str()));
+            }
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -748,6 +760,12 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 
         } else {
           tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
+          if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) TransportRegistry::")
+                         ACE_TEXT("create_transport_template_instance adding %s=%s\n"),
+                         it->first.c_str(), it->second.c_str()));
+            }
         }
       }
 
