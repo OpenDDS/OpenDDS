@@ -3720,7 +3720,6 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     else if (entity_id == ENTITYID_TL_SVC_REPLY_WRITER) {
     // TODO: call 'take_reply' function here
     }
-    
     break;
   }
 
