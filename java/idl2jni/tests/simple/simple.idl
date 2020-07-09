@@ -15,7 +15,7 @@ module simple {
   const long ArrayBounds = 4;
   typedef long TestArrayTypedef[ArrayBounds];
   typedef TestArrayTypedef TestArrayTypedef2;
-  //typedef long TestArray2Typedef[ArrayBounds]; //FUTURE: duplicate arrays
+  typedef long TestArray2Typedef[ArrayBounds];
   typedef string TestStringArray[ArrayBounds];
 
   typedef sequence<StringSeq> StringSeqSeq;
@@ -45,7 +45,6 @@ module simple {
     TestSeqTypedef seq1;
     SeqOfTypedefedLong seq2;
     StringTypedef st;
-    //DEPRECATED: sequence<octet> seq2;
   };
 
   typedef sequence<TestStruct> TestStructSequence;
@@ -137,8 +136,9 @@ module simple {
   local
 #endif
   interface TestLI {
+    //FUTURE: support for passing arrays
+    //boolean localOp(inout EnumSeq p1, out TestStructSequence p2, in TestStructArray p3);
     boolean localOp(inout EnumSeq p1, out TestStructSequence p2);
-                //FUTURE: support for passing arrays     in TestStructArray p3);
     boolean localOp2(inout TestStructSequence s1);
     EnumSeq returnASequence(out short p1, inout TestStruct p2);
     void primitive(inout boolean p1, out char p2, inout octet p3, out short p4,

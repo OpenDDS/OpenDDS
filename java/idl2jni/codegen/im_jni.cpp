@@ -19,6 +19,26 @@
 
 using namespace std;
 
+//add in "_var" if it's not already there
+string append_var(const string &str)
+{
+  if (str.size() <= 4 || str.substr(str.size() - 4) != "_var") {
+    return str + "_var";
+  }
+
+  return str;
+}
+
+//add in "_forany" if it's not already there
+string append_forany(const string &str)
+{
+  if (str.size() <= 7 || str.substr(str.size() - 7) != "_forany") {
+    return str + "_forany";
+  }
+
+  return str;
+}
+
 string idl_mapping_jni::scoped(UTL_ScopedName *name, bool omit_local)
 {
   return scoped_helper(name, "::", omit_local);
@@ -362,10 +382,11 @@ struct commonSetup {
   string sigToCxx, sigToJava, cxx, exporter;
 
   explicit commonSetup(UTL_ScopedName *name, const char *java = "jobject",
-                       bool useVar = false, bool skipDefault = false, bool useCxxRef = true)
+                       bool useVar = false, bool useForAny = false,
+                       bool skipDefault = false, bool useCxxRef = true)
   : hfile(be_global->stub_header_)
   , cppfile(be_global->stub_impl_)
-  , cxx(idl_mapping_jni::scoped(name) + (useVar ? "_var" : "")) {
+  , cxx(idl_mapping_jni::scoped(name) + (useVar ? "_var" : (useForAny ? "_forany" : ""))) {
     be_global->add_include("idl2jni_jni.h");
     be_global->add_include("idl2jni_runtime.h");
     ACE_CString ace_exporter = be_global->stub_export_macro();
@@ -487,6 +508,23 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
         "    jni->Set" + jniFn + "Field (target, fid, source." + fname
         + ");\n";
 
+    } else if (isArray(fields[i]->field_type())) {
+      string t = type(fields[i]->field_type());
+      string tt = taoType(fields[i]->field_type());
+      fieldsToCxx +=
+        "    " + t + " obj = static_cast<" + t + "> (jni->GetObjectField "
+        "(source, fid));\n"
+        "    " + append_forany(tt) + " fa(target." + fname + ");\n"
+        "    copyToCxx (jni, fa, obj);\n"
+        "    jni->DeleteLocalRef (obj);\n";
+      fieldsToJava +=
+        "    " + t + " obj = createNewObject ? 0 : "
+        "static_cast<" + t + "> (jni->GetObjectField (target, fid));\n"
+        "    const " + append_forany(tt) + " fa(const_cast<" + tt + "&>(source." + fname + "));\n"
+        "    copyToJava (jni, obj, fa, createNewObject);\n"
+        "    jni->SetObjectField (target, fid, obj);\n"
+        "    jni->DeleteLocalRef (obj);\n";
+
     } else if (jvmSig[0] == '[') {
       string t = type(fields[i]->field_type());
       fieldsToCxx +=
@@ -605,7 +643,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
                                         const string &jniArrayType, const string &taoTypeName, bool sequence,
                                         const string &length, bool elementIsObjref /* = false */)
 {
-  commonSetup c(name, jniArrayType.c_str(), false, false);
+  commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
   loopCxx, loopJava, actualJniType = jniType,
                                      resizeCxx = sequence ? "  target.length (len);\n" : "";
@@ -761,30 +799,6 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   toJavaBody.str() <<
   "}\n\n";
 
-  //extra overloads of copyTo{Java,Cxx} to deal with the array C++ _var mapping
-  if (!sequence) {
-    ACE_CString exporter = be_global->stub_export_macro();
-    string altsig_c =
-      "void copyToCxx (JNIEnv *jni, " + c.cxx + "_var &target, "
-      + jniArrayType + " source)";
-    string altsig_j =
-      "void copyToJava (JNIEnv *jni, " + jniArrayType + " &target, const "
-      + c.cxx + "_var &source, bool createNewObject";
-    c.hfile <<
-    exporter << (exporter == "" ? "" : "\n") << altsig_c << ";\n" <<
-    exporter << (exporter == "" ? "" : "\n") << altsig_j << " = false);\n";
-    altsig_j += ')';
-    c.cppfile <<
-    altsig_c << "\n"
-    "{\n" <<
-    toCxxBody.str() <<
-    "}\n\n" <<
-    altsig_j << "\n"
-    "{\n" <<
-    toJavaBody.str() <<
-    "}\n\n";
-  }
-
   return true;
 }
 
@@ -864,22 +878,12 @@ void write_native_unarrow(const char *cxx, const char *javaInterf)
   "}\n\n";
 }
 
-//add in "_var" if it's not already there
-string varify(const string &str)
-{
-  if (str.size() <= 4 || str.substr(str.size() - 4) != "_var") {
-    return str + "_var";
-  }
-
-  return str;
-}
-
 string arg_conversion(const char *name, AST_Type *type,
                       AST_Argument::Direction direction, string &argconv_in, string &argconv_out,
                       string &tao_argconv_in, string &tao_argconv_out)
 {
   string tao = idl_mapping_jni::taoType(type);
-  string tao_var = varify(tao);
+  string tao_var = append_var(tao);
   string jni = idl_mapping_jni::type(type);
   string jvmSig = idl_mapping_jni::jvmSignature(type);
   string holderSig = idl_mapping::scoped_helper(type->name(), "/") + "Holder";
@@ -889,25 +893,33 @@ string arg_conversion(const char *name, AST_Type *type,
   bool always_var(tao == tao_var);
 
   if (direction == AST_Argument::dir_IN) {
-    argconv_in +=
-      "      " + tao + " _c_" + name + ";\n"
-      "      copyToCxx (_jni, _c_" + name + ", " + name + ");\n";
-    tao_argconv_in +=
-      "  " + jni + " _j_" + name + " = 0;\n";
+    if (isArray(type)) {
+      argconv_in +=
+        "      " + tao + " _c_" + name + ";\n"
+        "      " + append_forany(tao) + " _c_" + name + "_fa(_c_" + name + ");\n"
+        "      copyToCxx (_jni, _c_" + name + "_fa, " + name + ");\n";
+      tao_argconv_in +=
+        "  " + jni + " _j_" + name + " = 0;\n";
+    } else {
+      argconv_in +=
+        "      " + tao + " _c_" + name + ";\n"
+        "      copyToCxx (_jni, _c_" + name + ", " + name + ");\n";
+      tao_argconv_in +=
+        "  " + jni + " _j_" + name + " = 0;\n";
+    }
 
     if (always_var) suffix = ".in ()";
 
-    if (isObjref(type))
+    if (isObjref(type)) {
       tao_argconv_in +=
         "  " + tao + " _c_" + name + " = " + non_var + "::_duplicate ("
         + name + ");\n"
         "  copyToJava (_jni, _j_" + name + ", _c_" + name + ", true);\n";
-
-    else
+    } else {
       tao_argconv_in +=
         "  copyToJava (_jni, _j_" + string(name) + ", " + name
         + ", true);\n";
-
+    }
   } else if (direction == AST_Argument::dir_INOUT) {
     argconv_in +=
       "      " + jni + " _j_" + name + " = deholderize<" + jni
@@ -997,17 +1009,21 @@ string arg_conversion(const char *name, AST_Type *type,
                      "      copyToJava (_jni, _j_" + string(name) + ", _c_" + name
                      + ((var && !isObjref(type)) ? ".in ()" : "") + ", true);\n";
 
-      if (var) {
+      if (isArray(type)) {
+        tao_argconv_out +=
+          "  " + append_forany(tao) + " _c_" + name + "_fa(_o_" + name + ");\n"
+          "  copyToCxx (_jni, " + string(name) + ", _c_" + name + "_fa);\n";
+      } else if (var) {
         string init = isSSU(type) ? (" = new " + tao) : "";
         tao_argconv_out +=
           "  " + tao_var + " _c_" + name + init + ";\n"
           "  copyToCxx (_jni, _c_" + name + ", _o_" + name + ");\n"
           "  " + name + " = _c_" + name + ".out ();\n";
 
-      } else
+      } else {
         tao_argconv_out +=
-          "  copyToCxx (_jni, " + string(name) + ", _o_" + name
-          + ");\n";
+          "  copyToCxx (_jni, " + string(name) + ", _o_" + name + ");\n";
+      }
 
       tao_argconv_out +=
         "  _jni->DeleteLocalRef (_o_" + string(name) + ");\n";
@@ -1045,10 +1061,13 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
   if (is_array || attr->field_type()->size_type() != AST_Type::FIXED) {
     if (!is_array && !is_objref) suffix = ".in ()";
 
-    if (is_array || isSSU(attr->field_type())) {
+    if (is_array) {
+      extra_type = "_forany";
+      retval = append_forany(retval);
+    } else if (isSSU(attr->field_type())) {
       extra_type = "_var";
       extra_init = " = new " + retval;
-      retval = varify(retval);
+      retval = append_var(retval);
     }
 
     extra_retn = "._retn ()";
@@ -1251,10 +1270,13 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     if (is_array || op->return_type()->size_type() != AST_Type::FIXED) {
       if (!is_array && !is_objref) suffix = ".in ()";
 
-      if (is_array || isSSU(op->return_type())) {
+      if (is_array) {
+        extra_type = "_forany";
+        retval = append_forany(retval);
+      } else if (isSSU(op->return_type())) {
         extra_type = "_var";
         extra_init = " = new " + retval;
-        retval = varify(retval);
+        retval = append_var(retval);
       }
 
       extra_retn = "._retn ()";
@@ -1540,7 +1562,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
 
 bool idl_mapping_jni::gen_interf_fwd(UTL_ScopedName *name)
 {
-  commonSetup c(name, "jobject", true, true);
+  commonSetup c(name, "jobject", true, false, true);
   return true;
 }
 
@@ -1710,6 +1732,33 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
         "        jni->CallVoidMethod (target, mid, " + edisc + "source."
         + string(br_name) + " ());\n";
 
+    } else if (isArray(branches[i]->field_type())) {
+      if (br_sig[0] == '[') {
+        jniCast = "static_cast<" + br_type + "> (";
+      }
+
+      if (branches[i]->field_type()->node_type() == AST_Decl::NT_typedef) {
+        AST_Typedef *td = AST_Typedef::narrow_from_decl(branches[i]->field_type());
+        if (td->primitive_base_type()->node_type() == AST_Decl::NT_string) {
+          br_tao = "CORBA::String_var";
+        }
+      }
+
+      copyToCxx =
+        "        " + br_tao + " taoVal;\n"
+        "        " + append_forany(br_tao) + " fa(taoVal);\n"
+        "        copyToCxx (jni, fa, value);\n"
+        "        target." + br_name + " (taoVal);\n";
+      copyToJava =
+        "        jfieldID fid = jni->GetFieldID (clazz, \""
+        + string(br_name) + "\", \"" + br_sig + "\");\n"
+        "        " + br_type + " obj = createNewObject ? 0 : " + jniCast +
+        "jni->GetObjectField (target, fid)" + (jniCast.size() ? ")" : "")
+        + ";\n"
+        "        " + append_forany(br_tao) + " fa(source." + br_name + "());\n"
+        "        copyToJava (jni, obj, fa, !obj);\n"
+        "        jni->CallVoidMethod (target, mid, " + edisc + "obj);\n"
+        "        jni->DeleteLocalRef (obj);\n";
     } else {
       if (br_sig[0] == '[') {
         jniCast = "static_cast<" + br_type + "> (";
