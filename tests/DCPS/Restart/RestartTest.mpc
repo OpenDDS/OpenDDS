@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test, dcps_cm, dcps_rtps_udp {
+project: dcpsexe, dcps_test, dcps_cm, dcps_rtps_udp, opendds_optional_security {
 
   requires += no_opendds_safety_profile
 

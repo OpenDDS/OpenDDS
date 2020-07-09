@@ -12,6 +12,6 @@ use strict;
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $test = new PerlDDS::TestFramework();
-$test->process('rt', 'RestartTest');
+$test->process('rt', 'RestartTest', @ARGV);
 $test->start_process('rt');
 exit $test->finish(60);

@@ -37,6 +37,12 @@ tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgEncrypt_Paylo
 tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgSign_PayloadEncrypt
 tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt
 #tests/security/attributes/run_test.pl -scenario FullMsgSign_PayloadEncrypt_Frag
+tests/security/attributes/run_test.pl --scenario Partitions_DefaultQoS
+tests/security/attributes/run_test.pl --scenario Partitions_Denied
+tests/security/attributes/run_test.pl --scenario Partitions_Match
+tests/security/attributes/run_test.pl --scenario Partitions_Reordered
+tests/security/attributes/run_test.pl --scenario Partitions_Subset
 tests/security/TopicWithoutPermissions/run_test.pl
 tests/DCPS/ParticipantLocationTopic/run_test.pl: CXX11 !NO_BUILT_IN_TOPICS !IPV6
 tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6: CXX11 !NO_BUILT_IN_TOPICS IPV6
+tests/DCPS/Restart/run_test.pl --secure

@@ -8,9 +8,12 @@
 #ifndef SECURITY_QOS_TEST_ARGS_H
 #define SECURITY_QOS_TEST_ARGS_H
 
-#include <string>
+#include "dds/DdsDcpsCoreC.h"
 
 #include "ace/ace_wchar.h"
+
+#include <string>
+#include <vector>
 
 namespace SecurityAttributes
 {
@@ -29,6 +32,7 @@ struct Args {
   int domain_;
 
   std::string topic_name_;
+  std::vector<std::string> partition_;
 
   bool reliable_;
   bool wait_for_acks_;
@@ -38,9 +42,11 @@ struct Args {
   int expected_result_;
   int timeout_;
 
-  int extra_space;
+  int extra_space_;
 
   Args();
+
+  void partition_to_qos(DDS::PartitionQosPolicy& policy);
 
   static int parse_args(int argc, ACE_TCHAR *argv[], Args& args);
 };
