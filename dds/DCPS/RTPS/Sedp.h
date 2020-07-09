@@ -15,6 +15,7 @@
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/RtpsRpcTypeSupportImpl.h"
 
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 
@@ -440,8 +441,12 @@ private:
 #endif
 
   // Temporary forward declaration. TODO: remove when type support is implemented
-  struct TypeLookup_Request;
-  struct TypeLookup_Reply;
+  struct TypeLookup_Request {
+    DDS::rpc::RequestHeader header;
+  };
+  struct TypeLookup_Reply {
+    DDS::rpc::ResponseHeader header;
+  };
 
   class TypeLookupWriter : public Writer {
   public:
@@ -462,7 +467,7 @@ private:
 
     virtual ~TypeLookupRequestWriter();
 
-    DDS::ReturnCode_t send_type_lookup_request(const TypeLookup_Request& type_lookup_request,
+    DDS::ReturnCode_t send_type_lookup_request(TypeLookup_Request& type_lookup_request,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence);
   };
@@ -479,9 +484,10 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t send_type_lookup_reply(const TypeLookup_Reply& type_lookup_reply,
+    DDS::ReturnCode_t send_type_lookup_reply(TypeLookup_Reply& type_lookup_reply,
       const DCPS::RepoId& reader,
-      DCPS::SequenceNumber& sequence);
+      DCPS::SequenceNumber& sequence,
+      DDS::rpc::SampleIdentity request_id);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TL_Reply_Writer_rch;
@@ -553,6 +559,10 @@ private:
     {}
 
     virtual ~TypeLookupRequestReader();
+
+    DDS::ReturnCode_t take_tl_request(const DCPS::ReceivedDataSample& sample,
+      DCPS::Serializer& ser,
+      TypeLookup_Request& type_lookup_request);
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TL_Request_Reader_rch;
@@ -567,6 +577,10 @@ private:
     {}
 
     virtual ~TypeLookupReplyReader();
+
+    DDS::ReturnCode_t take_tl_response(const DCPS::ReceivedDataSample& sample,
+      DCPS::Serializer& ser,
+      TypeLookup_Reply& type_lookup_reply);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TL_Reply_Reader_rch;
