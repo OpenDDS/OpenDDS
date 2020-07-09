@@ -2083,11 +2083,17 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
            it != dr_inst.domain_info.end();
            ++it) {
         dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::")
+                     ACE_TEXT("configure_domain_range_instance adding %s=%s\n"),
+                     it->first.c_str(), it->second.c_str()));
+        }
       }
 
       if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
         // create transport instance add default transport config
-        TransportRegistry::instance()->create_transport_template_instance(domainId, dr_inst.discovery_template_name);
+        TransportRegistry::instance()->create_transport_template_instance(domainId, this->global_transport_config_);
         dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
                              ACE_TEXT_CHAR_TO_TCHAR(TransportRegistry::instance()->get_config_instance_name(domainId).c_str()));
       }
@@ -2129,7 +2135,13 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
                         idx->second.c_str()),
                        -1);
             }
-            dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
+            dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) Service_Participant::")
+                         ACE_TEXT("configure_domain_range_instance processing AddDomainId: %s=%s\n"),
+                         it->first.c_str(), addr.c_str()));
+            }
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -2141,6 +2153,12 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
         } else {
           dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
+          if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) Service_Participant::")
+                         ACE_TEXT("configure_domain_range_instance adding config %s=%s\n"),
+                         it->first.c_str(), it->second.c_str()));
+            }
         }
       }
 
@@ -2206,7 +2224,6 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 
     if (iter != this->discovery_types_.end()) {
       // discovery code is loaded, process options
-      // --cj this object
       return iter->second->discovery_config(cf);
     } else {
       // No discovery code can be loaded, report an error

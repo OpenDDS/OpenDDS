@@ -651,7 +651,7 @@ TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
 }
 
 int
-TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, const OPENDDS_STRING& transport_template_name)
+TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, const ACE_TString& config_name)
 {
   OPENDDS_STRING transport_inst_name = get_transport_template_instance_name(domain);
   OPENDDS_STRING config_inst_name = get_config_instance_name(domain);
@@ -659,7 +659,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
   if (has_transport_template()) {
     TransportTemplate tr_inst;
 
-    if (get_transport_template_info(transport_template_name.c_str(), tr_inst)) {
+    if (get_transport_template_info(config_name, tr_inst)) {
       ACE_Configuration_Heap tcf;
       tcf.open();
       const ACE_Configuration_Section_Key& root = tcf.root_section();
@@ -751,8 +751,8 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
             }
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range_instance ")
+                        ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                        ACE_TEXT("create_transport_template_instance ")
                         ACE_TEXT("No support for %s customization\n"),
                         idx->second.c_str()),
                        -1);
@@ -800,7 +800,7 @@ TransportRegistry::config_has_transport_template(const ACE_TString& config_name)
 }
 
 bool
-TransportRegistry::get_transport_template_info(const OPENDDS_STRING& config_name, TransportTemplate& inst)
+TransportRegistry::get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst)
 {
   bool ret = false;
   if (has_transport_template()) {
@@ -813,18 +813,18 @@ TransportRegistry::get_transport_template_info(const OPENDDS_STRING& config_name
         inst.transport_info = i->transport_info;
 
         ret = true;
-
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
-                     ACE_TEXT("found config %C\n"),
-                     config_name.c_str()));
-        }
-
         break;
       }
     }
   }
+
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
+               ACE_TEXT("%C config %C\n"),
+               ret ? "found" : "did not find", config_name.c_str()));
+  }
+
   return ret;
 }
 
