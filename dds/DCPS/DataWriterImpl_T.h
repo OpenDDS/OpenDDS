@@ -358,7 +358,7 @@ public:
                        ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
                        ACE_TEXT("Skip %C data representation\n"),
                        TraitsType::type_name(),
-                       Encoding::kind_to_string(encoding_kind)));
+                       Encoding::kind_to_string(encoding_kind).c_str()));
           }
         } else { // Invalid data representations
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
