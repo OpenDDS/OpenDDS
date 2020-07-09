@@ -1,0 +1,510 @@
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/GNUmakefile.ACE MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ACEXML/common'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ACEXML/common/GNUmakefile.ACEXML MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ACEXML/common'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ACEXML/parser/parser'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ACEXML/parser/parser/GNUmakefile.ACEXML_Parser MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ACEXML/parser/parser'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_FE MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_A MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_C MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_E MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_I MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_O MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_S MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_U MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_BE_VIS_V MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/apps/gperf/src'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/apps/gperf/src/GNUmakefile.gperf MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/apps/gperf/src'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL/GNUmakefile.TAO_IDL_EXE MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/TAO_IDL'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Messaging'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Messaging/GNUmakefile.Messaging_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Messaging'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Valuetype'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Valuetype/GNUmakefile.Valuetype_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Valuetype'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/AnyTypeCode'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/AnyTypeCode/GNUmakefile.AnyTypeCode_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/AnyTypeCode'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Codeset'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Codeset/GNUmakefile.Codeset_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Codeset'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/GNUmakefile.TAO_Core_idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/GNUmakefile.TAO MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Codeset'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Codeset/GNUmakefile.Codeset MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Codeset'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/AnyTypeCode'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/AnyTypeCode/GNUmakefile.AnyTypeCode MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/AnyTypeCode'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Valuetype'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Valuetype/GNUmakefile.Valuetype MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Valuetype'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI/GNUmakefile.PI_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CodecFactory'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CodecFactory/GNUmakefile.CodecFactory_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CodecFactory'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CodecFactory'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CodecFactory/GNUmakefile.CodecFactory MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CodecFactory'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI/GNUmakefile.PI MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PortableServer'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PortableServer/GNUmakefile.PortableServer_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PortableServer'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PortableServer'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PortableServer/GNUmakefile.PortableServer MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PortableServer'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Messaging'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Messaging/GNUmakefile.Messaging MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Messaging'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.Async_ImR_Client_IDL MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/DynamicInterface'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/DynamicInterface/GNUmakefile.DynamicInterface MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/DynamicInterface'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.ImR_Activator_IDL MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.ImR_Locator_IDL MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.Svc_Utils MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.ImR_Activator MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.ImR_Activator_Service MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORManipulation'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORManipulation/GNUmakefile.IORManipulation_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORManipulation'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORManipulation'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORManipulation/GNUmakefile.IORManipulation MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORManipulation'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable/GNUmakefile.Async_IORTable_Core_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable/GNUmakefile.IORTable_Core_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable/GNUmakefile.IORTable MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable/GNUmakefile.Async_IORTable MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/IORTable'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.ImR_Locator MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI_Server'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI_Server/GNUmakefile.PI_Server_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI_Server'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI_Server'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI_Server/GNUmakefile.PI_Server MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/PI_Server'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.ImR_Locator_Service MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ImR_Client'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ImR_Client/GNUmakefile.ImR_Client_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ImR_Client'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ImR_Client'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ImR_Client/GNUmakefile.ImR_Client MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ImR_Client'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service/GNUmakefile.tao_imr MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/ImplRepo_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.CosNaming_IDL MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.CosNaming MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.CosNaming_Skel MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.CosNaming_Serv MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/Naming_Service'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/Naming_Service/GNUmakefile.Naming_Service MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/Naming_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/Naming_Service'
+NT_Naming_Service will not be built due to the following disabled make macros: winnt
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/Naming_Service/GNUmakefile.NT_Naming_Service MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/Naming_Service'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.PortableGroup MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.FTORB_Utils MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.FT_ClientORB MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs/GNUmakefile.FT_ServerORB MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/orbsvcs/orbsvcs'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/BiDir_GIOP'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/BiDir_GIOP/GNUmakefile.BiDir_GIOP_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/BiDir_GIOP'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/BiDir_GIOP'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/BiDir_GIOP/GNUmakefile.BiDir_GIOP MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/BiDir_GIOP'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_Framework'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_Framework/GNUmakefile.CSD_Framework_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_Framework'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_Framework'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_Framework/GNUmakefile.CSD_Framework MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_Framework'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_ThreadPool'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_ThreadPool/GNUmakefile.CSD_ThreadPool MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CSD_ThreadPool'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Strategies'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Strategies/GNUmakefile.Strategies_Core_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Strategies'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Strategies'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Strategies/GNUmakefile.Strategies MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Strategies'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello/GNUmakefile.Hello_Idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello/GNUmakefile.Hello_Client MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello/GNUmakefile.Hello_Server MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tests/Hello'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist/GNUmakefile.nsadd MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist/GNUmakefile.nsdel MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist/GNUmakefile.nslist MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/utils/nslist'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/XML_Utils'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/XML_Utils/GNUmakefile.ACE_XML_Utils MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/XML_Utils'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/dds/idl'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/dds/idl/GNUmakefile.opendds_idl MAKEFLAGS=w
+
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/dds/idl'
+make[1]: Entering directory '/home/calabresec/xtypes/filter_eval/OpenDDS/dds'
+
+GNUmakefile: /home/calabresec/xtypes/filter_eval/OpenDDS/dds/GNUmakefile.OpenDDS_Dcps MAKEFLAGS=w
+
+g++ -fvisibility=hidden -fvisibility-inlines-hidden -Wnon-virtual-dtor -ggdb -pthread -fno-strict-aliasing -Wall -W -Wpointer-arith -pipe -D_GNU_SOURCE   -I/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers -D__ACE_INLINE__ -I/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers -I/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO -I.. -I../dds -DOPENDDS_SECURITY -DNOMINMAX -DOPENDDS_DCPS_BUILD_DLL  -c -fPIC -o .shobj/DdsDcpsGuidTypeSupportImpl.o DdsDcpsGuidTypeSupportImpl.cpp
+g++ -fvisibility=hidden -fvisibility-inlines-hidden -Wnon-virtual-dtor -ggdb -pthread -fno-strict-aliasing -Wall -W -Wpointer-arith -pipe -D_GNU_SOURCE   -I/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers -D__ACE_INLINE__ -I/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers -I/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO -I.. -I../dds -DOPENDDS_SECURITY -DNOMINMAX -DOPENDDS_DCPS_BUILD_DLL  -c -fPIC -o .shobj/DdsDcpsCoreTypeSupportImpl.o DdsDcpsCoreTypeSupportImpl.cpp
+In file included from ../dds/DCPS/DataReaderImpl_T.h:14:0,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:12:
+/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Bound_Ptr.h:121:34: warning: ‘template<class> class std::auto_ptr’ is deprecated [-Wdeprecated-declarations]
+   explicit ACE_Strong_Bound_Ptr (auto_ptr<X> p);
+                                  ^~~~~~~~
+In file included from /usr/include/c++/7/memory:80:0,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Auto_Ptr.h:78,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.cpp:9,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.h:882,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/SString.h:23,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CDR.h:61,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.cpp:7,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.h:177,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Any_Insert_Policy_T.h:18,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Basic_Arguments.h:25,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/orb_typesC.h:47,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ORB.h:28,
+                 from DdsDcpsCoreC.h:45,
+                 from DdsDcpsCoreTypeSupportImpl.h:5,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:3:
+/usr/include/c++/7/bits/unique_ptr.h:51:28: note: declared here
+   template<typename> class auto_ptr;
+                            ^~~~~~~~
+In file included from ../dds/DCPS/DataReaderImpl_T.h:14:0,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:12:
+/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Bound_Ptr.h:222:15: warning: ‘template<class> class std::auto_ptr’ is deprecated [-Wdeprecated-declarations]
+   void reset (auto_ptr<X> p);
+               ^~~~~~~~
+In file included from /usr/include/c++/7/memory:80:0,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Auto_Ptr.h:78,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.cpp:9,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.h:882,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/SString.h:23,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CDR.h:61,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.cpp:7,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.h:177,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Any_Insert_Policy_T.h:18,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Basic_Arguments.h:25,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/orb_typesC.h:47,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ORB.h:28,
+                 from DdsDcpsCoreC.h:45,
+                 from DdsDcpsCoreTypeSupportImpl.h:5,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:3:
+/usr/include/c++/7/bits/unique_ptr.h:51:28: note: declared here
+   template<typename> class auto_ptr;
+                            ^~~~~~~~
+In file included from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Bound_Ptr.h:385:0,
+                 from ../dds/DCPS/DataReaderImpl_T.h:14,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:12:
+/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Bound_Ptr.inl:152:58: warning: ‘template<class> class std::auto_ptr’ is deprecated [-Wdeprecated-declarations]
+ ACE_Strong_Bound_Ptr<X, ACE_LOCK>::ACE_Strong_Bound_Ptr (auto_ptr<X> p)
+                                                          ^~~~~~~~
+In file included from /usr/include/c++/7/memory:80:0,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Auto_Ptr.h:78,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.cpp:9,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.h:882,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/SString.h:23,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CDR.h:61,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.cpp:7,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.h:177,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Any_Insert_Policy_T.h:18,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Basic_Arguments.h:25,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/orb_typesC.h:47,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ORB.h:28,
+                 from DdsDcpsCoreC.h:45,
+                 from DdsDcpsCoreTypeSupportImpl.h:5,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:3:
+/usr/include/c++/7/bits/unique_ptr.h:51:28: note: declared here
+   template<typename> class auto_ptr;
+                            ^~~~~~~~
+In file included from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Bound_Ptr.h:385:0,
+                 from ../dds/DCPS/DataReaderImpl_T.h:14,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:12:
+/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Bound_Ptr.inl:307:43: warning: ‘template<class> class std::auto_ptr’ is deprecated [-Wdeprecated-declarations]
+ ACE_Strong_Bound_Ptr<X, ACE_LOCK>::reset (auto_ptr<X> p)
+                                           ^~~~~~~~
+In file included from /usr/include/c++/7/memory:80:0,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/Auto_Ptr.h:78,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.cpp:9,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/String_Base.h:882,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/ace/SString.h:23,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/CDR.h:61,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.cpp:7,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/UB_String_Argument_T.h:177,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Any_Insert_Policy_T.h:18,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/Basic_Arguments.h:25,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/orb_typesC.h:47,
+                 from /home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/TAO/tao/ORB.h:28,
+                 from DdsDcpsCoreC.h:45,
+                 from DdsDcpsCoreTypeSupportImpl.h:5,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:3:
+/usr/include/c++/7/bits/unique_ptr.h:51:28: note: declared here
+   template<typename> class auto_ptr;
+                            ^~~~~~~~
+In file included from ../dds/DCPS/ContentFilteredTopicImpl.h:14:0,
+                 from DdsDcpsCoreTypeSupportImpl.cpp:11:
+../dds/DCPS/FilterEvaluator.h: In instantiation of ‘bool OpenDDS::DCPS::FilterEvaluator::eval(const T&, const DDS::StringSeq&) const [with T = OpenDDS::DCPS::ParticipantLocationBuiltinTopicData]’:
+../dds/DCPS/DataReaderImpl_T.h:716:13:   required from ‘bool OpenDDS::DCPS::DataReaderImpl_T<MessageType>::contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask, DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&, const DDS::StringSeq&) [with MessageType = OpenDDS::DCPS::ParticipantLocationBuiltinTopicData; DDS::SampleStateMask = unsigned int; DDS::ViewStateMask = unsigned int; DDS::InstanceStateMask = unsigned int]’
+DdsDcpsCoreTypeSupportImpl.cpp:16655:4:   required from here
+../dds/DCPS/FilterEvaluator.h:113:68: error: no type named ‘MarshalTraitsType’ in ‘struct OpenDDS::DCPS::ParticipantLocationBuiltinTopicData’
+     DCPS::Extensibility exten = T::MarshalTraitsType::extensibility();
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+../dds/DCPS/FilterEvaluator.h: In instantiation of ‘bool OpenDDS::DCPS::FilterEvaluator::eval(const T&, const DDS::StringSeq&) const [with T = DDS::TopicBuiltinTopicData]’:
+../dds/DCPS/DataReaderImpl_T.h:716:13:   required from ‘bool OpenDDS::DCPS::DataReaderImpl_T<MessageType>::contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask, DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&, const DDS::StringSeq&) [with MessageType = DDS::TopicBuiltinTopicData; DDS::SampleStateMask = unsigned int; DDS::ViewStateMask = unsigned int; DDS::InstanceStateMask = unsigned int]’
+DdsDcpsCoreTypeSupportImpl.cpp:16655:4:   required from here
+../dds/DCPS/FilterEvaluator.h:113:68: error: no type named ‘MarshalTraitsType’ in ‘struct DDS::TopicBuiltinTopicData’
+../dds/DCPS/FilterEvaluator.h: In instantiation of ‘bool OpenDDS::DCPS::FilterEvaluator::eval(const T&, const DDS::StringSeq&) const [with T = DDS::SubscriptionBuiltinTopicData]’:
+../dds/DCPS/DataReaderImpl_T.h:716:13:   required from ‘bool OpenDDS::DCPS::DataReaderImpl_T<MessageType>::contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask, DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&, const DDS::StringSeq&) [with MessageType = DDS::SubscriptionBuiltinTopicData; DDS::SampleStateMask = unsigned int; DDS::ViewStateMask = unsigned int; DDS::InstanceStateMask = unsigned int]’
+DdsDcpsCoreTypeSupportImpl.cpp:16655:4:   required from here
+../dds/DCPS/FilterEvaluator.h:113:68: error: no type named ‘MarshalTraitsType’ in ‘struct DDS::SubscriptionBuiltinTopicData’
+../dds/DCPS/FilterEvaluator.h: In instantiation of ‘bool OpenDDS::DCPS::FilterEvaluator::eval(const T&, const DDS::StringSeq&) const [with T = DDS::PublicationBuiltinTopicData]’:
+../dds/DCPS/DataReaderImpl_T.h:716:13:   required from ‘bool OpenDDS::DCPS::DataReaderImpl_T<MessageType>::contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask, DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&, const DDS::StringSeq&) [with MessageType = DDS::PublicationBuiltinTopicData; DDS::SampleStateMask = unsigned int; DDS::ViewStateMask = unsigned int; DDS::InstanceStateMask = unsigned int]’
+DdsDcpsCoreTypeSupportImpl.cpp:16655:4:   required from here
+../dds/DCPS/FilterEvaluator.h:113:68: error: no type named ‘MarshalTraitsType’ in ‘struct DDS::PublicationBuiltinTopicData’
+../dds/DCPS/FilterEvaluator.h: In instantiation of ‘bool OpenDDS::DCPS::FilterEvaluator::eval(const T&, const DDS::StringSeq&) const [with T = DDS::ParticipantBuiltinTopicData]’:
+../dds/DCPS/DataReaderImpl_T.h:716:13:   required from ‘bool OpenDDS::DCPS::DataReaderImpl_T<MessageType>::contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask, DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&, const DDS::StringSeq&) [with MessageType = DDS::ParticipantBuiltinTopicData; DDS::SampleStateMask = unsigned int; DDS::ViewStateMask = unsigned int; DDS::InstanceStateMask = unsigned int]’
+DdsDcpsCoreTypeSupportImpl.cpp:16655:4:   required from here
+../dds/DCPS/FilterEvaluator.h:113:68: error: no type named ‘MarshalTraitsType’ in ‘struct DDS::ParticipantBuiltinTopicData’
+/home/calabresec/xtypes/filter_eval/OpenDDS/ACE_wrappers/include/makeinclude/rules.local.GNU:189: recipe for target '.shobj/DdsDcpsCoreTypeSupportImpl.o' failed
+make[1]: *** [.shobj/DdsDcpsCoreTypeSupportImpl.o] Error 1
+make[1]: Leaving directory '/home/calabresec/xtypes/filter_eval/OpenDDS/dds'
+GNUmakefile.dist:1108: recipe for target 'OpenDDS_Dcps' failed
+make: *** [OpenDDS_Dcps] Error 2

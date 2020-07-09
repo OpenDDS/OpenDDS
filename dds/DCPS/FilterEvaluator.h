@@ -29,6 +29,9 @@ class MetaStruct;
 template<typename T>
 const MetaStruct& getMetaStruct();
 
+template<typename T>
+struct MarshalTraits;
+
 struct OpenDDS_Dcps_Export Value {
   Value(bool b, bool conversion_preferred = false);
   Value(int i, bool conversion_preferred = false);
@@ -109,7 +112,9 @@ public:
   template<typename T>
   bool eval(const T& sample, const DDS::StringSeq& params) const
   {
-    DeserializedForEval data(&sample, getMetaStruct<T>(), params);
+    //fred says get extensibility from marshal traits from the type
+    DCPS::Extensibility exten = MarshalTraits<T>::extensibility();
+    DeserializedForEval data(&sample, getMetaStruct<T>(), params, exten);
     return eval_i(data);
   }
 
@@ -149,12 +154,12 @@ private:
 
   struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
-                        const DDS::StringSeq& params, DCPS::Extensibility exten = APPENDABLE) //TODO: CLAYTON FIGURE OUT HOW TO GET EXTENSIBILITY HERE
+                        const DDS::StringSeq& params, DCPS::Extensibility exten)
       : DataForEval(meta, params), deserialized_(data), exten_(exten){}
     virtual ~DeserializedForEval();
     Value lookup(const char* field) const;
     const void* const deserialized_;
-    DCPS::Extensibility exten_; //TODO: CLAYTON FIGURE OUT HOW TO GET EXTENSIBILITY HERE
+    DCPS::Extensibility exten_;
   };
 
   struct SerializedForEval : DataForEval {
