@@ -18,10 +18,11 @@ struct FieldInfo {
   struct EleLen {
     AST_Type* ele_;
     std::size_t len_;
+    std::string struct_;
     explicit EleLen(FieldInfo& af);
-    struct Cmp { bool operator()(const EleLen& a, const EleLen& b) const; };
+    bool operator<(const EleLen& o) const;
   };
-  typedef std::set<EleLen, EleLen::Cmp> EleLenSet;
+  typedef std::set<EleLen> EleLenSet;
 
   static const std::string scope_op;
   static std::string get_type_name(AST_Type& field);
