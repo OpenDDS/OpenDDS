@@ -129,7 +129,7 @@ public:
   class Operand;
 
   struct OpenDDS_Dcps_Export DataForEval {
-    DataForEval(const MetaStruct& meta, const DDS::StringSeq& params, DCPS::Extensibility exten)
+    DataForEval(const MetaStruct& meta, const DDS::StringSeq& params)
       : meta_(meta), params_(params) {}
     virtual ~DataForEval();
     virtual Value lookup(const char* field) const = 0;
@@ -150,20 +150,22 @@ private:
   struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
                         const DDS::StringSeq& params, DCPS::Extensibility exten = APPENDABLE) //TODO: CLAYTON FIGURE OUT HOW TO GET EXTENSIBILITY HERE
-      : DataForEval(meta, params, exten), deserialized_(data) {}
+      : DataForEval(meta, params), deserialized_(data), exten_(exten){}
     virtual ~DeserializedForEval();
     Value lookup(const char* field) const;
     const void* const deserialized_;
+    DCPS::Extensibility exten_; //TODO: CLAYTON FIGURE OUT HOW TO GET EXTENSIBILITY HERE
   };
 
   struct SerializedForEval : DataForEval {
     SerializedForEval(ACE_Message_Block* data, const MetaStruct& meta,
                       const DDS::StringSeq& params, bool swap, bool cdr, DCPS::Extensibility exten)
-      : DataForEval(meta, params, exten), serialized_(data), swap_(swap), cdr_(cdr) {}
+      : DataForEval(meta, params), serialized_(data), swap_(swap), cdr_(cdr), exten_(exten) {}
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
     mutable OPENDDS_MAP(OPENDDS_STRING, Value) cache_;
+    DCPS::Extensibility exten_;
   };
 
   bool eval_i(DataForEval& data) const;

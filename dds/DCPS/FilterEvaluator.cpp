@@ -128,18 +128,19 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
   Serializer ser(mb.get(),
     cdr_ ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR, swap_);
   if (cdr_) {
-    char buffer[4];
-    ser.buffer_read(buffer, 4, false);
     EncapsulationHeader encap;
-    ACE_UINT16 kind = (ACE_UINT16(buffer[0]) << 8) | ACE_UINT16(buffer[1]);
-    encap.kind(EncapsulationHeader::Kind(kind));
-    ACE_UINT16 options = (ACE_UINT16(buffer[2]) << 8) | ACE_UINT16(buffer[3]);
-    encap.options(options);
+    if (!(ser >> encap)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+        ACE_TEXT("deserialization of encapsulation header failed.\n")));
+      //  TraitsType::type_name()));
+      //return;
+    }
     Encoding encoding;
-    //if(!encap.to_encoding(encoding, expected_extensibility)){
-      //return error
-    //}
-    //change encoding of serializer
+    if (!encap.to_encoding(encoding, exten_)) {
+      //return;
+    }
+    ser.encoding(encoding);
   }
   const Value v = meta_.getValue(ser, field);
   cache_.insert(std::make_pair(OPENDDS_STRING(field), v));
