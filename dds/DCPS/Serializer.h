@@ -47,6 +47,8 @@
 #include "Definitions.h"
 #include "PoolAllocator.h"
 
+#include <dds/DdsDcpsCoreC.h>
+
 #include <tao/String_Alloc.h>
 
 #include <ace/CDR_Base.h>
@@ -264,6 +266,23 @@ private:
   Kind kind_;
   /// The last two bytes as a big endian integer
   ACE_UINT16 options_;
+};
+
+// This helper class can be used to construct ace message blocks from OctetSeqs
+// and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
+// The OctetSeq must have its length set before constructing this object.
+class OpenDDS_Dcps_Export MessageBlockHelper {
+  public:
+    MessageBlockHelper(const DDS::OctetSeq& seq)
+    : db_(seq.length(), ACE_Message_Block::MB_DATA,
+                    reinterpret_cast<const char*>(seq.get_buffer()),
+                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/),
+      mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/) {}
+    ACE_Message_Block* get_message_block() { return &mb_; }
+
+  private:
+    ACE_Data_Block db_;
+    ACE_Message_Block mb_;
 };
 
 class Serializer;

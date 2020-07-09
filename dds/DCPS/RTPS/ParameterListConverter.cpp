@@ -45,8 +45,6 @@ namespace {
     DDS::OctetSeq seq;
     XTypes::serialize_type_info(type_info, seq);
     param.type_information(seq);
-    //discriminator set to PID_XTYPES... which tells us what is in the discriminating union
-    param._d(PID_XTYPES_TYPE_INFORMATION);
     add_param(param_list, param);
   }
 

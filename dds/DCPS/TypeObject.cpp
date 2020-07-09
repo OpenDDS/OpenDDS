@@ -169,30 +169,22 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
   return TypeIdentifier();
 }
 
-
 void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
 {
-  const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
-  DCPS::Message_Block_Ptr data(new ACE_Message_Block(
-    DCPS::serialized_size(encoding, type_info)));
-  DCPS::Serializer serializer(data.get(), encoding);
+  seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
+  DCPS::MessageBlockHelper helper(seq);
+  DCPS::Serializer serializer(helper.get_message_block(), XTypes::get_typeobject_encoding());
   if (!(serializer << type_info)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
               ACE_TEXT("serialization of type information failed.\n")));
   }
-  const size_t size = data->length();
-  seq.length(size);
-  std::memcpy(seq.get_buffer(), data->rd_ptr(), size);
 }
 
 void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq)
 {
-  ACE_Data_Block db(seq.length(), ACE_Message_Block::MB_DATA,
-                    reinterpret_cast<const char*>(seq.get_buffer()),
-                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
-  ACE_Message_Block data_mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-  data_mb.wr_ptr(data_mb.space());
-  DCPS::Serializer serializer(&data_mb, XTypes::get_typeobject_encoding());
+  DCPS::MessageBlockHelper helper(seq);
+  helper.get_message_block()->wr_ptr(helper.get_message_block()->space());
+  DCPS::Serializer serializer(helper.get_message_block(), XTypes::get_typeobject_encoding());
   if (!(serializer >> type_info)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
               ACE_TEXT("deserialization of type information failed.\n")));
