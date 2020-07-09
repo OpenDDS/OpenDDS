@@ -2796,10 +2796,6 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
     return true;
   }
 
-  if (!spdp_.new_stateless_message(msg)) {
-    return true;
-  }
-
   return false;
 }
 

@@ -104,7 +104,6 @@ public:
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
   DDS::Security::ParticipantCryptoHandle remote_crypto_handle(const DCPS::RepoId& remote_participant) const;
 
-  bool new_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);

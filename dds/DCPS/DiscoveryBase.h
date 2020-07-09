@@ -1602,7 +1602,8 @@ namespace OpenDDS {
         , auth_state_(AUTH_STATE_HANDSHAKE)
         , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
         , is_requester_(false)
-        , stateless_sequence_number_(0)
+        , auth_req_sequence_number_(0)
+        , handshake_sequence_number_(0)
         , security_builtins_associated_(false)
         , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
@@ -1633,7 +1634,8 @@ namespace OpenDDS {
         , auth_state_(AUTH_STATE_HANDSHAKE)
         , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
         , is_requester_(false)
-        , stateless_sequence_number_(0)
+        , auth_req_sequence_number_(0)
+        , handshake_sequence_number_(0)
         , security_builtins_associated_(false)
         , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
@@ -1697,7 +1699,8 @@ namespace OpenDDS {
         AuthState auth_state_;
         HandshakeState handshake_state_;
         bool is_requester_;
-        CORBA::LongLong stateless_sequence_number_;
+        CORBA::LongLong auth_req_sequence_number_;
+        CORBA::LongLong handshake_sequence_number_;
         bool security_builtins_associated_;
         bool seen_some_crypto_tokens_;
 
