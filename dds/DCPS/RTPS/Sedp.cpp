@@ -3112,24 +3112,6 @@ Sedp::Endpoint::~Endpoint()
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
 {
-  header_.prefix[0] = 'R';
-  header_.prefix[1] = 'T';
-  header_.prefix[2] = 'P';
-  header_.prefix[3] = 'S';
-  header_.version = PROTOCOLVERSION;
-  header_.vendorId = VENDORID_OPENDDS;
-  header_.guidPrefix[0] = pub_id.guidPrefix[0];
-  header_.guidPrefix[1] = pub_id.guidPrefix[1],
-  header_.guidPrefix[2] = pub_id.guidPrefix[2];
-  header_.guidPrefix[3] = pub_id.guidPrefix[3];
-  header_.guidPrefix[4] = pub_id.guidPrefix[4];
-  header_.guidPrefix[5] = pub_id.guidPrefix[5];
-  header_.guidPrefix[6] = pub_id.guidPrefix[6];
-  header_.guidPrefix[7] = pub_id.guidPrefix[7];
-  header_.guidPrefix[8] = pub_id.guidPrefix[8];
-  header_.guidPrefix[9] = pub_id.guidPrefix[9];
-  header_.guidPrefix[10] = pub_id.guidPrefix[10];
-  header_.guidPrefix[11] = pub_id.guidPrefix[11];
 }
 
 Sedp::Writer::~Writer()
