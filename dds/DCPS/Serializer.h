@@ -306,31 +306,31 @@ size_t serialized_size(const Encoding& encoding, const T& value)
 * The OctetSeq must have its length set before constructing this object.
 */
 class OpenDDS_Dcps_Export MessageBlockHelper {
-  public:
-  /**
-  * This constructor receives an already populated OctetSeq so the write pointer is advanced
-  */
-    explicit MessageBlockHelper(const DDS::OctetSeq& seq)
-    : db_(seq.length(), ACE_Message_Block::MB_DATA,
-                    reinterpret_cast<const char*>(seq.get_buffer()),
-                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-      , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-      {
-        mb_.wr_ptr(mb_.space());
-      }
+public:
+/**
+* This constructor receives an already populated OctetSeq so the write pointer is advanced
+*/
+  explicit MessageBlockHelper(const DDS::OctetSeq& seq)
+  : db_(seq.length(), ACE_Message_Block::MB_DATA,
+        reinterpret_cast<const char*>(seq.get_buffer()),
+        0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+    , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+    {
+      mb_.wr_ptr(mb_.space());
+    }
 
-    explicit MessageBlockHelper(DDS::OctetSeq& seq)
-    : db_(seq.length(), ACE_Message_Block::MB_DATA,
-                    reinterpret_cast<const char*>(seq.get_buffer()),
-                    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-      , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-      {}
+  explicit MessageBlockHelper(DDS::OctetSeq& seq)
+  : db_(seq.length(), ACE_Message_Block::MB_DATA,
+        reinterpret_cast<const char*>(seq.get_buffer()),
+        0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+    , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+    {}
 
-    operator ACE_Message_Block*() { return &mb_; }
+  operator ACE_Message_Block*() { return &mb_; }
 
-  private:
-    ACE_Data_Block db_;
-    ACE_Message_Block mb_;
+private:
+  ACE_Data_Block db_;
+  ACE_Message_Block mb_;
 };
 
 /**
