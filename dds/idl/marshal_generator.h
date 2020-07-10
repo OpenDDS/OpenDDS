@@ -26,8 +26,6 @@ public:
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
                  const char* repoid);
-private:
-  FieldInfo::EleLenSet anonymous_seq_generated_;
 };
 
 #endif

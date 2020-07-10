@@ -18,7 +18,6 @@ struct FieldInfo {
   struct EleLen {
     AST_Type* ele_;
     std::size_t len_;
-    std::string struct_;
     explicit EleLen(FieldInfo& af);
     bool operator<(const EleLen& o) const;
   };

@@ -10,13 +10,13 @@
 
 using namespace AstTypeClassification;
 
-FieldInfo::EleLen::EleLen(FieldInfo& af) :
-  ele_(af.as_base_), len_(af.n_elems_), struct_(af.struct_name_)
+FieldInfo::EleLen::EleLen(FieldInfo& af) : ele_(af.as_base_), len_(af.n_elems_)
 {
 }
 
-bool FieldInfo::EleLen::operator<(const EleLen& o) const {
-  return ele_ < o.ele_ || (ele_ == o.ele_ && (len_ < o.len_ || (len_ == o.len_ && struct_ < o.struct_)));
+bool FieldInfo::EleLen::operator<(const EleLen& o) const
+{
+  return ele_ < o.ele_ || (ele_ == o.ele_ && len_ < o.len_);
 }
 
 const std::string FieldInfo::scope_op = "::";

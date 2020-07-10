@@ -32,7 +32,6 @@ public:
 
 private:
   bool first_struct_;
-  FieldInfo::EleLenSet anonymous_seq_generated_;
 };
 
 #endif

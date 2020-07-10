@@ -1991,12 +1991,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
   }
 
+  FieldInfo::EleLenSet anonymous_seq_generated;
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
       if (af.arr_) {
         gen_anonymous_array(af);
-      } else if (af.seq_ && anonymous_seq_generated_.insert(FieldInfo::EleLen(af)).second) {
+      } else if (af.seq_ && anonymous_seq_generated.insert(FieldInfo::EleLen(af)).second) {
         gen_anonymous_sequence(af);
       }
     }
