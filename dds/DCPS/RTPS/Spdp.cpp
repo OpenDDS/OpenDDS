@@ -1029,7 +1029,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
   if (dp.have_auth_req_msg_) {
     dp.auth_req_msg_.message_identity.source_guid = guid_;
-    dp.auth_req_msg_.message_identity.sequence_number = static_cast<CORBA::LongLong>((++stateless_sequence_number_).getValue());
+    dp.auth_req_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
     dp.auth_req_msg_.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST;
     dp.auth_req_msg_.destination_participant_guid = guid;
     dp.auth_req_msg_.destination_endpoint_guid = GUID_UNKNOWN;
@@ -1043,7 +1043,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     if (sedp_.write_stateless_message(dp.auth_req_msg_, make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER)) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::attempt_authentication() - ")
-                   ACE_TEXT("Unable to write auth req message retry.\n")));
+                   ACE_TEXT("Unable to write auth req message.\n")));
       }
     } else {
       if (DCPS::security_debug.auth_debug) {
@@ -1052,7 +1052,6 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                    OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
       }
     }
-    // Schedule resend.
     schedule_handshake_resend(config_->auth_resend_period(), guid);
   }
 
@@ -1060,7 +1059,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   case DDS::Security::VALIDATION_OK: {
     dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
-    purge_handshake_deadlines(participants_.find(guid));
+    purge_handshake_deadlines(iter);
     return;
   }
   case DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE: {
@@ -1091,7 +1090,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     }
     dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
-    purge_handshake_deadlines(participants_.find(guid));
+    purge_handshake_deadlines(iter);
     return;
   }
   default: {
@@ -1102,7 +1101,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     }
     dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
-    purge_handshake_deadlines(participants_.find(guid));
+    purge_handshake_deadlines(iter);
     return;
   }
   }
@@ -1154,9 +1153,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   case DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST:
   case DCPS::HANDSHAKE_STATE_WAITING_FOR_TOKEN:
   case DCPS::HANDSHAKE_STATE_DONE: {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
-               ACE_TEXT("Invalid handshake state\n")));
+    if (DCPS::security_debug.auth_warn) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+                 ACE_TEXT("Invalid handshake state\n")));
+    }
     return;
   }
 
@@ -1317,7 +1318,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       } else {
         if (DCPS::security_debug.auth_debug) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - ")
-                     ACE_TEXT("Sent hanshake unknown message for participant: %C\n"),
+                     ACE_TEXT("Sent handshake unknown message for participant: %C\n"),
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
@@ -1547,7 +1548,7 @@ Spdp::send_handshake_message(const DCPS::RepoId& guid,
                              const DDS::Security::ParticipantStatelessMessage& msg)
 {
   dp.handshake_msg_ = msg;
-  dp.handshake_msg_.message_identity.sequence_number = static_cast<CORBA::LongLong>((++stateless_sequence_number_).getValue());
+  dp.handshake_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
 
   const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
   const DDS::ReturnCode_t retval = sedp_.write_stateless_message(dp.handshake_msg_, reader);
