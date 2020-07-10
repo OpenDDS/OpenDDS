@@ -114,6 +114,41 @@ namespace {
     }
   }
 
+  std::string string_type(Classification c)
+  {
+    return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
+      ((c & CL_WIDE) ? "std::wstring" : "std::string") :
+      (c & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
+  }
+
+  std::string to_cxx_type(AST_Type* type, std::size_t& size)
+  {
+    const Classification cls = classify(type);
+    if (cls & CL_ENUM) { size = 4; return "ACE_CDR::ULong"; }
+    if (cls & CL_STRING) { size = 4; return string_type(cls); } // encoding of str length is 4 bytes
+    if (cls & CL_PRIMITIVE) {
+      AST_Type* t = resolveActualType(type);
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(t);
+      switch (p->pt()) {
+      case AST_PredefinedType::PT_long: size = 4; return "ACE_CDR::Long";
+      case AST_PredefinedType::PT_ulong: size = 4; return "ACE_CDR::ULong";
+      case AST_PredefinedType::PT_longlong: size = 8; return "ACE_CDR::LongLong";
+      case AST_PredefinedType::PT_ulonglong: size = 8; return "ACE_CDR::ULongLong";
+      case AST_PredefinedType::PT_short: size = 2; return "ACE_CDR::Short";
+      case AST_PredefinedType::PT_ushort: size = 2; return "ACE_CDR::UShort";
+      case AST_PredefinedType::PT_float: size = 4; return "ACE_CDR::Float";
+      case AST_PredefinedType::PT_double: size = 8; return "ACE_CDR::Double";
+      case AST_PredefinedType::PT_longdouble: size = 16; return "ACE_CDR::LongDouble";
+      case AST_PredefinedType::PT_char: size = 1; return "ACE_CDR::Char";
+      case AST_PredefinedType::PT_wchar: size = 1; return "ACE_CDR::WChar"; // encoding of wchar length is 1 byte
+      case AST_PredefinedType::PT_boolean: size = 1; return "ACE_CDR::Boolean";
+      case AST_PredefinedType::PT_octet: size = 1; return "ACE_CDR::Octet";
+      default: throw std::invalid_argument("Unknown PRIMITIVE type");
+      }
+    }
+    return scoped(type->name());
+  }
+
   void
   gen_field_getValueFromSerialized(AST_Field* field)
   {
@@ -122,7 +157,7 @@ namespace {
     const Classification cls = classify(type);
     const std::string fieldName = field->local_name()->get_string();
     std::size_t size = 0;
-    const std::string cxx_type = FieldInfo::to_cxx_type(type, size);
+    const std::string cxx_type = to_cxx_type(type, size);
     if (cls & CL_SCALAR) {
       type = resolveActualType(type);
       const std::string val = (cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
@@ -248,8 +283,7 @@ namespace {
     Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
     std::string fieldType = (cls & CL_STRING) ?
-      FieldInfo::string_type(cls)
-      : scoped(field->field_type()->name());
+      string_type(cls) : scoped(field->field_type()->name());
     FieldInfo af(*field);
     if (af.as_base_ && field->field_type()->anonymous()) {
       fieldType = af.scoped_type_;
@@ -555,8 +589,10 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           "  ACE_CDR::ULong length;\n" <<
           "  if (!(ser >> length)) return false;\n";
         }
+        std::size_t sz = 0;
+        to_cxx_type(af.as_act_, sz);
         be_global->impl_ <<
-          "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
+          "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << sz << ");\n";
       }
     }
   }
@@ -624,7 +660,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   if ((elem_cls & (CL_PRIMITIVE | CL_ENUM)) && !(elem_cls & CL_WIDE)) {
     // fixed-length sequence/array element -> skip all elements at once
     std::size_t sz = 0;
-    FieldInfo::to_cxx_type(elem, sz);
+    to_cxx_type(elem, sz);
     be_global->impl_ <<
       "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
   } else {
@@ -680,7 +716,7 @@ func(const std::string&, AST_Type* br_type, const std::string&,
       "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     std::size_t sz = 0;
-    FieldInfo::to_cxx_type(br_type, sz);
+    to_cxx_type(br_type, sz);
     ss <<
       "    if (!ser.skip(1, " << sz << ")) return false;\n";
   } else {
