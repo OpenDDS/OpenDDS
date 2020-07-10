@@ -1,5 +1,0 @@
-project: dcps {
-  TypeSupport_Files {
-    test.idl
-  }
-}
