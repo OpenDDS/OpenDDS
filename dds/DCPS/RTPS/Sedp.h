@@ -126,7 +126,7 @@ public:
   void update_locators(const ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
-  DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
+  DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,

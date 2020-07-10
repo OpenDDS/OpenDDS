@@ -54,19 +54,26 @@ namespace OpenDDS {
       EndpointSecurityAttributesMap;
 
     enum AuthState {
-      AUTH_STATE_UNKNOWN,
-      AUTH_STATE_VALIDATING_REMOTE,
       AUTH_STATE_HANDSHAKE,
       AUTH_STATE_AUTHENTICATED,
       AUTH_STATE_UNAUTHENTICATED
     };
 
     enum HandshakeState {
-      // State of Requester waiting for reply and Replier waiting for final
-      HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL,
+      // Requester should call begin_handshake_request
+      HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST,
 
-      // State of Replier waiting for request
-      HANDSHAKE_STATE_EXPECTING_REQUEST
+      // Replier should call begin_handshake_reply
+      HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY,
+
+      // Requester and replier should call process handshake
+      HANDSHAKE_STATE_PROCESS_HANDSHAKE,
+
+      // Requester is waiting to see a token from replier.
+      HANDSHAKE_STATE_WAITING_FOR_TOKEN,
+
+      // Handshake concluded or timed out
+      HANDSHAKE_STATE_DONE
     };
 #endif
 
@@ -1592,9 +1599,11 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
-        , auth_state_(AUTH_STATE_UNKNOWN)
-        , handshake_state_(HANDSHAKE_STATE_EXPECTING_REQUEST)
+        , auth_state_(AUTH_STATE_HANDSHAKE)
+        , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
         , is_requester_(false)
+        , auth_req_sequence_number_(0)
+        , handshake_sequence_number_(0)
         , security_builtins_associated_(false)
         , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
@@ -1622,9 +1631,11 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
-        , auth_state_(AUTH_STATE_UNKNOWN)
-        , handshake_state_(HANDSHAKE_STATE_EXPECTING_REQUEST)
+        , auth_state_(AUTH_STATE_HANDSHAKE)
+        , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
         , is_requester_(false)
+        , auth_req_sequence_number_(0)
+        , handshake_sequence_number_(0)
         , security_builtins_associated_(false)
         , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
@@ -1684,10 +1695,12 @@ namespace OpenDDS {
         DDS::Security::ParticipantStatelessMessage handshake_msg_;
         MonotonicTimePoint stateless_msg_deadline_;
 
-        MonotonicTimePoint auth_deadline_;
+        MonotonicTimePoint handshake_deadline_;
         AuthState auth_state_;
         HandshakeState handshake_state_;
         bool is_requester_;
+        CORBA::LongLong auth_req_sequence_number_;
+        CORBA::LongLong handshake_sequence_number_;
         bool security_builtins_associated_;
         bool seen_some_crypto_tokens_;
 
