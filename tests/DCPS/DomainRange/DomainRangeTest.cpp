@@ -19,6 +19,8 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
+#include "tests/Utils/StatusMatching.h"
+
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_stdlib.h"
 
@@ -57,37 +59,7 @@ public:
     }
 
     // Block until Subscriber is available
-    DDS::StatusCondition_var condition = writer_->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    while (true) {
-      DDS::PublicationMatchedStatus matches;
-      if (writer_->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
-      }
-
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C has %d of %d readers\n", writer_id_.c_str(), matches.current_count, total_readers_));
-      if (matches.current_count >= total_readers_) {
-        break;
-      }
-
-      DDS::ConditionSeq conditions;
-      DDS::Duration_t timeout = { 60, 0 };
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         -1);
-      }
-    }
-
-    ws->detach_condition(condition);
+    Utils::wait_match(writer_, total_readers_);
 
     // Write samples
     Messenger::Message message;
@@ -171,8 +143,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    for (std::vector<DDS::DomainId_t>::const_iterator it = domains.begin();
-          it != domains.end(); ++it)
+    for (std::vector<DDS::DomainId_t>::const_iterator it = domains.begin(); it != domains.end(); ++it)
     {
       DDS::DomainId_t domain = *it;
 
