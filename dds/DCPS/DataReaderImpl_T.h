@@ -26,11 +26,11 @@ namespace OpenDDS {
    *
    */
   template <typename MessageType>
-    class
+  class
 #if ( __GNUC__ == 4 && __GNUC_MINOR__ == 1)
     OpenDDS_Dcps_Export
 #endif
-    DataReaderImpl_T
+  DataReaderImpl_T
     : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>,
       public virtual OpenDDS::DCPS::DataReaderImpl
   {
@@ -965,6 +965,59 @@ namespace OpenDDS {
 
     DataReaderImpl::qos_change(qos);
   }
+
+DDS::ReturnCode_t setup_deserialization()
+{
+  const DDS::DataRepresentationIdSeq repIds =
+    get_effective_data_rep_qos(qos_.representation.value);
+  bool success = false;
+  if (cdr_encapsulation()) {
+    Encoding::Kind encoding_kind;
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+        if (Encoding::KIND_XCDR1 == encoding_kind ||
+            Encoding::KIND_XCDR2 == encoding_kind) {
+          if (decoding_modes_.find(encoding_kind) == decoding_modes_.end()) {
+            EncodingMode mode(encoding_kind, swap_bytes());
+            decoding_modes_.insert(make_pair(encoding_kind, mode));
+            success = true;
+          }
+        } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
+          //Valid but incompatible data representation
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+                     ACE_TEXT("%CDataReaderImpl::setup_deserialization: ")
+                     ACE_TEXT("Skip %C data representation\n"),
+                     TraitsType::type_name(),
+                     Encoding::kind_to_string(encoding_kind).c_str()));
+        }
+      } else if (::OpenDDS::DCPS::DCPS_debug_level) {
+        // Invalid data representation
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("%CDataReaderImpl::setup_deserialization: ")
+                   ACE_TEXT("Encounter invalid data representation\n"),
+                   TraitsType::type_name()));
+        return DDS::RETCODE_ERROR;
+      }
+    }
+  } else {
+    EncodingMode mode(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+    decoding_modes_.insert(make_pair(Encoding::KIND_UNALIGNED_CDR, mode));
+    success = true;
+  }
+  if (!success) {
+    if (::OpenDDS::DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("%CDataReaderImpl::setup_deserialization: ")
+                 ACE_TEXT("Could not find a valid data representation\n"),
+                 TraitsType::type_name()));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  // TODO(sonndinh): Do we need to set up allocator? I guess no.
+
+  return DDS::RETCODE_OK;
+}
 
 protected:
 
@@ -2244,7 +2297,9 @@ unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->da
 
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
-InstanceMap  instance_map_;
+InstanceMap instance_map_;
+
+OPENDDS_MAP(Encoding::Kind, EncodingMode) decoding_modes_;
 };
 
 template <typename MessageType>
