@@ -146,7 +146,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     const std::string reader_id = "Reader";
     const std::string writer_id = "Writer";
-    bool reliable = true;
 
     int num_participants = 1;
 
@@ -172,220 +171,208 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-  for (std::vector<DDS::DomainId_t>::const_iterator it = domains.begin();
-        it != domains.end(); ++it)
-  {
-    DDS::DomainId_t domain = *it;
+    for (std::vector<DDS::DomainId_t>::const_iterator it = domains.begin();
+          it != domains.end(); ++it)
+    {
+      DDS::DomainId_t domain = *it;
 
-    // Create DomainParticipant
-    DDS::DomainParticipantQos dr_dp_qos;
-    dpf->get_default_participant_qos(dr_dp_qos);
+      // Create DomainParticipant
+      DDS::DomainParticipantQos dr_dp_qos;
+      dpf->get_default_participant_qos(dr_dp_qos);
 
-    DDS::DomainParticipant_var sub_participant =
-      dpf->create_participant(domain,
-                              dr_dp_qos,
-                              0,
-                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!sub_participant) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_participant failed!\n")),
-                       -1);
-    }
-
-    // Register TypeSupport
-    Messenger::MessageTypeSupport_var ts =
-      new Messenger::MessageTypeSupportImpl();
-
-    if (ts->register_type(sub_participant, "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" register_type failed!\n")),
-                       -1);
-    }
-
-    // Create Topic
-    CORBA::String_var type_name = ts->get_type_name();
-    DDS::Topic_var topic =
-        sub_participant->create_topic("TheTopic",
-                                type_name,
-                                TOPIC_QOS_DEFAULT,
-                                0,
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!topic) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_topic failed!\n")),
-                       -1);
-    }
-
-    // Create Subscriber
-    DDS::Subscriber_var subscriber =
-        sub_participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     0,
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!subscriber) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_subscriber failed!\n")), -1);
-    }
-
-    DDS::DomainParticipant_var pub_participant;
-
-    if (num_participants == 1) {
-      // writer uses same participant
-      pub_participant = sub_participant;
-    } else {
-      DDS::DomainParticipantQos dw_dp_qos;
-      dpf->get_default_participant_qos(dw_dp_qos);
-
-      pub_participant =
+      DDS::DomainParticipant_var sub_participant =
         dpf->create_participant(domain,
-                                dw_dp_qos,
+                                dr_dp_qos,
                                 0,
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      if (!pub_participant) {
+      if (!sub_participant) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_participant failed!\n")),
-                         -1);
+                        -1);
       }
-    }
 
-    // Register TypeSupport
-    Messenger::MessageTypeSupport_var dw_ts =
-      new Messenger::MessageTypeSupportImpl();
+      // Register TypeSupport
+      Messenger::MessageTypeSupport_var ts =
+        new Messenger::MessageTypeSupportImpl();
 
+      if (ts->register_type(sub_participant, "") != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" register_type failed!\n")),
+                        -1);
+      }
 
-    if (dw_ts->register_type(pub_participant, "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() dw -")
-                        ACE_TEXT(" register_type failed!\n")),
-                       -1);
-    }
+      // Create Topic
+      CORBA::String_var type_name = ts->get_type_name();
+      DDS::Topic_var topic =
+          sub_participant->create_topic("TheTopic",
+                                  type_name,
+                                  TOPIC_QOS_DEFAULT,
+                                  0,
+                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    // Create Topic
-    CORBA::String_var dw_type_name = dw_ts->get_type_name();
-    DDS::Topic_var dw_topic =
-        pub_participant->create_topic("TheTopic",
-                                dw_type_name,
-                                TOPIC_QOS_DEFAULT,
-                                0,
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (!topic) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_topic failed!\n")),
+                        -1);
+      }
 
-    if (!dw_topic) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_topic failed!\n")),
-                       -1);
-    }
+      // Create Subscriber
+      DDS::Subscriber_var subscriber =
+          sub_participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                      0,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    // Create Publisher
-    DDS::Publisher_var publisher =
-        pub_participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                     0,
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (!subscriber) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_subscriber failed!\n")), -1);
+      }
 
-    if (!publisher) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_publisher failed!\n")),
-                       -1);
-    }
+      DDS::DomainParticipant_var pub_participant;
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writer_id.c_str()));
+      if (num_participants == 1) {
+        // writer uses same participant
+        pub_participant = sub_participant;
+      } else {
+        DDS::DomainParticipantQos dw_dp_qos;
+        dpf->get_default_participant_qos(dw_dp_qos);
 
-    DDS::DataWriterQos dw_qos;
-    publisher->get_default_datawriter_qos(dw_qos);
+        pub_participant =
+          dpf->create_participant(domain,
+                                  dw_dp_qos,
+                                  0,
+                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (reliable) {
+        if (!pub_participant) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("ERROR: %N:%l: main() -")
+                            ACE_TEXT(" create_participant failed!\n")),
+                          -1);
+        }
+      }
+
+      // Register TypeSupport
+      Messenger::MessageTypeSupport_var dw_ts =
+        new Messenger::MessageTypeSupportImpl();
+
+      if (dw_ts->register_type(pub_participant, "") != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() dw -")
+                          ACE_TEXT(" register_type failed!\n")),
+                        -1);
+      }
+
+      // Create Topic
+      CORBA::String_var dw_type_name = dw_ts->get_type_name();
+      DDS::Topic_var dw_topic =
+          pub_participant->create_topic("TheTopic",
+                                  dw_type_name,
+                                  TOPIC_QOS_DEFAULT,
+                                  0,
+                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (!dw_topic) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_topic failed!\n")),
+                        -1);
+      }
+
+      // Create Publisher
+      DDS::Publisher_var publisher =
+          pub_participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                      0,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (!publisher) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_publisher failed!\n")),
+                        -1);
+      }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writer_id.c_str()));
+
+      DDS::DataWriterQos dw_qos;
+      publisher->get_default_datawriter_qos(dw_qos);
+
+      // reliability settings
       dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.reliability.max_blocking_time.sec     = 1;
       dw_qos.reliability.max_blocking_time.nanosec = 0;
-      // dw_qos.resource_limits.max_instances = 10;
-      // dw_qos.history.depth = 10;
-    } else {
-      dw_qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-    }
 
-    // Create DataWriter
-    DDS::DataWriter_var writer =
-      publisher->create_datawriter(dw_topic,
-                                   dw_qos,
-                                   0,
-                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!writer) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_datawriter failed!\n")),
-                       -1);
-    }
-    // Finish Writer Side Setup
-
-    const int n_msgs = reliable ? MSGS_PER_WRITER * TOTAL_WRITERS : 0;
-
-    // Create DataReaders
-    DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id, n_msgs, reader_done_callback));
-
-    DDS::DataReaderQos dr_qos;
-    subscriber->get_default_datareader_qos(dr_qos);
-    dr_qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
-
-    DDS::DataReader_var reader =
-      subscriber->create_datareader(topic,
-                                    dr_qos,
-                                    listener,
+      // Create DataWriter
+      DDS::DataWriter_var writer =
+        publisher->create_datawriter(dw_topic,
+                                    dw_qos,
+                                    0,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (!reader) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_datareader failed!\n")), -1);
-    }
+      if (!writer) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_datawriter failed!\n")),
+                        -1);
+      }
 
-    Messenger::MessageDataReader_var reader_i =
-      Messenger::MessageDataReader::_narrow(reader);
+      // Create DataReaders
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id, MSGS_PER_WRITER, reader_done_callback));
 
-    if (!reader_i) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" _narrow failed!\n")),
-                       -1);
-    }
+      DDS::DataReaderQos dr_qos;
+      subscriber->get_default_datareader_qos(dr_qos);
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n", writer_id.c_str()));
-    WriterTask task(writer_id, writer, TOTAL_READERS);
-    task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
-    task.wait();
+      DDS::DataReader_var reader =
+        subscriber->create_datareader(topic,
+                                      dr_qos,
+                                      listener,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (!reliable)
-      ACE_OS::sleep(10);
-    else {
+      if (!reader) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_datareader failed!\n")), -1);
+      }
+
+      Messenger::MessageDataReader_var reader_i =
+        Messenger::MessageDataReader::_narrow(reader);
+
+      if (!reader_i) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" _narrow failed!\n")),
+                        -1);
+      }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n", writer_id.c_str()));
+      WriterTask task(writer_id, writer, TOTAL_READERS);
+      task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
+      task.wait();
+
       ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
       while (readers_done != TOTAL_READERS)
         readers_done_cond.wait();
+
       // Sleep allows an ACKNACK to be generated.
       ACE_OS::sleep(3);
+
+      // Clean-up!
+      sub_participant->delete_contained_entities();
+      dpf->delete_participant(sub_participant);
+
+      if (num_participants == 2) {
+        pub_participant->delete_contained_entities();
+        dpf->delete_participant(pub_participant);
+      }
+
+      // reset for next domain
+      readers_done = 0;
+
     }
-
-    // Clean-up!
-    sub_participant->delete_contained_entities();
-    dpf->delete_participant(sub_participant);
-
-    if (num_participants == 2) {
-      pub_participant->delete_contained_entities();
-      dpf->delete_participant(pub_participant);
-    }
-
-    // reset for next domain
-    readers_done = 0;
-
-  }
 
     TheServiceParticipant->shutdown();
 
