@@ -805,7 +805,7 @@ TransportRegistry::get_transport_template_info(const ACE_TString& config_name, T
   bool ret = false;
   if (has_transport_template()) {
     for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-      if (!ACE_OS::strcmp(config_name.c_str(), i->config_name.c_str())) {
+      if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
         inst.transport_template_name = i->transport_template_name;
         inst.config_name = i->config_name;
         inst.instantiate_per_participant = i->instantiate_per_participant;
