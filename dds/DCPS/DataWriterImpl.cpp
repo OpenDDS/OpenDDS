@@ -2299,10 +2299,15 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
     if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
       return true;
     }
-    return !evaluator.eval(elt.get_sample()->cont(),
-                           elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                           elt.get_header().cdr_encapsulation_, meta,
-                           expression_params, typesupport->getExtensibility());
+    try {
+      return !evaluator.eval(elt.get_sample()->cont(),
+                             elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
+                             elt.get_header().cdr_encapsulation_, meta,
+                             expression_params, typesupport->getExtensibility());
+    } catch(const std::runtime_error& e) {
+      //return false here so that the sample is not filtered
+      return false;
+    }
   }
   else {
     return false;
