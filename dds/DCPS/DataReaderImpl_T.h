@@ -978,8 +978,8 @@ DDS::ReturnCode_t setup_deserialization()
         if (Encoding::KIND_XCDR1 == encoding_kind ||
             Encoding::KIND_XCDR2 == encoding_kind) {
           if (decoding_modes_.find(encoding_kind) == decoding_modes_.end()) {
-            EncodingMode mode(encoding_kind, swap_bytes());
-            decoding_modes_.insert(make_pair(encoding_kind, mode));
+            Encoding encoding(encoding_kind, swap_bytes());
+            decoding_modes_.insert(make_pair(encoding_kind, encoding));
             success = true;
           }
         } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
@@ -1000,8 +1000,8 @@ DDS::ReturnCode_t setup_deserialization()
       }
     }
   } else {
-    EncodingMode mode(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
-    decoding_modes_.insert(make_pair(Encoding::KIND_UNALIGNED_CDR, mode));
+    Encoding encoding(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+    decoding_modes_.insert(make_pair(Encoding::KIND_UNALIGNED_CDR, encoding));
     success = true;
   }
   if (!success) {
@@ -2299,7 +2299,7 @@ RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap instance_map_;
 
-OPENDDS_MAP(Encoding::Kind, EncodingMode) decoding_modes_;
+OPENDDS_MAP(Encoding::Kind, Encoding) decoding_modes_;
 };
 
 template <typename MessageType>
