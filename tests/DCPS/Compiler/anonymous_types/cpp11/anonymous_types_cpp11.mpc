@@ -4,8 +4,4 @@ project: dcps_test, opendds_cxx11 {
   TypeSupport_Files {
     ../test.idl
   }
-
-  IDL_Files {
-    ../test.idl
-  }
 }
