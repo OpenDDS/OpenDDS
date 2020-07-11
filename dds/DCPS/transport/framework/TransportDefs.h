@@ -171,6 +171,7 @@ namespace DCPS {
 static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
 static const ACE_TCHAR TRANSPORT_TEMPLATE_SECTION_NAME[] = ACE_TEXT("transport_template");
 static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
+static const ACE_TCHAR CUSTOMIZATION_SECTION_NAME[] = ACE_TEXT("Customization");
 
 /// Identifier type for DataLink objects.
 typedef ACE_UINT64  DataLinkIdType;

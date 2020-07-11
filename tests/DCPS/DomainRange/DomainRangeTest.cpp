@@ -279,9 +279,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Create DataWriter
       DDS::DataWriter_var writer =
         publisher->create_datawriter(dw_topic,
-                                    dw_qos,
-                                    0,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                     dw_qos,
+                                     0,
+                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (!writer) {
         ACE_ERROR_RETURN((LM_ERROR,
