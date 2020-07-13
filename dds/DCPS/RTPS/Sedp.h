@@ -395,7 +395,6 @@ private:
 
 
   private:
-    Header header_;
     DCPS::SequenceNumber seq_;
 
     void write_control_msg(DCPS::Message_Block_Ptr payload,

@@ -49,6 +49,10 @@ class DdsSecurity_Export  AuthenticationBuiltInImpl
   : public virtual DDS::Security::Authentication
 {
 public:
+
+  /// include in PropertyQosPolicy to add optional properties to Handshake tokens
+  static const char* PROPERTY_HANDSHAKE_DEBUG;
+
   AuthenticationBuiltInImpl();
   virtual ~AuthenticationBuiltInImpl();
 
@@ -187,13 +191,14 @@ private:
     DCPS::GUID_t participant_guid;
     LocalAuthCredentialData::shared_ptr credentials;
     RemoteParticipantMap validated_remotes;
+    bool handshake_debug;
 
     LocalParticipantData()
-      : participant_guid(DCPS::GUID_UNKNOWN),
-        credentials(),
-        validated_remotes()
+      : participant_guid(DCPS::GUID_UNKNOWN)
+      , credentials()
+      , validated_remotes()
+      , handshake_debug(false)
     {
-
     }
   };
   typedef std::map<DDS::Security::IdentityHandle, LocalParticipantData::shared_ptr> LocalParticipantMap;
