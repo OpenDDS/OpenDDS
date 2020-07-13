@@ -50,7 +50,7 @@ int run_cycle(
   ACE_Process_Manager& process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
-  AllocatedScenarioDataReader_var config_reader_impl,
+  AllocatedScenarioDataReader_var allocated_scenario_reader_impl,
   ReportDataWriter_var report_writer_impl);
 
 std::string create_config(const std::string& file_base_name, const char* contents)
@@ -74,15 +74,15 @@ public:
     std::stringstream ss;
     ss << 'n' << node_id_ << 'w' << worker_id_;
     file_base_name_ = ss.str();
-    config_filename_ = create_config(file_base_name_, config.config.in());
+    allocated_scenario_filename_ = create_config(file_base_name_, config.config.in());
     report_filename_ = join_path(output_dir, file_base_name_ + "_report.json");
     log_filename_ = join_path(output_dir, file_base_name_ + "_log.txt");
   }
 
   ~Worker()
   {
-    if (!config_filename_.empty()) {
-      ACE_OS::unlink(config_filename_.c_str());
+    if (!allocated_scenario_filename_.empty()) {
+      ACE_OS::unlink(allocated_scenario_filename_.c_str());
       ACE_OS::unlink(report_filename_.c_str());
       ACE_OS::unlink(log_filename_.c_str());
     }
@@ -125,7 +125,7 @@ public:
     std::shared_ptr<ACE_Process_Options> proc_opts = std::make_shared<ACE_Process_Options>();
     std::stringstream ss;
     ss << join_path(bench_root, "worker", "worker")
-      << " " << config_filename_
+      << " " << allocated_scenario_filename_
       << " --report " << report_filename_
       << " --log " << log_filename_ << std::flush;
     const std::string command = ss.str();
@@ -170,7 +170,7 @@ private:
   pid_t pid_ = ACE_INVALID_PID;
   int exit_status_ = 0;
   std::string file_base_name_;
-  std::string config_filename_;
+  std::string allocated_scenario_filename_;
   std::string report_filename_;
   std::string log_filename_;
 };
@@ -430,16 +430,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "create_topic status failed" << std::endl;
     return 1;
   }
-  Bench::TestController::AllocatedScenarioTypeSupport_var config_ts = new Bench::TestController::AllocatedScenarioTypeSupportImpl;
-  if (config_ts->register_type(participant, "")) {
+  Bench::TestController::AllocatedScenarioTypeSupport_var allocated_scenario_ts = new Bench::TestController::AllocatedScenarioTypeSupportImpl;
+  if (allocated_scenario_ts->register_type(participant, "")) {
     std::cerr << "register_type failed for Config" << std::endl;
     return 1;
   }
-  type_name = config_ts->get_type_name();
-  DDS::Topic_var config_topic = participant->create_topic(
-    config_topic_name, type_name, TOPIC_QOS_DEFAULT, nullptr,
+  type_name = allocated_scenario_ts->get_type_name();
+  DDS::Topic_var allocated_scenario_topic = participant->create_topic(
+    allocated_scenario_topic_name, type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!config_topic) {
+  if (!allocated_scenario_topic) {
     std::cerr << "create_topic config failed" << std::endl;
     return 1;
   }
@@ -469,15 +469,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  DDS::DataReader_var config_reader = subscriber->create_datareader(
-    config_topic, dr_qos, nullptr,
+  DDS::DataReader_var allocated_scenario_reader = subscriber->create_datareader(
+    allocated_scenario_topic, dr_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!config_reader) {
+  if (!allocated_scenario_reader) {
     std::cerr << "create_datareader config failed" << std::endl;
     return 1;
   }
-  AllocatedScenarioDataReader_var config_reader_impl = AllocatedScenarioDataReader::_narrow(config_reader);
-  if (!config_reader_impl) {
+  AllocatedScenarioDataReader_var allocated_scenario_reader_impl = AllocatedScenarioDataReader::_narrow(allocated_scenario_reader);
+  if (!allocated_scenario_reader_impl) {
     std::cerr << "narrow config reader failed" << std::endl;
     return 1;
   }
@@ -534,7 +534,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_Process_Manager process_manager(ACE_Process_Manager::DEFAULT_SIZE, ACE_Reactor::instance());
     while (true) {
       exit_status = run_cycle(name, process_manager, participant,
-        status_writer_impl, config_reader_impl, report_writer_impl);
+        status_writer_impl, allocated_scenario_reader_impl, report_writer_impl);
 
       if (run_mode == RunMode::one_shot || (run_mode == RunMode::daemon_exit_on_error && exit_status != 0)) {
         break;
@@ -573,9 +573,10 @@ bool write_status(
   return true;
 }
 
-bool wait_for_scenario_data(AllocatedScenarioDataReader_var config_reader_impl) {
+bool wait_for_scenario_data(AllocatedScenarioDataReader_var allocated_scenario_reader_impl)
+{
 
-  DDS::ReadCondition_var read_condition = config_reader_impl->create_readcondition(
+  DDS::ReadCondition_var read_condition = allocated_scenario_reader_impl->create_readcondition(
     DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   DDS::WaitSet_var ws(new DDS::WaitSet);
   ws->attach_condition(read_condition);
@@ -591,7 +592,7 @@ bool wait_for_scenario_data(AllocatedScenarioDataReader_var config_reader_impl) 
   }
 
   ws->detach_condition(read_condition);
-  config_reader_impl->delete_readcondition(read_condition);
+  allocated_scenario_reader_impl->delete_readcondition(read_condition);
 
   return true;
 }
@@ -600,7 +601,7 @@ void wait_for_full_scenario(
   const std::string& name,
   NodeId this_node_id,
   StatusDataWriter_var status_writer_impl,
-  AllocatedScenarioDataReader_var config_reader_impl,
+  AllocatedScenarioDataReader_var allocated_scenario_reader_impl,
   Bench::TestController::AllocatedScenario& result)
 {
   using Builder::ZERO;
@@ -612,7 +613,7 @@ void wait_for_full_scenario(
 
   bool complete = false;
   while (!complete) {
-    while (!wait_for_scenario_data(config_reader_impl)) {
+    while (!wait_for_scenario_data(allocated_scenario_reader_impl)) {
       // There was an actual DDS failure of some kind (not just a timeout), give it a few seconds and retry
       std::this_thread::sleep_for(std::chrono::seconds(3));
     }
@@ -620,7 +621,7 @@ void wait_for_full_scenario(
     DDS::ReturnCode_t rc = DDS::RETCODE_ERROR;
     Bench::TestController::AllocatedScenarioSeq scenarios;
     DDS::SampleInfoSeq info;
-    rc = config_reader_impl->take(
+    rc = allocated_scenario_reader_impl->take(
       scenarios, info,
       DDS::LENGTH_UNLIMITED,
       DDS::ANY_SAMPLE_STATE,
@@ -631,7 +632,9 @@ void wait_for_full_scenario(
       continue;
     }
 
-    if (allocated_scenario.scenario_id != TAO::String_Manager() && initial_attempt + std::chrono::seconds(30) < std::chrono::system_clock::now()) {
+    if (allocated_scenario.scenario_id != TAO::String_Manager() &&
+        initial_attempt + std::chrono::seconds(30) < std::chrono::system_clock::now())
+    {
       if (write_status(name, this_node_id, AVAILABLE, status_writer_impl)) {
         allocated_scenario.scenario_id = TAO::String_Manager();
         allocated_scenario.launch_time = ZERO;
@@ -650,7 +653,9 @@ void wait_for_full_scenario(
           }
         }
       }
-      if (std::string(scenarios[scenario].scenario_id.in()) == std::string(allocated_scenario.scenario_id.in()) && !(scenarios[scenario].launch_time == ZERO)) {
+      if (std::string(scenarios[scenario].scenario_id.in()) == std::string(allocated_scenario.scenario_id.in()) &&
+          !(scenarios[scenario].launch_time == ZERO))
+      {
         allocated_scenario.launch_time = scenarios[scenario].launch_time;
       }
     }
@@ -666,7 +671,7 @@ int run_cycle(
   ACE_Process_Manager& process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
-  AllocatedScenarioDataReader_var config_reader_impl,
+  AllocatedScenarioDataReader_var allocated_scenario_reader_impl,
   ReportDataWriter_var report_writer_impl)
 {
   NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
@@ -680,14 +685,14 @@ int run_cycle(
   }
 
   Bench::TestController::AllocatedScenario scenario;
-  wait_for_full_scenario(name, this_node_id, status_writer_impl, config_reader_impl, scenario);
+  wait_for_full_scenario(name, this_node_id, status_writer_impl, allocated_scenario_reader_impl, scenario);
 
   Bench::NodeController::Configs& configs = scenario.configs;
   for (CORBA::ULong node = 0; node < configs.length(); ++node) {
     if (configs[node].node_id == this_node_id) {
       worker_manager.timeout(configs[node].timeout);
-      CORBA::ULong config_count = configs[node].workers.length();
-      for (CORBA::ULong config = 0; config < config_count; config++) {
+      CORBA::ULong allocated_scenario_count = configs[node].workers.length();
+      for (CORBA::ULong config = 0; config < allocated_scenario_count; config++) {
         WorkerId& id = configs[node].workers[config].worker_id;
         const WorkerId end = id + configs[node].workers[config].count;
         for (; id < end; id++) {

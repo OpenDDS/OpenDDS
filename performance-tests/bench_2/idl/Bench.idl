@@ -158,7 +158,7 @@ module Bench {
       unsigned long timeout;
       WorkerConfigs workers;
     };
-    const string config_topic_name = "Node_Controller_Config";
+    const string allocated_scenario_topic_name = "Allocated_Scenario_Config";
     typedef sequence<Config> Configs;
 
     @topic

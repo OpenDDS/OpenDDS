@@ -33,18 +33,18 @@ DdsEntities::DdsEntities(
     throw std::runtime_error("create_topic status failed");
   }
   delete [] status_type_name;
-  config_ts_ = new Bench::TestController::AllocatedScenarioTypeSupportImpl;
-  if (config_ts_->register_type(participant_, "")) {
+  allocated_scenario_ts_ = new Bench::TestController::AllocatedScenarioTypeSupportImpl;
+  if (allocated_scenario_ts_->register_type(participant_, "")) {
     throw std::runtime_error("register_type failed for Config");
   }
-  char* config_type_name = config_ts_->get_type_name();
-  config_topic_ = participant_->create_topic(
-    config_topic_name, config_type_name, TOPIC_QOS_DEFAULT, nullptr,
+  char* allocated_scenario_type_name = allocated_scenario_ts_->get_type_name();
+  allocated_scenario_topic_ = participant_->create_topic(
+    allocated_scenario_topic_name, allocated_scenario_type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!config_topic_) {
+  if (!allocated_scenario_topic_) {
     throw std::runtime_error("create_topic config failed");
   }
-  delete [] config_type_name;
+  delete [] allocated_scenario_type_name;
   report_ts_ = new ReportTypeSupportImpl;
   if (report_ts_->register_type(participant_, "")) {
     throw std::runtime_error("register_type failed for Report");
@@ -69,13 +69,13 @@ DdsEntities::DdsEntities(
   dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  config_writer_ = publisher_->create_datawriter(
-    config_topic_, dw_qos, nullptr,
+  allocated_scenario_writer_ = publisher_->create_datawriter(
+    allocated_scenario_topic_, dw_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!config_writer_) {
+  if (!allocated_scenario_writer_) {
     throw std::runtime_error("create_datawriter config failed");
   }
-  scenario_writer_impl_ = Bench::TestController::AllocatedScenarioDataWriter::_narrow(config_writer_);
+  scenario_writer_impl_ = Bench::TestController::AllocatedScenarioDataWriter::_narrow(allocated_scenario_writer_);
   if (!scenario_writer_impl_) {
     throw std::runtime_error("narrow writer config failed");
   }

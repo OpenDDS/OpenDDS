@@ -389,10 +389,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
             if (timeout_thread) {
               timeout_thread->join();
             }
-            std::stringstream ss;
-            ss << "Timedout waiting for the scenario to complete";
-            throw std::runtime_error(ss.str());
-          } else {
+            throw std::runtime_error("Timedout waiting for the scenario to complete");
           }
         }
       }
