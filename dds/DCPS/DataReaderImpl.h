@@ -566,7 +566,10 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
-protected:
+  // TODO(sonndinh): public method?
+  DDS::ReturnCode_t setup_deserialization();
+
+ protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
 
@@ -874,6 +877,8 @@ private:
   unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
+
+  OPENDDS_MAP(Encoding::Kind, Encoding) decoding_modes_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

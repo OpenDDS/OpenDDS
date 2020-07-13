@@ -3282,6 +3282,56 @@ DataReaderImpl::get_ice_endpoint()
   return TransportClient::get_ice_endpoint();
 }
 
+DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
+{
+  const DDS::DataRepresentationIdSeq repIds =
+    get_effective_data_rep_qos(qos_.representation.value);
+  bool success = false;
+  if (cdr_encapsulation()) {
+    Encoding::Kind encoding_kind;
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+        if (Encoding::KIND_XCDR1 == encoding_kind ||
+            Encoding::KIND_XCDR2 == encoding_kind) {
+          if (decoding_modes_.find(encoding_kind) == decoding_modes_.end()) {
+            Encoding encoding(encoding_kind, swap_bytes());
+            decoding_modes_.insert(std::make_pair(encoding_kind, encoding));
+            success = true;
+          }
+        } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
+          //Valid but incompatible data representation
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+                     ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                     ACE_TEXT("Skip %C data representation\n"),
+                     Encoding::kind_to_string(encoding_kind).c_str()));
+        }
+      } else if (::OpenDDS::DCPS::DCPS_debug_level) {
+        // Invalid data representation
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                   ACE_TEXT("Encounter invalid data representation\n")));
+        return DDS::RETCODE_ERROR;
+      }
+    }
+  } else {
+    Encoding encoding(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+    decoding_modes_.insert(std::make_pair(Encoding::KIND_UNALIGNED_CDR, encoding));
+    success = true;
+  }
+  if (!success) {
+    if (::OpenDDS::DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                 ACE_TEXT("Could not find a valid data representation\n")));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  // TODO(sonndinh): Do we need to set up allocator? I guess no.
+
+  return DDS::RETCODE_OK;
+}
+
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
 {
   bool accepted = true;
