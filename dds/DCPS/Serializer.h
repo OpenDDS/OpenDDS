@@ -47,8 +47,6 @@
 #include "Definitions.h"
 #include "PoolAllocator.h"
 
-#include <dds/DdsDcpsCoreC.h>
-
 #include <tao/String_Alloc.h>
 
 #include <ace/CDR_Base.h>
@@ -63,6 +61,10 @@ class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace DDS {
+  struct OctetSeq;
+}
 
 namespace OpenDDS {
 namespace DCPS {
@@ -310,22 +312,8 @@ public:
 /**
 * This constructor receives an already populated OctetSeq so the write pointer is advanced
 */
-  explicit MessageBlockHelper(const DDS::OctetSeq& seq)
-  : db_(seq.length(), ACE_Message_Block::MB_DATA,
-        reinterpret_cast<const char*>(seq.get_buffer()),
-        0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-    , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-    {
-      mb_.wr_ptr(mb_.space());
-    }
-
-  explicit MessageBlockHelper(DDS::OctetSeq& seq)
-  : db_(seq.length(), ACE_Message_Block::MB_DATA,
-        reinterpret_cast<const char*>(seq.get_buffer()),
-        0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-    , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-    {}
-
+  explicit MessageBlockHelper(const DDS::OctetSeq& seq);
+  explicit MessageBlockHelper(DDS::OctetSeq& seq);
   operator ACE_Message_Block*() { return &mb_; }
 
 private:

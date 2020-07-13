@@ -270,6 +270,22 @@ OPENDDS_STRING Encoding::to_string() const
   return rv;
 }
 
+MessageBlockHelper::MessageBlockHelper(const DDS::OctetSeq& seq)
+: db_(seq.length(), ACE_Message_Block::MB_DATA,
+      reinterpret_cast<const char*>(seq.get_buffer()),
+      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+{
+  mb_.wr_ptr(mb_.space());
+}
+
+MessageBlockHelper::MessageBlockHelper(DDS::OctetSeq& seq)
+: db_(seq.length(), ACE_Message_Block::MB_DATA,
+      reinterpret_cast<const char*>(seq.get_buffer()),
+      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+{}
+
 const char Serializer::ALIGN_PAD[] = {0};
 
 Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
