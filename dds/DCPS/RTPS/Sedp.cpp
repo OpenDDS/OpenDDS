@@ -2946,24 +2946,6 @@ Sedp::Endpoint::~Endpoint()
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
 {
-  header_.prefix[0] = 'R';
-  header_.prefix[1] = 'T';
-  header_.prefix[2] = 'P';
-  header_.prefix[3] = 'S';
-  header_.version = PROTOCOLVERSION;
-  header_.vendorId = VENDORID_OPENDDS;
-  header_.guidPrefix[0] = pub_id.guidPrefix[0];
-  header_.guidPrefix[1] = pub_id.guidPrefix[1],
-  header_.guidPrefix[2] = pub_id.guidPrefix[2];
-  header_.guidPrefix[3] = pub_id.guidPrefix[3];
-  header_.guidPrefix[4] = pub_id.guidPrefix[4];
-  header_.guidPrefix[5] = pub_id.guidPrefix[5];
-  header_.guidPrefix[6] = pub_id.guidPrefix[6];
-  header_.guidPrefix[7] = pub_id.guidPrefix[7];
-  header_.guidPrefix[8] = pub_id.guidPrefix[8];
-  header_.guidPrefix[9] = pub_id.guidPrefix[9];
-  header_.guidPrefix[10] = pub_id.guidPrefix[10];
-  header_.guidPrefix[11] = pub_id.guidPrefix[11];
 }
 
 Sedp::Writer::~Writer()
@@ -3741,8 +3723,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(pdata), true);
 #endif
 
-    }
-    else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
+    } else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
       // TODO: process request and send reply
       TypeLookup_Request type_lookup_request;
       if (!sedp_.type_lookup_request_reader_->take_tl_request(sample, ser, type_lookup_request)) {
@@ -3750,8 +3731,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
           ACE_TEXT("failed to take type lookup request\n")));
         return;
       }
-    }
-    else if (entity_id == ENTITYID_TL_SVC_REPLY_WRITER) {
+    } else if (entity_id == ENTITYID_TL_SVC_REPLY_WRITER) {
       // TODO: process reply
       TypeLookup_Reply type_lookup_reply;
       if (!sedp_.type_lookup_reply_reader_->take_tl_response(sample, ser, type_lookup_reply)) {

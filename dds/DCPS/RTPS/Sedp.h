@@ -15,7 +15,7 @@
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/RtpsRpcTypeSupportImpl.h"
+#include "RtpsRpcTypeSupportImpl.h"
 
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 
@@ -349,23 +349,18 @@ private:
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
-    void send_sample(const ACE_Message_Block& data,
-                     size_t size,
-                     const DCPS::RepoId& reader,
-                     DCPS::SequenceNumber& sequence,
-                     bool historic = false);
-
     const DCPS::SequenceNumber& get_seq() const
     {
       return seq_;
     }
 
-
-  private:
-    Header header_;
-    DCPS::SequenceNumber seq_;
-
   protected:
+    void send_sample(const ACE_Message_Block& data,
+      size_t size,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence,
+      bool historic = false);
+
     void set_header_fields(DCPS::DataSampleHeader& dsh,
                            size_t size,
                            const DCPS::RepoId& reader,
@@ -373,6 +368,8 @@ private:
                            bool historic_sample = false,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
+  private:
+    DCPS::SequenceNumber seq_;
   };
 
   class SedpWriter : public Writer {
@@ -440,7 +437,7 @@ private:
   Writer_rch participant_volatile_message_secure_writer_;
 #endif
 
-  // Temporary forward declaration. TODO: remove when type support is implemented
+  // Temporary declaration. TODO: remove when type support is implemented
   struct TypeLookup_Request {
     DDS::rpc::RequestHeader header;
   };
