@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_TYPE_EXTERNAL_H
 #define OPENDDS_DCPS_TYPE_EXTERNAL_H
 
-#include "unique_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

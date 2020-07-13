@@ -7,7 +7,7 @@
 
 #include "TypeObject.h"
 
-#include "Hash.h"
+#include "dds/DCPS/Hash.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -7,9 +7,9 @@
 #define OPENDDS_DCPS_TYPE_OBJECT_H
 
 #include "External.h"
-#include "PoolAllocationBase.h"
-#include "PoolAllocator.h"
-#include "Serializer.h"
+#include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/Serializer.h"
 
 #include <tao/Array_VarOut_T.h>
 
