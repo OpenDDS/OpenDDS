@@ -267,7 +267,7 @@ bool Checklist::get_remote_candidate(const ACE_INET_Addr& address, Candidate& ca
 
 void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 {
-  if (nominated_ != valid_list_.end()) {
+  if (nominating_ != valid_list_.end() || nominated_ != valid_list_.end()) {
     // Don't generate a check when we are done.
     return;
   }
@@ -706,6 +706,7 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
       !valid_list_.empty() &&
       nominating_ == valid_list_.end() &&
       nominated_ == valid_list_.end()) {
+    triggered_check_queue_.clear();
     add_triggered_check(valid_list_.front());
     nominating_ = valid_list_.begin();
   }
