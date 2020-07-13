@@ -12,7 +12,7 @@
 #include "RcObject.h"
 #include "RcHandle_T.h"
 #include "unique_ptr.h"
-#include "TypeObject.h"
+#include "XTypes/TypeObject.h"
 
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"

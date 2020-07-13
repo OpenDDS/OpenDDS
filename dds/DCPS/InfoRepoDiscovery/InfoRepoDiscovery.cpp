@@ -5,10 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 #include "InfoRepoDiscovery.h"
-#include "dds/DCPS/TypeObject.h"
-#include "dds/DCPS/TypeSupportImpl.h"
 
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h"

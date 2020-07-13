@@ -126,7 +126,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
     "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
     "dds/DCPS/MultiTopicDataReader_T.h", "dds/DCPS/DataWriterImpl_T.h",
-    "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/TypeObject.h"
+    "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/XTypes/TypeObject.h"
   };
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 

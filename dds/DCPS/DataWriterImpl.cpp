@@ -24,7 +24,7 @@
 #include "DataSampleElement.h"
 #include "Util.h"
 #include "DCPS_Utils.h"
-#include "TypeObject.h"
+#include "XTypes/TypeObject.h"
 #include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"

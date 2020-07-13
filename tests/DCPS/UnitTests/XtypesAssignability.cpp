@@ -1,4 +1,4 @@
-#include "dds/DCPS/TypeAssignability.h"
+#include "dds/DCPS/XTypes/TypeAssignability.h"
 
 #include "gtest/gtest.h"
 
