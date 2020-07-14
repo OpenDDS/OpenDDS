@@ -28,14 +28,14 @@ public:
 
   Bench::NodeController::StatusTypeSupport_var status_ts_;
   DDS::Topic_var status_topic_;
-  Bench::NodeController::ConfigTypeSupport_var config_ts_;
-  DDS::Topic_var config_topic_;
+  Bench::TestController::AllocatedScenarioTypeSupport_var allocated_scenario_ts_;
+  DDS::Topic_var allocated_scenario_topic_;
   Bench::NodeController::ReportTypeSupport_var report_ts_;
   DDS::Topic_var report_topic_;
 
   DDS::Publisher_var publisher_;
-  DDS::DataWriter_var config_writer_;
-  Bench::NodeController::ConfigDataWriter_var config_writer_impl_;
+  DDS::DataWriter_var allocated_scenario_writer_;
+  Bench::TestController::AllocatedScenarioDataWriter_var scenario_writer_impl_;
 
   DDS::Subscriber_var subscriber_;
   DDS::DataReader_var status_reader_;

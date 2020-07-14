@@ -3,7 +3,6 @@
 #include <iostream>
 #include <exception>
 #include <sstream>
-#include <chrono> // For std::chrono::system_clock
 #include <ctime>
 
 #include <ace/Lib_Find.h> // For ACE::get_temp_dir
@@ -76,12 +75,12 @@ std::string create_temp_dir(const std::string& prefix)
   return ACE_TEXT_ALWAYS_CHAR(buffer);
 }
 
-std::string iso8601()
+std::string iso8601(const std::chrono::system_clock::time_point& tp)
 {
   using namespace std::chrono;
   std::stringstream ss;
-  const std::time_t now = system_clock::to_time_t(system_clock::now());
-  char buf[sizeof "2011-10-08T07:07:09Z"];
+  const std::time_t now = system_clock::to_time_t(tp);
+  char buf[sizeof "2011-10-08T07:07:09Z"]; // longest possible for UTC times (other zones add offset suffix)
   std::strftime(buf, sizeof buf, "%FT%TZ", std::gmtime(&now));
   ss << buf;
   return ss.str();

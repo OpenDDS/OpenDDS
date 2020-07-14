@@ -228,9 +228,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
 
-    process_construction_begin_time = Builder::get_time();
+    process_construction_begin_time = Builder::get_hr_time();
     Builder::BuilderProcess process(config.process);
-    process_construction_end_time = Builder::get_time();
+    process_construction_end_time = Builder::get_hr_time();
 
     Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
 
@@ -255,9 +255,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
 
-    process_enable_begin_time = Builder::get_time();
+    process_enable_begin_time = Builder::get_hr_time();
     process.enable_dds_entities();
-    process_enable_end_time = Builder::get_time();
+    process_enable_end_time = Builder::get_hr_time();
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
 
@@ -276,9 +276,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Starting process tests." << std::endl;
 
-    process_start_begin_time = Builder::get_time();
+    process_start_begin_time = Builder::get_hr_time();
     am.start();
-    process_start_end_time = Builder::get_time();
+    process_start_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests started." << std::endl << std::endl;
 
@@ -297,9 +297,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Stopping process tests." << std::endl;
 
-    process_stop_begin_time = Builder::get_time();
+    process_stop_begin_time = Builder::get_hr_time();
     am.stop();
-    process_stop_end_time = Builder::get_time();
+    process_stop_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests stopped." << std::endl << std::endl;
 
@@ -328,7 +328,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning process destruction / entity deletion." << std::endl;
 
-    process_destruction_begin_time = Builder::get_time();
+    process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
     proactor.proactor_end_event_loop();
@@ -348,7 +348,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     TheServiceParticipant->shutdown();
     return 1;
   }
-  process_destruction_end_time = Builder::get_time();
+  process_destruction_end_time = Builder::get_hr_time();
 
   Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
 
