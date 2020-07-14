@@ -31,7 +31,6 @@ namespace XTypes {
 namespace DCPS {
 
 class MetaStruct;
-enum Extensibility;
 
 template <typename Message> struct DDSTraits;
 
