@@ -2304,7 +2304,8 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
                              elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
                              elt.get_header().cdr_encapsulation_, meta,
                              expression_params, typesupport->getExtensibility());
-    } catch(const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
+      //if the eval fails, the throws will do the logging
       //return false here so that the sample is not filtered
       return false;
     }

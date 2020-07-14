@@ -153,7 +153,7 @@ private:
   struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
                         const DDS::StringSeq& params)
-      : DataForEval(meta, params), deserialized_(data){}
+      : DataForEval(meta, params), deserialized_(data) {}
     virtual ~DeserializedForEval();
     Value lookup(const char* field) const;
     const void* const deserialized_;
