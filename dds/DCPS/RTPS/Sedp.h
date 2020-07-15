@@ -268,6 +268,7 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
+    virtual ~Msg();
 
     static const char* msgTypeToString(MsgType type);
     const char* msgTypeToString() const;
