@@ -4,10 +4,12 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-
 #include "TypeObject.h"
 
+#include "Message_Block_Ptr.h"
 #include "Hash.h"
+
+#include <dds/DdsDcpsCoreC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -166,6 +168,28 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 
   return TypeIdentifier();
 }
+
+void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
+{
+  seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
+  DCPS::MessageBlockHelper helper(seq);
+  DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
+  if (!(serializer << type_info)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
+              ACE_TEXT("serialization of type information failed.\n")));
+  }
+}
+
+void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq)
+{
+  DCPS::MessageBlockHelper helper(seq);
+  DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
+  if (!(serializer >> type_info)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
+              ACE_TEXT("deserialization of type information failed.\n")));
+  }
+}
+
 
 } // namespace XTypes
 
@@ -1903,7 +1927,6 @@ bool operator>>(Serializer& strm, XTypes::AppliedBuiltinMemberAnnotations& stru)
     && (strm >> stru.max)
     && (strm >> stru.hash_id);
 }
-
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedVerbatimAnnotation& stru)

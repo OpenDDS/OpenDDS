@@ -619,9 +619,12 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     //this is the client reference to the DataWriterRemoteImpl
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_);
+    //turn into a octet seq to pass through generated files
+    DDS::OctetSeq serializedTypeInfo;
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
-      dr_remote_obj, qos, transInfo, publisherQos);
+      dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above
@@ -715,10 +718,14 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     //this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
+    //turn into a octet seq to pass through generated files
+    DDS::OctetSeq serializedTypeInfo;
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,
-                                              filterClassName, filterExpr, params);
+                                              filterClassName, filterExpr, params,
+                                              serializedTypeInfo);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above

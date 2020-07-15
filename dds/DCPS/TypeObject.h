@@ -20,6 +20,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+
+namespace DDS {
+  class OctetSeq;
+}
 namespace OpenDDS {
 namespace XTypes {
 
@@ -1606,6 +1610,13 @@ namespace XTypes {
 
   OpenDDS_Dcps_Export
   TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
+
+  OpenDDS_Dcps_Export
+  void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq);
+
+  OpenDDS_Dcps_Export
+  void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq);
+
 } // namespace XTypes
 
 namespace DCPS {
