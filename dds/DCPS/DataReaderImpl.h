@@ -566,14 +566,14 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
-  // TODO(sonndinh): public method?
-  DDS::ReturnCode_t setup_deserialization();
-
- protected:
+protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
 
   void prepare_to_delete();
+
+  /// Setup deserialization options
+  DDS::ReturnCode_t setup_deserialization();
 
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
@@ -591,7 +591,7 @@ public:
   void set_sample_rejected_status(
     const DDS::SampleRejectedStatus& status);
 
-//remove document this!
+  //remove document this!
   SubscriptionInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 

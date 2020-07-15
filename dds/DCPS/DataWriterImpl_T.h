@@ -339,6 +339,8 @@ public:
     return data_allocator_.get();
   };
 
+protected:
+
   DDS::ReturnCode_t setup_serialization()
   {
     const DDS::DataRepresentationIdSeq repIds =

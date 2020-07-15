@@ -1254,6 +1254,11 @@ DataReaderImpl::enable()
 
     }
 
+    const DDS::ReturnCode_t setup_deserialization_result = setup_deserialization();
+    if (setup_deserialization_result != DDS::RETCODE_OK) {
+      return setup_deserialization_result;
+    }
+
     const TransportLocatorSeq& trans_conf_info = this->connection_info();
 
     CORBA::String_var filterClassName = "";
@@ -3298,14 +3303,14 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
             decoding_modes_.insert(std::make_pair(encoding_kind, encoding));
             success = true;
           }
-        } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
+        } else if (DCPS_debug_level >= 2) {
           //Valid but incompatible data representation
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
                      ACE_TEXT("DataReaderImpl::setup_deserialization: ")
                      ACE_TEXT("Skip %C data representation\n"),
                      Encoding::kind_to_string(encoding_kind).c_str()));
         }
-      } else if (::OpenDDS::DCPS::DCPS_debug_level) {
+      } else if (DCPS_debug_level) {
         // Invalid data representation
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("DataReaderImpl::setup_deserialization: ")
@@ -3319,15 +3324,13 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     success = true;
   }
   if (!success) {
-    if (::OpenDDS::DCPS::DCPS_debug_level) {
+    if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DataReaderImpl::setup_deserialization: ")
                  ACE_TEXT("Could not find a valid data representation\n")));
     }
     return DDS::RETCODE_ERROR;
   }
-
-  // TODO(sonndinh): Do we need to set up allocator? I guess no.
 
   return DDS::RETCODE_OK;
 }
