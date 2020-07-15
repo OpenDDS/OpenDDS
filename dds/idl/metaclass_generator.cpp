@@ -170,7 +170,7 @@ namespace {
         size = 1;
         return "ACE_CDR::Char";
       case AST_PredefinedType::PT_wchar:
-        size = 1; // encoding of wchar length is 1 byte
+        size = 2;
         return "ACE_CDR::WChar";
       case AST_PredefinedType::PT_boolean:
         size = 1;
@@ -216,17 +216,6 @@ namespace {
           "      }\n"
           "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
           "        throw std::runtime_error(\"String '" << fieldName <<
-          "' contents could not be skipped\");\n"
-          "      }\n";
-      } else if (cls & CL_WIDE) {
-        be_global->impl_ <<
-          "      ACE_CDR::Octet len;\n"
-          "      if (!(ser >> ACE_InputCDR::to_octet(len))) {\n"
-          "        throw std::runtime_error(\"WChar '" << fieldName <<
-          "' length could not be deserialized\");\n"
-          "      }\n"
-          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
-          "        throw std::runtime_error(\"WChar '" << fieldName <<
           "' contents could not be skipped\");\n"
           "      }\n";
       } else {
@@ -661,7 +650,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   elem = resolveActualType(elem);
   const Classification elem_cls = classify(elem);
 
-  if ((elem_cls & (CL_PRIMITIVE | CL_ENUM)) && !(elem_cls & CL_WIDE)) {
+  if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
     // fixed-length sequence/array element -> skip all elements at once
     int sz = 1;
     to_cxx_type(elem, sz);
@@ -670,12 +659,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
-    if ((elem_cls & CL_PRIMITIVE) && (elem_cls & CL_WIDE)) {
-      be_global->impl_ <<
-        "    ACE_CDR::Octet o;\n"
-        "    if (!(ser >> ACE_InputCDR::to_octet(o))) return false;\n"
-        "    if (!ser.skip(o)) return false;\n";
-    } else if (elem_cls & CL_STRING) {
+    if (elem_cls & CL_STRING) {
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
         "    if (!(ser >> strlength)) return false;\n"
@@ -713,11 +697,6 @@ func(const std::string&, AST_Type* br_type, const std::string&,
       "    ACE_CDR::ULong len;\n"
       "    if (!(ser >> len)) return false;\n"
       "    if (!ser.skip(static_cast<ACE_UINT16>(len))) return false;\n";
-  } else if (br_cls & CL_WIDE) {
-    ss <<
-      "    ACE_CDR::Octet len;\n"
-      "    if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
-      "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     int sz = 1;
     to_cxx_type(br_type, sz);
