@@ -8,28 +8,33 @@
 
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/SubjectName.h"
-#include "Governance.h"
 
-#include <list>
+#include "dds/DdsDcpsCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityParamsC.h"
+
+#include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/RcObject.h"
+
+#include <set>
+#include <string>
+#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
-class Permissions : public DCPS::RcObject {
-public:
+struct Permissions : DCPS::RcObject {
 
   typedef DCPS::RcHandle<Permissions> shared_ptr;
 
-  enum AllowDeny_t
-  {
+  enum AllowDeny_t {
     ALLOW,
     DENY
   };
 
-  enum PublishSubscribe_t
-  {
+  enum PublishSubscribe_t {
     PUBLISH,
     SUBSCRIBE
   };
@@ -39,66 +44,45 @@ public:
     std::string not_after;
   };
 
-  struct PermissionTopicPsRule {
+  struct Action {
     PublishSubscribe_t ps_type;
-    std::vector<std::string> topic_list;
+    std::vector<std::string> topics;
+    std::vector<std::string> partitions;
+
+    bool topic_matches(const char* topic) const;
+    bool partitions_match(const DDS::StringSeq& entity_partitions, AllowDeny_t allow_or_deny) const;
   };
 
-  struct PermissionPartitionPs {
-    PublishSubscribe_t ps_type;
-    std::vector<std::string> partition_list;
-  };
+  typedef std::vector<Action> Actions;
 
-  typedef std::list<PermissionTopicPsRule> TopicPsRules;
-
-  struct PermissionTopicRule {
+  struct Rule {
     AllowDeny_t ad_type;
-    std::set< ::DDS::Security::DomainId_t > domain_list;
-    TopicPsRules topic_ps_rules;
+    std::set<DDS::Security::DomainId_t> domains;
+    Actions actions;
   };
 
-  typedef std::list<PermissionPartitionPs> PartitionPsList;
+  typedef std::vector<Rule> Rules;
 
-  struct PermissionsPartition {
-    AllowDeny_t ad_type;
-    std::set< ::DDS::Security::DomainId_t > domain_list;
-    PartitionPsList partition_ps;
-  };
-
-  typedef std::list<PermissionTopicRule> TopicRules;
-  typedef std::list<PermissionsPartition> Partitions;
-
-  struct PermissionGrantRule {
-    std::string grant_name;
+  struct Grant : DCPS::RcObject {
+    std::string name;
     SSL::SubjectName subject;
     Validity_t validity;
-    std::string default_permission;
-    TopicRules PermissionTopicRules;
-    Partitions PermissionPartitions;
+    AllowDeny_t default_permission;
+    Rules rules;
   };
 
-  typedef std::vector<PermissionGrantRule> PermissionGrantRules;
+  typedef DCPS::RcHandle<Grant> Grant_rch;
 
-  struct AcPerms {
-    PermissionGrantRules perm_rules;
-    DDS::Security::PermissionsToken perm_token;
-    DDS::Security::PermissionsCredentialToken perm_cred_token;
-  };
-
-  Permissions();
+  typedef std::vector<Grant_rch> Grants;
 
   int load(const SSL::SignedDocument& doc);
 
-  AcPerms& data()
-  {
-    return perm_data_;
-  }
+  bool has_grant(const SSL::SubjectName& name) const;
+  Grant_rch find_grant(const SSL::SubjectName& name) const;
 
-  bool contains_subject_name(const SSL::SubjectName& name) const;
-
-private:
-
-  AcPerms perm_data_;
+  Grants grants_;
+  DDS::Security::PermissionsToken perm_token_;
+  DDS::Security::PermissionsCredentialToken perm_cred_token_;
 };
 
 }

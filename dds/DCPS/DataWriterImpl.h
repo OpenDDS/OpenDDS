@@ -179,6 +179,8 @@ public:
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
 
+  virtual void replay_durable_data_for(const RepoId& remote_sub_id);
+
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   virtual void update_subscription_params(const RepoId& readerId,

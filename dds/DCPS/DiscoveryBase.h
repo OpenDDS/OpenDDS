@@ -54,14 +54,19 @@ namespace OpenDDS {
       EndpointSecurityAttributesMap;
 
     enum AuthState {
-      AS_UNKNOWN,
-      AS_VALIDATING_REMOTE,
-      AS_HANDSHAKE_REQUEST,
-      AS_HANDSHAKE_REQUEST_SENT,
-      AS_HANDSHAKE_REPLY,
-      AS_HANDSHAKE_REPLY_SENT,
-      AS_AUTHENTICATED,
-      AS_UNAUTHENTICATED
+      AUTH_STATE_UNKNOWN,
+      AUTH_STATE_VALIDATING_REMOTE,
+      AUTH_STATE_HANDSHAKE,
+      AUTH_STATE_AUTHENTICATED,
+      AUTH_STATE_UNAUTHENTICATED
+    };
+
+    enum HandshakeState {
+      // State of Requester waiting for reply and Replier waiting for final
+      HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL,
+
+      // State of Replier waiting for request
+      HANDSHAKE_STATE_EXPECTING_REQUEST
     };
 #endif
 
@@ -1593,8 +1598,13 @@ namespace OpenDDS {
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
-        , has_last_stateless_msg_(false)
-        , auth_state_(AS_UNKNOWN)
+        , have_auth_req_msg_(false)
+        , have_handshake_msg_(false)
+        , auth_state_(AUTH_STATE_UNKNOWN)
+        , handshake_state_(HANDSHAKE_STATE_EXPECTING_REQUEST)
+        , is_requester_(false)
+        , security_builtins_associated_(false)
+        , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1618,8 +1628,13 @@ namespace OpenDDS {
         , last_seq_(seq)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
-        , has_last_stateless_msg_(false)
-        , auth_state_(AS_UNKNOWN)
+        , have_auth_req_msg_(false)
+        , have_handshake_msg_(false)
+        , auth_state_(AUTH_STATE_UNKNOWN)
+        , handshake_state_(HANDSHAKE_STATE_EXPECTING_REQUEST)
+        , is_requester_(false)
+        , security_builtins_associated_(false)
+        , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1671,13 +1686,18 @@ namespace OpenDDS {
         ACE_UINT16 seq_reset_count_;
 
 #ifdef OPENDDS_SECURITY
-        bool has_last_stateless_msg_;
+        bool have_auth_req_msg_;
+        DDS::Security::ParticipantStatelessMessage auth_req_msg_;
+        bool have_handshake_msg_;
+        DDS::Security::ParticipantStatelessMessage handshake_msg_;
         MonotonicTimePoint stateless_msg_deadline_;
-        DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
-        DDS::Security::HandshakeMessageToken last_handshake_request_data_;
 
         MonotonicTimePoint auth_deadline_;
         AuthState auth_state_;
+        HandshakeState handshake_state_;
+        bool is_requester_;
+        bool security_builtins_associated_;
+        bool seen_some_crypto_tokens_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;
@@ -1720,16 +1740,25 @@ namespace OpenDDS {
         if (removed) {
 #ifndef DDS_HAS_MINIMUM_BIT
           ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-          // bit may be null if the DomainParticipant is shutting down
-          if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
-            bit->set_instance_state(iter->second.bit_ih_,
-                                    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-          }
           ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
           // bit may be null if the DomainParticipant is shutting down
-          if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
-            loc_bit->set_instance_state(iter->second.location_ih_,
+          if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
+              (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
+            {
+              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+              if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
+                bit->set_instance_state(iter->second.bit_ih_,
                                         DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+              }
+              if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
+                loc_bit->set_instance_state(iter->second.location_ih_,
+                                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+              }
+            }
+            iter = participants_.find(part_id);
+            if (iter == participants_.end()) {
+              return;
+            }
           }
 #endif /* DDS_HAS_MINIMUM_BIT */
           if (DCPS_debug_level > 3) {
@@ -1737,9 +1766,14 @@ namespace OpenDDS {
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
                        ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
           }
+
+          remove_discovered_participant_i(iter);
+
           participants_.erase(iter);
         }
       }
+
+      virtual void remove_discovered_participant_i(DiscoveredParticipantIter) {}
 
 #ifndef DDS_HAS_MINIMUM_BIT
     DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()

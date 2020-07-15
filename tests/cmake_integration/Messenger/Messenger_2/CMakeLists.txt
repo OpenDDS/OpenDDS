@@ -1,6 +1,8 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 #
+# This file is setup the way it is for testing purposes. For a cleaner example
+# see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
 project(OpenDDS_Messenger2_cmake CXX)
 cmake_minimum_required(VERSION 3.8.2)
@@ -33,35 +35,30 @@ add_library(${messenger})
 set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
-OPENDDS_TARGET_SOURCES(${messenger} ${dst}/Messenger.idl)
+OPENDDS_TARGET_SOURCES(${messenger} "${dst}/Messenger.idl")
+target_link_libraries(${messenger} OpenDDS::Dcps)
 
 # Publisher
 add_executable(${publisher}
-    ${dst}/publisher.cpp
-    ${dst}/Writer.cpp
-    ${dst}/Writer.h
+  "${dst}/publisher.cpp"
+  "${dst}/Writer.h"
+  "${dst}/Writer.cpp"
 )
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
+target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
 
 # Subscriber
 add_executable(${subscriber}
-    ${dst}/subscriber.cpp
-    ${dst}/DataReaderListener.cpp
-    ${dst}/DataReaderListener.h
+  "${dst}/subscriber.cpp"
+  "${dst}/DataReaderListener.h"
+  "${dst}/DataReaderListener.cpp"
 )
 set_target_properties(${subscriber}
   PROPERTIES OUTPUT_NAME subscriber
 )
-
-foreach(t ${all_targets})
-  target_link_libraries(${t} OpenDDS::OpenDDS)
-
-  if (NOT "${t}" STREQUAL "${messenger}")
-    target_link_libraries(${t} ${messenger})
-  endif()
-endforeach()
+target_link_libraries(${subscriber} ${messenger} OpenDDS::OpenDDS)
 
 # Copy configs/scripts into build-output directory
 file(GLOB ini "${src}/*.ini")

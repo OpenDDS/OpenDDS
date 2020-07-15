@@ -20,7 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class NetworkInterface {
+class OpenDDS_Dcps_Export NetworkInterface {
 public:
   typedef OPENDDS_SET(ACE_INET_Addr) AddressSet;
 
@@ -59,6 +59,10 @@ public:
     }
     return false;
   }
+
+  void add_default_addrs();
+  bool has(const ACE_INET_Addr& addr) const;
+  bool exclude_from_multicast(const char* configured_interface) const;
 
   AddressSet addresses;
 

@@ -236,6 +236,8 @@ private:
   /// any other threads while we perform this release.
   virtual void release_datalink(DataLink* link) = 0;
 
+  virtual void client_stop(const RepoId&) {}
+
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,
                            const ConnectionAttribs& attribs,
