@@ -993,6 +993,15 @@ protected:
       if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
         return;
       }
+
+      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+          ACE_TEXT("Encoding kind of the received sample does not ")
+          ACE_TEXT("match the ones specified by DataReader.\n"),
+          TraitsType::type_name()));
+        return;
+      }
       ser.encoding(encoding);
     }
 

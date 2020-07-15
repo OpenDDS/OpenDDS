@@ -878,6 +878,7 @@ private:
 
   bool transport_disabled_;
 
+protected:
   OPENDDS_MAP(Encoding::Kind, Encoding) decoding_modes_;
 };
 

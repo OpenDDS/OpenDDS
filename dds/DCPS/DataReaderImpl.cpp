@@ -3293,8 +3293,8 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     get_effective_data_rep_qos(qos_.representation.value);
   bool success = false;
   if (cdr_encapsulation()) {
-    Encoding::Kind encoding_kind;
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      Encoding::Kind encoding_kind;
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
         if (Encoding::KIND_XCDR1 == encoding_kind ||
             Encoding::KIND_XCDR2 == encoding_kind) {
@@ -3307,19 +3307,18 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
           //Valid but incompatible data representation
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
                      ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                     ACE_TEXT("Skip %C data representation\n"),
+                     ACE_TEXT("Skip %C data representation.\n"),
                      Encoding::kind_to_string(encoding_kind).c_str()));
         }
       } else if (DCPS_debug_level) {
-        // Invalid data representation
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                   ACE_TEXT("Encounter invalid data representation\n")));
+                   ACE_TEXT("Encountered invalid data representation.\n")));
         return DDS::RETCODE_ERROR;
       }
     }
   } else {
-    Encoding encoding(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+    const Encoding encoding(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
     decoding_modes_.insert(std::make_pair(Encoding::KIND_UNALIGNED_CDR, encoding));
     success = true;
   }
@@ -3327,7 +3326,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                 ACE_TEXT("Could not find a valid data representation\n")));
+                 ACE_TEXT("Could not find a valid data representation.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
