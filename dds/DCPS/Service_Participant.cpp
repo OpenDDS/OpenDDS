@@ -2063,7 +2063,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance adding %s=%s\n"),
+                     ACE_TEXT("configure_domain_range_instance adding %C=%C\n"),
                      it->first.c_str(), it->second.c_str()));
         }
       }
@@ -2071,13 +2071,13 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
         // create transport instance add default transport config
         TransportRegistry::instance()->create_transport_template_instance(domainId, this->global_transport_config_);
-        OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
+        const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
         dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
                              ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%s\n"),
+                     ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
                      config_instance_name.c_str()));
         }
       }
@@ -2123,7 +2123,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) Service_Participant::")
-                         ACE_TEXT("configure_domain_range_instance processing AddDomainId: %s=%s\n"),
+                         ACE_TEXT("configure_domain_range_instance processing AddDomainId: %C=%C\n"),
                          it->first.c_str(), addr.c_str()));
             }
           } else {
@@ -2140,7 +2140,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
           if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) Service_Participant::")
-                         ACE_TEXT("configure_domain_range_instance adding config %s=%s\n"),
+                         ACE_TEXT("configure_domain_range_instance adding config %C=%Cs\n"),
                          it->first.c_str(), it->second.c_str()));
             }
         }
