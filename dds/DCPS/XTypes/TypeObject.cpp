@@ -6,8 +6,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TypeObject.h"
 
-#include "Message_Block_Ptr.h"
-#include "Hash.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
+#include "dds/DCPS/Hash.h"
 
 #include <dds/DdsDcpsCoreC.h>
 

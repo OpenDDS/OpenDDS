@@ -4,7 +4,7 @@
  ***/
 #include "ExtensibilityTypeSupportImpl.h"
 
-#include <dds/DCPS/TypeObject.h>
+#include <dds/DCPS/XTypes/TypeObject.h>
 
 #include <gtest/gtest.h>
 

@@ -146,7 +146,7 @@ bool
 typeobject_generator::gen_enum(AST_Enum* node, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
-  be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
+  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
   const string clazz = tag_type(name);
 
@@ -217,7 +217,7 @@ bool
 typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
-  be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
+  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
   const string clazz = tag_type(name);
 
@@ -297,7 +297,7 @@ bool
 typeobject_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name,
                                   AST_Type* base, const char*)
 {
-  be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
+  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
   const string clazz = tag_type(name);
 
@@ -344,7 +344,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
   const char*)
 {
-  be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
+  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
   const string clazz = tag_type(name);
 

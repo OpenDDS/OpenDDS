@@ -12,7 +12,7 @@
 
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 
-#include "dds/DCPS/TypeObject.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
