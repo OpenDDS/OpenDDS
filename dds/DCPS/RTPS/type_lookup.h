@@ -56,7 +56,7 @@ namespace OpenDDS {
     {
       OpenDDS::XTypes::TypeIdentifierWithSizeSeq dependent_typeids;
       OpenDDS::XTypes::ContinuationPoint_forany continuation_point;
-    
+ 
       TypeLookup_getTypeDependencies_Out() {}
     };
 
