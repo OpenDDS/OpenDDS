@@ -67,8 +67,8 @@ int check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, 
   if (checkVal(lhs, rhs, name)) return 1;
 
   Message_Block_Ptr mb (amb->duplicate());
-  const Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR, OpenDDS::DCPS::ENDIAN_NATIVE);
-  OpenDDS::DCPS::Serializer ser(mb.get(), encoding);
+  const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+  Serializer ser(mb.get(), encoding);
   std::string rhs_name = name;
   rhs_name[0] = 'r';
   Value val = ms.getValue(ser, rhs_name.c_str());
@@ -100,7 +100,7 @@ int run_test(int, ACE_TCHAR*[])
   Source src;
   src.rhs_a.s = "hello";
   src.rhs_a.l = 42;
-  src.rhs_a.w = 0xdead;
+  src.rhs_a.w = L'☺';
   src.rhs_a.c = 'j';
   src.rhs_sa[0] = 23;
   src.rhs_sa[1] = -16536;
@@ -123,12 +123,13 @@ int run_test(int, ACE_TCHAR*[])
     tgtField[0] = 'l';
     targetMeta.assign(&tgt, tgtField.c_str(), &src, *fields, sourceMeta);
   }
-  const Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR, OpenDDS::DCPS::ENDIAN_NATIVE);
-  OpenDDS::DCPS::Message_Block_Ptr data(new ACE_Message_Block(OpenDDS::DCPS::serialized_size(encoding, src)));
-  OpenDDS::DCPS::Serializer ser(data.get(), encoding);
-  if(!(ser<<src)) {
+  const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+  Message_Block_Ptr data(new ACE_Message_Block(serialized_size(encoding, src)));
+  Serializer ser(data.get(), encoding);
+  if (!(ser<<src)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Tests::MetaStructTest::run_test: ")
       ACE_TEXT("Failed to serialize source.\n")));
+    return 1;
   }
   // Use checkVal for types that aren't supported in MetaStruct::getValue(), such as arrays and unions
   return check(tgt.lhs_a.s, src.rhs_a.s, "lhs_a.s", data.get(), Value::VAL_STRING, sourceMeta, &Value::s_)
