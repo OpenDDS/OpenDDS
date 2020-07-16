@@ -328,8 +328,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       while (readers_done != TOTAL_READERS)
         readers_done_cond.wait();
 
-      // Sleep allows an ACKNACK to be generated.
-      ACE_OS::sleep(3);
+      DDS::Duration_t timeout = { 3, 0 };
+      writer->wait_for_acknowledgments(timeout);
 
       // Clean-up!
       sub_participant->delete_contained_entities();

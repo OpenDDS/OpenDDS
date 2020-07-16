@@ -108,7 +108,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("failed to open section %s\n"),
+                          ACE_TEXT("failed to open section %C\n"),
                           sect_name.c_str()),
                          -1);
       } else {
@@ -128,7 +128,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         if (processSections(cf, sect, keys) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("too many nesting layers in [%s] section.\n"),
+                            ACE_TEXT("too many nesting layers in [%C] section.\n"),
                             sect_name.c_str()),
                            -1);
         }
@@ -178,7 +178,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("failed to open section [%s]\n"),
+                          ACE_TEXT("failed to open section [%C]\n"),
                           sect_name.c_str()),
                          -1);
       } else {
@@ -199,7 +199,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
           // Don't allow multiple layers of nesting ([config/x/y]).
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("too many nesting layers in [%s] section.\n"),
+                            ACE_TEXT("too many nesting layers in [%C] section.\n"),
                             sect_name.c_str()),
                            -1);
         }
@@ -260,7 +260,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                     config->passive_connect_duration_)) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%C] section.\n"),
+                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%C) in [config/%C] section.\n"),
                                   value.c_str(), config_id.c_str()),
                                  -1);
               }
@@ -717,9 +717,9 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
                                   ACE_TEXT("create_transport_template_instance ")
-                                  ACE_TEXT("could not convert %s to integer\n"),
+                                  ACE_TEXT("could not convert %C to integer\n"),
                                   custom.c_str()),
-                                  -1);
+                                -1);
               }
               val += domain;
               addr = addr.substr(0, pos);
@@ -729,15 +729,15 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
                                 ACE_TEXT("create_transport_template_instance ")
-                                ACE_TEXT("could not add_domain_id_to_ip_addr for address %s\n"),
+                                ACE_TEXT("could not add_domain_id_to_ip_addr for address %C\n"),
                                 idx->second.c_str()),
-                                -1);
+                              -1);
             }
 
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) TransportRegistry::")
-                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_ip_addr: %s=%s\n"),
+                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_ip_addr: %C=%C\n"),
                          it->first.c_str(), addr.c_str()));
             }
           }
@@ -755,24 +755,24 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
                                 ACE_TEXT("create_transport_template_instance ")
-                                ACE_TEXT("could not add_domain_id_to_port for %s since port exists.\n"),
+                                ACE_TEXT("could not add_domain_id_to_port for %C since port exists.\n"),
                                 idx->second.c_str()),
-                                -1);
+                              -1);
             }
 
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) TransportRegistry::")
-                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_port: %s=%s\n"),
+                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_port: %C=%C\n"),
                          it->first.c_str(), addr.c_str()));
             }
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
                               ACE_TEXT("create_transport_template_instance ")
-                              ACE_TEXT("No support for %s customization\n"),
+                              ACE_TEXT("No support for %C customization\n"),
                               idx->second.c_str()),
-                              -1);
+                            -1);
           }
 
           // write
@@ -783,7 +783,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
           if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) TransportRegistry::")
-                         ACE_TEXT("create_transport_template_instance adding %s=%s\n"),
+                         ACE_TEXT("create_transport_template_instance adding %C=%C\n"),
                          it->first.c_str(), it->second.c_str()));
           }
         }
@@ -797,7 +797,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
                           ACE_TEXT("load_discovery_configuration() returned %d\n"),
                           status),
-                          -1);
+                        -1);
       }
 
     }
