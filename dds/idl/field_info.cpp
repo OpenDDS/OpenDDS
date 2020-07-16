@@ -21,20 +21,32 @@ bool FieldInfo::EleLen::operator<(const EleLen& o) const
 
 const std::string FieldInfo::scope_op = "::";
 
+bool FieldInfo::cxx11() {
+  return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+}
+
+std::string FieldInfo::at_pfx() {
+  return cxx11() ? "T_" : "_";
+}
+
 std::string FieldInfo::get_type_name(AST_Type& field)
 {
   std::string n = scoped(field.name());
   if (!field.anonymous()) {
     return n;
   }
-  n = n.substr(0, n.rfind(scope_op) + 2) + "_" + field.local_name()->get_string();
+  n = n.substr(0, n.rfind(scope_op) + 2) + at_pfx() + field.local_name()->get_string();
   return (field.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
 }
 
-std::string FieldInfo::underscored_type_name(UTL_ScopedName* sn)
+std::string FieldInfo::underscored_type_name(UTL_ScopedName* sn, AST_Type& field)
 {
-  const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
-  return use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
+  std::string n = dds_generator::scoped_helper(sn, "_");
+  if (!field.anonymous()) {
+    return n;
+  }
+  std::size_t i = n.rfind(scope_op);
+  return n.substr(0, i + 2) + at_pfx() + n.substr(i + 2);
 }
 
 std::string FieldInfo::underscore(const std::string& scoped_type)
@@ -55,14 +67,14 @@ std::string FieldInfo::ref(const std::string& scoped_t, const std::string& under
 FieldInfo::FieldInfo(AST_Field& field) :
   type_(field.field_type()),
   name_(field.local_name()->get_string()),
-  underscored_(underscored_type_name(type_->name()))
+  underscored_(underscored_type_name(type_->name(), *type_))
 {
   init();
 }
 
 FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
   type_(base),
-  underscored_(underscored_type_name(sn)),
+  underscored_(underscored_type_name(sn, *type_)),
   scoped_type_(scoped(sn))
 {
   init();
@@ -89,7 +101,7 @@ void FieldInfo::init()
     std::size_t i = scoped_type_.rfind(scope_op);
     struct_name_ = scoped_type_.substr(0, i);
     if (!name_.empty()) {
-      type_name_ = "_" + name_;
+      type_name_ = at_pfx() + name_;
       if (seq_) { type_name_ += "_seq"; }
       scoped_type_ = struct_name_ + "::" + type_name_;
       underscored_ = underscore(scoped_type_);
@@ -120,16 +132,17 @@ void FieldInfo::init()
     arg_ = "seq";
   }
 
-  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+  if (cxx11()) {
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";
     const_unwrap_ = "  const " + unwrap_;
     unwrap_ = "  " + unwrap_;
     arg_ = "wrap";
     ref_ = ref(scoped_type_, underscored_, "");
     const_ref_ = ref(scoped_type_, underscored_);
+    ptr_ = "IDL::DistinctType<" + scoped_type_ + ", " + underscored_ + "_tag>*";
   } else {
     ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
     const_ref_ = "const " + ref_;
+    ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
   }
-  ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
 }

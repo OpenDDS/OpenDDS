@@ -6,6 +6,7 @@
  */
 
 #include "marshal_generator.h"
+#include "field_info.h"
 #include "utl_identifier.h"
 #include "topic_keys.h"
 
@@ -1546,6 +1547,25 @@ namespace {
     }
   }
 
+  string findSizeAnonymous(AST_Field* field, const string& prefix, string& intro)
+  {
+    FieldInfo af(*field);
+    string fieldref = prefix, local = insert_cxx11_accessor_parens(af.name_, false);
+    if (!af.cxx11() && (af.cls_ & CL_ARRAY)) {
+      intro += "  " + getArrayForany(prefix.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
+      fieldref += '_';
+      if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
+        local.erase(local.size() - 2);
+      }
+    } else if (af.cxx11() && (af.cls_ & (CL_SEQUENCE | CL_ARRAY))) {
+      fieldref = af.const_ref_ + "(" + fieldref + '.';
+      local += ')';
+    } else {
+      fieldref += '.';
+    }
+    return "  gen_find_size(" + fieldref + local + ", size, padding);\n";
+  }
+
   // common to both fields (in structs) and branches (in unions)
   string streamCommon(const string& name, AST_Type* type,
                       const string& prefix, string& intro,
@@ -1613,6 +1633,37 @@ namespace {
       }
       return "(strm " + fieldref + local + ')';
     }
+  }
+
+  string streamAnonymous(AST_Field* field, const string& prefix, string& intro)
+  {
+    FieldInfo af(*field);
+    const string shift = prefix.substr(0, 2);
+    string local = insert_cxx11_accessor_parens(af.name_, false);
+    const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
+    const string qual = prefix + '.' + local;
+    string expr = qual.substr(3);
+    WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
+    string fieldref = prefix;
+    if (!af.cxx11() && (af.cls_ & CL_ARRAY)) {
+      string pre = prefix;
+      if (shift == ">>" || shift == "<<") {
+        pre.erase(0, 3);
+      }
+      if (accessor) {
+        local.erase(local.size() - 2);
+      }
+      intro += "  " + getArrayForany(pre.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
+      fieldref += '_';
+    } else {
+      fieldref += '.';
+    }
+
+    if (af.cxx11() && (af.cls_ & (CL_ARRAY | CL_SEQUENCE))) {
+      return "(strm " + shift + " " + (dir == WD_OUTPUT ? af.const_ref_ : af.ref_)
+        + "(" + (fieldref + local).substr(3) + "))";
+    }
+    return "(strm " + fieldref + local + ')';
   }
 
   bool isBinaryProperty_t(const string& cxx)
@@ -2022,7 +2073,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "  if (" + cond + ") {\n  ";
       }
-      expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
+      if (fields[i]->field_type()->anonymous()) {
+        expr += findSizeAnonymous(fields[i], "stru", intro);
+      } else {
+        expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
+      }
       if (!cond.empty()) {
         expr += "  }\n";
       }
@@ -2042,7 +2097,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "(!(" + cond + ") || ";
       }
-      expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
+      if (fields[i]->field_type()->anonymous()) {
+        expr += streamAnonymous(fields[i], "<< stru", intro);
+      } else {
+        expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
+      }
       if (!cond.empty()) {
         expr += ")";
       }
@@ -2063,7 +2122,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr += rtpsCustom.preFieldRead(field_name);
         expr += "(!(" + cond + ") || ";
       }
-      expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
+      if (fields[i]->field_type()->anonymous()) {
+        expr += streamAnonymous(fields[i], ">> stru", intro);
+      } else {
+        expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
+      }
       if (!cond.empty()) {
         expr += ")";
       }

@@ -24,8 +24,10 @@ struct FieldInfo {
   typedef std::set<EleLen> EleLenSet;
 
   static const std::string scope_op;
+  static bool cxx11();
+  static std::string at_pfx();
   static std::string get_type_name(AST_Type& field);
-  static std::string underscored_type_name(UTL_ScopedName* sn);
+  static std::string underscored_type_name(UTL_ScopedName* sn, AST_Type& field);
   static std::string underscore(const std::string& scoped_type);
   static std::string ref(const std::string& scoped_t, const std::string& underscored_t, const std::string& const_s = "const ");
 

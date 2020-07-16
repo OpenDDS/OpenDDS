@@ -9,7 +9,6 @@
 #define marshal_generator_H
 
 #include "dds_generator.h"
-#include "field_info.h"
 
 class marshal_generator : public dds_generator {
 public:

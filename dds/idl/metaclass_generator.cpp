@@ -6,6 +6,7 @@
  */
 
 #include "metaclass_generator.h"
+#include "field_info.h"
 #include "be_extern.h"
 #include "utl_identifier.h"
 #include "topic_keys.h"

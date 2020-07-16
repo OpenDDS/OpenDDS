@@ -4,6 +4,7 @@
  */
 
 #include "langmap_generator.h"
+#include "field_info.h"
 #include "be_extern.h"
 
 #include "utl_identifier.h"
@@ -99,12 +100,22 @@ struct GeneratorBase
       return map_type_string(chartype, false);
     }
     if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
-      return scoped(type->name());
+      return FieldInfo::get_type_name(*type);
     }
     if (cls & CL_INTERFACE) {
       return scoped(type->name()) + "_var";
     }
     return "<<unknown>>";
+  }
+
+  std::string map_type(AST_Field* field)
+  {
+    AST_Type* type = field->field_type();
+    if (!type->anonymous()) {
+      return map_type(type);
+    }
+    FieldInfo af(*field);
+    return af.type_name_;
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -969,9 +980,14 @@ struct FaceGenerator : GeneratorBase
       AST_Type* field_type = fields[i]->field_type();
       const std::string field_name = fields[i]->local_name()->get_string();
       std::string type_name = map_type(field_type);
+
       const Classification cls = classify(field_type);
       if (cls & CL_STRING) {
         type_name = helpers_[(cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
+      }
+      if (fields[i]->field_type()->anonymous()) {
+        FieldInfo af(*(fields[i]));
+        type_name = af.type_name_;
       }
       be_global->lang_header_ <<
         "  " << type_name << ' ' << field_name << ";\n";
@@ -1379,6 +1395,28 @@ struct Cxx11Generator : GeneratorBase
       "using " << nm << " = " << array << elem_type << bounds.str() << ";\n";
   }
 
+  void gen_anonymous_type(AST_Field* field)
+  {
+    FieldInfo af(*field);
+    const std::string elem_type = af.as_base_ ? map_type(af.as_base_) : "";
+    if (af.arr_) {
+      be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
+      std::string array;
+      std::ostringstream bounds;
+      for (ACE_CDR::ULong dim = af.arr_->n_dims(); dim; --dim) {
+        const ACE_CDR::ULong extent = af.arr_->dims()[dim - 1]->ev()->u.ulval;
+        array += "std::array<";
+        bounds << ", " << extent << '>';
+      }
+      be_global->lang_header_ <<
+        "  using " << af.type_name_ << " = " << array << elem_type << bounds.str() << ";\n";
+    } else if (af.seq_) {
+      be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
+      be_global->lang_header_ <<
+        "  using " << af.type_name_ << " = std::vector<" << elem_type << ">;\n";
+    }
+  }
+
   void gen_array_traits(UTL_ScopedName*, AST_Array*) {}
   void gen_array_typedef(const char*, AST_Type*) {}
   void gen_typedef_varout(const char*, AST_Type*) {}
@@ -1415,7 +1453,7 @@ struct Cxx11Generator : GeneratorBase
     AST_Type* field_type = field->field_type();
     AST_Type* actual_field_type = resolveActualType(field_type);
     const Classification cls = classify(actual_field_type);
-    const std::string lang_field_type = generator_->map_type(field_type);
+    const std::string lang_field_type = generator_->map_type(field);
 
     const std::string assign_pre = "{ _" + nm + " = ",
       assign = assign_pre + "val; }\n",
@@ -1463,6 +1501,17 @@ struct Cxx11Generator : GeneratorBase
     const char* const nm = name->last_component()->get_string();
     gen_common_strunion_pre(nm);
 
+    bool has_anonymous_field = false;
+    for (size_t i = 0; i < fields.size(); ++i) {
+      if (fields[i]->field_type()->anonymous()) {
+        gen_anonymous_type(fields[i]);
+        has_anonymous_field = true;
+      }
+    }
+    if (has_anonymous_field) {
+      be_global->lang_header_ << '\n';
+    }
+
     be_global->lang_header_ <<
       "  " << nm << "() = default;\n"
       "  " << (fields.size() == 1 ? "explicit " : "") << nm << '(';
@@ -1472,7 +1521,7 @@ struct Cxx11Generator : GeneratorBase
     std::string init_list, swaps;
     for (size_t i = 0; i < fields.size(); ++i) {
       const std::string fn = fields[i]->local_name()->get_string();
-      const std::string ft = map_type(fields[i]->field_type());
+      const std::string ft = map_type(fields[i]);
       const Classification cls = classify(fields[i]->field_type());
       const bool by_ref = (cls & (CL_PRIMITIVE | CL_ENUM)) == 0;
       const std::string param = (by_ref ? "const " : "") + ft + (by_ref ? "&" : "")
