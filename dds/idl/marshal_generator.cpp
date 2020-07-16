@@ -978,11 +978,11 @@ namespace {
   string encoding_to_xcdr_version(Encoding encoding) {
     switch (encoding) {
     case encoding_xcdr1:
-      return "Encoding::XCDR1";
+      return "Encoding::XCDR_VERSION_1";
     case encoding_xcdr2:
-      return "Encoding::XCDR2";
+      return "Encoding::XCDR_VERSION_2";
     default:
-      return "Encoding::XCDR_NONE";
+      return "Encoding::XCDR_VERSION_NONE";
     }
   }
 
@@ -1042,6 +1042,7 @@ namespace {
   void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type)
   {
     type = resolveActualType(type);
+    const ExtensibilityKind exten = be_global->extensibility(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -1083,14 +1084,12 @@ namespace {
       break;
     }
     case AST_Decl::NT_enum:
-      // TODO(iguessthislldo): XCDR Stuff?
       align(encoding, size, 4);
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
       AST_String* string_node = dynamic_cast<AST_String*>(type);
-      // TODO(iguessthislldo): XCDR Stuff?
       align(encoding, size, 4);
       size += 4;
       const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
@@ -1103,9 +1102,8 @@ namespace {
     case AST_Decl::NT_struct: {
       const Fields fields(dynamic_cast<AST_Structure*>(type));
       const Fields::Iterator fields_end = fields.end();
-      const ExtensibilityKind exten = be_global->extensibility(type);
       idl_max_serialized_size_dheader(encoding, exten, size);
-      // TODO(iguessthislldo) Paremter Lists?
+      // TODO(iguessthislldo) Handle Parameter List
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         idl_max_serialized_size(encoding, size, (*i)->field_type());
       }
@@ -1114,7 +1112,7 @@ namespace {
     case AST_Decl::NT_sequence: {
       AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
       AST_Type* base_node = seq_node->base_type();
-      // TODO(iguessthislldo): XCDR Stuff?
+      idl_max_serialized_size_dheader(encoding, exten, size);
       size_t bound = seq_node->max_size()->ev()->u.ulval;
       align(encoding, size, 4);
       size += 4;
@@ -1124,7 +1122,7 @@ namespace {
     case AST_Decl::NT_array: {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       AST_Type* base_node = array_node->base_type();
-      // TODO(iguessthislldo): XCDR Stuff?
+      idl_max_serialized_size_dheader(encoding, exten, size);
       size_t array_size = 1;
       AST_Expression** dims = array_node->dims();
       for (unsigned long i = 0; i < array_node->n_dims(); i++) {
@@ -1135,7 +1133,8 @@ namespace {
     }
     case AST_Decl::NT_union: {
       AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-      // TODO(iguessthislldo): XCDR Stuff?
+      idl_max_serialized_size_dheader(encoding, exten, size);
+      // TODO(iguessthislldo) Handle Parameter List
       idl_max_serialized_size(encoding, size, union_node->disc_type());
       size_t largest_field_size = 0;
       const size_t starting_size = size;
@@ -1756,10 +1755,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
-  const bool parameter_list = exten == extensibilitykind_mutable && xcdr;
-  const bool maybe_delimited = not_final && repr.xcdr2;
+  const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
+  const bool may_be_delimited = not_final && repr.xcdr2;
   const bool not_only_delimited = not_final && repr.not_only_xcdr2();
-  const bool get_serialized_size = parameter_list || maybe_delimited;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1768,12 +1766,28 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
   RtpsFieldCustomizer rtpsCustom(cxx);
+
   {
     Function serialized_size("serialized_size", "void");
     serialized_size.addArg("encoding", "const Encoding&");
     serialized_size.addArg("size", "size_t&");
     serialized_size.addArg("stru", "const " + cxx + "&");
     serialized_size.endArgs();
+
+    if (may_be_parameter_list) {
+      /*
+       * For XCDR1 parameter lists this is used to hold the total size while
+       * size is hijacked for field sizes because of alignment resets.
+       */
+      be_global->impl_ <<
+        "  size_t xcdr1_pl_running_total = 0;\n";
+    }
+
+    if (may_be_delimited) {
+      be_global->impl_ <<
+        "  serialized_size_delimiter(encoding, size);\n";
+    }
+
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       AST_Type* field_type = resolveActualType(fields[i]->field_type());
@@ -1786,69 +1800,78 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "  if (" + cond + ") {\n  ";
       }
+      if (may_be_parameter_list) {
+        expr +=
+          "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+      }
       expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
       if (!cond.empty()) {
         expr += "  }\n";
       }
     }
     be_global->impl_ << intro << expr;
+
+    if (repr.xcdr1 && may_be_parameter_list) {
+      be_global->impl_ <<
+        "  serialized_size_list_end_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+    }
   }
+
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
 
-    // Get CDR Size if we need it.
-    if (get_serialized_size) {
+    if (may_be_delimited || may_be_parameter_list) {
       be_global->impl_ <<
-        "  size_t total_size = 0;\n"
-        "  serialized_size(strm.encoding(), total_size, stru);\n";
+        "  const Encoding& encoding = strm.encoding();\n";
     }
 
-    // Write the CDR Size if delimited
-    if (maybe_delimited) {
-      const char* indent = "  ";
-      if (not_only_delimited) {
-        indent = "    ";
-        be_global->impl_ <<
-          "  if (strm.encoding().xcdr_version() == Serializer::XCDR2) {\n";
-      }
+    // Write the CDR Size if delimited.
+    if (may_be_delimited) {
       be_global->impl_ <<
-        indent << "if (!strm.write_delimiter(total_size)) {\n" <<
-        indent << "  return false;\n" <<
-        indent << "}\n";
-      if (not_only_delimited) {
-        be_global->impl_ <<
-          "  }\n";
-      }
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+        "    size_t total_size = 0;\n"
+        "    serialized_size(encoding, total_size, stru);\n"
+        "    if (!strm.write_delimiter(total_size)) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n";
     }
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
-    if (parameter_list) {
+    if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  size_t size = 0;\n";
       std::ostringstream fields_encode;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], i);
         const string field_name = fields[i]->local_name()->get_string();
         fields_encode <<
-          "\n"
-          " {\n"
-          "   size_t field_size = 0;\n"
-          "   serialized_size(encoding(), field_size);\n"
-          "   if (!strm.write_parameter_id(" << id << ", field_size)) {\n"
-          "     return false;\n"
-          "   }\n"
-          "   if (!" <<
+          "\n" <<
+            findSizeCommon(field_name, fields[i]->field_type(), "stru", intro) <<
+          "  if (!strm.write_parameter_id(" << id << ", size)) {\n"
+          "    return false;\n"
+          "  }\n"
+          "  size = 0;\n"
+          "  if (!" <<
             streamCommon(field_name, fields[i]->field_type(),
               "<< stru", intro, cxx) << ") {\n"
-          "     return false;\n"
-          "   }\n"
-          " }\n";
+          "    return false;\n"
+          "  }\n";
+      }
+      if (repr.xcdr1 && may_be_parameter_list) {
+        fields_encode <<
+          "\n"
+          "  if (!strm.write_list_end_parameter_id()) {\n"
+          "    return false;\n"
+          "  }\n";
       }
       be_global->impl_ <<
         intro <<
-        fields_encode .str() << "\n"
+        fields_encode.str() << "\n"
         "  return true;\n";
     } else {
       string expr;
@@ -1873,17 +1896,17 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.addArg("stru", cxx + "&");
     extraction.endArgs();
     string intro;
-    if (maybe_delimited) {
+    if (may_be_delimited) {
       be_global->impl_ <<
-        "  unsigned total_size;\n";
+        "  size_t total_size = 0;\n";
       const char* indent = "  ";
       if (not_only_delimited) {
         indent = "    ";
         be_global->impl_ <<
-          "  if (strm.xcdr_version() == Serializer::XCDR2) {\n";
+          "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
       }
       be_global->impl_ <<
-        indent << "if (!strm.read_delimiter(size)) {\n" <<
+        indent << "if (!strm.read_delimiter(total_size)) {\n" <<
         indent << "  return false;\n" <<
         indent << "}\n";
       if (not_only_delimited) {
@@ -1891,48 +1914,51 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "  }\n";
       }
     }
-    if (parameter_list) {
+    if (may_be_parameter_list) {
       if (repr.xcdr2) {
         /**
-         * We don't have a sentinel pid in XCDR2 paramter lists, but we have
-         * the size, so we need to stop after we hit this offset.
+         * We don't have a PID marking the end in XCDR2 parameter lists, but we
+         * have the size, so we need to stop after we hit this offset.
+         *
+         * TODO(iguessthislldo): Replace this with a cleaner mechanism where
+         * the Serializer keeps track of the stream offset.
+         * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447056830
          */
         be_global->impl_ <<
-          "  const size_t end_of_fields = pos_rd() + total_size;\n";
+          "  const char* end_of_fields = strm.pos_rd() + total_size;\n";
       }
       be_global->impl_ <<
-        "  unsigned field_id;\n"
+        "  unsigned member_id;\n"
         "  size_t field_size;\n"
-        "  while (true) {\n"
-        "    if (!strm.read_parameter_id(field_id, field_size)) {\n"
+        "  while (true) {\n";
+
+      if (repr.xcdr2) {
+        be_global->impl_ << "\n"
+          "    if ((!strm.pos_rd() || strm.pos_rd() >= end_of_fields)";
+        if (repr.not_only_xcdr2()) {
+          be_global->impl_ << " &&\n"
+            "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
+        }
+        be_global->impl_ << ") {\n"
+          "      return true;\n"
+          "    }\n";
+      }
+
+      be_global->impl_ <<
+        "    if (!strm.read_parameter_id(member_id, field_size)) {\n"
         "      return false;\n"
         "    }\n";
+
       if (repr.xcdr1) {
         be_global->impl_ <<
           "    if (member_id == Serializer::pid_list_end";
         if (repr.not_only_xcdr1()) {
           be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR1";
+            "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_1";
         }
         be_global->impl_ << ") {\n"
           "      return true;\n"
           "    }\n";
-
-      } else if (repr.xcdr2) {
-        be_global->impl_ << "\n"
-          "    if (pos_rd() >= end_of_fields";
-        if (repr.not_only_xcdr2()) {
-          be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR2";
-        }
-        be_global->impl_ << ") {\n"
-          "      return true;\n"
-          "    }\n";
-
-      } else {
-        idl_global->err()->misc_error(
-          "Could not determine parameter list end condition", node);
-        return false;
       }
 
       std::ostringstream cases;

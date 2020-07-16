@@ -264,11 +264,27 @@ OPENDDS_STRING Encoding::to_string() const
 {
   OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
     endianness_to_string(endianness_);
-  if (!zero_init_padding_ ) {
+  if (!zero_init_padding_) {
     rv += ", non-initialized padding";
   }
   return rv;
 }
+
+MessageBlockHelper::MessageBlockHelper(const DDS::OctetSeq& seq)
+: db_(seq.length(), ACE_Message_Block::MB_DATA,
+      reinterpret_cast<const char*>(seq.get_buffer()),
+      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+{
+  mb_.wr_ptr(mb_.space());
+}
+
+MessageBlockHelper::MessageBlockHelper(DDS::OctetSeq& seq)
+: db_(seq.length(), ACE_Message_Block::MB_DATA,
+      reinterpret_cast<const char*>(seq.get_buffer()),
+      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+{}
 
 const char Serializer::ALIGN_PAD[] = {0};
 
@@ -508,9 +524,9 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
 bool Serializer::read_parameter_id(unsigned& id, size_t& size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
-  if (xcdr == Encoding::XCDR1) {
+  if (xcdr == Encoding::XCDR_VERSION_1) {
     // Get the "short" id and size
-    if (!align_r(4)) {
+    if (!align_r(xcdr1_pid_alignment)) {
       return false;
     }
     ACE_CDR::UShort pid;
@@ -543,7 +559,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
     }
 
     reset_alignment();
-  } else if (xcdr == Encoding::XCDR2) {
+  } else if (xcdr == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong emheader;
     if (!(*this >> emheader)) {
       return false;
@@ -571,8 +587,6 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
     }
 
     id = emheader & 0xfffffff;
-  } else { // Not XCDR or something we're not prepared for.
-    return false;
   }
 
   return true;
@@ -581,8 +595,8 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
 bool Serializer::write_parameter_id(unsigned id, size_t size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
-  if (xcdr == Encoding::XCDR1) {
-    if (!align_w(4)) {
+  if (xcdr == Encoding::XCDR_VERSION_1) {
+    if (!align_w(xcdr1_pid_alignment)) {
       return false;
     }
 
@@ -618,8 +632,7 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
     }
 
     reset_alignment();
-  } else if (xcdr == Encoding::XCDR2) {
-
+  } else if (xcdr == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong emheader = id;
     // TODO(iguessthislldo): Conditionally insert must understand flag?
     id += emheader_must_understand;
@@ -627,9 +640,6 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
     if (!(*this << emheader)) {
       return false;
     }
-
-  } else { // Not XCDR or something we're not prepared for.
-    return false;
   }
 
   return true;

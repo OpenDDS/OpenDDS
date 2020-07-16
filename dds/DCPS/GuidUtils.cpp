@@ -4,14 +4,19 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "GuidUtils.h"
 #include "Util.h"
 #include "GuidBuilder.h"
 #include "SafetyProfileStreams.h"
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include "RestoreOutputStreamState.h"
+#endif
 
-#include "ace/ACE.h"
-#include "ace/OS_NS_string.h"
+#include <ace/ACE.h>
+#include <ace/OS_NS_string.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -63,6 +68,8 @@ void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result)
 std::ostream&
 operator<<(std::ostream& os, const GUID_t& rhs)
 {
+  RestoreOutputStreamState os_state(os);
+
   std::size_t len = sizeof(rhs.guidPrefix);
 
   os << std::hex;

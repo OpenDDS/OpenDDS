@@ -153,7 +153,9 @@ bool ParticipantLocationListenerImpl::check(bool no_ice, bool ipv6)
             << " LOCAL"
             << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
             << ((expected & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+#ifdef ACE_HAS_IPV6
             << ((expected & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
+#endif
             << ((expected & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
             << ((expected & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
             << std::endl;

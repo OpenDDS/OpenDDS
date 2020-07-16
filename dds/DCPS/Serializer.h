@@ -53,7 +53,6 @@
 #include <ace/CDR_Stream.h>
 
 #include <limits>
-
 #include <string>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -61,6 +60,10 @@ class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace DDS {
+  struct OctetSeq;
+}
 
 namespace OpenDDS {
 namespace DCPS {
@@ -101,6 +104,7 @@ const size_t float64_cdr_size = 8;
 const size_t float128_cdr_size = 16;
 const size_t char8_cdr_size = 1;
 const size_t char16_cdr_size = 2;
+const size_t xcdr1_pid_alignment = 4;
 
 /**
  * Align "value" by "by" if it's not already.
@@ -146,9 +150,9 @@ public:
    * XCDR version derived from the Encoding kind.
    */
   enum XcdrVersion {
-    XCDR_NONE,
-    XCDR1,
-    XCDR2
+    XCDR_VERSION_NONE,
+    XCDR_VERSION_1,
+    XCDR_VERSION_2
   };
 
   // Encoding with KIND_XCDR1 and ENDIAN_NATIVE
@@ -299,6 +303,25 @@ size_t serialized_size(const Encoding& encoding, const T& value)
 }
 
 /**
+* This helper class can be used to construct ace message blocks from OctetSeqs
+* and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
+* The OctetSeq must have its length set before constructing this object.
+*/
+class OpenDDS_Dcps_Export MessageBlockHelper {
+public:
+/**
+* This constructor receives an already populated OctetSeq so the write pointer is advanced
+*/
+  explicit MessageBlockHelper(const DDS::OctetSeq& seq);
+  explicit MessageBlockHelper(DDS::OctetSeq& seq);
+  operator ACE_Message_Block*() { return &mb_; }
+
+private:
+  ACE_Data_Block db_;
+  ACE_Message_Block mb_;
+};
+
+/**
  * @class Serializer
  *
  * @brief Class to serialize and deserialize data for DDS.
@@ -312,6 +335,10 @@ public:
 
   // Flags and reserved ids used in parameter list ids.
   static const ACE_CDR::UShort pid_extended = 0x3f01;
+  /**
+   * Note that this is different than OpenDDS::RTPS::PID_SENTINEL(0x0001). See
+   * XTypes 1.3 Table 34 for details.
+   */
   static const ACE_CDR::UShort pid_list_end = 0x3f02;
   static const ACE_CDR::UShort pid_impl_extension = 0x8000;
   static const ACE_CDR::UShort pid_must_understand = 0x4000;
@@ -600,15 +627,24 @@ public:
   bool write_parameter_id(unsigned id, size_t size);
 
   /**
-   * Read a delimiter used for XCDR2 delimited data.
+   * Write the parameter ID that marks the end of XCDR1 parameter lists.
    *
    * Returns true if successful.
+   */
+  bool write_list_end_parameter_id();
+
+  /**
+   * Read a delimiter used for XCDR2 delimited data.
+   *
+   * Returns true if successful and size will be set to the size of the CDR
+   * value excluding the delimiter.
    */
   bool read_delimiter(size_t& size);
 
   /**
    * Write a delimiter used for XCDR2 delimited data.
    *
+   * Size is assumed to include the delimiter as serialized_size would return.
    * Returns true if successful.
    */
   bool write_delimiter(size_t size);
@@ -776,6 +812,18 @@ void max_serialized_size_ulong(const Encoding& encoding, size_t& size,
 OpenDDS_Dcps_Export
 void serialized_size_ulong(const Encoding& encoding, size_t& size,
   size_t count = 1);
+
+/// Add delimiter to the size of a serialized size if the encoding has them.
+OpenDDS_Dcps_Export
+void serialized_size_delimiter(const Encoding& encoding, size_t& size);
+
+OpenDDS_Dcps_Export
+void serialized_size_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
+
+OpenDDS_Dcps_Export
+void serialized_size_list_end_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -62,7 +62,8 @@ public:
 
   /// Persisted actor data structure
   typedef struct ActorStrt <QosSeq, QosSeq, ACE_CString,
-                            BinSeq, ContentSubscriptionBin> RWActor;
+                            BinSeq, ContentSubscriptionBin,
+                            BinSeq> RWActor;
 
   typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, Topic*> TopicIndex;
   typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, Participant*> ParticipantIndex;

@@ -31,6 +31,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS
     DCPS/transport/framework
     DCPS/security/framework
+    DCPS/XTypes
   }
 
   Header_Files {
@@ -40,6 +41,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS/transport/framework
     DCPS/security/framework
     DCPS/yard
+    DCPS/XTypes
 
     // Although these files only contain comments since
     // service-side suppression is done,
@@ -65,6 +67,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS
     DCPS/transport/framework
     DCPS/security/framework
+    DCPS/XTypes
   }
 
   InstallData_Files {

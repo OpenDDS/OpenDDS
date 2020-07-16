@@ -24,7 +24,7 @@
 #include "DataSampleElement.h"
 #include "Util.h"
 #include "DCPS_Utils.h"
-#include "TypeObject.h"
+#include "XTypes/TypeObject.h"
 #include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
@@ -224,6 +224,10 @@ DataWriterImpl::add_association(const RepoId& yourId,
                OPENDDS_STRING(converter).c_str(),
                qos_.transport_priority.value));
   }
+
+  //get message block from octet seq then deser to a type info
+  XTypes::TypeInformation ti;
+  XTypes::deserialize_type_info(ti, reader.serializedTypeInfo);
 
   AssociationData data;
   data.remote_id_ = reader.readerId;
@@ -2299,10 +2303,16 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
     if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
       return true;
     }
-    return !evaluator.eval(elt.get_sample()->cont(),
-                           elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                           elt.get_header().cdr_encapsulation_, meta,
-                           expression_params);
+    try {
+      return !evaluator.eval(elt.get_sample()->cont(),
+                             elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
+                             elt.get_header().cdr_encapsulation_, meta,
+                             expression_params, typesupport->getExtensibility());
+    } catch (const std::runtime_error& e) {
+      //if the eval fails, the throws will do the logging
+      //return false here so that the sample is not filtered
+      return false;
+    }
   }
   else {
     return false;

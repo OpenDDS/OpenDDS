@@ -102,9 +102,9 @@ Writer::svc()
     message.subject      = "Review";
     message.text         = "Worst. Movie. Ever.";
     message.count        = 0;
-    if (args_.extra_space > 0) {
-      message.extra_space.length(args_.extra_space);
-      memset(&message.extra_space[0], 'a', args_.extra_space);
+    if (args_.extra_space_ > 0) {
+      message.extra_space.length(args_.extra_space_);
+      memset(&message.extra_space[0], 'a', args_.extra_space_);
     }
 
     for (int i = 0; i < args_.num_messages_; i++) {

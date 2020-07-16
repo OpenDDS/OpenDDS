@@ -1,2 +1,0 @@
-feature(!no_opendds_security): opendds_security {
-}
