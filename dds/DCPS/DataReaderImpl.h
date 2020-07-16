@@ -591,7 +591,6 @@ protected:
   void set_sample_rejected_status(
     const DDS::SampleRejectedStatus& status);
 
-  //remove document this!
   SubscriptionInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
@@ -879,7 +878,7 @@ private:
   bool transport_disabled_;
 
 protected:
-  OPENDDS_MAP(Encoding::Kind, Encoding) decoding_modes_;
+  OPENDDS_SET(Encoding::Kind) decoding_modes_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

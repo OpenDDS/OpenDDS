@@ -915,6 +915,22 @@ namespace OpenDDS {
       if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
         return;
       }
+
+      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+          ACE_TEXT("Encoding kind of the received sample (%C) does not ")
+          ACE_TEXT("match the ones specified by DataReader.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+        return;
+      }
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+        ACE_TEXT("Deserializing with encoding kind %C.\n"),
+        TraitsType::type_name(),
+        Encoding::kind_to_string(encoding.kind()).c_str()));
+
       ser.encoding(encoding);
     }
 
@@ -997,11 +1013,18 @@ protected:
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
           ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-          ACE_TEXT("Encoding kind of the received sample does not ")
+          ACE_TEXT("Encoding kind %C of the received sample does not ")
           ACE_TEXT("match the ones specified by DataReader.\n"),
-          TraitsType::type_name()));
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
         return;
       }
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+        ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+        ACE_TEXT("Deserializing with encoding kind %C.\n"),
+        TraitsType::type_name(),
+        Encoding::kind_to_string(encoding.kind()).c_str()));
+
       ser.encoding(encoding);
     }
 

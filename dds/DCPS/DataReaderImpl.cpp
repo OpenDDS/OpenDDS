@@ -3298,11 +3298,8 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
         if (Encoding::KIND_XCDR1 == encoding_kind ||
             Encoding::KIND_XCDR2 == encoding_kind) {
-          if (decoding_modes_.find(encoding_kind) == decoding_modes_.end()) {
-            Encoding encoding(encoding_kind, swap_bytes());
-            decoding_modes_.insert(std::make_pair(encoding_kind, encoding));
-            success = true;
-          }
+          decoding_modes_.insert(encoding_kind);
+          success = true;
         } else if (DCPS_debug_level >= 2) {
           //Valid but incompatible data representation
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
@@ -3318,8 +3315,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
       }
     }
   } else {
-    const Encoding encoding(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
-    decoding_modes_.insert(std::make_pair(Encoding::KIND_UNALIGNED_CDR, encoding));
+    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
     success = true;
   }
   if (!success) {
@@ -3330,6 +3326,14 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     }
     return DDS::RETCODE_ERROR;
   }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+             ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+             ACE_TEXT("Setup successfully with data representations: ")));
+  OPENDDS_SET::iterator it = decoding_modes_.begin();
+  for (; it != decoding_modes_.end(); ++it) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C "), Encoding::kind_to_string(*it).c_str()));
+  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT(".\n")));
 
   return DDS::RETCODE_OK;
 }
