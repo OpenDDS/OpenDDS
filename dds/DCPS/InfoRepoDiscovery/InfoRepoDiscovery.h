@@ -14,7 +14,7 @@
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
-#include "dds/DCPS/TypeObject.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "ace/Task.h"
 

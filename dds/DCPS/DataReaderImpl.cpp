@@ -30,7 +30,7 @@
 #include "transport/framework/TransportExceptions.h"
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
-#include "TypeObject.h"
+#include "XTypes/TypeObject.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #include <dds/DdsDcpsCoreTypeSupportC.h>
