@@ -132,7 +132,6 @@ namespace {
       return "ACE_CDR::ULong";
     }
     if (cls & CL_STRING) {
-      size = 4; // encoding of str length is 4 bytes
       return string_type(cls);
     }
     if (cls & CL_PRIMITIVE) {
