@@ -165,5 +165,4 @@ namespace OpenDDS {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-
 #endif /* ifndef _TYPE_LOOKUP_H_ */
