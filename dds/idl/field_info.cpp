@@ -146,3 +146,8 @@ void FieldInfo::init()
     ptr_ = scoped_type_ + (arr_ ? "_forany*" : "*");
   }
 }
+
+bool FieldInfo::is_new(EleLenSet& el_set)
+{
+  return cxx11() || el_set.insert(EleLen(*this)).second;
+}

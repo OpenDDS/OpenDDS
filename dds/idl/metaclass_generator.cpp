@@ -580,7 +580,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
-      if (af.arr_ || (af.seq_ && anonymous_seq_generated.insert(FieldInfo::EleLen(af)).second)) {
+      if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");
         f.addArg("", af.ptr_);
