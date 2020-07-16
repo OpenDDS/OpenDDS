@@ -388,7 +388,7 @@ public:
       ACE_TEXT("%CDataWriterImpl::setup_serialization: "),
       ACE_TEXT("Setup successfully with %C data representation.\n"),
       TraitsType::type_name(),
-      Encoding::kind_to_string(encoding_mode_.kind()).c_str()));
+      Encoding::kind_to_string(encoding_mode_.encoding().kind()).c_str()));
 
     // Set up allocator with reserved space for data if it is bounded
     if (MarshalTraitsType::gen_is_bounded_size()) {
