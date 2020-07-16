@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/TypeObject.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 #include "RtpsRpcTypeSupportImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
