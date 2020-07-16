@@ -3326,14 +3326,16 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     }
     return DDS::RETCODE_ERROR;
   }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-             ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-             ACE_TEXT("Setup successfully with data representations: ")));
-  OPENDDS_SET(Encoding::Kind)::iterator it = decoding_modes_.begin();
-  for (; it != decoding_modes_.end(); ++it) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C "), Encoding::kind_to_string(*it).c_str()));
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+               ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+               ACE_TEXT("Setup successfully with data representations: ")));
+    OPENDDS_SET(Encoding::Kind)::iterator it = decoding_modes_.begin();
+    for (; it != decoding_modes_.end(); ++it) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C "), Encoding::kind_to_string(*it).c_str()));
+    }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT(".\n")));
   }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT(".\n")));
 
   return DDS::RETCODE_OK;
 }

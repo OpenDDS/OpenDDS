@@ -917,19 +917,23 @@ namespace OpenDDS {
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
-          ACE_TEXT("Encoding kind of the received sample (%C) does not ")
-          ACE_TEXT("match the ones specified by DataReader.\n"),
-          TraitsType::type_name(),
-          Encoding::kind_to_string(encoding.kind()).c_str()));
+        if (DCPS_debug_level >= 8) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+            ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+            ACE_TEXT("Encoding kind of the received sample (%C) does not ")
+            ACE_TEXT("match the ones specified by DataReader.\n"),
+            TraitsType::type_name(),
+            Encoding::kind_to_string(encoding.kind()).c_str()));
+        }
         return;
       }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
-        ACE_TEXT("Deserializing with encoding kind %C.\n"),
-        TraitsType::type_name(),
-        Encoding::kind_to_string(encoding.kind()).c_str()));
+      if (DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+          ACE_TEXT("Deserializing with encoding kind %C.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+      }
 
       ser.encoding(encoding);
     }
@@ -1011,19 +1015,23 @@ protected:
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-          ACE_TEXT("Encoding kind %C of the received sample does not ")
-          ACE_TEXT("match the ones specified by DataReader.\n"),
-          TraitsType::type_name(),
-          Encoding::kind_to_string(encoding.kind()).c_str()));
+        if (DCPS_debug_level >= 8) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+            ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+            ACE_TEXT("Encoding kind %C of the received sample does not ")
+            ACE_TEXT("match the ones specified by DataReader.\n"),
+            TraitsType::type_name(),
+            Encoding::kind_to_string(encoding.kind()).c_str()));
+        }
         return;
       }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-        ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-        ACE_TEXT("Deserializing with encoding kind %C.\n"),
-        TraitsType::type_name(),
-        Encoding::kind_to_string(encoding.kind()).c_str()));
+      if (DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+          ACE_TEXT("Deserializing with encoding kind %C.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+      }
 
       ser.encoding(encoding);
     }
@@ -1038,7 +1046,7 @@ protected:
       ser >> *data;
     }
     if (!ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
                  ACE_TEXT("deserialization failed, dropping sample.\n"),
                  TraitsType::type_name()));
       return;

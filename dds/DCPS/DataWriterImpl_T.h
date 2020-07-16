@@ -361,7 +361,7 @@ public:
                        TraitsType::type_name(),
                        Encoding::kind_to_string(encoding_kind).c_str()));
           }
-        } else if (::OpenDDS::DCPS::DCPS_debug_level){
+        } else if (::OpenDDS::DCPS::DCPS_debug_level) {
           // Invalid data representation
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                      ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
@@ -384,11 +384,13 @@ public:
       }
       return DDS::RETCODE_ERROR;
     }
+    if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) "),
       ACE_TEXT("%CDataWriterImpl::setup_serialization: "),
       ACE_TEXT("Setup successfully with %C data representation.\n"),
       TraitsType::type_name(),
       Encoding::kind_to_string(encoding_mode_.encoding().kind()).c_str()));
+    }
 
     // Set up allocator with reserved space for data if it is bounded
     if (MarshalTraitsType::gen_is_bounded_size()) {
