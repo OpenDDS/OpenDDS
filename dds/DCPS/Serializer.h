@@ -61,6 +61,10 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace DDS {
+  struct OctetSeq;
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -297,6 +301,25 @@ size_t serialized_size(const Encoding& encoding, const T& value)
   serialized_size(encoding, size, value);
   return size;
 }
+
+/**
+* This helper class can be used to construct ace message blocks from OctetSeqs
+* and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
+* The OctetSeq must have its length set before constructing this object.
+*/
+class OpenDDS_Dcps_Export MessageBlockHelper {
+public:
+/**
+* This constructor receives an already populated OctetSeq so the write pointer is advanced
+*/
+  explicit MessageBlockHelper(const DDS::OctetSeq& seq);
+  explicit MessageBlockHelper(DDS::OctetSeq& seq);
+  operator ACE_Message_Block*() { return &mb_; }
+
+private:
+  ACE_Data_Block db_;
+  ACE_Message_Block mb_;
+};
 
 /**
  * @class Serializer

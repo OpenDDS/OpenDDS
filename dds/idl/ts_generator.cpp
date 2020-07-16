@@ -126,7 +126,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
     "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
     "dds/DCPS/MultiTopicDataReader_T.h", "dds/DCPS/DataWriterImpl_T.h",
-    "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/TypeObject.h"
+    "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/XTypes/TypeObject.h"
   };
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 
@@ -234,6 +234,9 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  void representations_allowed_by_type(::DDS::DataRepresentationIdSeq& seq);\n"
       "\n"
       "  virtual const OpenDDS::XTypes::TypeObject& getMinimalTypeObject() const; \n"
+      "\n"
+      "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
+      "\n"
       "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
   }
@@ -294,6 +297,10 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "const OpenDDS::XTypes::TypeObject& " << short_name << "TypeSupportImpl::getMinimalTypeObject() const\n"
       "{\n"
       "  return OpenDDS::DCPS::getMinimalTypeObject<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "}\n\n"
+      "OpenDDS::DCPS::Extensibility " << short_name << "TypeSupportImpl::getExtensibility() const \n"
+      "{\n"
+      "  return MarshalTraitsType::extensibility();\n"
       "}\n\n"
       << short_name << "TypeSupport::_ptr_type " << short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"

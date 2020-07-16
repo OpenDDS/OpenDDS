@@ -9,7 +9,7 @@
 #include "dds/DCPS/MonitorFactory.h"
 
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#include "dds/DCPS/TypeObject.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
