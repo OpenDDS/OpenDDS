@@ -729,7 +729,7 @@ private:
   EndpointSecurityAttributesMap endpoint_security_attributes_;
 #endif
 
-  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool narrow = false) const;
+  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_narrow = false) const;
 
   struct ChangeMulticastGroup : public JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};

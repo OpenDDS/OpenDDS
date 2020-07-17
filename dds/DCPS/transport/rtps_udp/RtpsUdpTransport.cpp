@@ -265,16 +265,15 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
     ACE_INET_Addr addr;
     // If conversion was successful
     if (locator_to_address(addr, locators[i], false) == 0) {
-      // if this is a unicast address, or if we are allowing multicast
-      if (!addr.is_multicast()) {
-        if (uc_addr == ACE_INET_Addr()) {
-          uc_addr = addr;
-          uc_addr_valid = true;
-        }
-      } else {
+      if (addr.is_multicast()) {
         if (mc_addr == ACE_INET_Addr()) {
           mc_addr = addr;
           mc_addr_valid = true;
+        }
+      } else {
+        if (uc_addr == ACE_INET_Addr()) {
+          uc_addr = addr;
+          uc_addr_valid = true;
         }
       }
       if (uc_addr_valid && (!config().use_multicast_ || mc_addr_valid)) {
