@@ -424,9 +424,9 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-      ACE_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-      if(!writers_.count(remote_id)){
+      if (!writers_.count(remote_id)) {
         return;
       }
       writers_[remote_id]->handle_ = handle;
