@@ -3592,10 +3592,9 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeLookup_Reque
   Serializer serializer(payload.cont(), encoding);
   DCPS::EncapsulationHeader encap;
   if (encap.from_encoding(encoding, DCPS::FINAL) &&
-    serializer << encap && serializer << type_lookup_request) {
+      serializer << encap && serializer << type_lookup_request) {
     send_sample(payload, size, reader, sequence);
-  }
-  else {
+  } else {
     result = DDS::RETCODE_ERROR;
   }
 
@@ -3628,8 +3627,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
   if (encap.from_encoding(encoding, DCPS::FINAL) &&
     serializer << encap && serializer << type_lookup_reply) {
     send_sample(payload, size, reader, sequence);
-  }
-  else {
+  } else {
     result = DDS::RETCODE_ERROR;
   }
 

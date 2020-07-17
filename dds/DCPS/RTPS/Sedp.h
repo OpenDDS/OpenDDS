@@ -8,6 +8,8 @@
 #ifndef OPENDDS_RTPS_SEDP_H
 #define OPENDDS_RTPS_SEDP_H
 
+#include "type_lookup.h"
+
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
@@ -36,8 +38,6 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "dds/DCPS/PoolAllocator.h"
-
-#include "type_lookup.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
