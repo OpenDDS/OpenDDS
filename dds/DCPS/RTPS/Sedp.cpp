@@ -257,6 +257,8 @@ using DCPS::Encoding;
 using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
 
+const Encoding sedp_encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   DCPS::EndpointManager<ParticipantData_t>(participant_id, lock),
   spdp_(owner),
@@ -3275,20 +3277,19 @@ Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
                                        DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, plist);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, plist);
 
   // Build and send RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::MUTABLE) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
@@ -3305,20 +3306,19 @@ Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
                                             DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, pmd);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, pmd);
 
   // Build and send RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << pmd) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3336,19 +3336,18 @@ Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatel
                                           DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, msg);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
     DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3367,19 +3366,18 @@ Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::Participant
   OPENDDS_ASSERT(sedp_.associated_volatile_readers_.count(reader) != 0);
 
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, msg);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
     DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3429,8 +3427,6 @@ Sedp::SedpWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredPa
 DDS::ReturnCode_t
 Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 {
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
-
   // Build param list for message
   Parameter param;
   param.guid(rid);
@@ -3441,8 +3437,8 @@ Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, plist);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, plist);
 
   DCPS::Message_Block_Ptr payload(
     new ACE_Message_Block(
@@ -3456,9 +3452,9 @@ Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
     return DDS::RETCODE_ERROR;
   }
 
-  Serializer serializer(payload->cont(), encoding);
+  Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::MUTABLE) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     // Send
     write_control_msg(move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
@@ -3575,23 +3571,22 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeLookup_Reque
                                                         DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   type_lookup_request.header.request_id.writer_guid = this->get_repo_id();
   // TODO: handle rpc sequence number
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, type_lookup_request);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, type_lookup_request);
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_request) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3609,22 +3604,21 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
                                                     DDS::rpc::SampleIdentity request_id)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   type_lookup_reply.header.related_request_id = request_id;
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, type_lookup_reply);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, type_lookup_reply);
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
     serializer << encap && serializer << type_lookup_reply) {
     send_sample(payload, size, reader, sequence);
   } else {
