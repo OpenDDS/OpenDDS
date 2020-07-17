@@ -110,12 +110,8 @@ struct GeneratorBase
 
   std::string map_type(AST_Field* field)
   {
-    AST_Type* type = field->field_type();
-    if (!type->anonymous()) {
-      return map_type(type);
-    }
     FieldInfo af(*field);
-    return af.type_name_;
+    return (af.type_->anonymous() && af.as_base_) ? af.type_name_ : map_type(af.type_);
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -984,10 +980,6 @@ struct FaceGenerator : GeneratorBase
       const Classification cls = classify(field_type);
       if (cls & CL_STRING) {
         type_name = helpers_[(cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
-      }
-      if (fields[i]->field_type()->anonymous()) {
-        FieldInfo af(*(fields[i]));
-        type_name = af.type_name_;
       }
       be_global->lang_header_ <<
         "  " << type_name << ' ' << field_name << ";\n";
