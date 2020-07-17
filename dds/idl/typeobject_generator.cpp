@@ -398,7 +398,6 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       string member_string;
       const TryConstructFailAction trycon = be_global->try_construct(*pos);
       gen_member_flag_str(member_string, trycon, *pos);
-
       be_global->impl_ <<
         "        .append(\n"
         "          XTypes::MinimalUnionMember(\n"
