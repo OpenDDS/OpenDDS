@@ -262,7 +262,7 @@ public:
   std::string name() const;
 };
 
-// @tryconstruct ==================================================================
+// @try_construct ============================================================
 
 enum TryConstructFailAction {
   tryconstructfailaction_discard,

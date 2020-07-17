@@ -359,7 +359,7 @@ std::string MutableAnnotation::name() const
   return "mutable";
 }
 
-// @tryconstruct ============================================================
+// @try_construct ============================================================
 
 std::string TryConstructAnnotation::definition() const
 {
@@ -373,6 +373,7 @@ std::string TryConstructAnnotation::definition() const
     "  TryConstructFailAction value default USE_DEFAULT;\n"
     "};\n";
 }
+
 std::string TryConstructAnnotation::name() const
 {
   return "try_construct";
