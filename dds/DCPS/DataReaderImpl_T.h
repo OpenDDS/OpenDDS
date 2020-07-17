@@ -917,8 +917,8 @@ namespace OpenDDS {
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
-        if (DCPS_debug_level >= 8) {
-          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
             ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
             ACE_TEXT("Encoding kind of the received sample (%C) does not ")
             ACE_TEXT("match the ones specified by DataReader.\n"),
@@ -1015,8 +1015,8 @@ protected:
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
-        if (DCPS_debug_level >= 8) {
-          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
             ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
             ACE_TEXT("Encoding kind %C of the received sample does not ")
             ACE_TEXT("match the ones specified by DataReader.\n"),
