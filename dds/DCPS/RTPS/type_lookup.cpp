@@ -13,7 +13,7 @@ namespace OpenDDS {
   using DCPS::serialized_size;
   using DCPS::operator<<;
 
-  namespace XTypes {
+  namespace DCPS {
 
     void serialized_size(const Encoding& encoding, size_t& size,
       const XTypes::TypeLookup_getTypes_In& stru)
@@ -21,12 +21,12 @@ namespace OpenDDS {
       serialized_size(encoding, size, stru.type_ids);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_In& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_In& stru)
     {
       return (strm << stru.type_ids);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_In& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_In& stru)
     {
       return (strm >> stru.type_ids);
     }
@@ -39,13 +39,13 @@ namespace OpenDDS {
       serialized_size(encoding, size, stru.complete_to_minimal);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_Out& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_Out& stru)
     {
       return (strm << stru.types)
         && (strm << stru.complete_to_minimal);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Out& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Out& stru)
     {
       return (strm >> stru.types)
         && (strm >> stru.complete_to_minimal);
@@ -58,12 +58,12 @@ namespace OpenDDS {
       serialized_size(encoding, size, stru.result);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_Result& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_Result& stru)
     {
       return (strm << stru.result);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru)
     {
       return (strm >> stru.result);
     }
@@ -75,12 +75,12 @@ namespace OpenDDS {
       max_serialized_size_octet(encoding, size, 32);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::ContinuationPoint_forany& arr)
+    bool operator<<(Serializer& strm, const XTypes::ContinuationPoint_forany& arr)
     {
       return strm.write_octet_array(arr.in(), 32);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::ContinuationPoint_forany& arr)
+    bool operator>>(Serializer& strm, XTypes::ContinuationPoint_forany& arr)
     {
       return strm.read_octet_array(arr.out(), 32);
     }
@@ -93,13 +93,13 @@ namespace OpenDDS {
       max_serialized_size_octet(encoding, size, 32);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_In& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_In& stru)
     {
       return (strm << stru.type_ids)
         && (strm << stru.continuation_point);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_In& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_In& stru)
     {
       return (strm >> stru.type_ids)
         && (strm >> stru.continuation_point);
@@ -113,13 +113,13 @@ namespace OpenDDS {
       max_serialized_size_octet(encoding, size, 32);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Out& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Out& stru)
     {
       return (strm << stru.dependent_typeids)
         && (strm << stru.continuation_point);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Out& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Out& stru)
     {
       return (strm >> stru.dependent_typeids)
         && (strm >> stru.continuation_point);
@@ -132,12 +132,12 @@ namespace OpenDDS {
       serialized_size(encoding, size, stru.result);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Result& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Result& stru)
     {
       return (strm << stru.result);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result& stru)
     {
       return (strm >> stru.result);
     }
@@ -159,7 +159,7 @@ namespace OpenDDS {
       }
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Call& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_Call& stru)
     {
       if (!(strm << ACE_OutputCDR::from_octet(stru.kind))) {
         return false;
@@ -175,7 +175,7 @@ namespace OpenDDS {
       return false;
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Call& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_Call& stru)
     {
       ACE_CDR::Octet kind;
       if (!(strm >> ACE_InputCDR::to_octet(kind))) {
@@ -212,13 +212,13 @@ namespace OpenDDS {
       serialized_size(encoding, size, stru.data);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Request& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_Request& stru)
     {
       return (strm << stru.header)
         && (strm << stru.data);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Request& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_Request& stru)
     {
       return (strm >> stru.header)
         && (strm >> stru.data);
@@ -241,7 +241,7 @@ namespace OpenDDS {
       }
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Return& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_Return& stru)
     {
       if (!(strm << ACE_OutputCDR::from_octet(stru.kind))) {
         return false;
@@ -257,7 +257,7 @@ namespace OpenDDS {
       return false;
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Return& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_Return& stru)
     {
       ACE_CDR::Octet kind;
       if (!(strm >> ACE_InputCDR::to_octet(kind))) {
@@ -294,13 +294,13 @@ namespace OpenDDS {
       serialized_size(encoding, size, stru.data);
     }
 
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Reply& stru)
+    bool operator<<(Serializer& strm, const XTypes::TypeLookup_Reply& stru)
     {
       return (strm << stru.header)
         && (strm << stru.data);
     }
 
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Reply& stru)
+    bool operator>>(Serializer& strm, XTypes::TypeLookup_Reply& stru)
     {
       return (strm >> stru.header)
         && (strm >> stru.data);

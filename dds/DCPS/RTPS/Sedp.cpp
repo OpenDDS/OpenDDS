@@ -3583,7 +3583,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeLookup_Reque
   // Determine message length
   size_t size = 0;
   DCPS::serialized_size_ulong(encoding, size);
-  XTypes::serialized_size(encoding, size, type_lookup_request);
+  DCPS::serialized_size(encoding, size, type_lookup_request);
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
@@ -3616,7 +3616,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
   // Determine message length
   size_t size = 0;
   DCPS::serialized_size_ulong(encoding, size);
-  XTypes::serialized_size(encoding, size, type_lookup_reply);
+  DCPS::serialized_size(encoding, size, type_lookup_reply);
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),

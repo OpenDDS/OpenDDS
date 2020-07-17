@@ -105,6 +105,9 @@ namespace OpenDDS {
 
       TypeLookup_Reply() {}
     };
+  } // namespace XTPS
+
+  namespace DCPS {
 
     void serialized_size(const DCPS::Encoding& encoding, size_t& size,
       const XTypes::TypeLookup_getTypes_In& stru);
