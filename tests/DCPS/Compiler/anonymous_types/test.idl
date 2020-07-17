@@ -15,25 +15,25 @@ typedef sequence<long> LongSequence;
 typedef sequence<long, 3> Long3Sequence;
 typedef string<100> BoundedString;
 
-//struct NS {
-//  long n;
-//  string s;
-//};
+struct NS {
+  long n;
+//string s;
+};
 
-//typedef struct XYZ_ {
-//  double x;
-//  double y;
-//  double z;
-//} XYZ;
+typedef struct XYZ_ {
+  double x;
+  double y;
+  double z;
+} XYZ;
 
-//typedef sequence<XYZ> XYZSequence;
+typedef sequence<XYZ> XYZSequence;
 
 @topic
 struct TestStruct {
-  //char c;
-  //float f;
+  char c;
+  float f;
   //string str;
-  //XYZ position;
+  XYZ position;
 
   Short3Array s3arr;
   //Short2x3Array s2x3arr;
@@ -43,7 +43,7 @@ struct TestStruct {
   LongSequence lseq;
   Long3Sequence l3seq;
   BoundedString bstr;
-  //XYZSequence xyzseq;
+  XYZSequence xyzseq;
 
   // prefix a_ denotes anonymous type fields
 
@@ -59,8 +59,8 @@ struct TestStruct {
   sequence<long, 5> a_l5seq;
 
   //string<200> a_bstr;
-  //sequence<XYZ> a_xyzseq;
-  //sequence<NS, 5> a_ns5seq;
+  sequence<XYZ> a_xyzseq;
+  sequence<NS, 5> a_ns5seq;
 
   //test C++ keyword used as anonymous type field
   //to see all escaping is done correctly
