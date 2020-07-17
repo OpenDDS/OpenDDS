@@ -239,6 +239,10 @@ namespace XTypes {
   typedef MemberFlag BitflagFlag;             // Unused. No flags apply
   typedef MemberFlag BitsetMemberFlag;        // Unused. No flags apply
 
+  const MemberFlag TryConstructDiscardValue    = TRY_CONSTRUCT1;
+  const MemberFlag TryConstructUseDefaultValue = TRY_CONSTRUCT2;
+  const MemberFlag TryConstructTrimValue       = TRY_CONSTRUCT1 | TRY_CONSTRUCT2;
+
   // Mask used to remove the flags that do not affect assignability
   // Selects  T1, T2, O, M, K, D
   const MemberFlag MemberFlagMinimalMask = 0x003f;

@@ -21,6 +21,7 @@ void Annotations::register_all()
   register_one<FinalAnnotation>();
   register_one<AppendableAnnotation>();
   register_one<MutableAnnotation>();
+  register_one<TryConstructAnnotation>();
   register_one<OpenDDS::DataRepresentationAnnotation>();
 }
 
@@ -356,6 +357,25 @@ std::string MutableAnnotation::definition() const
 std::string MutableAnnotation::name() const
 {
   return "mutable";
+}
+
+// @tryconstruct ============================================================
+
+std::string TryConstructAnnotation::definition() const
+{
+  return
+    "@annotation try_construct {\n"
+    "  enum TryConstructFailAction {\n"
+    "    DISCARD,\n"
+    "    USE_DEFAULT,\n"
+    "    TRIM\n"
+    "  };\n"
+    "  TryConstructFailAction value default USE_DEFAULT;\n"
+    "};\n";
+}
+std::string TryConstructAnnotation::name() const
+{
+  return "try_construct";
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

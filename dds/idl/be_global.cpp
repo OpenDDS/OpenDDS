@@ -748,6 +748,18 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
   return value;
 }
 
+TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(
+      builtin_annotations_["::@try_construct"]);
+  TryConstructFailAction value;
+  if (!try_construct_annotation->node_value_exists(node, value)) {
+    value = tryconstructfailaction_discard;
+  }
+  return value;
+}
+
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {

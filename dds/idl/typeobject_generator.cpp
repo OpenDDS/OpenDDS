@@ -252,12 +252,12 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end(); pos != limit; ++pos) {
       string member_string;
+      const TryConstructFailAction trycon = be_global->try_construct(*pos);
+      gen_member_flag_str(member_string, trycon, *pos);
       bool is_key;
       be_global->check_key(*pos, is_key);
       if (is_key) {
-        member_string = "XTypes::IS_KEY";
-      } else {
-        member_string = "0";
+        member_string += " | XTypes::IS_KEY";
       }
       be_global->impl_ <<
         "        .append(\n"
@@ -360,6 +360,12 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (!be_global->is_topic_type(node)) {
       type_flag_str += " | XTypes::IS_NESTED";
     }
+    string member_string;
+    const TryConstructFailAction trycon = be_global->try_construct(discriminator);
+    gen_member_flag_str(member_string, trycon, discriminator);
+    if (be_global->has_key(node)) {
+      member_string += " | XTypes::IS_KEY";
+    }
     be_global->impl_ <<
       "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
       "    XTypes::MinimalTypeObject(\n"
@@ -370,7 +376,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       "        ),\n"
       "        XTypes::MinimalDiscriminatorMember(\n"
       "          XTypes::CommonDiscriminatorMember(\n"
-      "            XTypes::UnionDiscriminatorFlag(),\n" // TODO:  Set this.
+      "            XTypes::UnionDiscriminatorFlag(" << member_string << "),\n"
       "            ";
     call_get_minimal_type_identifier(discriminator);
     be_global->impl_ <<
@@ -390,11 +396,9 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         }
       }
       string member_string;
-      if (be_global->has_key(node)) {
-        member_string = " XTypes::IS_KEY ";
-      } else {
-        member_string = "0";
-      }
+      const TryConstructFailAction trycon = be_global->try_construct(*pos);
+      gen_member_flag_str(member_string, trycon, *pos);
+
       be_global->impl_ <<
         "        .append(\n"
         "          XTypes::MinimalUnionMember(\n"
@@ -477,5 +481,25 @@ void typeobject_generator::gen_type_flag_str(std::string& type_flag_str,
     default:
       idl_global->err()->misc_error(
         "Unexpected extensibility while setting flags", node);
+    }
+}
+
+void typeobject_generator::gen_member_flag_str(std::string& member_flag_str,
+                                               TryConstructFailAction trycon,
+                                               AST_Decl* node)
+{
+  switch (trycon) {
+    case tryconstructfailaction_discard:
+      member_flag_str = "XTypes::TryConstructDiscardValue";
+      break;
+    case tryconstructfailaction_use_default:
+      member_flag_str = "XTypes::TryConstructUseDefaultValue";
+      break;
+    case tryconstructfailaction_trim:
+      member_flag_str = "XTypes::TryConstructTrimValue";
+      break;
+    default:
+      idl_global->err()->misc_error(
+        "Unexpected try_construct value while setting flags", node);
     }
 }
