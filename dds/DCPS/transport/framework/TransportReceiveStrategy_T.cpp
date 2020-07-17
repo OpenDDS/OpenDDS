@@ -157,7 +157,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   receive_transport_header_ = *cur_rb;
   if (!receive_transport_header_.valid()) {
     cur_rb->reset();
-    if (DCPS::DCPS_debug_level > 0) {
+    if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TransportHeader invalid.\n")));
     }
     return 0;
