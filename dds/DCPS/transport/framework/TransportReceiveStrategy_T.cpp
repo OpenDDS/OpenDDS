@@ -1119,8 +1119,6 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
 
   this->receive_sample_remaining_ = 0;
 
-  this->receive_sample_remaining_ = 0;
-
   bool done = false;
   update_buffer_index(done);
   return done ? 0 : 1;
