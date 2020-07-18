@@ -6,8 +6,9 @@
  */
 
 #include "marshal_generator.h"
-#include "utl_identifier.h"
 #include "topic_keys.h"
+
+#include "utl_identifier.h"
 
 #include <string>
 #include <sstream>
@@ -1731,6 +1732,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         break;
       }
     }
+    bool octetSeqOnly = false;
+    if (fields.size() == 1) {
+      AST_Type* const type = resolveActualType(fields[0]->field_type());
+      const Classification fld_cls = classify(type);
+      if (fld_cls & CL_SEQUENCE) {
+        AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+        AST_Type* const base = seq->base_type();
+        if (classify(base) & CL_PRIMITIVE) {
+          AST_PredefinedType* const pt = AST_PredefinedType::narrow_from_decl(base);
+          octetSeqOnly = pt->pt() == AST_PredefinedType::PT_octet;
+        }
+      }
+    }
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
       max_marsh.addArg("stru", "const " + cxx + "&");
@@ -1963,12 +1977,57 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
+    string exp, fn = " { return false; }";
+    if (octetSeqOnly) {
+      const ACE_CString exporter = be_global->export_macro();
+      if (exporter != "") {
+        exp = string(" ") + exporter.c_str();
+      }
+      fn = ";";
+      string field_name = fields[0]->local_name()->get_string();
+
+      const char* get_len, *set_len, *get_buffer, *buffer_pre = "";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        get_len = "size";
+        set_len = "resize";
+        get_buffer = "[0]";
+        buffer_pre = "&";
+        field_name += "()";
+      } else {
+        get_len = set_len = "length";
+        get_buffer = ".get_buffer()";
+      }
+
+      be_global->impl_ <<
+        "bool MarshalTraits<" << cxx << ">::to_message_block(ACE_Message_Block& mb, "
+        "const " << cxx << "& stru)\n"
+        "{\n"
+        "  if (mb.size(stru." << field_name << "." << get_len << "()) != 0) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  return mb.copy(reinterpret_cast<const char*>(" << buffer_pre << "stru."
+        << field_name << get_buffer << "), stru." << field_name << "." << get_len
+        << "()) == 0;\n"
+        "}\n\n"
+        "bool MarshalTraits<" << cxx << ">::from_message_block(" << cxx << "& stru, "
+        "const ACE_Message_Block& mb)\n"
+        "{\n"
+        "  stru." << field_name << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
+        "  std::memcpy(" << buffer_pre << "stru." << field_name << get_buffer
+        << ", mb.rd_ptr(), mb.length());\n"
+        "  return true;\n"
+        "}\n\n";
+    }
+
     be_global->header_ <<
       "template <>\n"
-      "struct MarshalTraits<" << cxx << "> {\n"
+      "struct" << exp << " MarshalTraits<" << cxx << "> {\n"
       "  static bool gen_is_bounded_size() { return " << (is_bounded_struct ? "true" : "false") << "; }\n"
       "  static bool gen_is_bounded_key_size() { return " << (bounded_key ? "true" : "false") << "; }\n"
+      "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)" << fn << "\n"
+      "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)" << fn << "\n"
       "};\n";
+
   }
 
   return true;
@@ -2313,6 +2372,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     "  static bool gen_is_bounded_size() { return " << (is_bounded ? "true" : "false") << "; }\n"
     // Key is the discriminator, so it's always bounded
     "  static bool gen_is_bounded_key_size() { return true; }\n"
+    "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&) { return false; }\n"
+    "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&) { return false; }\n"
     "};\n";
 
   return true;
