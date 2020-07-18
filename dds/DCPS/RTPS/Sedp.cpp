@@ -4440,47 +4440,57 @@ Sedp::Task::svc()
     switch (msg->type_) {
       case Msg::MSG_PARTICIPANT:
       svc_i(msg->dpdata_);
+      msg->dpdata_ = 0;
       break;
 
     case Msg::MSG_WRITER:
       svc_i(msg->id_, msg->wdata_);
+      msg->wdata_ = 0;
       break;
 
 #ifdef OPENDDS_SECURITY
     case Msg::MSG_WRITER_SECURE:
       svc_i(msg->id_, msg->wdata_secure_);
+      msg->wdata_secure_ = 0;
       break;
 #endif
 
     case Msg::MSG_READER:
       svc_i(msg->id_, msg->rdata_);
+      msg->rdata_ = 0;
       break;
 
 #ifdef OPENDDS_SECURITY
     case Msg::MSG_READER_SECURE:
       svc_i(msg->id_, msg->rdata_secure_);
+      msg->rdata_secure_ = 0;
       break;
 #endif
 
     case Msg::MSG_PARTICIPANT_DATA:
       svc_i(msg->id_, msg->pmdata_);
+      msg->pmdata_ = 0;
       break;
 
 #ifdef OPENDDS_SECURITY
     case Msg::MSG_PARTICIPANT_DATA_SECURE:
       svc_participant_message_data_secure(msg->id_, msg->pmdata_);
+      msg->pmdata_ = 0;
       break;
 
     case Msg::MSG_PARTICIPANT_STATELESS_DATA:
       svc_stateless_message(msg->id_, msg->pgmdata_);
+      msg->pgmdata_ = 0;
       break;
 
     case Msg::MSG_PARTICIPANT_VOLATILE_SECURE:
       svc_volatile_message_secure(msg->id_, msg->pgmdata_);
+      msg->pgmdata_ = 0;
       break;
 
     case Msg::MSG_DCPS_PARTICIPANT_SECURE:
       svc_secure_i(msg->id_, msg->dpdata_);
+      msg->dpdata_ = 0;
       break;
 #endif
 
@@ -5326,6 +5336,52 @@ WaitForAcks::reset()
   acks_ = 0;
   // no need to signal, going back to zero won't ever
   // cause wait_for_acks() to exit it's loop
+}
+
+Sedp::Msg::~Msg() {
+  switch (type_) {
+  case MSG_PARTICIPANT:
+    delete dpdata_;
+    break;
+  case MSG_WRITER:
+    delete wdata_;
+    break;
+  case MSG_READER:
+    delete rdata_;
+    break;
+  case MSG_PARTICIPANT_DATA:
+    delete pmdata_;
+    break;
+  case MSG_REMOVE_FROM_PUB_BIT:
+  case MSG_REMOVE_FROM_SUB_BIT:
+  case MSG_FINI_BIT:
+  case MSG_STOP:
+    break;
+
+#ifdef OPENDDS_SECURITY
+  case MSG_PARTICIPANT_STATELESS_DATA:
+  case MSG_PARTICIPANT_VOLATILE_SECURE:
+    delete pgmdata_;
+    break;
+  case MSG_PARTICIPANT_DATA_SECURE:
+    delete pmdata_;
+    break;
+  case MSG_WRITER_SECURE:
+    delete wdata_secure_;
+    break;
+  case MSG_READER_SECURE:
+    delete rdata_secure_;
+    break;
+  case MSG_DCPS_PARTICIPANT_SECURE:
+    delete dpdata_;
+    break;
+#endif
+
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Msg::~Msg(): ")
+               ACE_TEXT("%d is either invalid or not recognized.\n"),
+               type_));
+  }
 }
 
 const char* Sedp::Msg::msgTypeToString(MsgType type) {
