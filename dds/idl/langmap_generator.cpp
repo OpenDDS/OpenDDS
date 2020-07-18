@@ -1387,9 +1387,8 @@ struct Cxx11Generator : GeneratorBase
       "using " << nm << " = " << array << elem_type << bounds.str() << ";\n";
   }
 
-  void gen_anonymous_type(AST_Field* field)
+  void gen_anonymous_type(FieldInfo& af)
   {
-    FieldInfo af(*field);
     const std::string elem_type = af.as_base_ ? map_type(af.as_base_) : "";
     if (af.arr_) {
       be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
@@ -1495,8 +1494,9 @@ struct Cxx11Generator : GeneratorBase
 
     bool has_anonymous_field = false;
     for (size_t i = 0; i < fields.size(); ++i) {
-      if (fields[i]->field_type()->anonymous()) {
-        gen_anonymous_type(fields[i]);
+      FieldInfo af(*(fields[i]));
+      if (af.type_->anonymous() && af.as_base_) {
+        gen_anonymous_type(af);
         has_anonymous_field = true;
       }
     }
