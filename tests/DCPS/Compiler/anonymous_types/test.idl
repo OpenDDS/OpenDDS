@@ -68,7 +68,7 @@ struct TestStruct {
   sequence<long, 3> break; // _tao_seq_CORBA_Long__3 _cxx_break;
   sequence<long, 3> class; // _tao_seq_CORBA_Long__3 _cxx_class;
 };
-/*
+
 // ========== ========== ========== ========== ==========
 //from Relay.idl
 #include <dds/DdsDcpsCore.idl>
@@ -123,9 +123,9 @@ module RtpsRelay {
   @topic
   struct AnonymousFields {
     @key GUID_t guid;
-    @key short a_s2x3arr[2][3];
+//    @key short a_s2x3arr[2][3];
     sequence<long, 5> a_l5seq;
   };
 };
-*/
+
 // ========== ========== ========== ========== ==========
