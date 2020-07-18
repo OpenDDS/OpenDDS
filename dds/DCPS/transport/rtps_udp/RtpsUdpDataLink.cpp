@@ -544,17 +544,20 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
 }
 
 void
-RtpsUdpDataLink::add_locator(const RepoId& remote_id,
-                             const ACE_INET_Addr& address,
-                             bool requires_inline_qos)
+RtpsUdpDataLink::add_locators(const RepoId& remote_id,
+                              const ACE_INET_Addr& narrow_address,
+                              const ACE_INET_Addr& wide_address,
+                              bool requires_inline_qos)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
+  locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_TCHAR addr_buff[256] = {};
-    address.addr_to_string(addr_buff, 256);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locator %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+    ACE_TCHAR narrow_addr_buff[256] = {};
+    narrow_address.addr_to_string(narrow_addr_buff, 256);
+    ACE_TCHAR wide_addr_buff[256] = {};
+    wide_address.addr_to_string(wide_addr_buff, 256);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s and %s\n"), LogGuid(remote_id).c_str(), narrow_addr_buff, wide_addr_buff));
   }
 }
 
@@ -2199,13 +2202,14 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
   AddrSet addrs;
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVec::iterator it = meta_submessages.begin(); it != meta_submessages.end(); ++it) {
-    if (it->dst_guid_ == GUID_UNKNOWN) {
-      addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+    const bool directed = it->dst_guid_ != GUID_UNKNOWN;
+    if (directed) {
+      accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
     } else {
-      accumulate_addresses(it->from_guid_, it->dst_guid_, addrs);
+      addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
     }
     for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
-      accumulate_addresses(it->from_guid_, *it2, addrs);
+      accumulate_addresses(it->from_guid_, *it2, addrs, directed);
     }
     if (addrs.empty()) {
       continue;
@@ -3984,7 +3988,7 @@ RtpsUdpDataLink::AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
   AddrSet retval;
 
-  accumulate_addresses(local, remote, retval);
+  accumulate_addresses(local, remote, retval, true);
 
   return retval;
 }
@@ -4005,7 +4009,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
 
 void
 RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
-                                                     AddrSet& addresses) const {
+                                      AddrSet& addresses, bool prefer_narrow) const {
   ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
@@ -4017,7 +4021,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    normal_addr = pos->second.addr_;
+    normal_addr = prefer_narrow ? pos->second.narrow_addr_ : pos->second.wide_addr_;
   } else {
     const GuidConverter conv(remote);
     if (conv.isReader()) {
