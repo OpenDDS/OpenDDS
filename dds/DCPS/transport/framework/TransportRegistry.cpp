@@ -841,7 +841,7 @@ TransportRegistry::get_transport_template_info(const ACE_TString& config_name, T
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
-               ACE_TEXT("%C config %C\n"),
+               ACE_TEXT("%C config %s\n"),
                ret ? "found" : "did not find", config_name.c_str()));
   }
 
