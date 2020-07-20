@@ -2272,7 +2272,7 @@ struct BundleHelper {
     prev_size_ = size_;
     prev_padding_ = padding_;
     gen_find_size(val, size_, padding_);
-    if ((size_ + padding_) > max_bundle_size_) {
+    if ((size_ + padding_) > (max_bundle_size_ - 100)) {
       push_to_next_bundle(val);
       return false;
     }

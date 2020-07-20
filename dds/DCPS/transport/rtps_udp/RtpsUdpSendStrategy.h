@@ -63,10 +63,7 @@ protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);
 
-  virtual size_t max_message_size() const
-  {
-    return max_message_size_;
-  }
+  virtual size_t max_message_size(TransportQueueElement* element) const;
 
   virtual void add_delayed_notification(TransportQueueElement* element);
 
