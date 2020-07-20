@@ -753,11 +753,7 @@ TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
   TryConstructAnnotation* try_construct_annotation =
     dynamic_cast<TryConstructAnnotation*>(
       builtin_annotations_["::@try_construct"]);
-  TryConstructFailAction value;
-  if (!try_construct_annotation->node_value_exists(node, value)) {
-    value = tryconstructfailaction_discard;
-  }
-  return value;
+  return try_construct_annotation->node_value(node);
 }
 
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(

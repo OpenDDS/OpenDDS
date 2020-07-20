@@ -500,5 +500,5 @@ void typeobject_generator::gen_member_flag_str(std::string& member_flag_str,
     default:
       idl_global->err()->misc_error(
         "Unexpected try_construct value while setting flags", node);
-    }
+  }
 }

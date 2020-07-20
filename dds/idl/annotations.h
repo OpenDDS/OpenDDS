@@ -274,6 +274,10 @@ class TryConstructAnnotation : public AnnotationWithEnumValue<TryConstructFailAc
 public:
   std::string definition() const;
   std::string name() const;
+  virtual TryConstructFailAction default_value() const
+  {
+    return tryconstructfailaction_discard;
+  }
 };
 
 // OpenDDS Specific Annotations
