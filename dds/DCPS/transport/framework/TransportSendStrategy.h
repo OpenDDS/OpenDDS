@@ -179,7 +179,7 @@ protected:
   /// The transport framework will use the returned value (if > 0) to
   /// fragment larger messages.  This fragmentation and
   /// reassembly will be transparent to the user.
-  virtual size_t max_message_size(TransportQueueElement* element) const;
+  virtual size_t max_message_size() const;
 
   /// Set graceful disconnecting flag.
   void set_graceful_disconnecting(bool flag);
@@ -263,7 +263,7 @@ private:
   /// How much space is available in the current packet before we reach one
   /// of the limits: max_message_size() [transport's inherent limitation]
   /// or max_size_ [user's configured limit]
-  size_t space_available(TransportQueueElement* element) const;
+  size_t space_available() const;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

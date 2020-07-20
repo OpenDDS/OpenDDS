@@ -39,7 +39,7 @@ protected:
   ssize_t sync_send(const iovec iov[], int n);
   ssize_t async_send(const iovec iov[], int n);
 
-  virtual size_t max_message_size(TransportQueueElement* /*element*/) const
+  virtual size_t max_message_size() const
   {
     return UDP_MAX_MESSAGE_SIZE;
   }

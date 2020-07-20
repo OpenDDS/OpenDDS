@@ -713,18 +713,18 @@ RtpsUdpSendStrategy::stop_i()
 {
 }
 
-size_t RtpsUdpSendStrategy::max_message_size(TransportQueueElement* element) const
+size_t RtpsUdpSendStrategy::max_message_size() const
 {
   size_t size = max_message_size_;
 #ifdef OPENDDS_SECURITY
-  if (element) {
-    // Temp Dummy Fixed Value. This should be enough for the PREFIX (24) and
-    // POSTFIX (24), and the bytes being added to the payload, but it doesn't
-    // seem to be working.
-    size -= 100;
-  }
-#else
-  ACE_UNUSED(element);
+  // Temp Dummy Fixed Value. This should be enough for the PREFIX (24) and
+  // POSTFIX (24), and the bytes being added to the payload, but it doesn't
+  // seem to be working.
+
+  // Worst case scenario is full message encryption plus one submessage encryption.
+
+  size -= MaxSecurePrefixSize + MaxSecureSuffixSize + MaxSubmessageSecurePrefix + MaxSubmessageSecureSuffix;
+
 #endif
   return size;
 }

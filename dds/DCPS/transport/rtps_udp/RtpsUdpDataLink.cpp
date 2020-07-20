@@ -2249,46 +2249,56 @@ struct BundleHelper {
   BundleHelper(size_t max_bundle_size, OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
   : max_bundle_size_(max_bundle_size)
   , size_(0)
-  , padding_(0)
-  , prev_size_(0)
-  , prev_padding_(0)
   , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
   {
+#ifdef OPENDDS_SECURITY
+    size_ += RtpsUdpSendStrategy::MaxSecurePrefixSize;
+    max_bundle_size_ -= RtpsUdpSendStrategy::MaxSecureSuffixSize;
+#endif
   }
 
   void end_bundle() {
-    meta_submessage_bundle_sizes_.push_back(size_ + padding_);
-    size_ = 0; padding_ = 0; prev_size_ = 0; prev_padding_ = 0;
+    meta_submessage_bundle_sizes_.push_back(size_);
+    size_ = 0;
+#ifdef OPENDDS_SECURITY
+    size_ = RtpsUdpSendStrategy::MaxSecurePrefixSize;
+#endif
   }
 
   template <typename T>
-  void push_to_next_bundle(const T&) {
-    meta_submessage_bundle_sizes_.push_back(prev_size_ + prev_padding_);
-    size_ -= prev_size_; padding_ -= prev_padding_; prev_size_ = 0; prev_padding_ = 0;
-  }
+  bool add_to_bundle(const T& val, size_t& submessage_length) {
+    submessage_length = 0;
 
-  template <typename T>
-  bool add_to_bundle(const T& val) {
-    prev_size_ = size_;
-    prev_padding_ = padding_;
-    gen_find_size(val, size_, padding_);
-    if ((size_ + padding_) > (max_bundle_size_ - 100)) {
-      push_to_next_bundle(val);
+    const size_t prev_prev_size = size_;
+
+#ifdef OPENDDS_SECURITY
+    // If this a Data submessage or something that is encrypted.
+    size_ += RtpsUdpSendStrategy::MaxSubmessageSecurePrefix;
+#endif
+    const size_t prev_size = size_;
+    size_t padding = 0;
+    gen_find_size(val, size_, padding);
+    submessage_length = size_ - prev_size;
+    size_ += padding;
+#ifdef OPENDDS_SECURITY
+    // If this a Data submessage or something that is encrypted.
+    size_ += RtpsUdpSendStrategy::MaxSubmessageSecureSuffix;
+#endif
+    if (size_ > max_bundle_size_) {
+      const size_t chunk_size = size_ - prev_prev_size;
+      meta_submessage_bundle_sizes_.push_back(prev_prev_size);
+      size_ = 0;
+#ifdef OPENDDS_SECURITY
+      size_ = RtpsUdpSendStrategy::MaxSecurePrefixSize;
+#endif
+      size_ += chunk_size;
       return false;
     }
     return true;
   }
 
-  size_t prev_size_diff() const {
-    return size_ - prev_size_;
-  }
-
-  size_t prev_padding_diff() const {
-    return padding_ - prev_padding_;
-  }
-
   size_t max_bundle_size_;
-  size_t size_, padding_, prev_size_, prev_padding_;
+  size_t size_;
   OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes_;
 };
 
@@ -2324,6 +2334,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
 
     prev_dst = GUID_UNKNOWN;
 
+    size_t submessage_length = 0;
+
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
@@ -2331,7 +2343,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep
           // going
-          if (!helper.add_to_bundle(idst)) {
+          if (!helper.add_to_bundle(idst, submessage_length)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
@@ -2341,26 +2353,26 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
         MetaSubmessage& res = **resp_it;
         switch (res.sm_._d()) {
           case HEARTBEAT: {
-            result = helper.add_to_bundle(res.sm_.heartbeat_sm());
+            result = helper.add_to_bundle(res.sm_.heartbeat_sm(), submessage_length);
             res.sm_.heartbeat_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+              static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
-            result = helper.add_to_bundle(res.sm_.acknack_sm());
+            result = helper.add_to_bundle(res.sm_.acknack_sm(), submessage_length);
             res.sm_.acknack_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+              static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
             break;
           }
           case GAP: {
-            result = helper.add_to_bundle(res.sm_.gap_sm());
-            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.gap_sm(), submessage_length);
+            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
             break;
           }
           case NACK_FRAG: {
-            result = helper.add_to_bundle(res.sm_.nack_frag_sm());
+              result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
             res.sm_.nack_frag_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+              static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
             break;
           }
           default: {

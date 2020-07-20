@@ -935,7 +935,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             "this->max_size_ == [%d].\n",
             this->max_size_));
 
-      const size_t max_message_size = this->max_message_size(element);
+      const size_t max_message_size = this->max_message_size();
 
       // Really an assert.  We can't accept any element that wouldn't fit into
       // a transport packet by itself (ie, it would be the only element in the
@@ -1003,7 +1003,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         : /* not fragmenting */ element_length;
 
       if ((exclusive && (this->elems_.size() != 0))
-          || (this->space_available(element) < space_needed)) {
+          || (this->space_available() < space_needed)) {
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Element won't fit in current packet or requires exclusive"
@@ -1063,7 +1063,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
         this->header_.last_fragment_ = false;
         if (max_message_size) { // fragmentation enabled
-          const size_t avail = this->space_available(element);
+          const size_t avail = this->space_available();
           if (element_length > avail) {
             VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %u > %u\n", element_length, avail), 0);
             ElementPair ep = element->fragment(avail);
@@ -1528,12 +1528,12 @@ TransportSendStrategy::get_packet_elems_from_queue()
     // Flag used to determine if the element requires a packet all to itself.
     const bool exclusive_packet = element->requires_exclusive_packet();
 
-    const size_t avail = this->space_available(element);
+    const size_t avail = this->space_available();
 
     bool frag = false;
     if (element_length > avail) {
       // The current element won't fit into the current packet
-      if (this->max_message_size(element)) { // fragmentation enabled
+      if (this->max_message_size()) { // fragmentation enabled
         this->header_.first_fragment_ = !element->is_fragment();
         VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting from queue\n"), 0);
         ElementPair ep = element->fragment(avail);
@@ -1885,10 +1885,10 @@ void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
   element->data_delivered();
 }
 
-size_t TransportSendStrategy::space_available(TransportQueueElement* element) const
+size_t TransportSendStrategy::space_available() const
 {
   const size_t used = this->max_header_size_ + this->header_.length_,
-    max_msg = this->max_message_size(element);
+    max_msg = this->max_message_size();
   if (max_msg) {
     return std::min(this->max_size_ - used, max_msg - used);
   }

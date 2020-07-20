@@ -138,7 +138,7 @@ ACE_HANDLE TransportSendStrategy::get_handle()
 
 
 ACE_INLINE
-size_t TransportSendStrategy::max_message_size(TransportQueueElement* /*element*/) const
+size_t TransportSendStrategy::max_message_size() const
 {
   return 0;
 }
