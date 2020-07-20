@@ -113,6 +113,69 @@ TEST(serializer_test, Encoding__Encoding_static_is_encacapsulatd_XCDR2)
 {
   EXPECT_TRUE(Encoding::is_encapsulated(Encoding::Kind::KIND_XCDR2));
 }
+
+TEST(serializer_test, EncapsulationHeader__EncapsulationHeader)
+{
+  EncapsulationHeader eh;
+  EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR1_BIG_FINAL)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_XCDR1, Endianness::ENDIAN_BIG);
+  EXPECT_TRUE(eh.from_encoding(enc,Extensibility::FINAL));
+  EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR1_LITTLE_FINAL)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_XCDR1, Endianness::ENDIAN_LITTLE);
+  EXPECT_TRUE(eh.from_encoding(enc,Extensibility::FINAL));
+  EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR1_LITTLE_MUTABLE)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_XCDR1, Endianness::ENDIAN_LITTLE);
+  EXPECT_TRUE(eh.from_encoding(enc,Extensibility::MUTABLE));
+  EXPECT_STREQ("CDR/XCDR1 Little Endian Parameter List", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR2_LITTLE_FINAL)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_XCDR2, Endianness::ENDIAN_LITTLE);
+  EXPECT_TRUE(eh.from_encoding(enc,Extensibility::FINAL));
+  EXPECT_STREQ("XCDR2 Little Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR2_LITTLE_APPENDABLE)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_XCDR2, Endianness::ENDIAN_LITTLE);
+  EXPECT_TRUE(eh.from_encoding(enc,Extensibility::APPENDABLE));
+  EXPECT_STREQ("XCDR2 Little Endian Delimited", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR2_LITTLE_MUTABLE)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_XCDR2, Endianness::ENDIAN_LITTLE);
+  EXPECT_TRUE(eh.from_encoding(enc,Extensibility::MUTABLE));
+  EXPECT_STREQ("XCDR2 Little Endian Parameter List", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__from_encoding_UNALIGNED_CDR_LITTLE_MUTABLE)
+{
+  EncapsulationHeader eh;
+  Encoding enc(Encoding::Kind::KIND_UNALIGNED_CDR, Endianness::ENDIAN_LITTLE);
+  EXPECT_FALSE(eh.from_encoding(enc,Extensibility::MUTABLE));
+  EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
