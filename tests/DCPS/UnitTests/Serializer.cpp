@@ -4,17 +4,76 @@
 
 using namespace OpenDDS::DCPS;
 
-// Test DataSampleHeader::valid_data()
-TEST(serializer_test, endianness_to_string)
+TEST(serializer_test, Encoding__Encoding)
 {
-  // const size_t message_id_count = MESSAGE_ID_MAX;
-  // for (size_t i = 0; i < message_id_count; ++i) {
-  //   MessageId msg_id = static_cast<MessageId>(i);
-  //   DataSampleHeader header;
-  //   header.message_id_ = static_cast<char>(msg_id);
-    // EXPECT_EQ(header.valid_data(), msg_id == SAMPLE_DATA)
-    //   << "msg_id is " << to_string(msg_id);
-  }
+  Encoding enc;
+  EXPECT_EQ(0,enc.to_string().compare(0,24,"CDR/XCDR1, little-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR1_ENDIAN_BIG)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR1,Endianness::ENDIAN_BIG);
+  EXPECT_EQ(0,enc.to_string().compare(0,21,"CDR/XCDR1, big-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_UNALIGNED_CDR_ENDIAN_BIG)
+{
+  Encoding enc(Encoding::Kind::KIND_UNALIGNED_CDR,Endianness::ENDIAN_BIG);
+  EXPECT_EQ(0,enc.to_string().compare(0,25,"Unaligned CDR, big-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR2_ENDIAN_BIG)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR2,Endianness::ENDIAN_BIG);
+  EXPECT_EQ(0,enc.to_string().compare(0,17,"XCDR2, big-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR1_ENDIAN_LITTLE)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR1,Endianness::ENDIAN_LITTLE);
+  EXPECT_EQ(0,enc.to_string().compare(0,24,"CDR/XCDR1, little-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_UNALIGNED_CDR_ENDIAN_LITTLE)
+{
+  Encoding enc(Encoding::Kind::KIND_UNALIGNED_CDR,Endianness::ENDIAN_LITTLE);
+  EXPECT_EQ(0,enc.to_string().compare(0,28,"Unaligned CDR, little-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR2_ENDIAN_LITTLE)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR2,Endianness::ENDIAN_LITTLE);
+  EXPECT_EQ(0,enc.to_string().compare(0,20,"XCDR2, little-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR2_Swap)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR2,true);
+  EXPECT_EQ(0,enc.to_string().compare(0,17,"XCDR2, big-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR2_No_Swap)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR2,false);
+  EXPECT_EQ(0,enc.to_string().compare(0,20,"XCDR2, little-endian"));
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR1_max_align)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR1,Endianness::ENDIAN_BIG);
+  EXPECT_EQ(8,enc.max_align());
+}
+
+TEST(serializer_test, Encoding__Encoding_UNALIGNED_CDR_max_align)
+{
+  Encoding enc(Encoding::Kind::KIND_UNALIGNED_CDR,Endianness::ENDIAN_BIG);
+  EXPECT_EQ(0,enc.max_align());
+}
+
+TEST(serializer_test, Encoding__Encoding_XCDR2_max_align)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR2,Endianness::ENDIAN_BIG);
+  EXPECT_EQ(4,enc.max_align());
 }
 
 int main(int argc, char* argv[])
