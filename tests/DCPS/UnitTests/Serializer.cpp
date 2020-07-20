@@ -76,6 +76,43 @@ TEST(serializer_test, Encoding__Encoding_XCDR2_max_align)
   EXPECT_EQ(4,enc.max_align());
 }
 
+TEST(serializer_test, align_value_no_offset)
+{
+  size_t value = 8;
+  align(value,4);
+  EXPECT_EQ(8,value);
+}
+
+TEST(serializer_test, align_value_add_offset)
+{
+  size_t value = 9;
+  align(value,4);
+  EXPECT_EQ(12,value);
+}
+
+TEST(serializer_test, align_value_smaller_than_by)
+{
+  size_t value = 4;
+  align(value,9);
+  EXPECT_EQ(9,value);
+}
+
+TEST(serializer_test, Encoding__is_encapsulated_this_XCDR1)
+{
+  Encoding enc(Encoding::Kind::KIND_XCDR1,Endianness::ENDIAN_BIG);
+  EXPECT_TRUE(enc.is_encapsulated());
+}
+
+TEST(serializer_test, Encoding__is_encapsulated_this_UNALIGNED_CDR)
+{
+  Encoding enc(Encoding::Kind::KIND_UNALIGNED_CDR,Endianness::ENDIAN_LITTLE);
+  EXPECT_FALSE(enc.is_encapsulated());
+}
+
+TEST(serializer_test, Encoding__Encoding_static_is_encacapsulatd_XCDR2)
+{
+  EXPECT_TRUE(Encoding::is_encapsulated(Encoding::Kind::KIND_XCDR2));
+}
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
