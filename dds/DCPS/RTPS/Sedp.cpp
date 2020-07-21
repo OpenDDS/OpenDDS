@@ -39,6 +39,7 @@
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
@@ -3567,13 +3568,22 @@ Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
 
 DDS::ReturnCode_t
 Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeLookup_Request& type_lookup_request,
-                                                        const RepoId& reader,
-                                                        DCPS::SequenceNumber& sequence)
+                                                        const DCPS::RepoId& reader,
+                                                        DCPS::SequenceNumber& sequence,
+                                                        DCPS::SequenceNumber& rpc_sequence,
+                                                        const DCPS::RepoId& participant_id)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
-  type_lookup_request.header.request_id.writer_guid = this->get_repo_id();
-  // TODO: handle rpc sequence number
+  type_lookup_request.header.request_id.writer_guid = get_repo_id();
+
+  ++rpc_sequence;
+  type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
+  type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
+
+  // As per chapter 7.6.3.3.4 of XTypes spec
+  std::string instance_name = static_cast<std::string>("dds.builtin.TOS.") + ::OpenDDS::DCPS::to_string(participant_id);
+  type_lookup_request.header.instance_name = instance_name.c_str();
 
   // Determine message length
   size_t size = 0;
@@ -3601,11 +3611,13 @@ DDS::ReturnCode_t
 Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
                                                     const RepoId& reader,
                                                     DCPS::SequenceNumber& sequence,
-                                                    DDS::rpc::SampleIdentity request_id)
+                                                    DDS::rpc::SampleIdentity request_id,
+                                                    DDS::rpc::RemoteExceptionCode_t exception_code)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   type_lookup_reply.header.related_request_id = request_id;
+  type_lookup_reply.header.remote_ex = exception_code;
 
   // Determine message length
   size_t size = 0;

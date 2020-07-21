@@ -70,19 +70,19 @@ namespace OpenDDS {
 
 
     void serialized_size(const Encoding& encoding, size_t& size,
-      const XTypes::ContinuationPoint_forany&)
+      const XTypes::ContinuationPoint&)
     {
       max_serialized_size_octet(encoding, size, 32);
     }
 
-    bool operator<<(Serializer& strm, const XTypes::ContinuationPoint_forany& arr)
+    bool operator<<(Serializer& strm, const XTypes::ContinuationPoint& arr)
     {
-      return strm.write_octet_array(arr.in(), 32);
+      return strm.write_octet_array(arr, 32);
     }
 
-    bool operator>>(Serializer& strm, XTypes::ContinuationPoint_forany& arr)
+    bool operator>>(Serializer& strm, XTypes::ContinuationPoint& arr)
     {
-      return strm.read_octet_array(arr.out(), 32);
+      return strm.read_octet_array(arr, 32);
     }
 
 

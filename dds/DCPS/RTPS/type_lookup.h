@@ -1,5 +1,5 @@
-#ifndef _TYPE_LOOKUP_H_
-#define _TYPE_LOOKUP_H_
+#ifndef OPENDDS_RTPS_TYPE_LOOKUP_H_
+#define OPENDDS_RTPS_TYPE_LOOKUP_H_
 
 /*
  * Distributed under the OpenDDS License.
@@ -39,15 +39,12 @@ namespace OpenDDS {
       TypeLookup_getTypes_Result() {};
     };
 
-    typedef ACE_CDR::Octet ContinuationPoint[32];
-    struct ContinuationPoint_tag {};
-    typedef ACE_CDR::Octet ContinuationPoint_slice;
-    typedef TAO_Array_Forany_T<ContinuationPoint, ContinuationPoint_slice, ContinuationPoint_tag> ContinuationPoint_forany;
+    typedef CORBA::Octet ContinuationPoint[32];
 
     struct  TypeLookup_getTypeDependencies_In
     {
       OpenDDS::XTypes::TypeIdentifierSeq type_ids;
-      OpenDDS::XTypes::ContinuationPoint_forany continuation_point;
+      OpenDDS::XTypes::ContinuationPoint continuation_point;
 
       TypeLookup_getTypeDependencies_In() {}
     };
@@ -55,7 +52,7 @@ namespace OpenDDS {
     struct  TypeLookup_getTypeDependencies_Out
     {
       OpenDDS::XTypes::TypeIdentifierWithSizeSeq dependent_typeids;
-      OpenDDS::XTypes::ContinuationPoint_forany continuation_point;
+      OpenDDS::XTypes::ContinuationPoint continuation_point;
 
       TypeLookup_getTypeDependencies_Out() {}
     };
@@ -125,9 +122,9 @@ namespace OpenDDS {
     bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru);
 
     void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::ContinuationPoint_forany& arr);
-    bool operator<<(DCPS::Serializer& ser, const XTypes::ContinuationPoint_forany& arr);
-    bool operator>>(DCPS::Serializer& ser, XTypes::ContinuationPoint_forany& arr);
+      const XTypes::ContinuationPoint& arr);
+    bool operator<<(DCPS::Serializer& ser, const XTypes::ContinuationPoint& arr);
+    bool operator>>(DCPS::Serializer& ser, XTypes::ContinuationPoint& arr);
 
     void serialized_size(const DCPS::Encoding& encoding, size_t& size,
       const XTypes::TypeLookup_getTypeDependencies_In& stru);
@@ -168,4 +165,4 @@ namespace OpenDDS {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* ifndef _TYPE_LOOKUP_H_ */
+#endif /* ifndef OPENDDS_RTPS_TYPE_LOOKUP_H_ */
