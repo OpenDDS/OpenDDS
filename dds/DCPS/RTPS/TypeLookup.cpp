@@ -3,7 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "type_lookup.h"
+#include "TypeLookup.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

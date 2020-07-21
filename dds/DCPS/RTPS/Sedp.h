@@ -8,7 +8,7 @@
 #ifndef OPENDDS_RTPS_SEDP_H
 #define OPENDDS_RTPS_SEDP_H
 
-#include "type_lookup.h"
+#include "TypeLookup.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
