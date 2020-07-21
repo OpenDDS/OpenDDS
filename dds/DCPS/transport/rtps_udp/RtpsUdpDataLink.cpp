@@ -2896,6 +2896,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       }
     }
   }
+
   SequenceNumber ack;
   ack.setValue(acknack.readerSNState.bitmapBase.high,
                acknack.readerSNState.bitmapBase.low);
@@ -2913,7 +2914,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
   // we don't need to do anything further.
   if (!is_final || bitmapNonEmpty(acknack.readerSNState)) {
-    ri->second.requested_changes_.push_back(acknack.readerSNState);
+    // Don't add the request if the reader is expecting durable data.
+    // Otherwise, send_and_gather_nack_replies will either answer from
+    // the send buffer or send a gap.
+    if (!ri->second.expecting_durable_data()) {
+      ri->second.requested_changes_.push_back(acknack.readerSNState);
+    }
     // Determine if the reader needs a heartbeat.
     DisjointSequence reqs;
     process_requested_changes_i(reqs, ri->second);
@@ -2941,6 +2947,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ++deliver_iter;
   }
 
+  // TODO(jrw972): Move this earlier so the acknack can actually send
+  // the durability data.  Until then, the reader must send at least two
+  // acknacks before it will get any data.
   if (first_ack) {
     link->invoke_on_start_callbacks(id_, remote, true);
   }
