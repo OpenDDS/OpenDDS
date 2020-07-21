@@ -452,6 +452,23 @@ private:
                                 const ACE_TCHAR* filename);
 
   /**
+   * Load the domain range template configuration
+   * prior to discovery and domain configuration
+   */
+  int load_domain_ranges(ACE_Configuration_Heap& cf);
+
+  /**
+   * Load the discovery template information
+   */
+  int load_discovery_templates(ACE_Configuration_Heap& cf);
+
+  /**
+   * Process the domain range template and activate the
+   * domain for the given domain ID
+   */
+  int configure_domain_range_instance(DDS::DomainId_t domainId);
+
+  /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
@@ -555,6 +572,29 @@ private:
   /// is used when the entity tree does not specify one.  If
   /// not set, the default transport configuration is used.
   ACE_TString global_transport_config_;
+
+  // domain range template support
+  struct DomainRange
+  {
+    DDS::DomainId_t range_start;
+    DDS::DomainId_t range_end;
+    OPENDDS_STRING discovery_template_name;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) domain_info;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) disc_info;
+
+    DomainRange() : range_start(-1), range_end(-1) {}
+  };
+
+  OPENDDS_VECTOR(DomainRange) domain_ranges_;
+
+  int parse_domain_range(const OPENDDS_STRING& range, int& start, int& end);
+
+  bool has_domain_range() const;
+
+  bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
+
+  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
 
 public:
   /// Pointer to the monitor factory that is used to create
