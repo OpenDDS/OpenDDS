@@ -1515,6 +1515,7 @@ DataWriterImpl::enable()
   // Done after enable_transport so we know its swap_bytes.
   const DDS::ReturnCode_t setup_serialization_result = setup_serialization();
   if (setup_serialization_result != DDS::RETCODE_OK) {
+    data_container_->shutdown_ = true;
     return setup_serialization_result;
   }
 

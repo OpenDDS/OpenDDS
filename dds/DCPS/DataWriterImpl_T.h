@@ -345,8 +345,8 @@ public:
       get_effective_data_rep_qos(qos_.representation.value);
     bool success = false;
     if (cdr_encapsulation()) {
-      Encoding::Kind encoding_kind;
       for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+        Encoding::Kind encoding_kind;
         if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
           if (Encoding::KIND_XCDR1 == encoding_kind ||
               Encoding::KIND_XCDR2 == encoding_kind) {
@@ -354,7 +354,7 @@ public:
             success = true;
             break;
           } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-            // Valid but incompatible data representation
+            // Supported but incompatible data representation
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
                        ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
                        ACE_TEXT("Skip %C data representation\n"),
@@ -362,12 +362,11 @@ public:
                        Encoding::kind_to_string(encoding_kind).c_str()));
           }
         } else if (::OpenDDS::DCPS::DCPS_debug_level) {
-          // Invalid data representation
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          // Unsupported or unknown data representation
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                      ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                     ACE_TEXT("Encounter invalid data representation\n"),
+                     ACE_TEXT("Encountered unsupported or unknown data representation\n"),
                      TraitsType::type_name()));
-          return DDS::RETCODE_ERROR;
         }
       }
     } else {
@@ -385,8 +384,8 @@ public:
       return DDS::RETCODE_ERROR;
     }
     if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) "),
-        ACE_TEXT("%CDataWriterImpl::setup_serialization: "),
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+        ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
         ACE_TEXT("Setup successfully with %C data representation.\n"),
         TraitsType::type_name(),
         Encoding::kind_to_string(encoding_mode_.encoding().kind()).c_str()));
