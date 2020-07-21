@@ -463,24 +463,24 @@ void typeobject_generator::gen_type_flag_str(std::string& type_flag_str,
                                              AST_Decl* node)
 {
   switch (exten) {
-    case extensibilitykind_final:
-      type_flag_str = "XTypes::IS_FINAL";
-      break;
-    case extensibilitykind_appendable:
-      type_flag_str = "XTypes::IS_APPENDABLE";
-      break;
-    case extensibilitykind_mutable:
-      if (can_be_mutable) {
-        type_flag_str = "XTypes::IS_MUTABLE";
-      } else {
-        idl_global->err()->misc_error(
-          "Unexpected extensibility while setting flags: type cannot be mutable", node);
-      }
-      break;
-    default:
+  case extensibilitykind_final:
+    type_flag_str = "XTypes::IS_FINAL";
+    break;
+  case extensibilitykind_appendable:
+    type_flag_str = "XTypes::IS_APPENDABLE";
+    break;
+  case extensibilitykind_mutable:
+    if (can_be_mutable) {
+      type_flag_str = "XTypes::IS_MUTABLE";
+    } else {
       idl_global->err()->misc_error(
-        "Unexpected extensibility while setting flags", node);
+        "Unexpected extensibility while setting flags: type cannot be mutable", node);
     }
+    break;
+  default:
+    idl_global->err()->misc_error(
+      "Unexpected extensibility while setting flags", node);
+  }
 }
 
 void typeobject_generator::gen_member_flag_str(std::string& member_flag_str,
@@ -488,17 +488,17 @@ void typeobject_generator::gen_member_flag_str(std::string& member_flag_str,
                                                AST_Decl* node)
 {
   switch (trycon) {
-    case tryconstructfailaction_discard:
-      member_flag_str = "XTypes::TryConstructDiscardValue";
-      break;
-    case tryconstructfailaction_use_default:
-      member_flag_str = "XTypes::TryConstructUseDefaultValue";
-      break;
-    case tryconstructfailaction_trim:
-      member_flag_str = "XTypes::TryConstructTrimValue";
-      break;
-    default:
-      idl_global->err()->misc_error(
-        "Unexpected try_construct value while setting flags", node);
+  case tryconstructfailaction_discard:
+    member_flag_str = "XTypes::TryConstructDiscardValue";
+    break;
+  case tryconstructfailaction_use_default:
+    member_flag_str = "XTypes::TryConstructUseDefaultValue";
+    break;
+  case tryconstructfailaction_trim:
+    member_flag_str = "XTypes::TryConstructTrimValue";
+    break;
+  default:
+    idl_global->err()->misc_error(
+      "Unexpected try_construct value while setting flags", node);
   }
 }
