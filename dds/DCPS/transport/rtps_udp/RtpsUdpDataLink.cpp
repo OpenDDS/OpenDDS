@@ -2370,7 +2370,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
             break;
           }
           case NACK_FRAG: {
-              result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
+            result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
             res.sm_.nack_frag_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
             break;
