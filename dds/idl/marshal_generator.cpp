@@ -1550,19 +1550,19 @@ namespace {
   bool findSizeAnonymous(AST_Field* field, const string& prefix, string& intro, string& expr)
   {
     FieldInfo af(*field);
-    if (!af.type_->anonymous() || !af.as_base_) {
+    if (!af.type_->anonymous() || !af.as_base_ || !(af.cls_ & (CL_SEQUENCE | CL_ARRAY))) {
       return false;
     }
     string fieldref = prefix, local = insert_cxx11_accessor_parens(af.name_, false);
-    if (!af.cxx11() && (af.cls_ & CL_ARRAY)) {
+    if (af.cxx11()) {
+      fieldref = af.const_ref_ + "(" + fieldref + '.';
+      local += ')';
+    } else if (af.cls_ & CL_ARRAY) {
       intro += "  " + getArrayForany(prefix.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
       fieldref += '_';
       if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
         local.erase(local.size() - 2);
       }
-    } else if (af.cxx11() && (af.cls_ & (CL_SEQUENCE | CL_ARRAY))) {
-      fieldref = af.const_ref_ + "(" + fieldref + '.';
-      local += ')';
     } else {
       fieldref += '.';
     }
@@ -1639,36 +1639,26 @@ namespace {
     }
   }
 
-  bool streamAnonymous(AST_Field* field, const string& prefix, string& intro, string& expr)
+  bool streamAnonymous(AST_Field* field, const string& shift, string& intro, string& expr)
   {
     FieldInfo af(*field);
-    if (!af.type_->anonymous() || !af.as_base_) {
+    if (!af.type_->anonymous() || !af.as_base_ || !(af.cls_ & (CL_SEQUENCE | CL_ARRAY))) {
       return false;
     }
-    const string shift = prefix.substr(0, 2);
+    const string stru = "stru";
     string local = insert_cxx11_accessor_parens(af.name_, false);
     const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
-    const string qual = prefix + '.' + local;
-    WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
-    string fieldref = prefix;
-    if (!af.cxx11() && (af.cls_ & CL_ARRAY)) {
-      string pre = prefix;
-      if (shift == ">>" || shift == "<<") {
-        pre.erase(0, 3);
-      }
-      if (accessor) {
-        local.erase(local.size() - 2);
-      }
-      intro += "  " + getArrayForany(pre.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
-      fieldref += '_';
+    if (af.cxx11()) {
+      expr += "(strm " + shift + " " + ((shift == "<<") ? af.const_ref_ : af.ref_)
+        + "(" + stru + "." + local + "))";
     } else {
-      fieldref += '.';
-    }
-
-    if (af.cxx11() && (af.cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-      expr += "(strm " + shift + " " + (dir == WD_OUTPUT ? af.const_ref_ : af.ref_)
-        + "(" + (fieldref + local).substr(3) + "))";
-    } else {
+      const string fieldref = shift + ' ' + stru + ((af.cls_ & CL_ARRAY) ? '_' : '.');
+      if (af.cls_ & CL_ARRAY) {
+        if (accessor) {
+          local.erase(local.size() - 2);
+        }
+        intro += "  " + getArrayForany(stru.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
+      }
       expr += "(strm " + fieldref + local + ')';
     }
     return true;
@@ -2103,7 +2093,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "(!(" + cond + ") || ";
       }
-      if (!streamAnonymous(fields[i], "<< stru", intro, expr)) {
+      if (!streamAnonymous(fields[i], "<<", intro, expr)) {
         expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
       }
       if (!cond.empty()) {
@@ -2126,7 +2116,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr += rtpsCustom.preFieldRead(field_name);
         expr += "(!(" + cond + ") || ";
       }
-      if (!streamAnonymous(fields[i], ">> stru", intro, expr)) {
+      if (!streamAnonymous(fields[i], ">>", intro, expr)) {
         expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
       }
       if (!cond.empty()) {
