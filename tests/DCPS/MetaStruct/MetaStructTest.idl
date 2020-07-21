@@ -1,6 +1,8 @@
 struct A {
   string s;
   long l;
+  wchar w;
+  char c;
 };
 
 typedef short ShortArray[3];
