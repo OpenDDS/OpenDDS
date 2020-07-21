@@ -61,7 +61,7 @@ TEST(serializer_test, Encoding__Encoding_XCDR2_No_Swap)
 TEST(serializer_test, Encoding__Encoding_XCDR1_max_align)
 {
   Encoding enc(Encoding::Kind::KIND_XCDR1,Endianness::ENDIAN_BIG);
-  EXPECT_EQ(8,enc.max_align());
+  EXPECT_EQ(8, enc.max_align());
 }
 
 TEST(serializer_test, Encoding__Encoding_UNALIGNED_CDR_max_align)
