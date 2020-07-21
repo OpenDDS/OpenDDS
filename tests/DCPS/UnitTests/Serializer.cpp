@@ -291,6 +291,34 @@ TEST(serializer_test, EncapsulationHeader__to_encoding_XML)
   EXPECT_STREQ("XML", eh.to_string().c_str());
 }
 
+TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Encoding)
+{
+  ACE_Message_Block amb;
+  Encoding enc(Encoding::Kind::KIND_UNALIGNED_CDR, Endianness::ENDIAN_LITTLE);
+  Serializer ser(&amb, enc);
+
+  EXPECT_TRUE(ser.good_bit());
+  EXPECT_EQ(0, ser.encoding().to_string().compare(0,28,"Unaligned CDR, little-endian"));
+}
+
+TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind)
+{
+  ACE_Message_Block amb;
+  Serializer ser(&amb, Encoding::Kind::KIND_XCDR1);
+
+  EXPECT_TRUE(ser.good_bit());
+  EXPECT_EQ(0, ser.encoding().to_string().compare(0,24,"CDR/XCDR1, little-endian"));
+}
+
+TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
+{
+  ACE_Message_Block amb;
+  Serializer ser(&amb, Encoding::Kind::KIND_XCDR2);
+
+  EXPECT_TRUE(ser.good_bit());
+  EXPECT_EQ(0, ser.encoding().to_string().compare(0,20,"XCDR2, little-endian"));
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
