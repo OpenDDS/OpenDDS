@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----151C3DB2630F6C05B31C164F363CA743"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----70CA1DA3CE99026E2940E9DBC35F89AF"
 
 This is an S/MIME signed message
 
-------151C3DB2630F6C05B31C164F363CA743
+------70CA1DA3CE99026E2940E9DBC35F89AF
 Content-Type: text/plain
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -13,34 +13,30 @@ Content-Type: text/plain
       <domains>
         <id>113</id>
       </domains>
-      <!-- <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants> -->
       <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants>
-      <!-- <enable_join_access_control>TRUE</enable_join_access_control> -->
       <enable_join_access_control>FALSE</enable_join_access_control>
-      <!-- <discovery_protection_kind>ENCRYPT</discovery_protection_kind> -->
       <discovery_protection_kind>NONE</discovery_protection_kind>
-      <!-- <liveliness_protection_kind>ENCRYPT</liveliness_protection_kind> -->
       <liveliness_protection_kind>NONE</liveliness_protection_kind>
-      <rtps_protection_kind>NONE</rtps_protection_kind>
+      <rtps_protection_kind>SIGN</rtps_protection_kind>
       <!-- <rtps_protection_kind>ENCRYPT</rtps_protection_kind> -->
       <topic_access_rules>
         <topic_rule>
           <topic_expression>*</topic_expression>
-          <!-- <enable_discovery_protection>TRUE</enable_discovery_protection> -->
-          <!-- <enable_liveliness_protection>TRUE</enable_liveliness_protection> -->
           <enable_discovery_protection>FALSE</enable_discovery_protection>
           <enable_liveliness_protection>FALSE</enable_liveliness_protection>
           <enable_read_access_control>FALSE</enable_read_access_control>
           <enable_write_access_control>FALSE</enable_write_access_control>
-          <metadata_protection_kind>NONE</metadata_protection_kind>
-          <data_protection_kind>ENCRYPT</data_protection_kind>
+          <!-- <metadata_protection_kind>NONE</metadata_protection_kind> -->
+          <metadata_protection_kind>ENCRYPT</metadata_protection_kind>
+          <data_protection_kind>NONE</data_protection_kind>
+          <!-- <data_protection_kind>ENCRYPT</data_protection_kind> -->
         </topic_rule>
       </topic_access_rules>
     </domain_rule>
   </domain_access_rules>
 </dds>
 
-------151C3DB2630F6C05B31C164F363CA743
+------70CA1DA3CE99026E2940E9DBC35F89AF
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -73,16 +69,16 @@ T2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMM
 Jk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZI
 hvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQCkjopvwK438jANBglg
 hkgBZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3
-DQEJBTEPFw0yMDA3MjAxNzA2NTJaMC8GCSqGSIb3DQEJBDEiBCAA3llmtzlCQN1S
-dy8QUytvBWNwGXYvASBuuH/Q3jBEYTB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
+DQEJBTEPFw0yMDA3MjEwNTA1MjRaMC8GCSqGSIb3DQEJBDEiBCDw6Q7xj+x+xMwQ
+DIice0/xZDMOy7Sieb6WJ9f9quPASTB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
 AwQBKjALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqG
 SIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIB
-KDANBgkqhkiG9w0BAQEFAASCAQBfh9bP4nDUhTI9+ERJwshuR1cCwIX5UUR39AEx
-jTp8ALkSEppHgVs/LGR1KRihcu/Orz6pHBLfX7Aj+Xvot7xzEZ6djeGUjfhsCptC
-TJSqOCE+U4LNXfrJqkxcNAaWaKDqAfklAQ3FY8d6sW5+8qOgKNC5kfptkYzRy2DR
-zhgITUt9NRHio7UJpAJYSpqYQQUCI6niBx+koDJIqaw6FhMtHMlqAh3XW6oC/+gR
-BPzJrfrgrNJcrty5Q59BNQaYImo5938wJcBmOS7LdJ/0lY5fqzo5PqikkFZgrXf4
-qMXsUwVAwrrArLgz6LEehri/zjR7CmvA3NUnvMRxj/KR218I
+KDANBgkqhkiG9w0BAQEFAASCAQCdBXRm14QlFWtF7jzqYJZkYKTrsG6n0JAiFWwS
+Z3ePj+9jcFdZ1ZgbjMCWWGGVf5u2xRCJWfl2cjYQzC11XKQJs1f06xILvM4ECTrs
+C/DoszywYArZILABMc+HHEORcyFk4ZrL1Qq9MNgm25j9Pp46AWgvOHm7nysAO+CG
+Upydi53jh0WiNM5MMulH4fyhePYEkBk4L1vYCp6QsQvggNhtDNL6WqPwi+2hlpZT
+3f4oLImFQO2cIGGtWNhavkh08aANEapGLfzF4TJjjqMoJGB3SzN7oqN0Ybuo0uyb
+mfzA8CCTt0jPtUf7gDU7Gj2nwbwWqkGN7OWUXawyRQJLTCFU
 
-------151C3DB2630F6C05B31C164F363CA743--
+------70CA1DA3CE99026E2940E9DBC35F89AF--
 

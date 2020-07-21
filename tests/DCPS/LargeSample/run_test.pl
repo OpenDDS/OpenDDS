@@ -11,8 +11,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my @common_opts = ('-DCPSSecurityFakeEncryption', '1');
-# my @common_opts = ();
+my @common_opts = ();
 my @common_pub_opts = ();
 my @sub_opts = ();
 my $reliable = 1;
