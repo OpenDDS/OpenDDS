@@ -357,7 +357,6 @@ public:
     bool expect_create_reader = true)
   {
     if (!topic_) {
-      std::cout << "Topic is NULL" << std::endl;
       add_result(false);
       return;
     }
@@ -365,7 +364,6 @@ public:
     // Create Writer and Reader
     DDS::DataWriter_var writer = create_writer(publisher_, topic_, writer_reprs);
     if (!writer) {
-      std::cout << "create_writer failed" << std::endl;
       if (expect_create_writer) {
         add_result(false);
         return;
@@ -376,7 +374,6 @@ public:
     }
     DDS::DataReader_var reader = create_reader(subscriber_, topic_, reader_reprs);
     if (!reader) {
-      std::cout << "create_reader failed" << std::endl;
       if (expect_create_reader) {
         add_result(false);
         return;
@@ -408,7 +405,6 @@ public:
       break;
 
     case check_match_result_error:
-      std::cout << "check_match_result_error" << std::endl;
       passed = false;
       break;
     }
