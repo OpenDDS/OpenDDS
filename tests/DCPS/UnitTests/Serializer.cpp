@@ -322,5 +322,6 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
+  DCPS_debug_level = 0;
   return RUN_ALL_TESTS();
 }
