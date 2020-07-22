@@ -15,9 +15,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/security/framework/Properties.h>
-#endif
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportInst_rch.h>
 #include <dds/DCPS/StaticIncludes.h>
@@ -44,9 +41,10 @@ void parse_args(int argc, ACE_TCHAR* argv[],
                 size_t& writer_process_count,
                 size_t& writers_per_process,
                 size_t& samples_per_writer,
-                unsigned& data_field_length_offset)
+                unsigned& data_field_length_offset,
+                unsigned& security_id)
 {
-  ACE_Get_Opt getopt(argc, argv, "r:p:w:s:o:");
+  ACE_Get_Opt getopt(argc, argv, "r:p:w:s:o:i:");
   for (int opt = 0; (opt = getopt()) != EOF;) {
     if (opt == 'r') {
       reliable = ACE_OS::atoi(getopt.opt_arg());
@@ -58,6 +56,8 @@ void parse_args(int argc, ACE_TCHAR* argv[],
       samples_per_writer = ACE_OS::atoi(getopt.opt_arg());
     } else if (opt == 'o') {
       data_field_length_offset = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'i') {
+      security_id = ACE_OS::atoi(getopt.opt_arg());
     }
   }
 }
@@ -78,30 +78,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     size_t writers_per_process = default_writers_per_process;
     size_t samples_per_writer = default_samples_per_writer;
     unsigned data_field_length_offset = default_data_field_length_offset;
+    unsigned security_id = 1;
     parse_args(argc, argv, reliable,
-      writer_process_count, writers_per_process, samples_per_writer, data_field_length_offset);
+      writer_process_count, writers_per_process, samples_per_writer,
+      data_field_length_offset, security_id);
     const size_t num_messages_expected = writer_process_count * writers_per_process * samples_per_writer;
 
     // Create DomainParticipant
     DDS::DomainParticipantQos participant_qos;
     dpf->get_default_participant_qos(participant_qos);
-#ifdef OPENDDS_SECURITY
-    if (TheServiceParticipant->get_security()) {
-      DDS::PropertySeq& props = participant_qos.property.value;
-      append(props, DDS::Security::Properties::AuthIdentityCA,
-        "file:../../security/certs/identity/identity_ca_cert.pem");
-      append(props, DDS::Security::Properties::AuthIdentityCertificate,
-        "file:../../security/certs/identity/test_participant_01_cert.pem");
-      append(props, DDS::Security::Properties::AuthPrivateKey,
-        "file:../../security/certs/identity/test_participant_01_private_key.pem");
-      append(props, DDS::Security::Properties::AccessPermissionsCA,
-        "file:../../security/certs/permissions/permissions_ca_cert.pem");
-      append(props, DDS::Security::Properties::AccessGovernance,
-        "file:./governance_signed.p7s");
-      append(props, DDS::Security::Properties::AccessPermissions,
-        "file:./permissions_signed.p7s");
-    }
-#endif
+    set_security_qos(participant_qos, security_id);
     DDS::DomainParticipant_var participant =
       dpf->create_participant(domain,
                               participant_qos,

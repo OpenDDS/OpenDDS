@@ -20,6 +20,7 @@ my $writer_process_count = 2;
 my $writers_per_process = 2;
 my $samples_per_writer = 10;
 my $data_length_offset = 0;
+my $security_id = 1;
 
 my $test = new PerlDDS::TestFramework();
 
@@ -49,12 +50,12 @@ if (!$is_rtps) {
   $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -DCPSDebugLevel 1");
 }
 
-$test->process("subscriber", "subscriber", join(' ', @sub_opts));
+$test->process("subscriber", "subscriber", join(' ', @sub_opts, '-i', $security_id++));
 for (my $pub = 0; $pub < $writer_process_count; $pub++) {
   my $num = $pub + 1;
   my $name = "publisher #$num";
   my @pub_opts = ();
-  push(@pub_opts, @common_pub_opts);
+  push(@pub_opts, @common_pub_opts, '-i', $security_id++);
   push(@pub_opts, "-p", "$num") if ($PerlDDS::SafetyProfile);
   $test->process($name, "publisher", join(' ', @pub_opts));
   $test->start_process($name);
