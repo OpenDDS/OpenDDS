@@ -715,12 +715,13 @@ RtpsUdpSendStrategy::stop_i()
 
 size_t RtpsUdpSendStrategy::max_message_size() const
 {
-  size_t size = max_message_size_;
+  // TODO: Make this conditional on if the message actually needs to do this.
+  return max_message_size_
 #ifdef OPENDDS_SECURITY
-  // Worst case scenario is full message encryption plus one submessage encryption.
-  size -= MaxSecurePrefixSize + MaxSecureSuffixSize + MaxSubmessageSecurePrefix + MaxSubmessageSecureSuffix;
+    // Worst case scenario is full message encryption plus one submessage encryption.
+    - MaxSecureSubmessageAdditionalSize - MaxSecureFullMessageAdditionalSize
 #endif
-  return size;
+    ;
 }
 
 } // namespace DCPS

@@ -14,8 +14,8 @@
       <topic_access_rules>
         <topic_rule>
           <topic_expression>*</topic_expression>
-          <enable_discovery_protection>FALSE</enable_discovery_protection>
-          <enable_liveliness_protection>FALSE</enable_liveliness_protection>
+          <enable_discovery_protection>TRUE</enable_discovery_protection>
+          <enable_liveliness_protection>TRUE</enable_liveliness_protection>
           <enable_read_access_control>FALSE</enable_read_access_control>
           <enable_write_access_control>FALSE</enable_write_access_control>
           <!-- <metadata_protection_kind>NONE</metadata_protection_kind> -->

@@ -59,10 +59,23 @@ public:
                       RTPS::SubmessageSeq& submessages);
 #endif
 
-  static const size_t MaxSecurePrefixSize = 24; // TODO: Determine.
-  static const size_t MaxSecureSuffixSize = 24; // TODO: Determine.
-  static const size_t MaxSubmessageSecurePrefix = 24; // TODO: Determine.
-  static const size_t MaxSubmessageSecureSuffix = 24; // TODO: Determine.
+  // NOTE: The header and footer sizes are dependent on the built-in crypto plugin.
+  static const size_t MaxCryptoHeaderSize = 20;
+  static const size_t MaxCryptoFooterSize = 20;
+  static const size_t MaxSecurePrefixSize = RTPS::SMHDR_SZ + MaxCryptoHeaderSize;
+  static const size_t MaxSecureSuffixSize =
+    (RTPS::SM_ALIGN - 1) /* Max padding after submessage of variable length */ +
+    RTPS::SMHDR_SZ + MaxCryptoFooterSize;
+  static const size_t MaxSecureSubmessageLeadingSize = MaxSecurePrefixSize;
+  static const size_t MaxSecureSubmessageFollowingSize =
+    RTPS::SMHDR_SZ /* SEC_BODY */ + MaxSecureSuffixSize;
+  static const size_t MaxSecureSubmessageAdditionalSize =
+    MaxSecureSubmessageLeadingSize + MaxSecureSubmessageFollowingSize;
+  static const size_t MaxSecureFullMessageLeadingSize =
+    RTPS::SMHDR_SZ + RTPS::INFO_SRC_SZ + MaxSecurePrefixSize;
+  static const size_t MaxSecureFullMessageFollowingSize = MaxSecureSuffixSize;
+  static const size_t MaxSecureFullMessageAdditionalSize =
+    MaxSecureFullMessageLeadingSize + MaxSecureFullMessageFollowingSize;
 
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
