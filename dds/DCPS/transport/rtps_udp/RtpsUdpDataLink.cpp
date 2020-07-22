@@ -2246,49 +2246,42 @@ bool RtpsUdpDataLink::separate_message(EntityId_t entity)
 namespace {
 
 struct BundleHelper {
-  const size_t initial_size =
+  static const size_t initial_size =
 #ifdef OPENDDS_SECURITY
     RtpsUdpSendStrategy::MaxSecureFullMessageLeadingSize;
 #else
-    0
+    0;
 #endif
-    ;
 
-  const size_t max_size_handicap =
+  static const size_t max_size_handicap =
 #ifdef OPENDDS_SECURITY
-    RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize
+    RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
 #else
-    0
+    0;
 #endif
-    ;
 
   BundleHelper(size_t max_bundle_size, OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
   : max_bundle_size_(max_bundle_size - max_size_handicap)
   , size_(initial_size)
   , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
-  , first_add_to_bundle_(true)
   {
   }
 
-  void end_bundle() {
+  void end_bundle()
+  {
     meta_submessage_bundle_sizes_.push_back(size_);
     size_ = initial_size;
   }
 
   template <typename T>
-  bool add_to_bundle(const T& val, size_t& submessage_length) {
+  bool add_to_bundle(const T& val, size_t& submessage_length)
+  {
     submessage_length = 0;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) add_to_bundle: %C\n", gen_OpenDDS_RTPS_SubmessageKind_names[val.smHeader.submessageId]));
-
-    if (first_add_to_bundle_) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) add_to_bundle: initial call ======================================================\n"));
-      first_add_to_bundle_ = false;
-    }
 
     const size_t prev_prev_size = size_;
 
 #ifdef OPENDDS_SECURITY
-    // If this a Data submessage or something that is encrypted.
+    // Could be an encoded submessage (encoding happens later)
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageLeadingSize;
 #endif
     const size_t prev_size = size_;
@@ -2297,28 +2290,21 @@ struct BundleHelper {
     submessage_length = size_ - prev_size;
     size_ += padding;
 #ifdef OPENDDS_SECURITY
-    // If this a Data submessage or something that is encrypted.
+    // Could be an encoded submessage (encoding happens later)
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageFollowingSize;
 #endif
     if (size_ > max_bundle_size_) {
-      ACE_DEBUG((LM_DEBUG,
-        "(%P|%t) add_to_bundle: size_ (%u) > max_bundle_size_ (%u): No more room\n",
-        size_, max_bundle_size_));
       const size_t chunk_size = size_ - prev_prev_size;
       meta_submessage_bundle_sizes_.push_back(prev_prev_size);
       size_ = initial_size + chunk_size;
       return false;
     }
-    ACE_DEBUG((LM_DEBUG,
-      "(%P|%t) add_to_bundle: size_ (%u) <= max_bundle_size_ (%u): Still has room\n",
-      size_, max_bundle_size_));
     return true;
   }
 
   size_t max_bundle_size_;
   size_t size_;
   OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes_;
-  bool first_add_to_bundle_;
 };
 
 }
@@ -2363,9 +2349,6 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           // size difference into the next bundle, reset prev_dst, and keep
           // going
           if (!helper.add_to_bundle(idst, submessage_length)) {
-            ACE_DEBUG((LM_DEBUG,
-              "(%P|%t) bundle_mapped_meta_submessages: INFO_DST reset, current bundle size is %u!\n",
-              meta_submessage_bundles.back().size()));
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
@@ -2448,7 +2431,6 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
     prev_dst = GUID_UNKNOWN;
     ACE_Message_Block mb_bundle(meta_submessage_bundle_sizes[i]); //FUTURE: allocators?
     Serializer ser(&mb_bundle, false, Serializer::ALIGN_CDR);
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) meta_submessage_bundles[i].size(): %u\n", meta_submessage_bundles[i].size()));
     for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin(); it != meta_submessage_bundles[i].end(); ++it) {
       MetaSubmessage& res = **it;
       RepoId dst = res.dst_guid_;

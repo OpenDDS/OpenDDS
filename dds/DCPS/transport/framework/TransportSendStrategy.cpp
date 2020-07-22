@@ -1065,7 +1065,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         if (max_message_size) { // fragmentation enabled
           const size_t avail = this->space_available();
           if (element_length > avail) {
-            VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %u > %u\n", element_length, avail), 0);
+            VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
             ElementPair ep = element->fragment(avail);
             element = ep.first;
             element_length = element->msg()->total_length();
