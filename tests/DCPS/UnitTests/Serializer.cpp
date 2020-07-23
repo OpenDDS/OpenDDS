@@ -38,7 +38,6 @@ TEST(serializer_test, Encoding__Encoding_UNALIGNED_CDR_ENDIAN_LITTLE)
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EXPECT_EQ(0, enc.to_string().compare(0, 28, "Unaligned CDR, little-endian"));
 }
-  EXPECT_EQ(0, enc.to_string().compare(0, 24, "CDR/XCDR1, little-endian"));
 
 TEST(serializer_test, Encoding__Encoding_XCDR2_ENDIAN_LITTLE)
 {
