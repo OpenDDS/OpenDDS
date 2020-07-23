@@ -971,7 +971,7 @@ namespace {
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
-          suffix += use_cxx11 ? accessor : "[0]";
+          suffix += use_cxx11 ? "->data()" : "[0]";
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)
           << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
@@ -1010,7 +1010,7 @@ namespace {
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
-          suffix += use_cxx11 ? accessor : "[0]";
+          suffix += use_cxx11 ? "->data()" : "[0]";
         be_global->impl_ <<
           "  return strm.read_" << getSerializerName(elem)
           << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
@@ -1119,7 +1119,7 @@ namespace {
       if (af.as_cls_ & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < af.arr_->n_dims(); ++i)
-          suffix += use_cxx11 ? accessor : "[0]";
+          suffix += use_cxx11 ? "->data()" : "[0]";
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(af.as_act_)
           << "_array(arr" << accessor << suffix << ", " << af.n_elems_ << ");\n";
@@ -1157,7 +1157,7 @@ namespace {
       if (af.as_cls_ & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < af.arr_->n_dims(); ++i)
-          suffix += use_cxx11 ? accessor : "[0]";
+          suffix += use_cxx11 ? "->data()" : "[0]";
         be_global->impl_ <<
           "  return strm.read_" << getSerializerName(af.as_act_)
           << "_array(arr" << accessor << suffix << ", " << af.n_elems_ << ");\n";

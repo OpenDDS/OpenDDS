@@ -1,13 +1,37 @@
 #include <tao/LongSeq.pidl>
 
+module moduleA {
+
+typedef double D3[3];
+typedef long L2x3x4a[2][3][4];
+
+@topic
+struct StructA {
+  @key D3 position;
+  @key double velocity[3];
+  L2x3x4a l2x3x4;
+  short s2x3x4a[2][3][4];
+  short s2x3x4a_2nd[2][3][4];
+  //@key short s2x3x4a_key[2][3][4];
+  sequence<long, 3> a_l3seq;
+};
+
+struct StructB {
+  sequence<short> ids;
+  sequence<long, 3> l3;
+};
+
+}; //moduleA
+
+
 typedef short Short3Array[3];
-//typedef short Short2x3Array[2][3];
-//typedef double Double2x3x4Array[2][3][4];
-//typedef string Str2x3x4x5Array[2][3][4][5];
+typedef short Short2x3Array[2][3];
+typedef double Double2x3x4Array[2][3][4];
+typedef string Str2x3x4x5Array[2][3][4][5];
 typedef Short3Array Short3Array_x2[2];
 
 struct StructOfMultiDimArray {
-//Str2x3x4x5Array str2x3x4x5arr;
+  Str2x3x4x5Array str2x3x4x5arr;
   Short3Array_x2 s3arr_x2arr;
 };
 
@@ -36,8 +60,8 @@ struct TestStruct {
   XYZ position;
 
   Short3Array s3arr;
-  //Short2x3Array s2x3arr;
-  //Double2x3x4Array d2x3x4arr;
+  Short2x3Array s2x3arr;
+  Double2x3x4Array d2x3x4arr;
   StructOfMultiDimArray smda;
 
   LongSequence lseq;
@@ -49,8 +73,10 @@ struct TestStruct {
 
   short a_s3arr[3];
   short a_s3arr_2nd[3];
-  //@key short a_s2x3arr[2][3];
-  //double a_d2x3x4arr[2][3][4];
+  @key long a_l2arr_key[2];
+  //@key short a_s2x3arr_key[2][3];
+  short a_s2x3arr[2][3];
+  double a_d2x3x4arr[2][3][4];
 
   sequence<long> a_lseq;
   sequence<long> a_lseq_2nd;
@@ -127,5 +153,3 @@ module RtpsRelay {
     sequence<long, 5> a_l5seq;
   };
 };
-
-// ========== ========== ========== ========== ==========
