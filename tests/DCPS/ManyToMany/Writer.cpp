@@ -74,11 +74,11 @@ Writer::write()
         ++writer->message.sample_id;
 
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("%T (%P|%t) Writing Message: process_id = %C ")
+                   ACE_TEXT("%T (%P|%t) Writing Message: process_id = %d ")
                    ACE_TEXT("participant_id = %d ")
                    ACE_TEXT("writer_id = %d ")
-                   ACE_TEXT("sample_id = %d \n"),
-                   writer->message.process_id.in(),
+                   ACE_TEXT("sample_id = %d\n"),
+                   writer->message.process_id,
                    writer->message.participant_id,
                    writer->message.writer_id,
                    writer->message.sample_id));
