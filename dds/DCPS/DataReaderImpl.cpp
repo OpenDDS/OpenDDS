@@ -854,10 +854,8 @@ DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
+DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
 {
-  DDS::DataReaderQos qos = qos_arg;
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1179,7 +1177,12 @@ DataReaderImpl::enable()
 
   if (topic_servant_) {
     if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), false)) {
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
+          ACE_TEXT("none of the data representation QoS is allowed by the ")
+          ACE_TEXT("topic type IDL annotations\n")));
+      }
+      return DDS::RETCODE_ERROR;
     }
   }
 

@@ -964,11 +964,8 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 #endif
 }
 
-DDS::ReturnCode_t
-DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
+DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
 {
-  DDS::DataWriterQos qos = qos_arg;
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1372,7 +1369,12 @@ DataWriterImpl::enable()
   }
 
   if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), true)) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
+        ACE_TEXT("none of the data representation QoS is allowed by the ")
+        ACE_TEXT("topic type IDL annotations\n")));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   // Note: do configuration based on QoS in enable() because
