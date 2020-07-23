@@ -64,6 +64,9 @@ struct FieldInfo {
   FieldInfo(UTL_ScopedName* sn, AST_Type* base);
   void init();
   bool is_new(EleLenSet& el_set);
+  bool anonymous_array() const;
+  bool anonymous_sequence() const;
+  bool anonymous() const;
 };
 
 #endif

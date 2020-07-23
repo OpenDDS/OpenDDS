@@ -1124,23 +1124,25 @@ namespace {
           "  return strm.write_" << getSerializerName(af.as_act_)
           << "_array(arr" << accessor << suffix << ", " << af.n_elems_ << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        string indent = "  ";
-        NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
-        if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
-          be_global->impl_ <<
-            indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
-            << "_dup(arr" << nfl.index_ << ");\n" <<
-            indent << af.scoped_elem_ << "_forany tmp = tmp_var.inout();\n" <<
-            streamAndCheck("<< tmp", indent.size());
-        } else {
-          string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
-          string pre;
-          if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = af.elem_const_ref_ + "(";
-            suffix += ')';
+        {
+          string indent = "  ";
+          NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
+          if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
+            be_global->impl_ <<
+              indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
+              << "_dup(arr" << nfl.index_ << ");\n" <<
+              indent << af.scoped_elem_ << "_forany tmp = tmp_var.inout();\n" <<
+              streamAndCheck("<< tmp", indent.size());
+          } else {
+            string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
+            string pre;
+            if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
+              pre = af.elem_const_ref_ + "(";
+              suffix += ')';
+            }
+            be_global->impl_ <<
+              streamAndCheck("<< " + pre + "arr" + nfl.index_ + suffix , indent.size());
           }
-          be_global->impl_ <<
-            streamAndCheck("<< " + pre + "arr" + nfl.index_ + suffix , indent.size());
         }
         be_global->impl_ << "  return true;\n";
       }
@@ -1160,23 +1162,25 @@ namespace {
           "  return strm.read_" << getSerializerName(af.as_act_)
           << "_array(arr" << accessor << suffix << ", " << af.n_elems_ << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        string indent = "  ";
-        NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
-        if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
-          be_global->impl_ <<
-            indent << af.scoped_elem_ << "_var tmp = " << af.scoped_elem_ << "_alloc();\n" <<
-            indent << af.scoped_elem_ << "_forany fa = tmp.inout();\n" <<
-            streamAndCheck(">> fa", indent.size()) <<
-            indent << af.scoped_elem_ << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
-        } else {
-          string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
-          string pre;
-          if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = af.elem_ref_ + "(";
-            suffix += ')';
+        {
+          string indent = "  ";
+          NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
+          if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
+            be_global->impl_ <<
+              indent << af.scoped_elem_ << "_var tmp = " << af.scoped_elem_ << "_alloc();\n" <<
+              indent << af.scoped_elem_ << "_forany fa = tmp.inout();\n" <<
+              streamAndCheck(">> fa", indent.size()) <<
+              indent << af.scoped_elem_ << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
+          } else {
+            string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
+            string pre;
+            if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
+              pre = af.elem_ref_ + "(";
+              suffix += ')';
+            }
+            be_global->impl_ <<
+              streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
           }
-          be_global->impl_ <<
-            streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
         }
         be_global->impl_ << "  return true;\n";
       }
@@ -1550,7 +1554,7 @@ namespace {
   bool findSizeAnonymous(AST_Field* field, const string& prefix, string& intro, string& expr)
   {
     FieldInfo af(*field);
-    if (!af.type_->anonymous() || !af.as_base_ || !(af.cls_ & (CL_SEQUENCE | CL_ARRAY))) {
+    if (!af.anonymous()) {
       return false;
     }
     string fieldref = prefix, local = insert_cxx11_accessor_parens(af.name_, false);
@@ -1642,7 +1646,7 @@ namespace {
   bool streamAnonymous(AST_Field* field, const string& shift, string& intro, string& expr)
   {
     FieldInfo af(*field);
-    if (!af.type_->anonymous() || !af.as_base_ || !(af.cls_ & (CL_SEQUENCE | CL_ARRAY))) {
+    if (!af.anonymous()) {
       return false;
     }
     const string stru = "stru";
@@ -2044,9 +2048,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*(fields[i]));
-      if (af.arr_) {
+      if (af.anonymous_array()) {
         gen_anonymous_array(af);
-      } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
+      } else if (af.anonymous_sequence() && af.is_new(anonymous_seq_generated)) {
         gen_anonymous_sequence(af);
       }
     }

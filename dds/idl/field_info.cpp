@@ -151,3 +151,18 @@ bool FieldInfo::is_new(EleLenSet& el_set)
 {
   return cxx11() || el_set.insert(EleLen(*this)).second;
 }
+
+bool FieldInfo::anonymous_array() const
+{
+  return type_->anonymous() && arr_ && (cls_ & CL_ARRAY);
+}
+
+bool FieldInfo::anonymous_sequence() const
+{
+  return type_->anonymous() && seq_ && (cls_ & CL_SEQUENCE);
+}
+
+bool FieldInfo::anonymous() const
+{
+  return type_->anonymous() && as_base_ && (cls_ & (CL_ARRAY | CL_SEQUENCE));
+}
