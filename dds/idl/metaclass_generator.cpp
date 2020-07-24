@@ -115,11 +115,11 @@ namespace {
     }
   }
 
-  std::string string_type(Classification c)
+  std::string string_type(Classification cls)
   {
     return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
-      ((c & CL_WIDE) ? "std::wstring" : "std::string") :
-      (c & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
+      ((cls & CL_WIDE) ? "std::wstring" : "std::string") :
+      (cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
   }
 
   std::string to_cxx_type(AST_Type* type, std::size_t& size)
@@ -579,7 +579,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   FieldInfo::EleLenSet anonymous_seq_generated;
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
-      FieldInfo af(*(fields[i]));
+      FieldInfo af(*fields[i]);
       if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");

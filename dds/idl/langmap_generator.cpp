@@ -1494,7 +1494,7 @@ struct Cxx11Generator : GeneratorBase
 
     bool has_anonymous_field = false;
     for (size_t i = 0; i < fields.size(); ++i) {
-      FieldInfo af(*(fields[i]));
+      FieldInfo af(*fields[i]);
       if (af.type_->anonymous() && af.as_base_) {
         gen_anonymous_type(af);
         has_anonymous_field = true;

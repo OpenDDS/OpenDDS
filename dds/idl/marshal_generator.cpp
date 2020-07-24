@@ -2047,7 +2047,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   FieldInfo::EleLenSet anonymous_seq_generated;
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
-      FieldInfo af(*(fields[i]));
+      FieldInfo af(*fields[i]);
       if (af.anonymous_array()) {
         gen_anonymous_array(af);
       } else if (af.anonymous_sequence() && af.is_new(anonymous_seq_generated)) {

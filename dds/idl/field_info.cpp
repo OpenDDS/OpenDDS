@@ -21,7 +21,8 @@ bool FieldInfo::EleLen::operator<(const EleLen& o) const
 
 const std::string FieldInfo::scope_op = "::";
 
-bool FieldInfo::cxx11() {
+bool FieldInfo::cxx11()
+{
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 }
 
