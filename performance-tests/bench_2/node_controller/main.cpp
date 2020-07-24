@@ -721,13 +721,18 @@ int run_cycle(
 
   using Builder::ZERO;
 
-  std::chrono::time_point<std::chrono::system_clock> timeout_time;
   if (scenario.launch_time < ZERO) {
-    timeout_time = std::chrono::system_clock::now() - get_duration(scenario.launch_time);
+    auto duration = -1 * get_duration(scenario.launch_time);
+    if (duration > std::chrono::seconds::zero()) {
+      std::this_thread::sleep_for(duration);
+    }
   } else {
-    timeout_time = std::chrono::system_clock::time_point(get_duration(scenario.launch_time));
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::system_clock::time_point(get_duration(scenario.launch_time)) - now;
+    if (duration > std::chrono::seconds::zero()) {
+      std::this_thread::sleep_for(duration);
+    }
   }
-  std::this_thread::sleep_until(timeout_time);
 
   // Run Workers and Wait for Them to Finish
   worker_manager.run_workers(report_writer_impl);
