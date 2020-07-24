@@ -83,7 +83,7 @@ double weighted_median(std::vector<double> medians, std::vector<size_t> weights,
 void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero_equals_key_press = true) {
   if (zero_equals_key_press && ts == ZERO) {
     std::stringstream ss;
-    ss << "No " << ts_name << " time specified. Press any key to continue." << std::endl;
+    ss << "No " << ts_name << " time specified. Press enter to continue." << std::endl;
     std::cerr << ss.str() << std::flush;
     std::string line;
     std::getline(std::cin, line);
