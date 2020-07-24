@@ -318,6 +318,29 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 20, "XCDR2, little-endian"));
 }
 
+TEST(serializer_test, Serializer__set_endianness)
+{
+  ACE_Message_Block amb;
+  Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  Serializer ser(&amb, enc);
+
+  EXPECT_TRUE(ser.good_bit());
+  EXPECT_EQ(0, ser.encoding().to_string().compare(0, 28, "Unaligned CDR, little-endian"));
+
+  ser.endianness(ENDIAN_BIG);
+  EXPECT_EQ(0, ser.encoding().to_string().compare(0, 25, "Unaligned CDR, big-endian"));
+}
+
+TEST(serializer_test, Serializer__swap_bytes_endianness)
+{
+  ACE_Message_Block amb;
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  ser.swap_bytes(true);
+  EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
