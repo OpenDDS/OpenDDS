@@ -223,7 +223,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::system_clock::time_point(get_duration(config.create_time));
       }
-      std::this_thread::sleep_until(timeout_time);
+      if (std::chrono::system_clock::now() < timeout_time) {
+        std::this_thread::sleep_until(timeout_time);
+      }
     }
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
@@ -250,7 +252,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::system_clock::time_point(get_duration(config.enable_time));
       }
-      std::this_thread::sleep_until(timeout_time);
+      if (std::chrono::system_clock::now() < timeout_time) {
+        std::this_thread::sleep_until(timeout_time);
+      }
     }
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
@@ -271,7 +275,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::system_clock::time_point(get_duration(config.start_time));
       }
-      std::this_thread::sleep_until(timeout_time);
+      if (std::chrono::system_clock::now() < timeout_time) {
+        std::this_thread::sleep_until(timeout_time);
+      }
     }
 
     Log::log() << "Starting process tests." << std::endl;
@@ -292,7 +298,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::system_clock::time_point(get_duration(config.stop_time));
       }
-      std::this_thread::sleep_until(timeout_time);
+      if (std::chrono::system_clock::now() < timeout_time) {
+        std::this_thread::sleep_until(timeout_time);
+      }
     }
 
     Log::log() << "Stopping process tests." << std::endl;
@@ -319,7 +327,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::system_clock::time_point(get_duration(config.destruction_time));
       }
-      std::this_thread::sleep_until(timeout_time);
+      if (std::chrono::system_clock::now() < timeout_time) {
+        std::this_thread::sleep_until(timeout_time);
+      }
     }
 
     process.detach_listeners();

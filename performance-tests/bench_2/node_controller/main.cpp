@@ -12,6 +12,7 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
+#include <condition_variable>
 
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
@@ -115,6 +116,7 @@ public:
         report.log = str.c_str();
       }
     }
+    std::cout << "Writing report for worker " << worker_id_ << std::endl;
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
       std::cerr << "Write report failed" << std::endl;
     }
@@ -200,21 +202,22 @@ public:
 
   bool add_worker(const NodeId& node_id, const WorkerConfig& config)
   {
-    std::lock_guard<std::mutex> ul(lock_);
+    std::lock_guard<std::mutex> guard(mutex_);
     if (all_workers_.count(config.worker_id)) {
       std::cerr << "Received the same worker id twice: " << config.worker_id << std::endl;
       return true;
     }
     all_workers_[config.worker_id] = std::make_shared<Worker>(node_id, config);
-    remaining_workers_++;
+    remaining_worker_count_++;
     return false;
   }
 
   // Must hold lock_
   void worker_is_finished(WorkerPtr& worker)
   {
-    remaining_workers_--;
+    remaining_worker_count_--;
     finished_workers_.push_back(worker);
+    cv_.notify_all();
   }
 
   // Must hold lock_
@@ -235,7 +238,7 @@ public:
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
     // Spawn Workers
     {
-      std::lock_guard<std::mutex> guard(lock_);
+      std::lock_guard<std::mutex> guard(mutex_);
       for (auto worker_i : all_workers_) {
         auto& worker = worker_i.second;
         std::shared_ptr<ACE_Process_Options> proc_opts = worker->get_proc_opts();
@@ -256,10 +259,9 @@ public:
       // Check to see if any workers are done and write their reports
       std::list<WorkerPtr> finished_workers;
       {
-        std::lock_guard<std::mutex> guard(lock_);
-        finished_workers = finished_workers_;
-        finished_workers_.clear();
-        running = remaining_workers_;
+        std::lock_guard<std::mutex> guard(mutex_);
+        finished_workers.swap(finished_workers_);
+        running = remaining_worker_count_ != 0;
       }
       for (auto& i : finished_workers) {
         i->write_report(report_writer_impl);
@@ -280,16 +282,24 @@ public:
         kill_workers = true;
       }
       if (kill_workers) {
-        std::lock_guard<std::mutex> guard(lock_);
+        std::lock_guard<std::mutex> guard(mutex_);
         kill_all_the_workers(); // Bwahahaha
         running = false;
       }
 
       if (running) {
-        ACE_OS::sleep(1);
+        std::unique_lock<std::mutex> lock(mutex_);
+        cv_.wait_for(lock, std::chrono::seconds(1));
       }
     }
     ACE_Reactor::instance()->cancel_timer(this);
+
+    DDS::Duration_t timeout = { 30, 0 };
+    if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+      std::cerr << "Waiting for report acknowledgment failed" << std::endl;
+    } else {
+      std::cout << "All reports written and acknowledged." << std::endl;
+    }
   }
 
   /// Used to the Handle Exit of a Worker
@@ -297,14 +307,15 @@ public:
   {
     pid_t pid = process->getpid();
 
-    std::lock_guard<std::mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(mutex_);
 
     const auto i = pid_to_worker_id_.find(pid);
     if (i != pid_to_worker_id_.end()) {
       auto& worker = all_workers_[i->second];
       worker->set_exit_status(process->return_value(), process->exit_code());
-      remaining_workers_--;
+      remaining_worker_count_--;
       finished_workers_.push_back(worker);
+      cv_.notify_all();
     } else {
       std::cerr << "WorkerManager::handle_exit() received an unknown PID: " << pid << std::endl;
     }
@@ -316,6 +327,7 @@ public:
   virtual int handle_timeout(const ACE_Time_Value&, const void* = nullptr)
   {
     scenario_timedout_.store(true);
+    cv_.notify_all();
     return -1;
   }
 
@@ -324,15 +336,17 @@ public:
   {
     if (signum == SIGINT) {
       sigint_.store(true);
+      cv_.notify_all();
     }
     return 0;
   }
 
 private:
   unsigned timeout_ = 0;
-  std::mutex lock_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
   std::map<WorkerId, WorkerPtr> all_workers_;
-  size_t remaining_workers_ = 0;
+  size_t remaining_worker_count_ = 0;
   std::map<pid_t, WorkerId> pid_to_worker_id_;
   std::list<WorkerPtr> finished_workers_;
   ACE_Process_Manager& process_manager_;
