@@ -8,28 +8,27 @@
 #ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/MonitorFactory.h"
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DomainParticipantFactoryImpl.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
-#include "dds/DCPS/NetworkConfigModifier.h"
-
-#include "ace/Task.h"
-#include "ace/Configuration.h"
-#include "ace/Time_Value.h"
-#include "ace/ARGV.h"
-#include "ace/Barrier.h"
-
+#include "Definitions.h"
+#include "MonitorFactory.h"
+#include "Discovery.h"
+#include "PoolAllocator.h"
+#include "DomainParticipantFactoryImpl.h"
+#include "unique_ptr.h"
+#include "ReactorTask.h"
+#include "NetworkConfigMonitor.h"
+#include "NetworkConfigModifier.h"
 #include "Recorder.h"
 #include "Replayer.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Task.h>
+#include <ace/Configuration.h>
+#include <ace/Time_Value.h>
+#include <ace/ARGV.h>
+#include <ace/Barrier.h>
 
 #include <memory>
 
@@ -45,7 +44,6 @@ namespace DCPS {
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
-class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -265,8 +263,11 @@ public:
   bool  publisher_content_filter() const;
   //@}
 
-  /// Accessor for pending data timeout.
+  /// Accessors for pending data timeout.
+  //@{
   TimeDuration pending_timeout() const;
+  void pending_timeout(const TimeDuration& value);
+  //@}
 
   /// Accessors for priority extremums for the current scheduler.
   //@{

@@ -6,10 +6,12 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "WaitSet.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "debug.h"
+
 #include "Service_Participant.h"
+
+#include "WaitSet.h"
+#include "transport/framework/TransportRegistry.h"
+#include "debug.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "GuidConverter.h"
@@ -17,26 +19,24 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
-#include "NetworkConfigMonitor.h"
-#include "NetworkConfigModifier.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
 
-#include "ace/config.h"
-#include "ace/Singleton.h"
-#include "ace/Arg_Shifter.h"
-#include "ace/Reactor.h"
-#include "ace/Select_Reactor.h"
-#include "ace/Configuration_Import_Export.h"
-#include "ace/Service_Config.h"
-#include "ace/Argv_Type_Converter.h"
-#include "ace/Auto_Ptr.h"
-#include "ace/Sched_Params.h"
-#include "ace/Malloc_Allocator.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/config.h>
+#include <ace/Singleton.h>
+#include <ace/Arg_Shifter.h>
+#include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
+#include <ace/Configuration_Import_Export.h>
+#include <ace/Service_Config.h>
+#include <ace/Argv_Type_Converter.h>
+#include <ace/Auto_Ptr.h>
+#include <ace/Sched_Params.h>
+#include <ace/Malloc_Allocator.h>
+#include <ace/OS_NS_unistd.h>
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
