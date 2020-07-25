@@ -723,14 +723,14 @@ int run_cycle(
 
   if (scenario.launch_time < ZERO) {
     auto duration = -1 * get_duration(scenario.launch_time);
-    if (duration > std::chrono::seconds::zero()) {
-      std::this_thread::sleep_for(duration);
+    if (duration > std::chrono::milliseconds(100)) {
+      std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
     }
   } else {
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::system_clock::time_point(get_duration(scenario.launch_time)) - now;
-    if (duration > std::chrono::seconds::zero()) {
-      std::this_thread::sleep_for(duration);
+    if (duration > std::chrono::milliseconds(100)) {
+      std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
     }
   }
 

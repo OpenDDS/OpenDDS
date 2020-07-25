@@ -90,14 +90,14 @@ void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero
   } else {
     if (ts < ZERO) {
       auto duration = -1 * get_duration(ts);
-      if (duration > std::chrono::seconds::zero()) {
-        std::this_thread::sleep_for(duration);
+      if (duration > std::chrono::milliseconds(100)) {
+        std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
       }
     } else {
       auto now = std::chrono::system_clock::now();
       auto duration = std::chrono::system_clock::time_point(get_duration(ts)) - now;
-      if (duration > std::chrono::seconds::zero()) {
-        std::this_thread::sleep_for(duration);
+      if (duration > std::chrono::milliseconds(100)) {
+        std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
       }
     }
   }
