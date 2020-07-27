@@ -35,6 +35,7 @@ namespace OpenDDS {
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
+    typedef MarshalTraits<MessageType> MarshalTraitsType;
     typedef typename TraitsType::MessageSequenceType MessageSequenceType;
 
     typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
@@ -74,7 +75,7 @@ namespace OpenDDS {
     typedef typename TraitsType::DataReaderType Interface;
 
     DataReaderImpl_T (void)
-    : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this)))
+    : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this))), marshall_skip_serialize_(false)
     {
     }
 
@@ -975,6 +976,15 @@ protected:
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
+    if(marshall_skip_serialize_)
+    {
+      if(!MarshalTraitsType::from_message_block(static_cast<MessageType &>(*data), static_cast<ACE_Message_Block &>(*sample.sample_)))
+      {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::dds_demarshal\n")
+                  ACE_TEXT("attempting to skip serialize but bad from_message_block.")));
+      }
+      return;
+    }
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
@@ -2243,6 +2253,9 @@ unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->da
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap  instance_map_;
+
+bool marshall_skip_serialize_;
+
 };
 
 template <typename MessageType>
