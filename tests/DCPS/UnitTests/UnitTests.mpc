@@ -124,3 +124,10 @@ project(*XtypesAssignability): dcps_test, googletest {
     XtypesAssignability.cpp
   }
 }
+
+project(*Serializer): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    Serializer.cpp
+  }
+}

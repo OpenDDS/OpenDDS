@@ -100,9 +100,11 @@ bool EncapsulationHeader::from_encoding(
     }
     break;
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::from_encoding: ")
-      ACE_TEXT("Got Encoding With Unsupported Kind: %C\n"),
-      Encoding::kind_to_string(encoding.kind()).c_str()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::from_encoding: ")
+        ACE_TEXT("Got Encoding With Unsupported Kind: %C\n"),
+        Encoding::kind_to_string(encoding.kind()).c_str()));
+    }
     return false;
   }
   return true;
@@ -175,15 +177,19 @@ bool EncapsulationHeader::to_encoding(
     break;
 
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
-      ACE_TEXT("Unsupported Encoding: %C\n"), to_string().c_str()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
+        ACE_TEXT("Unsupported Encoding: %C\n"), to_string().c_str()));
+    }
     return false;
   }
 
   if (wrong_extensibility) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
-      ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
-      to_string().c_str()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
+        ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
+        to_string().c_str()));
+    }
     return false;
   }
 
