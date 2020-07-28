@@ -1387,9 +1387,9 @@ struct Cxx11Generator : GeneratorBase
       "using " << nm << " = " << array << elem_type << bounds.str() << ";\n";
   }
 
-  void gen_anonymous_type(FieldInfo& af)
+  static void gen_anonymous_type(FieldInfo& af)
   {
-    const std::string elem_type = af.as_base_ ? map_type(af.as_base_) : "";
+    const std::string elem_type = af.as_base_ ? generator_->map_type(af.as_base_) : "";
     if (af.arr_) {
       be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
       std::string array;
@@ -1440,27 +1440,27 @@ struct Cxx11Generator : GeneratorBase
 
   static void gen_struct_members(AST_Field* field)
   {
-    const std::string nm = field->local_name()->get_string();
-    AST_Type* field_type = field->field_type();
-    AST_Type* actual_field_type = resolveActualType(field_type);
-    const Classification cls = classify(actual_field_type);
-    const std::string lang_field_type = generator_->map_type(field);
+    FieldInfo af(*field);
+    if (af.anonymous()) {
+      gen_anonymous_type(af);
+    }
 
-    const std::string assign_pre = "{ _" + nm + " = ",
+    const std::string lang_field_type = generator_->map_type(field);
+    const std::string assign_pre = "{ _" + af.name_ + " = ",
       assign = assign_pre + "val; }\n",
       move = assign_pre + "std::move(val); }\n",
-      ret = "{ return _" + nm + "; }\n";
+      ret = "{ return _" + af.name_ + "; }\n";
     std::string initializer;
-    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+    if (af.cls_ & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->lang_header_ <<
-        "  void " << nm << '(' << lang_field_type << " val) " << assign <<
-        "  " << lang_field_type << ' ' << nm << "() const " << ret <<
-        "  " << lang_field_type << "& " << nm << "() " << ret;
-      if (cls & CL_ENUM) {
-        AST_Enum* enu = AST_Enum::narrow_from_decl(actual_field_type);
+        "  void " << af.name_ << '(' << lang_field_type << " val) " << assign <<
+        "  " << lang_field_type << ' ' << af.name_ << "() const " << ret <<
+        "  " << lang_field_type << "& " << af.name_ << "() " << ret;
+      if (af.cls_ & CL_ENUM) {
+        AST_Enum* enu = AST_Enum::narrow_from_decl(af.act_);
         for (UTL_ScopeActiveIterator it(enu, UTL_Scope::IK_decls); !it.is_done(); it.next()) {
           if (it.item()->node_type() == AST_Decl::NT_enum_val) {
-            initializer = '{' + generator_->map_type(field_type)
+            initializer = '{' + generator_->map_type(af.type_)
               + "::" + it.item()->local_name()->get_string() + '}';
             break;
           }
@@ -1469,18 +1469,18 @@ struct Cxx11Generator : GeneratorBase
         initializer = "{}";
       }
     } else {
-      if (cls & CL_ARRAY) {
+      if (af.cls_ & CL_ARRAY) {
         initializer = "{}";
       }
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
-        "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
-        "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
-        "  const " << lang_field_type << "& " << nm << "() const " << ret <<
-        "  " << lang_field_type << "& " << nm << "() " << ret;
+        "  void " << af.name_ << "(const " << lang_field_type << "& val) " << assign <<
+        "  void " << af.name_ << '(' << lang_field_type << "&& val) " << move <<
+        "  const " << lang_field_type << "& " << af.name_ << "() const " << ret <<
+        "  " << lang_field_type << "& " << af.name_ << "() " << ret;
     }
     be_global->lang_header_ <<
-      "  " << lang_field_type << " _" << nm << initializer << ";\n\n";
+      "  " << lang_field_type << " _" << af.name_ << initializer << ";\n\n";
   }
 
   bool gen_struct(AST_Structure*, UTL_ScopedName* name,
@@ -1492,17 +1492,7 @@ struct Cxx11Generator : GeneratorBase
     const char* const nm = name->last_component()->get_string();
     gen_common_strunion_pre(nm);
 
-    bool has_anonymous_field = false;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      FieldInfo af(*fields[i]);
-      if (af.type_->anonymous() && af.as_base_) {
-        gen_anonymous_type(af);
-        has_anonymous_field = true;
-      }
-    }
-    if (has_anonymous_field) {
-      be_global->lang_header_ << '\n';
-    }
+    std::for_each(fields.begin(), fields.end(), gen_struct_members);
 
     be_global->lang_header_ <<
       "  " << nm << "() = default;\n"
@@ -1527,8 +1517,6 @@ struct Cxx11Generator : GeneratorBase
 
     be_global->lang_header_ << ";\n\n";
     be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
-
-    std::for_each(fields.begin(), fields.end(), gen_struct_members);
 
     gen_common_strunion_post(nm);
     be_global->impl_ <<

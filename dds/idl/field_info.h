@@ -9,6 +9,7 @@
 #define FIELD_INFO_H
 
 #include "dds_generator.h"
+
 #include <utl_scoped_name.h>
 #include <ast.h>
 
@@ -18,7 +19,7 @@ struct FieldInfo {
   struct EleLen {
     AST_Type* ele_;
     std::size_t len_;
-    explicit EleLen(FieldInfo& af);
+    explicit EleLen(const FieldInfo& af);
     bool operator<(const EleLen& o) const;
   };
   typedef std::set<EleLen> EleLenSet;
@@ -63,7 +64,7 @@ struct FieldInfo {
   explicit FieldInfo(AST_Field& field); //for anonymous types
   FieldInfo(UTL_ScopedName* sn, AST_Type* base);
   void init();
-  bool is_new(EleLenSet& el_set);
+  bool is_new(EleLenSet& el_set) const;
   bool anonymous_array() const;
   bool anonymous_sequence() const;
   bool anonymous() const;

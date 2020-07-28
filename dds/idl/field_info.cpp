@@ -6,11 +6,12 @@
  */
 
 #include "field_info.h"
+
 #include <sstream>
 
 using namespace AstTypeClassification;
 
-FieldInfo::EleLen::EleLen(FieldInfo& af) : ele_(af.as_base_), len_(af.n_elems_)
+FieldInfo::EleLen::EleLen(const FieldInfo& af) : ele_(af.as_base_), len_(af.n_elems_)
 {
 }
 
@@ -113,9 +114,9 @@ void FieldInfo::init()
     if (scoped_type_.empty()) {
       scoped_type_ = scoped(type_->name());
     }
-    //name_
+    //name_ is empty
     type_name_ = scoped_type_;
-    //struct_name_
+    //struct_name_ is empty
   }
 
   n_elems_ = 1;
@@ -148,7 +149,7 @@ void FieldInfo::init()
   }
 }
 
-bool FieldInfo::is_new(EleLenSet& el_set)
+bool FieldInfo::is_new(EleLenSet& el_set) const
 {
   return cxx11() || el_set.insert(EleLen(*this)).second;
 }

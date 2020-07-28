@@ -6,10 +6,12 @@
  */
 
 #include "metaclass_generator.h"
+
 #include "field_info.h"
 #include "be_extern.h"
-#include "utl_identifier.h"
 #include "topic_keys.h"
+
+#include <utl_identifier.h>
 
 using namespace AstTypeClassification;
 
@@ -125,25 +127,57 @@ namespace {
   std::string to_cxx_type(AST_Type* type, std::size_t& size)
   {
     const Classification cls = classify(type);
-    if (cls & CL_ENUM) { size = 4; return "ACE_CDR::ULong"; }
-    if (cls & CL_STRING) { size = 4; return string_type(cls); } // encoding of str length is 4 bytes
+    if (cls & CL_ENUM) {
+      size = 4;
+      return "ACE_CDR::ULong";
+    }
+    if (cls & CL_STRING) {
+      size = 4; // encoding of str length is 4 bytes
+      return string_type(cls);
+    }
     if (cls & CL_PRIMITIVE) {
       AST_Type* t = resolveActualType(type);
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(t);
       switch (p->pt()) {
-      case AST_PredefinedType::PT_long: size = 4; return "ACE_CDR::Long";
-      case AST_PredefinedType::PT_ulong: size = 4; return "ACE_CDR::ULong";
-      case AST_PredefinedType::PT_longlong: size = 8; return "ACE_CDR::LongLong";
-      case AST_PredefinedType::PT_ulonglong: size = 8; return "ACE_CDR::ULongLong";
-      case AST_PredefinedType::PT_short: size = 2; return "ACE_CDR::Short";
-      case AST_PredefinedType::PT_ushort: size = 2; return "ACE_CDR::UShort";
-      case AST_PredefinedType::PT_float: size = 4; return "ACE_CDR::Float";
-      case AST_PredefinedType::PT_double: size = 8; return "ACE_CDR::Double";
-      case AST_PredefinedType::PT_longdouble: size = 16; return "ACE_CDR::LongDouble";
-      case AST_PredefinedType::PT_char: size = 1; return "ACE_CDR::Char";
-      case AST_PredefinedType::PT_wchar: size = 1; return "ACE_CDR::WChar"; // encoding of wchar length is 1 byte
-      case AST_PredefinedType::PT_boolean: size = 1; return "ACE_CDR::Boolean";
-      case AST_PredefinedType::PT_octet: size = 1; return "ACE_CDR::Octet";
+      case AST_PredefinedType::PT_long:
+        size = 4;
+        return "ACE_CDR::Long";
+      case AST_PredefinedType::PT_ulong:
+        size = 4;
+        return "ACE_CDR::ULong";
+      case AST_PredefinedType::PT_longlong:
+        size = 8;
+        return "ACE_CDR::LongLong";
+      case AST_PredefinedType::PT_ulonglong:
+        size = 8;
+        return "ACE_CDR::ULongLong";
+      case AST_PredefinedType::PT_short:
+        size = 2;
+        return "ACE_CDR::Short";
+      case AST_PredefinedType::PT_ushort:
+        size = 2;
+        return "ACE_CDR::UShort";
+      case AST_PredefinedType::PT_float:
+        size = 4;
+        return "ACE_CDR::Float";
+      case AST_PredefinedType::PT_double:
+        size = 8;
+        return "ACE_CDR::Double";
+      case AST_PredefinedType::PT_longdouble:
+        size = 16;
+        return "ACE_CDR::LongDouble";
+      case AST_PredefinedType::PT_char:
+        size = 1;
+        return "ACE_CDR::Char";
+      case AST_PredefinedType::PT_wchar:
+        size = 1; // encoding of wchar length is 1 byte
+        return "ACE_CDR::WChar";
+      case AST_PredefinedType::PT_boolean:
+        size = 1;
+        return "ACE_CDR::Boolean";
+      case AST_PredefinedType::PT_octet:
+        size = 1;
+        return "ACE_CDR::Octet";
       default: throw std::invalid_argument("Unknown PRIMITIVE type");
       }
     }
@@ -213,21 +247,12 @@ namespace {
         pre = "IDL::DistinctType<";
         post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
       }
-      if (field->field_type()->anonymous()) {
-        FieldInfo f(*field);
-        be_global->impl_ <<
-          "    if (!gen_skip_over(ser, static_cast<" << f.ptr_ << ">(0))) {\n"
-          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
-          " could not be skipped\");\n"
-          "    }\n";
-      } else {
-        be_global->impl_ <<
-          "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_type << post
-          << "*>(0))) {\n"
-          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
-          " could not be skipped\");\n"
-          "    }\n";
-      }
+      std::string ptr = field->field_type()->anonymous() ?
+        FieldInfo(*field).ptr_ : (pre + cxx_type + post + '*');
+      be_global->impl_ <<
+        "    if (!gen_skip_over(ser, static_cast<" << ptr << ">(0))) {\n"
+        "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
+        "    }\n";
     }
   }
 
