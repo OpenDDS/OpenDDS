@@ -43,6 +43,8 @@ tests/security/attributes/run_test.pl --scenario Partitions_Match
 tests/security/attributes/run_test.pl --scenario Partitions_Reordered
 tests/security/attributes/run_test.pl --scenario Partitions_Subset
 tests/security/TopicWithoutPermissions/run_test.pl
+
 tests/DCPS/ParticipantLocationTopic/run_test.pl: CXX11 !NO_BUILT_IN_TOPICS !IPV6
 tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6: CXX11 !NO_BUILT_IN_TOPICS IPV6
 tests/DCPS/Restart/run_test.pl --secure
+tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE

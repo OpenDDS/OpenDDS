@@ -79,13 +79,18 @@ sub terminate_wait_kill {
 sub print_file {
   my $file = shift;
 
+  if ($ENV{'DDS_TEST_NO_LOG_FILES'}) {
+    print STDERR "<<<<<  $file  >>>>> (skipping contents)\n";
+    return;
+  }
+
   if (open FILE, "<", $file) {
-      print STDERR "<<<<<  $file  >>>>>\n";
-      while (my $line = <FILE>) {
-          print STDERR "$line";
-      }
-      print STDERR "\n<<<<<  end $file  >>>>>\n\n";
-      close FILE;
+    print STDERR "<<<<<  $file  >>>>>\n";
+    while (my $line = <FILE>) {
+      print STDERR "$line";
+    }
+    print STDERR "\n<<<<<  end $file  >>>>>\n\n";
+    close FILE;
   }
 }
 
@@ -328,7 +333,7 @@ sub new {
   $self->{dcps_security_debug} = defined $ENV{DCPSSecurityDebug} ?
     $ENV{DCPSSecurityDebug} : "";
   $self->{dcps_security_debug_level} = defined $ENV{DCPSSecurityDebugLevel} ?
-    $ENV{DCPSSecurityDebugLevel} : ($PerlDDS::security ? "9" : "");
+    $ENV{DCPSSecurityDebugLevel} : "";
   $self->{add_orb_log_file} = 1;
   $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;

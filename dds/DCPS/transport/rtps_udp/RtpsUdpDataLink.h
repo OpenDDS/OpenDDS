@@ -120,8 +120,8 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
-                   bool requires_inline_qos);
+  void add_locators(const RepoId& remote_id, const ACE_INET_Addr& narrow_address,
+                    const ACE_INET_Addr& wide_address, bool requires_inline_qos);
 
   typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
 
@@ -231,10 +231,11 @@ private:
   GuidPrefix_t local_prefix_;
 
   struct RemoteInfo {
-    RemoteInfo() : addr_(), requires_inline_qos_(false) {}
-    RemoteInfo(const ACE_INET_Addr& addr, bool iqos)
-      : addr_(addr), requires_inline_qos_(iqos) {}
-    ACE_INET_Addr addr_;
+    RemoteInfo() : narrow_addr_(), wide_addr_(), requires_inline_qos_(false) {}
+    RemoteInfo(const ACE_INET_Addr& narrow_addr, const ACE_INET_Addr& wide_addr, bool iqos)
+      : narrow_addr_(narrow_addr), wide_addr_(wide_addr), requires_inline_qos_(iqos) {}
+    ACE_INET_Addr narrow_addr_;
+    ACE_INET_Addr wide_addr_;
     bool requires_inline_qos_;
   };
 
@@ -730,7 +731,7 @@ private:
   EndpointSecurityAttributesMap endpoint_security_attributes_;
 #endif
 
-  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses) const;
+  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_narrow = false) const;
 
   struct ChangeMulticastGroup : public JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};

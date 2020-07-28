@@ -544,17 +544,20 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
 }
 
 void
-RtpsUdpDataLink::add_locator(const RepoId& remote_id,
-                             const ACE_INET_Addr& address,
-                             bool requires_inline_qos)
+RtpsUdpDataLink::add_locators(const RepoId& remote_id,
+                              const ACE_INET_Addr& narrow_address,
+                              const ACE_INET_Addr& wide_address,
+                              bool requires_inline_qos)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
+  locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_TCHAR addr_buff[256] = {};
-    address.addr_to_string(addr_buff, 256);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locator %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+    ACE_TCHAR narrow_addr_buff[256] = {};
+    narrow_address.addr_to_string(narrow_addr_buff, 256);
+    ACE_TCHAR wide_addr_buff[256] = {};
+    wide_address.addr_to_string(wide_addr_buff, 256);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s and %s\n"), LogGuid(remote_id).c_str(), narrow_addr_buff, wide_addr_buff));
   }
 }
 
@@ -2194,13 +2197,14 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
   AddrSet addrs;
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVec::iterator it = meta_submessages.begin(); it != meta_submessages.end(); ++it) {
-    if (it->dst_guid_ == GUID_UNKNOWN) {
-      addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+    const bool directed = it->dst_guid_ != GUID_UNKNOWN;
+    if (directed) {
+      accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
     } else {
-      accumulate_addresses(it->from_guid_, it->dst_guid_, addrs);
+      addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
     }
     for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
-      accumulate_addresses(it->from_guid_, *it2, addrs);
+      accumulate_addresses(it->from_guid_, *it2, addrs, directed);
     }
     if (addrs.empty()) {
       continue;
@@ -2241,13 +2245,27 @@ bool RtpsUdpDataLink::separate_message(EntityId_t entity)
 namespace {
 
 struct BundleHelper {
+  static const size_t initial_size =
+#ifdef OPENDDS_SECURITY
+    RtpsUdpSendStrategy::MaxSecureFullMessageLeadingSize;
+#else
+    0;
+#endif
+
+  static const size_t max_size_handicap =
+#ifdef OPENDDS_SECURITY
+    RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
+#else
+    0;
+#endif
+
   typedef OPENDDS_VECTOR(size_t) SizeVec;
   BundleHelper(
     const Encoding& encoding, size_t max_bundle_size,
     SizeVec& meta_submessage_bundle_sizes)
   : encoding_(encoding)
-  , max_bundle_size_(max_bundle_size)
-  , size_(0)
+  , max_bundle_size_(max_bundle_size - max_size_handicap)
+  , size_(initial_size)
   , prev_size_(0)
   , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
   {
@@ -2255,21 +2273,29 @@ struct BundleHelper {
 
   void end_bundle() {
     meta_submessage_bundle_sizes_.push_back(size_);
-    size_ = 0;
-    prev_size_ = 0;
+    size_ = initial_size;
+    prev_size_ = initial_size;
   }
 
   template <typename T>
   void push_to_next_bundle(const T&) {
     meta_submessage_bundle_sizes_.push_back(prev_size_);
     size_ -= prev_size_;
-    prev_size_ = 0;
+    prev_size_ = initial_size;
   }
 
   template <typename T>
   bool add_to_bundle(const T& val) {
     prev_size_ = size_;
+#ifdef OPENDDS_SECURITY
+    // Could be an encoded submessage (encoding happens later)
+    size_ += RtpsUdpSendStrategy::MaxSecureSubmessageLeadingSize;
+#endif
     serialized_size(encoding_, size_, val);
+#ifdef OPENDDS_SECURITY
+    // Could be an encoded submessage (encoding happens later)
+    size_ += RtpsUdpSendStrategy::MaxSecureSubmessageFollowingSize;
+#endif
     if (size_ > max_bundle_size_) {
       push_to_next_bundle(val);
       return false;
@@ -2339,25 +2365,18 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
         switch (res.sm_._d()) {
           case HEARTBEAT: {
             result = helper.add_to_bundle(res.sm_.heartbeat_sm());
-            res.sm_.heartbeat_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
             result = helper.add_to_bundle(res.sm_.acknack_sm());
-            res.sm_.acknack_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case GAP: {
             result = helper.add_to_bundle(res.sm_.gap_sm());
-            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case NACK_FRAG: {
             result = helper.add_to_bundle(res.sm_.nack_frag_sm());
-            res.sm_.nack_frag_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           default: {
@@ -2894,6 +2913,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       }
     }
   }
+
   SequenceNumber ack;
   ack.setValue(acknack.readerSNState.bitmapBase.high,
                acknack.readerSNState.bitmapBase.low);
@@ -2911,7 +2931,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
   // we don't need to do anything further.
   if (!is_final || bitmapNonEmpty(acknack.readerSNState)) {
-    ri->second.requested_changes_.push_back(acknack.readerSNState);
+    // Don't add the request if the reader is expecting durable data.
+    // Otherwise, send_and_gather_nack_replies will either answer from
+    // the send buffer or send a gap.
+    if (!ri->second.expecting_durable_data()) {
+      ri->second.requested_changes_.push_back(acknack.readerSNState);
+    }
     // Determine if the reader needs a heartbeat.
     DisjointSequence reqs;
     process_requested_changes_i(reqs, ri->second);
@@ -2939,6 +2964,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ++deliver_iter;
   }
 
+  // TODO(jrw972): Move this earlier so the acknack can actually send
+  // the durability data.  Until then, the reader must send at least two
+  // acknacks before it will get any data.
   if (first_ack) {
     link->invoke_on_start_callbacks(id_, remote, true);
   }
@@ -3986,7 +4014,7 @@ RtpsUdpDataLink::AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
   AddrSet retval;
 
-  accumulate_addresses(local, remote, retval);
+  accumulate_addresses(local, remote, retval, true);
 
   return retval;
 }
@@ -4007,7 +4035,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
 
 void
 RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
-                                                     AddrSet& addresses) const {
+                                      AddrSet& addresses, bool prefer_narrow) const {
   ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
@@ -4019,7 +4047,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    normal_addr = pos->second.addr_;
+    normal_addr = prefer_narrow ? pos->second.narrow_addr_ : pos->second.wide_addr_;
   } else {
     const GuidConverter conv(remote);
     if (conv.isReader()) {
