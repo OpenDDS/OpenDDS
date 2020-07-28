@@ -2365,18 +2365,26 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
         switch (res.sm_._d()) {
           case HEARTBEAT: {
             result = helper.add_to_bundle(res.sm_.heartbeat_sm());
+            res.sm_.heartbeat_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
             result = helper.add_to_bundle(res.sm_.acknack_sm());
+            res.sm_.acknack_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case GAP: {
             result = helper.add_to_bundle(res.sm_.gap_sm());
+            res.sm_.gap_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case NACK_FRAG: {
             result = helper.add_to_bundle(res.sm_.nack_frag_sm());
+            res.sm_.nack_frag_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           default: {
