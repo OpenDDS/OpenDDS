@@ -28,97 +28,52 @@ bool FieldInfo::cxx11()
 }
 
 std::string FieldInfo::at_pfx() {
-  return cxx11() ? "T_" : "_";
+  return cxx11() ? "AnonymousType_" : "_";
 }
 
-std::string FieldInfo::get_type_name(AST_Type& field)
+std::string FieldInfo::scoped_type(AST_Type& field_type, const std::string& field_name)
 {
-  std::string n = scoped(field.name());
-  if (!field.anonymous()) {
+  std::string n = scoped(field_type.name());
+  if (!field_type.anonymous()) {
     return n;
   }
-  n = n.substr(0, n.rfind(scope_op) + 2) + at_pfx() + field.local_name()->get_string();
-  return (field.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+  n = n.substr(0, n.rfind(scope_op) + 2) + at_pfx() + field_name;
+  return (field_type.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
 }
 
-std::string FieldInfo::underscored_type_name(UTL_ScopedName* sn, AST_Type& field)
+std::string FieldInfo::underscore(const std::string& scoped)
 {
-  std::string n = dds_generator::scoped_helper(sn, "_");
-  if (!field.anonymous()) {
-    return n;
-  }
-  std::size_t i = n.rfind(scope_op);
-  return n.substr(0, i + 2) + at_pfx() + n.substr(i + 2);
-}
-
-std::string FieldInfo::underscore(const std::string& scoped_type)
-{
-  std::string s = scoped_type;
+  std::string s = scoped;
   for (std::size_t i = s.find(scope_op); i != s.npos; i = s.find(scope_op, i + 2)) {
     s.replace(i, 2, "_");
   }
   return s;
 }
 
-std::string FieldInfo::ref(const std::string& scoped_t, const std::string& underscored_t, const std::string& const_s)
+std::string FieldInfo::ref(const std::string& scoped, const std::string& underscored, const std::string& const_s)
 {
-  return "IDL::DistinctType<" + const_s + scoped_t + ", " + underscored_t + "_tag>";
+  return "IDL::DistinctType<" + const_s + scoped + ", " + underscored + "_tag>";
 }
 
-// for anonymous types
-FieldInfo::FieldInfo(AST_Field& field) :
-  type_(field.field_type()),
-  name_(field.local_name()->get_string()),
-  underscored_(underscored_type_name(type_->name(), *type_))
+FieldInfo::FieldInfo(AST_Field& field)
+  : type_(field.field_type())
+  , name_(field.local_name()->get_string())
+  , scoped_type_(scoped_type(*type_, name_))
+  , underscored_(underscore(scoped_type_))
+  , struct_name_(scoped_type_.substr(0, scoped_type_.rfind(scope_op)))
+  , type_name_(scoped_type_.substr(scoped_type_.rfind(scope_op) + 2))
+  , act_(resolveActualType(type_))
+  , cls_(classify(act_))
+  , arr_(AST_Array::narrow_from_decl(type_))
+  , seq_(AST_Sequence::narrow_from_decl(type_))
+  , as_base_(arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : 0))
+  , as_act_(as_base_ ? resolveActualType(as_base_) : 0)
+  , as_cls_(as_act_ ? classify(as_act_) : CL_UNKNOWN)
+  , scoped_elem_(as_base_ ? scoped(as_base_->name()) : "")
+  , underscored_elem_(as_base_ ? underscore(scoped_elem_) : "")
+  , elem_ref_(as_base_ ? ref(scoped_elem_, underscored_elem_, "") : "")
+  , elem_const_ref_(as_base_ ? ref(scoped_elem_, underscored_elem_) : "")
 {
-  init();
-}
-
-FieldInfo::FieldInfo(UTL_ScopedName* sn, AST_Type* base) :
-  type_(base),
-  underscored_(underscored_type_name(sn, *type_)),
-  scoped_type_(scoped(sn))
-{
-  init();
-}
-
-void FieldInfo::init()
-{
-  act_ = resolveActualType(type_);
-  cls_ = classify(act_);
-  arr_ = AST_Array::narrow_from_decl(type_);
-  seq_ = AST_Sequence::narrow_from_decl(type_);
-  as_base_ = arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : 0);
-  as_act_ = as_base_ ? resolveActualType(as_base_) : 0;
-  as_cls_ = as_act_ ? classify(as_act_) : CL_UNKNOWN;
-  scoped_elem_ = as_base_ ? scoped(as_base_->name()) : "";
-  underscored_elem_ = as_base_ ? underscore(scoped_elem_) : "";
-  if (!scoped_elem_.empty() && !underscored_elem_.empty()) {
-    elem_ref_ = ref(scoped_elem_, underscored_elem_, "");
-    elem_const_ref_ = ref(scoped_elem_, underscored_elem_);
-  }
-
-  if (type_->anonymous() && as_base_) {
-    scoped_type_ = scoped(type_->name());
-    std::size_t i = scoped_type_.rfind(scope_op);
-    struct_name_ = scoped_type_.substr(0, i);
-    if (!name_.empty()) {
-      type_name_ = at_pfx() + name_;
-      if (seq_) { type_name_ += "_seq"; }
-      scoped_type_ = struct_name_ + "::" + type_name_;
-      underscored_ = underscore(scoped_type_);
-    } else {
-      type_name_ = scoped_type_.substr(i + 2);
-    }
-  } else {
-    if (scoped_type_.empty()) {
-      scoped_type_ = scoped(type_->name());
-    }
-    //name_ is empty
-    type_name_ = scoped_type_;
-    //struct_name_ is empty
-  }
-
   n_elems_ = 1;
   if (arr_) {
     for (size_t i = 0; i < arr_->n_dims(); ++i) {
@@ -152,16 +107,6 @@ void FieldInfo::init()
 bool FieldInfo::is_new(EleLenSet& el_set) const
 {
   return cxx11() || el_set.insert(EleLen(*this)).second;
-}
-
-bool FieldInfo::anonymous_array() const
-{
-  return type_->anonymous() && arr_ && (cls_ & CL_ARRAY);
-}
-
-bool FieldInfo::anonymous_sequence() const
-{
-  return type_->anonymous() && seq_ && (cls_ & CL_SEQUENCE);
 }
 
 bool FieldInfo::anonymous() const

@@ -27,29 +27,27 @@ struct FieldInfo {
   static const std::string scope_op;
   static bool cxx11();
   static std::string at_pfx();
-  static std::string get_type_name(AST_Type& field);
-  static std::string underscored_type_name(UTL_ScopedName* sn, AST_Type& field);
-  static std::string underscore(const std::string& scoped_type);
-  static std::string ref(const std::string& scoped_t, const std::string& underscored_t, const std::string& const_s = "const ");
+  static std::string scoped_type(AST_Type& field_type, const std::string& field_name);
+  static std::string underscore(const std::string& scoped);
+  static std::string ref(const std::string& scoped, const std::string& underscored, const std::string& const_s = "const ");
 
   AST_Type* type_;
-  std::string name_;
-  std::string underscored_;
+  const std::string name_;
+  const std::string scoped_type_;
+  const std::string underscored_;
+  const std::string struct_name_;
+  const std::string type_name_;
   AST_Type* act_;
-  AstTypeClassification::Classification cls_;
+  const AstTypeClassification::Classification cls_;
   AST_Array* arr_;
   AST_Sequence* seq_;
   AST_Type* as_base_;
   AST_Type* as_act_;
-  AstTypeClassification::Classification as_cls_;
-  std::string scoped_elem_;
-  std::string underscored_elem_;
-  std::string elem_ref_;
-  std::string elem_const_ref_;
-
-  std::string scoped_type_;
-  std::string struct_name_;
-  std::string type_name_;
+  const AstTypeClassification::Classification as_cls_;
+  const std::string scoped_elem_;
+  const std::string underscored_elem_;
+  const std::string elem_ref_;
+  const std::string elem_const_ref_;
 
   std::size_t n_elems_;
   std::string length_;
@@ -61,12 +59,8 @@ struct FieldInfo {
   std::string const_ref_;
   std::string ptr_;
 
-  explicit FieldInfo(AST_Field& field); //for anonymous types
-  FieldInfo(UTL_ScopedName* sn, AST_Type* base);
-  void init();
+  explicit FieldInfo(AST_Field& field);
   bool is_new(EleLenSet& el_set) const;
-  bool anonymous_array() const;
-  bool anonymous_sequence() const;
   bool anonymous() const;
 };
 

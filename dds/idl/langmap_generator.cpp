@@ -100,7 +100,7 @@ struct GeneratorBase
       return map_type_string(chartype, false);
     }
     if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
-      return FieldInfo::get_type_name(*type);
+      return scoped(type->name());
     }
     if (cls & CL_INTERFACE) {
       return scoped(type->name()) + "_var";
@@ -1441,7 +1441,7 @@ struct Cxx11Generator : GeneratorBase
   static void gen_struct_members(AST_Field* field)
   {
     FieldInfo af(*field);
-    if (af.anonymous()) {
+    if (af.type_->anonymous()) {
       gen_anonymous_type(af);
     }
 

@@ -311,7 +311,7 @@ namespace {
     std::string fieldType = (cls & CL_STRING) ?
       string_type(cls) : scoped(field->field_type()->name());
     FieldInfo af(*field);
-    if (af.as_base_ && field->field_type()->anonymous()) {
+    if (af.as_base_ && af.type_->anonymous()) {
       fieldType = af.scoped_type_;
     }
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))

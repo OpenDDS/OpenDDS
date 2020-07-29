@@ -1531,7 +1531,7 @@ namespace {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
-      string tdname = FieldInfo::get_type_name(*typedeff);
+      string tdname = scoped(typedeff->name());
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         intro += "  " + getArrayForany(prefix.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
@@ -1609,7 +1609,6 @@ namespace {
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
-      string tdname = FieldInfo::get_type_name(*typedeff);
       const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         string pre = prefix;
@@ -2048,9 +2047,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   for (size_t i = 0; i < fields.size(); ++i) {
     if (fields[i]->field_type()->anonymous()) {
       FieldInfo af(*fields[i]);
-      if (af.anonymous_array()) {
+      if (af.arr_) {
         gen_anonymous_array(af);
-      } else if (af.anonymous_sequence() && af.is_new(anonymous_seq_generated)) {
+      } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
         gen_anonymous_sequence(af);
       }
     }
