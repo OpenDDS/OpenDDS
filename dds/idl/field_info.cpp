@@ -96,7 +96,7 @@ FieldInfo::FieldInfo(AST_Field& field)
     arg_ = "wrap";
     ref_ = ref(scoped_type_, underscored_, "");
     const_ref_ = ref(scoped_type_, underscored_);
-    ptr_ = "IDL::DistinctType<" + scoped_type_ + ", " + underscored_ + "_tag>*";
+    ptr_ = ref_ + '*';
   } else {
     ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
     const_ref_ = "const " + ref_;

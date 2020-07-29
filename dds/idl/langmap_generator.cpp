@@ -1368,58 +1368,36 @@ struct Cxx11Generator : GeneratorBase
       "class " << name->last_component()->get_string() << ";\n";
   }
 
-  void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
+  static void gen_array(AST_Array* arr, const std::string& type, const std::string& elem, const std::string& ind = "")
   {
-    be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
-    AST_Type* elem = arr->base_type();
-    const std::string elem_type = map_type(elem);
-
-    std::ostringstream bounds;
     std::string array;
+    std::ostringstream bounds;
     for (ACE_CDR::ULong dim = arr->n_dims(); dim; --dim) {
-      const ACE_CDR::ULong extent = arr->dims()[dim - 1]->ev()->u.ulval;
       array += "std::array<";
-      bounds << ", " << extent << '>';
+      bounds << ", " << arr->dims()[dim - 1]->ev()->u.ulval << '>';
     }
-
-    be_global->lang_header_ <<
-      "using " << nm << " = " << array << elem_type << bounds.str() << ";\n";
+    be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
+    be_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
   }
 
-  static void gen_anonymous_type(FieldInfo& af)
+  void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
   {
-    const std::string elem_type = af.as_base_ ? generator_->map_type(af.as_base_) : "";
-    if (af.arr_) {
-      be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
-      std::string array;
-      std::ostringstream bounds;
-      for (ACE_CDR::ULong dim = af.arr_->n_dims(); dim; --dim) {
-        const ACE_CDR::ULong extent = af.arr_->dims()[dim - 1]->ev()->u.ulval;
-        array += "std::array<";
-        bounds << ", " << extent << '>';
-      }
-      be_global->lang_header_ <<
-        "  using " << af.type_name_ << " = " << array << elem_type << bounds.str() << ";\n";
-    } else if (af.seq_) {
-      be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ <<
-        "  using " << af.type_name_ << " = std::vector<" << elem_type << ">;\n";
-    }
+    gen_array(arr, tdname->last_component()->get_string(), map_type(arr->base_type()));
   }
 
   void gen_array_traits(UTL_ScopedName*, AST_Array*) {}
   void gen_array_typedef(const char*, AST_Type*) {}
   void gen_typedef_varout(const char*, AST_Type*) {}
 
-  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  static void gen_sequence(const std::string& type, const std::string& elem,  const std::string& ind = "")
   {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
-    AST_Type* elem = seq->base_type();
-    const std::string elem_type = map_type(elem);
-    be_global->lang_header_ <<
-      "using " << nm << " = std::vector<" << elem_type << ">;\n";
+    be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
+  }
+
+  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  {
+    gen_sequence(tdname->last_component()->get_string(), map_type(seq->base_type()));
   }
 
   static void gen_common_strunion_pre(const char* nm)
@@ -1441,8 +1419,13 @@ struct Cxx11Generator : GeneratorBase
   static void gen_struct_members(AST_Field* field)
   {
     FieldInfo af(*field);
-    if (af.type_->anonymous()) {
-      gen_anonymous_type(af);
+    if (af.type_->anonymous() && af.as_base_) {
+      const std::string elem_type = generator_->map_type(af.as_base_);
+      if (af.arr_) {
+        gen_array(af.arr_, af.type_name_, elem_type, "  ");
+      } else if (af.seq_) {
+        gen_sequence(af.type_name_, elem_type, "  ");
+      }
     }
 
     const std::string lang_field_type = generator_->map_type(field);
