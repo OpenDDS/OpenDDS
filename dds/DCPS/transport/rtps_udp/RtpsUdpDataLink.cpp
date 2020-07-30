@@ -2254,18 +2254,11 @@ struct BundleHelper {
     0;
 #endif
 
-  static const size_t max_size_handicap =
-#ifdef OPENDDS_SECURITY
-    RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
-#else
-    0;
-#endif
-
   BundleHelper(
     const Encoding& encoding, size_t max_bundle_size,
     SizeVec& meta_submessage_bundle_sizes)
   : encoding_(encoding)
-  , max_bundle_size_(max_bundle_size - max_size_handicap)
+  , max_bundle_size_(max_bundle_size)
   , size_(initial_size)
   , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
   {
@@ -2291,9 +2284,16 @@ struct BundleHelper {
     size_ += submessage_size;
 #ifdef OPENDDS_SECURITY
     // Could be an encoded submessage (encoding happens later)
+    align(size_, RTPS::SM_ALIGN);
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageFollowingSize;
 #endif
-    if (size_ > max_bundle_size_) {
+    size_t compare_size = size_;
+#ifdef OPENDDS_SECURITY
+    // Could be an encoded rtps message (encoding happens later)
+    align(compare_size, RTPS::SM_ALIGN);
+    compare_size += RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
+#endif
+    if (compare_size > max_bundle_size_) {
       const size_t chunk_size = size_ - prev_size;
       meta_submessage_bundle_sizes_.push_back(prev_size);
       size_ = initial_size + chunk_size;
