@@ -134,10 +134,26 @@ namespace {
    // a union with the discriminatorset to the default value for the discriminator type.
     //if this selects a branch then the selected member is also set to the default value for the member type.
     //otherwise the value of the union is fully specified by the discriminator value
-
     } else if (fld_cls & CL_ARRAY) {
-      // TODO
-      //val = string("set_default(") + name + ");\n";
+      AST_Array* arr = AST_Array::narrow_from_decl(actual_type);
+      string cxx_elem = scoped(arr->base_type()->name());
+      string temp = name;
+      if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
+        temp.erase(temp.size() - 2);
+      }
+      temp += "_temp";
+      std::replace( temp.begin(), temp.end(), '.', '_');
+      std::replace( temp.begin(), temp.end(), '[', '_');
+      std::replace( temp.begin(), temp.end(), ']', '_');
+      if (use_cxx11) {
+        string pre = "IDL::DistinctType<" + scoped(type->name()) + ", " +
+          dds_generator::scoped_helper(type->name(), "_") + "_tag>(" + name + ")";
+        val += string("  set_default(") + pre + ");\n";
+      } else {
+        val = scoped(type->name()) + "_forany " + temp + "(const_cast<"
+          + scoped(type->name()) + "_slice*>(" + name + "));\n";
+        val += string("  set_default(") + temp + ");\n";
+      }
     } else if (fld_cls & CL_ENUM) {
       // For now, simply return the first value of the enumeration.
       // Must be changed, if support for @default_literal is desired.
@@ -770,6 +786,19 @@ namespace {
     size_t n_elems = 1;
     for (size_t i = 0; i < arr->n_dims(); ++i) {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
+    }
+    {
+      Function set_default("set_default", "void");
+      set_default.addArg("stru", cxx);
+      set_default.endArgs();
+      string indent = "  ";
+      string var_name = "stru";
+      if (use_cxx11) {
+        be_global->impl_ << "  " << scoped(arr->name()) + "& arr = stru;\n";
+        var_name = "arr";
+      }
+      NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+      be_global->impl_ << "    " << type_to_default(elem, var_name + nfl.index_);
     }
     {
       Function serialized_size("serialized_size", "void");
@@ -2112,7 +2141,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           switch (be_global->try_construct(fields[i])) {
           case tryconstructfailaction_use_default:
             cases << "        strm.skip(end_of_field - strm.pos_rd());\n";
-            cases << "        stru." << field_name << "." << seq_resize_func << "(0);\n";
+            cases << "        set_default(stru." << field_name << ");\n";
             break;
           case tryconstructfailaction_discard:
           case tryconstructfailaction_trim:
