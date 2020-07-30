@@ -3,42 +3,19 @@
 
 module moduleA {
 
-typedef double D3[3];
-typedef long L2x3x4a[2][3][4];
+typedef double Double3[3];
+typedef long Long2x3[2][3];
+typedef Double3 Double3_x2[2];
+typedef sequence<long> LongSeq;
+typedef sequence<long, 3> Long3Seq;
+typedef string String2x3x4[2][3][4];
+typedef string<10> BoundedString;
 
-@topic
-struct StructA {
-  @key D3 position;
-  @key double velocity[3];
-  L2x3x4a l2x3x4;
-  short s2x3x4a[2][3][4];
-  short s2x3x4a_2nd[2][3][4];
-  //@key short s2x3x4a_key[2][3][4];
-  sequence<long, 3> a_l3seq;
+struct MultiDimArrayStruct {
+  Long2x3 l2x3;
+  Double3_x2 d3_x2;
+  String2x3x4 str2x3x4;
 };
-
-struct StructB {
-  sequence<short> ids;
-  sequence<long, 3> l3;
-};
-
-}; //moduleA
-
-
-typedef short Short3Array[3];
-typedef short Short2x3Array[2][3];
-typedef double Double2x3x4Array[2][3][4];
-typedef string Str2x3x4x5Array[2][3][4][5];
-typedef Short3Array Short3Array_x2[2];
-
-struct StructOfMultiDimArray {
-  Str2x3x4x5Array str2x3x4x5arr;
-  Short3Array_x2 s3arr_x2arr;
-};
-
-typedef sequence<long> LongSequence;
-typedef sequence<long, 3> Long3Sequence;
-typedef string<100> BoundedString;
 
 struct NS {
   long n;
@@ -54,40 +31,42 @@ typedef struct XYZ_ {
 typedef sequence<XYZ> XYZSequence;
 
 @topic
-struct TestStruct {
+struct TopicA {
+  @key Double3 d3_key;
+  @key long l3_key[3];
+  //@key Long2x3 l2x3_key;
+  //@key short s2x3_key[2][3];
+
   char c;
   float f;
+  MultiDimArrayStruct mda;
+
+  short s3[3];
+  long l2x3[2][3];
+  long l3x2[3][2];
+  short s2x3x4[2][3][4];
+  short s2x3x4_2nd[2][3][4];
+
+  LongSeq lseq;
+  Long3Seq l3seq;
+
+  sequence<short> ss;
+  sequence<short> ss_2nd;
+  sequence<long, 3> l3s;
+  sequence<long, 3> l3s_2nd;
+  sequence<long, 5> l5s;
+
   string str;
-  XYZ position;
-
-  Short3Array s3arr;
-  Short2x3Array s2x3arr;
-  Double2x3x4Array d2x3x4arr;
-  StructOfMultiDimArray smda;
-
-  LongSequence lseq;
-  Long3Sequence l3seq;
   BoundedString bstr;
-  XYZSequence xyzseq;
+  string<20> bstr20;
+  sequence<string> strs;
+  //sequence<string<30>> str30s;
+  sequence<BoundedString> bstrs;
 
-  // prefix a_ denotes anonymous type fields
-
-  short a_s3arr[3];
-  short a_s3arr_2nd[3];
-  @key long a_l2arr_key[2];
-  //@key short a_s2x3arr_key[2][3];
-  short a_s2x3arr[2][3];
-  double a_d2x3x4arr[2][3][4];
-
-  sequence<long> a_lseq;
-  sequence<long> a_lseq_2nd;
-  sequence<long, 3> a_l3seq;
-  sequence<long, 3> a_l3seq_2nd;
-  sequence<long, 5> a_l5seq;
-
-  string<200> a_bstr;
-  sequence<XYZ> a_xyzseq;
-  sequence<NS, 5> a_ns5seq;
+  XYZ position;
+  XYZSequence positions;
+  sequence<XYZ> xyzs;
+  sequence<NS, 5> ns5s;
 
   //test C++ keyword used as anonymous type field
   //to see all escaping is done correctly
@@ -96,11 +75,12 @@ struct TestStruct {
   sequence<long, 3> class; // _tao_seq_CORBA_Long__3 _cxx_class;
 };
 
-// ========== ========== ========== ========== ==========
-//from Relay.idl
+}; //moduleA
+
+
 #include <dds/DdsDcpsCore.idl>
 
-module RtpsRelay {
+module moduleB {
   typedef octet GuidPrefix_t[12]; //GUID prefix bytes - uniquely specify the participant
   typedef octet EntityKey_t[3];   //Key portion of Entity identifier
 
@@ -123,9 +103,21 @@ module RtpsRelay {
     DDS::PublisherQos publisher_qos;
   };
 
+  // anonymous types ---------- ---------- ----------
+
+  struct EntityId_a {
+    @key octet entityKey[3];
+    @key octet entityKind;
+  };
+
+  struct GUID_a {
+    @key octet guidPrefix[12];
+    @key EntityId_a entityId;
+  };
+
   @topic
   struct ReaderEntry {
-    @key GUID_t guid;
+    @key GUID_a guid;
     string topic_name;
     string type_name;
     DDS::DataReaderQos data_reader_qos;
@@ -134,23 +126,12 @@ module RtpsRelay {
 
   @topic
   struct GuidNameAddress {
-    @key GUID_t guid;
+    @key GUID_a guid;
     @key string name;
     string address;
   };
 
-  typedef sequence<GUID_t> GuidSequence;
-
   struct RelayHeader {
-    GuidSequence to;
-  };
-//...
-
-  // test anonymous fields in module and topic
-  @topic
-  struct AnonymousFields {
-    @key GUID_t guid;
-//    @key short a_s2x3arr[2][3];
-    sequence<long, 5> a_l5seq;
+    sequence<GUID_a> to;
   };
 };
