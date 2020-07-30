@@ -2244,6 +2244,8 @@ bool RtpsUdpDataLink::separate_message(EntityId_t entity)
 
 namespace {
 
+typedef OPENDDS_VECTOR(size_t) SizeVec;
+
 struct BundleHelper {
   static const size_t initial_size =
 #ifdef OPENDDS_SECURITY
@@ -2252,64 +2254,57 @@ struct BundleHelper {
     0;
 #endif
 
-  static const size_t max_size_handicap =
-#ifdef OPENDDS_SECURITY
-    RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
-#else
-    0;
-#endif
-
-  typedef OPENDDS_VECTOR(size_t) SizeVec;
   BundleHelper(
     const Encoding& encoding, size_t max_bundle_size,
     SizeVec& meta_submessage_bundle_sizes)
   : encoding_(encoding)
-  , max_bundle_size_(max_bundle_size - max_size_handicap)
+  , max_bundle_size_(max_bundle_size)
   , size_(initial_size)
-  , prev_size_(0)
   , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
   {
   }
 
-  void end_bundle() {
+  void end_bundle()
+  {
     meta_submessage_bundle_sizes_.push_back(size_);
     size_ = initial_size;
-    prev_size_ = initial_size;
   }
 
   template <typename T>
-  void push_to_next_bundle(const T&) {
-    meta_submessage_bundle_sizes_.push_back(prev_size_);
-    size_ -= prev_size_;
-    prev_size_ = initial_size;
-  }
-
-  template <typename T>
-  bool add_to_bundle(const T& val) {
-    prev_size_ = size_;
+  bool add_to_bundle(T& submessage)
+  {
+    const size_t prev_size = size_;
 #ifdef OPENDDS_SECURITY
     // Could be an encoded submessage (encoding happens later)
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageLeadingSize;
 #endif
-    serialized_size(encoding_, size_, val);
+    const size_t submessage_size = serialized_size(encoding_, submessage);
+    submessage.smHeader.submessageLength = static_cast<CORBA::UShort>(submessage_size - RTPS::SMHDR_SZ);
+    align(size_, RTPS::SM_ALIGN);
+    size_ += submessage_size;
 #ifdef OPENDDS_SECURITY
     // Could be an encoded submessage (encoding happens later)
+    align(size_, RTPS::SM_ALIGN);
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageFollowingSize;
 #endif
-    if (size_ > max_bundle_size_) {
-      push_to_next_bundle(val);
+    size_t compare_size = size_;
+#ifdef OPENDDS_SECURITY
+    // Could be an encoded rtps message (encoding happens later)
+    align(compare_size, RTPS::SM_ALIGN);
+    compare_size += RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
+#endif
+    if (compare_size > max_bundle_size_) {
+      const size_t chunk_size = size_ - prev_size;
+      meta_submessage_bundle_sizes_.push_back(prev_size);
+      size_ = initial_size + chunk_size;
       return false;
     }
     return true;
   }
 
-  size_t prev_size_diff() const {
-    return size_ - prev_size_;
-  }
-
   const Encoding& encoding_;
-  size_t max_bundle_size_;
-  size_t size_, prev_size_;
+  const size_t max_bundle_size_;
+  size_t size_;
   SizeVec& meta_submessage_bundle_sizes_;
 };
 
@@ -2321,7 +2316,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
   AddrDestMetaSubmessageMap& adr_map,
   MetaSubmessageIterVecVec& meta_submessage_bundles,
   OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
-  OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
+  SizeVec& meta_submessage_bundle_sizes)
 {
   using namespace RTPS;
 
@@ -2365,26 +2360,18 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
         switch (res.sm_._d()) {
           case HEARTBEAT: {
             result = helper.add_to_bundle(res.sm_.heartbeat_sm());
-            res.sm_.heartbeat_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
             result = helper.add_to_bundle(res.sm_.acknack_sm());
-            res.sm_.acknack_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case GAP: {
             result = helper.add_to_bundle(res.sm_.gap_sm());
-            res.sm_.gap_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case NACK_FRAG: {
             result = helper.add_to_bundle(res.sm_.nack_frag_sm());
-            res.sm_.nack_frag_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           default: {
@@ -2425,7 +2412,7 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   // Build reasonably-sized submessage bundles based on our destination map
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
   OPENDDS_VECTOR(AddrSet) meta_submessage_bundle_addrs; // for a bundle's address set
-  OPENDDS_VECTOR(size_t) meta_submessage_bundle_sizes; // for allocating the bundle's buffer
+  SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
   bundle_mapped_meta_submessages(
     encoding, adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs,
     meta_submessage_bundle_sizes);
