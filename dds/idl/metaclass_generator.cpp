@@ -178,7 +178,8 @@ namespace {
       case AST_PredefinedType::PT_octet:
         size = 1;
         return "ACE_CDR::Octet";
-      default: throw std::invalid_argument("Unknown PRIMITIVE type");
+      default:
+        throw std::invalid_argument("Unknown PRIMITIVE type");
       }
     }
     return scoped(type->name());
@@ -247,7 +248,7 @@ namespace {
         pre = "IDL::DistinctType<";
         post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
       }
-      std::string ptr = field->field_type()->anonymous() ?
+      const std::string ptr = field->field_type()->anonymous() ?
         FieldInfo(*field).ptr_ : (pre + cxx_type + post + '*');
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << ptr << ">(0))) {\n"

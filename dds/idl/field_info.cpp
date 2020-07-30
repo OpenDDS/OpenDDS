@@ -11,7 +11,9 @@
 
 using namespace AstTypeClassification;
 
-FieldInfo::EleLen::EleLen(const FieldInfo& af) : ele_(af.as_base_), len_(af.n_elems_)
+FieldInfo::EleLen::EleLen(const FieldInfo& af)
+  : ele_(af.as_base_)
+  , len_(af.n_elems_)
 {
 }
 
@@ -27,7 +29,8 @@ bool FieldInfo::cxx11()
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 }
 
-std::string FieldInfo::at_pfx() {
+std::string FieldInfo::at_pfx()
+{
   return cxx11() ? "AnonymousType_" : "_";
 }
 
