@@ -698,9 +698,6 @@ private:
   /// Encoding Settings
   Encoding encoding_;
 
-  /// Logical reading position of the stream.
-  size_t pos_;
-
   /// Indicates whether bytes will be swapped for this stream.
   bool swap_bytes_;
 
@@ -718,6 +715,9 @@ private:
    * started at.
    */
   unsigned char align_wshift_;
+
+  /// Logical reading position of the stream.
+  size_t pos_;
 
   /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];
