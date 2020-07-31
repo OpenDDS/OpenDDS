@@ -13,6 +13,9 @@
 
 #include <utl_identifier.h>
 
+#include <cstddef>
+#include <stdexcept>
+
 using namespace AstTypeClassification;
 
 namespace {
