@@ -293,6 +293,7 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
+  , pos_(0)
 {
   this->encoding(encoding);
   reset_alignment();
@@ -304,6 +305,7 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
+  , pos_(0)
 {
   encoding(Encoding(kind, endianness));
   reset_alignment();
@@ -315,6 +317,7 @@ Serializer::Serializer(ACE_Message_Block* chain,
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
+  , pos_(0)
 {
   encoding(Encoding(kind, swap_bytes));
   reset_alignment();
