@@ -505,6 +505,21 @@ std::ostream& operator<<(std::ostream& o,
   }
 }
 
+inline std::string bounded_arg(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  std::ostringstream arg;
+  const Classification cls = classify(type);
+  if (cls & CL_STRING) {
+    AST_String* const str = AST_String::narrow_from_decl(type);
+    arg << str->max_size()->ev()->u.ulval;
+  } else if (cls & CL_SEQUENCE) {
+    AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+    arg << seq->max_size()->ev()->u.ulval;
+  }
+  return arg.str();
+}
+
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
                           size_t& n_labels, bool& has_default)
@@ -601,8 +616,43 @@ void generateCaseBody(
       "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
       "      uni._d(disc);\n"
       "      return true;\n"
-      "    }\n"
-      "    return false;\n";
+      "    }\n";
+
+    if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
+      switch (be_global->try_construct(branch)) {
+      case tryconstructfailaction_trim:
+        be_global->impl_ <<
+          "    if (strm.good_bit() && tmp.in() && (" << bounded_arg(br) << " < ACE_OS::strlen(tmp.in()))) {\n"
+          "      tmp[" << bounded_arg(br) << "] = 0;\n"
+          "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+          "      uni._d(disc);\n"
+          "      return true;\n"
+          "    } else {\n"
+          "      return false;\n"
+          "    }\n";
+        break;
+      case tryconstructfailaction_use_default: {
+        std::string default_val = "\"\"";
+        if (br_cls & CL_WIDE) {
+          default_val = "L\"\"";
+        }
+        be_global->impl_ <<
+          "    if (strm.good_bit() && uni." << name << "() && (" << bounded_arg(br) << " < ACE_OS::strlen(uni." << name << "()))) {\n"
+          "      uni." << name << "(" << default_val << ");\n"
+          "      uni._d(disc);\n"
+          "      return true;\n"
+          "    } else {\n"
+          "      return false;\n"
+          "    }\n";
+        break;
+      }
+      case tryconstructfailaction_discard:
+        be_global->impl_ << "        return false;\n";
+        break;
+      }
+    } else {
+      be_global->impl_ << "    return false;\n";
+    }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
     std::string intro;

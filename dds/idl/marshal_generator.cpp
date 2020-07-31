@@ -437,20 +437,6 @@ namespace {
     return true;
   }
 
-  std::string bounded_arg(AST_Type* type)
-  {
-    std::ostringstream arg;
-    const Classification cls = classify(type);
-    if (cls & CL_STRING) {
-      AST_String* const str = AST_String::narrow_from_decl(type);
-      arg << str->max_size()->ev()->u.ulval;
-    } else if (cls & CL_SEQUENCE) {
-      AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
-      arg << seq->max_size()->ev()->u.ulval;
-    }
-    return arg.str();
-  }
-
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -939,13 +925,13 @@ namespace {
   }
 
   string getArrayForany(const char* prefix, const char* fname,
-                        const string& cxx_fld)
+                        const string& cxx_fld, const string& temp_var_suffix = "")
   {
     string local = fname;
     if (local.size() > 2 && local.substr(local.size() - 2, 2) == "()") {
       local.erase(local.size() - 2);
     }
-    return cxx_fld + "_forany " + prefix + '_' + local + "(const_cast<"
+    return cxx_fld + "_forany " + prefix + '_' + local + temp_var_suffix + "(const_cast<"
       + cxx_fld + "_slice*>(" + prefix + "." + fname + "));";
   }
 
@@ -1395,7 +1381,8 @@ namespace {
         if (accessor) {
           local.erase(local.size() - 2);
         }
-        intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname) + '\n';
+        intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname, "_sc") + '\n';
+        local += "_sc";
         fieldref += '_';
       } else {
         fieldref += '.';
@@ -2138,12 +2125,22 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             cases << "        return false;\n";
             break;
           }
-        } else if (fld_cls & CL_STRUCTURE) {
-          std::string seq_resize_func = (use_cxx11) ? "resize" : "length";
+        } else if ((fld_cls & CL_STRUCTURE) || (fld_cls & CL_UNION)) {
           switch (be_global->try_construct(fields[i])) {
           case tryconstructfailaction_use_default:
             cases << "        strm.skip(end_of_field - strm.pos_rd());\n";
             cases << "        set_default(stru." << field_name << ");\n";
+            break;
+          case tryconstructfailaction_discard:
+          case tryconstructfailaction_trim:
+            cases << "        return false;\n";
+            break;
+          }
+        } else if (fld_cls & CL_ARRAY) {
+          switch (be_global->try_construct(fields[i])) {
+          case tryconstructfailaction_use_default:
+            cases << "        strm.skip(end_of_field - strm.pos_rd());\n";
+            cases << "        " << type_to_default(field_type, string("stru.") + field_name);
             break;
           case tryconstructfailaction_discard:
           case tryconstructfailaction_trim:
