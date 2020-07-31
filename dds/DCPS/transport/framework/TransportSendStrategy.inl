@@ -9,9 +9,11 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE
-OpenDDS::DCPS::TransportSendStrategy::SendMode
-OpenDDS::DCPS::TransportSendStrategy::mode() const
+TransportSendStrategy::SendMode TransportSendStrategy::mode() const
 {
   DBG_ENTRY_LVL("TransportSendStrategy","mode",6);
 
@@ -19,16 +21,15 @@ OpenDDS::DCPS::TransportSendStrategy::mode() const
 }
 
 ACE_INLINE
-OpenDDS::DCPS::ThreadSynch*
-OpenDDS::DCPS::TransportSendStrategy::synch() const
+ThreadSynch* TransportSendStrategy::synch() const
 {
   DBG_ENTRY_LVL("TransportSendStrategy","synch",6);
 
   return synch_.get();
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::send_start()
+ACE_INLINE
+void TransportSendStrategy::send_start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_start",6);
 
@@ -38,8 +39,8 @@ OpenDDS::DCPS::TransportSendStrategy::send_start()
     ++this->start_counter_;
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::link_released(bool flag)
+ACE_INLINE
+void TransportSendStrategy::link_released(bool flag)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","link_released",6);
 
@@ -47,16 +48,16 @@ OpenDDS::DCPS::TransportSendStrategy::link_released(bool flag)
   this->link_released_ = flag;
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::relink(bool)
+ACE_INLINE
+void TransportSendStrategy::relink(bool)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","relink",6);
   // The subsclass needs implement this function for re-establishing
   // the link upon send failure.
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::suspend_send()
+ACE_INLINE
+void TransportSendStrategy::suspend_send()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","suspend_send",6);
   GuardType guard(this->lock_);
@@ -67,8 +68,8 @@ OpenDDS::DCPS::TransportSendStrategy::suspend_send()
   }
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::resume_send()
+ACE_INLINE
+void TransportSendStrategy::resume_send()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","resume_send",6);
   GuardType guard(this->lock_);
@@ -103,8 +104,8 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
   }
 }
 
-ACE_INLINE const char*
-OpenDDS::DCPS::TransportSendStrategy::mode_as_str(SendMode mode)
+ACE_INLINE
+const char* TransportSendStrategy::mode_as_str(SendMode mode)
 {
   static const char* SendModeStr[] = { "MODE_NOT_SET",
                                        "MODE_DIRECT",
@@ -114,40 +115,41 @@ OpenDDS::DCPS::TransportSendStrategy::mode_as_str(SendMode mode)
                                        "UNKNOWN"
                                      };
 
-  return SendModeStr [mode];
+  return SendModeStr[mode];
 }
 
-ACE_INLINE bool
-OpenDDS::DCPS::TransportSendStrategy::isDirectMode()
+ACE_INLINE
+bool TransportSendStrategy::isDirectMode()
 {
   return this->mode_ == MODE_DIRECT;
 }
 
-ACE_INLINE ssize_t
-OpenDDS::DCPS::TransportSendStrategy::send_bytes(const iovec iov[],
-                                                 int n,
-                                                 int& /*bp*/)
+ACE_INLINE
+ssize_t TransportSendStrategy::send_bytes(const iovec iov[], int n, int& /*bp*/)
 {
   return send_bytes_i(iov, n);
 }
 
-ACE_INLINE ACE_HANDLE
-OpenDDS::DCPS::TransportSendStrategy::get_handle()
+ACE_INLINE
+ACE_HANDLE TransportSendStrategy::get_handle()
 {
   return ACE_INVALID_HANDLE;
 }
 
 
-ACE_INLINE size_t
-OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
+ACE_INLINE
+size_t TransportSendStrategy::max_message_size() const
 {
   return 0;
 }
 
-ACE_INLINE OpenDDS::DCPS::TransportQueueElement*
-OpenDDS::DCPS::TransportSendStrategy::current_packet_first_element() const
+ACE_INLINE
+TransportQueueElement* TransportSendStrategy::current_packet_first_element() const
 {
   return this->elems_.peek();
 }
+
+} // namespace OpenDDS
+} // namespace DCPS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

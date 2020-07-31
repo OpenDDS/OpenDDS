@@ -8,28 +8,27 @@
 #ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/MonitorFactory.h"
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DomainParticipantFactoryImpl.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
-#include "dds/DCPS/NetworkConfigModifier.h"
-
-#include "ace/Task.h"
-#include "ace/Configuration.h"
-#include "ace/Time_Value.h"
-#include "ace/ARGV.h"
-#include "ace/Barrier.h"
-
+#include "Definitions.h"
+#include "MonitorFactory.h"
+#include "Discovery.h"
+#include "PoolAllocator.h"
+#include "DomainParticipantFactoryImpl.h"
+#include "unique_ptr.h"
+#include "ReactorTask.h"
+#include "NetworkConfigMonitor.h"
+#include "NetworkConfigModifier.h"
 #include "Recorder.h"
 #include "Replayer.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Task.h>
+#include <ace/Configuration.h>
+#include <ace/Time_Value.h>
+#include <ace/ARGV.h>
+#include <ace/Barrier.h>
 
 #include <memory>
 
@@ -45,7 +44,6 @@ namespace DCPS {
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
-class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -266,8 +264,11 @@ public:
   bool  publisher_content_filter() const;
   //@}
 
-  /// Accessor for pending data timeout.
+  /// Accessors for pending data timeout.
+  //@{
   TimeDuration pending_timeout() const;
+  void pending_timeout(const TimeDuration& value);
+  //@}
 
   /// Accessors for priority extremums for the current scheduler.
   //@{
@@ -453,6 +454,23 @@ private:
                                 const ACE_TCHAR* filename);
 
   /**
+   * Load the domain range template configuration
+   * prior to discovery and domain configuration
+   */
+  int load_domain_ranges(ACE_Configuration_Heap& cf);
+
+  /**
+   * Load the discovery template information
+   */
+  int load_discovery_templates(ACE_Configuration_Heap& cf);
+
+  /**
+   * Process the domain range template and activate the
+   * domain for the given domain ID
+   */
+  int configure_domain_range_instance(DDS::DomainId_t domainId);
+
+  /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
@@ -557,6 +575,29 @@ private:
   /// is used when the entity tree does not specify one.  If
   /// not set, the default transport configuration is used.
   ACE_TString global_transport_config_;
+
+  // domain range template support
+  struct DomainRange
+  {
+    DDS::DomainId_t range_start;
+    DDS::DomainId_t range_end;
+    OPENDDS_STRING discovery_template_name;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) domain_info;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) disc_info;
+
+    DomainRange() : range_start(-1), range_end(-1) {}
+  };
+
+  OPENDDS_VECTOR(DomainRange) domain_ranges_;
+
+  int parse_domain_range(const OPENDDS_STRING& range, int& start, int& end);
+
+  bool has_domain_range() const;
+
+  bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
+
+  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
 
 public:
   /// Pointer to the monitor factory that is used to create

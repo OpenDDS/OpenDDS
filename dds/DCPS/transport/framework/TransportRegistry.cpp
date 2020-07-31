@@ -27,8 +27,6 @@
 
 
 namespace {
-  const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
-
   /// Used for sorting
   bool predicate(const OpenDDS::DCPS::TransportInst_rch& lhs,
                  const OpenDDS::DCPS::TransportInst_rch& rhs)
@@ -102,13 +100,15 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   for (int index = 0;
        cf.enumerate_sections(root, index, sect_name) == 0;
        ++index) {
-    if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0) {
-      // found the [transport/*] section, now iterate through subsections...
+    if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0 ||
+        ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0) {
+      // found the [transport/*] or [transport_template/*] section,
+      // now iterate through subsections...
       ACE_Configuration_Section_Key sect;
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("failed to open section %s\n"),
+                          ACE_TEXT("failed to open section %C\n"),
                           sect_name.c_str()),
                          -1);
       } else {
@@ -128,7 +128,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         if (processSections(cf, sect, keys) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("too many nesting layers in [%s] section.\n"),
+                            ACE_TEXT("too many nesting layers in [%C] section.\n"),
                             sect_name.c_str()),
                            -1);
         }
@@ -178,7 +178,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("failed to open section [%s]\n"),
+                          ACE_TEXT("failed to open section [%C]\n"),
                           sect_name.c_str()),
                          -1);
       } else {
@@ -199,7 +199,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
           // Don't allow multiple layers of nesting ([config/x/y]).
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("too many nesting layers in [%s] section.\n"),
+                            ACE_TEXT("too many nesting layers in [%C] section.\n"),
                             sect_name.c_str()),
                            -1);
         }
@@ -233,6 +233,15 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                 configInfo.second.push_back(token);
                 value.erase(0, pos + 1);
               }
+
+              // does this config specify a transport_template?
+              for (OPENDDS_VECTOR(TransportTemplate)::iterator it = transport_templates_.begin(); it != transport_templates_.end(); ++it) {
+                if (it->transport_template_name == value) {
+                  it->config_name = config_id;
+                  break;
+                }
+              }
+
               configInfo.second.push_back(value);
 
               configInfoVec.push_back(configInfo);
@@ -251,7 +260,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                     config->passive_connect_duration_)) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%C] section.\n"),
+                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%C) in [config/%C] section.\n"),
                                   value.c_str(), config_id.c_str()),
                                  -1);
               }
@@ -272,13 +281,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
           }
         }
       }
-    } else if (ACE_OS::strncmp(sect_name.c_str(), OLD_TRANSPORT_PREFIX.c_str(),
-                               OLD_TRANSPORT_PREFIX.length()) == 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("Obsolete transport configuration found (%s).\n"),
-                        sect_name.c_str()),
-                       -1);
     }
   }
 
@@ -314,6 +316,132 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
     for (OPENDDS_LIST(TransportInst_rch)::const_iterator it = instances.begin();
          it != instances.end(); ++it) {
       config->instances_.push_back(*it);
+    }
+  }
+
+  return 0;
+}
+
+int
+TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
+{
+  const ACE_Configuration_Section_Key& root = cf.root_section();
+  ACE_Configuration_Section_Key transport_sect;
+
+  if (cf.open_section(root, TRANSPORT_TEMPLATE_SECTION_NAME, 0, transport_sect) != 0) {
+    if (DCPS_debug_level > 0) {
+      // This is not an error if the configuration file does not have
+      // any domain range (sub)section.
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_template_configuration ")
+                 ACE_TEXT("failed to open [%s] section.\n"),
+                 TRANSPORT_TEMPLATE_SECTION_NAME));
+    }
+
+    return 0;
+
+  } else {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_templates ")
+                   ACE_TEXT("config has %s sections.\n"),
+                   TRANSPORT_TEMPLATE_SECTION_NAME));
+    }
+
+    // Ensure there are no properties in this section
+    ValueMap vm;
+    if (pullValues(cf, transport_sect, vm) > 0) {
+      // There are values inside [domain]
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
+                        ACE_TEXT("domain sections must have a subsection name\n")),
+                       -1);
+    }
+    // Process the subsections of this section (the individual domains)
+    KeyList keys;
+    if (processSections(cf, transport_sect, keys) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
+                        ACE_TEXT("too many nesting layers in the [transport_template] section.\n")),
+                       -1);
+    }
+
+    // Loop through the [transport_template/*] sections
+    for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+      TransportTemplate element;
+      element.instantiate_per_participant = false;
+      element.transport_template_name = it->first;
+
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) [transport_template/%C]\n"),
+                   element.transport_template_name.c_str()));
+      }
+
+      ValueMap values;
+      pullValues(cf, it->second, values);
+      OPENDDS_STRING rule;
+      OPENDDS_STRING customization;
+
+      for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+        OPENDDS_STRING name = it->first;
+        if (name == "instantiation_rule") {
+          rule = it->second;
+          if (rule == "per_participant") {
+            element.instantiate_per_participant = true;
+          }
+          if (DCPS_debug_level > 0) {
+            OPENDDS_STRING flag = element.instantiate_per_participant ? "true" : "false";
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [transport_template/%C]: instantiantion rule == %C\n"),
+                       element.transport_template_name.c_str(), flag.c_str()));
+          }
+        } else if (name == ACE_TEXT_ALWAYS_CHAR(CUSTOMIZATION_SECTION_NAME)) {
+          customization = it->second;
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [transport_template/%C]: customization == %C\n"),
+                       element.transport_template_name.c_str(), customization.c_str()));
+          }
+
+          ACE_Configuration_Section_Key custom_sect;
+          if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
+            ValueMap vcm;
+
+            if (pullValues(cf, custom_sect, vcm) > 0) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
+                                ACE_TEXT("Customization sections must have a subsection name\n")),
+                                -1);
+            }
+
+            // Process the subsections of the custom section
+            KeyList keys;
+            if (processSections(cf, custom_sect, keys) != 0) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
+                                ACE_TEXT("too many nesting layers in the [Customization] section.\n")),
+                                -1);
+              }
+
+              // add customizations to domain range
+              for (KeyList::const_iterator iter = keys.begin(); iter != keys.end(); ++iter) {
+                if (customization == iter->first) {
+                  ValueMap values;
+                  pullValues(cf, iter->second, values);
+
+                  for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+                    element.customizations[it->first] = it->second;
+                  }
+                }
+              }
+            }
+        } else {
+          element.transport_info[it->first] = it->second;
+        }
+      }
+
+      transport_templates_.push_back(element);
     }
   }
 
@@ -493,6 +621,10 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
   return type_map_.count(name);
 }
 
+bool TransportRegistry::has_transport_template() const
+{
+  return transport_templates_.size() > 0;
+}
 
 void
 TransportRegistry::release()
@@ -505,6 +637,7 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
+  transport_templates_.clear();
   type_map_.clear();
   inst_map_.clear();
   config_map_.clear();
@@ -517,6 +650,202 @@ TransportRegistry::released() const
 {
   GuardType guard(lock_);
   return released_;
+}
+
+OPENDDS_STRING
+TransportRegistry::get_transport_template_instance_name(const DDS::DomainId_t id)
+{
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = "transport_template_instance_";
+  configured_name += to_dds_string(id);
+  return configured_name;
+}
+
+OPENDDS_STRING
+TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
+{
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = "templ_config_";
+  configured_name += to_dds_string(id);
+  return configured_name;
+}
+
+int
+TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, const ACE_TString& config_name)
+{
+  OPENDDS_STRING transport_inst_name = get_transport_template_instance_name(domain);
+  OPENDDS_STRING config_inst_name = get_config_instance_name(domain);
+
+  if (has_transport_template()) {
+    TransportTemplate tr_inst;
+
+    if (get_transport_template_info(config_name, tr_inst)) {
+      ACE_Configuration_Heap tcf;
+      tcf.open();
+      const ACE_Configuration_Section_Key& root = tcf.root_section();
+
+      // create config
+      ACE_Configuration_Section_Key csect;
+      tcf.open_section(root, ACE_TEXT("config"), 1 /* create */, csect);
+      ACE_Configuration_Section_Key csub_sect;
+      tcf.open_section(csect, ACE_TEXT_CHAR_TO_TCHAR(config_inst_name.c_str()), 1 /* create */, csub_sect);
+      tcf.set_string_value(csub_sect, ACE_TEXT("transports"), ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()));
+
+      // create matching transport section
+      ACE_Configuration_Section_Key tsect;
+      tcf.open_section(root, ACE_TEXT("transport"), 1 /* create */, tsect);
+      ACE_Configuration_Section_Key tsub_sect;
+      tcf.open_section(tsect, ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()), 1 /* create */, tsub_sect);
+
+      for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
+           it != tr_inst.transport_info.end(); ++it) {
+        // customization.
+        OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator idx = tr_inst.customizations.find(it->first);
+        if (idx != tr_inst.customizations.end()) {
+          OPENDDS_STRING addr = it->second;
+
+          // only add_domain_id_to_ip_addr and add_domain_id_to_port are supported at this time.
+          if (idx->second.find("add_domain_id_to_ip_addr") != std::string::npos) {
+            size_t pos = addr.find_last_of(".");
+            if (pos != OPENDDS_STRING::npos) {
+              OPENDDS_STRING custom = addr.substr(pos + 1);
+              size_t cpos = custom.find(":");
+              OPENDDS_STRING port= "";
+              if (cpos != OPENDDS_STRING::npos) {
+                port = custom.substr(cpos);
+              }
+              int val = 0;
+              if (!convertToInteger(custom, val)) {
+                ACE_ERROR_RETURN((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                                  ACE_TEXT("create_transport_template_instance ")
+                                  ACE_TEXT("could not convert %C to integer\n"),
+                                  custom.c_str()),
+                                -1);
+              }
+              val += domain;
+              addr = addr.substr(0, pos);
+              addr += "." + to_dds_string(val);
+              addr += port;
+            } else {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                                ACE_TEXT("create_transport_template_instance ")
+                                ACE_TEXT("could not add_domain_id_to_ip_addr for address %C\n"),
+                                idx->second.c_str()),
+                              -1);
+            }
+
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) TransportRegistry::")
+                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_ip_addr: %C=%C\n"),
+                         it->first.c_str(), addr.c_str()));
+            }
+          }
+
+          if (idx->second.find("add_domain_id_to_port") != std::string::npos) {
+            size_t pos = addr.find_last_of(":");
+            if (pos == OPENDDS_STRING::npos) {
+              // See 9.6.1.3 in the RTPS 2.2 protocol specification.
+              const int PB = 7400;
+              const int DG = 250;
+              const int D2 = 1;
+              int rtpsPort = PB + DG * domain + D2;
+              addr += ":" + to_dds_string(rtpsPort);
+            } else {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                                ACE_TEXT("create_transport_template_instance ")
+                                ACE_TEXT("could not add_domain_id_to_port for %C since port exists.\n"),
+                                idx->second.c_str()),
+                              -1);
+            }
+
+            if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) TransportRegistry::")
+                         ACE_TEXT("create_transport_template_instance processing add_domain_id_to_port: %C=%C\n"),
+                         it->first.c_str(), addr.c_str()));
+            }
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                              ACE_TEXT("create_transport_template_instance ")
+                              ACE_TEXT("No support for %C customization\n"),
+                              idx->second.c_str()),
+                            -1);
+          }
+
+          // write
+          tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(idx->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
+
+        } else {
+          tcf.set_string_value(tsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
+          if (DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) TransportRegistry::")
+                         ACE_TEXT("create_transport_template_instance adding %C=%C\n"),
+                         it->first.c_str(), it->second.c_str()));
+          }
+        }
+      }
+
+      // load transport
+      int status = this->load_transport_configuration("transport_config_" + to_dds_string(domain), tcf);
+
+      if (status != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
+                          ACE_TEXT("load_discovery_configuration() returned %d\n"),
+                          status),
+                        -1);
+      }
+
+    }
+
+  }
+
+  return 0;
+}
+
+bool
+TransportRegistry::config_has_transport_template(const ACE_TString& config_name) const
+{
+  for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+    if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool
+TransportRegistry::get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst)
+{
+  bool ret = false;
+  if (has_transport_template()) {
+    for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+      if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
+        inst.transport_template_name = i->transport_template_name;
+        inst.config_name = i->config_name;
+        inst.instantiate_per_participant = i->instantiate_per_participant;
+        inst.customizations = i->customizations;
+        inst.transport_info = i->transport_info;
+
+        ret = true;
+        break;
+      }
+    }
+  }
+
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportRegistry::get_transport_template_info: ")
+               ACE_TEXT("%C config %s\n"),
+               ret ? "found" : "did not find", config_name.c_str()));
+  }
+
+  return ret;
 }
 
 }

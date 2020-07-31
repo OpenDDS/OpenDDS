@@ -96,7 +96,7 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
     if (status == DDS::RETCODE_OK && si.valid_data) {
 
       // Calculate the stateless stuff
-      const Builder::TimeStamp& now = Builder::get_time();
+      const Builder::TimeStamp& now = Builder::get_sys_time();
       double latency = Builder::to_seconds_double(now - data.sent_time);
       double jitter = -1.0;
       double round_trip_latency = -1.0;
@@ -192,13 +192,13 @@ WorkerDataReaderListener::on_subscription_matched(
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
       if (datareader_) {
-        last_discovery_time_->value.time_prop(Builder::get_time());
+        last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
     }
   } else {
     if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datareader_) {
-        last_discovery_time_->value.time_prop(Builder::get_time());
+        last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
     }
   }

@@ -83,7 +83,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   enable_time_->value.time_prop(ZERO);
   last_discovery_time_->value.time_prop(Builder::ZERO);
 
-  create_time_->value.time_prop(get_time());
+  create_time_->value.time_prop(get_hr_time());
   datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
   if (CORBA::is_nil(datareader_.in())) {
     throw std::runtime_error("datareader creation failed");
@@ -111,7 +111,7 @@ DataReader::~DataReader() {
 
 void DataReader::enable() {
   if (enable_time_->value.time_prop() == ZERO) {
-    enable_time_->value.time_prop(get_time());
+    enable_time_->value.time_prop(get_hr_time());
     datareader_->enable();
   }
 }
