@@ -122,7 +122,8 @@ namespace {
     },
   };
 
-  string type_to_default(AST_Type* type, const string& name) {
+  string type_to_default(AST_Type* type, const string& name)
+  {
     string val;
     AST_Type* actual_type = resolveActualType(type);
     Classification fld_cls = classify(actual_type);
@@ -135,7 +136,7 @@ namespace {
     //if this selects a branch then the selected member is also set to the default value for the member type.
     //otherwise the value of the union is fully specified by the discriminator value
     } else if (fld_cls & CL_ARRAY) {
-      AST_Array* arr = AST_Array::narrow_from_decl(actual_type);
+      AST_Array* arr = dynamic_cast<AST_Array*>(actual_type);
       string cxx_elem = scoped(arr->base_type()->name());
       string temp = name;
       if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
@@ -157,9 +158,9 @@ namespace {
     } else if (fld_cls & CL_ENUM) {
       // For now, simply return the first value of the enumeration.
       // Must be changed, if support for @default_literal is desired.
-      AST_Enum* enu = AST_Enum::narrow_from_decl(actual_type);
+      AST_Enum* enu = dynamic_cast<AST_Enum*>(actual_type);
       UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
-      AST_EnumVal *item = AST_EnumVal::narrow_from_decl(i.item());
+      AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
       string enum_val = item->name()->get_string_copy();
       if (use_cxx11) {
         enum_val = scoped(type->name()) + "::" + item->local_name()->get_string();
@@ -575,7 +576,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -627,7 +628,7 @@ namespace {
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
-      AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+      AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
       string bound;
       if (!seq->unbounded()) {
         bound = (use_cxx11 ? bounded_arg(seq) : "seq.maximum()");
@@ -722,7 +723,7 @@ namespace {
             streamAndCheck(">> IDL::DistinctType<" + cxx_elem + ", " +
                            elem_underscores + "_tag>(seq[i])", 4);
         } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
-        //just copy into whatever and ditch after
+          //just copy into whatever and ditch after
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
         }
         be_global->impl_ <<
@@ -1313,7 +1314,7 @@ namespace {
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
         return indent +
@@ -1888,6 +1889,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       return special_structs[i].gen(cxx);
     }
   }
+
   RtpsFieldCustomizer rtpsCustom(cxx);
 
   {
@@ -2708,9 +2710,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     Classification disc_cls = classify(disc_type);
     ACE_CDR::ULong default_enum_val = 0;
     if (disc_cls & CL_ENUM) {
-      AST_Enum* enu = AST_Enum::narrow_from_decl(disc_type);
+      AST_Enum* enu = dynamic_cast<AST_Enum*>(disc_type);
       UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
-      AST_EnumVal *item = AST_EnumVal::narrow_from_decl(i.item());
+      AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
       default_enum_val = item->constant_value()->ev()->u.eval;
     }
     bool found = false;
