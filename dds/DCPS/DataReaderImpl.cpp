@@ -434,9 +434,9 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-      ACE_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-      if(!writers_.count(remote_id)){
+      if (!writers_.count(remote_id)) {
         return;
       }
       writers_[remote_id]->handle_ = handle;
@@ -854,10 +854,8 @@ DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
+DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
 {
-  DDS::DataReaderQos qos = qos_arg;
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1179,7 +1177,12 @@ DataReaderImpl::enable()
 
   if (topic_servant_) {
     if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), false)) {
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
+          ACE_TEXT("none of the data representation QoS is allowed by the ")
+          ACE_TEXT("topic type IDL annotations\n")));
+      }
+      return DDS::RETCODE_ERROR;
     }
   }
 
@@ -1256,6 +1259,11 @@ DataReaderImpl::enable()
           ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
 
+    }
+
+    const DDS::ReturnCode_t setup_deserialization_result = setup_deserialization();
+    if (setup_deserialization_result != DDS::RETCODE_OK) {
+      return setup_deserialization_result;
     }
 
     const TransportLocatorSeq& trans_conf_info = this->connection_info();
@@ -3284,6 +3292,59 @@ ICE::Endpoint*
 DataReaderImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();
+}
+
+DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
+{
+  const DDS::DataRepresentationIdSeq repIds =
+    get_effective_data_rep_qos(qos_.representation.value);
+  bool success = false;
+  if (cdr_encapsulation()) {
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      Encoding::Kind encoding_kind;
+      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+        if (Encoding::KIND_XCDR1 == encoding_kind ||
+            Encoding::KIND_XCDR2 == encoding_kind) {
+          decoding_modes_.insert(encoding_kind);
+          success = true;
+        } else if (DCPS_debug_level >= 2) {
+          // Supported but incompatible data representation
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+                     ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                     ACE_TEXT("Skip %C data representation.\n"),
+                     Encoding::kind_to_string(encoding_kind).c_str()));
+        }
+      } else if (DCPS_debug_level) {
+        // Unsupported or unknown data representation
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                   ACE_TEXT("Encountered unsupported or unknown data representation.\n")));
+      }
+    }
+  } else {
+    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
+    success = true;
+  }
+  if (!success) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                 ACE_TEXT("Could not find a valid data representation.\n")));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+               ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+               ACE_TEXT("Setup successfully with data representations: ")));
+    OPENDDS_SET(Encoding::Kind)::iterator it = decoding_modes_.begin();
+    for (; it != decoding_modes_.end(); ++it) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C "), Encoding::kind_to_string(*it).c_str()));
+    }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT(".\n")));
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)

@@ -740,12 +740,12 @@ TransportSendStrategy::terminate_send(bool graceful_disconnecting)
     if ((this->mode_ == MODE_TERMINATED || this->mode_ == MODE_SUSPEND)
         && !this->graceful_disconnecting_) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "It was already terminated non gracefully, will not set to graceful disconnecting \n"));
+            "It was already terminated non gracefully, will not set to graceful disconnecting\n"));
       reset_flag = false;
     }
   }
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:  Now flip to MODE_TERMINATED \n"));
+  VDBG((LM_DEBUG, "(%P|%t) DBG:  Now flip to MODE_TERMINATED\n"));
 
   this->clear(MODE_TERMINATED);
 
@@ -1065,7 +1065,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         if (max_message_size) { // fragmentation enabled
           const size_t avail = this->space_available();
           if (element_length > avail) {
-            VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting\n"), 0);
+            VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
             ElementPair ep = element->fragment(avail);
             element = ep.first;
             element_length = element->msg()->total_length();
@@ -1879,15 +1879,13 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
   this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
 }
 
-void
-OpenDDS::DCPS::TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
+void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
 {
   GuardType guard(this->lock_);
   element->data_delivered();
 }
 
-size_t
-TransportSendStrategy::space_available() const
+size_t TransportSendStrategy::space_available() const
 {
   const size_t used = this->max_header_size_ + this->header_.length_,
     max_msg = this->max_message_size();

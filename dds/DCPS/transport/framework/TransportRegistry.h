@@ -93,12 +93,18 @@ public:
 
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
-  /// the TransportRegistry.  This is called by the Service_Participant
+  /// the TransportRegistry. This is called by the Service_Participant
   /// at initialization time. This function iterates each section in
   /// the configuration file, and creates TransportInst and
   /// TransportConfig objects and adds them to the registry.
   int load_transport_configuration(const OPENDDS_STRING& file_name,
                                    ACE_Configuration_Heap& cf);
+
+  /// For internal use by OpenDDS DCPS layer:
+  /// Process the transport_template configuration in the
+  /// ACE_Configuration_Heap object.
+  /// Called by the Service_Participant at initialization time.
+  int load_transport_templates(ACE_Configuration_Heap& cf);
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -110,6 +116,14 @@ public:
   void load_transport_lib(const OPENDDS_STRING& transport_type);
 
   bool released() const;
+
+  bool config_has_transport_template(const ACE_TString& config_name) const;
+
+  int create_transport_template_instance(DDS::DomainId_t domain, const ACE_TString& config_name);
+
+  OPENDDS_STRING get_transport_template_instance_name(DDS::DomainId_t id);
+
+  OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -136,6 +150,22 @@ private:
   bool released_;
 
   mutable LockType lock_;
+
+  // transport template support
+  struct TransportTemplate
+  {
+    OPENDDS_STRING transport_template_name;
+    OPENDDS_STRING config_name;
+    bool instantiate_per_participant;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) transport_info;
+  };
+
+  OPENDDS_VECTOR(TransportTemplate) transport_templates_;
+
+  bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
+
+  bool has_transport_template() const;
 };
 
 } // namespace DCPS

@@ -262,6 +262,24 @@ public:
   std::string name() const;
 };
 
+// @try_construct ============================================================
+
+enum TryConstructFailAction {
+  tryconstructfailaction_discard,
+  tryconstructfailaction_use_default,
+  tryconstructfailaction_trim,
+};
+
+class TryConstructAnnotation : public AnnotationWithEnumValue<TryConstructFailAction> {
+public:
+  std::string definition() const;
+  std::string name() const;
+  virtual TryConstructFailAction default_value() const
+  {
+    return tryconstructfailaction_discard;
+  }
+};
+
 // OpenDDS Specific Annotations
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {

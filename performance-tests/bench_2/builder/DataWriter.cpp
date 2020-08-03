@@ -94,7 +94,7 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   enable_time_->value.time_prop(ZERO);
   last_discovery_time_->value.time_prop(Builder::ZERO);
 
-  create_time_->value.time_prop(get_time());
+  create_time_->value.time_prop(get_hr_time());
   datawriter_ = publisher_->create_datawriter(topic_, qos, listener_, listener_status_mask_);
   if (CORBA::is_nil(datawriter_.in())) {
     throw std::runtime_error("datawriter creation failed");
@@ -122,7 +122,7 @@ DataWriter::~DataWriter() {
 
 void DataWriter::enable() {
   if (enable_time_->value.time_prop() == ZERO) {
-    enable_time_->value.time_prop(get_time());
+    enable_time_->value.time_prop(get_hr_time());
     datawriter_->enable();
   }
 }

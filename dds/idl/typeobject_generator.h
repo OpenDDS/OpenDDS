@@ -27,6 +27,8 @@ public:
 
   void gen_type_flag_str(std::string& type_flag_str, ExtensibilityKind exten, bool can_be_mutable, AST_Decl* node);
 
+  void gen_member_flag_str(std::string& member_flag_str, TryConstructFailAction trycon, AST_Decl* node);
+
   static std::string tag_type(UTL_ScopedName* name);
 };
 

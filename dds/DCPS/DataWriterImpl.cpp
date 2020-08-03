@@ -544,6 +544,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       for (SendStateDataSampleList::iterator list_el = list.begin();
            list_el != list.end(); ++list_el) {
+        list_el->get_header().historic_sample_ = true;
+
         if (list_el->get_header().sequence_ > seq) {
           seq = list_el->get_header().sequence_;
         }
@@ -774,6 +776,8 @@ void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
 
       for (SendStateDataSampleList::iterator list_el = list.begin();
            list_el != list.end(); ++list_el) {
+        list_el->get_header().historic_sample_ = true;
+
         if (list_el->get_header().sequence_ > seq) {
           seq = list_el->get_header().sequence_;
         }
@@ -964,11 +968,8 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 #endif
 }
 
-DDS::ReturnCode_t
-DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
+DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
 {
-  DDS::DataWriterQos qos = qos_arg;
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1372,7 +1373,12 @@ DataWriterImpl::enable()
   }
 
   if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), true)) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
+        ACE_TEXT("none of the data representation QoS is allowed by the ")
+        ACE_TEXT("topic type IDL annotations\n")));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   // Note: do configuration based on QoS in enable() because
@@ -1515,6 +1521,7 @@ DataWriterImpl::enable()
   // Done after enable_transport so we know its swap_bytes.
   const DDS::ReturnCode_t setup_serialization_result = setup_serialization();
   if (setup_serialization_result != DDS::RETCODE_OK) {
+    data_container_->shutdown_ = true;
     return setup_serialization_result;
   }
 

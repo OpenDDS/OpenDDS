@@ -16,7 +16,9 @@ namespace Builder {
 
 Bench_Builder_Export extern const TimeStamp ZERO;
 
-Bench_Builder_Export TimeStamp get_time();
+Bench_Builder_Export TimeStamp get_sys_time();
+
+Bench_Builder_Export TimeStamp get_hr_time();
 
 Bench_Builder_Export TimeStamp from_seconds(int32_t sec);
 

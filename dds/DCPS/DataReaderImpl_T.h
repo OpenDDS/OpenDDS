@@ -26,11 +26,11 @@ namespace OpenDDS {
    *
    */
   template <typename MessageType>
-    class
+  class
 #if ( __GNUC__ == 4 && __GNUC_MINOR__ == 1)
     OpenDDS_Dcps_Export
 #endif
-    DataReaderImpl_T
+  DataReaderImpl_T
     : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>,
       public virtual OpenDDS::DCPS::DataReaderImpl
   {
@@ -915,6 +915,26 @@ namespace OpenDDS {
       if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
         return;
       }
+
+      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+            ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+            ACE_TEXT("Encoding kind of the received sample (%C) does not ")
+            ACE_TEXT("match the ones specified by DataReader.\n"),
+            TraitsType::type_name(),
+            Encoding::kind_to_string(encoding.kind()).c_str()));
+        }
+        return;
+      }
+      if (DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+          ACE_TEXT("Deserializing with encoding kind %C.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+      }
+
       ser.encoding(encoding);
     }
 
@@ -993,6 +1013,26 @@ protected:
       if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
         return;
       }
+
+      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+            ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+            ACE_TEXT("Encoding kind %C of the received sample does not ")
+            ACE_TEXT("match the ones specified by DataReader.\n"),
+            TraitsType::type_name(),
+            Encoding::kind_to_string(encoding.kind()).c_str()));
+        }
+        return;
+      }
+      if (DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+          ACE_TEXT("Deserializing with encoding kind %C.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+      }
+
       ser.encoding(encoding);
     }
 
@@ -1006,7 +1046,7 @@ protected:
       ser >> *data;
     }
     if (!ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
                  ACE_TEXT("deserialization failed, dropping sample.\n"),
                  TraitsType::type_name()));
       return;
@@ -2244,7 +2284,7 @@ unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->da
 
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
-InstanceMap  instance_map_;
+InstanceMap instance_map_;
 };
 
 template <typename MessageType>

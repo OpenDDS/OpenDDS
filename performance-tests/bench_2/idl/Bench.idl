@@ -14,11 +14,9 @@ module Bench {
 // Data Section
 // ---
 
-#pragma DCPS_DATA_TYPE "Bench::Data"
-#pragma DCPS_DATA_KEY  "Bench::Data id.high"
-#pragma DCPS_DATA_KEY  "Bench::Data id.low"
+  @topic
   struct Data {
-    UniqueId id;
+    @key UniqueId id;
     unsigned long msg_count;
     unsigned long total_hops;
     unsigned long hop_count;
@@ -132,25 +130,9 @@ module Bench {
       BUSY
     };
 
-#pragma DCPS_DATA_TYPE "Bench::NodeController::Status"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[9]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[8]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[7]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[6]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[5]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[4]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[3]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[2]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[1]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[0]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKind"
+    @topic
     struct Status {
-      NodeId node_id;
+      @key NodeId node_id;
       StateEnum state;
       // Optional Human Friendly Name
       string name;
@@ -167,7 +149,6 @@ module Bench {
     };
     typedef sequence<WorkerConfig> WorkerConfigs;
 
-#pragma DCPS_DATA_TYPE "Bench::NodeController::Config"
     struct Config {
       NodeId node_id;
       /*
@@ -177,10 +158,10 @@ module Bench {
       unsigned long timeout;
       WorkerConfigs workers;
     };
-    const string config_topic_name = "Node_Controller_Config";
+    const string allocated_scenario_topic_name = "Allocated_Scenario_Config";
     typedef sequence<Config> Configs;
 
-#pragma DCPS_DATA_TYPE "Bench::NodeController::Report"
+    @topic
     struct Report {
       NodeId node_id;
       WorkerId worker_id;
@@ -230,10 +211,13 @@ module Bench {
     };
 
     // Result of Applying a Scenario Prototype to a List of Discovered Nodes
+    @topic
     struct AllocatedScenario {
+      string scenario_id;
       NodeController::Configs configs;
       unsigned long expected_reports;
       unsigned long timeout;
+      Builder::TimeStamp launch_time;
     };
   };
 };

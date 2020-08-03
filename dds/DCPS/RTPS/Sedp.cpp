@@ -2869,11 +2869,11 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
 
-  const GUID_t src_endpoint = msg.source_endpoint_guid;
-  const GUID_t dst_endpoint = msg.destination_endpoint_guid;
-  const GUID_t this_endpoint = participant_stateless_message_reader_->get_repo_id();
-  const GUID_t dst_participant = msg.destination_participant_guid;
-  const GUID_t this_participant = participant_id_;
+  const GUID_t& src_endpoint = msg.source_endpoint_guid;
+  const GUID_t& dst_endpoint = msg.destination_endpoint_guid;
+  const GUID_t& this_endpoint = participant_stateless_message_reader_->get_repo_id();
+  const GUID_t& dst_participant = msg.destination_participant_guid;
+  const GUID_t& this_participant = participant_id_;
 
   if (ignoring(src_endpoint)) {
     return true;
@@ -4182,10 +4182,9 @@ Sedp::write_durable_participant_message_data(const RepoId& reader)
 
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
-Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
+Sedp::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                               const RepoId& reader)
 {
-  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_stateless_message_writer_->get_seq().getValue());
   DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_stateless_message_writer_->write_stateless_message(msg, reader, sequence);
 }
@@ -4672,47 +4671,57 @@ Sedp::Task::svc()
     switch (msg->type_) {
       case Msg::MSG_PARTICIPANT:
       svc_i(msg->dpdata_);
+      msg->dpdata_ = 0;
       break;
 
     case Msg::MSG_WRITER:
       svc_i(msg->id_, msg->wdata_);
+      msg->wdata_ = 0;
       break;
 
 #ifdef OPENDDS_SECURITY
     case Msg::MSG_WRITER_SECURE:
       svc_i(msg->id_, msg->wdata_secure_);
+      msg->wdata_secure_ = 0;
       break;
 #endif
 
     case Msg::MSG_READER:
       svc_i(msg->id_, msg->rdata_);
+      msg->rdata_ = 0;
       break;
 
 #ifdef OPENDDS_SECURITY
     case Msg::MSG_READER_SECURE:
       svc_i(msg->id_, msg->rdata_secure_);
+      msg->rdata_secure_ = 0;
       break;
 #endif
 
     case Msg::MSG_PARTICIPANT_DATA:
       svc_i(msg->id_, msg->pmdata_);
+      msg->pmdata_ = 0;
       break;
 
 #ifdef OPENDDS_SECURITY
     case Msg::MSG_PARTICIPANT_DATA_SECURE:
       svc_participant_message_data_secure(msg->id_, msg->pmdata_);
+      msg->pmdata_ = 0;
       break;
 
     case Msg::MSG_PARTICIPANT_STATELESS_DATA:
       svc_stateless_message(msg->id_, msg->pgmdata_);
+      msg->pgmdata_ = 0;
       break;
 
     case Msg::MSG_PARTICIPANT_VOLATILE_SECURE:
       svc_volatile_message_secure(msg->id_, msg->pgmdata_);
+      msg->pgmdata_ = 0;
       break;
 
     case Msg::MSG_DCPS_PARTICIPANT_SECURE:
       svc_secure_i(msg->id_, msg->dpdata_);
+      msg->dpdata_ = 0;
       break;
 #endif
 
@@ -5555,6 +5564,52 @@ WaitForAcks::reset()
   acks_ = 0;
   // no need to signal, going back to zero won't ever
   // cause wait_for_acks() to exit it's loop
+}
+
+Sedp::Msg::~Msg() {
+  switch (type_) {
+  case MSG_PARTICIPANT:
+    delete dpdata_;
+    break;
+  case MSG_WRITER:
+    delete wdata_;
+    break;
+  case MSG_READER:
+    delete rdata_;
+    break;
+  case MSG_PARTICIPANT_DATA:
+    delete pmdata_;
+    break;
+  case MSG_REMOVE_FROM_PUB_BIT:
+  case MSG_REMOVE_FROM_SUB_BIT:
+  case MSG_FINI_BIT:
+  case MSG_STOP:
+    break;
+
+#ifdef OPENDDS_SECURITY
+  case MSG_PARTICIPANT_STATELESS_DATA:
+  case MSG_PARTICIPANT_VOLATILE_SECURE:
+    delete pgmdata_;
+    break;
+  case MSG_PARTICIPANT_DATA_SECURE:
+    delete pmdata_;
+    break;
+  case MSG_WRITER_SECURE:
+    delete wdata_secure_;
+    break;
+  case MSG_READER_SECURE:
+    delete rdata_secure_;
+    break;
+  case MSG_DCPS_PARTICIPANT_SECURE:
+    delete dpdata_;
+    break;
+#endif
+
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Msg::~Msg(): ")
+               ACE_TEXT("%d is either invalid or not recognized.\n"),
+               type_));
+  }
 }
 
 const char* Sedp::Msg::msgTypeToString(MsgType type) {

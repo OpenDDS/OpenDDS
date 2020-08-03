@@ -396,9 +396,9 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
     kind = Encoding::KIND_XCDR2;
     break;
   default:
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
 
 DDS::DataRepresentationIdSeq get_effective_data_rep_qos(DDS::DataRepresentationIdSeq qos) {

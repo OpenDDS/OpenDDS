@@ -572,6 +572,9 @@ protected:
 
   void prepare_to_delete();
 
+  /// Setup deserialization options
+  DDS::ReturnCode_t setup_deserialization();
+
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
   void post_read_or_take();
@@ -588,7 +591,6 @@ protected:
   void set_sample_rejected_status(
     const DDS::SampleRejectedStatus& status);
 
-//remove document this!
   SubscriptionInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
@@ -874,6 +876,9 @@ private:
   unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
+
+protected:
+  OPENDDS_SET(Encoding::Kind) decoding_modes_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

@@ -209,6 +209,13 @@ void Serializer::endianness(Endianness value)
   this->encoding(encoding);
 }
 
+ACE_INLINE
+Endianness Serializer::endianness() const
+{
+  return encoding_.endianness();
+}
+
+
 // NOTE: I use the ternary operators in here for conditionals to help
 //       the compiler inline the code -- and it does end up fairly
 //       tight...

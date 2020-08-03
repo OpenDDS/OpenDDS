@@ -210,6 +210,8 @@ public:
 
   ExtensibilityKind extensibility(AST_Decl* node) const;
 
+  TryConstructFailAction try_construct(AST_Decl* node) const;
+
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
   unsigned get_id(

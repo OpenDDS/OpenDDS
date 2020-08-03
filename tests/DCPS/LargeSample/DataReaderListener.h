@@ -8,6 +8,7 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <dds/DCPS/LocalObject.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -15,11 +16,14 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include <map>
+#include <set>
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl();
+  DataReaderListenerImpl(
+    size_t writer_process_count, size_t writers_per_process, size_t samples_per_writer,
+    unsigned data_field_length_offset);
 
   virtual ~DataReaderListenerImpl();
 
@@ -50,27 +54,28 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_samples() const {
+  size_t num_samples() const
+  {
     return num_samples_;
   }
 
   bool data_consistent() const;
 
-  static const unsigned int NUM_PROCESSES = 2;
-  static const unsigned int NUM_WRITERS_PER_PROCESS = 2;
-  static const unsigned int NUM_SAMPLES_PER_WRITER = 10;
-
 private:
   DDS::DataReader_var  reader_;
-  long                 num_samples_;
-  typedef std::set<CORBA::Long> Counts;
-  typedef std::map<CORBA::Long, Counts> WriterCounts;
-  typedef std::map<std::string, WriterCounts> ProcessWriters;
+  size_t num_samples_;
+  typedef CORBA::Long ProcessId, WriterId, SampleId;
+  typedef std::set<SampleId> Counts;
+  typedef std::map<WriterId, Counts> WriterCounts;
+  typedef std::map<ProcessId, WriterCounts> ProcessWriters;
+  /// Holds the highest sample id for a given process/writer pair
+  std::map<ProcessId, std::map<WriterId, SampleId> > processToWriterSamples_;
   ProcessWriters process_writers_;
   bool valid_;
-  typedef std::string PROCESS_ID_STR;
-  typedef CORBA::Long WRITER_ID, HIGHEST_SAMPLE_RECVD;
-  std::map<PROCESS_ID_STR, std::map<WRITER_ID, HIGHEST_SAMPLE_RECVD> > processToWriterSamples_;
+  size_t writer_process_count_;
+  size_t writers_per_process_;
+  size_t samples_per_writer_;
+  unsigned data_field_length_offset_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

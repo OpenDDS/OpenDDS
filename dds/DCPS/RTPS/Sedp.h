@@ -129,7 +129,7 @@ public:
   void update_locators(const ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
-  DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
+  DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
@@ -269,6 +269,7 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
+    virtual ~Msg();
 
     static const char* msgTypeToString(MsgType type);
     const char* msgTypeToString() const;

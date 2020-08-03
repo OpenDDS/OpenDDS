@@ -51,13 +51,13 @@ WorkerDataWriterListener::on_publication_matched(
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataWriterListener reached expected count!" << std::endl;
       if (datawriter_) {
-        last_discovery_time_->value.time_prop(Builder::get_time());
+        last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
     }
   } else {
     if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datawriter_) {
-        last_discovery_time_->value.time_prop(Builder::get_time());
+        last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
     }
   }

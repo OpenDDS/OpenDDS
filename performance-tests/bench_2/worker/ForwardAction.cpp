@@ -123,7 +123,7 @@ void ForwardAction::on_data(const Data& data) {
 
         // Temporarily break const promises to modify data for resending
         Data& dangerous_data = const_cast<Data&>(data);
-        dangerous_data.sent_time = Builder::get_time();
+        dangerous_data.sent_time = Builder::get_sys_time();
         dangerous_data.hop_count = old_hop_count + 1;
 
         (*it)->write(data, 0);
@@ -142,7 +142,7 @@ void ForwardAction::do_writes() {
     Data& data = data_queue_[queue_first_];
     data.hop_count += 1;
     for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
-      data.sent_time = Builder::get_time();
+      data.sent_time = Builder::get_sys_time();
       (*it)->write(data, 0);
     }
     queue_first_ = (queue_first_ + 1) % data_queue_.size();

@@ -495,8 +495,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     test.test_case(default_repr, explicit_default_reprs, true);
     test.test_case(xcdr2_repr, default_repr, false);
     test.test_case(default_repr, xcdr2_repr, false);
-    test.test_case(xml_repr, default_repr, false);
-    test.test_case(default_repr, xml_repr, false);
+    test.test_case(xml_repr, default_repr, false, false);
+    test.test_case(default_repr, xml_repr, false, true, false);
 
     test.test_case(xcdr1_repr, xcdr1_repr, true);
     test.test_case(explicit_default_reprs, xcdr1_repr, true);
@@ -510,8 +510,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     test.test_case(default_repr, explicit_default_reprs, true);
     test.test_case(xcdr2_repr, default_repr, false);
     test.test_case(default_repr, xcdr2_repr, false);
-    test.test_case(xml_repr, default_repr, false);
-    test.test_case(default_repr, xml_repr, false);
+    test.test_case(xml_repr, default_repr, false, false);
+    test.test_case(default_repr, xml_repr, false, true, false);
 
     test.set_topic(defaulted_type.type_name(), xml_repr);
     test.test_case(default_repr, default_repr, true);
@@ -519,8 +519,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     test.test_case(default_repr, explicit_default_reprs, true);
     test.test_case(xcdr2_repr, default_repr, false);
     test.test_case(default_repr, xcdr2_repr, false);
-    test.test_case(xml_repr, default_repr, false);
-    test.test_case(default_repr, xml_repr, false);
+    test.test_case(xml_repr, default_repr, false, false);
+    test.test_case(default_repr, xml_repr, false, true, false);
 
     RegisteredType<ExplicitDefaultType> explictly_default_type;
     if (!explictly_default_type.register_type(participant.in())) {
@@ -579,9 +579,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     test.test_case(default_repr, explicit_default_reprs, true, false);
     test.test_case(xcdr2_repr, default_repr, false, false);
     test.test_case(default_repr, xcdr2_repr, false, false);
-    test.test_case(xml_repr, default_repr, false, true, false);
+    test.test_case(xml_repr, default_repr, false, false, false);
     test.test_case(default_repr, xml_repr, false, false);
-    test.test_case(xml_repr, xml_repr, true);
+    test.test_case(xml_repr, xml_repr, true, false);
 
     test.set_topic(xcdr1_type.type_name(), xml_repr);
     test.test_case(default_repr, default_repr, true);

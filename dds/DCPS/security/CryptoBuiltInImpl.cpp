@@ -1097,7 +1097,7 @@ namespace {
     return length + (offset ? alignment - offset : 0);
   }
 
-  const int SEQLEN_SZ = 4, SM_ALIGN = 4;
+  const int SEQLEN_SZ = 4;
 
   // Precondition: the bytes of 'original' starting at 'offset' to the end of 'original' are a valid Submessage
   // If that Submessage has octetsToNextHeader == 0, returns true and makes 'modified' a copy of 'original'
@@ -1125,7 +1125,7 @@ namespace {
     ser_in >> submessageLength;
     if (submessageLength == 0) {
       modified = original;
-      const size_t len = roundUp(static_cast<unsigned int>(origLength - RTPS::SMHDR_SZ), SM_ALIGN);
+      const size_t len = roundUp(static_cast<unsigned int>(origLength - RTPS::SMHDR_SZ), RTPS::SM_ALIGN);
       modified[offset + 2 + !flag_e] = len & 0xff;
       modified[offset + 2 + flag_e] = (len >> 8) & 0xff;
       return true;
@@ -1195,7 +1195,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   }
 
   size += pOut->length(); // submessage inside wrapper
-  align(size, SM_ALIGN);
+  align(size, RTPS::SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // postfix submessage header
   const size_t preFooter = size;
@@ -1210,13 +1210,13 @@ bool CryptoBuiltInImpl::encode_submessage(
 
   if (!authOnly) {
     smHdr.submessageId = RTPS::SEC_BODY;
-    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), SM_ALIGN));
+    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), RTPS::SM_ALIGN));
     ser << smHdr;
     ser << pOut->length();
   }
 
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
-  ser.align_w(SM_ALIGN);
+  ser.align_w(RTPS::SM_ALIGN);
 
   smHdr.submessageId = RTPS::SEC_POSTFIX;
   smHdr.submessageLength = static_cast<ACE_UINT16>(size - preFooter);
@@ -1392,7 +1392,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   }
 
   size += pOut->length();
-  align(size, SM_ALIGN);
+  align(size, RTPS::SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // SRTPS Postfix
   serialized_size(common_encoding, size, cryptoFooter);
@@ -1409,13 +1409,13 @@ bool CryptoBuiltInImpl::encode_rtps_message(
 
   if (addSecBody) {
     smHdr.submessageId = RTPS::SEC_BODY;
-    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), SM_ALIGN));
+    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), RTPS::SM_ALIGN));
     ser << smHdr;
     ser << pOut->length();
   }
 
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
-  ser.align_w(SM_ALIGN);
+  ser.align_w(RTPS::SM_ALIGN);
 
   smHdr.submessageId = RTPS::SRTPS_POSTFIX;
   smHdr.submessageLength = 0; // final submessage doesn't need a length
