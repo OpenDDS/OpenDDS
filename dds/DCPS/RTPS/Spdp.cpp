@@ -2720,7 +2720,7 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& address, const STUN::Message& mes
 {
   DCPS::RcHandle<DCPS::JobQueue> job_queue = outer_->job_queue();
   if (job_queue) {
-    job_queue->enqueue(DCPS::make_rch<SendStun>(this, address, message));
+    job_queue->enqueue(DCPS::make_rch<SendStun>(rchandle_from(this), address, message));
   }
 }
 
@@ -2756,12 +2756,18 @@ Spdp::SpdpTransport::stun_server_address() const
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-  for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
-    if (iter != outer_->participants_.end()) {
-      outer_->enqueue_location_update_i(iter, compute_ice_location_mask(addr), addr);
-      outer_->process_location_updates_i(iter);
+  job_queue_->enqueue(DCPS::make_rch<IceConnect>(rchandle_from(this->outer_), guids, addr));
+}
+
+void
+Spdp::IceConnect::execute()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
+  for (ICE::GuidSetType::const_iterator pos = guids_.begin(), limit = guids_.end(); pos != limit; ++pos) {
+    DiscoveredParticipantIter iter = spdp_->participants_.find(pos->remote);
+    if (iter != spdp_->participants_.end()) {
+      spdp_->enqueue_location_update_i(iter, compute_ice_location_mask(addr_), addr_);
+      spdp_->process_location_updates_i(iter);
     }
   }
 }
@@ -2769,12 +2775,18 @@ Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_A
 void
 Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-  for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
-    if (iter != outer_->participants_.end()) {
-      outer_->enqueue_location_update_i(iter, compute_ice_location_mask(addr), ACE_INET_Addr());
-      outer_->process_location_updates_i(iter);
+  job_queue_->enqueue(DCPS::make_rch<IceDisconnect>(rchandle_from(this->outer_), guids, addr));
+}
+
+void
+Spdp::IceDisconnect::execute()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
+  for (ICE::GuidSetType::const_iterator pos = guids_.begin(), limit = guids_.end(); pos != limit; ++pos) {
+    DiscoveredParticipantIter iter = spdp_->participants_.find(pos->remote);
+    if (iter != spdp_->participants_.end()) {
+      spdp_->enqueue_location_update_i(iter, compute_ice_location_mask(addr_), ACE_INET_Addr());
+      spdp_->process_location_updates_i(iter);
     }
   }
 }

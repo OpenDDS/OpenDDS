@@ -347,13 +347,53 @@ private:
 #ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {
   public:
-    SendStun(SpdpTransport* tport, const ACE_INET_Addr& address, const STUN::Message& message) : tport_(tport), address_(address), message_(message) {}
+    SendStun(DCPS::RcHandle<SpdpTransport> tport,
+             const ACE_INET_Addr& address,
+             const STUN::Message& message)
+      : tport_(tport)
+      , address_(address)
+      , message_(message)
+    {}
     void execute();
   private:
-    SpdpTransport* tport_;
+    DCPS::RcHandle<SpdpTransport> tport_;
     ACE_INET_Addr address_;
     STUN::Message message_;
   };
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  class IceConnect : public DCPS::JobQueue::Job {
+  public:
+    IceConnect(DCPS::RcHandle<Spdp> spdp,
+               const ICE::GuidSetType& guids,
+               const ACE_INET_Addr& addr)
+      : spdp_(spdp)
+      , guids_(guids)
+      , addr_(addr)
+    {}
+    void execute();
+  private:
+    DCPS::RcHandle<Spdp> spdp_;
+    ICE::GuidSetType guids_;
+    ACE_INET_Addr addr_;
+  };
+
+  class IceDisconnect : public DCPS::JobQueue::Job {
+  public:
+    IceDisconnect(DCPS::RcHandle<Spdp> spdp,
+                  const ICE::GuidSetType& guids,
+                  const ACE_INET_Addr& addr)
+      : spdp_(spdp)
+      , guids_(guids)
+      , addr_(addr)
+    {}
+    void execute();
+  private:
+    DCPS::RcHandle<Spdp> spdp_;
+    ICE::GuidSetType guids_;
+    ACE_INET_Addr addr_;
+  };
+#endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
