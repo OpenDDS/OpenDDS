@@ -920,7 +920,7 @@ Sedp::associate(const ParticipantData_t& pdata)
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
     DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
     type_lookup_reply_reader_->assoc(peer);
   }
 
@@ -1658,6 +1658,23 @@ Sedp::update_locators(const ParticipantData_t& pdata)
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     transport_inst_->update_locators(remote_id, remote_data);
   }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REQ_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+
 #ifdef OPENDDS_SECURITY
   if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
@@ -3567,13 +3584,17 @@ Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeLookup_Request& type_lookup_request,
+Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                                         const DCPS::RepoId& reader,
                                                         DCPS::SequenceNumber& sequence,
                                                         DCPS::SequenceNumber& rpc_sequence,
                                                         const DCPS::RepoId& participant_id)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  XTypes::TypeLookup_Request type_lookup_request;
+
+  type_lookup_request.data.getTypes.type_ids = type_ids;
+  type_lookup_request.data.kind = XTypes::CK_TYPES;
 
   type_lookup_request.header.request_id.writer_guid = get_repo_id();
 
@@ -3646,10 +3667,9 @@ Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& s
                                                DCPS::Serializer& ser,
                                                XTypes::TypeLookup_Request& type_lookup_request)
 {
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  // TODO: add /uncomment logic
-  //ser >> type_lookup_request;
-  return result;
+  // TODO: uncomment; anything else to do here?
+  // ser >> type_lookup_request;
+    return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -3657,10 +3677,9 @@ Sedp::TypeLookupReplyReader::take_tl_response(const DCPS::ReceivedDataSample& sa
                                               DCPS::Serializer& ser,
                                               XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  // TODO: add /uncomment logic
-  //ser >> type_lookup_reply;
-  return result;
+  // TODO: uncomment; anything else to do here?
+  // ser >> type_lookup_reply;
+  return DDS::RETCODE_OK;
 }
 
 //-------------------------------------------------------------------------

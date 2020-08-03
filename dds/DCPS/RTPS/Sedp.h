@@ -465,7 +465,7 @@ private:
 
     virtual ~TypeLookupRequestWriter();
 
-    DDS::ReturnCode_t send_type_lookup_request(XTypes::TypeLookup_Request& type_lookup_request,
+    DDS::ReturnCode_t send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
       DCPS::SequenceNumber& rpc_sequence,
