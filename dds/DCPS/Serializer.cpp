@@ -474,7 +474,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //
   // Extract the string size.
   //
-  ACE_CDR::ULong bytecount; // Not include the null
+  ACE_CDR::ULong bytecount;
   if (!(*this >> bytecount)) {
     return 0;
   }
