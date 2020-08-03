@@ -617,42 +617,7 @@ void generateCaseBody(
       "      uni._d(disc);\n"
       "      return true;\n"
       "    }\n";
-
-    if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
-      switch (be_global->try_construct(branch)) {
-      case tryconstructfailaction_trim:
-        be_global->impl_ <<
-          "    if (strm.good_bit() && tmp.in() && (" << bounded_arg(br) << " < ACE_OS::strlen(tmp.in()))) {\n"
-          "      tmp[" << bounded_arg(br) << "] = 0;\n"
-          "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
-          "      uni._d(disc);\n"
-          "      return true;\n"
-          "    } else {\n"
-          "      return false;\n"
-          "    }\n";
-        break;
-      case tryconstructfailaction_use_default: {
-        std::string default_val = "\"\"";
-        if (br_cls & CL_WIDE) {
-          default_val = "L\"\"";
-        }
-        be_global->impl_ <<
-          "    if (strm.good_bit() && uni." << name << "() && (" << bounded_arg(br) << " < ACE_OS::strlen(uni." << name << "()))) {\n"
-          "      uni." << name << "(" << default_val << ");\n"
-          "      uni._d(disc);\n"
-          "      return true;\n"
-          "    } else {\n"
-          "      return false;\n"
-          "    }\n";
-        break;
-      }
-      case tryconstructfailaction_discard:
-        be_global->impl_ << "        return false;\n";
-        break;
-      }
-    } else {
-      be_global->impl_ << "    return false;\n";
-    }
+      "    return false;\n";
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
     std::string intro;
