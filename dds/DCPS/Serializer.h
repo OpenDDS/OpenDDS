@@ -617,7 +617,7 @@ public:
    *
    * Returns true if successful.
    */
-  bool read_parameter_id(unsigned& id, size_t& size);
+  bool read_parameter_id(unsigned& id, size_t& size, bool& must_understand);
 
   /**
    * Write a XCDR parameter ID used in XCDR parameter lists.

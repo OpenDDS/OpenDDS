@@ -1945,7 +1945,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 
       be_global->impl_ <<
-        "    if (!strm.read_parameter_id(member_id, field_size)) {\n"
+        "    bool must_understand = false;\n"
+        "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "      return false;\n"
         "    }\n";
 
@@ -1978,6 +1979,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "    switch (member_id) {\n"
         << cases.str() <<
         "    default:\n"
+        "      if (must_understand) {\n"
+        "        if (DCPS_debug_level >= 1) {\n"
+        "          ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in " << cxx.c_str() << "\\n\"), member_id));\n" <<
+        "        }\n"
+        "        return false;\n"
+        "      }\n"
         "      strm.skip(field_size);\n"
         "      break;\n"
         "    }\n"
