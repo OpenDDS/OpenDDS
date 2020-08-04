@@ -366,32 +366,19 @@ private:
   public:
     IceConnect(DCPS::RcHandle<Spdp> spdp,
                const ICE::GuidSetType& guids,
-               const ACE_INET_Addr& addr)
+               const ACE_INET_Addr& addr,
+               bool connect)
       : spdp_(spdp)
       , guids_(guids)
       , addr_(addr)
+      , connect_(connect)
     {}
     void execute();
   private:
     DCPS::RcHandle<Spdp> spdp_;
     ICE::GuidSetType guids_;
     ACE_INET_Addr addr_;
-  };
-
-  class IceDisconnect : public DCPS::JobQueue::Job {
-  public:
-    IceDisconnect(DCPS::RcHandle<Spdp> spdp,
-                  const ICE::GuidSetType& guids,
-                  const ACE_INET_Addr& addr)
-      : spdp_(spdp)
-      , guids_(guids)
-      , addr_(addr)
-    {}
-    void execute();
-  private:
-    DCPS::RcHandle<Spdp> spdp_;
-    ICE::GuidSetType guids_;
-    ACE_INET_Addr addr_;
+    bool connect_;
   };
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif
