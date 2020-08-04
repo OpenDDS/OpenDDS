@@ -268,7 +268,7 @@ checkValues(const Values& expected, const Values& observed)
   if(expected.stdstringValue != observed.stdstringValue) {
     ACE::format_hexdump(expected.stdstringValue.c_str(), expected.stdstringValue.length(), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(observed.stdstringValue.c_str(), observed.stdstringValue.length(), obuffer, sizeof(obuffer));
-    std::cout << "string values not correct after insertion and extraction." << std::endl;
+    std::cout << "std string values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.stdstringValue << "/" << ebuffer;
     std::cout << ", observed: " << observed.stdstringValue << "/" << obuffer;
     std::cout << ")." << std::endl;
@@ -289,7 +289,10 @@ checkValues(const Values& expected, const Values& observed)
   if(expected.stdwstringValue != observed.stdwstringValue) {
     ACE::format_hexdump(reinterpret_cast<const char*>(expected.stdwstringValue.c_str()), expected.stdwstringValue.length(), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(reinterpret_cast<const char*>(observed.stdwstringValue.c_str()), observed.stdwstringValue.length(), obuffer, sizeof(obuffer));
-    std::cout << "wstring values not correct after insertion and extraction." << std::endl;
+    std::cout << "std wstring values not correct after insertion and extraction." << std::endl;
+    std::wcout << "(expected: " << expected.stdwstringValue << "/" << ebuffer;
+    std::wcout << ", observed: " << observed.stdwstringValue << "/" << obuffer;
+    std::cout << ")." << std::endl;
     failed = true;
   }
 #endif
@@ -303,8 +306,6 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
   ACE_TCHAR obuffer[512];
   for (size_t i = 0; i < ARRAYSIZE; ++i) {
     if (expected.charValue[i]       != observed.charValue[i]) {
-      std::cout << "char " << i << " values not correct after insertion and extraction." << std::endl;
-      std::cout << "(expected: " << expected.charValue[i] << ", observed: " << observed.charValue[i] << ")." << std::endl;
       ACE::format_hexdump((char*)&(expected.charValue[i]), sizeof(ACE_CDR::Char), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.charValue[i]), sizeof(ACE_CDR::Char), obuffer, sizeof(obuffer));
       std::cout << "char[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -421,7 +422,12 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   const Encoding& encoding)
 {
   ACE_Message_Block* testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
-  const char* out = encoding.endianness() ? "" : "OUT";
+  const char* out =
+#ifdef ACE_LITTLE_ENDIAN
+    encoding.endianness() == OpenDDS::DCPS::ENDIAN_BIG ? "" : "OUT";
+#else
+    encoding.endianness() == OpenDDS::DCPS::ENDIAN_LITTLE ? "" : "OUT";
+#endif
   std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   insertions(testchain, expected, encoding);
   size_t bytesWritten = testchain->total_length();
@@ -446,11 +452,10 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
     failed = true;
   }
   checkValues(expected, observed);
+
+  CORBA::string_free(observed.stringValue);
 #ifdef DDS_HAS_WCHAR
   CORBA::wstring_free(observed.wstringValue);
-#ifndef OPENDDS_SAFETY_PROFILE
-  CORBA::string_free(observed.stringValue);
-#endif
 #endif
   testchain->release();
 
