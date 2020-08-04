@@ -1,5 +1,4 @@
 /Compiler_TryConstruct
-TryConstruct.idl
 TryConstructC.cpp
 TryConstructC.h
 TryConstructC.inl
