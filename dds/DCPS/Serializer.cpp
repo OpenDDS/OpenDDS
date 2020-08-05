@@ -546,7 +546,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
     }
 
     // TODO(iguessthislldo): handle PID flags
-    must_understand = false;
+    must_understand = false; // Placeholder
 
     // If extended, get the "long" id and size
     if (short_id == pid_extended) {
@@ -572,7 +572,6 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       return false;
     }
 
-    // TODO(iguessthislldo): Handle Must Understand Flag
     must_understand = emheader & emheader_must_understand;
 
     // Get Size

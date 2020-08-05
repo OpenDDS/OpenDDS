@@ -139,14 +139,14 @@ void amalgam_serializer_test(
   // Serialize and Compare CDR
   {
     Serializer serializer(&buffer, encoding);
-    EXPECT_TRUE(serializer << value);
+    ASSERT_TRUE(serializer << value);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
 
   // Deserialize and Compare C++ Values
   {
     Serializer serializer(&buffer, encoding);
-    EXPECT_TRUE(serializer >> result);
+    ASSERT_TRUE(serializer >> result);
     EXPECT_PRED_FORMAT2(assert_values, value, result);
   }
 }
@@ -476,9 +476,9 @@ TEST(mutable_tests, to_additional_field_xcdr2_test)
   /// value?) if we decide on that.
 }
 
-TEST(mutable_tests, to_additional_field_mustunderstatnd_test)
+TEST(mutable_tests, from_additional_field_misunderstand_test)
 {
-  const unsigned char expected[] = {
+  const unsigned char additional_mustunderstatnd[] = {
     // Delimiter
     0x00, 0x00, 0x00, 0x2a, // +4 = 4
     // long_field
@@ -502,7 +502,7 @@ TEST(mutable_tests, to_additional_field_mustunderstatnd_test)
   // Deserialization should fail for unknown must_understand field
   {
     ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)expected, sizeof(expected));
+    buffer.copy((const char*)additional_mustunderstatnd, sizeof(additional_mustunderstatnd));
     Serializer serializer(&buffer, xcdr2);
 
     MutableStruct result;
@@ -512,11 +512,11 @@ TEST(mutable_tests, to_additional_field_mustunderstatnd_test)
   // Deserialize and Compare C++ Values
   {
     ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)expected, sizeof(expected));
+    buffer.copy((const char*)additional_mustunderstatnd, sizeof(additional_mustunderstatnd));
     Serializer serializer(&buffer, xcdr2);
 
     AdditionalFieldMutableStruct result;
-    EXPECT_TRUE(serializer >> result);
+    ASSERT_TRUE(serializer >> result);
 
     AdditionalFieldMutableStruct value;
     set_values(value);

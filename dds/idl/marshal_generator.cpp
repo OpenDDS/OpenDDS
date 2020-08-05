@@ -1980,8 +1980,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         << cases.str() <<
         "    default:\n"
         "      if (must_understand) {\n"
-        "        if (DCPS_debug_level >= 1) {\n"
-        "          ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in " << cxx.c_str() << "\\n\"), member_id));\n" <<
+        "        if (DCPS_debug_level >= 8) {\n"
+        "          ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
+                     << cxx.c_str() << "\\n\"), member_id));\n" <<
         "        }\n"
         "        return false;\n"
         "      }\n"
