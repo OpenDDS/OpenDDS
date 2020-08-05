@@ -6,6 +6,8 @@
  */
 
 //bounded string definitions for trim
+typedef string<20> str20;
+typedef wstring<20> wstr20;
 typedef string<64> str64;
 typedef wstring<64> wstr64;
 
@@ -17,13 +19,23 @@ enum EnumType {VALUE1, VALUE2};
 
 //nested struct for use in struct, union, and sequence
 struct NestedStruct {
-  @try_construct(DISCARD) ShortArray sa_d;
-  @try_construct(USE_DEFAULT) ShortArray sa_ud;
-  @try_construct(TRIM) ShortArray sa_t;
-  @try_construct(DISCARD) string str_d;
-  @try_construct(USE_DEFAULT) string str_ud;
-  @try_construct(TRIM) string str_t;
+  // @try_construct(DISCARD) ShortArray sa_d;
+  // @try_construct(USE_DEFAULT) ShortArray sa_ud;
+  // @try_construct(TRIM) ShortArray sa_t;
+  @try_construct(DISCARD) str64 str64_d;
+  @try_construct(USE_DEFAULT) str64 str64_ud;
+  @try_construct(TRIM) str64 str64_t;
 };
+//nested struct for use in struct, union, and sequence
+struct NestedStruct2 {
+  // @try_construct(DISCARD) ShortArray sa_d;
+  // @try_construct(USE_DEFAULT) ShortArray sa_ud;
+  // @try_construct(TRIM) ShortArray sa_t;
+  @try_construct(DISCARD) str20 str20_d;
+  @try_construct(USE_DEFAULT) str20 str20_ud;
+  @try_construct(TRIM) str20 str20_t;
+};
+
 //nested union for use in struct, union, and sequence
 union NestedUnion switch (EnumType) {
   case VALUE1: boolean u_b;
@@ -61,243 +73,7 @@ typedef sequence<ShortSeqUnbound, 20> SeqShortSeqUnboundBound;
 typedef sequence<ShortSeqBound> SeqShortSeqBoundUnbound;
 typedef sequence<ShortSeqBound, 20> SeqShortSeqBoundBound;
 
-module Messenger {
-  @topic
-  @final
-  @OpenDDS::data_representation(XCDR2)
-  struct Final_Message {
-    //strings and wstrings
-    @try_construct(DISCARD) str64 str64_d;
-    @try_construct(USE_DEFAULT) str64 str64_ud;
-    @try_construct(TRIM) str64 str64_t;
-    @try_construct(DISCARD) wstr64 wstr64_d;
-    @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
-    @try_construct(TRIM) wstr64 wstr64_t;
-
-    //sequences
-    //primitive seqs
-    @try_construct(DISCARD) ShortSeqUnbound psu_d;
-    @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
-    @try_construct(TRIM) ShortSeqUnbound psu_t;
-    @try_construct(DISCARD) ShortSeqBound psb_d;
-    @try_construct(USE_DEFAULT) ShortSeqBound psb_ud;
-    @try_construct(TRIM) ShortSeqBound psb_t;
-    @try_construct(DISCARD) UnsignedShortSeqUnbound upsu_d;
-    @try_construct(USE_DEFAULT) UnsignedShortSeqUnbound upsu_ud;
-    @try_construct(TRIM) UnsignedShortSeqUnbound upsu_t;
-    @try_construct(DISCARD) UnsignedShortSeqBound upsb_d;
-    @try_construct(USE_DEFAULT) UnsignedShortSeqBound upsb_ud;
-    @try_construct(TRIM) UnsignedShortSeqBound upsb_t;
-    //enum seqs
-    @try_construct(DISCARD) EnumSeqUnbound esu_d;
-    @try_construct(USE_DEFAULT) EnumSeqUnbound esu_ud;
-    @try_construct(TRIM) EnumSeqUnbound esu_t;
-    @try_construct(DISCARD) EnumSeqBound esb_d;
-    @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
-    @try_construct(TRIM) EnumSeqBound esb_t;
-    //string seqs
-    @try_construct(DISCARD) StringSeqUnbound strsu_d;
-    @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
-    @try_construct(TRIM) StringSeqUnbound strsu_t;
-    @try_construct(DISCARD) StringSeqBound strsb_d;
-    @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
-    @try_construct(TRIM) StringSeqBound strsb_t;
-    //wstring seqs
-    @try_construct(DISCARD) WideStringSeqUnbound wstrsu_d;
-    @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
-    @try_construct(TRIM) WideStringSeqUnbound wstrsu_t;
-    @try_construct(DISCARD) WideStringSeqBound wstrsb_d;
-    @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
-    @try_construct(TRIM) WideStringSeqBound wstrsb_t;
-    //struct seqs
-    @try_construct(DISCARD) StructSeqUnbound ssu_d;
-    @try_construct(USE_DEFAULT) StructSeqUnbound ssu_ud;
-    @try_construct(TRIM) StructSeqUnbound ssu_t;
-    @try_construct(DISCARD) StructSeqBound ssb_d;
-    @try_construct(USE_DEFAULT) StructSeqBound ssb_ud;
-    @try_construct(TRIM) StructSeqBound ssb_t;
-    //array seqs
-    @try_construct(DISCARD) ShortArraySeqUnbound sasu_d;
-    @try_construct(USE_DEFAULT) ShortArraySeqUnbound sasu_ud;
-    @try_construct(TRIM) ShortArraySeqUnbound sasu_t;
-    @try_construct(DISCARD) ShortArraySeqBound sasb_d;
-    @try_construct(USE_DEFAULT) ShortArraySeqBound sasb_ud;
-    @try_construct(TRIM) ShortArraySeqBound sasb_t;
-    //seq seqs
-    @try_construct(DISCARD) SeqShortSeqUnboundUnbound sssuu_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqUnboundUnbound sssuu_ud;
-    @try_construct(TRIM) SeqShortSeqUnboundUnbound sssuu_t;
-    @try_construct(DISCARD) SeqShortSeqUnboundBound sssub_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqUnboundBound sssub_ud;
-    @try_construct(TRIM) SeqShortSeqUnboundBound sssub_t;
-    @try_construct(DISCARD) SeqShortSeqBoundUnbound sssbu_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqBoundUnbound sssbu_ud;
-    @try_construct(TRIM) SeqShortSeqBoundUnbound sssbu_t;
-    @try_construct(DISCARD) SeqShortSeqBoundBound sssbb_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqBoundBound sssbb_ud;
-    @try_construct(TRIM) SeqShortSeqBoundBound sssbb_t;
-    //union seqs
-    @try_construct(DISCARD) UnionSeqUnbound usu_d;
-    @try_construct(USE_DEFAULT) UnionSeqUnbound usu_ud;
-    @try_construct(TRIM) UnionSeqUnbound usu_t;
-    @try_construct(DISCARD) UnionSeqBound usb_d;
-    @try_construct(USE_DEFAULT) UnionSeqBound usb_ud;
-    @try_construct(TRIM) UnionSeqBound usb_t;
-
-    //struct and union
-    @try_construct(DISCARD) NestedStruct ns_d;
-    @try_construct(USE_DEFAULT) NestedStruct ns_ud;
-    @try_construct(TRIM) NestedStruct ns_t;
-    @try_construct(DISCARD) NestedUnion nu_d;
-    @try_construct(USE_DEFAULT) NestedUnion nu_ud;
-    @try_construct(TRIM) NestedUnion nu_t;
-
-    //array
-    @try_construct(DISCARD) ShortArray sa_md;
-    @try_construct(USE_DEFAULT) ShortArray sa_mud;
-    @try_construct(TRIM) ShortArray sa_mt;
-
-    //enum
-    @try_construct(DISCARD) EnumType e_d;
-    @try_construct(USE_DEFAULT) EnumType e_ud;
-    @try_construct(TRIM) EnumType e_t;
-
-    //primitives
-    //byte
-    @try_construct(DISCARD) octet by_d;
-    @try_construct(USE_DEFAULT) octet by_ud;
-    @try_construct(TRIM) octet by_t;
-    //boolean
-    @try_construct(DISCARD) boolean bo_d;
-    @try_construct(USE_DEFAULT) boolean bo_ud;
-    @try_construct(TRIM) boolean bo_t;
-    //integer types  
-    @try_construct(DISCARD) short s_d;
-    @try_construct(USE_DEFAULT) short s_ud;
-    @try_construct(TRIM) short s_t;
-    @try_construct(DISCARD) unsigned short us_d;
-    @try_construct(USE_DEFAULT) unsigned short us_ud;
-    @try_construct(TRIM) unsigned short us_t;
-  };
-  
-  @topic
-  @appendable
-  @OpenDDS::data_representation(XCDR2)
-  struct Appendable_Message {
-    //strings and wstrings
-    @try_construct(DISCARD) str64 str64_d;
-    @try_construct(USE_DEFAULT) str64 str64_ud;
-    @try_construct(TRIM) str64 str64_t;
-    @try_construct(DISCARD) wstr64 wstr64_d;
-    @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
-    @try_construct(TRIM) wstr64 wstr64_t;
-
-    //sequences
-    //primitive seqs
-    @try_construct(DISCARD) ShortSeqUnbound psu_d;
-    @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
-    @try_construct(TRIM) ShortSeqUnbound psu_t;
-    @try_construct(DISCARD) ShortSeqBound psb_d;
-    @try_construct(USE_DEFAULT) ShortSeqBound psb_ud;
-    @try_construct(TRIM) ShortSeqBound psb_t;
-    @try_construct(DISCARD) UnsignedShortSeqUnbound upsu_d;
-    @try_construct(USE_DEFAULT) UnsignedShortSeqUnbound upsu_ud;
-    @try_construct(TRIM) UnsignedShortSeqUnbound upsu_t;
-    @try_construct(DISCARD) UnsignedShortSeqBound upsb_d;
-    @try_construct(USE_DEFAULT) UnsignedShortSeqBound upsb_ud;
-    @try_construct(TRIM) UnsignedShortSeqBound upsb_t;
-    //enum seqs
-    @try_construct(DISCARD) EnumSeqUnbound esu_d;
-    @try_construct(USE_DEFAULT) EnumSeqUnbound esu_ud;
-    @try_construct(TRIM) EnumSeqUnbound esu_t;
-    @try_construct(DISCARD) EnumSeqBound esb_d;
-    @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
-    @try_construct(TRIM) EnumSeqBound esb_t;
-    //string seqs
-    @try_construct(DISCARD) StringSeqUnbound strsu_d;
-    @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
-    @try_construct(TRIM) StringSeqUnbound strsu_t;
-    @try_construct(DISCARD) StringSeqBound strsb_d;
-    @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
-    @try_construct(TRIM) StringSeqBound strsb_t;
-    //wstring seqs
-    @try_construct(DISCARD) WideStringSeqUnbound wstrsu_d;
-    @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
-    @try_construct(TRIM) WideStringSeqUnbound wstrsu_t;
-    @try_construct(DISCARD) WideStringSeqBound wstrsb_d;
-    @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
-    @try_construct(TRIM) WideStringSeqBound wstrsb_t;
-    //struct seqs
-    @try_construct(DISCARD) StructSeqUnbound ssu_d;
-    @try_construct(USE_DEFAULT) StructSeqUnbound ssu_ud;
-    @try_construct(TRIM) StructSeqUnbound ssu_t;
-    @try_construct(DISCARD) StructSeqBound ssb_d;
-    @try_construct(USE_DEFAULT) StructSeqBound ssb_ud;
-    @try_construct(TRIM) StructSeqBound ssb_t;
-    //array seqs
-    @try_construct(DISCARD) ShortArraySeqUnbound sasu_d;
-    @try_construct(USE_DEFAULT) ShortArraySeqUnbound sasu_ud;
-    @try_construct(TRIM) ShortArraySeqUnbound sasu_t;
-    @try_construct(DISCARD) ShortArraySeqBound sasb_d;
-    @try_construct(USE_DEFAULT) ShortArraySeqBound sasb_ud;
-    @try_construct(TRIM) ShortArraySeqBound sasb_t;
-    //seq seqs
-    @try_construct(DISCARD) SeqShortSeqUnboundUnbound sssuu_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqUnboundUnbound sssuu_ud;
-    @try_construct(TRIM) SeqShortSeqUnboundUnbound sssuu_t;
-    @try_construct(DISCARD) SeqShortSeqUnboundBound sssub_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqUnboundBound sssub_ud;
-    @try_construct(TRIM) SeqShortSeqUnboundBound sssub_t;
-    @try_construct(DISCARD) SeqShortSeqBoundUnbound sssbu_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqBoundUnbound sssbu_ud;
-    @try_construct(TRIM) SeqShortSeqBoundUnbound sssbu_t;
-    @try_construct(DISCARD) SeqShortSeqBoundBound sssbb_d;
-    @try_construct(USE_DEFAULT) SeqShortSeqBoundBound sssbb_ud;
-    @try_construct(TRIM) SeqShortSeqBoundBound sssbb_t;
-    //union seqs
-    @try_construct(DISCARD) UnionSeqUnbound usu_d;
-    @try_construct(USE_DEFAULT) UnionSeqUnbound usu_ud;
-    @try_construct(TRIM) UnionSeqUnbound usu_t;
-    @try_construct(DISCARD) UnionSeqBound usb_d;
-    @try_construct(USE_DEFAULT) UnionSeqBound usb_ud;
-    @try_construct(TRIM) UnionSeqBound usb_t;
-
-    //struct and union
-    @try_construct(DISCARD) NestedStruct ns_d;
-    @try_construct(USE_DEFAULT) NestedStruct ns_ud;
-    @try_construct(TRIM) NestedStruct ns_t;
-    @try_construct(DISCARD) NestedUnion nu_d;
-    @try_construct(USE_DEFAULT) NestedUnion nu_ud;
-    @try_construct(TRIM) NestedUnion nu_t;
-
-    //array
-    @try_construct(DISCARD) ShortArray sa_md;
-    @try_construct(USE_DEFAULT) ShortArray sa_mud;
-    @try_construct(TRIM) ShortArray sa_mt;
-
-    //enum
-    @try_construct(DISCARD) EnumType e_d;
-    @try_construct(USE_DEFAULT) EnumType e_ud;
-    @try_construct(TRIM) EnumType e_t;
-
-    //primitives
-    //byte
-    @try_construct(DISCARD) octet by_d;
-    @try_construct(USE_DEFAULT) octet by_ud;
-    @try_construct(TRIM) octet by_t;
-    //boolean
-    @try_construct(DISCARD) boolean bo_d;
-    @try_construct(USE_DEFAULT) boolean bo_ud;
-    @try_construct(TRIM) boolean bo_t;
-    //integer types  
-    @try_construct(DISCARD) short s_d;
-    @try_construct(USE_DEFAULT) short s_ud;
-    @try_construct(TRIM) short s_t;
-    @try_construct(DISCARD) unsigned short us_d;
-    @try_construct(USE_DEFAULT) unsigned short us_ud;
-    @try_construct(TRIM) unsigned short us_t;
-  };
-
+module TryCon {
 @topic
   @mutable
   @OpenDDS::data_representation(XCDR2)
@@ -414,6 +190,34 @@ module Messenger {
     @try_construct(DISCARD) unsigned short us_d;
     @try_construct(USE_DEFAULT) unsigned short us_ud;
     @try_construct(TRIM) unsigned short us_t;
+  };
+
+  @mutable
+  @OpenDDS::data_representation(XCDR2)
+  struct StringTest1 {
+    str64 str64_d;
+    str64 str64_ud;
+    str64 str64_t;
+  };
+
+  @mutable
+  @OpenDDS::data_representation(XCDR2)
+  struct StringTest2 {
+    @try_construct(DISCARD) str20 str20_d;
+    @try_construct(USE_DEFAULT) str20 str20_ud;
+    @try_construct(TRIM) str20 str20_t;
+  };
+
+  @mutable
+  @OpenDDS::data_representation(XCDR2)
+  struct NestedStructTest1{
+    NestedStruct ns;
+  };
+
+  @mutable
+  @OpenDDS::data_representation(XCDR2)
+  struct NestedStructTest2{
+    @try_construct(USE_DEFAULT) NestedStruct2 ns;
   };
 
 };
