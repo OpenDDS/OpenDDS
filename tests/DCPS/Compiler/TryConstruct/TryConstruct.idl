@@ -17,25 +17,6 @@ typedef short ShortArray[10];
 //enum for use in struct, union, and sequence
 enum EnumType {VALUE1, VALUE2};
 
-//nested struct for use in struct, union, and sequence
-struct NestedStruct {
-  // @try_construct(DISCARD) ShortArray sa_d;
-  // @try_construct(USE_DEFAULT) ShortArray sa_ud;
-  // @try_construct(TRIM) ShortArray sa_t;
-  @try_construct(DISCARD) str64 str64_d;
-  @try_construct(USE_DEFAULT) str64 str64_ud;
-  @try_construct(TRIM) str64 str64_t;
-};
-//nested struct for use in struct, union, and sequence
-struct NestedStruct2 {
-  // @try_construct(DISCARD) ShortArray sa_d;
-  // @try_construct(USE_DEFAULT) ShortArray sa_ud;
-  // @try_construct(TRIM) ShortArray sa_t;
-  @try_construct(DISCARD) str20 str20_d;
-  @try_construct(USE_DEFAULT) str20 str20_ud;
-  @try_construct(TRIM) str20 str20_t;
-};
-
 //nested union for use in struct, union, and sequence
 union NestedUnion switch (EnumType) {
   case VALUE1: boolean u_b;
@@ -61,17 +42,66 @@ typedef sequence<wstr64, 20> WideStringSeqBound;
 //array
 typedef sequence<ShortArray> ShortArraySeqUnbound;
 typedef sequence<ShortArray, 20> ShortArraySeqBound;
-//struct
-typedef sequence<NestedStruct> StructSeqUnbound;
-typedef sequence<NestedStruct, 20> StructSeqBound;
-//union
-typedef sequence<NestedUnion> UnionSeqUnbound;
-typedef sequence<NestedUnion, 20> UnionSeqBound;
 //sequence
 typedef sequence<ShortSeqUnbound> SeqShortSeqUnboundUnbound;
 typedef sequence<ShortSeqUnbound, 20> SeqShortSeqUnboundBound;
 typedef sequence<ShortSeqBound> SeqShortSeqBoundUnbound;
 typedef sequence<ShortSeqBound, 20> SeqShortSeqBoundBound;
+
+//nested struct for use in struct, union, and sequence
+struct NestedStruct {
+  // @try_construct(DISCARD) ShortArray sa_d;
+  // @try_construct(USE_DEFAULT) ShortArray sa_ud;
+  // @try_construct(TRIM) ShortArray sa_t;
+  @try_construct(DISCARD) str64 str64_d;
+  @try_construct(USE_DEFAULT) str64 str64_ud;
+  @try_construct(TRIM) str64 str64_t;
+};
+
+//struct
+typedef sequence<NestedStruct> StructSeqUnbound;
+typedef sequence<NestedStruct, 20> StructSeqBound;
+
+//union
+typedef sequence<NestedUnion> UnionSeqUnbound;
+typedef sequence<NestedUnion, 20> UnionSeqBound;
+
+//nested struct for use in struct, union, and sequence
+struct NestedStruct2 {
+  @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
+  @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
+  @try_construct(USE_DEFAULT) ShortSeqBound psb_ud;
+  @try_construct(USE_DEFAULT) UnsignedShortSeqUnbound upsu_ud;
+  @try_construct(USE_DEFAULT) UnsignedShortSeqBound upsb_ud;
+  @try_construct(USE_DEFAULT) EnumSeqUnbound esu_ud;
+  @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
+  @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
+  @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
+  @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
+  @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
+  @try_construct(USE_DEFAULT) StructSeqUnbound ssu_ud;
+  @try_construct(USE_DEFAULT) StructSeqBound ssb_ud;
+  @try_construct(USE_DEFAULT) ShortArraySeqUnbound sasu_ud;
+  @try_construct(USE_DEFAULT) ShortArraySeqBound sasb_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqUnboundUnbound sssuu_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqUnboundBound sssub_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqBoundUnbound sssbu_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqBoundBound sssbb_ud;
+  @try_construct(USE_DEFAULT) UnionSeqUnbound usu_ud;
+  @try_construct(USE_DEFAULT) UnionSeqBound usb_ud;
+  @try_construct(USE_DEFAULT) NestedStruct ns_ud;
+  @try_construct(USE_DEFAULT) NestedUnion nu_ud;
+  @try_construct(USE_DEFAULT) ShortArray sa_mud;
+  @try_construct(USE_DEFAULT) EnumType e_ud;
+  @try_construct(USE_DEFAULT) octet by_ud;
+  @try_construct(USE_DEFAULT) boolean bo_ud;
+  @try_construct(USE_DEFAULT) short s_ud;
+  @try_construct(USE_DEFAULT) unsigned short us_ud;
+  @try_construct(DISCARD) str20 str20_d;
+  @try_construct(USE_DEFAULT) str20 str20_ud;
+  @try_construct(TRIM) str20 str20_t;
+};
+
 
 module TryCon {
 @topic

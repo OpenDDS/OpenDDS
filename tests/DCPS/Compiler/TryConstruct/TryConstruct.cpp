@@ -272,6 +272,8 @@ TEST(TestTryCon, string)
     }
   }
 }
+//because nested structs can force default behavior on all members,
+//this is the easiest place to test use_default for every type
 TEST(TestTryCon, nestedstruct)
 {
   TryCon::NestedStructTest1 sent;
@@ -282,6 +284,38 @@ TEST(TestTryCon, nestedstruct)
   expected.ns.str20_d = "";
   expected.ns.str20_ud = "";
   expected.ns.str20_t = "";
+  expected.ns.wstr64_ud = L"";
+  expected.ns.psu_ud.length(0);
+  expected.ns.psb_ud.length(0);
+  expected.ns.upsu_ud.length(0);
+  expected.ns.upsb_ud.length(0);
+  expected.ns.esu_ud.length(0);
+  expected.ns.esb_ud.length(0);
+  expected.ns.strsu_ud.length(0);
+  expected.ns.strsb_ud.length(0);
+  expected.ns.wstrsu_ud.length(0);
+  expected.ns.wstrsb_ud.length(0);
+  expected.ns.ssu_ud.length(0);
+  expected.ns.ssb_ud.length(0);
+  expected.ns.sasu_ud.length(0);
+  expected.ns.sasb_ud.length(0);
+  expected.ns.sssuu_ud.length(0);
+  expected.ns.sssub_ud.length(0);
+  expected.ns.sssbu_ud.length(0);
+  expected.ns.sssbb_ud.length(0);
+  expected.ns.usu_ud.length(0);
+  expected.ns.usb_ud.length(0);
+  expected.ns.ns_ud.str64_d = "";
+  expected.ns.ns_ud.str64_ud = "";
+  expected.ns.ns_ud.str64_t = "";  
+  expected.ns.nu_ud._d(VALUE1);
+  expected.ns.nu_ud.u_b(false);
+  for (ACE_INT16 i = 0; i < 10; i++) expected.ns.sa_mud[i] = 0;
+  expected.ns.e_ud = VALUE1;
+  expected.ns.by_ud = 0x00;
+  expected.ns.bo_ud = false;
+  expected.ns.s_ud = 0;
+  expected.ns.us_ud = 0;
   TryCon::NestedStructTest2 actual;
 
   {
@@ -301,6 +335,40 @@ TEST(TestTryCon, nestedstruct)
     EXPECT_FALSE(strcmp(actual.ns.str20_d.in(), expected.ns.str20_d.in()));
     EXPECT_FALSE(strcmp(actual.ns.str20_ud.in(), expected.ns.str20_ud.in()));
     EXPECT_FALSE(strcmp(actual.ns.str20_t.in(), expected.ns.str20_t.in()));
+    EXPECT_FALSE(wcscmp(actual.ns.wstr64_ud.in(), expected.ns.wstr64_ud.in()));
+    EXPECT_EQ(actual.ns.psu_ud.length(), expected.ns.psu_ud.length());
+    EXPECT_EQ(actual.ns.psb_ud.length(), expected.ns.psb_ud.length());
+    EXPECT_EQ(actual.ns.upsu_ud.length(), expected.ns.upsu_ud.length());
+    EXPECT_EQ(actual.ns.upsb_ud.length(), expected.ns.upsb_ud.length());
+    EXPECT_EQ(actual.ns.esu_ud.length(), expected.ns.esu_ud.length());
+    EXPECT_EQ(actual.ns.esb_ud.length(), expected.ns.esb_ud.length());
+    EXPECT_EQ(actual.ns.strsu_ud.length(), expected.ns.strsu_ud.length());
+    EXPECT_EQ(actual.ns.strsb_ud.length(), expected.ns.strsb_ud.length());
+    EXPECT_EQ(actual.ns.wstrsu_ud.length(), expected.ns.wstrsu_ud.length());
+    EXPECT_EQ(actual.ns.wstrsb_ud.length(), expected.ns.wstrsb_ud.length());
+    EXPECT_EQ(actual.ns.ssu_ud.length(), expected.ns.ssu_ud.length());
+    EXPECT_EQ(actual.ns.ssb_ud.length(), expected.ns.ssb_ud.length());
+    EXPECT_EQ(actual.ns.sasu_ud.length(), expected.ns.sasu_ud.length());
+    EXPECT_EQ(actual.ns.sasb_ud.length(), expected.ns.sasb_ud.length());
+    EXPECT_EQ(actual.ns.sssuu_ud.length(), expected.ns.sssuu_ud.length());
+    EXPECT_EQ(actual.ns.sssub_ud.length(), expected.ns.sssub_ud.length());
+    EXPECT_EQ(actual.ns.sssbu_ud.length(), expected.ns.sssbu_ud.length());
+    EXPECT_EQ(actual.ns.sssbb_ud.length(), expected.ns.sssbb_ud.length());
+    EXPECT_EQ(actual.ns.usu_ud.length(), expected.ns.usu_ud.length());
+    EXPECT_EQ(actual.ns.usb_ud.length(), expected.ns.usb_ud.length());
+    EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_d.in(), expected.ns.ns_ud.str64_d.in()));
+    EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_ud.in(), expected.ns.ns_ud.str64_ud.in()));
+    EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_t.in(), expected.ns.ns_ud.str64_t.in()));  
+    EXPECT_EQ(actual.ns.nu_ud._d(), expected.ns.nu_ud._d());
+    EXPECT_EQ(actual.ns.nu_ud.u_b(), expected.ns.nu_ud.u_b());
+    for (ACE_INT16 i = 0; i < 10; i++) {
+      EXPECT_EQ(actual.ns.sa_mud[i], expected.ns.sa_mud[i]);
+    }
+    EXPECT_EQ(actual.ns.e_ud, expected.ns.e_ud);
+    EXPECT_EQ(actual.ns.by_ud, expected.ns.by_ud);
+    EXPECT_EQ(actual.ns.bo_ud, expected.ns.bo_ud);
+    EXPECT_EQ(actual.ns.s_ud, expected.ns.s_ud);
+    EXPECT_EQ(actual.ns.us_ud, expected.ns.us_ud);
   }
 }
 int main(int argc, char* argv[])
