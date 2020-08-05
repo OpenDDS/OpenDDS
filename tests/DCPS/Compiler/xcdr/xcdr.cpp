@@ -476,9 +476,9 @@ TEST(mutable_tests, to_additional_field_xcdr2_test)
   /// value?) if we decide on that.
 }
 
-TEST(mutable_tests, from_additional_field_misunderstand_test)
+TEST(mutable_tests, from_additional_field_must_understand_test)
 {
-  const unsigned char additional_mustunderstatnd[] = {
+  const unsigned char additional_field_must_understand[] = {
     // Delimiter
     0x00, 0x00, 0x00, 0x2a, // +4 = 4
     // long_field
@@ -502,7 +502,7 @@ TEST(mutable_tests, from_additional_field_misunderstand_test)
   // Deserialization should fail for unknown must_understand field
   {
     ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)additional_mustunderstatnd, sizeof(additional_mustunderstatnd));
+    buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
     Serializer serializer(&buffer, xcdr2);
 
     MutableStruct result;
@@ -512,7 +512,7 @@ TEST(mutable_tests, from_additional_field_misunderstand_test)
   // Deserialize and Compare C++ Values
   {
     ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)additional_mustunderstatnd, sizeof(additional_mustunderstatnd));
+    buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
     Serializer serializer(&buffer, xcdr2);
 
     AdditionalFieldMutableStruct result;
