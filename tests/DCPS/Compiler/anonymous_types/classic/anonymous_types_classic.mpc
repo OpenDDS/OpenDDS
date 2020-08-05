@@ -1,0 +1,11 @@
+project: dcps_test, msvc_bigobj {
+  idlflags += -I..
+
+  TypeSupport_Files {
+    ../test.idl
+  }
+
+  IDL_Files {
+    ../test.idl
+  }
+}

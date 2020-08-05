@@ -2342,6 +2342,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
 
     prev_dst = GUID_UNKNOWN;
 
+    size_t submessage_length = 0;
+
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
@@ -2349,7 +2351,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep
           // going
-          if (!helper.add_to_bundle(idst)) {
+          if (!helper.add_to_bundle(idst, submessage_length)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
