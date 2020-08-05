@@ -2406,9 +2406,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += rtpsCustom.preFieldRead(field_name);
           expr += "(!(" + cond + ") || ";
         }
-      if (!streamAnonymous(fields[i], ">>", intro, expr)) {
-        expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
-      }
+        if (!streamAnonymous(fields[i], ">>", intro, expr)) {
+          expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
+        }
         if (!cond.empty()) {
           expr += ")";
         }
