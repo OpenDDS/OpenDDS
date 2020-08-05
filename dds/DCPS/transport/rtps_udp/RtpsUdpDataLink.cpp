@@ -2351,7 +2351,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep
           // going
-          if (!helper.add_to_bundle(idst, submessage_length)) {
+          if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
