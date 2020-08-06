@@ -527,7 +527,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   return length;
 }
 
-bool Serializer::read_parameter_id(unsigned& id, size_t& size)
+bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_understand)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -546,6 +546,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
     }
 
     // TODO(iguessthislldo): handle PID flags
+    must_understand = false; // Placeholder
 
     // If extended, get the "long" id and size
     if (short_id == pid_extended) {
@@ -571,7 +572,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
       return false;
     }
 
-    // TODO(iguessthislldo): Handle Must Understand Flag
+    must_understand = emheader & emheader_must_understand;
 
     // Get Size
     // TODO(iguessthislldo) LC

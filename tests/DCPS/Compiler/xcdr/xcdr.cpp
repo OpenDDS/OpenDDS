@@ -139,14 +139,14 @@ void amalgam_serializer_test(
   // Serialize and Compare CDR
   {
     Serializer serializer(&buffer, encoding);
-    EXPECT_TRUE(serializer << value);
+    ASSERT_TRUE(serializer << value);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
 
   // Deserialize and Compare C++ Values
   {
     Serializer serializer(&buffer, encoding);
-    EXPECT_TRUE(serializer >> result);
+    ASSERT_TRUE(serializer >> result);
     EXPECT_PRED_FORMAT2(assert_values, value, result);
   }
 }
@@ -476,6 +476,54 @@ TEST(mutable_tests, to_additional_field_xcdr2_test)
   /// value?) if we decide on that.
 }
 
+TEST(mutable_tests, from_additional_field_must_understand_test)
+{
+  const unsigned char additional_field_must_understand[] = {
+    // Delimiter
+    0x00, 0x00, 0x00, 0x2a, // +4 = 4
+    // long_field
+    0x00, 0x00, 0x00, 0x06, // PID +4 = 8
+    0x7f, 0xff, 0xff, 0xff, // +4 = 12
+    // additional_field @must_understand
+    0x80, 0x00, 0x00, 0x01, // PID +4 = 16
+    0x12, 0x34, 0x56, 0x78, // +4 = 20
+    // long_long_field
+    0x00, 0x00, 0x00, 0x0a, // PID +4 = 24
+    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 32
+    // octet_field
+    0x00, 0x00, 0x00, 0x08, // PID +4 = 36
+    0x01, // +1 = 37
+    // short_field
+    0x00, 0x00, 0x00, // +3 pad = 40
+    0x00, 0x00, 0x00, 0x04, // PID +4 = 44
+    0x7f, 0xff // +2 = 46
+  };
+
+  // Deserialization should fail for unknown must_understand field
+  {
+    ACE_Message_Block buffer(1024);
+    buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
+    Serializer serializer(&buffer, xcdr2);
+
+    MutableStruct result;
+    EXPECT_FALSE(serializer >> result);
+  }
+
+  // Deserialize and Compare C++ Values
+  {
+    ACE_Message_Block buffer(1024);
+    buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
+    Serializer serializer(&buffer, xcdr2);
+
+    AdditionalFieldMutableStruct result;
+    ASSERT_TRUE(serializer >> result);
+
+    AdditionalFieldMutableStruct value;
+    set_values(value);
+    EXPECT_PRED_FORMAT2(assert_values, value, result);
+  }
+}
+
 TEST(mutable_tests, from_additional_field_xcdr2_test)
 {
   const unsigned char expected[] = {
@@ -486,7 +534,7 @@ TEST(mutable_tests, from_additional_field_xcdr2_test)
     0x7f, 0xff, 0xff, 0xff, // +4 = 12
     // additional_field
     0x00, 0x00, 0x00, 0x01, // PID +4 = 16
-    0x12, 0x34, 0x56, 0x78, // PID +4 = 20
+    0x12, 0x34, 0x56, 0x78, // +4 = 20
     // long_long_field
     0x00, 0x00, 0x00, 0x0a, // PID +4 = 24
     0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 32
