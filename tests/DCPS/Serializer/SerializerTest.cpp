@@ -231,7 +231,6 @@ bool extractions(ACE_Message_Block* chain, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size + ACE_OS::strlen(values.stringValue) + 1;
-    std::cout << "strlen is " << ACE_OS::strlen(values.stringValue) << std::endl;
     pos = serializer.pos();
     print(pos, expectedPos, prevPos, readPosOk, "string");
   }
@@ -615,6 +614,90 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   testchain->release();
 }
 
+const int chainCaps[] = {2, 4, 4};
+
+bool runOverrunTest()
+{
+  std::cout << "\nRunning overrun test..." << std::endl;
+
+  for (size_t i = 0; i < encoding_count; ++i) {
+    ACE_Message_Block* chain = getchain(sizeof(chainCaps)/sizeof(chainCaps[0]), chainCaps);
+
+    // Overrun write
+    Serializer s1(chain, encodings[i]);
+    ACE_CDR::ULong ul = 1234;
+    if (!(s1 << ul)) {
+      std::cerr << "runOverrunTest: 1st insert ulong using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    ACE_CDR::Float flt = 3.14;
+    if (!(s1 << flt)) {
+      std::cerr << "runOverrunTest: 1st insert float using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    ACE_CDR::LongLong ll = 987654321;
+    if (s1 << ll) {
+      std::cerr << "runOverrunTest: 1st insert long long using "
+                << encodings[i].to_string()
+                << " succeeded when it should've failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    chain->release();
+
+    chain = getchain(sizeof(chainCaps)/sizeof(chainCaps[0]), chainCaps);
+    Serializer s2(chain, encodings[i]);
+    if (!(s2 << ul)) {
+      std::cerr << "runOverrunTest: 2nd insert ulong using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    if (!(s2 << flt)) {
+      std::cerr << "runOverrunTest: 2nd insert float using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    ACE_CDR::UShort us = 12;
+    if (!(s2 << us)) {
+      std::cerr << "runOverrunTest: 2nd insert ushort using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+
+    // Overrun read
+    Serializer s3(chain, encodings[i]);
+    if (!(s3 >> ul)) {
+      std::cerr << "runOverrunTest: 1st extract ulong using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    if (!(s3 >> flt)) {
+      std::cerr << "runOverrunTest: 1st extract float using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    if (s3 >> ll) {
+      std::cerr << "runOverrunTest: 1st extract long long using "
+                << encodings[i].to_string()
+                << " succeeded when it should've failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    chain->release();
+  }
+
+  return true;
+}
+
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
@@ -691,6 +774,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
     std::cout << "\n\n*** "  << encodings[encoding].to_string() << std::endl;
     runTest(expected, expectedArray, encodings[encoding], true);
+  }
+
+  if (!runOverrunTest()) {
+    failed = true;
   }
 
   if (!runAlignmentTest() || !runAlignmentResetTest() || !runAlignmentOverrunTest()) {
