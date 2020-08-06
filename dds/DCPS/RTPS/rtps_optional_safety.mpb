@@ -19,5 +19,6 @@ feature(!no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defau
 
   TypeSupport_Files {
     RtpsCore.idl
+    RtpsRpc.idl
   }
 }
