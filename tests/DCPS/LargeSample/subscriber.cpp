@@ -5,37 +5,32 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Argv_Type_Converter.h>
-#include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
+#include "common.h"
+#include "DataReaderListener.h"
+#include "MessengerTypeSupportImpl.h"
+#include "../../Utils/ExceptionStreams.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
-#if defined (sun)
-#include "dds/DCPS/transport/udp/UdpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst_rch.h"
-#endif
-
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportInst_rch.h>
+#include <dds/DCPS/StaticIncludes.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/udp/Udp.h>
+#  include <dds/DCPS/transport/multicast/Multicast.h>
+#  include <dds/DCPS/transport/shmem/Shmem.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
-#include "DataReaderListener.h"
-#include "MessengerTypeSupportImpl.h"
-#include "tests/Utils/ExceptionStreams.h"
+#include <ace/Argv_Type_Converter.h>
+#include <ace/Get_Opt.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <cstdlib>
 
@@ -43,14 +38,26 @@ namespace {
 
 void parse_args(int argc, ACE_TCHAR* argv[],
                 bool& reliable,
-                int& num_msgs)
+                size_t& writer_process_count,
+                size_t& writers_per_process,
+                size_t& samples_per_writer,
+                unsigned& data_field_length_offset,
+                unsigned& security_id)
 {
-  ACE_Get_Opt getopt(argc, argv, "r:n:");
+  ACE_Get_Opt getopt(argc, argv, "r:p:w:s:o:i:");
   for (int opt = 0; (opt = getopt()) != EOF;) {
     if (opt == 'r') {
       reliable = ACE_OS::atoi(getopt.opt_arg());
-    } else if (opt == 'n') {
-      num_msgs = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'p') {
+      writer_process_count = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'w') {
+      writers_per_process = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 's') {
+      samples_per_writer = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'o') {
+      data_field_length_offset = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'i') {
+      security_id = ACE_OS::atoi(getopt.opt_arg());
     }
   }
 }
@@ -67,36 +74,30 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       TheParticipantFactoryWithArgs(argc, argv);
 
     bool reliable = true;
-    int num_messages_expected = 40;
-    parse_args(argc, argv, reliable, num_messages_expected);
-
-    // handle test performance issue on one platform
-#if defined (sun)
-    const char* udpTransName = "udp";
-    OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::TransportRegistry::instance()->get_inst(udpTransName);
-    if (inst != 0) {
-      OpenDDS::DCPS::UdpInst_rch udp_inst = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::UdpInst>(inst);
-      if (udp_inst == 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: retrieving transport config for: %C failed!\n"),
-                          udpTransName), -1);
-      }
-      udp_inst->rcv_buffer_size_ = 0x40000;
-    }
-#endif
+    size_t writer_process_count = default_writer_process_count;
+    size_t writers_per_process = default_writers_per_process;
+    size_t samples_per_writer = default_samples_per_writer;
+    unsigned data_field_length_offset = default_data_field_length_offset;
+    unsigned security_id = 1;
+    parse_args(argc, argv, reliable,
+      writer_process_count, writers_per_process, samples_per_writer,
+      data_field_length_offset, security_id);
+    const size_t num_messages_expected = writer_process_count * writers_per_process * samples_per_writer;
 
     // Create DomainParticipant
+    DDS::DomainParticipantQos participant_qos;
+    dpf->get_default_participant_qos(participant_qos);
+    set_security_qos(participant_qos, security_id);
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(111,
-                              PARTICIPANT_QOS_DEFAULT,
+      dpf->create_participant(domain,
+                              participant_qos,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_participant() failed!\n")), 1);
     }
 
     // Register Type (Messenger::Message)
@@ -106,7 +107,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), 1);
     }
 
     // Create Topic (Movie Discussion List)
@@ -121,7 +122,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_topic() failed!\n")), 1);
     }
 
     // Create Subscriber
@@ -133,11 +134,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(sub.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), 1);
     }
 
     // Create DataReader
-    DataReaderListenerImpl* listener_svt = new DataReaderListenerImpl;
+    DataReaderListenerImpl* listener_svt =
+      new DataReaderListenerImpl(
+        writer_process_count, writers_per_process, samples_per_writer, data_field_length_offset);
     DDS::DataReaderListener_var listener(listener_svt);
 
     DDS::DataReaderQos qos;
@@ -161,15 +164,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), 1);
     }
 
     for (int delay = 0; listener_svt->num_samples() != num_messages_expected
-         && delay < 60; ++delay) {
+         && delay < 30; ++delay) {
       ACE_OS::sleep(1);
     }
 
-    const long received = listener_svt->num_samples();
+    const size_t received = listener_svt->num_samples();
     const bool data_consistent = reliable ? listener_svt->data_consistent() : true;
     std::string error = "";
     bool show_data_loss = true;
@@ -177,8 +180,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (reliable && data_consistent && received < num_messages_expected) {
       error = "ERROR: ";
       status = EXIT_FAILURE;
-    }
-    else if (!data_consistent) {
+    } else if (!data_consistent) {
       status = EXIT_FAILURE;
       show_data_loss = false;
     }

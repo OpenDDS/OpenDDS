@@ -1,46 +1,53 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
+#include "common.h"
+#include "MessengerTypeSupportImpl.h"
+#include "Writer.h"
+
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/StaticIncludes.h>
+#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
+#  include <dds/DCPS/transport/udp/Udp.h>
+#  include <dds/DCPS/transport/multicast/Multicast.h>
+#  include <dds/DCPS/transport/shmem/Shmem.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#endif
 
 #include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/Service_Participant.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#endif
-
-#include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
-
 namespace {
 
 void parse_args(int argc, ACE_TCHAR* argv[],
                 bool& reliable,
-                int& num_msgs,
-                int& my_pid)
+                int& my_pid,
+                size_t& writers_per_process,
+                size_t& samples_per_writer,
+                unsigned& data_field_length_offset,
+                unsigned& security_id)
 {
-  ACE_Get_Opt getopt(argc, argv, "r:n:p:");
+  ACE_Get_Opt getopt(argc, argv, "r:p:w:s:o:i:");
   for (int opt = 0; (opt = getopt()) != EOF;) {
     if (opt == 'r') {
       reliable = ACE_OS::atoi(getopt.opt_arg());
-    } else if (opt == 'n') {
-      num_msgs = ACE_OS::atoi(getopt.opt_arg());
     } else if (opt == 'p') {
       my_pid = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'w') {
+      writers_per_process = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 's') {
+      samples_per_writer = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'o') {
+      data_field_length_offset = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'i') {
+      security_id = ACE_OS::atoi(getopt.opt_arg());
     }
   }
 }
@@ -57,23 +64,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       TheParticipantFactoryWithArgs(argc, argv);
 
     bool reliable = true;
-    int num_msgs = 10;
     int my_pid = ACE_OS::getpid();
-
-    parse_args(argc, argv, reliable, num_msgs, my_pid);
+    size_t writers_per_process = default_writers_per_process;
+    size_t samples_per_writer = default_samples_per_writer;
+    unsigned data_field_length_offset = default_data_field_length_offset;
+    unsigned security_id = 1;
+    parse_args(argc, argv, reliable, my_pid,
+      writers_per_process, samples_per_writer, data_field_length_offset, security_id);
 
     // Create DomainParticipant
+    DDS::DomainParticipantQos participant_qos;
+    dpf->get_default_participant_qos(participant_qos);
+    set_security_qos(participant_qos, security_id);
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(111,
-                              PARTICIPANT_QOS_DEFAULT,
+      dpf->create_participant(domain,
+                              participant_qos,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_participant failed!\n")),
-                       -1);
+                       1);
     }
 
     // Register TypeSupport (Messenger::Message)
@@ -84,7 +96,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: register_type failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create Topic
@@ -100,7 +112,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_topic failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create Publisher
@@ -113,7 +125,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                       -1);
+                       1);
     }
 
     DDS::DataWriterQos qos;
@@ -124,36 +136,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    // Create DataWriter
-    DDS::DataWriter_var dw =
-      pub->create_datawriter(topic.in(),
-                             qos,
-                             DDS::DataWriterListener::_nil(),
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(dw.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                       -1);
-    }
-
-    DDS::DataWriter_var dw2 =
-      pub->create_datawriter(topic.in(),
-                             qos,
-                             DDS::DataWriterListener::_nil(),
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(dw2.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_datawriter 2 failed!\n")),
-                       -1);
+    // Create DataWriters
+    DataWriters datawriters;
+    for (size_t i = 0; i < writers_per_process; ++i) {
+      datawriters.push_back(
+        pub->create_datawriter(topic.in(),
+                               qos,
+                               DDS::DataWriterListener::_nil(),
+                               OpenDDS::DCPS::DEFAULT_STATUS_MASK));
+      if (!datawriters.back()) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: create_datawriter failed!\n")),
+                         1);
+      }
     }
 
     {
-      Writer writer(dw, dw2, my_pid);
-      writer.write(reliable, num_msgs);
+      Writer writer(datawriters, my_pid);
+      writer.write(reliable, samples_per_writer, data_field_length_offset);
     }
 
     // Sleep to give subscriber a chance to nak before exiting
@@ -171,7 +172,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "Publisher vars going out of scope\n"));
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = -1;
+    status = 1;
   }
 
   ACE_DEBUG((LM_DEBUG, "Publisher exiting with status=%d\n", status));

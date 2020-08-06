@@ -5,22 +5,29 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
+#include "DataReaderListener.h"
+
+#include "common.h"
+#include "MessengerTypeSupportC.h"
+#include "MessengerTypeSupportImpl.h"
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
 
-#include "Writer.h"
-#include "DataReaderListener.h"
-#include "MessengerTypeSupportC.h"
-#include "MessengerTypeSupportImpl.h"
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <iostream>
 
-DataReaderListenerImpl::DataReaderListenerImpl()
+DataReaderListenerImpl::DataReaderListenerImpl(
+  size_t writer_process_count, size_t writers_per_process, size_t samples_per_writer,
+  unsigned data_field_length_offset)
   : num_samples_(0)
   , valid_(true)
+  , writer_process_count_(writer_process_count)
+  , writers_per_process_(writers_per_process)
+  , samples_per_writer_(samples_per_writer)
+  , data_field_length_offset_(data_field_length_offset)
 {
 }
 
@@ -38,7 +45,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
-      ACE_OS::exit(-1);
+      ACE_OS::exit(1);
     }
 
     Messenger::MessageSeq messages;
@@ -58,63 +65,48 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         if (si.valid_data) {
           const Messenger::Message& message = messages[i];
           // only sample_id unique entries
-          if (process_writers_[message.process_id.in()][message.writer_id].insert(message.sample_id).second) {
+          if (process_writers_[message.process_id][message.writer_id].insert(message.sample_id).second) {
             ++num_samples_;
-          }
-          else {
+          } else {
             std::cout << "ERROR: duplicate ";
             valid_ = false;
           }
 
           // output for console to consume
-          std::cout << "Message: process_id = " << message.process_id.in()
+          std::cout << "Received message: process_id = " << message.process_id
                     << " writer_id = " << message.writer_id
-                    << " sample_id = " << message.sample_id << '\n';
+                    << " sample_id = " << message.sample_id
+                    << " data.length = " << message.data.length()
+                    << std::endl;
           // also track it in the log file
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("%N:%l: Message: process_id = %C ")
+                     ACE_TEXT("%N:%l: Received message: process_id = %u ")
                      ACE_TEXT("writer_id = %d ")
-                     ACE_TEXT("sample_id = %d\n"),
-                     message.process_id.in(),
+                     ACE_TEXT("sample_id = %d data.length = %u\n"),
+                     message.process_id,
                      message.writer_id,
-                     message.sample_id));
+                     message.sample_id,
+                     message.data.length()));
 
-          if (message.sample_id < processToWriterSamples_[message.process_id.in()][message.writer_id]) {
-            std::cout << "ERROR: Out of order message from process_id " << message.process_id.in() << " writer_id "
+          if (message.sample_id < processToWriterSamples_[message.process_id][message.writer_id]) {
+            std::cout << "ERROR: Out of order message from process_id " << message.process_id << " writer_id "
                       << message.writer_id << " sample_id " << message.sample_id << " already received sample with id: "
-                      << processToWriterSamples_[std::string(message.process_id)][message.writer_id]
+                      << processToWriterSamples_[message.process_id][message.writer_id]
                       << " (" << message.from.in() << ")\n";
             valid_ = false;
           } else {
-              processToWriterSamples_[std::string(message.process_id)][message.writer_id] = message.sample_id;
-          }
-          if ((message.writer_id == 1 && std::string(message.from) != "Comic Book Guy 1") ||
-              (message.writer_id == 2 && std::string(message.from) != "Comic Book Guy 2")) {
-            std::cout << "ERROR: Bad from for process_id " << message.process_id.in() << " writer_id "
-                      << message.writer_id << " sample_id " << message.sample_id
-                      << " (" << message.from.in() << ")\n";
-            valid_ = false;
-          }
-          else if (message.writer_id != 1 && message.writer_id != 2) {
-            std::cout << "ERROR: Bad writer_id for process_id " << message.process_id.in()
-                      << " writer_id " << message.writer_id << " sample_id "
-                      << message.sample_id << " (" << message.from.in() << ")\n";
-            valid_ = false;
+            processToWriterSamples_[message.process_id][message.writer_id] = message.sample_id;
           }
 
-          const unsigned int data_size = Writer::calc_sample_length(
-            message.sample_id, message.writer_id
-          );
+          const unsigned int data_size = expected_data_field_length(
+            data_field_length_offset_, message.writer_id, message.sample_id);
           if (message.data.length() != data_size) {
             std::cout << "ERROR: Expected message.data to have a size of " << data_size
                       << " but it is " << message.data.length() << "\n";
             valid_ = false;
           }
           for (CORBA::ULong j = 0; j < message.data.length(); ++j) {
-            if ((message.writer_id == 1 &&
-                 (message.data[j] != j % 256)) ||
-                (message.writer_id == 2 &&
-                 (message.data[j] != 255 - (j % 256)))) {
+            if (message.data[j] != expected_data_field_element(message.writer_id, message.sample_id, j)) {
               std::cout << "ERROR: Bad data at index " << j << " writer_id "
                         << message.writer_id << " sample_id " << message.sample_id
                         << "\n";
@@ -146,7 +138,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
-    ACE_OS::exit(-1);
+    ACE_OS::exit(1);
   }
 }
 
@@ -196,17 +188,17 @@ void DataReaderListenerImpl::on_sample_lost(
 bool DataReaderListenerImpl::data_consistent() const
 {
   bool valid_and_done = valid_;
-  if (process_writers_.size() != NUM_PROCESSES) {
-    std::cout << "ERROR: expect to receive data from " << NUM_PROCESSES
+  if (process_writers_.size() != writer_process_count_) {
+    std::cout << "ERROR: expect to receive data from " << writer_process_count_
               << " processes but instead received from "
               << process_writers_.size() << std::endl;
     valid_and_done = false;
   }
   for (ProcessWriters::const_iterator process = process_writers_.begin();
-       process !=  process_writers_.end();
+       process != process_writers_.end();
        ++process) {
-    if (process->second.size() != NUM_WRITERS_PER_PROCESS) {
-      std::cout << "ERROR: expect to receive from " << NUM_WRITERS_PER_PROCESS
+    if (process->second.size() != writers_per_process_) {
+      std::cout << "ERROR: expect to receive from " << writers_per_process_
                 << " writers from process " << process->first
                 << " but instead received from "
                 << process->second.size() << std::endl;
@@ -215,13 +207,25 @@ bool DataReaderListenerImpl::data_consistent() const
     for (WriterCounts::const_iterator writer = process->second.begin();
          writer != process->second.end();
          ++writer) {
-      if (writer->second.size() > NUM_SAMPLES_PER_WRITER) {
-        std::cout << "ERROR: expect to receive no more than " << NUM_SAMPLES_PER_WRITER
+      if (writer->second.size() != samples_per_writer_) {
+        std::cout << "ERROR: Expected to receive " << samples_per_writer_
                   << " samples from process=" << process->first
                   << " writer=" << writer->first
                   << " but instead received "
                   << writer->second.size() << std::endl;
         valid_and_done = false;
+        if (writer->second.size() < samples_per_writer_) {
+          for (size_t sample = 0; sample < samples_per_writer_; ++sample) {
+            std::cerr
+              << (writer->second.count(sample) ? "           Got" : "ERROR: Missing")
+              << " process " << process->first
+              << " writer " << writer->first
+              << " sample " << sample
+              << " expected data length " << expected_data_field_length(
+                data_field_length_offset_, sample, writer->first)
+              << std::endl;
+          }
+        }
       }
     }
   }

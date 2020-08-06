@@ -215,14 +215,14 @@ private:
       : ReactorInterceptor(reactor, owner)
     { }
 
-    void schedule_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
     {
       execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
     }
 
-    ReactorInterceptor::CommandPtr cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    ReactorInterceptor::CommandPtr cancel_timer(const PendingAssoc_rch& pend)
     {
-      return execute_or_enqueue(new CancelCommand(this, transport_client, pend));
+      return execute_or_enqueue(new CancelCommand(this, pend));
     }
 
     virtual bool reactor_is_shut_down() const
@@ -237,39 +237,40 @@ private:
     class CommandBase : public Command {
     public:
       CommandBase(PendingAssocTimer* timer,
-                  TransportClient* transport_client,
                   const PendingAssoc_rch& assoc)
         : timer_ (timer)
-        , transport_client_ (transport_client)
         , assoc_ (assoc)
       { }
     protected:
       PendingAssocTimer* timer_;
-      TransportClient* transport_client_;
       PendingAssoc_rch assoc_;
     };
     struct ScheduleCommand : public CommandBase {
       ScheduleCommand(PendingAssocTimer* timer,
-                      TransportClient* transport_client,
+                      TransportClient_rch transport_client,
                       const PendingAssoc_rch& assoc)
-        : CommandBase (timer, transport_client, assoc)
+        : CommandBase (timer, assoc)
+        , transport_client_ (transport_client)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
-          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-          assoc_->scheduled_ = true;
-          timer_->reactor()->schedule_timer(assoc_.in(),
-                                            transport_client_,
-                                            transport_client_->passive_connect_duration_.value());
+          TransportClient_rch client = transport_client_.lock();
+          if (client) {
+            ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+            assoc_->scheduled_ = true;
+            timer_->reactor()->schedule_timer(assoc_.in(),
+                                              client.in(),
+                                              client->passive_connect_duration_.value());
+          }
         }
       }
+      WeakRcHandle<TransportClient> transport_client_;
     };
     struct CancelCommand : public CommandBase {
       CancelCommand(PendingAssocTimer* timer,
-                    TransportClient* transport_client,
                     const PendingAssoc_rch& assoc)
-        : CommandBase (timer, transport_client, assoc)
+        : CommandBase (timer, assoc)
       { }
       virtual void execute()
       {

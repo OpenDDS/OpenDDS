@@ -59,10 +59,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       new Messenger::MessageTypeSupportImpl();
     CORBA::String_var type_name = mts->get_type_name();
     std::vector<WriterSample> writers;
-    std::ostringstream pid;
-    pid << mypid;
     WriterSample ws;
-    ws.message.process_id = pid.str().c_str();
+    ws.message.process_id = mypid;
     ws.message.from       = "Comic Book Guy";
     ws.message.text       = "Worst. Movie. Ever.";
     ws.message.participant_id = 0;
@@ -72,7 +70,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ws.message.data[j] = j % 256;
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf for process=%C\n"), pid.str().c_str()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf for process=%d\n"), mypid));
     int part_num = 0;
     for (Participants::iterator part = participants.begin();
          part != participants.end();
