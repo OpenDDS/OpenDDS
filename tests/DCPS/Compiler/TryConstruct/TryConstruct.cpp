@@ -11,7 +11,7 @@
 
 using namespace OpenDDS::XTypes;
 using namespace OpenDDS::DCPS;
-const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
+const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
 TEST(TestMutableStruct, flags_match)
 {
   //strings
@@ -238,17 +238,17 @@ TEST(TestTryCon, string)
   TryCon::StringTest2 actual;
 
   {
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
 
     // Serialize and Compare CDR
     {
-      Serializer serializer(data.get(), xcdr2);
+      Serializer serializer(data.get(), xcdr1);
       EXPECT_TRUE(serializer << sent);
     }
 
     // Deserialize and Compare C++ Values
     {
-      Serializer serializer(data.get(), xcdr2);
+      Serializer serializer(data.get(), xcdr1);
       EXPECT_TRUE(serializer >> actual);
     }
     EXPECT_FALSE(strcmp(actual.str20_d.in(), expected.str20_d.in()));
@@ -257,29 +257,150 @@ TEST(TestTryCon, string)
   }
   {
     sent.str64_d = "abcdefghijklmnopqrstuvwxyz";
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
 
     // Serialize and Compare CDR
     {
-      Serializer serializer(data.get(), xcdr2);
+      Serializer serializer(data.get(), xcdr1);
       EXPECT_TRUE(serializer << sent);
     }
 
     // Deserialize and Compare C++ Values
     {
-      Serializer serializer(data.get(), xcdr2);
+      Serializer serializer(data.get(), xcdr1);
       EXPECT_FALSE(serializer >> actual);
+    }
+  }
+}
+TEST(TestTryCon, DISCARD) 
+{
+  {
+    TryCon::DiscardStructString1 sent;
+    sent.str64_d = "abcdefghijklmnopqrstuvwxyz";
+    TryCon::DiscardStructString2 actual;
+
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+
+      // Serialize and Compare CDR
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      // Deserialize and Compare C++ Values
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::DiscardStructWString1 sent;
+    sent.wstr64_d = L"abcdefghijklmnopqrstuvwxyz";
+    TryCon::DiscardStructWString2 actual;
+
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+
+      // Serialize and Compare CDR
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      // Deserialize and Compare C++ Values
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::DiscardStructStruct1 sent;
+    sent.ns.str64_d = "abcdefghijklmnopqrstuvwxyz";
+    sent.ns.str64_ud = "abcdefghijklmnopqrstuvwxyz";
+    sent.ns.str64_t = "abcdefghijklmnopqrstuvwxyz";
+    TryCon::DiscardStructStruct2 actual;
+
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+
+      // Serialize and Compare CDR
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      // Deserialize and Compare C++ Values
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::DiscardStructArray1 sent;
+    sent.sa[0] = "abcdefghijklmnopqrstuvwxyz";
+    TryCon::DiscardStructArray2 actual;
+
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+
+      // Serialize and Compare CDR
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      // Deserialize and Compare C++ Values
+      {
+        Serializer serializer(data.get(), xcdr1);
+        EXPECT_FALSE(serializer >> actual);
+      }
     }
   }
 }
 //because nested structs can force default behavior on all members,
 //this is the easiest place to test use_default for every type
-TEST(TestTryCon, nestedstruct)
+TEST(TestTryCon, USE_DEFAULT)
 {
   TryCon::NestedStructTest1 sent;
   sent.ns.str64_d = "abcdefghijklmnopqrstuvwxyz";
   sent.ns.str64_ud = "abcdefghijklmnopqrstuvwxyz";
   sent.ns.str64_t = "abcdefghijklmnopqrstuvwxyz";
+  sent.ns.wstr64_ud = L"☺";
+  sent.ns.psu_ud.length(1);
+  sent.ns.psb_ud.length(1);
+  sent.ns.upsu_ud.length(1);
+  sent.ns.upsb_ud.length(1);
+  sent.ns.esu_ud.length(1);
+  sent.ns.esb_ud.length(1);
+  sent.ns.strsu_ud.length(1);
+  sent.ns.strsb_ud.length(1);
+  sent.ns.wstrsu_ud.length(1);
+  sent.ns.wstrsb_ud.length(1);
+  sent.ns.ssu_ud.length(1);
+  sent.ns.ssb_ud.length(1);
+  sent.ns.sasu_ud.length(1);
+  sent.ns.sasb_ud.length(1);
+  sent.ns.sssuu_ud.length(1);
+  sent.ns.sssub_ud.length(1);
+  sent.ns.sssbu_ud.length(1);
+  sent.ns.sssbb_ud.length(1);
+  sent.ns.usu_ud.length(1);
+  sent.ns.usb_ud.length(1);
+  sent.ns.ns_ud.str64_d = "HELLO";
+  sent.ns.ns_ud.str64_ud = "WORLD";
+  sent.ns.ns_ud.str64_t = "GOODBYE";  
+  sent.ns.nu_ud._d(VALUE1);
+  sent.ns.nu_ud.u_b(false);
+  for (ACE_INT16 i = 0; i < 10; i++) sent.ns.sa_mud[i] = 0;
+  sent.ns.e_ud = VALUE1;
+  sent.ns.by_ud = 0x00;
+  sent.ns.bo_ud = false;
+  sent.ns.s_ud = 5;
+  sent.ns.us_ud = 5;
   TryCon::NestedStructTest2 expected;
   expected.ns.str20_d = "";
   expected.ns.str20_ud = "";
@@ -319,17 +440,17 @@ TEST(TestTryCon, nestedstruct)
   TryCon::NestedStructTest2 actual;
 
   {
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
 
     // Serialize and Compare CDR
     {
-      Serializer serializer(data.get(), xcdr2);
+      Serializer serializer(data.get(), xcdr1);
       EXPECT_TRUE(serializer << sent);
     }
 
     // Deserialize and Compare C++ Values
     {
-      Serializer serializer(data.get(), xcdr2);
+      Serializer serializer(data.get(), xcdr1);
       EXPECT_TRUE(serializer >> actual);
     }
     EXPECT_FALSE(strcmp(actual.ns.str20_d.in(), expected.ns.str20_d.in()));
@@ -369,6 +490,187 @@ TEST(TestTryCon, nestedstruct)
     EXPECT_EQ(actual.ns.bo_ud, expected.ns.bo_ud);
     EXPECT_EQ(actual.ns.s_ud, expected.ns.s_ud);
     EXPECT_EQ(actual.ns.us_ud, expected.ns.us_ud);
+  }
+}
+//test all the trims in the same place
+//because nested structs can force default behavior on all members,
+//this is the easiest place to test use_default for every type
+TEST(TestTryCon, TRIM)
+{
+  TryCon::TrimStruct1 sent;
+  sent.str64_t = "abcdefghijklmnopqrstuvwxyz";
+  sent.wstr64_t = L"abcdefghijklmnopqrstuvwxyz";
+  sent.psu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.psu_t[i] = 1;
+  }
+  sent.psb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.psb_t[i] = 1;
+  }
+  sent.upsu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.upsu_t[i] = 1;
+  }
+  sent.upsb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.upsb_t[i] = 1;
+  }
+  sent.esu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.esu_t[i] = VALUE1;
+  }
+  sent.esb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.esb_t[i] = VALUE1;
+  }
+  sent.strsu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.strsu_t[i] = "HELLOWORLD";
+  }
+  sent.strsb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.strsb_t[i] = "HELLOWORLD";
+  }
+  sent.wstrsu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.wstrsu_t[i] = L"☺";
+  }
+  sent.wstrsb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.wstrsb_t[i] = L"☺";
+  }
+  sent.ssu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.ssu_t[i].str64_t = "abcdefghijklmnopqrstuvwxyz";
+  }
+  sent.ssb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.ssb_t[i].str64_t = "abcdefghijklmnopqrstuvwxyz";
+  }
+  sent.sasu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 j = 0; j < 10; j++) {
+      sent.sasu_t[i][j] = 1;
+    }
+  }
+  sent.sasb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 j = 0; j < 10; j++) {
+      sent.sasb_t[i][j] = 1;
+    }
+  }
+  sent.sssuu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.sssuu_t[i].length(3);
+    sent.sssuu_t[i][0] = 1;
+    sent.sssuu_t[i][1] = 1;
+    sent.sssuu_t[i][2] = 1;
+  }
+  sent.sssub_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.sssub_t[i].length(3);
+    sent.sssub_t[i][0] = 1;
+    sent.sssub_t[i][1] = 1;
+    sent.sssub_t[i][2] = 1;
+  }
+  sent.sssbu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.sssbu_t[i].length(3);
+    sent.sssbu_t[i][0] = 1;
+    sent.sssbu_t[i][1] = 1;
+    sent.sssbu_t[i][2] = 1;
+  }
+  sent.sssbb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.sssbb_t[i].length(3);
+    sent.sssbb_t[i][0] = 1;
+    sent.sssbb_t[i][1] = 1;
+    sent.sssbb_t[i][2] = 1;
+  }
+  sent.usu_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.usu_t[i]._d(VALUE1);
+    sent.usu_t[i].u_b(false);
+  }
+  sent.usb_t.length(3);
+  for (ACE_INT16 i = 0; i < 3; i++) {
+    sent.usb_t[i]._d(VALUE1);
+    sent.usb_t[i].u_b(false);
+  }
+  TryCon::TrimStruct2 expected;
+  expected.str20_t = "abcdefghijklmnopqrst";
+  expected.wstr20_t = L"abcdefghijklmnopqrst";
+  expected.psu_t.length(3);
+  expected.psb_t.length(2);
+  expected.upsu_t.length(3);
+  expected.upsb_t.length(2);
+  expected.esu_t.length(3);
+  expected.esb_t.length(2);
+  expected.strsu_t.length(3);
+  expected.strsb_t.length(2);
+  expected.wstrsu_t.length(3);
+  expected.wstrsb_t.length(2);
+  expected.ssu_t.length(3);
+  expected.ssu_t[0].str20_t = "abcdefghijklmnopqrst";
+  expected.ssb_t.length(2);
+  expected.ssb_t[0].str20_t = "abcdefghijklmnopqrst";
+  expected.sasu_t.length(3);
+  expected.sasb_t.length(2);
+  expected.sssuu_t.length(3);
+  expected.sssuu_t[0].length(3);
+  expected.sssub_t.length(2);
+  expected.sssub_t[0].length(3);
+  expected.sssbu_t.length(3);
+  expected.sssbu_t[0].length(2);
+  expected.sssbb_t.length(2);
+  expected.sssbb_t[0].length(2);
+  expected.usu_t.length(3);
+  expected.usb_t.length(2);
+  TryCon::TrimStruct2 actual;
+
+  {
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+
+    // Serialize and Compare CDR
+    {
+      Serializer serializer(data.get(), xcdr1);
+      EXPECT_TRUE(serializer << sent);
+    }
+
+    // Deserialize and Compare C++ Values
+    {
+      Serializer serializer(data.get(), xcdr1);
+      EXPECT_TRUE(serializer >> actual);
+    }
+    EXPECT_FALSE(strcmp(actual.str20_t.in(), expected.str20_t.in())); 
+    EXPECT_FALSE(wcscmp(actual.wstr20_t.in(), expected.wstr20_t.in()));
+    EXPECT_EQ(actual.psu_t.length(), expected.psu_t.length());
+    EXPECT_EQ(actual.psb_t.length(), expected.psb_t.length());
+    EXPECT_EQ(actual.upsu_t.length(), expected.upsu_t.length());
+    EXPECT_EQ(actual.upsb_t.length(), expected.upsb_t.length());
+    EXPECT_EQ(actual.esu_t.length(), expected.esu_t.length());
+    EXPECT_EQ(actual.esb_t.length(), expected.esb_t.length());
+    EXPECT_EQ(actual.strsu_t.length(), expected.strsu_t.length());
+    EXPECT_EQ(actual.strsb_t.length(), expected.strsb_t.length());
+    EXPECT_EQ(actual.wstrsu_t.length(), expected.wstrsu_t.length());
+    EXPECT_EQ(actual.wstrsb_t.length(), expected.wstrsb_t.length());
+    EXPECT_EQ(actual.ssu_t.length(), expected.ssu_t.length());
+    EXPECT_FALSE(strcmp(actual.ssu_t[0].str20_t.in(), expected.ssu_t[0].str20_t.in()));
+    EXPECT_EQ(actual.ssb_t.length(), expected.ssb_t.length());
+    EXPECT_FALSE(strcmp(actual.ssb_t[0].str20_t.in(), expected.ssb_t[0].str20_t.in()));
+    EXPECT_EQ(actual.sasu_t.length(), expected.sasu_t.length());
+    EXPECT_EQ(actual.sasb_t.length(), expected.sasb_t.length());
+    EXPECT_EQ(actual.sssuu_t.length(), expected.sssuu_t.length());
+    EXPECT_EQ(actual.sssuu_t[0].length(), expected.sssuu_t[0].length());
+    EXPECT_EQ(actual.sssub_t.length(), expected.sssub_t.length());
+    EXPECT_EQ(actual.sssub_t[0].length(), expected.sssub_t[0].length());
+    EXPECT_EQ(actual.sssbu_t.length(), expected.sssbu_t.length());
+    EXPECT_EQ(actual.sssbu_t[0].length(), expected.sssbu_t[0].length());
+    EXPECT_EQ(actual.sssbb_t.length(), expected.sssbb_t.length());
+    EXPECT_EQ(actual.sssbb_t[0].length(), expected.sssbb_t[0].length());
+    EXPECT_EQ(actual.usu_t.length(), expected.usu_t.length());
+    EXPECT_EQ(actual.usb_t.length(), expected.usb_t.length());
   }
 }
 int main(int argc, char* argv[])
