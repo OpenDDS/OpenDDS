@@ -49,11 +49,12 @@ const MonotonicTimePoint source_timestamp_3(ACE_Time_Value(3,0));
 const PublicationHandle publication_handle_1(PublicationHandle(1));
 const PublicationHandle publication_handle_2(PublicationHandle(2));
 typedef SampleCache<Sample> SampleCacheType;
+typedef SampleCacheType::SampleCachePtr SampleCachePtrType;
 typedef SampleCacheType::SampleList SampleList;
 typedef Sink<Sample> SinkType;
 typedef SinkType::SinkPtr SinkPtrType;
-// typedef Source<Sample> SourceType;
-// typedef SourceType::SinkPtrType SinkPtrType;
+typedef Source<Sample> SourceType;
+typedef SourceType::SourcePtr SourcePtrType;
 
 void test_SampleCache_ctor()
 {
@@ -207,7 +208,7 @@ void test_SampleCache_dispose_instance()
   TEST_ASSERT(sample_cache.state() == SampleCacheState(NO_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE));
 }
 
-void test_SampleCache_write_all()
+void test_SampleCache_initialize()
 {
   std::cout << __func__ << std::endl;
 
@@ -215,7 +216,7 @@ void test_SampleCache_write_all()
   setup1(sample_cache1);
 
   SampleCacheType sample_cache2;
-  sample_cache2.write_all(sample_cache1);
+  sample_cache2.initialize(sample_cache1);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
@@ -630,7 +631,7 @@ void test_Sink_initialize()
   SinkPtrType sink2 = make_rch<SinkType>(-1);
 
   sink1->write(Sample("a", 1), source_timestamp, 0);
-  sink2->initialize(sink1, source_timestamp, 0);
+  sink2->initialize(sink1);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
@@ -654,7 +655,7 @@ void test_Sink_initialize_limit_depth()
 
   sink1->write(Sample("a", 0), source_timestamp, 0);
   sink1->write(Sample("a", 1), source_timestamp, 0);
-  sink2->initialize(sink1, source_timestamp, 0);
+  sink2->initialize(sink1);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
@@ -1784,7 +1785,242 @@ void test_Sink_get_key_value()
 
   flag = sink->get_key_value(sample, 0);
   TEST_ASSERT(flag == false);
+}
 
+void test_Source_register_instance()
+{
+  std::cout << __func__ << std::endl;
+
+  SourcePtrType source_1 = make_rch<SourceType>(-1);
+  SourcePtrType source_2 = make_rch<SourceType>(-1);
+
+  SinkPtrType sink_1 = make_rch<SinkType>(-1);
+  SinkPtrType sink_2 = make_rch<SinkType>(-1);
+  SinkPtrType sink_3 = make_rch<SinkType>(-1);
+
+  source_1->connect(sink_1);
+  source_1->connect(sink_3);
+
+  source_2->connect(sink_2);
+  source_2->connect(sink_3);
+
+  source_1->register_instance(Sample("a", 1), source_timestamp_1);
+  source_2->register_instance(Sample("b", 2), source_timestamp_2);
+
+  const InstanceHandle a_ih_1 = sink_1->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_2 = sink_2->lookup_instance(Sample("b", 2));
+  const InstanceHandle a_ih_3 = sink_3->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_3 = sink_3->lookup_instance(Sample("b", 2));
+  const PublicationHandle ph_1 = source_1->get_publication_handle();
+  const PublicationHandle ph_2 = source_2->get_publication_handle();
+
+  SampleList sample_list;
+  SampleInfoList sample_info_list;
+
+  sink_1->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih_1, ph_1, false));
+
+  sink_2->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih_2, ph_2, false));
+
+  sink_3->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 2);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_list[1] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 2);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih_3, ph_1, false));
+  TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih_3, ph_2, false));
+}
+
+void test_Source_write()
+{
+  std::cout << __func__ << std::endl;
+
+  SourcePtrType source_1 = make_rch<SourceType>(-1);
+  SourcePtrType source_2 = make_rch<SourceType>(-1);
+
+  SinkPtrType sink_1 = make_rch<SinkType>(-1);
+  SinkPtrType sink_2 = make_rch<SinkType>(-1);
+  SinkPtrType sink_3 = make_rch<SinkType>(-1);
+
+  source_1->connect(sink_1);
+  source_1->connect(sink_3);
+
+  source_2->connect(sink_2);
+  source_2->connect(sink_3);
+
+  source_1->write(Sample("a", 1), source_timestamp_1);
+  source_2->write(Sample("b", 2), source_timestamp_2);
+
+  const InstanceHandle a_ih_1 = sink_1->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_2 = sink_2->lookup_instance(Sample("b", 2));
+  const InstanceHandle a_ih_3 = sink_3->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_3 = sink_3->lookup_instance(Sample("b", 2));
+  const PublicationHandle ph_1 = source_1->get_publication_handle();
+  const PublicationHandle ph_2 = source_2->get_publication_handle();
+
+  SampleList sample_list;
+  SampleInfoList sample_info_list;
+
+  sink_1->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih_1, ph_1, true));
+
+  sink_2->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih_2, ph_2, true));
+
+  sink_3->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 2);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_list[1] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 2);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih_3, ph_1, true));
+  TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih_3, ph_2, true));
+}
+
+void test_Source_unregister_instance()
+{
+  std::cout << __func__ << std::endl;
+
+  SourcePtrType source_1 = make_rch<SourceType>(-1);
+  SourcePtrType source_2 = make_rch<SourceType>(-1);
+
+  SinkPtrType sink_1 = make_rch<SinkType>(-1);
+  SinkPtrType sink_2 = make_rch<SinkType>(-1);
+  SinkPtrType sink_3 = make_rch<SinkType>(-1);
+
+  source_1->connect(sink_1);
+  source_1->connect(sink_3);
+
+  source_2->connect(sink_2);
+  source_2->connect(sink_3);
+
+  source_1->register_instance(Sample("a", 1), source_timestamp_1);
+  source_2->register_instance(Sample("b", 2), source_timestamp_1);
+
+  source_1->unregister_instance(Sample("a", 1), source_timestamp_2);
+  source_2->unregister_instance(Sample("b", 2), source_timestamp_3);
+
+  const InstanceHandle a_ih_1 = sink_1->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_2 = sink_2->lookup_instance(Sample("b", 2));
+  const InstanceHandle a_ih_3 = sink_3->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_3 = sink_3->lookup_instance(Sample("b", 2));
+  const PublicationHandle ph_1 = source_1->get_publication_handle();
+  const PublicationHandle ph_2 = source_2->get_publication_handle();
+
+  SampleList sample_list;
+  SampleInfoList sample_info_list;
+
+  sink_1->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, a_ih_1, ph_1, false));
+
+  sink_2->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, b_ih_2, ph_2, false));
+
+  sink_3->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 2);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_list[1] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 2);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, a_ih_3, ph_1, false));
+  TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, b_ih_3, ph_2, false));
+}
+
+void test_Source_dispose_instance()
+{
+  std::cout << __func__ << std::endl;
+
+  SourcePtrType source_1 = make_rch<SourceType>(-1);
+  SourcePtrType source_2 = make_rch<SourceType>(-1);
+
+  SinkPtrType sink_1 = make_rch<SinkType>(-1);
+  SinkPtrType sink_2 = make_rch<SinkType>(-1);
+  SinkPtrType sink_3 = make_rch<SinkType>(-1);
+
+  source_1->connect(sink_1);
+  source_1->connect(sink_3);
+
+  source_2->connect(sink_2);
+  source_2->connect(sink_3);
+
+  source_1->register_instance(Sample("a", 1), source_timestamp_1);
+  source_2->register_instance(Sample("b", 2), source_timestamp_1);
+
+  source_1->dispose_instance(Sample("a", 1), source_timestamp_2);
+  source_2->dispose_instance(Sample("b", 2), source_timestamp_3);
+
+  const InstanceHandle a_ih_1 = sink_1->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_2 = sink_2->lookup_instance(Sample("b", 2));
+  const InstanceHandle a_ih_3 = sink_3->lookup_instance(Sample("a", 1));
+  const InstanceHandle b_ih_3 = sink_3->lookup_instance(Sample("b", 2));
+  const PublicationHandle ph_1 = source_1->get_publication_handle();
+  const PublicationHandle ph_2 = source_2->get_publication_handle();
+
+  SampleList sample_list;
+  SampleInfoList sample_info_list;
+
+  sink_1->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, a_ih_1, ph_1, false));
+
+  sink_2->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, b_ih_2, ph_2, false));
+
+  sink_3->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 2);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_list[1] == Sample("b", 2));
+  TEST_ASSERT(sample_info_list.size() == 2);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, a_ih_3, ph_1, false));
+  TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, b_ih_3, ph_2, false));
+}
+
+void test_Source_disconnect()
+{
+  std::cout << __func__ << std::endl;
+
+  SourcePtrType source_1 = make_rch<SourceType>(-1);
+
+  SinkPtrType sink_1 = make_rch<SinkType>(-1);
+
+  source_1->connect(sink_1);
+  source_1->write(Sample("a", 1), source_timestamp_1);
+  source_1->disconnect(sink_1);
+  source_1->write(Sample("b", 2), source_timestamp_2);
+
+  const InstanceHandle a_ih_1 = sink_1->lookup_instance(Sample("a", 1));
+  const PublicationHandle ph_1 = source_1->get_publication_handle();
+
+  SampleList sample_list;
+  SampleInfoList sample_info_list;
+
+  sink_1->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  TEST_ASSERT(sample_list.size() == 1);
+  TEST_ASSERT(sample_list[0] == Sample("a", 1));
+  TEST_ASSERT(sample_info_list.size() == 1);
+  TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih_1, ph_1, true));
 }
 
 }
@@ -1799,7 +2035,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     test_SampleCache_register_instance();
     test_SampleCache_unregister_instance();
     test_SampleCache_dispose_instance();
-    test_SampleCache_write_all();
+    test_SampleCache_initialize();
     test_SampleCache_read_all_not_read();
     test_SampleCache_read_N_not_read();
     test_SampleCache_read_all_read();
@@ -1853,6 +2089,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     test_Sink_read_next_instance();
     test_Sink_take_next_instance();
     test_Sink_get_key_value();
+
+    test_Source_register_instance();
+    test_Source_write();
+    test_Source_unregister_instance();
+    test_Source_dispose_instance();
+    test_Source_disconnect();
   }
   catch (char const *ex)
   {

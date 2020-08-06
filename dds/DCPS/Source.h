@@ -24,11 +24,10 @@ public:
 
   void schedule()
   {
-    reactor_interceptor_.enqueue(rchandle_from(this));
+    //reactor_interceptor_.enqueue(rchandle_from(this));
   }
 
 private:
-
   ReactorInterceptor& reactor_interceptor_;
 };
 
@@ -190,25 +189,28 @@ template<typename Sample>
 class SampleCache : public RcObject {
 public:
   typedef std::vector<Sample> SampleList;
+  typedef RcHandle<SampleCache> SampleCachePtr;
 
   SampleCache()
     : view_state_(NEW_VIEW_STATE)
     , instance_state_(ALIVE_INSTANCE_STATE)
-    , have_instance_element_(true)
+    , instance_element_state_(NOT_READ)
     , disposed_generation_count_(0)
     , no_writers_generation_count_(0)
   { }
 
-  void write_all(const SampleCache& other)
+  void initialize(const SampleCache& other)
   {
-    for (typename ListType::const_iterator pos = other.not_new_samples_.begin(), limit = other.not_new_samples_.end();
-         pos != limit; ++pos) {
-      write(pos->sample, pos->source_timestamp, pos->publication_handle);
-    }
-    for (typename ListType::const_iterator pos = other.new_samples_.begin(), limit = other.new_samples_.end();
-         pos != limit; ++pos) {
-      write(pos->sample, pos->source_timestamp, pos->publication_handle);
-    }
+    // All of the samples are new.
+    new_samples_.insert(new_samples_.end(), other.not_new_samples_.begin(), other.not_new_samples_.end());
+    new_samples_.insert(new_samples_.end(), other.new_samples_.begin(), other.new_samples_.end());
+    view_state_ = NEW_VIEW_STATE;
+    instance_state_ = other.instance_state_;
+    instance_element_state_ = NOT_READ;
+    instance_element_ = other.instance_element_;
+    disposed_generation_count_ = 0;
+    no_writers_generation_count_ = 0;
+    publication_handles_ = other.publication_handles_;
   }
 
   void register_instance(const Sample& key, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
@@ -236,7 +238,7 @@ public:
     }
 
     if (instance_state_ != ALIVE_INSTANCE_STATE) {
-      have_instance_element_ = true;
+      instance_element_state_ = NOT_READ;
       instance_state_ = ALIVE_INSTANCE_STATE;
     }
   }
@@ -254,7 +256,7 @@ public:
     if (instance_state_ == ALIVE_INSTANCE_STATE && publication_handles_.empty()) {
       instance_state_ = NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
       instance_element_ = Element(key, disposed_generation_count_, no_writers_generation_count_, source_timestamp, publication_handle);
-      have_instance_element_ = true;
+      instance_element_state_ = NOT_READ;
       // TODO: Do we need to change the view state?
     }
   }
@@ -264,7 +266,7 @@ public:
     if (instance_state_ == ALIVE_INSTANCE_STATE) {
       instance_state_ = NOT_ALIVE_DISPOSED_INSTANCE_STATE;
       instance_element_ = Element(key, disposed_generation_count_, no_writers_generation_count_, source_timestamp, publication_handle);
-      have_instance_element_ = true;
+      instance_element_state_ = NOT_READ;
       // TODO: Do we need to change the view state?
     }
   }
@@ -285,17 +287,17 @@ public:
       while (sample_list.size() != max_samples && new_samples_pos != new_samples_end) {
         not_read_mrsic_idx = sample_list.size();
         sample_list.push_back(new_samples_pos->sample);
-        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, new_samples_pos->disposed_generation_count, new_samples_pos->no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (new_samples_pos->disposed_generation_count + new_samples_pos->no_writers_generation_count), new_samples_pos->source_timestamp, this, new_samples_pos->publication_handle, true));
+        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, new_samples_pos->disposed_generation_count, new_samples_pos->no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (new_samples_pos->disposed_generation_count + new_samples_pos->no_writers_generation_count), new_samples_pos->source_timestamp, get_instance_handle(), new_samples_pos->publication_handle, true));
         ++new_samples_pos;
       }
 
-      if (sample_list.size() == size_before && sample_list.size() != max_samples && have_instance_element_) {
+      if (sample_list.size() == size_before && sample_list.size() != max_samples && instance_element_state_ == NOT_READ) {
         not_read_mrsic_idx = sample_list.size();
         sample_list.push_back(instance_element_.sample);
-        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, instance_element_.disposed_generation_count, instance_element_.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (instance_element_.disposed_generation_count + instance_element_.no_writers_generation_count), instance_element_.source_timestamp, this, instance_element_.publication_handle, false));
-        have_instance_element_ = false;
+        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, instance_element_.disposed_generation_count, instance_element_.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (instance_element_.disposed_generation_count + instance_element_.no_writers_generation_count), instance_element_.source_timestamp, get_instance_handle(), instance_element_.publication_handle, false));
+        instance_element_state_ = READ;
       } else if (sample_list.size() != size_before) {
-        have_instance_element_ = false;
+        instance_element_state_ = READ;
       }
     }
 
@@ -304,7 +306,13 @@ public:
            sample_list.size() != max_samples && pos != limit; ++pos) {
         read_mrsic_idx = sample_list.size();
         sample_list.push_back(pos->sample);
-        sample_info_list.push_back(SampleInfo(READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (pos->disposed_generation_count + pos->no_writers_generation_count), pos->source_timestamp, this, pos->publication_handle, true));
+        sample_info_list.push_back(SampleInfo(READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (pos->disposed_generation_count + pos->no_writers_generation_count), pos->source_timestamp, get_instance_handle(), pos->publication_handle, true));
+      }
+
+      if (sample_list.size() == size_before && sample_list.size() != max_samples && instance_element_state_ == READ) {
+        read_mrsic_idx = sample_list.size();
+        sample_list.push_back(instance_element_.sample);
+        sample_info_list.push_back(SampleInfo(READ_SAMPLE_STATE, view_state_, instance_state_, instance_element_.disposed_generation_count, instance_element_.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (instance_element_.disposed_generation_count + instance_element_.no_writers_generation_count), instance_element_.source_timestamp, get_instance_handle(), instance_element_.publication_handle, false));
       }
     }
 
@@ -337,8 +345,17 @@ public:
         read_mrsic_idx = sample_list.size();
         const Element& front = not_new_samples_.front();
         sample_list.push_back(front.sample);
-        sample_info_list.push_back(SampleInfo(READ_SAMPLE_STATE, view_state_, instance_state_, front.disposed_generation_count, front.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (front.disposed_generation_count + front.no_writers_generation_count), front.source_timestamp, this, front.publication_handle, true));
+        sample_info_list.push_back(SampleInfo(READ_SAMPLE_STATE, view_state_, instance_state_, front.disposed_generation_count, front.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (front.disposed_generation_count + front.no_writers_generation_count), front.source_timestamp, get_instance_handle(), front.publication_handle, true));
         not_new_samples_.pop_front();
+      }
+
+      if (sample_list.size() == size_before && sample_list.size() != max_samples && instance_element_state_ == READ) {
+        read_mrsic_idx = sample_list.size();
+        sample_list.push_back(instance_element_.sample);
+        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, instance_element_.disposed_generation_count, instance_element_.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (instance_element_.disposed_generation_count + instance_element_.no_writers_generation_count), instance_element_.source_timestamp, get_instance_handle(), instance_element_.publication_handle, false));
+        instance_element_state_ = TAKEN;
+      } else if (sample_list.size() != size_before) {
+        instance_element_state_ = TAKEN;
       }
     }
 
@@ -347,17 +364,17 @@ public:
         not_read_mrsic_idx = sample_list.size();
         const Element& front = new_samples_.front();
         sample_list.push_back(front.sample);
-        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, front.disposed_generation_count, front.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (front.disposed_generation_count + front.no_writers_generation_count), front.source_timestamp, this, front.publication_handle, true));
+        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, front.disposed_generation_count, front.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (front.disposed_generation_count + front.no_writers_generation_count), front.source_timestamp, get_instance_handle(), front.publication_handle, true));
         new_samples_.pop_front();
       }
 
-      if (sample_list.size() == size_before && sample_list.size() != max_samples && have_instance_element_) {
+      if (sample_list.size() == size_before && sample_list.size() != max_samples && instance_element_state_ == NOT_READ) {
         not_read_mrsic_idx = sample_list.size();
         sample_list.push_back(instance_element_.sample);
-        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, instance_element_.disposed_generation_count, instance_element_.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (instance_element_.disposed_generation_count + instance_element_.no_writers_generation_count), instance_element_.source_timestamp, this, instance_element_.publication_handle, false));
-        have_instance_element_ = false;
+        sample_info_list.push_back(SampleInfo(NOT_READ_SAMPLE_STATE, view_state_, instance_state_, instance_element_.disposed_generation_count, instance_element_.no_writers_generation_count, 0, 0, (disposed_generation_count_ + no_writers_generation_count_) - (instance_element_.disposed_generation_count + instance_element_.no_writers_generation_count), instance_element_.source_timestamp, get_instance_handle(), instance_element_.publication_handle, false));
+        instance_element_state_ = TAKEN;
       } else if (sample_list.size() != size_before) {
-        have_instance_element_ = false;
+        instance_element_state_ = TAKEN;
       }
     }
 
@@ -401,8 +418,8 @@ public:
   SampleCacheState state() const
   {
     const int sample_state =
-      ((have_instance_element_ || !new_samples_.empty()) ? NOT_READ_SAMPLE_STATE : 0) |
-      (!not_new_samples_.empty() ? READ_SAMPLE_STATE : 0);
+      ((instance_element_state_ == NOT_READ || !new_samples_.empty()) ? NOT_READ_SAMPLE_STATE : 0) |
+      ((instance_element_state_ == READ || !not_new_samples_.empty()) ? READ_SAMPLE_STATE : 0);
     return SampleCacheState(sample_state, view_state_, instance_state_);
   }
 
@@ -447,11 +464,14 @@ private:
   ListType new_samples_;
   ViewState view_state_;
   InstanceState instance_state_;
-  bool have_instance_element_;
+  enum {
+    NOT_READ,
+    READ,
+    TAKEN
+  } instance_element_state_;
   Element instance_element_;
   size_t disposed_generation_count_;
   size_t no_writers_generation_count_;
-  MonotonicTimePoint source_timestamp;
   PublicationHandleSet publication_handles_;
 
   static bool valid_data_pred(const Element& element)
@@ -475,15 +495,14 @@ public:
   {}
 
   // All of the samples in other should belong to a single publication.
-  void initialize(SinkPtr other, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
+  void initialize(SinkPtr other)
   {
     ACE_GUARD(ACE_Thread_Mutex, g1, mutex_);
     {
       ACE_GUARD(ACE_Thread_Mutex, g2, other->mutex_);
       for (typename KeyCache::const_iterator pos = other->key_to_cache_.begin(), limit = other->key_to_cache_.end(); pos != limit; ++pos) {
         SampleCachePtr s = make_rch<SampleCache>();
-        s->register_instance(pos->first, source_timestamp, publication_handle);
-        s->write_all(*pos->second);
+        s->initialize(*pos->second);
         s->resize(depth_);
         key_to_cache_[pos->first] = s;
         instance_to_cache_[s->get_instance_handle()] = s;
@@ -723,7 +742,7 @@ public:
     }
   }
 
-  void read_next_instance(SampleList& sample_list,
+  bool read_next_instance(SampleList& sample_list,
                           SampleInfoList& sample_info_list,
                           size_t max_samples,
                           InstanceHandle previous_handle,
@@ -734,14 +753,15 @@ public:
     sample_list.clear();
     sample_info_list.clear();
 
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
     typename InstanceCache::const_iterator pos = instance_to_cache_.upper_bound(previous_handle);
     if (pos == instance_to_cache_.end()) {
-      return;
+      return false;
     }
 
     read_instance_i(sample_list, sample_info_list, max_samples, pos->second, sample_state_mask, view_state_mask, instance_state_mask);
+    return !sample_list.empty();
   }
 
   void take_next_instance(SampleList& sample_list,
@@ -882,91 +902,120 @@ private:
 
 };
 
-// template<typename Sample>
-// class Source {
-// public:
-//   typedef Sink<Sample> SinkType;
-//   typedef RcHandle<SinkType> SinkPtrType;
+template<typename Sample>
+class Source : public RcObject {
+public:
+  typedef RcHandle<Source> SourcePtr;
+  typedef Sink<Sample> Sink;
+  typedef typename Sink::SinkPtr SinkPtr;
 
-//   Source(size_t depth = 1)
-//   {
-//     durability_sink_ = make_rch<SinkType>(depth);
-//   }
+  Source(size_t depth = 1)
+  {
+    durability_sink_ = make_rch<SinkType>(depth);
+    sinks_.insert(durability_sink_);
+  }
 
-//   void register_instance(const Sample& sample)
-//   {
-//     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-//     for (Sinks::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-//       (pos)->add_key(key);
-//     }
-//     process_updates();
-//   }
+  PublicationHandle get_publication_handle() const { return this; }
 
-//   void write(const Sample& sample)
-//   {
-//     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-//     for (typename SinksType::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-//       (*pos)->write(key, value);
-//     }
-//     process_updates();
-//   }
+  void register_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    for (typename Sinks::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
+      SinkPtr sink = *pos;
+      sink->register_instance(sample, source_timestamp, get_publication_handle());
+    }
+    process_updates();
+  }
 
-//   void unregister_instance(const Sample& sample)
-//   {
-//     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-//     for (Sinks::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-//       (pos)->remove_key(key);
-//     }
-//     process_updates();
-//   }
+  void write(const Sample& sample, const MonotonicTimePoint& source_timestamp)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    for (typename Sinks::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
+      SinkPtr sink = *pos;
+      sink->write(sample, source_timestamp, get_publication_handle());
+    }
+    process_updates();
+  }
 
-//   void connect(SinkPtrType sink)
-//   {
-//     {
-//       ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
-//       to_insert_.insert(sink);
-//       to_erase_.erase(sink);
-//     }
-//     if (mutex_.tryacquire() == 0) {
-//       process_updates();
-//       mutex_.release();
-//     }
-//   }
+  void unregister_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    for (typename Sinks::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
+      SinkPtr sink = *pos;
+      sink->unregister_instance(sample, source_timestamp, get_publication_handle());
+    }
+    process_updates();
+  }
 
-//   void disconnect(SinkPtrType sink)
-//   {
-//     {
-//       ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
-//       to_erase_.insert(sink);
-//       to_insert_.erase(sink);
-//     }
-//     if (mutex_.tryacquire() == 0) {
-//       process_updates();
-//       mutex_.release();
-//     }
-//   }
+  void dispose_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    for (typename Sinks::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
+      SinkPtr sink = *pos;
+      sink->dispose_instance(sample, source_timestamp, get_publication_handle());
+    }
+    process_updates();
+  }
 
-// private:
-//   typedef std::set<SinkPtrType> SinksType;
-//   ACE_Thread_Mutex update_mutex_; // Second in locking order.
-//   SinksType to_insert_;
-//   SinksType to_erase_;
-//   ACE_Thread_Mutex mutex_; // First in locking order.
-//   SinksType sinks_;
-//   SinkPtrType durability_sink_;
+  void connect(SinkPtr sink)
+  {
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
+      to_insert_.insert(sink);
+      to_erase_.erase(sink);
+    }
+    if (mutex_.tryacquire() == 0) {
+      process_updates();
+      mutex_.release();
+    }
+  }
 
-//   void process_updates()
-//   {
-//     ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
-//     sinks_.erase(to_erase_.begin(), to_erase_.end());
-//     sinks_.insert(to_insert_.begin(), to_insert_.end());
-//     for (typename SinksType::const_iterator pos = to_insert_.begin(), limit = to_insert_.end(); pos != limit; ++pos) {
-//       (*pos)->initialize(durability_sink_);
-//     }
-//     to_erase_.clear();
-//     to_insert_.clear();
-//   }
-// };
+  void disconnect(SinkPtr sink)
+  {
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
+      to_erase_.insert(sink);
+      to_insert_.erase(sink);
+    }
+    if (mutex_.tryacquire() == 0) {
+      process_updates();
+      mutex_.release();
+    }
+  }
+
+private:
+  typedef std::set<SinkPtr> Sinks;
+  ACE_Thread_Mutex update_mutex_; // Second in locking order.
+  Sinks to_insert_;
+  Sinks to_erase_;
+  ACE_Thread_Mutex mutex_; // First in locking order.
+  Sinks sinks_;
+  SinkPtr durability_sink_;
+
+  void process_updates()
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
+    for (typename Sinks::const_iterator pos = to_erase_.begin(), limit = to_erase_.end(); pos != limit; ++pos) {
+      SinkPtr sink = *pos;
+
+      SampleList sample_list;
+      SampleInfoList sample_info_list;
+      InstanceHandle instance_handle = 0;
+      while (durability_sink_->read_next_instance(sample_list, sample_info_list, 1, instance_handle, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE)) {
+        sink->unregister_instance(sample_list[0], source_timestamp, get_publication_handle());
+        instance_handle = sample_info_list[0].instance_handle;
+      }
+
+      sinks_.erase(sink);
+    }
+    sinks_.insert(to_insert_.begin(), to_insert_.end());
+    for (typename Sinks::const_iterator pos = to_insert_.begin(), limit = to_insert_.end(); pos != limit; ++pos) {
+      (*pos)->initialize(durability_sink_);
+    }
+    to_erase_.clear();
+    to_insert_.clear();
+  }
+};
 
 } // namespace DCPS
 } // namespace OpenDDS
