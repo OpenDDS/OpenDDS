@@ -420,6 +420,7 @@ public:
 
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
 
+  /// Examine the logical reading position of the stream.
   size_t pos() const { return pos_; }
 
   /**

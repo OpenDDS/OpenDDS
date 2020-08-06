@@ -103,7 +103,8 @@ void array_insertions(
   serializer.write_wchar_array(values.wcharValue, length);
 }
 
-size_t skip(size_t pos, size_t typeSize, size_t maxAlign) {
+size_t skip(size_t pos, size_t typeSize, size_t maxAlign)
+{
   if (maxAlign == 0) {
     return 0;
   }
@@ -112,7 +113,8 @@ size_t skip(size_t pos, size_t typeSize, size_t maxAlign) {
 }
 
 void print(const size_t& pos, const size_t& expectedPos,
-  size_t& prevPos, bool& readPosOk, std::string type) {
+  size_t& prevPos, bool& readPosOk, std::string type)
+{
   if (pos != expectedPos && readPosOk) {
     std::cerr << "ERROR: Read " << type << " -- Prev position: " << prevPos << ". Read: "
               << pos << ". Expected: " << expectedPos << std::endl;
@@ -557,12 +559,7 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   const Encoding& encoding, const bool checkPos)
 {
   ACE_Message_Block* testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
-  const char* out =
-#ifdef ACE_LITTLE_ENDIAN
-    encoding.endianness() == OpenDDS::DCPS::ENDIAN_BIG ? "" : "OUT";
-#else
-    encoding.endianness() == OpenDDS::DCPS::ENDIAN_LITTLE ? "" : "OUT";
-#endif
+  const char* out = encoding.endianness() == OpenDDS::DCPS::ENDIAN_NATIVE ? "OUT" : "";
   std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   insertions(testchain, expected, encoding);
   size_t bytesWritten = testchain->total_length();
