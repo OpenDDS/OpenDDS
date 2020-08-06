@@ -16,19 +16,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class Observer : public ReactorInterceptor::Command {
+class ObserverInterface : public virtual RcObject {
 public:
-  Observer(ReactorInterceptor& reactor_interceptor)
-    : reactor_interceptor_(reactor_interceptor)
-  {}
-
-  void schedule()
-  {
-    //reactor_interceptor_.enqueue(rchandle_from(this));
-  }
-
-private:
-  ReactorInterceptor& reactor_interceptor_;
+  virtual void schedule() = 0;
 };
 
 enum SampleState {
@@ -484,23 +474,22 @@ private:
 template <typename Sample>
 class Sink : public RcObject {
 public:
-  const size_t MAX_DEPTH = -1;
-
   typedef std::vector<Sample> SampleList;
+  typedef ObserverInterface Observer;
   typedef RcHandle<Observer> ObserverPtr;
-  typedef RcHandle<Sink> SinkPtr;
 
-  Sink(size_t depth)
+  Sink(size_t depth = -1, ObserverPtr observer = ObserverPtr())
     : depth_(depth)
+    , observer_(observer)
   {}
 
   // All of the samples in other should belong to a single publication.
-  void initialize(SinkPtr other)
+  void initialize(const Sink& other)
   {
     ACE_GUARD(ACE_Thread_Mutex, g1, mutex_);
     {
-      ACE_GUARD(ACE_Thread_Mutex, g2, other->mutex_);
-      for (typename KeyCache::const_iterator pos = other->key_to_cache_.begin(), limit = other->key_to_cache_.end(); pos != limit; ++pos) {
+      ACE_GUARD(ACE_Thread_Mutex, g2, other.mutex_);
+      for (typename KeyCache::const_iterator pos = other.key_to_cache_.begin(), limit = other.key_to_cache_.end(); pos != limit; ++pos) {
         SampleCachePtr s = make_rch<SampleCache>();
         s->initialize(*pos->second);
         s->resize(depth_);
@@ -508,6 +497,10 @@ public:
         instance_to_cache_[s->get_instance_handle()] = s;
         state_to_caches_[s->state()].insert(s);
       }
+    }
+
+    if (observer_) {
+      observer_->schedule();
     }
   }
 
@@ -523,7 +516,10 @@ public:
       state_to_caches_[s1].erase(sample_cache);
       state_to_caches_[s2].insert(sample_cache);
     }
-    // TODO: Schedule observer.
+
+    if (observer_) {
+      observer_->schedule();
+    }
   }
 
   void write(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
@@ -538,7 +534,10 @@ public:
       state_to_caches_[s1].erase(sample_cache);
       state_to_caches_[s2].insert(sample_cache);
     }
-    // TODO: Schedule observer.
+
+    if (observer_) {
+      observer_->schedule();
+    }
   }
 
   void unregister_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
@@ -556,7 +555,10 @@ public:
       state_to_caches_[s1].erase(sample_cache);
       state_to_caches_[s2].insert(sample_cache);
     }
-    // TODO: Schedule observer.
+
+    if (observer_) {
+      observer_->schedule();
+    }
   }
 
   void dispose_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
@@ -574,7 +576,10 @@ public:
       state_to_caches_[s1].erase(sample_cache);
       state_to_caches_[s2].insert(sample_cache);
     }
-    // TODO: Schedule observer.
+
+    if (observer_) {
+      observer_->schedule();
+    }
   }
 
   void read(SampleList& sample_list,
@@ -830,11 +835,12 @@ private:
   typedef std::set<SampleCachePtr> SampleCachePtrSet;
   typedef std::map<SampleCacheState, SampleCachePtrSet> StateCache;
 
-  ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex mutex_;
   KeyCache key_to_cache_; // For per-instance operations.
   InstanceCache instance_to_cache_; // For per-instance operations.
   StateCache state_to_caches_;
   size_t depth_;
+  ObserverPtr observer_;
 
   SampleCachePtr insert_instance_i(const Sample& sample)
   {
@@ -907,7 +913,7 @@ class Source : public RcObject {
 public:
   typedef RcHandle<Source> SourcePtr;
   typedef Sink<Sample> Sink;
-  typedef typename Sink::SinkPtr SinkPtr;
+  typedef RcHandle<Sink> SinkPtr;
 
   Source(size_t depth = 1)
   {
@@ -1010,7 +1016,7 @@ private:
     }
     sinks_.insert(to_insert_.begin(), to_insert_.end());
     for (typename Sinks::const_iterator pos = to_insert_.begin(), limit = to_insert_.end(); pos != limit; ++pos) {
-      (*pos)->initialize(durability_sink_);
+      (*pos)->initialize(*durability_sink_);
     }
     to_erase_.clear();
     to_insert_.clear();

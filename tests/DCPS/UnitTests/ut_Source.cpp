@@ -41,6 +41,20 @@ struct Sample {
 //   return out;
 // }
 
+class TestObserver : public ObserverInterface {
+public:
+  TestObserver()
+    : scheduled(false)
+  {}
+
+  virtual void schedule()
+  {
+    scheduled = true;
+  }
+
+  bool scheduled;
+};
+
 const Sample key("a", 0);
 const MonotonicTimePoint source_timestamp;
 const MonotonicTimePoint source_timestamp_1(ACE_Time_Value(1,0));
@@ -52,9 +66,10 @@ typedef SampleCache<Sample> SampleCacheType;
 typedef SampleCacheType::SampleCachePtr SampleCachePtrType;
 typedef SampleCacheType::SampleList SampleList;
 typedef Sink<Sample> SinkType;
-typedef SinkType::SinkPtr SinkPtrType;
+typedef RcHandle<SinkType> SinkPtrType;
 typedef Source<Sample> SourceType;
 typedef SourceType::SourcePtr SourcePtrType;
+typedef RcHandle<TestObserver> ObserverPtrType;
 
 void test_SampleCache_ctor()
 {
@@ -627,17 +642,21 @@ void test_Sink_initialize()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink1 = make_rch<SinkType>(-1);
-  SinkPtrType sink2 = make_rch<SinkType>(-1);
+  ObserverPtrType observer = make_rch<TestObserver>();
 
-  sink1->write(Sample("a", 1), source_timestamp, 0);
-  sink2->initialize(sink1);
+  SinkType sink1;
+  SinkType sink2(-1, observer);
+
+  sink1.write(Sample("a", 1), source_timestamp, 0);
+  sink2.initialize(sink1);
+
+  TEST_ASSERT(observer->scheduled == true);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink2->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink2.read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
-  const InstanceHandle a_ih = sink2->lookup_instance(Sample("a", 0));
+  const InstanceHandle a_ih = sink2.lookup_instance(Sample("a", 0));
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -650,18 +669,22 @@ void test_Sink_initialize_limit_depth()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink1 = make_rch<SinkType>(2);
-  SinkPtrType sink2 = make_rch<SinkType>(1);
+  ObserverPtrType observer = make_rch<TestObserver>();
 
-  sink1->write(Sample("a", 0), source_timestamp, 0);
-  sink1->write(Sample("a", 1), source_timestamp, 0);
-  sink2->initialize(sink1);
+  SinkType sink1(2);
+  SinkType sink2(1, observer);
+
+  sink1.write(Sample("a", 0), source_timestamp, 0);
+  sink1.write(Sample("a", 1), source_timestamp, 0);
+  sink2.initialize(sink1);
+
+  TEST_ASSERT(observer->scheduled == true);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink2->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink2.read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
-  const InstanceHandle a_ih = sink2->lookup_instance(key);
+  const InstanceHandle a_ih = sink2.lookup_instance(key);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -674,19 +697,23 @@ void test_Sink_register_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  ObserverPtrType observer = make_rch<TestObserver>();
 
-  InstanceHandle ih = sink->lookup_instance(key);
+  SinkType sink(-1, observer);
+
+  InstanceHandle ih = sink.lookup_instance(key);
   TEST_ASSERT(ih == 0);
 
-  sink->register_instance(key, source_timestamp, 0);
+  sink.register_instance(key, source_timestamp, 0);
 
-  ih = sink->lookup_instance(key);
+  TEST_ASSERT(observer->scheduled == true);
+
+  ih = sink.lookup_instance(key);
   TEST_ASSERT(ih != 0);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == key);
@@ -694,16 +721,16 @@ void test_Sink_register_instance()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, false));
 
-  sink->register_instance(key, source_timestamp, publication_handle_1);
+  sink.register_instance(key, source_timestamp, publication_handle_1);
 
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 0);
   TEST_ASSERT(sample_info_list.size() == 0);
 
-  sink->register_instance(key, source_timestamp, 0);
+  sink.register_instance(key, source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 0);
 
@@ -714,19 +741,23 @@ void test_Sink_write()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  ObserverPtrType observer = make_rch<TestObserver>();
 
-  sink->write(Sample("a", 1), source_timestamp_1, publication_handle_1);
-  sink->write(Sample("b", 2), source_timestamp_1, publication_handle_2);
-  sink->write(Sample("a", 3), source_timestamp_2, publication_handle_2);
-  sink->write(Sample("b", 4), source_timestamp_2, publication_handle_1);
+  SinkType sink(-1, observer);
+
+  sink.write(Sample("a", 1), source_timestamp_1, publication_handle_1);
+  sink.write(Sample("b", 2), source_timestamp_1, publication_handle_2);
+  sink.write(Sample("a", 3), source_timestamp_2, publication_handle_2);
+  sink.write(Sample("b", 4), source_timestamp_2, publication_handle_1);
+
+  TEST_ASSERT(observer->scheduled == true);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
-  const InstanceHandle a_ih = sink->lookup_instance(Sample("a", 0));
-  const InstanceHandle b_ih = sink->lookup_instance(Sample("b", 0));
+  const InstanceHandle a_ih = sink.lookup_instance(Sample("a", 0));
+  const InstanceHandle b_ih = sink.lookup_instance(Sample("b", 0));
 
   TEST_ASSERT(sample_list.size() == 4);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -745,15 +776,15 @@ void test_Sink_register_write()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->register_instance(Sample("a", 1), source_timestamp_1, publication_handle_1);
+  sink.register_instance(Sample("a", 1), source_timestamp_1, publication_handle_1);
 
-  const InstanceHandle a_ih = sink->lookup_instance(Sample("a", 0));
+  const InstanceHandle a_ih = sink.lookup_instance(Sample("a", 0));
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -761,9 +792,9 @@ void test_Sink_register_write()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih, publication_handle_1, false));
 
-  sink->write(Sample("a", 1), source_timestamp_1, publication_handle_1);
+  sink.write(Sample("a", 1), source_timestamp_1, publication_handle_1);
 
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -776,20 +807,24 @@ void test_Sink_unregister_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  ObserverPtrType observer = make_rch<TestObserver>();
 
-  sink->register_instance(key, source_timestamp, 0);
+  SinkType sink(-1, observer);
 
-  InstanceHandle ih = sink->lookup_instance(key);
+  sink.register_instance(key, source_timestamp, 0);
+
+  TEST_ASSERT(observer->scheduled == true);
+
+  InstanceHandle ih = sink.lookup_instance(key);
   TEST_ASSERT(ih != 0);
 
-  sink->unregister_instance(key, source_timestamp, 0);
+  sink.unregister_instance(key, source_timestamp, 0);
 
-  TEST_ASSERT(sink->lookup_instance(key) == ih);
+  TEST_ASSERT(sink.lookup_instance(key) == ih);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == key);
@@ -802,20 +837,24 @@ void test_Sink_dispose_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  ObserverPtrType observer = make_rch<TestObserver>();
 
-  sink->register_instance(key, source_timestamp, 0);
+  SinkType sink(-1, observer);
 
-  InstanceHandle ih = sink->lookup_instance(key);
+  sink.register_instance(key, source_timestamp, 0);
+
+  InstanceHandle ih = sink.lookup_instance(key);
   TEST_ASSERT(ih != 0);
 
-  sink->dispose_instance(key, source_timestamp, 0);
+  sink.dispose_instance(key, source_timestamp, 0);
 
-  TEST_ASSERT(sink->lookup_instance(key) == ih);
+  TEST_ASSERT(observer->scheduled == true);
+
+  TEST_ASSERT(sink.lookup_instance(key) == ih);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == key);
@@ -828,15 +867,15 @@ void test_Sink_read_not_read_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -849,16 +888,16 @@ void test_Sink_read_not_read_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
-  sink->dispose_instance(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
+  sink.dispose_instance(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -871,16 +910,16 @@ void test_Sink_read_not_read_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -893,16 +932,16 @@ void test_Sink_read_not_read_not_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("a", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("a", 2), source_timestamp_2, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(Sample("a", 0));
+  const InstanceHandle ih = sink.lookup_instance(Sample("a", 0));
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -910,7 +949,7 @@ void test_Sink_read_not_read_not_new_alive()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, ih, 0, true));
 
-  sink->read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 2));
@@ -923,15 +962,15 @@ void test_Sink_read_not_read_not_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -939,9 +978,9 @@ void test_Sink_read_not_read_not_new_not_alive_disposed()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->dispose_instance(Sample("a", 1), source_timestamp, 0);
+  sink.dispose_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -954,15 +993,15 @@ void test_Sink_read_not_read_not_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -970,9 +1009,9 @@ void test_Sink_read_not_read_not_new_not_alive_no_writers()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -985,15 +1024,15 @@ void test_Sink_read_read_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1001,10 +1040,10 @@ void test_Sink_read_read_new_alive()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(key, source_timestamp, 0);
-  sink->register_instance(key, source_timestamp, 0);
+  sink.unregister_instance(key, source_timestamp, 0);
+  sink.register_instance(key, source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1017,15 +1056,15 @@ void test_Sink_read_read_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1033,11 +1072,11 @@ void test_Sink_read_read_new_not_alive_disposed()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(key, source_timestamp, 0);
-  sink->register_instance(key, source_timestamp, 0);
-  sink->dispose_instance(key, source_timestamp, 0);
+  sink.unregister_instance(key, source_timestamp, 0);
+  sink.register_instance(key, source_timestamp, 0);
+  sink.dispose_instance(key, source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
 
@@ -1049,15 +1088,15 @@ void test_Sink_read_read_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1065,11 +1104,11 @@ void test_Sink_read_read_new_not_alive_no_writers()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
-  sink->register_instance(Sample("a", 1), source_timestamp, 0);
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.register_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1082,15 +1121,15 @@ void test_Sink_read_read_not_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1098,7 +1137,7 @@ void test_Sink_read_read_not_new_alive()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->read(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1111,15 +1150,15 @@ void test_Sink_read_read_not_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1127,9 +1166,9 @@ void test_Sink_read_read_not_new_not_alive_disposed()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->dispose_instance(Sample("a", 1), source_timestamp, 0);
+  sink.dispose_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1142,15 +1181,15 @@ void test_Sink_read_read_not_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1158,9 +1197,9 @@ void test_Sink_read_read_not_new_not_alive_no_writers()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->read(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1173,15 +1212,15 @@ void test_Sink_take_not_read_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1194,16 +1233,16 @@ void test_Sink_take_not_read_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
-  sink->dispose_instance(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
+  sink.dispose_instance(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1216,16 +1255,16 @@ void test_Sink_take_not_read_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1238,16 +1277,16 @@ void test_Sink_take_not_read_not_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("a", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("a", 2), source_timestamp_2, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(Sample("a", 0));
+  const InstanceHandle ih = sink.lookup_instance(Sample("a", 0));
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1255,7 +1294,7 @@ void test_Sink_take_not_read_not_new_alive()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, ih, 0, true));
 
-  sink->take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 2));
@@ -1268,15 +1307,15 @@ void test_Sink_take_not_read_not_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1284,9 +1323,9 @@ void test_Sink_take_not_read_not_new_not_alive_disposed()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->dispose_instance(Sample("a", 1), source_timestamp, 0);
+  sink.dispose_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1299,15 +1338,15 @@ void test_Sink_take_not_read_not_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1315,9 +1354,9 @@ void test_Sink_take_not_read_not_new_not_alive_no_writers()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1330,15 +1369,15 @@ void test_Sink_take_read_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1346,10 +1385,10 @@ void test_Sink_take_read_new_alive()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(key, source_timestamp, 0);
-  sink->register_instance(key, source_timestamp, 0);
+  sink.unregister_instance(key, source_timestamp, 0);
+  sink.register_instance(key, source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1362,15 +1401,15 @@ void test_Sink_take_read_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1378,11 +1417,11 @@ void test_Sink_take_read_new_not_alive_disposed()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(key, source_timestamp, 0);
-  sink->register_instance(key, source_timestamp, 0);
-  sink->dispose_instance(key, source_timestamp, 0);
+  sink.unregister_instance(key, source_timestamp, 0);
+  sink.register_instance(key, source_timestamp, 0);
+  sink.dispose_instance(key, source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
 
@@ -1394,15 +1433,15 @@ void test_Sink_take_read_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, -1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1410,11 +1449,11 @@ void test_Sink_take_read_new_not_alive_no_writers()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
-  sink->register_instance(Sample("a", 1), source_timestamp, 0);
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.register_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, 1, READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1427,15 +1466,15 @@ void test_Sink_take_read_not_new_alive()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1443,7 +1482,7 @@ void test_Sink_take_read_not_new_alive()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->take(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1456,15 +1495,15 @@ void test_Sink_take_read_not_new_not_alive_disposed()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1472,9 +1511,9 @@ void test_Sink_take_read_not_new_not_alive_disposed()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->dispose_instance(Sample("a", 1), source_timestamp, 0);
+  sink.dispose_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1487,15 +1526,15 @@ void test_Sink_take_read_not_new_not_alive_no_writers()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp, 0);
+  sink.write(Sample("a", 1), source_timestamp, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read(sample_list, sample_info_list, 1, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1503,9 +1542,9 @@ void test_Sink_take_read_not_new_not_alive_no_writers()
   TEST_ASSERT(sample_info_list.size() == 1);
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp, ih, 0, true));
 
-  sink->unregister_instance(Sample("a", 1), source_timestamp, 0);
+  sink.unregister_instance(Sample("a", 1), source_timestamp, 0);
 
-  sink->take(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  sink.take(sample_list, sample_info_list, -1, READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 1);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1518,29 +1557,29 @@ void test_Sink_read_next_sample()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("a", 2), source_timestamp_2, 0);
-  sink->write(Sample("a", 3), source_timestamp_3, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("a", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 3), source_timestamp_3, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   Sample sample;
   SampleInfo sample_info;
-  bool flag = sink->read_next_sample(sample, sample_info);
+  bool flag = sink.read_next_sample(sample, sample_info);
 
   TEST_ASSERT(flag);
   TEST_ASSERT(sample == Sample("a", 1));
   TEST_ASSERT(sample_info == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, ih, 0, true));
 
-  flag = sink->read_next_sample(sample, sample_info);
+  flag = sink.read_next_sample(sample, sample_info);
 
   TEST_ASSERT(flag);
   TEST_ASSERT(sample == Sample("a", 2));
   TEST_ASSERT(sample_info == SampleInfo(NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, ih, 0, true));
 
-  flag = sink->read_next_sample(sample, sample_info);
+  flag = sink.read_next_sample(sample, sample_info);
 
   TEST_ASSERT(flag);
   TEST_ASSERT(sample == Sample("a", 3));
@@ -1551,29 +1590,29 @@ void test_Sink_take_next_sample()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("a", 2), source_timestamp_2, 0);
-  sink->write(Sample("a", 3), source_timestamp_3, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("a", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 3), source_timestamp_3, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   Sample sample;
   SampleInfo sample_info;
-  bool flag = sink->take_next_sample(sample, sample_info);
+  bool flag = sink.take_next_sample(sample, sample_info);
 
   TEST_ASSERT(flag);
   TEST_ASSERT(sample == Sample("a", 1));
   TEST_ASSERT(sample_info == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, ih, 0, true));
 
-  flag = sink->take_next_sample(sample, sample_info);
+  flag = sink.take_next_sample(sample, sample_info);
 
   TEST_ASSERT(flag);
   TEST_ASSERT(sample == Sample("a", 2));
   TEST_ASSERT(sample_info == SampleInfo(NOT_READ_SAMPLE_STATE, NOT_NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, ih, 0, true));
 
-  flag = sink->take_next_sample(sample, sample_info);
+  flag = sink.take_next_sample(sample, sample_info);
 
   TEST_ASSERT(flag);
   TEST_ASSERT(sample == Sample("a", 3));
@@ -1584,17 +1623,17 @@ void test_Sink_read_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("b", 2), source_timestamp_2, 0);
-  sink->write(Sample("a", 3), source_timestamp_3, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("b", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 3), source_timestamp_3, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->read_instance(sample_list, sample_info_list, -1, ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.read_instance(sample_list, sample_info_list, -1, ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 2);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1609,17 +1648,17 @@ void test_Sink_take_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("b", 2), source_timestamp_2, 0);
-  sink->write(Sample("a", 3), source_timestamp_3, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("b", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 3), source_timestamp_3, 0);
 
-  const InstanceHandle ih = sink->lookup_instance(key);
+  const InstanceHandle ih = sink.lookup_instance(key);
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
-  sink->take_instance(sample_list, sample_info_list, -1, ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  sink.take_instance(sample_list, sample_info_list, -1, ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
   TEST_ASSERT(sample_list.size() == 2);
   TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1634,20 +1673,20 @@ void test_Sink_read_next_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("b", 2), source_timestamp_2, 0);
-  sink->write(Sample("a", 3), source_timestamp_3, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("b", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 3), source_timestamp_3, 0);
 
-  const InstanceHandle a_ih = sink->lookup_instance(key);
-  const InstanceHandle b_ih = sink->lookup_instance(Sample("b", 0));
+  const InstanceHandle a_ih = sink.lookup_instance(key);
+  const InstanceHandle b_ih = sink.lookup_instance(Sample("b", 0));
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
 
   if (a_ih < b_ih) {
-    sink->read_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.read_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 2);
     TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1657,7 +1696,7 @@ void test_Sink_read_next_instance()
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 1, 0, 0, source_timestamp_1, a_ih, 0, true));
     TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, a_ih, 0, true));
 
-    sink->read_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.read_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 1);
     TEST_ASSERT(sample_list[0] == Sample("b", 2));
@@ -1665,12 +1704,12 @@ void test_Sink_read_next_instance()
     TEST_ASSERT(sample_info_list.size() == 1);
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih, 0, true));
 
-    sink->read_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.read_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 0);
     TEST_ASSERT(sample_info_list.size() == 0);
   } else {
-    sink->read_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.read_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 1);
     TEST_ASSERT(sample_list[0] == Sample("b", 2));
@@ -1678,7 +1717,7 @@ void test_Sink_read_next_instance()
     TEST_ASSERT(sample_info_list.size() == 1);
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih, 0, true));
 
-    sink->read_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.read_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 2);
     TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1688,7 +1727,7 @@ void test_Sink_read_next_instance()
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 1, 0, 0, source_timestamp_1, a_ih, 0, true));
     TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, a_ih, 0, true));
 
-    sink->read_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.read_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 0);
     TEST_ASSERT(sample_info_list.size() == 0);
@@ -1699,20 +1738,20 @@ void test_Sink_take_next_instance()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("b", 2), source_timestamp_2, 0);
-  sink->write(Sample("a", 3), source_timestamp_3, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("b", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 3), source_timestamp_3, 0);
 
-  const InstanceHandle a_ih = sink->lookup_instance(key);
-  const InstanceHandle b_ih = sink->lookup_instance(Sample("b", 0));
+  const InstanceHandle a_ih = sink.lookup_instance(key);
+  const InstanceHandle b_ih = sink.lookup_instance(Sample("b", 0));
 
   SampleList sample_list;
   SampleInfoList sample_info_list;
 
   if (a_ih < b_ih) {
-    sink->take_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.take_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 2);
     TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1722,7 +1761,7 @@ void test_Sink_take_next_instance()
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 1, 0, 0, source_timestamp_1, a_ih, 0, true));
     TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, a_ih, 0, true));
 
-    sink->take_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.take_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 1);
     TEST_ASSERT(sample_list[0] == Sample("b", 2));
@@ -1730,12 +1769,12 @@ void test_Sink_take_next_instance()
     TEST_ASSERT(sample_info_list.size() == 1);
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih, 0, true));
 
-    sink->take_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.take_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 0);
     TEST_ASSERT(sample_info_list.size() == 0);
   } else {
-    sink->take_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.take_next_instance(sample_list, sample_info_list, -1, 0, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 1);
     TEST_ASSERT(sample_list[0] == Sample("b", 2));
@@ -1743,7 +1782,7 @@ void test_Sink_take_next_instance()
     TEST_ASSERT(sample_info_list.size() == 1);
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_2, b_ih, 0, true));
 
-    sink->take_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.take_next_instance(sample_list, sample_info_list, -1, b_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 2);
     TEST_ASSERT(sample_list[0] == Sample("a", 1));
@@ -1753,7 +1792,7 @@ void test_Sink_take_next_instance()
     TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 1, 0, 0, source_timestamp_1, a_ih, 0, true));
     TEST_ASSERT(sample_info_list[1] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_3, a_ih, 0, true));
 
-    sink->take_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    sink.take_next_instance(sample_list, sample_info_list, -1, a_ih, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
 
     TEST_ASSERT(sample_list.size() == 0);
     TEST_ASSERT(sample_info_list.size() == 0);
@@ -1764,26 +1803,26 @@ void test_Sink_get_key_value()
 {
   std::cout << __func__ << std::endl;
 
-  SinkPtrType sink = make_rch<SinkType>(-1);
+  SinkType sink;
 
-  sink->write(Sample("a", 1), source_timestamp_1, 0);
-  sink->write(Sample("b", 2), source_timestamp_2, 0);
+  sink.write(Sample("a", 1), source_timestamp_1, 0);
+  sink.write(Sample("b", 2), source_timestamp_2, 0);
 
-  const InstanceHandle a_ih = sink->lookup_instance(key);
-  const InstanceHandle b_ih = sink->lookup_instance(Sample("b", 0));
+  const InstanceHandle a_ih = sink.lookup_instance(key);
+  const InstanceHandle b_ih = sink.lookup_instance(Sample("b", 0));
 
   Sample sample;
   bool flag;
 
-  flag = sink->get_key_value(sample, a_ih);
+  flag = sink.get_key_value(sample, a_ih);
   TEST_ASSERT(flag == true);
   TEST_ASSERT(sample == Sample("a", 1));
 
-  flag = sink->get_key_value(sample, b_ih);
+  flag = sink.get_key_value(sample, b_ih);
   TEST_ASSERT(flag == true);
   TEST_ASSERT(sample == Sample("b", 2));
 
-  flag = sink->get_key_value(sample, 0);
+  flag = sink.get_key_value(sample, 0);
   TEST_ASSERT(flag == false);
 }
 
