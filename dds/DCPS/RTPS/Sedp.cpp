@@ -3603,7 +3603,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 
   // As per chapter 7.6.3.3.4 of XTypes spec
-  std::string instance_name = static_cast<std::string>("dds.builtin.TOS.") + ::OpenDDS::DCPS::to_string(participant_id);
+  std::string instance_name = static_cast<std::string>("dds.builtin.TOS.") + static_cast<std::string>(::OpenDDS::DCPS::to_string(participant_id));
   type_lookup_request.header.instance_name = instance_name.c_str();
 
   // Determine message length
