@@ -7,7 +7,7 @@
  */
 
 #include "RtpsRpcTypeSupportImpl.h"
-#include "dds/DCPS/XTypes/TypeObject.h"
+#include <dds/DCPS/XTypes/TypeObject.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -97,7 +97,7 @@ namespace OpenDDS {
 
       TypeLookup_Reply() {}
     };
-  } // namespace XTPS
+  } // namespace XTypes
 
   namespace DCPS {
 

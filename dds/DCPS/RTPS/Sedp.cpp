@@ -1372,13 +1372,13 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
     sedp_->participant_message_writer_->assoc(peer);
   }
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
-    avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+      avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_READER;
     sedp_->type_lookup_request_writer_->assoc(peer);
   }
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
-    avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+      avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_READER;
     sedp_->type_lookup_reply_writer_->assoc(peer);
@@ -3651,7 +3651,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
     new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
     serializer << encap && serializer << type_lookup_reply) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3669,7 +3669,7 @@ Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& s
 {
   // TODO: uncomment; anything else to do here?
   // ser >> type_lookup_request;
-    return DDS::RETCODE_OK;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -3992,7 +3992,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       // TODO: process request and send reply
       XTypes::TypeLookup_Request type_lookup_request;
       if (!sedp_.type_lookup_request_reader_->take_tl_request(sample, ser, type_lookup_request)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
           ACE_TEXT("failed to take type lookup request\n")));
         return;
       }
@@ -4000,7 +4000,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       // TODO: process reply
       XTypes::TypeLookup_Reply type_lookup_reply;
       if (!sedp_.type_lookup_reply_reader_->take_tl_response(sample, ser, type_lookup_reply)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
           ACE_TEXT("failed to take type lookup reply\n")));
         return;
       }

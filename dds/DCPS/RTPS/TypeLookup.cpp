@@ -9,10 +9,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 
-  using DCPS::Encoding;
-  using DCPS::serialized_size;
-  using DCPS::operator<<;
-
   namespace DCPS {
 
     void serialized_size(const Encoding& encoding, size_t& size,
