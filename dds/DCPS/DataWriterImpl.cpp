@@ -2696,8 +2696,7 @@ void DataWriterImpl::wait_pending()
 {
   if (!TransportRegistry::instance()->released()) {
     data_container_->wait_pending(wait_pending_deadline_);
-    controlTracker.wait_messages_pending(
-      "DataWriterImpl::wait_control_pending", wait_pending_deadline_);
+    controlTracker.wait_messages_pending("DataWriterImpl::wait_pending", wait_pending_deadline_);
   }
 }
 

@@ -321,10 +321,11 @@ bool PublisherImpl::prepare_to_delete_datawriters()
   const DataWriterMap::iterator end = datawriter_map_.end();
   for (DataWriterMap::iterator i = datawriter_map_.begin(); i != end; ++i) {
     DataWriterImpl* const writer = dynamic_cast<DataWriterImpl*>(i->second.in());
-    if (!writer) {
+    if (writer) {
+      writer->prepare_to_delete();
+    } else {
       result = false;
     }
-    writer->prepare_to_delete();
   }
 
   return result;
