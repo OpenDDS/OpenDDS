@@ -11,6 +11,13 @@ typedef wstring<20> wstr20;
 typedef string<64> str64;
 typedef wstring<64> wstr64;
 
+typedef sequence<@try_construct(USE_DEFAULT) str20> BoundStringSeq_ud;
+typedef sequence<@try_construct(TRIM) str20> BoundStringSeq_t;
+typedef sequence<@try_construct(DISCARD) str20> BoundStringSeq_d;
+typedef sequence<@try_construct(USE_DEFAULT) wstr20> BoundWStringSeq_ud;
+typedef sequence<@try_construct(TRIM) wstr20> BoundWStringSeq_t;
+typedef sequence<@try_construct(DISCARD) wstr20> BoundWStringSeq_d;
+
 //array for use in struct, union, and sequence
 typedef short ShortArray[10];
 typedef str64 str64Array[15];
@@ -25,6 +32,7 @@ union NestedUnion switch (EnumType) {
   case VALUE2: short u_s;
   default: float u_f;
 };
+
 //sequences
 //enum
 typedef sequence<EnumType> EnumSeqUnbound;

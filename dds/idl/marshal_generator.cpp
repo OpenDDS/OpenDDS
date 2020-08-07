@@ -451,6 +451,24 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(seq->base_type());
+    AST_Annotation_Appl* ann_appl = seq->base_type_annotations().find("::@try_construct");
+    TryConstructFailAction try_construct = tryconstructfailaction_discard;
+    if (ann_appl) {
+      switch (get_u32_annotation_member_value(ann_appl, "value"))
+      {
+      case 0:
+        try_construct = tryconstructfailaction_discard;
+        break;
+      case 1:
+        try_construct = tryconstructfailaction_use_default;
+        break;
+      case 2:
+        try_construct = tryconstructfailaction_trim;
+        break;
+      default:
+        try_construct = tryconstructfailaction_discard;
+      }
+    }
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
@@ -696,8 +714,35 @@ namespace {
           if (elem_cls & CL_BOUNDED) {
             const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ")
               + bounded_arg(elem);
-            be_global->impl_ <<
-              streamAndCheck(">> " + getWrapper(args, elem, WD_INPUT), 4);
+            be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
+            string field_name = "seq[i]";
+            switch (try_construct)
+            {
+            case tryconstructfailaction_use_default:
+            {
+              be_global->impl_<<
+                "      if (strm.good_bit() && seq[i].in() && ("
+                        << bounded_arg(elem) << " < ACE_OS::strlen(seq[i].in()))) {\n"
+                "        " << type_to_default(elem, "seq[i]") <<
+                "      } else {\n"
+                "        return false;\n"
+                "      }\n";
+              break;
+            }
+            case tryconstructfailaction_trim:
+              be_global->impl_ <<
+                "      if (strm.good_bit() && seq[i].in() && ("
+                         << bounded_arg(elem) << " < ACE_OS::strlen(seq[i].in()))) {\n"
+                "        seq[i].inout()[" << bounded_arg(elem) << "] = 0;\n"
+                "      } else {\n"
+                "        return false;\n"
+                "      }\n";
+              break;
+            case tryconstructfailaction_discard:
+              be_global->impl_ << "      return false;\n";
+              break;
+            }
+            be_global->impl_ << "    }\n";
           } else { // unbounded string
             const string getbuffer =
               (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
@@ -2088,20 +2133,20 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           switch (be_global->try_construct(fields[i])) {
           case tryconstructfailaction_trim:
             cases <<
-              "        if (strm.good_bit() && stru." << field_name << ".in() && (" << bounded_arg(field_type) << " < ACE_OS::strlen(stru." << field_name << ".in()))) {\n"
+              "        if (strm.good_bit() && stru." << field_name << ".in() && ("
+                       << bounded_arg(field_type) << " < ACE_OS::strlen(stru."
+                       << field_name << ".in()))) {\n"
               "          stru." << field_name << ".inout()[" << bounded_arg(field_type) << "] = 0;\n"
               "        } else {\n"
               "          return false;\n"
               "        }\n";
             break;
           case tryconstructfailaction_use_default: {
-            std::string default_val = "\"\"";
-            if (fld_cls & CL_WIDE) {
-              default_val = "L\"\"";
-            }
             cases <<
-              "        if (strm.good_bit() && stru." << field_name << ".in() && (" << bounded_arg(field_type) << " < ACE_OS::strlen(stru." << field_name << ".in()))) {\n"
-              "          stru." << field_name << " = " << default_val << ";\n"
+              "        if (strm.good_bit() && stru." << field_name << ".in() && ("
+                       << bounded_arg(field_type) << " < ACE_OS::strlen(stru."
+                       << field_name << ".in()))) {\n"
+              "          " << type_to_default(field_type, "stru." + field_name) <<
               "        } else {\n"
               "          return false;\n"
               "        }\n";
