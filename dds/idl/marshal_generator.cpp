@@ -659,11 +659,12 @@ namespace {
     }
 
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg(sf.arg_.c_str(), sf.const_ref_);
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void"); //JJA replaced by serialized_size
+      // serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_); //JJA encoding https://github.com/objectcomputing/OpenDDS/pull/1668/commits/1d68036500658bfa3c146ce357433a6700b63b42#diff-214adda5c041740a8003dd55968b8036R266
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("seq", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ << sf.const_unwrap_ <<
         "  find_size_ulong(size, padding);\n"
         "  if (" << check_empty << ") {\n"
@@ -674,7 +675,7 @@ namespace {
           "  size += " << get_length << " * max_marshaled_size_ulong();\n";
       } else if (sf.as_cls_ & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(sf.as_act_) <<
-          "  size += " << get_length << " * " << getMaxSizeExprPrimitive(sf.as_act_) << ";\n";
+          "  size += " << get_length << " * " << getMaxSizeExprPrimitive(sf.as_act_) << ";\n"; //JJA += goes away? Fred sending instructions on how to simplify the build process for IDL generator development and development
       } else if (sf.as_cls_ & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -1049,11 +1050,13 @@ namespace {
     }
 
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg(af.arg_.c_str(), af.const_ref_);
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+
+      Function serialized_size("serialized_size", "void"); //JJA replaced by serialized_size
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
+      //serialized_size.addArg("seq", "const " + cxx + "&");//JJA what do do with cxx in this case?
+      serialized_size.endArgs();
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
@@ -1091,7 +1094,7 @@ namespace {
             indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
             << "_dup(arr" << nfl.index_ << ");\n" <<
             indent << af.scoped_elem_ << "_forany tmp = tmp_var.inout();\n" <<
-            indent << "gen_find_size(tmp, size, padding);\n";
+            indent << "gen_find_size(tmp, size, padding);\n"; //JJA what would these calls look like with this change?
         } else { // Struct, Sequence, Union, C++11 Array
           string pre, post;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
