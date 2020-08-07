@@ -456,7 +456,7 @@ private:
     virtual ~TypeLookupWriter();
   };
 
-  typedef DCPS::RcHandle<TypeLookupWriter> TL_Writer_rch;
+  typedef DCPS::RcHandle<TypeLookupWriter> TypeLookupWriter_rch;
 
   class TypeLookupRequestWriter : public TypeLookupWriter {
   public:
@@ -580,7 +580,7 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
-    DDS::ReturnCode_t take_tl_response(const DCPS::ReceivedDataSample& sample,
+    DDS::ReturnCode_t take_tl_reply(const DCPS::ReceivedDataSample& sample,
       DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
   };

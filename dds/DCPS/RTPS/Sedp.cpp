@@ -3590,7 +3590,6 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
                                                         DCPS::SequenceNumber& rpc_sequence,
                                                         const DCPS::RepoId& participant_id)
 {
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   XTypes::TypeLookup_Request type_lookup_request;
 
   type_lookup_request.data.getTypes.type_ids = type_ids;
@@ -3603,7 +3602,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 
   // As per chapter 7.6.3.3.4 of XTypes spec
-  OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") + ::OpenDDS::DCPS::to_string(participant_id);
+  const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") + DCPS::to_string(participant_id);
   type_lookup_request.header.instance_name = instance_name.c_str();
 
   // Determine message length
@@ -3617,7 +3616,8 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
     new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
       serializer << encap && serializer << type_lookup_request) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3635,8 +3635,6 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
                                                     DDS::rpc::SampleIdentity request_id,
                                                     DDS::rpc::RemoteExceptionCode_t exception_code)
 {
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-
   type_lookup_reply.header.related_request_id = request_id;
   type_lookup_reply.header.remote_ex = exception_code;
 
@@ -3651,6 +3649,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
     new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
     serializer << encap && serializer << type_lookup_reply) {
     send_sample(payload, size, reader, sequence);
@@ -3673,7 +3672,7 @@ Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& s
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupReplyReader::take_tl_response(const DCPS::ReceivedDataSample& sample,
+Sedp::TypeLookupReplyReader::take_tl_reply(const DCPS::ReceivedDataSample& sample,
                                               DCPS::Serializer& ser,
                                               XTypes::TypeLookup_Reply& type_lookup_reply)
 {
@@ -3999,7 +3998,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     } else if (entity_id == ENTITYID_TL_SVC_REPLY_WRITER) {
       // TODO: process reply
       XTypes::TypeLookup_Reply type_lookup_reply;
-      if (!sedp_.type_lookup_reply_reader_->take_tl_response(sample, ser, type_lookup_reply)) {
+      if (!sedp_.type_lookup_reply_reader_->take_tl_reply(sample, ser, type_lookup_reply)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
           ACE_TEXT("failed to take type lookup reply\n")));
         return;
