@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/XTypes/TypeObject.h"
 #include "RtpsRpcTypeSupportImpl.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -17,9 +17,9 @@ namespace OpenDDS {
     const CORBA::ULong TypeLookup_getTypes_HashId = 25318099U;
     const CORBA::ULong TypeLookup_getDependencies_HashId = 95091505U;
 
-    struct  TypeLookup_getTypes_In
+    struct TypeLookup_getTypes_In
     {
-      OpenDDS::XTypes::TypeIdentifierSeq type_ids;
+      TypeIdentifierSeq type_ids;
 
       TypeLookup_getTypes_In() {}
     };
@@ -36,7 +36,7 @@ namespace OpenDDS {
     {
       OpenDDS::XTypes::TypeLookup_getTypes_Out result;
 
-      TypeLookup_getTypes_Result() {};
+      TypeLookup_getTypes_Result() {}
     };
 
     typedef CORBA::Octet ContinuationPoint[32];
@@ -61,17 +61,12 @@ namespace OpenDDS {
     {
       OpenDDS::XTypes::TypeLookup_getTypeDependencies_Out result;
 
-      TypeLookup_getTypeDependencies_Result() {};
+      TypeLookup_getTypeDependencies_Result() {}
     };
-
-    // Call kinds
-    const TypeKind CK_NONE = 0x00;
-    const TypeKind CK_TYPES = 0x01;
-    const TypeKind CK_TYPE_DEPENDENCIES = 0x02;
 
     struct TypeLookup_Call
     {
-      ACE_CDR::Octet kind;
+      CORBA::ULong kind;
       OpenDDS::XTypes::TypeLookup_getTypes_In getTypes;
       OpenDDS::XTypes::TypeLookup_getTypeDependencies_In getTypeDependencies;
 
@@ -88,7 +83,7 @@ namespace OpenDDS {
 
     struct TypeLookup_Return
     {
-      ACE_CDR::Octet kind;
+      CORBA::ULong kind;
       OpenDDS::XTypes::TypeLookup_getTypes_Result getTypes;
       OpenDDS::XTypes::TypeLookup_getTypeDependencies_Result getTypeDependencies;
 

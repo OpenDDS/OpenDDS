@@ -148,11 +148,11 @@ namespace OpenDDS {
     {
       max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.kind));
       switch (stru.kind) {
-        case XTypes::CK_TYPES: {
+        case XTypes::TypeLookup_getTypes_HashId: {
           serialized_size(encoding, size, stru.getTypes);
           break;
         }
-        case XTypes::CK_TYPE_DEPENDENCIES: {
+        case XTypes::TypeLookup_getDependencies_HashId: {
           serialized_size(encoding, size, stru.getTypeDependencies);
           break;
         }
@@ -165,10 +165,10 @@ namespace OpenDDS {
         return false;
       }
       switch (stru.kind) {
-        case XTypes::CK_TYPES: {
+        case XTypes::TypeLookup_getTypes_HashId: {
           return (strm << stru.getTypes);
         }
-        case XTypes::CK_TYPE_DEPENDENCIES: {
+        case XTypes::TypeLookup_getDependencies_HashId: {
           return (strm << stru.getTypeDependencies);
         }
       }
@@ -182,7 +182,7 @@ namespace OpenDDS {
         return false;
       }
       switch (kind) {
-        case XTypes::CK_TYPES: {
+        case XTypes::TypeLookup_getTypes_HashId: {
           OpenDDS::XTypes::TypeLookup_getTypes_In tmp;
           if (strm >> tmp) {
             stru.getTypes = tmp;
@@ -191,7 +191,7 @@ namespace OpenDDS {
           }
           return false;
         }
-        case XTypes::CK_TYPE_DEPENDENCIES: {
+        case XTypes::TypeLookup_getDependencies_HashId: {
           OpenDDS::XTypes::TypeLookup_getTypeDependencies_In tmp;
           if (strm >> tmp) {
             stru.getTypeDependencies = tmp;
@@ -230,11 +230,11 @@ namespace OpenDDS {
     {
       max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.kind));
       switch (stru.kind) {
-        case XTypes::CK_TYPES: {
+        case XTypes::TypeLookup_getTypes_HashId: {
           serialized_size(encoding, size, stru.getTypes);
           break;
         }
-        case XTypes::CK_TYPE_DEPENDENCIES: {
+        case XTypes::TypeLookup_getDependencies_HashId: {
           serialized_size(encoding, size, stru.getTypeDependencies);
           break;
         }
@@ -247,10 +247,10 @@ namespace OpenDDS {
         return false;
       }
       switch (stru.kind) {
-        case XTypes::CK_TYPES: {
+        case XTypes::TypeLookup_getTypes_HashId: {
           return (strm << stru.getTypes);
         }
-        case XTypes::CK_TYPE_DEPENDENCIES: {
+        case XTypes::TypeLookup_getDependencies_HashId: {
           return (strm << stru.getTypeDependencies);
         }
       }
@@ -264,7 +264,7 @@ namespace OpenDDS {
         return false;
       }
       switch (kind) {
-        case XTypes::CK_TYPES: {
+        case XTypes::TypeLookup_getTypes_HashId: {
           OpenDDS::XTypes::TypeLookup_getTypes_Result tmp;
           if (strm >> tmp) {
             stru.getTypes = tmp;
@@ -273,7 +273,7 @@ namespace OpenDDS {
           }
           return false;
         }
-        case XTypes::CK_TYPE_DEPENDENCIES: {
+        case XTypes::TypeLookup_getDependencies_HashId: {
           OpenDDS::XTypes::TypeLookup_getTypeDependencies_Result tmp;
           if (strm >> tmp) {
             stru.getTypeDependencies = tmp;

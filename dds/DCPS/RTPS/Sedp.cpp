@@ -3594,11 +3594,11 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
   XTypes::TypeLookup_Request type_lookup_request;
 
   type_lookup_request.data.getTypes.type_ids = type_ids;
-  type_lookup_request.data.kind = XTypes::CK_TYPES;
+  type_lookup_request.data.kind = XTypes::TypeLookup_getTypes_HashId;
 
   type_lookup_request.header.request_id.writer_guid = get_repo_id();
 
-  ++rpc_sequence;
+  //++rpc_sequence;
   type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 

@@ -2721,6 +2721,7 @@ bool operator<<(Serializer& ser, const XTypes::TypeObject& type_object)
 
 bool operator>>(Serializer& ser, XTypes::TypeObject& type_object)
 {
+  // TODO: needs correct implementation
   using namespace XTypes;
   if (!(ser << ACE_OutputCDR::from_octet(type_object.kind))) {
     return false;
@@ -2758,18 +2759,21 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierTypeObjectPair& stru)
 {
+  // TODO: needs correct implementation
   serialized_size(encoding, size, stru.type_identifier);
   serialized_size(encoding, size, stru.type_object);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierTypeObjectPair& stru)
 {
+  // TODO: needs correct implementation
   return (strm << stru.type_identifier)
     && (strm << stru.type_object);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
 {
+  // TODO: needs correct implementation
   return (strm >> stru.type_identifier)
     && (strm >> stru.type_object);
 }
@@ -2777,18 +2781,21 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPair& stru)
 {
+  // TODO: needs correct implementation
   serialized_size(encoding, size, stru.type_identifier1);
   serialized_size(encoding, size, stru.type_identifier2);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru)
 {
+  // TODO: needs correct implementation
   return (strm << stru.type_identifier1)
     && (strm << stru.type_identifier2);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
 {
+  // TODO: needs correct implementation
   return (strm >> stru.type_identifier1)
     && (strm >> stru.type_identifier2);
 }
@@ -2796,6 +2803,7 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPairSeq& seq)
 {
+  // TODO: needs correct implementation
   DCPS::serialized_size_ulong(encoding, size);
   for (CORBA::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
@@ -2804,6 +2812,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& seq)
 {
+  // TODO: needs correct implementation
   const CORBA::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
@@ -2818,6 +2827,7 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& seq)
 {
+  // TODO: needs correct implementation
   CORBA::ULong length;
   if (!(strm >> length)) {
     return false;

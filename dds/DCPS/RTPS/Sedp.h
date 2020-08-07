@@ -9,6 +9,7 @@
 #define OPENDDS_RTPS_SEDP_H
 
 #include "TypeLookup.h"
+#include "RtpsRpcTypeSupportImpl.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -17,7 +18,6 @@
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "RtpsRpcTypeSupportImpl.h"
 
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 
@@ -366,17 +366,17 @@ private:
 
   protected:
     void send_sample(const ACE_Message_Block& data,
-      size_t size,
-      const DCPS::RepoId& reader,
-      DCPS::SequenceNumber& sequence,
-      bool historic = false);
+                     size_t size,
+                     const DCPS::RepoId& reader,
+                     DCPS::SequenceNumber& sequence,
+                     bool historic = false);
 
     void set_header_fields(DCPS::DataSampleHeader& dsh,
-      size_t size,
-      const DCPS::RepoId& reader,
-      DCPS::SequenceNumber& sequence,
-      bool historic_sample = false,
-      DCPS::MessageId id = DCPS::SAMPLE_DATA);
+                           size_t size,
+                           const DCPS::RepoId& reader,
+                           DCPS::SequenceNumber& sequence,
+                           bool historic_sample = false,
+                           DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
   private:
     DCPS::SequenceNumber seq_;
@@ -423,28 +423,28 @@ private:
 
   };
 
-  typedef DCPS::RcHandle<SedpWriter> Writer_rch;
+  typedef DCPS::RcHandle<SedpWriter> SedpWriter_rch;
 
-  Writer_rch publications_writer_;
+  SedpWriter_rch publications_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer_rch publications_secure_writer_;
+  SedpWriter_rch publications_secure_writer_;
 #endif
 
-  Writer_rch subscriptions_writer_;
+  SedpWriter_rch subscriptions_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer_rch subscriptions_secure_writer_;
+  SedpWriter_rch subscriptions_secure_writer_;
 #endif
 
-  Writer_rch participant_message_writer_;
+  SedpWriter_rch participant_message_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer_rch participant_message_secure_writer_;
-  Writer_rch participant_stateless_message_writer_;
-  Writer_rch dcps_participant_secure_writer_;
+  SedpWriter_rch participant_message_secure_writer_;
+  SedpWriter_rch participant_stateless_message_writer_;
+  SedpWriter_rch dcps_participant_secure_writer_;
 
-  Writer_rch participant_volatile_message_secure_writer_;
+  SedpWriter_rch participant_volatile_message_secure_writer_;
 #endif
 
   class TypeLookupWriter : public Writer {

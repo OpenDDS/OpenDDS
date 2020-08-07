@@ -13,6 +13,7 @@
 
 module DDS {
 
+// namespace, as per chapter 7.11.1.4.1 of RPC spec
 module rpc {
 struct SampleIdentity {
   OpenDDS::DCPS::GUID_t writer_guid;
