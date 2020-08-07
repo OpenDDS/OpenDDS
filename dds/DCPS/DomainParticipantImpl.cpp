@@ -283,9 +283,7 @@ DomainParticipantImpl::delete_subscriber(
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::ReturnCode_t ret
-  = the_servant->delete_contained_entities();
-
+  DDS::ReturnCode_t ret = the_servant->delete_contained_entities();
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -420,9 +418,7 @@ DomainParticipantImpl::create_topic_i(
   }
 
   if (found) {
-    CORBA::String_var found_type
-    = entry->pair_.svt_->get_type_name();
-
+    CORBA::String_var found_type = entry->pair_.svt_->get_type_name();
     if (ACE_OS::strcmp(type_name, found_type) == 0) {
       DDS::TopicQos found_qos;
       entry->pair_.svt_->get_qos(found_qos);
@@ -586,10 +582,8 @@ DomainParticipantImpl::delete_topic_i(
         //TBD - mark the TopicImpl as deleted and make it
         //      reject calls to the TopicImpl.
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-        TopicStatus status
-        = disco->remove_topic(the_dp_servant->get_domain_id(),
-                              the_dp_servant->get_id(),
-                              the_topic_servant->get_id());
+        TopicStatus status = disco->remove_topic(
+          the_dp_servant->get_domain_id(), the_dp_servant->get_id(), the_topic_servant->get_id());
 
         if (status != REMOVED) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -982,8 +976,17 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()
 {
-  // mark that the entity is being deleted
-  set_deleted(true);
+  if (!get_deleted()) {
+    // mark that the entity is being deleted
+    set_deleted(true);
+
+    if (!prepare_to_delete_datawriters()) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (!set_wait_pending_deadline(TheServiceParticipant->new_pending_timeout_deadline())) {
+      return DDS::RETCODE_ERROR;
+    }
+  }
 
   // BIT subscriber and data readers will be deleted with the
   // rest of the entities, so need to report to discovery that
@@ -2370,9 +2373,7 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       pubPtr = (*pubIter).obj_.in();
       ++pubIter;
 
-      DDS::ReturnCode_t result
-      = pubPtr->delete_contained_entities();
-
+      DDS::ReturnCode_t result = pubPtr->delete_contained_entities();
       if (result != DDS::RETCODE_OK) {
         ret = result;
       }
@@ -2485,6 +2486,28 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
   shutdown_mutex_.release();
 
   return 0;
+}
+
+bool DomainParticipantImpl::prepare_to_delete_datawriters()
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, publishers_protector_, false);
+  bool result = true;
+  const PublisherSet::iterator end = publishers_.end();
+  for (PublisherSet::iterator i = publishers_.begin(); i != end; ++i) {
+    result &= i->svt_->prepare_to_delete_datawriters();
+  }
+  return result;
+}
+
+bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadline)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, publishers_protector_, false);
+  bool result = true;
+  const PublisherSet::iterator end = publishers_.end();
+  for (PublisherSet::iterator i = publishers_.begin(); i != end; ++i) {
+    result &= i->svt_->set_wait_pending_deadline(deadline);
+  }
+  return result;
 }
 
 } // namespace DCPS

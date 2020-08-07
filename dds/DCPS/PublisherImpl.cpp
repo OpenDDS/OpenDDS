@@ -176,9 +176,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     return DDS::RETCODE_ERROR;
   }
 
-  // marks entity as deleted and stops future associating
-  dw_servant->prepare_to_delete();
-
   {
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
@@ -188,31 +185,20 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
           ACE_TEXT("the data writer %C doesn't ")
-          ACE_TEXT("belong to this subscriber \n"),
+          ACE_TEXT("belong to this subscriber\n"),
           OPENDDS_STRING(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-  // Trigger data to be persisted, i.e. made durable, if so
-  // configured. This needs be called before unregister_instances
-  // because unregister_instances may cause instance dispose.
-  if (!dw_servant->persist_data() && DCPS_debug_level >= 2) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::delete_datawriter, ")
-        ACE_TEXT("failed to make data durable.\n")));
+  if (!dw_servant->get_deleted()) {
+    dw_servant->prepare_to_delete();
+    dw_servant->set_wait_pending_deadline(TheServiceParticipant->new_pending_timeout_deadline());
   }
-#endif
 
-  // Unregister all registered instances prior to deletion.
-  dw_servant->unregister_instances(SystemTimePoint::now().to_dds_time());
-
-  // Wait for any control messages to be transported during
+  // Wait for any data and control messages to be transported during
   // unregistering of instances.
   dw_servant->wait_pending();
-  dw_servant->wait_control_pending();
 
   RepoId publication_id  = GUID_UNKNOWN;
   {
@@ -328,11 +314,53 @@ PublisherImpl::lookup_datawriter(const char* topic_name)
   }
 }
 
-DDS::ReturnCode_t
-PublisherImpl::delete_contained_entities()
+bool PublisherImpl::prepare_to_delete_datawriters()
 {
-  // mark that the entity is being deleted
-  set_deleted(true);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, false);
+  bool result = true;
+  const DataWriterMap::iterator end = datawriter_map_.end();
+  for (DataWriterMap::iterator i = datawriter_map_.begin(); i != end; ++i) {
+    DataWriterImpl* const writer = dynamic_cast<DataWriterImpl*>(i->second.in());
+    if (!writer) {
+      result = false;
+    }
+    writer->prepare_to_delete();
+  }
+
+  return result;
+}
+
+bool PublisherImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadline)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, false);
+  bool result = true;
+  const DataWriterMap::iterator end = datawriter_map_.end();
+  for (DataWriterMap::iterator i = datawriter_map_.begin(); i != end; ++i) {
+    DataWriterImpl* const writer = dynamic_cast<DataWriterImpl*>(i->second.in());
+    if (writer) {
+      writer->set_wait_pending_deadline(deadline);
+    } else {
+      result = false;
+    }
+  }
+  return result;
+}
+
+DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
+{
+  // If the call isn't part of another delete, prepare the datawriters to be
+  // deleted and set the pending deadline on all the writers.
+  if (!get_deleted()) {
+    // mark that the entity is being deleted
+    set_deleted(true);
+
+    if (!prepare_to_delete_datawriters()) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (!set_wait_pending_deadline(TheServiceParticipant->new_pending_timeout_deadline())) {
+      return DDS::RETCODE_ERROR;
+    }
+  }
 
   while (true) {
     PublicationId pub_id = GUID_UNKNOWN;
@@ -362,7 +390,7 @@ PublisherImpl::delete_contained_entities()
           ACE_TEXT("delete_contained_entities: ")
           ACE_TEXT("failed to delete ")
           ACE_TEXT("datawriter %C.\n"),
-          OPENDDS_STRING(converter).c_str()),ret);
+          OPENDDS_STRING(converter).c_str()), ret);
     }
   }
 
