@@ -3651,7 +3651,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
   DCPS::EncapsulationHeader encap;
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
-    serializer << encap && serializer << type_lookup_reply) {
+      serializer << encap && serializer << type_lookup_reply) {
     send_sample(payload, size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3673,8 +3673,8 @@ Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& s
 
 DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::take_tl_reply(const DCPS::ReceivedDataSample& sample,
-                                              DCPS::Serializer& ser,
-                                              XTypes::TypeLookup_Reply& type_lookup_reply)
+                                           DCPS::Serializer& ser,
+                                           XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   // TODO: uncomment; anything else to do here?
   // ser >> type_lookup_reply;
