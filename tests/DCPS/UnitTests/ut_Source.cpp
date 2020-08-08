@@ -5,6 +5,9 @@
 
 #include "dds/DCPS/Source.h"
 
+#include "ace/Select_Reactor.h"
+#include "ace/Reactor.h"
+
 #include <string.h>
 
 using namespace OpenDDS::DCPS;
@@ -53,6 +56,22 @@ public:
   }
 
   bool scheduled;
+};
+
+class TestJobQueueObserver : public JobQueueObserver<Sample> {
+public:
+  TestJobQueueObserver()
+    : observed(false)
+  {}
+
+  virtual void observe(SinkPtr sink)
+  {
+    observed = true;
+    this->sink = sink;
+  }
+
+  bool observed;
+  SinkPtr sink;
 };
 
 const Sample key("a", 0);
@@ -645,7 +664,8 @@ void test_Sink_initialize()
   ObserverPtrType observer = make_rch<TestObserver>();
 
   SinkType sink1;
-  SinkType sink2(-1, observer);
+  SinkType sink2(-1);
+  sink2.set_observer(observer);
 
   sink1.write(Sample("a", 1), source_timestamp, 0);
   sink2.initialize(sink1);
@@ -672,7 +692,8 @@ void test_Sink_initialize_limit_depth()
   ObserverPtrType observer = make_rch<TestObserver>();
 
   SinkType sink1(2);
-  SinkType sink2(1, observer);
+  SinkType sink2(1);
+  sink2.set_observer(observer);
 
   sink1.write(Sample("a", 0), source_timestamp, 0);
   sink1.write(Sample("a", 1), source_timestamp, 0);
@@ -699,7 +720,8 @@ void test_Sink_register_instance()
 
   ObserverPtrType observer = make_rch<TestObserver>();
 
-  SinkType sink(-1, observer);
+  SinkType sink(-1);
+  sink.set_observer(observer);
 
   InstanceHandle ih = sink.lookup_instance(key);
   TEST_ASSERT(ih == 0);
@@ -743,7 +765,8 @@ void test_Sink_write()
 
   ObserverPtrType observer = make_rch<TestObserver>();
 
-  SinkType sink(-1, observer);
+  SinkType sink(-1);
+  sink.set_observer(observer);
 
   sink.write(Sample("a", 1), source_timestamp_1, publication_handle_1);
   sink.write(Sample("b", 2), source_timestamp_1, publication_handle_2);
@@ -809,7 +832,8 @@ void test_Sink_unregister_instance()
 
   ObserverPtrType observer = make_rch<TestObserver>();
 
-  SinkType sink(-1, observer);
+  SinkType sink(-1);
+  sink.set_observer(observer);
 
   sink.register_instance(key, source_timestamp, 0);
 
@@ -839,7 +863,8 @@ void test_Sink_dispose_instance()
 
   ObserverPtrType observer = make_rch<TestObserver>();
 
-  SinkType sink(-1, observer);
+  SinkType sink(-1);
+  sink.set_observer(observer);
 
   sink.register_instance(key, source_timestamp, 0);
 
@@ -2062,6 +2087,27 @@ void test_Source_disconnect()
   TEST_ASSERT(sample_info_list[0] == SampleInfo(NOT_READ_SAMPLE_STATE, NEW_VIEW_STATE, NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, source_timestamp_1, a_ih_1, ph_1, true));
 }
 
+void test_JobQueueObserver_initialize()
+{
+  ACE_Select_Reactor impl;
+  ACE_Reactor reactor(&impl);
+  RcHandle<JobQueue> job_queue = make_rch<JobQueue>(&reactor);
+
+  SinkPtrType sink = make_rch<SinkType>(-1);
+  RcHandle<TestJobQueueObserver> observer = make_rch<TestJobQueueObserver>();
+
+  observer->set_job_queue(job_queue);
+  observer->set_sink(sink);
+
+  observer->schedule();
+
+  ACE_Time_Value tv(1,0);
+  reactor.run_reactor_event_loop(tv);
+
+  TEST_ASSERT(observer->observed);
+  TEST_ASSERT(observer->sink == sink);
+}
+
 }
 
 int
@@ -2134,6 +2180,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     test_Source_unregister_instance();
     test_Source_dispose_instance();
     test_Source_disconnect();
+
+    test_JobQueueObserver_initialize();
   }
   catch (char const *ex)
   {

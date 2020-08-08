@@ -22,7 +22,7 @@ namespace DCPS {
 
 class JobQueue : public RcEventHandler {
 public:
-  class Job : public RcObject {
+  class Job : public virtual RcObject {
   public:
     virtual ~Job() { }
     virtual void execute() = 0;

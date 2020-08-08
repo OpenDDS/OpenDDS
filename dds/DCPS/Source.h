@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_SOURCE_H
 #define OPENDDS_DCPS_SOURCE_H
 
-#include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -19,6 +19,60 @@ namespace DCPS {
 class ObserverInterface : public virtual RcObject {
 public:
   virtual void schedule() = 0;
+};
+
+template <typename Sample>
+class Sink;
+
+template <typename Sample>
+class JobQueueObserver : public ObserverInterface, public JobQueue::Job {
+public:
+  typedef RcHandle<Sink<Sample>> SinkPtr;
+  typedef WeakRcHandle<Sink<Sample>> WeakSinkPtr;
+
+  JobQueueObserver()
+    : scheduled_(false)
+  {}
+
+  void set_job_queue(WeakRcHandle<JobQueue> job_queue)
+  {
+    job_queue_ = job_queue;
+  }
+
+  void set_sink(WeakSinkPtr sink)
+  {
+    sink_ = sink;
+  }
+
+  virtual void schedule()
+  {
+    // Don't need a lock so long as the sink is locked.
+    if (scheduled_ == true) {
+      return;
+    }
+
+    RcHandle<JobQueue> job_queue = job_queue_.lock();
+    if (job_queue) {
+      job_queue->enqueue(rchandle_from(this));
+      scheduled_ = true;
+    }
+  }
+
+  virtual void execute()
+  {
+    scheduled_ = false;
+    SinkPtr sink = sink_.lock();
+    if (sink) {
+      observe(sink);
+    }
+  }
+
+  virtual void observe(SinkPtr sink) = 0;
+
+private:
+  WeakRcHandle<JobQueue> job_queue_;
+  WeakSinkPtr sink_;
+  bool scheduled_;
 };
 
 enum SampleState {
@@ -477,108 +531,140 @@ public:
   typedef std::vector<Sample> SampleList;
   typedef ObserverInterface Observer;
   typedef RcHandle<Observer> ObserverPtr;
+  typedef WeakRcHandle<Observer> WeakObserverPtr;
 
-  Sink(size_t depth = -1, ObserverPtr observer = ObserverPtr())
+  Sink(size_t depth = -1)
     : depth_(depth)
-    , observer_(observer)
   {}
+
+  void set_observer(ObserverPtr observer)
+  {
+    observer_ = observer;
+  }
+
 
   // All of the samples in other should belong to a single publication.
   void initialize(const Sink& other)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g1, mutex_);
+    ObserverPtr observer;
+
     {
-      ACE_GUARD(ACE_Thread_Mutex, g2, other.mutex_);
-      for (typename KeyCache::const_iterator pos = other.key_to_cache_.begin(), limit = other.key_to_cache_.end(); pos != limit; ++pos) {
-        SampleCachePtr s = make_rch<SampleCache>();
-        s->initialize(*pos->second);
-        s->resize(depth_);
-        key_to_cache_[pos->first] = s;
-        instance_to_cache_[s->get_instance_handle()] = s;
-        state_to_caches_[s->state()].insert(s);
+      ACE_GUARD(ACE_Thread_Mutex, g1, mutex_);
+      {
+        ACE_GUARD(ACE_Thread_Mutex, g2, other.mutex_);
+        for (typename KeyCache::const_iterator pos = other.key_to_cache_.begin(), limit = other.key_to_cache_.end(); pos != limit; ++pos) {
+          SampleCachePtr s = make_rch<SampleCache>();
+          s->initialize(*pos->second);
+          s->resize(depth_);
+          key_to_cache_[pos->first] = s;
+          instance_to_cache_[s->get_instance_handle()] = s;
+          state_to_caches_[s->state()].insert(s);
+        }
       }
+
+      observer = observer_.lock();
     }
 
-    if (observer_) {
-      observer_->schedule();
+    if (observer) {
+      observer->schedule();
     }
   }
 
   void register_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    SampleCachePtr sample_cache = insert_instance_i(sample);
-    const SampleCacheState s1 = sample_cache->state();
-    sample_cache->register_instance(sample, source_timestamp, publication_handle);
-    sample_cache->resize(depth_);
-    const SampleCacheState s2 = sample_cache->state();
-    if (s1 != s2) {
-      state_to_caches_[s1].erase(sample_cache);
-      state_to_caches_[s2].insert(sample_cache);
+    ObserverPtr observer;
+
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      SampleCachePtr sample_cache = insert_instance_i(sample);
+      const SampleCacheState s1 = sample_cache->state();
+      sample_cache->register_instance(sample, source_timestamp, publication_handle);
+      sample_cache->resize(depth_);
+      const SampleCacheState s2 = sample_cache->state();
+      if (s1 != s2) {
+        state_to_caches_[s1].erase(sample_cache);
+        state_to_caches_[s2].insert(sample_cache);
+      }
+      observer = observer_.lock();
     }
 
-    if (observer_) {
-      observer_->schedule();
+    if (observer) {
+      observer->schedule();
     }
   }
 
   void write(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    SampleCachePtr sample_cache = insert_instance_i(sample);
-    const SampleCacheState s1 = sample_cache->state();
-    sample_cache->write(sample, source_timestamp, publication_handle);
-    sample_cache->resize(depth_);
-    const SampleCacheState s2 = sample_cache->state();
-    if (s1 != s2) {
-      state_to_caches_[s1].erase(sample_cache);
-      state_to_caches_[s2].insert(sample_cache);
+    ObserverPtr observer;
+
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      SampleCachePtr sample_cache = insert_instance_i(sample);
+      const SampleCacheState s1 = sample_cache->state();
+      sample_cache->write(sample, source_timestamp, publication_handle);
+      sample_cache->resize(depth_);
+      const SampleCacheState s2 = sample_cache->state();
+      if (s1 != s2) {
+        state_to_caches_[s1].erase(sample_cache);
+        state_to_caches_[s2].insert(sample_cache);
+      }
+      observer = observer_.lock();
     }
 
-    if (observer_) {
-      observer_->schedule();
+    if (observer) {
+      observer->schedule();
     }
   }
 
   void unregister_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    SampleCachePtr sample_cache = lookup_instance_i(sample);
-    if (!sample_cache) {
-      return;
-    }
-    const SampleCacheState s1 = sample_cache->state();
-    sample_cache->unregister_instance(sample, source_timestamp, publication_handle);
-    sample_cache->resize(depth_);
-    const SampleCacheState s2 = sample_cache->state();
-    if (s1 != s2) {
-      state_to_caches_[s1].erase(sample_cache);
-      state_to_caches_[s2].insert(sample_cache);
+    ObserverPtr observer;
+
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      SampleCachePtr sample_cache = lookup_instance_i(sample);
+      if (!sample_cache) {
+        return;
+      }
+      const SampleCacheState s1 = sample_cache->state();
+      sample_cache->unregister_instance(sample, source_timestamp, publication_handle);
+      sample_cache->resize(depth_);
+      const SampleCacheState s2 = sample_cache->state();
+      if (s1 != s2) {
+        state_to_caches_[s1].erase(sample_cache);
+        state_to_caches_[s2].insert(sample_cache);
+      }
+      observer = observer_.lock();
     }
 
-    if (observer_) {
-      observer_->schedule();
+    if (observer) {
+      observer->schedule();
     }
   }
 
   void dispose_instance(const Sample& sample, const MonotonicTimePoint& source_timestamp, const PublicationHandle publication_handle)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    SampleCachePtr sample_cache = lookup_instance_i(sample);
-    if (!sample_cache) {
-      return;
-    }
-    const SampleCacheState s1 = sample_cache->state();
-    sample_cache->dispose_instance(sample, source_timestamp, publication_handle);
-    sample_cache->resize(depth_);
-    const SampleCacheState s2 = sample_cache->state();
-    if (s1 != s2) {
-      state_to_caches_[s1].erase(sample_cache);
-      state_to_caches_[s2].insert(sample_cache);
+    ObserverPtr observer;
+
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      SampleCachePtr sample_cache = lookup_instance_i(sample);
+      if (!sample_cache) {
+        return;
+      }
+      const SampleCacheState s1 = sample_cache->state();
+      sample_cache->dispose_instance(sample, source_timestamp, publication_handle);
+      sample_cache->resize(depth_);
+      const SampleCacheState s2 = sample_cache->state();
+      if (s1 != s2) {
+        state_to_caches_[s1].erase(sample_cache);
+        state_to_caches_[s2].insert(sample_cache);
+      }
+      observer = observer_.lock();
     }
 
-    if (observer_) {
-      observer_->schedule();
+    if (observer) {
+      observer->schedule();
     }
   }
 
@@ -840,7 +926,7 @@ private:
   InstanceCache instance_to_cache_; // For per-instance operations.
   StateCache state_to_caches_;
   size_t depth_;
-  ObserverPtr observer_;
+  WeakObserverPtr observer_;
 
   SampleCachePtr insert_instance_i(const Sample& sample)
   {
