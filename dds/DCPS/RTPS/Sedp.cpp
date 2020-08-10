@@ -3597,7 +3597,6 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 
   type_lookup_request.header.request_id.writer_guid = get_repo_id();
 
-  //++rpc_sequence;
   type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 

@@ -70,7 +70,7 @@ namespace XTypes {
     Octet32Seq(
       ::CORBA::ULong length,
       ::CORBA::Octet* buffer,
-      ::CORBA::Boolean release = false) {};
+      ::CORBA::Boolean release = false) : ::TAO::bounded_value_sequence<::CORBA::Octet, 32> (length, buffer, release) {};
 #if defined (ACE_HAS_CPP11)
     Octet32Seq(const Octet32Seq&) = default;
     Octet32Seq(Octet32Seq&&) = default;
