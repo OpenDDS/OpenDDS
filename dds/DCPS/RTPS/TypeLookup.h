@@ -14,6 +14,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
   namespace XTypes {
 
+    // As per chapter 7.6.3.3.3 of XTypes spec
+    // Used in TypeLookup_Call and TypeLookup_Return
     const CORBA::ULong TypeLookup_getTypes_HashId = 25318099U;
     const CORBA::ULong TypeLookup_getDependencies_HashId = 95091505U;
 
@@ -24,42 +26,42 @@ namespace OpenDDS {
       TypeLookup_getTypes_In() {}
     };
 
-    struct  TypeLookup_getTypes_Out
+    struct TypeLookup_getTypes_Out
     {
-      OpenDDS::XTypes::TypeIdentifierTypeObjectPairSeq types;
-      OpenDDS::XTypes::TypeIdentifierPairSeq complete_to_minimal;
+      TypeIdentifierTypeObjectPairSeq types;
+      TypeIdentifierPairSeq complete_to_minimal;
 
       TypeLookup_getTypes_Out() {}
     };
 
-    struct  TypeLookup_getTypes_Result
+    struct TypeLookup_getTypes_Result
     {
-      OpenDDS::XTypes::TypeLookup_getTypes_Out result;
+      TypeLookup_getTypes_Out result;
 
       TypeLookup_getTypes_Result() {}
     };
 
     typedef CORBA::Octet ContinuationPoint[32];
 
-    struct  TypeLookup_getTypeDependencies_In
+    struct TypeLookup_getTypeDependencies_In
     {
-      OpenDDS::XTypes::TypeIdentifierSeq type_ids;
-      OpenDDS::XTypes::ContinuationPoint continuation_point;
+      TypeIdentifierSeq type_ids;
+      ContinuationPoint continuation_point;
 
       TypeLookup_getTypeDependencies_In() {}
     };
 
-    struct  TypeLookup_getTypeDependencies_Out
+    struct TypeLookup_getTypeDependencies_Out
     {
-      OpenDDS::XTypes::TypeIdentifierWithSizeSeq dependent_typeids;
-      OpenDDS::XTypes::ContinuationPoint continuation_point;
+      TypeIdentifierWithSizeSeq dependent_typeids;
+      ContinuationPoint continuation_point;
 
       TypeLookup_getTypeDependencies_Out() {}
     };
 
-    struct  TypeLookup_getTypeDependencies_Result
+    struct TypeLookup_getTypeDependencies_Result
     {
-      OpenDDS::XTypes::TypeLookup_getTypeDependencies_Out result;
+      TypeLookup_getTypeDependencies_Out result;
 
       TypeLookup_getTypeDependencies_Result() {}
     };
@@ -67,8 +69,8 @@ namespace OpenDDS {
     struct TypeLookup_Call
     {
       CORBA::ULong kind;
-      OpenDDS::XTypes::TypeLookup_getTypes_In getTypes;
-      OpenDDS::XTypes::TypeLookup_getTypeDependencies_In getTypeDependencies;
+      TypeLookup_getTypes_In getTypes;
+      TypeLookup_getTypeDependencies_In getTypeDependencies;
 
       TypeLookup_Call() {}
     };
@@ -76,7 +78,7 @@ namespace OpenDDS {
     struct TypeLookup_Request
     {
       DDS::rpc::RequestHeader header;
-      OpenDDS::XTypes::TypeLookup_Call data;
+      TypeLookup_Call data;
 
       TypeLookup_Request() {}
     };
@@ -84,8 +86,8 @@ namespace OpenDDS {
     struct TypeLookup_Return
     {
       CORBA::ULong kind;
-      OpenDDS::XTypes::TypeLookup_getTypes_Result getTypes;
-      OpenDDS::XTypes::TypeLookup_getTypeDependencies_Result getTypeDependencies;
+      TypeLookup_getTypes_Result getTypes;
+      TypeLookup_getTypeDependencies_Result getTypeDependencies;
 
       TypeLookup_Return() {}
     };
@@ -93,7 +95,7 @@ namespace OpenDDS {
     struct TypeLookup_Reply
     {
       DDS::rpc::ResponseHeader header;
-      OpenDDS::XTypes::TypeLookup_Return data;
+      TypeLookup_Return data;
 
       TypeLookup_Reply() {}
     };
