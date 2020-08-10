@@ -1042,6 +1042,13 @@ namespace {
   void gen_anonymous_array(const FieldInfo& af)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    string cxx = af.name_;
+    string const_cxx = cxx, unwrap, const_unwrap;
+    if (use_cxx11) {
+      const_cxx = "IDL::DistinctType<const " + cxx + ", " + af.underscored_ + "_tag>";
+    } else {
+      const_cxx = "const " + cxx + "_forany&";
+    }
     if (!af.as_act_->in_main_file() && af.as_act_->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(af.as_act_->file_name().c_str());
     }
@@ -1060,10 +1067,11 @@ namespace {
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
-          "  find_size_ulong(size, padding);\n";
+          "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
         if (af.n_elems_ > 1) {
           be_global->impl_ <<
-            "  size += " << af.n_elems_ - 1 << " * max_marshaled_size_ulong();\n";
+            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
+              << (af.n_elems_ - 1) << ");\n";
         }
       } else if (af.as_cls_ & CL_PRIMITIVE) {
         const string align = getAlignment(af.as_act_);
@@ -1080,7 +1088,7 @@ namespace {
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
         if (af.as_cls_ & CL_STRING) {
           be_global->impl_ <<
-            indent << "find_size_ulong(size, padding);\n" <<
+            indent << "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
@@ -1088,21 +1096,24 @@ namespace {
             be_global->impl_ << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())";
           }
           be_global->impl_ << ((af.as_cls_ & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n" : " + 1;\n");
+            ? " * OpenDDS::DCPS::char16_cdr_size;\n"
+            : " + 1;\n");
         } else if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
           be_global->impl_ <<
             indent << af.scoped_elem_ << "_var tmp_var = " << af.scoped_elem_
             << "_dup(arr" << nfl.index_ << ");\n" <<
             indent << af.scoped_elem_ << "_forany tmp = tmp_var.inout();\n" <<
-            indent << "gen_find_size(tmp, size, padding);\n"; //JJA what would these calls look like with this change?
+            indent << "serialized_size(encoding, size, tmp);\n";
         } else { // Struct, Sequence, Union, C++11 Array
           string pre, post;
           if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = af.elem_const_ref_ + "(";
+            pre = "IDL::DistinctType<const " + af.scoped_elem_ + ", " +
+              dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
             post = ')';
           }
           be_global->impl_ <<
-            indent << "gen_find_size(" << pre << "arr" << nfl.index_ << post << ", size, padding);\n";
+            indent << "serialized_size(encoding, size, "
+              << pre << "arr" << nfl.index_ << post << ");\n";
         }
       }
     }
@@ -1134,7 +1145,8 @@ namespace {
             string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
             string pre;
             if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = af.elem_const_ref_ + "(";
+              pre = "IDL::DistinctType<const " + af.scoped_elem_ + ", " +
+                dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
               suffix += ')';
             }
             be_global->impl_ <<
@@ -1172,7 +1184,8 @@ namespace {
             string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
             string pre;
             if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = af.elem_ref_ + "(";
+              pre = "IDL::DistinctType<" + af.scoped_elem_ + ", " +
+                dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
               suffix += ')';
             }
             be_global->impl_ <<
