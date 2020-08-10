@@ -488,8 +488,7 @@ private:
     DDS::ReturnCode_t send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
-      DDS::rpc::SampleIdentity request_id,
-      DDS::rpc::RemoteExceptionCode_t exception_code);
+      DDS::RPC::RemoteExceptionCode_t exception_code);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TL_Reply_Writer_rch;

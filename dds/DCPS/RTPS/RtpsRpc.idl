@@ -14,7 +14,7 @@
 module DDS {
 
 // namespace, as per chapter 7.11.1.4.1 of RPC spec
-module rpc {
+module RPC {
 struct SampleIdentity {
   OpenDDS::DCPS::GUID_t writer_guid;
   OpenDDS::RTPS::SequenceNumber_t sequence_number;
@@ -40,7 +40,7 @@ struct ResponseHeader {
   RemoteExceptionCode_t remote_ex;
 };
 
-}; // module rpc
+}; // module RPC
 }; // module DDS
 
 #endif /* OPENDDS_RTPS_RPC_IDL */

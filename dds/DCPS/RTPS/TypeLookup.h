@@ -12,152 +12,196 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-  namespace XTypes {
+namespace XTypes {
 
-    // As per chapter 7.6.3.3.3 of XTypes spec
-    // Used in TypeLookup_Call and TypeLookup_Return
-    const CORBA::ULong TypeLookup_getTypes_HashId = 25318099U;
-    const CORBA::ULong TypeLookup_getDependencies_HashId = 95091505U;
+  // As per chapter 7.6.3.3.3 of XTypes spec
+  // Used in TypeLookup_Call and TypeLookup_Return
+  const CORBA::ULong TypeLookup_getTypes_HashId = 25318099U;
+  const CORBA::ULong TypeLookup_getDependencies_HashId = 95091505U;
 
-    struct TypeLookup_getTypes_In
-    {
-      TypeIdentifierSeq type_ids;
+  struct TypeLookup_getTypes_In
+  {
+    TypeIdentifierSeq type_ids;
 
-      TypeLookup_getTypes_In() {}
-    };
+    TypeLookup_getTypes_In() {}
+  };
 
-    struct TypeLookup_getTypes_Out
-    {
-      TypeIdentifierTypeObjectPairSeq types;
-      TypeIdentifierPairSeq complete_to_minimal;
+  struct TypeLookup_getTypes_Out
+  {
+    TypeIdentifierTypeObjectPairSeq types;
+    TypeIdentifierPairSeq complete_to_minimal;
 
-      TypeLookup_getTypes_Out() {}
-    };
+    TypeLookup_getTypes_Out() {}
+  };
 
-    struct TypeLookup_getTypes_Result
-    {
-      TypeLookup_getTypes_Out result;
+  struct TypeLookup_getTypes_Result
+  {
+    TypeLookup_getTypes_Out result;
 
-      TypeLookup_getTypes_Result() {}
-    };
+    TypeLookup_getTypes_Result() {}
+  };
 
-    typedef CORBA::Octet ContinuationPoint[32];
+#if !defined (_OPENDDS_XTYPES_OCTET32SEQ_CH_)
+#define _OPENDDS_XTYPES_OCTET32SEQ_CH_
 
-    struct TypeLookup_getTypeDependencies_In
-    {
-      TypeIdentifierSeq type_ids;
-      ContinuationPoint continuation_point;
+  class Octet32Seq;
 
-      TypeLookup_getTypeDependencies_In() {}
-    };
+  typedef
+    ::TAO_FixedSeq_Var_T<
+    Octet32Seq
+    >
+    Octet32Seq_var;
 
-    struct TypeLookup_getTypeDependencies_Out
-    {
-      TypeIdentifierWithSizeSeq dependent_typeids;
-      ContinuationPoint continuation_point;
+  typedef
+    ::TAO_Seq_Out_T<
+    Octet32Seq
+    >
+    Octet32Seq_out;
 
-      TypeLookup_getTypeDependencies_Out() {}
-    };
+  class  Octet32Seq
+    : public
+    ::TAO::bounded_value_sequence<
+    ::CORBA::Octet,
+    32
+    >
+  {
+  public:
+    Octet32Seq(void) {};
+    Octet32Seq(
+      ::CORBA::ULong length,
+      ::CORBA::Octet* buffer,
+      ::CORBA::Boolean release = false) {};
+#if defined (ACE_HAS_CPP11)
+    Octet32Seq(const Octet32Seq&) = default;
+    Octet32Seq(Octet32Seq&&) = default;
+    Octet32Seq& operator= (const Octet32Seq&) = default;
+    Octet32Seq& operator= (Octet32Seq&&) = default;
+#endif /* ACE_HAS_CPP11 */
+    virtual ~Octet32Seq(void) {};
 
-    struct TypeLookup_getTypeDependencies_Result
-    {
-      TypeLookup_getTypeDependencies_Out result;
+    typedef Octet32Seq_var _var_type;
+    typedef Octet32Seq_out _out_type;
+  };
 
-      TypeLookup_getTypeDependencies_Result() {}
-    };
+#endif /* end #if !defined */
 
-    struct TypeLookup_Call
-    {
-      CORBA::ULong kind;
-      TypeLookup_getTypes_In getTypes;
-      TypeLookup_getTypeDependencies_In getTypeDependencies;
+  typedef Octet32Seq ContinuationPoint;
 
-      TypeLookup_Call() {}
-    };
+  struct TypeLookup_getTypeDependencies_In
+  {
+    TypeIdentifierSeq type_ids;
+    ContinuationPoint continuation_point;
 
-    struct TypeLookup_Request
-    {
-      DDS::rpc::RequestHeader header;
-      TypeLookup_Call data;
+    TypeLookup_getTypeDependencies_In() {}
+  };
 
-      TypeLookup_Request() {}
-    };
+  struct TypeLookup_getTypeDependencies_Out
+  {
+    TypeIdentifierWithSizeSeq dependent_typeids;
+    ContinuationPoint continuation_point;
 
-    struct TypeLookup_Return
-    {
-      CORBA::ULong kind;
-      TypeLookup_getTypes_Result getTypes;
-      TypeLookup_getTypeDependencies_Result getTypeDependencies;
+    TypeLookup_getTypeDependencies_Out() {}
+  };
 
-      TypeLookup_Return() {}
-    };
+  struct TypeLookup_getTypeDependencies_Result
+  {
+    TypeLookup_getTypeDependencies_Out result;
 
-    struct TypeLookup_Reply
-    {
-      DDS::rpc::ResponseHeader header;
-      TypeLookup_Return data;
+    TypeLookup_getTypeDependencies_Result() {}
+  };
 
-      TypeLookup_Reply() {}
-    };
-  } // namespace XTypes
+  struct TypeLookup_Call
+  {
+    CORBA::ULong kind;
+    TypeLookup_getTypes_In getTypes;
+    TypeLookup_getTypeDependencies_In getTypeDependencies;
 
-  namespace DCPS {
+    TypeLookup_Call() {}
+  };
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_getTypes_In& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_In& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_In& stru);
+  struct TypeLookup_Request
+  {
+    DDS::RPC::RequestHeader header;
+    TypeLookup_Call data;
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_getTypes_Out& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_Out& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Out& stru);
+    TypeLookup_Request() {}
+  };
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_getTypes_Result& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_Result& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru);
+  struct TypeLookup_Return
+  {
+    CORBA::ULong kind;
+    TypeLookup_getTypes_Result getTypes;
+    TypeLookup_getTypeDependencies_Result getTypeDependencies;
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::ContinuationPoint& arr);
-    bool operator<<(DCPS::Serializer& ser, const XTypes::ContinuationPoint& arr);
-    bool operator>>(DCPS::Serializer& ser, XTypes::ContinuationPoint& arr);
+    TypeLookup_Return() {}
+  };
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_getTypeDependencies_In& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_In& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_In& stru);
+  struct TypeLookup_Reply
+  {
+    DDS::RPC::ResponseHeader header;
+    TypeLookup_Return data;
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_getTypeDependencies_Out& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Out& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Out& stru);
+    TypeLookup_Reply() {}
+  };
+} // namespace XTypes
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_getTypeDependencies_Result& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Result& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result& stru);
+namespace DCPS {
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_Call& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Call& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Call& stru);
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_getTypes_In& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_In& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_In& stru);
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_Request& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Request& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Request& stru);
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_getTypes_Out& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_Out& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Out& stru);
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_Return& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Return& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Return& stru);
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_getTypes_Result& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypes_Result& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru);
 
-    void serialized_size(const DCPS::Encoding& encoding, size_t& size,
-      const XTypes::TypeLookup_Reply& stru);
-    bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Reply& stru);
-    bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Reply& stru);
-  } // namespace DCPS
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::ContinuationPoint& arr);
+  bool operator<<(DCPS::Serializer& ser, const XTypes::ContinuationPoint& _tao_sequence);
+  bool operator>>(DCPS::Serializer& ser, XTypes::ContinuationPoint& _tao_sequence);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_getTypeDependencies_In& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_In& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_In& stru);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_getTypeDependencies_Out& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Out& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Out& stru);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_getTypeDependencies_Result& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Result& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result& stru);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_Call& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Call& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Call& stru);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_Request& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Request& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Request& stru);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_Return& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Return& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Return& stru);
+
+  void serialized_size(const DCPS::Encoding& encoding, size_t& size,
+    const XTypes::TypeLookup_Reply& stru);
+  bool operator<<(DCPS::Serializer& strm, const XTypes::TypeLookup_Reply& stru);
+  bool operator>>(DCPS::Serializer& strm, XTypes::TypeLookup_Reply& stru);
+} // namespace DCPS
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

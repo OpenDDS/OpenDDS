@@ -1455,7 +1455,7 @@ Sedp::disassociate(const ParticipantData_t& pdata)
 
     if (local_avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
       disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER, part,
-        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, *participant_message_writer_);
+                          ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, *participant_message_writer_);
     }
     disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER, *participant_message_reader_);
@@ -3632,10 +3632,8 @@ DDS::ReturnCode_t
 Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
                                                     const RepoId& reader,
                                                     DCPS::SequenceNumber& sequence,
-                                                    DDS::rpc::SampleIdentity request_id,
-                                                    DDS::rpc::RemoteExceptionCode_t exception_code)
+                                                    DDS::RPC::RemoteExceptionCode_t exception_code)
 {
-  type_lookup_reply.header.related_request_id = request_id;
   type_lookup_reply.header.remote_ex = exception_code;
 
   // Determine message length
