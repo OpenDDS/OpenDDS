@@ -473,9 +473,9 @@ private:
       const DCPS::RepoId& participant_id);
   };
 
-  typedef DCPS::RcHandle<TypeLookupRequestWriter> TL_Request_Writer_rch;
+  typedef DCPS::RcHandle<TypeLookupRequestWriter> TypeLookupRequestWriter_rch;
 
-  TL_Request_Writer_rch type_lookup_request_writer_;
+  TypeLookupRequestWriter_rch type_lookup_request_writer_;
 
   class TypeLookupReplyWriter : public TypeLookupWriter {
   public:
@@ -491,9 +491,9 @@ private:
       DDS::RPC::RemoteExceptionCode_t exception_code);
   };
 
-  typedef DCPS::RcHandle<TypeLookupReplyWriter> TL_Reply_Writer_rch;
+  typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
 
-  TL_Reply_Writer_rch type_lookup_reply_writer_;
+  TypeLookupReplyWriter_rch type_lookup_reply_writer_;
 
   class Reader
     : public DCPS::TransportReceiveListener
@@ -550,7 +550,7 @@ private:
     virtual ~TypeLookupReader();
   };
 
-  typedef DCPS::RcHandle<TypeLookupReader> TL_Reader_rch;
+  typedef DCPS::RcHandle<TypeLookupReader> TypeLookupReader_rch;
 
 
   class TypeLookupRequestReader : public TypeLookupReader {
@@ -566,10 +566,10 @@ private:
       XTypes::TypeLookup_Request& type_lookup_request);
   };
 
-  typedef DCPS::RcHandle<TypeLookupRequestReader> TL_Request_Reader_rch;
+  typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
 
 
-  TL_Request_Reader_rch type_lookup_request_reader_;
+  TypeLookupRequestReader_rch type_lookup_request_reader_;
 
   class TypeLookupReplyReader : public TypeLookupReader {
   public:
@@ -584,9 +584,9 @@ private:
       XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
-  typedef DCPS::RcHandle<TypeLookupReplyReader> TL_Reply_Reader_rch;
+  typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
 
-  TL_Reply_Reader_rch type_lookup_reply_reader_;
+  TypeLookupReplyReader_rch type_lookup_reply_reader_;
 
   static const size_t TASK_MQ_BYTES = sizeof(Msg) * 1024 * 32;
 
