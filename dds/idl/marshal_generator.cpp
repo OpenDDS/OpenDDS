@@ -709,13 +709,14 @@ namespace {
           be_global->impl_ <<
             "    " << sf.scoped_elem_ << "_var tmp_var = " << sf.scoped_elem_ << "_dup(seq[i]);\n"
             "    " << sf.scoped_elem_ << "_forany tmp = tmp_var.inout();\n"
-            "    gen_find_size(tmp, size, padding);\n";
+            "    serialized_size(encoding, size, tmp);\n";
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            "    gen_find_size(" << sf.elem_const_ref_ << "(seq[i]), size, padding);\n";
+            "    serialized_size(encoding, size, IDL::DistinctType<const "
+            << sf.scoped_elem_ << ", " << sf.elem_ref_ + "(seq[i]));\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
-            "    gen_find_size(seq[i], size, padding);\n";
+            "    serialized_size(encoding, size, seq[i]);\n";
         }
         be_global->impl_ <<
           "  }\n";
@@ -1080,15 +1081,10 @@ namespace {
               << (af.n_elems_ - 1) << ");\n";
         }
       } else if (af.as_cls_ & CL_PRIMITIVE) {
-        const string align = getAlignment(af.as_act_);
-        if (!align.empty()) {
-          be_global->impl_ <<
-            "  if ((size + padding) % " << align << ") {\n"
-            "    padding += " << align << " - ((size + padding) % " << align << ");\n"
-            "  }\n";
-        }
+        std::ostringstream n_elems_ss;
+        n_elems_ss << af.n_elems_;
         be_global->impl_ <<
-          "  size += " << af.n_elems_ << " * " << getMaxSizeExprPrimitive(af.as_act_) << ";\n";
+          "  " << getMaxSizeExprPrimitive(af.as_act_, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
