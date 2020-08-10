@@ -638,6 +638,7 @@ namespace {
 
   void gen_anonymous_sequence(const FieldInfo& sf)
   {
+    string cxx = sf.name_;
     if (!sf.as_act_->in_main_file()) {
       if (sf.as_act_->node_type() == AST_Decl::NT_pre_defined) {
         if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
@@ -654,8 +655,12 @@ namespace {
     const string check_empty = use_cxx11 ? "seq.empty()" : "seq.length() == 0";
     const string get_length = use_cxx11 ? "static_cast<uint32_t>(seq.size())" : "seq.length()";
     const string get_buffer = use_cxx11 ? "seq.data()" : "seq.get_buffer()";
+    string const_cxx = cxx, unwrap, const_unwrap;
     if (use_cxx11) {
       be_global->header_ << "struct " << sf.underscored_ << "_tag {};\n\n";
+      const_cxx = "IDL::DistinctType<const " + cxx + ", " + sf.underscored_ + "_tag>";
+    } else {
+      const_cxx = "const " + cxx + '&';
     }
 
     {
@@ -663,19 +668,19 @@ namespace {
       // serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_); //JJA encoding https://github.com/objectcomputing/OpenDDS/pull/1668/commits/1d68036500658bfa3c146ce357433a6700b63b42#diff-214adda5c041740a8003dd55968b8036R266
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
-      serialized_size.addArg("seq", "const " + cxx + "&");
+      serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       serialized_size.endArgs();
       be_global->impl_ << sf.const_unwrap_ <<
-        "  find_size_ulong(size, padding);\n"
+        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (sf.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
-          "  size += " << get_length << " * max_marshaled_size_ulong();\n";
+          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (sf.as_cls_ & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(sf.as_act_) <<
-          "  size += " << get_length << " * " << getMaxSizeExprPrimitive(sf.as_act_) << ";\n"; //JJA += goes away? Fred sending instructions on how to simplify the build process for IDL generator development and development
+          "  " + getMaxSizeExprPrimitive(sf.as_act_, get_length) << ";\n";
       } else if (sf.as_cls_ & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -687,9 +692,10 @@ namespace {
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (sf.as_cls_ & CL_STRING) {
           be_global->impl_ <<
-            "    find_size_ulong(size, padding);\n";
+            "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
           const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n" : " + 1;\n";
+            ? " * OpenDDS::DCPS::char16_cdr_size;\n"
+            : " + 1;\n";
           if (use_cxx11) {
             be_global->impl_ <<
               "    size += seq[i].size()" << strlen_suffix;
