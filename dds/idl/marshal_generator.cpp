@@ -389,7 +389,7 @@ namespace {
     return arg.str();
   }
 
-  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq, AST_Typedef* td = 0)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
@@ -404,6 +404,19 @@ namespace {
 
     AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
+
+    AST_Decl* node = td;
+    if (td == 0) {
+      node = seq;
+    }
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    const OpenDDS::DataRepresentation repr =
+      be_global->data_representations(node);
+    const bool not_final = exten != extensibilitykind_final;
+    const bool primitive = (elem_cls & CL_PRIMITIVE);
+    const bool may_be_delimited = not_final && repr.xcdr2 && !primitive;
+    const bool not_only_delimited = repr.not_only_xcdr2() && may_be_delimited;
+
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
         if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
@@ -442,6 +455,19 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       serialized_size.endArgs();
+
+      if (may_be_delimited) {
+        if (not_only_delimited) {
+          be_global->impl_ <<
+            "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+            "  ";
+        }
+        be_global->impl_ << "  serialized_size_delimiter(encoding, size);\n";
+        if (not_only_delimited) {
+          be_global->impl_ << "  }\n";
+        }
+      }
+
       be_global->impl_ << const_unwrap <<
         "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
@@ -500,6 +526,26 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       insertion.endArgs();
+
+      if (may_be_delimited) {
+        std::string arg_string = use_cxx11 ? "wrap" : "seq";
+        const char* indent = "  ";
+        if (not_only_delimited) {
+          indent = "    ";
+          be_global->impl_ <<
+            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+        }
+        be_global->impl_ <<
+          indent << "size_t total_size = 0;\n" <<
+          indent << "serialized_size(strm.encoding(), total_size, " << arg_string << ");\n" <<
+          indent << "if (!strm.write_delimiter(total_size)) {\n" <<
+          indent << "  return false;\n";
+        if (not_only_delimited) {
+          be_global->impl_ << indent << "}\n";
+        }
+        be_global->impl_ << "  }\n";
+      }
+
       be_global->impl_ << const_unwrap <<
         "  const CORBA::ULong length = " << get_length << ";\n";
       if (!seq->unbounded()) {
@@ -563,6 +609,25 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(use_cxx11 ? "wrap" : "seq", cxx);
       extraction.endArgs();
+
+      if (may_be_delimited) {
+        be_global->impl_ <<
+          "  size_t total_size = 0;\n";
+        const char* indent = "  ";
+        if (not_only_delimited) {
+          indent = "    ";
+          be_global->impl_ <<
+            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+        }
+        be_global->impl_ <<
+          indent << "if (!strm.read_delimiter(total_size)) {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
+        if (not_only_delimited) {
+          be_global->impl_ << "  }\n";
+        }
+      }
+
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
@@ -658,7 +723,7 @@ namespace {
     }
   }
 
-  void gen_array(UTL_ScopedName* name, AST_Array* arr)
+  void gen_array(UTL_ScopedName* name, AST_Array* arr, AST_Typedef* td = 0)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
@@ -680,6 +745,19 @@ namespace {
 
     AST_Type* elem = resolveActualType(arr->base_type());
     Classification elem_cls = classify(elem);
+
+    AST_Decl* node = td;
+    if (td == 0) {
+      node = arr;
+    }
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    const OpenDDS::DataRepresentation repr =
+      be_global->data_representations(node);
+    const bool not_final = exten != extensibilitykind_final;
+    const bool primitive = (elem_cls & CL_PRIMITIVE);
+    const bool may_be_delimited = not_final && repr.xcdr2 && !primitive;
+    const bool not_only_delimited = repr.not_only_xcdr2() && may_be_delimited;
+
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(elem->file_name().c_str());
@@ -695,6 +773,19 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
       serialized_size.endArgs();
+
+      if (may_be_delimited) {
+        if (not_only_delimited) {
+          be_global->impl_ <<
+            "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+            "  ";
+        }
+        be_global->impl_ << "  serialized_size_delimiter(encoding, size);\n";
+        if (not_only_delimited) {
+          be_global->impl_ << "  }\n";
+        }
+      }
+
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
@@ -748,6 +839,26 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
       insertion.endArgs();
+
+      if (may_be_delimited) {
+        std::string arg_string = use_cxx11 ? "wrap" : "arr";
+        const char* indent = "  ";
+        if (not_only_delimited) {
+          indent = "    ";
+          be_global->impl_ <<
+            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+        }
+        be_global->impl_ <<
+          indent << "size_t total_size = 0;\n" <<
+          indent << "serialized_size(strm.encoding(), total_size, " << arg_string << ");\n" <<
+          indent << "if (!strm.write_delimiter(total_size)) {\n" <<
+          indent << "  return false;\n";
+        if (not_only_delimited) {
+          be_global->impl_ << indent << "}\n";
+        }
+        be_global->impl_ << "  }\n";
+      }
+
       be_global->impl_ << const_unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (elem_cls & CL_PRIMITIVE) {
@@ -787,6 +898,25 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(use_cxx11 ? "wrap" : "arr", cxx);
       extraction.endArgs();
+
+      if (may_be_delimited) {
+        be_global->impl_ <<
+          "  size_t total_size = 0;\n";
+        const char* indent = "  ";
+        if (not_only_delimited) {
+          indent = "    ";
+          be_global->impl_ <<
+            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+        }
+        be_global->impl_ <<
+          indent << "if (!strm.read_delimiter(total_size)) {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
+        if (not_only_delimited) {
+          be_global->impl_ << "  }\n";
+        }
+      }
+
       be_global->impl_ << unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
       if (elem_cls & CL_PRIMITIVE) {
@@ -1159,15 +1289,15 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
+bool marshal_generator::gen_typedef(AST_Typedef* td, UTL_ScopedName* name, AST_Type* base,
   const char*)
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
-    gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+    gen_sequence(name, AST_Sequence::narrow_from_decl(base), td);
     break;
   case AST_Decl::NT_array:
-    gen_array(name, AST_Array::narrow_from_decl(base));
+    gen_array(name, AST_Array::narrow_from_decl(base), td);
     break;
   default:
     return true;
@@ -1784,8 +1914,15 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
 
     if (may_be_delimited) {
-      be_global->impl_ <<
-        "  serialized_size_delimiter(encoding, size);\n";
+      if (not_only_delimited) {
+        be_global->impl_ <<
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+          "  ";
+      }
+      be_global->impl_ << "  serialized_size_delimiter(encoding, size);\n";
+      if (not_only_delimited) {
+        be_global->impl_ << "  }\n";
+      }
     }
 
     string expr, intro;
@@ -1830,14 +1967,21 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     // Write the CDR Size if delimited.
     if (may_be_delimited) {
+      const char* indent = "  ";
+      if (not_only_delimited) {
+        indent = "    ";
+        be_global->impl_ <<
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+      }
       be_global->impl_ <<
-        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
-        "    size_t total_size = 0;\n"
-        "    serialized_size(encoding, total_size, stru);\n"
-        "    if (!strm.write_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n"
-        "  }\n";
+        indent << "size_t total_size = 0;\n" <<
+        indent << "serialized_size(encoding, total_size, stru);\n" <<
+        indent << "if (!strm.write_delimiter(total_size)) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+        if (not_only_delimited) {
+          be_global->impl_ << "  }\n";
+        }
     }
 
     // Write the fields
@@ -2497,6 +2641,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const OpenDDS::DataRepresentation repr =
     be_global->data_representations(node);
 
+  const bool xcdr = repr.xcdr1 || repr.xcdr2;
+  const bool not_final = exten != extensibilitykind_final;
+  const bool may_be_delimited = not_final && repr.xcdr2;
+  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
+
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
       return special_unions[i].gen(cxx, discriminator, branches);
@@ -2510,6 +2659,19 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.addArg("size", "size_t&");
     serialized_size.addArg("uni", "const " + cxx + "&");
     serialized_size.endArgs();
+
+    if (may_be_delimited) {
+      if (not_only_delimited) {
+        be_global->impl_ <<
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+          "  ";
+      }
+      be_global->impl_ << "  serialized_size_delimiter(encoding, size);\n";
+      if (not_only_delimited) {
+        be_global->impl_ << "  }\n";
+      }
+    }
+
     const string align = getAlignment(discriminator);
     if (!align.empty()) {
       be_global->impl_ << "  encoding.align(size, " << align << ");\n";
@@ -2529,6 +2691,31 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
+
+    if (may_be_delimited) {
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n";
+    }
+
+    // Write the CDR Size if delimited.
+    if (may_be_delimited) {
+      const char* indent = "  ";
+      if (not_only_delimited) {
+        indent = "    ";
+        be_global->impl_ <<
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+      }
+      be_global->impl_ <<
+        indent << "size_t total_size = 0;\n" <<
+        indent << "serialized_size(encoding, total_size, uni);\n" <<
+        indent << "if (!strm.write_delimiter(total_size)) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+      if (not_only_delimited) {
+        be_global->impl_ << "  }\n";
+      }
+    }
+
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
     if (generateSwitchForUnion("uni._d()", streamCommon, branches,
@@ -2542,6 +2729,26 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.addArg("strm", "Serializer&");
     extraction.addArg("uni", cxx + "&");
     extraction.endArgs();
+
+    if (may_be_delimited) {
+      be_global->impl_ <<
+        "  size_t total_size = 0;\n";
+      const char* indent = "  ";
+      if (not_only_delimited) {
+        indent = "    ";
+        be_global->impl_ <<
+          "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+      }
+      be_global->impl_ <<
+        indent << "if (!strm.read_delimiter(total_size)) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+      if (not_only_delimited) {
+        be_global->impl_ <<
+          "  }\n";
+      }
+    }
+
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n" <<
       streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
