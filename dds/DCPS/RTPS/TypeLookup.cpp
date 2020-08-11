@@ -14,16 +14,19 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_getTypes_In& stru)
   {
+    // TODO: needs correct implementation
     serialized_size(encoding, size, stru.type_ids);
   }
 
   bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_In& stru)
   {
+    // TODO: needs correct implementation
     return strm << stru.type_ids;
   }
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_In& stru)
   {
+    // TODO: needs correct implementation
     return strm >> stru.type_ids;
   }
 
@@ -31,18 +34,21 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_getTypes_Out& stru)
   {
+    // TODO: needs correct implementation
     serialized_size(encoding, size, stru.types);
     serialized_size(encoding, size, stru.complete_to_minimal);
   }
 
   bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_Out& stru)
   {
+    // TODO: needs correct implementation
     return (strm << stru.types)
       && (strm << stru.complete_to_minimal);
   }
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Out& stru)
   {
+    // TODO: needs correct implementation
     return (strm >> stru.types)
       && (strm >> stru.complete_to_minimal);
   }
@@ -51,52 +57,64 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_getTypes_Result& stru)
   {
-    serialized_size(encoding, size, stru.result);
+    switch (stru.return_code) {
+    case DDS::RETCODE_OK:
+      serialized_size(encoding, size, stru.result);
+      break;
+    }
   }
 
   bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_Result& stru)
   {
-    return strm << stru.result;
+    if (!(strm << ACE_OutputCDR::from_octet(stru.return_code))) {
+      return false;
+    }
+    switch (stru.return_code) {
+    case DDS::RETCODE_OK:
+      return strm << stru.result;
+    }
+    return false;
   }
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru)
   {
-    return strm >> stru.result;
-  }
-
-
-  void serialized_size(const Encoding& encoding, size_t& size,
-    const XTypes::ContinuationPoint&)
-  {
-    max_serialized_size_octet(encoding, size, 32);
-  }
-
-  bool operator<<(Serializer& strm, const XTypes::ContinuationPoint& _tao_sequence)
-  {
-    return TAO::marshal_sequence(strm, _tao_sequence);
-  }
-
-  bool operator>>(Serializer& strm, XTypes::ContinuationPoint& _tao_sequence)
-  {
-    return TAO::demarshal_sequence(strm, _tao_sequence);
+    CORBA::ULong return_code;
+    if (!(strm >> return_code)) {
+      return false;
+    }
+    switch (return_code) {
+    case DDS::RETCODE_OK: {
+      OpenDDS::XTypes::TypeLookup_getTypes_Out tmp;
+      if (strm >> tmp) {
+        stru.result = tmp;
+        stru.return_code = return_code;
+        return true;
+      }
+      return false;
+    }
+    }
+    return false;
   }
 
 
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_getTypeDependencies_In& stru)
   {
+    // TODO: needs correct implementation
     serialized_size(encoding, size, stru.type_ids);
-    max_serialized_size_octet(encoding, size, 32);
+    serialized_size(encoding, size, stru.continuation_point);
   }
 
   bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_In& stru)
   {
+    // TODO: needs correct implementation
     return (strm << stru.type_ids)
       && (strm << stru.continuation_point);
   }
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_In& stru)
   {
+    // TODO: needs correct implementation
     return (strm >> stru.type_ids)
       && (strm >> stru.continuation_point);
   }
@@ -105,18 +123,21 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_getTypeDependencies_Out& stru)
   {
+    // TODO: needs correct implementation
     serialized_size(encoding, size, stru.dependent_typeids);
-    max_serialized_size_octet(encoding, size, 32);
+    serialized_size(encoding, size, stru.continuation_point);
   }
 
   bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Out& stru)
   {
+    // TODO: needs correct implementation
     return (strm << stru.dependent_typeids)
       && (strm << stru.continuation_point);
   }
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Out& stru)
   {
+    // TODO: needs correct implementation
     return (strm >> stru.dependent_typeids)
       && (strm >> stru.continuation_point);
   }
@@ -125,17 +146,43 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_getTypeDependencies_Result& stru)
   {
-    serialized_size(encoding, size, stru.result);
+    switch (stru.return_code) {
+    case DDS::RETCODE_OK:
+      serialized_size(encoding, size, stru.result);
+      break;
+    }
   }
 
   bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_Result& stru)
   {
-    return strm << stru.result;
+    if (!(strm << ACE_OutputCDR::from_octet(stru.return_code))) {
+      return false;
+    }
+    switch (stru.return_code) {
+    case DDS::RETCODE_OK:
+      return strm << stru.result;
+    }
+    return false;
   }
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result& stru)
   {
-    return strm >> stru.result;
+    CORBA::ULong return_code;
+    if (!(strm >> return_code)) {
+      return false;
+    }
+    switch (return_code) {
+    case DDS::RETCODE_OK: {
+      OpenDDS::XTypes::TypeLookup_getTypeDependencies_Out tmp;
+      if (strm >> tmp) {
+        stru.result = tmp;
+        stru.return_code = return_code;
+        return true;
+      }
+      return false;
+    }
+    }
+    return false;
   }
 
 
@@ -297,30 +344,50 @@ namespace DCPS {
     return (strm >> stru.header)
       && (strm >> stru.data);
   }
+
+
+  void serialized_size(const Encoding& encoding, size_t& size,
+    const XTypes::OctetSeq32& seq)
+  {
+    DCPS::serialized_size_ulong(encoding, size);
+    if (seq.length() == 0) {
+      return;
+    }
+    max_serialized_size_octet(encoding, size, seq.length());
+  }
+
+  bool operator<<(Serializer& strm, const XTypes::OctetSeq32& seq)
+  {
+    const CORBA::ULong length = seq.length();
+    if (length > 32) {
+      return false;
+    }
+    if (!(strm << length)) {
+      return false;
+    }
+    if (length == 0) {
+      return true;
+    }
+    return strm.write_octet_array(seq.get_buffer(), length);
+  }
+
+  bool operator>>(Serializer& strm, XTypes::OctetSeq32& seq)
+  {
+    CORBA::ULong length;
+    if (!(strm >> length)) {
+      return false;
+    }
+    if (length > 32) {
+      return false;
+    }
+    seq.length(length);
+    if (length == 0) {
+      return true;
+    }
+    return strm.read_octet_array(seq.get_buffer(), length);
+  }
+
 } // namespace DCPS
 } // namespace OpenDDS
-
-#if !defined (_OPENDDS_XTYPES_OCTET32SEQ_CS_)
-#define _OPENDDS_XTYPES_OCTET32SEQ_CS_
-
-OpenDDS::XTypes::Octet32Seq::Octet32Seq(void)
-{}
-
-OpenDDS::XTypes::Octet32Seq::Octet32Seq(
-  ::CORBA::ULong length,
-  ::CORBA::Octet* buffer,
-  ::CORBA::Boolean release
-)
-  : ::TAO::bounded_value_sequence<
-  ::CORBA::Octet,
-  32
-  >
-  (length, buffer, release)
-{}
-
-OpenDDS::XTypes::Octet32Seq::~Octet32Seq(void)
-{}
-
-#endif /* end #if !defined */
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
