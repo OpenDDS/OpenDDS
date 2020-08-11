@@ -42,12 +42,9 @@ struct TypeLookup_getTypes_Result
   TypeLookup_getTypes_Result() {}
 };
 
-template <typename T>
-struct SequenceOct32 : public Sequence<T>
+struct OctetSeq32 : public Sequence<ACE_CDR::Octet>
 {
 };
-
-typedef SequenceOct32<ACE_CDR::Octet>  OctetSeq32;
 
 struct TypeLookup_getTypeDependencies_In
 {
