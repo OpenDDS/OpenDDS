@@ -668,7 +668,7 @@ namespace {
       // serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_); //JJA encoding https://github.com/objectcomputing/OpenDDS/pull/1668/commits/1d68036500658bfa3c146ce357433a6700b63b42#diff-214adda5c041740a8003dd55968b8036R266
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
-      serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
+      serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_);
       serialized_size.endArgs();
       be_global->impl_ << sf.const_unwrap_ <<
         "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
@@ -1049,13 +1049,7 @@ namespace {
   void gen_anonymous_array(const FieldInfo& af)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    string cxx = af.name_;
-    string const_cxx = cxx, unwrap, const_unwrap;
-    if (use_cxx11) {
-      const_cxx = "IDL::DistinctType<const " + cxx + ", " + af.underscored_ + "_tag>";
-    } else {
-      const_cxx = "const " + cxx + "_forany&";
-    }
+
     if (!af.as_act_->in_main_file() && af.as_act_->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(af.as_act_->file_name().c_str());
     }
@@ -1068,8 +1062,7 @@ namespace {
       Function serialized_size("serialized_size", "void"); //JJA replaced by serialized_size
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
-      serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
-      //serialized_size.addArg("seq", "const " + cxx + "&");//JJA what do do with cxx in this case?
+      serialized_size.addArg(af.arg_.c_str(), af.const_ref_);
       serialized_size.endArgs();
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
@@ -1625,7 +1618,7 @@ namespace {
     } else {
       fieldref += '.';
     }
-    expr += "  gen_find_size(" + fieldref + local + ", size, padding);\n";
+    expr += "  serialized_size(encoding, size, " + fieldref + local + ");\n";
     return true;
   }
 
