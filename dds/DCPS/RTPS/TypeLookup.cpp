@@ -300,4 +300,27 @@ namespace DCPS {
 } // namespace DCPS
 } // namespace OpenDDS
 
+#if !defined (_OPENDDS_XTYPES_OCTET32SEQ_CS_)
+#define _OPENDDS_XTYPES_OCTET32SEQ_CS_
+
+OpenDDS::XTypes::Octet32Seq::Octet32Seq(void)
+{}
+
+OpenDDS::XTypes::Octet32Seq::Octet32Seq(
+  ::CORBA::ULong length,
+  ::CORBA::Octet* buffer,
+  ::CORBA::Boolean release
+)
+  : ::TAO::bounded_value_sequence<
+  ::CORBA::Octet,
+  32
+  >
+  (length, buffer, release)
+{}
+
+OpenDDS::XTypes::Octet32Seq::~Octet32Seq(void)
+{}
+
+#endif /* end #if !defined */
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

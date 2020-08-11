@@ -66,18 +66,18 @@ namespace XTypes {
     >
   {
   public:
-    Octet32Seq(void) {};
+    Octet32Seq(void);
     Octet32Seq(
       ::CORBA::ULong length,
       ::CORBA::Octet* buffer,
-      ::CORBA::Boolean release = false) : ::TAO::bounded_value_sequence<::CORBA::Octet, 32> (length, buffer, release) {};
+      ::CORBA::Boolean release = false);
 #if defined (ACE_HAS_CPP11)
     Octet32Seq(const Octet32Seq&) = default;
     Octet32Seq(Octet32Seq&&) = default;
     Octet32Seq& operator= (const Octet32Seq&) = default;
     Octet32Seq& operator= (Octet32Seq&&) = default;
 #endif /* ACE_HAS_CPP11 */
-    virtual ~Octet32Seq(void) {};
+    virtual ~Octet32Seq(void);
 
     typedef Octet32Seq_var _var_type;
     typedef Octet32Seq_out _out_type;
