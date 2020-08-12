@@ -1557,6 +1557,8 @@ namespace XTypes {
     CompleteTypeObject complete;
     MinimalTypeObject minimal;
 
+    TypeObject() {}
+
     TypeObject(const CompleteTypeObject& a_complete)
       : kind(EK_COMPLETE)
       , complete(a_complete)
@@ -1579,6 +1581,13 @@ namespace XTypes {
   struct TypeIdentifierTypeObjectPair {
     TypeIdentifier type_identifier;
     TypeObject type_object;
+
+    TypeIdentifierTypeObjectPair() {}
+
+    TypeIdentifierTypeObjectPair(const TypeIdentifier& ti, const TypeObject& to)
+      : type_identifier(ti)
+      , type_object(to)
+    {}
   };
   typedef Sequence<TypeIdentifierTypeObjectPair> TypeIdentifierTypeObjectPairSeq;
 
@@ -1950,19 +1959,28 @@ bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifier& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifier& stru);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSize& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSize& stru);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSizeSeq& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSizeSeq& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSizeSeq& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
@@ -2285,6 +2303,30 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeObjectHashId& stru);
 bool operator<<(Serializer& strm, const XTypes::TypeObjectHashId& stru);
 bool operator>>(Serializer& strm, XTypes::TypeObjectHashId& stru);
+
+OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierTypeObjectPair& stru);
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& strm, const XTypes::TypeIdentifierTypeObjectPair& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru);
+
+OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierPair& stru);
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
+
+OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierPairSeq& stru);
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& stru);
 
 
 } // namespace DCPS

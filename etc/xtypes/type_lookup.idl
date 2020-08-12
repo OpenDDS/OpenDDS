@@ -1,0 +1,79 @@
+#include "RtpsRpc.idl"
+#include "opendds_typeobject.idl"
+
+module OpenDDS {
+module XTypes {    // spec: DDS::XTypes
+
+// computed from @hashid("getTypes")
+const unsigned long TypeLookup_getTypes_HashId = 0x018252d3;
+// computed from @hashid("getDependencies");
+const unsigned long TypeLookup_getDependencies_HashId = 0x05aafb31;
+
+// Query the TypeObjects associated with one or more TypeIdentifiers
+@extensibility(MUTABLE)
+struct TypeLookup_getTypes_In {
+  @hashid TypeIdentifierSeq type_ids;
+};
+
+@extensibility(MUTABLE)
+struct TypeLookup_getTypes_Out {
+  @hashid TypeIdentifierTypeObjectPairSeq types;
+  @hashid TypeIdentifierPairSeq complete_to_minimal;
+};
+
+union TypeLookup_getTypes_Result switch(long) {
+  case DDS::RETCODE_OK:
+  TypeLookup_getTypes_Out result;
+};
+
+// Query TypeIdentifiers that the specified types depend on
+typedef sequence<octet, 32> Octet32Seq;
+@extensibility(MUTABLE)
+struct TypeLookup_getTypeDependencies_In {
+  @hashid TypeIdentifierSeq type_ids;
+  @hashid Octet32Seq continuation_point;
+};
+
+@extensibility(MUTABLE)
+struct TypeLookup_getTypeDependencies_Out {
+  @hashid TypeIdentifierWithSizeSeq dependent_typeids;
+  @hashid Octet32Seq continuation_point;
+};
+
+union TypeLookup_getTypeDependencies_Result switch(long){
+case DDS::RETCODE_OK:
+  TypeLookup_getTypeDependencies_Out result;
+};
+
+// Service Request
+union TypeLookup_Call switch(long) {
+  case TypeLookup_getTypes_HashId:
+    TypeLookup_getTypes_In getTypes;
+  case TypeLookup_getDependencies_HashId:
+    TypeLookup_getTypeDependencies_In getTypeDependencies;
+};
+
+//TODO: uncomment line below
+//@RPCRequestType
+struct TypeLookup_Request {
+  DDS::rpc::RequestHeader header;
+  TypeLookup_Call data;
+};
+
+// Service Reply
+union TypeLookup_Return switch(long) {
+  case TypeLookup_getTypes_HashId:
+    TypeLookup_getTypes_Result getType;
+  case TypeLookup_getDependencies_HashId:
+    TypeLookup_getTypeDependencies_Result getTypeDependencies;
+};
+
+//TODO: uncomment line below
+//@RPCReplyType
+struct TypeLookup_Reply {
+  DDS::rpc::RequestHeader header;
+  TypeLookup_Return return;
+};
+
+};  // end of module XTypes
+};  // end module DDS
