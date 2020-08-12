@@ -664,8 +664,7 @@ namespace {
     }
 
     {
-      Function serialized_size("serialized_size", "void"); //JJA replaced by serialized_size
-      // serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_); //JJA encoding https://github.com/objectcomputing/OpenDDS/pull/1668/commits/1d68036500658bfa3c146ce357433a6700b63b42#diff-214adda5c041740a8003dd55968b8036R266
+      Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_);
@@ -1059,7 +1058,7 @@ namespace {
 
     {
 
-      Function serialized_size("serialized_size", "void"); //JJA replaced by serialized_size
+      Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(af.arg_.c_str(), af.const_ref_);
