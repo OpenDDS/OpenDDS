@@ -5,10 +5,8 @@
 * Distributed under the OpenDDS License.
 * See: http://www.opendds.org/license.html
 */
-
 #include "RtpsRpcTypeSupportImpl.h"
 #include <dds/DCPS/XTypes/TypeObject.h>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
