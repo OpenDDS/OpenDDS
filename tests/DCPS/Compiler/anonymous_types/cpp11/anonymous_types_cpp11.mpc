@@ -1,0 +1,7 @@
+project: dcps_test, opendds_cxx11, msvc_bigobj {
+  idlflags += -I..
+
+  TypeSupport_Files {
+    ../test.idl
+  }
+}
