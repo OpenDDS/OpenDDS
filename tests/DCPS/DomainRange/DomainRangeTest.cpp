@@ -133,11 +133,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
         x = shifter.get_the_parameter (ACE_TEXT("-participants"));
         if (x != NULL) {
-          int p = ACE_OS::atoi(x);
-          if (p == 2) {
-            num_participants = p;
+          if (ACE_OS::atoi(x) == 2) {
+            num_participants = 2;
           }
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - using %d participants in each domain\n", p));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - using %d participants in each domain\n", num_participants));
         }
         shifter.consume_arg ();
       }

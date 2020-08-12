@@ -1913,6 +1913,8 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
       }
 
       if (!perDomainDefaultTportConfig.empty()) {
+        // store domain and associated config for template or multiple participant domain use
+        TheTransportRegistry->associate_domain_to_config(domainId, perDomainDefaultTportConfig);
         TransportRegistry* const reg = TransportRegistry::instance();
         TransportConfig_rch tc = reg->get_config(perDomainDefaultTportConfig);
         if (tc.is_nil()) {
@@ -1923,6 +1925,9 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
         } else {
           reg->domain_default_config(domainId, tc);
         }
+      } else {
+        // store domain and associated config for template or multiple participant domain use
+        TheTransportRegistry->associate_domain_to_config(domainId, global_transport_config_.c_str());
       }
 
       // Check to see if the specified discovery configuration has been defined
@@ -2186,6 +2191,19 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
     }
   }
   return 0;
+}
+
+
+bool
+Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId)
+{
+  for (OPENDDS_VECTOR(DomainRange)::iterator i = domain_ranges_.begin(); i != domain_ranges_.end(); ++i) {
+    if (domainId >= i->range_start && domainId <= i->range_end) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 int

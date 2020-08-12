@@ -6,7 +6,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "DomainParticipantFactoryImpl.h"
 
 #include "DomainParticipantImpl.h"
@@ -85,6 +85,26 @@ DomainParticipantFactoryImpl::create_participant(
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
+  // if a participant is already in the domain and rtps then
+  // create a new transport instance for the new participant.
+  DPMap::iterator i = participants_.find(domainId);
+  if (i != participants_.end()) {
+    OPENDDS_STRING config_name = dp->get_unique_id();
+
+    bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, config_name);
+
+    if (ret) {
+      TheTransportRegistry->bind_config(config_name, dp.in());
+    } else {
+      ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+               ACE_TEXT("could not create new transport instance for participant.\n")));
+
+      return DDS::DomainParticipant::_nil();
+    }
+  }
+
   participants_[domainId].insert(dp);
   return dp._retn();
 }
@@ -93,8 +113,6 @@ DDS::ReturnCode_t
 DomainParticipantFactoryImpl::delete_participant(
   DDS::DomainParticipant_ptr a_participant)
 {
-
-//xxx rc = 4
   if (CORBA::is_nil(a_participant)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

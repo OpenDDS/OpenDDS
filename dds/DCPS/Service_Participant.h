@@ -396,6 +396,13 @@ public:
   int load_configuration(ACE_Configuration_Heap& cf,
                          const ACE_TCHAR* filename);
 
+  /**
+   * Used by TransportRegistry to determine if a domain ID
+   * is part of a [DomainRange]
+   */
+  bool belongs_to_domain_range(DDS::DomainId_t domainId);
+
+
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
    * Configure the safety profile pool
