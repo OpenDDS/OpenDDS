@@ -1979,9 +1979,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         indent << "if (!strm.write_delimiter(total_size)) {\n" <<
         indent << "  return false;\n" <<
         indent << "}\n";
-        if (not_only_delimited) {
-          be_global->impl_ << "  }\n";
-        }
+      if (not_only_delimited) {
+        be_global->impl_ << "  }\n";
+      }
     }
 
     // Write the fields
