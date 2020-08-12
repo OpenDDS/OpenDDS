@@ -575,10 +575,15 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
     must_understand = emheader & emheader_must_understand;
 
     // Get Size
-    // TODO(iguessthislldo) LC
-    const unsigned short lc = (emheader >> 28) & 0x7;
-    if (lc < 4) {
-      size = 1 << lc;
+    const unsigned short lc = (emheader >> 16) & 0x7;
+    if (lc == 0) {
+      size = 1;
+    } else if (lc == 1) {
+      size = 2;
+    } else if (lc == 2) {
+      size = 4;
+    } else if (lc == 3) {
+      size = 8;
     } else {
       ACE_CDR::ULong next_int;
       if (!(*this >> next_int)) {
@@ -592,7 +597,6 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
         size = next_int;
       }
     }
-
     id = emheader & 0xfffffff;
   }
 
@@ -640,15 +644,34 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
 
     reset_alignment();
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
-    ACE_CDR::ULong emheader = id;
-    // TODO(iguessthislldo): Conditionally insert must understand flag?
-    id += emheader_must_understand;
-    // TODO(iguessthislldo) LC
+    // Compute Length Code (LC) and NEXTINT
+    ACE_CDR::ULong lc = 0;
+    ACE_CDR::ULong nextint = 0;
+    if (size == 1) {
+      lc = 0;
+    } else if (size == 2) {
+      lc = 1;
+    } else if (size == 4) {
+      lc = 2;
+    } else if (size == 8) {
+      lc = 3;
+    } else if (size > 8 && (size % 8 == 0)) {
+      lc = 7; nextint = size / 8;
+    } else if (size > 4 && (size % 4 == 0)) {
+      lc = 6; nextint = size / 4;
+    } else if (size > 2 && (size % 2 == 0)) {
+      lc = 5; nextint = size;
+    } else {
+      lc = 4; nextint = size;
+    }
+    const ACE_CDR::ULong emheader = (lc << 16) | id;
     if (!(*this << emheader)) {
       return false;
     }
+    if (nextint > 0) {
+      return (*this << nextint);
+    }
   }
-
   return true;
 }
 

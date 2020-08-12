@@ -1780,7 +1780,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
        * size is hijacked for field sizes because of alignment resets.
        */
       be_global->impl_ <<
-        "  size_t xcdr1_pl_running_total = 0;\n";
+        "  size_t mutable_running_total = 0;\n";
     }
 
     if (may_be_delimited) {
@@ -1802,7 +1802,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
       if (may_be_parameter_list) {
         expr +=
-          "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+          "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
       }
       expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
       if (!cond.empty()) {
@@ -1813,7 +1813,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     if (repr.xcdr1 && may_be_parameter_list) {
       be_global->impl_ <<
-        "  serialized_size_list_end_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }
   }
 

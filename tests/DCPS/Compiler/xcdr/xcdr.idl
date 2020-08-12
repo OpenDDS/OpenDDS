@@ -104,3 +104,68 @@ struct AdditionalFieldMutableStruct {
   @id(8) octet octet_field;
   @id(4) short short_field;
 };
+
+@final
+struct Octet5 {
+  octet a;
+  octet b;
+  octet c;
+  octet d;
+  octet e;
+};
+
+@final
+struct Short3 {
+  short x;
+  short y;
+  short z;
+};
+
+@final
+struct Boolean3 {
+  boolean a;
+  boolean b;
+  boolean c;
+};
+
+@final
+struct LongLong2 {
+  long long a;
+  long long b;
+};
+
+@final
+struct Struct20 {
+  LongLong2 ll2;
+  long l;
+};
+
+@final
+struct Struct24 {
+  Struct20 a;
+  long b;
+};
+
+@final
+struct Struct7 {
+  Short3 s3;
+  octet o;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct LengthCodeStruct {           //LC  size
+  @id(0) octet octet_field;         // 0    1
+  @id(1) short short_field;         // 1    2
+  @id(2) long long_field;           // 2    4
+  @id(3) long long long_long_field; // 3    8
+
+  @id(4) Octet5 octet5_field;       // 4    5
+  @id(5) Short3 short3_field;       // 5    6
+  @id(6) Struct20 struct20_field;   // 6  4x5
+  @id(7) Struct24 struct24_field;   // 7  8x3
+
+  @id(8) Boolean3 boolean3_field;   // 4    3
+  @id(9) Struct7 struct7_field;     // 4    7
+};
