@@ -42,7 +42,7 @@ struct TypeLookup_getTypes_Result
   TypeLookup_getTypes_Result() {}
 };
 
-struct OctetSeq32 : public Sequence<ACE_CDR::Octet>
+struct OctetSeq32 : Sequence<ACE_CDR::Octet>
 {
 };
 

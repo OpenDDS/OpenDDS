@@ -1,13 +1,14 @@
 #include "RtpsRpc.idl"
 #include "opendds_typeobject.idl"
 
-module OpenDDS { module XTypes {    // spec: DDS::XTypes
+module OpenDDS {
+module XTypes {    // spec: DDS::XTypes
 
 	// computed from @hashid("getTypes")
 	const unsigned long TypeLookup_getTypes_HashId = 0x018252d3;
 	// computed from @hashid("getDependencies");
 	const unsigned long TypeLookup_getDependencies_HashId = 0x05aafb31;
-	
+
 	// Query the TypeObjects associated with one or more TypeIdentifiers
 	@extensibility(MUTABLE)
 	struct TypeLookup_getTypes_In {
@@ -24,7 +25,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
 		case DDS::RETCODE_OK:
 		TypeLookup_getTypes_Out result;
 	};
-	
+
 	// Query TypeIdentifiers that the specified types depend on
 	typedef sequence<octet, 32> Octet32Seq;
 	@extensibility(MUTABLE)
@@ -32,7 +33,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
 		@hashid TypeIdentifierSeq type_ids;
 		@hashid Octet32Seq continuation_point;
 	};
-	
+
 	@extensibility(MUTABLE)
 	struct TypeLookup_getTypeDependencies_Out {
 		@hashid TypeIdentifierWithSizeSeq dependent_typeids;
@@ -58,7 +59,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
 		DDS::rpc::RequestHeader header;
 		TypeLookup_Call data;
 	};
-	
+
 	// Service Reply
 	union TypeLookup_Return switch(long) {
 		case TypeLookup_getTypes_HashId:
@@ -66,13 +67,13 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
 		case TypeLookup_getDependencies_HashId:
 			TypeLookup_getTypeDependencies_Result getTypeDependencies;
 	};
-	
+
 	//TODO: uncomment line below
 	//@RPCReplyType
 	struct TypeLookup_Reply {
 		DDS::rpc::RequestHeader header;
 		TypeLookup_Return return;
 	};
-	
+
 };  // end of module XTypes
 };  // end module DDS
