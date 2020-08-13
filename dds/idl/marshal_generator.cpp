@@ -1257,8 +1257,7 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_typedef(AST_Typedef* td, UTL_ScopedName* name, AST_Type* base,
-  const char*)
+bool marshal_generator::gen_typedef(AST_Typedef* td, UTL_ScopedName* name, AST_Type* base, const char*)
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
