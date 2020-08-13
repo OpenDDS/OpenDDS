@@ -575,7 +575,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
     must_understand = emheader & emheader_must_understand;
 
     // Get Size
-    const unsigned short lc = (emheader >> 16) & 0x7;
+    const unsigned short lc = (emheader >> 28) & 0x7;
     if (lc == 0) {
       size = 1;
     } else if (lc == 1) {
@@ -664,7 +664,7 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
     } else {
       lc = 4; nextint = size;
     }
-    const ACE_CDR::ULong emheader = (lc << 16) | id;
+    const ACE_CDR::ULong emheader = (lc << 28) | id;
     if (!(*this << emheader)) {
       return false;
     }
