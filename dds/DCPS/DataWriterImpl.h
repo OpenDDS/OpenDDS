@@ -427,8 +427,14 @@ public:
   bool persist_data();
 #endif
 
-  /// Wait for pending samples to drain.
+  /// Wait for pending data and control messages to drain.
   void wait_pending();
+
+  /**
+   * Set deadline to complete wait_pending by. If 0, then wait_pending will
+   * wait indefinately if needed.
+   */
+  void set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
   /**
    * Get an instance handle for a new instance.
@@ -443,12 +449,6 @@ public:
                   const FilterEvaluator& evaluator,
                   const DDS::StringSeq& expression_params) const;
 #endif
-
-  /**
-   * Wait until pending control elements have either been delivered
-   * or dropped.
-   */
-  void wait_control_pending();
 
   DataBlockLockPool::DataBlockLock* get_db_lock() {
     return db_lock_pool_->get_lock();
@@ -686,6 +686,8 @@ private:
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
   RcHandle<LivenessTimer> liveness_timer_;
+
+  MonotonicTimePoint wait_pending_deadline_;
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
@@ -700,8 +702,7 @@ public:
   }
 
   /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
+  virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
 
 private:
   WeakRcHandle<DataWriterImpl> writer_;

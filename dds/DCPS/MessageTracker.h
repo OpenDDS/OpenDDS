@@ -8,10 +8,12 @@
 #ifndef OPENDDS_DCPS_MESSAGETRACKER_H
 #define OPENDDS_DCPS_MESSAGETRACKER_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "ace/Thread_Mutex.h"
-#include "ace/Condition_Thread_Mutex.h"
+#include "dcps_export.h"
+#include "PoolAllocator.h"
+#include "TimeTypes.h"
+
+#include <ace/Thread_Mutex.h>
+#include <ace/Condition_Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -47,9 +49,16 @@ namespace DCPS {
     bool pending_messages();
 
     /**
-     * Block until all messages have been account for.
+     * Block until all messages have been accounted for or timeouts out based
+     * on PendingTimeout.
      */
-    void wait_messages_pending(OPENDDS_STRING& caller_message);
+    void wait_messages_pending(const char* caller);
+
+    /**
+     * Block until all messages have been accounted for or the deadline supplied
+     * has passed. Blocks indefinitely if deadline is zero.
+     */
+    void wait_messages_pending(const char* caller, const MonotonicTimePoint& deadline);
 
     /**
      * For testing.
