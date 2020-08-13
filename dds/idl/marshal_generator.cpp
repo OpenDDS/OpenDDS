@@ -1915,18 +1915,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
     if (may_be_parameter_list) {
-      if (repr.xcdr2) {
         /**
          * We don't have a PID marking the end in XCDR2 parameter lists, but we
          * have the size, so we need to stop after we hit this offset.
-         *
-         * TODO(iguessthislldo): Replace this with a cleaner mechanism where
-         * the Serializer keeps track of the stream offset.
-         * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447056830
          */
-        be_global->impl_ <<
-          "  const char* end_of_fields = strm.pos_rd() + total_size;\n";
-      }
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
@@ -1934,7 +1926,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       if (repr.xcdr2) {
         be_global->impl_ << "\n"
-          "    if ((!strm.pos_rd() || strm.pos_rd() >= end_of_fields)";
+          "    if (strm.pos() >= total_size + uint32_cdr_size";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
             "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
@@ -1993,21 +1985,35 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  return false;\n";
     } else {
       string expr;
+      expr += "  total_size += uint32_cdr_size;\n";
       for (size_t i = 0; i < fields.size(); ++i) {
-        if (i) expr += "\n    && ";
         const string field_name = fields[i]->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
           expr += rtpsCustom.preFieldRead(field_name);
           expr += "(!(" + cond + ") || ";
         }
+        // TODO (sonndinh): When the stream ends before some fields on the
+        // reader side get their values, are they set to their default values
+        // or is this a place where try-construct comes into play?
+        expr += "  if (strm.pos() >= total_size) {\n";
+        expr += "    return true;\n";
+        expr += "  }\n";
+        expr += "  if (!";
         expr += streamCommon(
           field_name, fields[i]->field_type(), ">> stru", intro, cxx);
+        expr += ") {\n";
+        expr += "    return false;\n";
+        expr += "  }\n";
         if (!cond.empty()) {
           expr += ")";
         }
       }
-      be_global->impl_ << intro << "  return " << expr << ";\n";
+      expr += "  if (strm.pos() < total_size) {\n";
+      expr += "    strm.skip(total_size - strm.pos());\n";
+      expr += "  }\n";
+      expr += "  return true;\n";
+      be_global->impl_ << intro << expr;
     }
   }
 
