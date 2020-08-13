@@ -996,6 +996,7 @@ protected:
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::dds_demarshal\n")
                   ACE_TEXT("attempting to skip serialize but bad from_message_block.")));
       }
+      store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
       return;
     }
     const bool cdr = sample.header_.cdr_encapsulation_;
