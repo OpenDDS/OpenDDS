@@ -165,6 +165,10 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
+  // TypeLookup
+  bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+                                const DCPS::RepoId& reader);
+
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
@@ -364,6 +368,11 @@ private:
       return seq_;
     }
 
+    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+
+
   protected:
     void send_sample(const ACE_Message_Block& data,
                      size_t size,
@@ -378,6 +387,11 @@ private:
                            bool historic_sample = false,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
+    void write_control_msg(DCPS::Message_Block_Ptr payload,
+      size_t size,
+      DCPS::MessageId id,
+      DCPS::SequenceNumber seq = DCPS::SequenceNumber());
+
   private:
     DCPS::SequenceNumber seq_;
   };
@@ -389,10 +403,6 @@ private:
     {}
 
     virtual ~SedpWriter();
-
-    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
-                                           const DCPS::RepoId& reader,
-                                           DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
                                                 const DCPS::RepoId& reader,
@@ -414,13 +424,6 @@ private:
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
 
     void end_historic_samples(const DCPS::RepoId& reader);
-
-  private:
-    void write_control_msg(DCPS::Message_Block_Ptr payload,
-      size_t size,
-      DCPS::MessageId id,
-      DCPS::SequenceNumber seq = DCPS::SequenceNumber());
-
   };
 
   typedef DCPS::RcHandle<SedpWriter> SedpWriter_rch;
@@ -563,7 +566,7 @@ private:
 
     DDS::ReturnCode_t take_tl_request(const DCPS::ReceivedDataSample& sample,
       DCPS::Serializer& ser,
-      XTypes::TypeLookup_Request& type_lookup_request);
+      XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
@@ -580,8 +583,7 @@ private:
     virtual ~TypeLookupReplyReader();
 
     DDS::ReturnCode_t take_tl_reply(const DCPS::ReceivedDataSample& sample,
-      DCPS::Serializer& ser,
-      XTypes::TypeLookup_Reply& type_lookup_reply);
+      DCPS::Serializer& ser);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;

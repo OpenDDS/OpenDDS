@@ -22,7 +22,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
-#include "dds/DCPS/Xtypes/TypeLookupService.h"
+#include "dds/DCPS/XTypes/TypeLookupService.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
