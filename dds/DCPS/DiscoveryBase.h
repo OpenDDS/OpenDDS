@@ -220,6 +220,10 @@ namespace OpenDDS {
       }
 
       virtual ~EndpointManager() { }
+      void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
+      {
+        type_lookup_service_ = type_lookup_service;
+      }
 
       RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                 const DDS::BuiltinTopicKey_t& key)
