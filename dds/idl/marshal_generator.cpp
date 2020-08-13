@@ -400,11 +400,11 @@ namespace {
   {
     if (may_be_delimited) {
       string indent = "  ";
-      if(is_ser_func) {
+      if (is_ser_func) {
         be_global->impl_ << indent << "size_t total_size = 0;\n";
       }
       if (not_only_delimited) {
-        if(is_ser_func) {
+        if (is_ser_func) {
           be_global->impl_ <<
             "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
         } else {
@@ -413,7 +413,7 @@ namespace {
         }
         indent = "    ";
       }
-      for (size_t i = 0; i < code.size(); i++) {
+      for (size_t i = 0; i < code.size(); ++i) {
         be_global->impl_ << indent << code[i] << "\n";
       }
       if (not_only_delimited) {
