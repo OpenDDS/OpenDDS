@@ -59,14 +59,28 @@ public:
                       RTPS::SubmessageSeq& submessages);
 #endif
 
+  // NOTE: The header and footer sizes are dependent on the built-in crypto plugin.
+  static const size_t MaxCryptoHeaderSize = 20;
+  static const size_t MaxCryptoFooterSize = 20;
+  static const size_t MaxSecurePrefixSize = RTPS::SMHDR_SZ + MaxCryptoHeaderSize;
+  static const size_t MaxSubmessagePadding = RTPS::SM_ALIGN - 1;
+  static const size_t MaxSecureSuffixSize = RTPS::SMHDR_SZ + MaxCryptoFooterSize;
+  static const size_t MaxSecureSubmessageLeadingSize = MaxSecurePrefixSize;
+  static const size_t MaxSecureSubmessageFollowingSize =
+    RTPS::SMHDR_SZ /* SEC_BODY */ + MaxSecureSuffixSize;
+  static const size_t MaxSecureSubmessageAdditionalSize =
+    MaxSecureSubmessageLeadingSize + MaxSubmessagePadding + MaxSecureSubmessageFollowingSize;
+  static const size_t MaxSecureFullMessageLeadingSize =
+    RTPS::SMHDR_SZ + RTPS::INFO_SRC_SZ + MaxSecurePrefixSize;
+  static const size_t MaxSecureFullMessageFollowingSize = MaxSecureSuffixSize;
+  static const size_t MaxSecureFullMessageAdditionalSize =
+    MaxSecureFullMessageLeadingSize + MaxSubmessagePadding + MaxSecureFullMessageFollowingSize;
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);
 
-  virtual size_t max_message_size() const
-  {
-    return max_message_size_;
-  }
+  virtual size_t max_message_size() const;
 
   virtual void add_delayed_notification(TransportQueueElement* element);
 

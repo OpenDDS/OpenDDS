@@ -225,11 +225,11 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  ACE_INET_Addr addr = get_connection_addr(remote_data, &requires_inline_qos,
-                                           &blob_bytes_read);
+  std::pair<ACE_INET_Addr, ACE_INET_Addr> addrs = get_connection_addrs(remote_data, &requires_inline_qos,
+                                                                       &blob_bytes_read);
 
   if (link_) {
-    link_->add_locator(remote_id, addr, requires_inline_qos);
+    link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
 
 #if defined(OPENDDS_SECURITY)
     if (remote_data.length() > blob_bytes_read) {
@@ -244,32 +244,53 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   }
 }
 
-ACE_INET_Addr
-RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
-                                      bool* requires_inline_qos,
-                                      unsigned int* blob_bytes_read) const
+std::pair<ACE_INET_Addr, ACE_INET_Addr>
+RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
+                                       bool* requires_inline_qos,
+                                       unsigned int* blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
   DDS::ReturnCode_t result =
     blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
-    return ACE_INET_Addr();
+    return std::make_pair(ACE_INET_Addr(), ACE_INET_Addr());
   }
 
+  ACE_INET_Addr uc_addr;
+  ACE_INET_Addr mc_addr;
+  bool uc_addr_valid = false;
+  bool mc_addr_valid = false;
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
     if (locator_to_address(addr, locators[i], false) == 0) {
-      // if this is a unicast address, or if we are allowing multicast
-      if (!addr.is_multicast() || config().use_multicast_) {
-        return addr;
+      if (addr.is_multicast()) {
+        if (mc_addr == ACE_INET_Addr()) {
+          mc_addr = addr;
+          mc_addr_valid = true;
+        }
+      } else {
+        if (uc_addr == ACE_INET_Addr()) {
+          uc_addr = addr;
+          uc_addr_valid = true;
+        }
+      }
+      if (uc_addr_valid && (!config().use_multicast_ || mc_addr_valid)) {
+        return std::make_pair(uc_addr, config().use_multicast_ ? mc_addr : uc_addr);
       }
     }
   }
 
-  // Return default address
-  return ACE_INET_Addr();
+  // If we didn't return early, something was 'missing'
+  if (uc_addr == ACE_INET_Addr() && !(mc_addr == ACE_INET_Addr())) {
+    uc_addr = mc_addr;
+  }
+  if (mc_addr == ACE_INET_Addr() && !(uc_addr == ACE_INET_Addr())) {
+    mc_addr = uc_addr;
+  }
+
+  return std::make_pair(uc_addr, config().use_multicast_ ? mc_addr : uc_addr);
 }
 
 bool
@@ -297,7 +318,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  link_->register_for_reader(writerid, readerid, get_connection_addr(*blob),
+  link_->register_for_reader(writerid, readerid, get_connection_addrs(*blob).second,
                              listener);
 }
 
@@ -329,7 +350,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  link_->register_for_writer(readerid, writerid, get_connection_addr(*blob),
+  link_->register_for_writer(readerid, writerid, get_connection_addrs(*blob).first,
                              listener);
 }
 
@@ -357,9 +378,9 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   if (link_) {
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    ACE_INET_Addr addr = get_connection_addr(*blob, &requires_inline_qos,
-                                             &blob_bytes_read);
-    link_->add_locator(remote, addr, requires_inline_qos);
+    std::pair<ACE_INET_Addr, ACE_INET_Addr> addrs = get_connection_addrs(*blob, &requires_inline_qos,
+                                                                         &blob_bytes_read);
+    link_->add_locators(remote, addrs.first, addrs.second, requires_inline_qos);
   }
 }
 

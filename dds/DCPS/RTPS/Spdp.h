@@ -122,8 +122,8 @@ public:
   static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
-  void process_auth_deadlines(const DCPS::MonotonicTimePoint& tv);
-  void process_auth_resends(const DCPS::MonotonicTimePoint& tv);
+  void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
+  void process_handshake_resends(const DCPS::MonotonicTimePoint& tv);
 
   /**
    * Write Secured Updated DP QOS
@@ -214,11 +214,10 @@ private:
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
-                                           DDS::Security::ParticipantStatelessMessage& msg,
-                                           bool resend);
-  DCPS::MonotonicTimePoint schedule_auth_resend(const DCPS::TimeDuration& time, const DCPS::RepoId& guid);
+                                           const DDS::Security::ParticipantStatelessMessage& msg);
+  DCPS::MonotonicTimePoint schedule_handshake_resend(const DCPS::TimeDuration& time, const DCPS::RepoId& guid);
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter);
-  void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif
 
@@ -305,10 +304,10 @@ private:
     void send_local(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpMulti> local_sender_;
 #ifdef OPENDDS_SECURITY
-    void process_auth_deadlines(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> auth_deadline_processor_;
-    void process_auth_resends(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> auth_resend_processor_;
+    void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
+    void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> handshake_resend_processor_;
 #endif
     void send_relay(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_sender_;
@@ -348,13 +347,40 @@ private:
 #ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {
   public:
-    SendStun(SpdpTransport* tport, const ACE_INET_Addr& address, const STUN::Message& message) : tport_(tport), address_(address), message_(message) {}
+    SendStun(DCPS::RcHandle<SpdpTransport> tport,
+             const ACE_INET_Addr& address,
+             const STUN::Message& message)
+      : tport_(tport)
+      , address_(address)
+      , message_(message)
+    {}
     void execute();
   private:
-    SpdpTransport* tport_;
+    DCPS::RcHandle<SpdpTransport> tport_;
     ACE_INET_Addr address_;
     STUN::Message message_;
   };
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  class IceConnect : public DCPS::JobQueue::Job {
+  public:
+    IceConnect(DCPS::RcHandle<Spdp> spdp,
+               const ICE::GuidSetType& guids,
+               const ACE_INET_Addr& addr,
+               bool connect)
+      : spdp_(spdp)
+      , guids_(guids)
+      , addr_(addr)
+      , connect_(connect)
+    {}
+    void execute();
+  private:
+    DCPS::RcHandle<Spdp> spdp_;
+    ICE::GuidSetType guids_;
+    ACE_INET_Addr addr_;
+    bool connect_;
+  };
+#endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
@@ -375,6 +401,8 @@ private:
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 
+  DCPS::SequenceNumber stateless_sequence_number_;
+
   DDS::Security::IdentityHandle identity_handle_;
   DDS::Security::PermissionsHandle permissions_handle_;
   DDS::Security::ParticipantCryptoHandle crypto_handle_;
@@ -387,14 +415,15 @@ private:
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
   typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
-  TimeQueue auth_deadlines_;
-  TimeQueue auth_resends_;
+  TimeQueue handshake_deadlines_;
+  TimeQueue handshake_resends_;
 
   void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
   void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
 
-  void purge_auth_deadlines(DiscoveredParticipantIter iter);
-  void purge_auth_resends(DiscoveredParticipantIter iter);
+  void purge_handshake_deadlines(DiscoveredParticipantIter iter);
+  void purge_handshake_resends(DiscoveredParticipantIter iter);
+
 #endif
 
   friend class ::DDS_TEST;

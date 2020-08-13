@@ -717,6 +717,17 @@ RtpsUdpSendStrategy::stop_i()
 {
 }
 
+size_t RtpsUdpSendStrategy::max_message_size() const
+{
+  // TODO: Make this conditional on if the message actually needs to do this.
+  return max_message_size_
+#ifdef OPENDDS_SECURITY
+    // Worst case scenario is full message encryption plus one submessage encryption.
+    - MaxSecureSubmessageAdditionalSize - MaxSecureFullMessageAdditionalSize
+#endif
+    ;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

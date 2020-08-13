@@ -622,6 +622,15 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   if (check_header(rsh)) {
     ReceivedDataSample plain_sample(mb.duplicate());
     if (rsh.into_received_data_sample(plain_sample)) {
+      if (rsh.more_fragments()) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   Attempt reassembly of decoded fragments\n"));
+        if (reassemble_i(plain_sample, rsh)) {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   Reassembled complete message from decoded\n"));
+          encoded_submsg_ = true;
+          deliver_sample_i(plain_sample, rsh.submessage_);
+          return;
+        }
+      }
       encoded_submsg_ = true;
       deliver_sample_i(plain_sample, rsh.submessage_);
     }
@@ -872,8 +881,13 @@ bool RtpsUdpReceiveStrategy::getDirectedWriteReaders(RepoIdSet& directedWriteRea
   return !directedWriteReaders.empty();
 }
 
-bool
-RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
+bool RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
+{
+  RtpsSampleHeader& rsh = received_sample_header();
+  return reassemble_i(data, rsh);
+}
+
+bool RtpsUdpReceiveStrategy::reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh)
 {
   using namespace RTPS;
   receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
@@ -887,7 +901,6 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     // Peek at the byte order from the encapsulation containing the payload.
     data.header_.byte_order_ = data.sample_->rd_ptr()[1] & FLAG_E;
 
-    RtpsSampleHeader& rsh = received_sample_header();
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
 
     const CORBA::Octet data_flags = (data.header_.byte_order_ ? FLAG_E : 0)

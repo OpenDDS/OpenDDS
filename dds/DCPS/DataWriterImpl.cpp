@@ -544,6 +544,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       for (SendStateDataSampleList::iterator list_el = list.begin();
            list_el != list.end(); ++list_el) {
+        list_el->get_header().historic_sample_ = true;
+
         if (list_el->get_header().sequence_ > seq) {
           seq = list_el->get_header().sequence_;
         }
@@ -774,6 +776,8 @@ void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
 
       for (SendStateDataSampleList::iterator list_el = list.begin();
            list_el != list.end(); ++list_el) {
+        list_el->get_header().historic_sample_ = true;
+
         if (list_el->get_header().sequence_ > seq) {
           seq = list_el->get_header().sequence_;
         }

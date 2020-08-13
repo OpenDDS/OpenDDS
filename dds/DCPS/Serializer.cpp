@@ -299,6 +299,7 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
+  , pos_(0)
 {
   this->encoding(encoding);
   reset_alignment();
@@ -310,6 +311,7 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
+  , pos_(0)
 {
   encoding(Encoding(kind, endianness));
   reset_alignment();
@@ -321,6 +323,7 @@ Serializer::Serializer(ACE_Message_Block* chain,
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
+  , pos_(0)
 {
   encoding(Encoding(kind, swap_bytes));
   reset_alignment();
@@ -477,7 +480,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //
   // Extract the string size.
   //
-  ACE_CDR::ULong bytecount; // includes the null
+  ACE_CDR::ULong bytecount;
   if (!(*this >> bytecount)) {
     return 0;
   }
@@ -527,7 +530,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   return length;
 }
 
-bool Serializer::read_parameter_id(unsigned& id, size_t& size)
+bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_understand)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -546,6 +549,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
     }
 
     // TODO(iguessthislldo): handle PID flags
+    must_understand = false; // Placeholder
 
     // If extended, get the "long" id and size
     if (short_id == pid_extended) {
@@ -571,7 +575,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
       return false;
     }
 
-    // TODO(iguessthislldo): Handle Must Understand Flag
+    must_understand = emheader & emheader_must_understand;
 
     // Get Size
     // TODO(iguessthislldo) LC
