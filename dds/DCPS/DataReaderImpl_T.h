@@ -981,14 +981,14 @@ namespace OpenDDS {
 
 protected:
 
-  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample, //jja has message block in
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
                              OpenDDS::DCPS::SubscriptionInstance_rch& instance,
                              bool& just_registered,
                              bool& filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator); //JJA first param for from_message_block;
-    // jja bool return stuff here
+    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
+
     if(marshal_skip_serialize_)
     {
       if(!MarshalTraitsType::from_message_block(static_cast<MessageType &>(*data), static_cast<ACE_Message_Block &>(*sample.sample_)))

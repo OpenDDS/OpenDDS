@@ -332,13 +332,13 @@ private:
         static_cast<ACE_Message_Block*>(
           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
         ACE_Message_Block(
-          effective_size, //jja length of octet seq
+          effective_size,
           ACE_Message_Block::MB_DATA,
           0, // cont
           0, // data
-          data_allocator_.get(), // allocator_strategy //jja allocator and locks same
+          data_allocator_.get(), // allocator_strategy
           get_db_lock(), // data block locking_strategy
-          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, //jja doxygen read in headers
+          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
           ACE_Time_Value::zero,
           ACE_Time_Value::max_time,
           db_allocator_.get(),
