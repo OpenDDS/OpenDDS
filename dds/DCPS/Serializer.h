@@ -25,11 +25,11 @@
  *       const Encoding& encoding, size_t& size, const Type& value);
  *     Get the byte size of the representation of value.
  *
- *   bool operator>>(Serializer& serializer, Type& value);
+ *   bool operator<<(Serializer& serializer, Type& value);
  *     Tries to encode value into the stream of the serializer. Returns true if
  *     successful, else false.
  *
- *   bool operator<<(Serializer& serializer, const Type& value);
+ *   bool operator>>(Serializer& serializer, const Type& value);
  *     Tries to decodes a representation of Type located at the current
  *     position of the stream and use that to set value. Returns true if
  *     successful, else false.
@@ -303,15 +303,15 @@ size_t serialized_size(const Encoding& encoding, const T& value)
 }
 
 /**
-* This helper class can be used to construct ace message blocks from OctetSeqs
-* and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
-* The OctetSeq must have its length set before constructing this object.
-*/
+ * This helper class can be used to construct ace message blocks from OctetSeqs
+ * and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
+ * The OctetSeq must have its length set before constructing this object.
+ */
 class OpenDDS_Dcps_Export MessageBlockHelper {
 public:
-/**
-* This constructor receives an already populated OctetSeq so the write pointer is advanced
-*/
+  /**
+   * This constructor receives an already populated OctetSeq so the write pointer is advanced
+   */
   explicit MessageBlockHelper(const DDS::OctetSeq& seq);
   explicit MessageBlockHelper(DDS::OctetSeq& seq);
   operator ACE_Message_Block*() { return &mb_; }
@@ -419,6 +419,9 @@ public:
   bool skip(ACE_CDR::UShort n, int size = 1);
 
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
+
+  /// Examine the logical reading position of the stream.
+  size_t pos() const { return pos_; }
 
   /**
    * The buffer @a x must be large enough to contain @a length
@@ -617,7 +620,7 @@ public:
    *
    * Returns true if successful.
    */
-  bool read_parameter_id(unsigned& id, size_t& size);
+  bool read_parameter_id(unsigned& id, size_t& size, bool& must_understand);
 
   /**
    * Write a XCDR parameter ID used in XCDR parameter lists.
@@ -703,7 +706,7 @@ private:
   bool good_bit_;
 
   /**
-   * Number of bytes off of max alignment that the current_ block's / rd_ptr()
+   * Number of bytes off of max alignment that the current_ block's rd_ptr()
    * started at.
    */
   unsigned char align_rshift_;
@@ -713,6 +716,9 @@ private:
    * started at.
    */
   unsigned char align_wshift_;
+
+  /// Logical reading position of the stream.
+  size_t pos_;
 
   /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];

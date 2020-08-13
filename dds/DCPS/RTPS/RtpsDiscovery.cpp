@@ -579,6 +579,13 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "Customization") {
+          if (DCPS::DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                       ACE_TEXT("%C section has a Customization setting.\n"),
+                       rtps_name.c_str()));
+          }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

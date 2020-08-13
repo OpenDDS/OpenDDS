@@ -57,6 +57,7 @@
 #include <json_conversion.h>
 
 using Builder::Log;
+using Builder::ZERO;
 using Bench::get_option_argument;
 
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
@@ -77,6 +78,29 @@ double weighted_median(std::vector<double> medians, std::vector<size_t> weights,
     }
   }
   return default_value;
+}
+
+void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero_equals_key_press = true) {
+  if (zero_equals_key_press && ts == ZERO) {
+    std::stringstream ss;
+    ss << "No " << ts_name << " time specified. Press enter to continue." << std::endl;
+    std::cerr << ss.str() << std::flush;
+    std::string line;
+    std::getline(std::cin, line);
+  } else {
+    if (ts < ZERO) {
+      auto duration = -1 * get_duration(ts);
+      if (duration > std::chrono::milliseconds(100)) {
+        std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
+      }
+    } else {
+      auto now = std::chrono::system_clock::now();
+      auto duration = std::chrono::system_clock::time_point(get_duration(ts)) - now;
+      if (duration > std::chrono::milliseconds(100)) {
+        std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
+      }
+    }
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
@@ -216,21 +240,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::condition_variable cv;
     std::mutex cv_mutex;
 
-    if (!(config.create_time == ZERO)) {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.create_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.create_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.create_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.create_time, "create", false);
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
 
-    process_construction_begin_time = Builder::get_time();
+    process_construction_begin_time = Builder::get_hr_time();
     Builder::BuilderProcess process(config.process);
-    process_construction_end_time = Builder::get_time();
+    process_construction_end_time = Builder::get_hr_time();
 
     Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
 
@@ -240,66 +256,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 
-    if (config.enable_time == ZERO) {
-      std::cerr << "No test enable time specified. Press any key to enable process entities." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.enable_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.enable_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.enable_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.enable_time, "enable");
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
 
-    process_enable_begin_time = Builder::get_time();
+    process_enable_begin_time = Builder::get_hr_time();
     process.enable_dds_entities();
-    process_enable_end_time = Builder::get_time();
+    process_enable_end_time = Builder::get_hr_time();
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
 
-    if (config.start_time == ZERO) {
-      std::cerr << "No test start time specified. Press any key to start process testing." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.start_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.start_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.start_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.start_time, "start");
 
     Log::log() << "Starting process tests." << std::endl;
 
-    process_start_begin_time = Builder::get_time();
+    process_start_begin_time = Builder::get_hr_time();
     am.start();
-    process_start_end_time = Builder::get_time();
+    process_start_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests started." << std::endl << std::endl;
 
-    if (config.stop_time == ZERO) {
-      std::cerr << "No stop time specified. Press any key to stop process testing." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.stop_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.stop_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.stop_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.stop_time, "stop");
 
     Log::log() << "Stopping process tests." << std::endl;
 
-    process_stop_begin_time = Builder::get_time();
+    process_stop_begin_time = Builder::get_hr_time();
     am.stop();
-    process_stop_end_time = Builder::get_time();
+    process_stop_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests stopped." << std::endl << std::endl;
 
@@ -309,18 +292,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
-    if (config.destruction_time == ZERO) {
-      std::cerr << "No destruction time specified. Press any key to destroy process entities." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.destruction_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.destruction_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.destruction_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.destruction_time, "destruction");
 
     process.detach_listeners();
 
@@ -328,7 +300,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning process destruction / entity deletion." << std::endl;
 
-    process_destruction_begin_time = Builder::get_time();
+    process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
     proactor.proactor_end_event_loop();
@@ -348,7 +320,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     TheServiceParticipant->shutdown();
     return 1;
   }
-  process_destruction_end_time = Builder::get_time();
+  process_destruction_end_time = Builder::get_hr_time();
 
   Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
 

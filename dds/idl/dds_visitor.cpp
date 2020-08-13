@@ -69,25 +69,14 @@ namespace {
   void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
   {
     UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
-
     for (; !it.is_done(); it.next()) {
       AST_Decl* item = it.item();
-
       if (item->node_type() == nt) {
         v.push_back(T::narrow_from_decl(item));
       }
     }
   }
 
-  bool field_check_anon(AST_Field* f)
-  {
-    AST_Decl::NodeType nt = f->field_type()->node_type();
-    if (nt == AST_Decl::NT_array || nt == AST_Decl::NT_sequence) {
-      idl_global->err()->misc_error("field has an anonymous type.", f);
-      return false;
-    }
-    return true;
-  }
 } // namespace
 
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
@@ -321,10 +310,6 @@ dds_visitor::visit_structure(AST_Structure* node)
   const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-    if (!field_check_anon(*i)) {
-      error_ = true;
-      return -1;
-    }
     field_vec.push_back(*i);
   }
 
@@ -469,18 +454,12 @@ dds_visitor::visit_union(AST_Union* node)
   const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-    if (!field_check_anon(*i)) {
-      error_ = true;
-      return -1;
-    }
-
     AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
     if (!ub) {
       idl_global->err()->misc_error("expected union to only contain UnionBranches", ub);
       error_ = true;
       return -1;
     }
-
     branches.push_back(ub);
   }
 

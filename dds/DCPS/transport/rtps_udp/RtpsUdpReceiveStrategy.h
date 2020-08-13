@@ -100,6 +100,7 @@ private:
   virtual bool check_header(const RtpsSampleHeader& header);
 
   virtual bool reassemble(ReceivedDataSample& data);
+  virtual bool reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh);
 
 #ifdef OPENDDS_SECURITY
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,

@@ -103,33 +103,170 @@ void array_insertions(
   serializer.write_wchar_array(values.wcharValue, length);
 }
 
-void extractions(ACE_Message_Block* chain, Values& values,
-  const Encoding& encoding)
+size_t skip(size_t pos, size_t typeSize, size_t maxAlign)
+{
+  if (maxAlign == 0) {
+    return 0;
+  }
+  size_t align = std::min(typeSize, maxAlign);
+  return (align - (pos % align)) % align;
+}
+
+void print(const size_t& pos, const size_t& expectedPos,
+  size_t& prevPos, bool& readPosOk, std::string type)
+{
+  if (pos != expectedPos && readPosOk) {
+    std::cerr << "ERROR: Read " << type << " -- Prev position: " << prevPos << ". Read: "
+              << pos << ". Expected: " << expectedPos << std::endl;
+    readPosOk = false;
+  }
+  prevPos = pos;
+}
+
+bool extractions(ACE_Message_Block* chain, Values& values,
+  const Encoding& encoding, const bool checkPos)
 {
   Serializer serializer(chain, encoding);
+  bool readPosOk = true;
+  size_t pos = serializer.pos(), expectedPos = 0, prevPos = pos;
+  if (pos != expectedPos) {
+    std::cerr << "ERROR: Initial position is" << pos
+              << ". It should be 0." << std::endl;
+    readPosOk = false;
+  }
 
   serializer >> ACE_InputCDR::to_octet(values.octetValue);
+  if (checkPos) {
+    expectedPos += 1;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "octet");
+  }
+
   serializer >> values.shortValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::int16_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::int16_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "short");
+  }
+
   serializer >> values.longValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::int32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::int32_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "long");
+  }
+
   serializer >> values.longlongValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::int64_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::int64_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "long long");
+  }
+
   serializer >> values.ushortValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint16_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint16_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "ushort");
+  }
+
   serializer >> values.ulongValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint32_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "ulong");
+  }
+
   serializer >> values.ulonglongValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint64_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint64_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "ulong long");
+  }
+
   serializer >> values.floatValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::float32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::float32_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "float");
+  }
+
   serializer >> values.doubleValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::float64_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::float64_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "double");
+  }
+
   serializer >> values.longdoubleValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::float128_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::float128_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "long double");
+  }
+
   serializer >> values.charValue;
+  if (checkPos) {
+    expectedPos += OpenDDS::DCPS::char8_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "char");
+  }
+
   serializer >> ACE_InputCDR::to_wchar(values.wcharValue);
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::char16_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::char16_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "wchar");
+  }
+
   serializer >> ACE_InputCDR::to_string(values.stringValue, 0);
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint32_cdr_size + ACE_OS::strlen(values.stringValue) + 1;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "string");
+  }
 #ifndef OPENDDS_SAFETY_PROFILE
   serializer >> values.stdstringValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint32_cdr_size + values.stdstringValue.size() + 1;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "std string");
+  }
 #endif
 #ifdef DDS_HAS_WCHAR
   serializer >> ACE_InputCDR::to_wstring(values.wstringValue, 0);
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint32_cdr_size +
+      ACE_OS::strlen(values.wstringValue) * OpenDDS::DCPS::char16_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "wstring");
+  }
 #ifndef OPENDDS_SAFETY_PROFILE
   serializer >> values.stdwstringValue;
+  if (checkPos) {
+    expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
+      OpenDDS::DCPS::uint32_cdr_size +
+      values.stdwstringValue.size() * OpenDDS::DCPS::char16_cdr_size;
+    pos = serializer.pos();
+    print(pos, expectedPos, prevPos, readPosOk, "std wstring");
+  }
 #endif
 #endif
+
+  return readPosOk;
 }
 
 void array_extractions(ACE_Message_Block* chain, ArrayValues& values,
@@ -268,7 +405,7 @@ checkValues(const Values& expected, const Values& observed)
   if(expected.stdstringValue != observed.stdstringValue) {
     ACE::format_hexdump(expected.stdstringValue.c_str(), expected.stdstringValue.length(), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(observed.stdstringValue.c_str(), observed.stdstringValue.length(), obuffer, sizeof(obuffer));
-    std::cout << "string values not correct after insertion and extraction." << std::endl;
+    std::cout << "std string values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.stdstringValue << "/" << ebuffer;
     std::cout << ", observed: " << observed.stdstringValue << "/" << obuffer;
     std::cout << ")." << std::endl;
@@ -289,7 +426,10 @@ checkValues(const Values& expected, const Values& observed)
   if(expected.stdwstringValue != observed.stdwstringValue) {
     ACE::format_hexdump(reinterpret_cast<const char*>(expected.stdwstringValue.c_str()), expected.stdwstringValue.length(), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(reinterpret_cast<const char*>(observed.stdwstringValue.c_str()), observed.stdwstringValue.length(), obuffer, sizeof(obuffer));
-    std::cout << "wstring values not correct after insertion and extraction." << std::endl;
+    std::cout << "std wstring values not correct after insertion and extraction." << std::endl;
+    std::wcout << "(expected: " << expected.stdwstringValue << "/" << ebuffer;
+    std::wcout << ", observed: " << observed.stdwstringValue << "/" << obuffer;
+    std::cout << ")." << std::endl;
     failed = true;
   }
 #endif
@@ -303,8 +443,6 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
   ACE_TCHAR obuffer[512];
   for (size_t i = 0; i < ARRAYSIZE; ++i) {
     if (expected.charValue[i]       != observed.charValue[i]) {
-      std::cout << "char " << i << " values not correct after insertion and extraction." << std::endl;
-      std::cout << "(expected: " << expected.charValue[i] << ", observed: " << observed.charValue[i] << ")." << std::endl;
       ACE::format_hexdump((char*)&(expected.charValue[i]), sizeof(ACE_CDR::Char), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.charValue[i]), sizeof(ACE_CDR::Char), obuffer, sizeof(obuffer));
       std::cout << "char[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -418,10 +556,10 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
 const int chaindefs[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 30, 35, 40, 45, 50, 128, 256, 512, 1024};
 
 void runTest(const Values& expected, const ArrayValues& expectedArray,
-  const Encoding& encoding)
+  const Encoding& encoding, const bool checkPos)
 {
   ACE_Message_Block* testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
-  const char* out = encoding.endianness() ? "" : "OUT";
+  const char* out = encoding.endianness() == OpenDDS::DCPS::ENDIAN_NATIVE ? "OUT" : "";
   std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   insertions(testchain, expected, encoding);
   size_t bytesWritten = testchain->total_length();
@@ -440,17 +578,19 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
 #endif
 #endif
                     };
-  extractions(testchain, observed, encoding);
+  bool readPosOk = extractions(testchain, observed, encoding, checkPos);
+  if (!readPosOk) {
+    failed = true;
+  }
   if (testchain->total_length()) {
-    std::cout << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
+    std::cerr << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
     failed = true;
   }
   checkValues(expected, observed);
+
+  CORBA::string_free(observed.stringValue);
 #ifdef DDS_HAS_WCHAR
   CORBA::wstring_free(observed.wstringValue);
-#ifndef OPENDDS_SAFETY_PROFILE
-  CORBA::string_free(observed.stringValue);
-#endif
 #endif
   testchain->release();
 
@@ -464,11 +604,95 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   ArrayValues observedArray;
   array_extractions(testchain, observedArray, ARRAYSIZE, encoding);
   if (testchain->total_length()) {
-    std::cout << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
+    std::cerr << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
     failed = true;
   }
   checkArrayValues(expectedArray, observedArray);
   testchain->release();
+}
+
+const int chainCaps[] = {2, 4, 4};
+
+bool runOverrunTest()
+{
+  std::cout << "\nRunning overrun test..." << std::endl;
+
+  for (size_t i = 0; i < encoding_count; ++i) {
+    ACE_Message_Block* chain = getchain(sizeof(chainCaps)/sizeof(chainCaps[0]), chainCaps);
+
+    // Overrun write
+    Serializer s1(chain, encodings[i]);
+    ACE_CDR::ULong ul = 1234;
+    if (!(s1 << ul)) {
+      std::cerr << "runOverrunTest: 1st insert ulong using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    ACE_CDR::Float flt = 3.14;
+    if (!(s1 << flt)) {
+      std::cerr << "runOverrunTest: 1st insert float using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    ACE_CDR::LongLong ll = 987654321;
+    if (s1 << ll) {
+      std::cerr << "runOverrunTest: 1st insert long long using "
+                << encodings[i].to_string()
+                << " succeeded when it should've failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    chain->release();
+
+    chain = getchain(sizeof(chainCaps)/sizeof(chainCaps[0]), chainCaps);
+    Serializer s2(chain, encodings[i]);
+    if (!(s2 << ul)) {
+      std::cerr << "runOverrunTest: 2nd insert ulong using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    if (!(s2 << flt)) {
+      std::cerr << "runOverrunTest: 2nd insert float using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    ACE_CDR::UShort us = 12;
+    if (!(s2 << us)) {
+      std::cerr << "runOverrunTest: 2nd insert ushort using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+
+    // Overrun read
+    Serializer s3(chain, encodings[i]);
+    if (!(s3 >> ul)) {
+      std::cerr << "runOverrunTest: 1st extract ulong using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    if (!(s3 >> flt)) {
+      std::cerr << "runOverrunTest: 1st extract float using "
+                << encodings[i].to_string() << " failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    if (s3 >> ll) {
+      std::cerr << "runOverrunTest: 1st extract long long using "
+                << encodings[i].to_string()
+                << " succeeded when it should've failed" << std::endl;
+      chain->release();
+      return false;
+    }
+    chain->release();
+  }
+
+  return true;
 }
 
 int
@@ -546,7 +770,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
     std::cout << "\n\n*** "  << encodings[encoding].to_string() << std::endl;
-    runTest(expected, expectedArray, encodings[encoding]);
+    runTest(expected, expectedArray, encodings[encoding], true);
+  }
+
+  if (!runOverrunTest()) {
+    failed = true;
   }
 
   if (!runAlignmentTest() || !runAlignmentResetTest() || !runAlignmentOverrunTest()) {

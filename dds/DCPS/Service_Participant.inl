@@ -321,6 +321,12 @@ Service_Participant::pending_timeout() const
 }
 
 ACE_INLINE
+void Service_Participant::pending_timeout(const TimeDuration& value)
+{
+  pending_timeout_ = value;
+}
+
+ACE_INLINE
 int
 Service_Participant::priority_min() const
 {

@@ -161,7 +161,7 @@ void WriteAction::do_write() {
         data_.id.high = mt_();
         data_.id.low = mt_();
       }
-      data_.created_time = data_.sent_time = Builder::get_time();
+      data_.created_time = data_.sent_time = Builder::get_sys_time();
       DDS::ReturnCode_t result = data_dw_->write(data_, 0);
       if (result != DDS::RETCODE_OK) {
         --(data_.msg_count);
