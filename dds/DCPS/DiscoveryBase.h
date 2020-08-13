@@ -1902,13 +1902,17 @@ namespace OpenDDS {
           if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
               (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
             {
+              const DDS::InstanceHandle_t bit_ih = iter->second.bit_ih_;
+              const DDS::InstanceHandle_t location_ih = iter->second.location_ih_;
+
               ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-              if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
-                bit->set_instance_state(iter->second.bit_ih_,
+              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+              if (bit && bit_ih != DDS::HANDLE_NIL) {
+                bit->set_instance_state(bit_ih,
                                         DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
               }
-              if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
-                loc_bit->set_instance_state(iter->second.location_ih_,
+              if (loc_bit && location_ih != DDS::HANDLE_NIL) {
+                loc_bit->set_instance_state(location_ih,
                                             DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
               }
             }

@@ -251,6 +251,9 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
     : this->smemcpy(dest + offset, this->current_->rd_ptr(), initial);
   this->current_->rd_ptr(initial);
 
+  // Update the logical reading position in the stream.
+  pos_ += initial;
+
   //   smemcpy
   //
   //   dest            b1   b2   b3        offset   remainder   initial
@@ -433,6 +436,7 @@ Serializer::skip(ACE_CDR::UShort n, int size)
   if (size > 1 && !align_r(std::min(size_t(size), encoding().max_align()))) {
     return false;
   }
+
   for (size_t len = static_cast<size_t>(n * size); len;) {
     if (!this->current_) {
       this->good_bit_ = false;
@@ -447,6 +451,10 @@ Serializer::skip(ACE_CDR::UShort n, int size)
       this->current_->rd_ptr(len);
       break;
     }
+  }
+
+  if (this->good_bit_) {
+    pos_ += n * size;
   }
   return this->good_bit();
 }
@@ -773,6 +781,7 @@ bool Serializer::align_r(size_t al)
   al = std::min(al, encoding().max_align());
   const size_t len =
     (al - ptrdiff_t(this->current_->rd_ptr()) + this->align_rshift_) % al;
+
   return skip(static_cast<ACE_CDR::UShort>(len));
 }
 

@@ -4565,7 +4565,7 @@ void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant)
 {
   ACE_UNUSED_ARG(bSecureParticipant);
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
 
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
 
@@ -4581,7 +4581,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
 }
 
@@ -4589,7 +4589,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> 
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication_SecurityWrapper> wrapper)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_WRITER_SECURE, id, wrapper.release()));
 }
 #endif
@@ -4597,7 +4597,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication_S
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata.release()));
 }
 
@@ -4605,7 +4605,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription>
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> wrapper)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_READER_SECURE, id, wrapper.release()));
 }
 #endif
@@ -4613,7 +4613,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription_
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
 }
 
@@ -4621,7 +4621,7 @@ void
 Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
 #else
   ACE_UNUSED_ARG(which_bit);
@@ -4633,14 +4633,14 @@ Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 void
 Sedp::Task::enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_DATA_SECURE, id, data.release()));
 }
 
 void
 Sedp::Task::enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_STATELESS_DATA, id, data.release()));
 }
 
@@ -4648,7 +4648,7 @@ void
 Sedp::Task::enqueue_volatile_message_secure(
   DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_VOLATILE_SECURE, id, data.release()));
 }
 #endif
@@ -4737,6 +4737,9 @@ Sedp::Task::svc()
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
                             ACE_TEXT("received MSG_STOP. Task exiting\n")));
+      }
+      while (!msg_queue_->is_empty() && getq(msg) != -1) {
+        delete msg;
       }
       return 0;
     }
