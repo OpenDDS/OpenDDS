@@ -1534,6 +1534,15 @@ DataWriterImpl::enable()
   XTypes::TypeInformation type_info;
   typesupport->to_type_info(type_info);
 
+  XTypes::TypeIdentifierTypeObjectPairSeq ti_to_pair_seq;
+  XTypes::TypeIdentifierTypeObjectPair ti_to_pair;
+  ti_to_pair.type_identifier = type_info.minimal.typeid_with_size.type_id;
+  ti_to_pair.type_object = typesupport->getMinimalTypeObject();
+  ti_to_pair_seq.append(ti_to_pair);
+  // TLS_TODO: verify implementation
+  XTypes::TypeLookupService_rch type_lookup_service = participant->GetTypeLookupService();
+  type_lookup_service->AddTypeObjectsToCache(ti_to_pair_seq);
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,

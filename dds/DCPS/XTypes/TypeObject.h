@@ -213,6 +213,11 @@ namespace XTypes {
     {
       std::memcpy(hash, a_hash, sizeof hash);
     }
+
+    bool operator<(const TypeObjectHashId& other) const
+    {
+      return (kind < other.kind) && hash < other.hash;
+    }
   };
 
   // Flags that apply to struct/union/collection/enum/bitmask/bitset
@@ -657,6 +662,25 @@ namespace XTypes {
       TypeIdentifier ti(k);
       ti.extended_defn() = extended_defn;
       return ti;
+    }
+
+    bool operator<(const TypeIdentifier& other) const
+    {
+      if (kind_ != other.kind_) {
+        return kind_ < other.kind_;
+      }
+
+      switch (kind_) {
+      case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+        return (sc_component_id().sc_component_id < other.sc_component_id().sc_component_id)
+                && (sc_component_id().scc_length < other.sc_component_id().scc_length)
+                && (sc_component_id().scc_index < other.sc_component_id().scc_index);
+      case XTypes::EK_COMPLETE:
+      case XTypes::EK_MINIMAL:
+        return (equivalence_hash() < other.equivalence_hash());
+      default:
+        return false;
+      };
     }
 
   private:
@@ -1594,6 +1618,13 @@ namespace XTypes {
   struct TypeIdentifierPair {
     TypeIdentifier type_identifier1;
     TypeIdentifier type_identifier2;
+
+    TypeIdentifierPair() {}
+
+    TypeIdentifierPair(const TypeIdentifier& t1, const TypeIdentifier& t2)
+      : type_identifier1(t1)
+      , type_identifier2(t2)
+    {}
   };
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
