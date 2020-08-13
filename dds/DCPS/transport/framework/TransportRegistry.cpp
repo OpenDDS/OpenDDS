@@ -779,7 +779,7 @@ bool TransportRegistry::create_new_transport_instance_for_participant(DDS::Domai
   return false;
 }
 
-void TransportRegistry::associate_domain_to_config(DDS::DomainId_t id, OPENDDS_STRING cfg)
+void TransportRegistry::associate_domain_to_config(DDS::DomainId_t id, const OPENDDS_STRING& cfg)
 {
   domain_config_map_[id] = cfg;
 }
@@ -1010,7 +1010,7 @@ TransportRegistry::get_transport_template_info(const ACE_TString& config_name, T
 
 bool TransportRegistry::has_transport_templates() const
 {
-  return transport_templates_.size() > 0;
+  return !transport_templates_.empty();
 }
 
 bool
@@ -1042,7 +1042,7 @@ TransportRegistry::get_transport_info(const ACE_TString& config_name, TransportE
 
 bool TransportRegistry::has_transports() const
 {
-  return transports_.size() > 0;
+  return !transports_.empty();
 }
 
 }

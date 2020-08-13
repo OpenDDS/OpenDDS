@@ -1927,7 +1927,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
         }
       } else {
         // store domain and associated config for template or multiple participant domain use
-        TheTransportRegistry->associate_domain_to_config(domainId, global_transport_config_.c_str());
+        TheTransportRegistry->associate_domain_to_config(domainId, ACE_TEXT_ALWAYS_CHAR(global_transport_config_.c_str()));
       }
 
       // Check to see if the specified discovery configuration has been defined
@@ -2195,9 +2195,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
 
 bool
-Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId)
+Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
 {
-  for (OPENDDS_VECTOR(DomainRange)::iterator i = domain_ranges_.begin(); i != domain_ranges_.end(); ++i) {
+  for (OPENDDS_VECTOR(DomainRange)::const_iterator i = domain_ranges_.begin(); i != domain_ranges_.end(); ++i) {
     if (domainId >= i->range_start && domainId <= i->range_end) {
       return true;
     }
@@ -2397,7 +2397,7 @@ int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& st
 bool
 Service_Participant::has_domain_range() const
 {
-  return domain_ranges_.size() > 0;
+  return !domain_ranges_.empty();
 }
 
 bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)

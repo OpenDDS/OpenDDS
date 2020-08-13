@@ -400,7 +400,7 @@ public:
    * Used by TransportRegistry to determine if a domain ID
    * is part of a [DomainRange]
    */
-  bool belongs_to_domain_range(DDS::DomainId_t domainId);
+  bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
 
 #ifdef OPENDDS_SAFETY_PROFILE

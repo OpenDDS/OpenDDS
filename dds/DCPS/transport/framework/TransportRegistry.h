@@ -133,7 +133,7 @@ public:
   // for separate participants in the same domain. This is called
   // from the Service_Particpant since it knows if the GlobalTransportConfig
   // has been set or overriden by a command line option.
-  void associate_domain_to_config(DDS::DomainId_t id, OPENDDS_STRING cfg);
+  void associate_domain_to_config(DDS::DomainId_t id, const OPENDDS_STRING& cfg);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;

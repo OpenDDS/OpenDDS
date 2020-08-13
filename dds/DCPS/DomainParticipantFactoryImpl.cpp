@@ -6,7 +6,6 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "DomainParticipantFactoryImpl.h"
 
 #include "DomainParticipantImpl.h"
@@ -15,6 +14,8 @@
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "Util.h"
+
+#include "transport/framework/TransportRegistry.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 
