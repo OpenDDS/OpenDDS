@@ -100,7 +100,7 @@ void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
   ReaderEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SubscriptionListener::unregister_intance remove local reader %C\n"), guid_to_string(repoid).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SubscriptionListener::unregister_instance remove local reader %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n")));
