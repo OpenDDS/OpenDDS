@@ -6,7 +6,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+
 #include "WriteDataContainer.h"
 #include "DataSampleHeader.h"
 #include "InstanceDataSampleList.h"
@@ -19,13 +19,11 @@
 #include "Util.h"
 #include "Time_Helper.h"
 #include "GuidConverter.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "transport/framework/TransportSendElement.h"
+#include "transport/framework/TransportCustomizedElement.h"
+#include "transport/framework/TransportRegistry.h"
 
-#include "tao/debug.h"
-
-#include "ace/Auto_Ptr.h"
+#include <ace/Condition_Recursive_Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -1346,32 +1344,25 @@ WriteDataContainer::persist_data()
 }
 #endif
 
-void
-WriteDataContainer::wait_pending()
+void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
 {
-  const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
-  MonotonicTimePoint timeout_at;
-  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
-
-  if (!pending_timeout.is_zero()) {
-    timeout_at = MonotonicTimePoint::now() + pending_timeout;
-    timeout_ptr = &timeout_at.value();
-  }
+  const bool indefinite = deadline.is_zero();
+  const ACE_Time_Value_T<MonotonicClock>* deadline_ptr = indefinite ? 0 : &deadline.value();
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
-    if (pending_timeout.is_zero()) {
+    if (indefinite) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending no timeout\n")));
     } else {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending ")
         ACE_TEXT("timeout at %#T\n"),
-        &pending_timeout.value()));
+        deadline_ptr));
     }
   }
 
   while (pending_data()) {
-    if (empty_condition_.wait(timeout_ptr) == -1 && pending_data()) {
+    if (empty_condition_.wait(deadline_ptr) == -1 && pending_data()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),

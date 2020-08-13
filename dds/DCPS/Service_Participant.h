@@ -269,6 +269,9 @@ public:
   void pending_timeout(const TimeDuration& value);
   //@}
 
+  /// Get a new pending timeout deadline
+  MonotonicTimePoint new_pending_timeout_deadline() const;
+
   /// Accessors for priority extremums for the current scheduler.
   //@{
   int priority_min() const;

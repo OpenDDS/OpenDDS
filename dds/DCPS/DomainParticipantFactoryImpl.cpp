@@ -6,15 +6,17 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "DomainParticipantFactoryImpl.h"
+
 #include "DomainParticipantImpl.h"
 #include "Marked_Default_Qos.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "GuidConverter.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "Util.h"
-#include "tao/debug.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -103,9 +105,7 @@ DomainParticipantFactoryImpl::delete_participant(
 
   // The servant's ref count should be 2 at this point, one referenced
   // by the poa and the other referenced by the map.
-  DomainParticipantImpl* the_servant
-  = dynamic_cast<DomainParticipantImpl*>(a_participant);
-
+  DomainParticipantImpl* the_servant = dynamic_cast<DomainParticipantImpl*>(a_participant);
   if (!the_servant) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
@@ -151,9 +151,7 @@ DomainParticipantFactoryImpl::delete_participant(
                         OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
 
     } else {
-      DDS::ReturnCode_t result
-      = the_servant->delete_contained_entities();
-
+      DDS::ReturnCode_t result = the_servant->delete_contained_entities();
       if (result != DDS::RETCODE_OK) {
         return result;
       }

@@ -2528,6 +2528,19 @@ DataWriterImpl::prepare_to_delete()
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();
+
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+  // Trigger data to be persisted, i.e. made durable, if so
+  // configured. This needs be called before unregister_instances
+  // because unregister_instances may cause instance dispose.
+  if (!persist_data() && DCPS_debug_level >= 2) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::prepare_to_delete: ")
+      ACE_TEXT("failed to make data durable.\n")));
+  }
+#endif
+
+  // Unregister all registered instances prior to deletion.
+  unregister_instances(SystemTimePoint::now().to_dds_time());
 }
 
 PublicationInstance_rch
@@ -2679,20 +2692,11 @@ DataWriterImpl::persist_data()
 }
 #endif
 
-void
-DataWriterImpl::wait_control_pending()
+void DataWriterImpl::wait_pending()
 {
   if (!TransportRegistry::instance()->released()) {
-    OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
-    controlTracker.wait_messages_pending(caller_string);
-  }
-}
-
-void
-DataWriterImpl::wait_pending()
-{
-  if (!TransportRegistry::instance()->released()) {
-    data_container_->wait_pending();
+    data_container_->wait_pending(wait_pending_deadline_);
+    controlTracker.wait_messages_pending("DataWriterImpl::wait_pending", wait_pending_deadline_);
   }
 }
 
@@ -2769,9 +2773,12 @@ DataWriterImpl::get_ice_endpoint()
   return TransportClient::get_ice_endpoint();
 }
 
-int
-LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg)
+void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadline)
+{
+  wait_pending_deadline_ = deadline;
+}
+
+int LivenessTimer::handle_timeout(const ACE_Time_Value& tv, const void* arg)
 {
   DataWriterImpl_rch writer = this->writer_.lock();
   if (writer) {
