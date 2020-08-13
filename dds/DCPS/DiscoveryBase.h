@@ -1525,6 +1525,8 @@ namespace OpenDDS {
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
       OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) relay_only_readers_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
+      XTypes::TypeLookupService_rch type_lookup_service_;
+
 
 #ifdef OPENDDS_SECURITY
       DDS::Security::AccessControl_var access_control_;
@@ -1740,6 +1742,11 @@ namespace OpenDDS {
       }
 
       DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
+
+      void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
+      {
+        endpoint_manager().type_lookup_service(type_lookup_service);
+      }
 
     protected:
 
@@ -2264,6 +2271,14 @@ namespace OpenDDS {
       {
         get_part(domainId, participantId)->association_complete(localId, remoteId);
       }
+
+      virtual void set_type_lookup_service(DDS::DomainId_t domainId,
+                                           const RepoId& participantId,
+                                           XTypes::TypeLookupService_rch type_lookup_service)
+      {
+        get_part(domainId, participantId)->type_lookup_service(type_lookup_service);
+      }
+
 
     protected:
 

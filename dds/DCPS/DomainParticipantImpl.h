@@ -15,6 +15,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/Xtypes/TypeLookupService.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsCoreTypeSupportC.h"
@@ -562,6 +563,12 @@ private:
   MonotonicTimePoint last_liveliness_activity_;
 
   virtual int handle_exception(ACE_HANDLE fd);
+
+private:
+  XTypes::TypeLookupService_rch type_lookup_service_;
+
+public:
+  XTypes::TypeLookupService_rch GetTypeLookupService() { return type_lookup_service_; }
 };
 
 } // namespace DCPS

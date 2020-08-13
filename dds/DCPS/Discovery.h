@@ -22,6 +22,8 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
+#include "dds/DCPS/Xtypes/TypeLookupService.h"
+
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #endif
@@ -258,6 +260,10 @@ public:
     const RepoId& participantId,
     const RepoId& localId,
     const RepoId& remoteId) = 0;
+
+  virtual void set_type_lookup_service(DDS::DomainId_t domainId,
+    const RepoId& participantId,
+    XTypes::TypeLookupService_rch type_lookup_service_) {}
 
   virtual bool supports_liveliness() const { return false; }
 
