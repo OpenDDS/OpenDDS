@@ -38,7 +38,7 @@
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "dds/DCPS/Xtypes/TypeLookupService.h"
+#include "dds/DCPS/XTypes/TypeLookupService.h"
 
 #include <tao/ORB_Core.h>
 

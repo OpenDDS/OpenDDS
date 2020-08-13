@@ -17,6 +17,7 @@
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/SporadicTask.h"
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
@@ -130,7 +131,7 @@ namespace OpenDDS {
     };
 
     template <typename DiscoveredParticipantData_>
-    class EndpointManager {
+    class EndpointManager : public virtual DCPS::RcEventHandler {
     protected:
 
       struct DiscoveredSubscription : PoolAllocationBase {
@@ -212,14 +213,26 @@ namespace OpenDDS {
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
+        , reactor_task_(false)
+        , max_reply_period(5)  // 5 sec sufficient?
 #ifdef OPENDDS_SECURITY
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
       {
+        reactor_task_.open(0);
+        type_lookup_reply_deadline_processor_ = DCPS::make_rch<EndpointManagerSporadic>(reactor_task_.interceptor(), ref(*this), &EndpointManager::remove_expired_endpoints);
       }
 
-      virtual ~EndpointManager() { }
+      virtual ~EndpointManager()
+      {
+        if (type_lookup_reply_deadline_processor_) {
+          type_lookup_reply_deadline_processor_->cancel_and_wait();
+        }
+
+        reactor_task_.stop();
+      }
+
       void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
       {
         type_lookup_service_ = type_lookup_service;
@@ -795,6 +808,10 @@ namespace OpenDDS {
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
+      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+                                            const DCPS::RepoId& reader)
+      { return true; };
+
       void match_endpoints(RepoId repoId, const TopicDetails& td,
                            bool remove = false)
       {
@@ -919,6 +936,11 @@ namespace OpenDDS {
       typedef typename MatchingDataMap::iterator MatchingDataIter;
       // TLS_TODO: is dedicated synchronisation needed for this buffer?
       MatchingDataMap matching_data_buffer;
+      DCPS::ReactorTask reactor_task_;
+      typedef DCPS::PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
+      DCPS::RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
+      const TimeDuration max_reply_period;
+
       void
       match(const RepoId& writer, const RepoId& reader)
       {
@@ -1174,6 +1196,31 @@ namespace OpenDDS {
                          ACE_TEXT("reader incompatible\n")));
             }
             drr->update_incompatible_qos(readerStatus);
+          }
+        }
+      }
+
+      void
+      remove_expired_endpoints(const DCPS::MonotonicTimePoint& /*now*/)
+      {
+        MatchingDataIter it;
+        for (it = matching_data_buffer.begin(); it != matching_data_buffer.end(); it++) {
+          if (MonotonicTimePoint::now() - it->second.time_added_to_map >= max_reply_period) {
+            // TLS_TODO: sanity check on locks
+            matching_data_buffer.erase(it->first);
+          }
+        }
+        // TLS_TODO: any other cleanup?
+      }
+
+      void
+      match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
+      {
+        MatchingDataIter it;
+        for (it = matching_data_buffer.begin(); it != matching_data_buffer.end(); it++) {
+          if (it->second.rpc_sequence_number == rpc_sequence_number) {
+            // TLS_TODO: sanity check on locks
+            match_continue(it->second.writer, it->second.reader);
           }
         }
       }
