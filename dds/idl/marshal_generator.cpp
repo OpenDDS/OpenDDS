@@ -716,8 +716,7 @@ namespace {
               + bounded_arg(elem);
             be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
             string field_name = "seq[i]";
-            switch (try_construct)
-            {
+            switch (try_construct) {
             case tryconstructfailaction_use_default:
             {
               be_global->impl_<<
@@ -809,6 +808,24 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(arr->base_type());
+    AST_Annotation_Appl* ann_appl = arr->base_type_annotations().find("::@try_construct");
+    TryConstructFailAction try_construct = tryconstructfailaction_discard;
+    if (ann_appl) {
+      switch (get_u32_annotation_member_value(ann_appl, "value"))
+      {
+      case 0:
+        try_construct = tryconstructfailaction_discard;
+        break;
+      case 1:
+        try_construct = tryconstructfailaction_use_default;
+        break;
+      case 2:
+        try_construct = tryconstructfailaction_trim;
+        break;
+      default:
+        try_construct = tryconstructfailaction_discard;
+      }
+    }
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
@@ -959,9 +976,42 @@ namespace {
               pre = "IDL::DistinctType<" + cxx_elem + ", " +
                 dds_generator::scoped_helper(arr->base_type()->name(), "_") + "_tag>(";
               suffix += ')';
+            } else if (elem_cls & CL_STRING) {
+              if (elem_cls & CL_BOUNDED) {
+                ///
+                const string args = string("arr" + nfl.index_) + (use_cxx11 ? ", " : ".out(), ")
+                  + bounded_arg(elem);
+                be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
+                switch (try_construct) {
+                case tryconstructfailaction_use_default:
+                  be_global->impl_<<
+                    "      if (strm.good_bit() && arr" << nfl.index_ << ".in() && ("
+                            << bounded_arg(elem) << " < ACE_OS::strlen(arr" << nfl.index_ << ".in()))) {\n"
+                    "        " << type_to_default(elem, "arr" + nfl.index_) <<
+                    "      } else {\n"
+                    "        return false;\n"
+                    "      }\n";
+                  break;
+                case tryconstructfailaction_trim:
+                  be_global->impl_ <<
+                    "      if (strm.good_bit() && arr" << nfl.index_ << ".in() && ("
+                            << bounded_arg(elem) << " < ACE_OS::strlen(arr" << nfl.index_ << ".in()))) {\n"
+                    "        arr" << nfl.index_ << ".inout()[" << bounded_arg(elem) << "] = 0;\n"
+                    "      } else {\n"
+                    "        return false;\n"
+                    "      }\n";
+                  break;
+                case tryconstructfailaction_discard:
+                  be_global->impl_ << "      return false;\n";
+                  break;
+                }
+                be_global->impl_ << "    }\n";
+                ///
+              }
+            } else {
+              be_global->impl_ <<
+                streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
             }
-            be_global->impl_ <<
-              streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
           }
         }
         be_global->impl_ << "  return true;\n";
