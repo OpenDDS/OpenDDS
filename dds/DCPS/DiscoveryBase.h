@@ -893,6 +893,7 @@ namespace OpenDDS {
       }
 
 
+
       struct MatchingData {
         RepoId writer;
         RepoId reader;
