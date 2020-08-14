@@ -146,17 +146,21 @@ struct Long3 {
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
-struct LengthCodeStruct {           //LC  size
-  @id(0) octet octet_field;         // 0    1
-  @id(1) short short_field;         // 1    2
-  @id(2) long long_field;           // 2    4
-  @id(3) long long long_long_field; // 3    8
+struct LengthCodeStruct { //LC Size
+  @id(0) octet o;         // 0    1
+  @id(1) short s;         // 1    2
+  @id(2) long l;          // 2    4
+  @id(3) long long ll;    // 3    8
 
-  @id(4) Bool3 b3;       // 4    3
-  @id(5) Octet5 o5;      // 4    5
-  @id(6) Short3 s3;      // 4    6
-  @id(7) Struct7 t7;     // 4    7
+  @id(4) Bool3 b3;        // 4    3
+  @id(5) Octet5 o5;       // 4    5
+  @id(6) Short3 s3;       // 4    6
+  @id(7) Struct7 t7;      // 4    7
+  @id(8) Long3 l3;        // 4   12
 
-//@id(8) string<4> str4; // 4    4
-  @id(9) Long3 l3;       // 4   12
+  @id(11) string<1> str1; // 4  4+1
+  @id(12) string<2> str2; // 4  4+2
+  @id(13) string<3> str3; // 4  4+3
+  @id(14) string<4> str4; // 3  4+4
+  @id(15) string<5> str5; // 4  4+5
 };

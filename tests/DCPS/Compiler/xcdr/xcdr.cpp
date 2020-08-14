@@ -52,6 +52,44 @@ void expect_values_equal(const TypeA& a, const TypeB& b)
   expect_values_equal_base(a, b);
 }
 
+template<>
+void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
+{
+  EXPECT_EQ(a.o, b.o);
+  EXPECT_EQ(a.s, b.s);
+  EXPECT_EQ(a.l, b.l);
+  EXPECT_EQ(a.ll, b.ll);
+
+  EXPECT_EQ(a.b3.a, b.b3.a);
+  EXPECT_EQ(a.b3.b, b.b3.b);
+  EXPECT_EQ(a.b3.c, b.b3.c);
+
+  EXPECT_EQ(a.o5.a, b.o5.a);
+  EXPECT_EQ(a.o5.b, b.o5.b);
+  EXPECT_EQ(a.o5.c, b.o5.c);
+  EXPECT_EQ(a.o5.d, b.o5.d);
+  EXPECT_EQ(a.o5.e, b.o5.e);
+
+  EXPECT_EQ(a.s3.x, b.s3.x);
+  EXPECT_EQ(a.s3.y, b.s3.y);
+  EXPECT_EQ(a.s3.z, b.s3.z);
+
+  EXPECT_EQ(a.t7.s3.x, b.t7.s3.x);
+  EXPECT_EQ(a.t7.s3.y, b.t7.s3.y);
+  EXPECT_EQ(a.t7.s3.z, b.t7.s3.z);
+  EXPECT_EQ(a.t7.o, b.t7.o);
+
+  EXPECT_EQ(a.l3.a, b.l3.a);
+  EXPECT_EQ(a.l3.b, b.l3.b);
+  EXPECT_EQ(a.l3.c, b.l3.c);
+
+  EXPECT_EQ(a.str1, b.str1);
+  EXPECT_EQ(a.str2, b.str2);
+  EXPECT_EQ(a.str3, b.str3);
+  EXPECT_EQ(a.str4, b.str4);
+  EXPECT_EQ(a.str5, b.str5);
+}
+
 template<typename TypeA, typename TypeB>
 ::testing::AssertionResult assert_values(
   const char* a_expr, const char* b_expr,
@@ -549,10 +587,11 @@ TEST(mutable_tests, from_additional_field_xcdr2_test)
   amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2, expected);
 }
 */
+
 TEST(mutable_tests, length_code_test)
 {
   const unsigned char expected[] = {
-    0x00,0x00,0x00,0x60, // +4 = 4  Delimiter
+    0x00,0x00,0x00,0x9d, // +4 = 4  Delimiter
 
   //(MU<<31)+(LC<<28)+id    NEXTINT    Value and Pad(0) // Size (Type)
   //--------------------  -----------  -------------------------------------------
@@ -561,15 +600,19 @@ TEST(mutable_tests, length_code_test)
     0x20,0x00,0x00,0x02,               1,2,3,4,         // 4 (long)      +4+4=28
     0x30,0x00,0x00,0x03,               1,2,3,4,5,6,7,8, // 8 (long long) +4+8=40
 
-    0x40,0x00,0x00,0x04,  0,0,0,0x03,  1,0,1,            (0), // b3 +8+3+1=52
-    0x40,0x00,0x00,0x05,  0,0,0,0x05,  1,2,3,4,5,(0),(0),(0), // o5 +8+5+3=68
-    0x40,0x00,0x00,0x06,  0,0,0,0x06,  0,1,0,2,0,3,  (0),(0), // s3 +8+6+2=84
-    0x40,0x00,0x00,0x07,  0,0,0,0x07,  0,1,0,2,0,3,4,    (0), // t7 +8+7+1=100
+    0x40,0x00,0x00,0x04,  0,0,0,0x03,  1,0,1,              (0), // b3 +8+3+1=52
+    0x40,0x00,0x00,0x05,  0,0,0,0x05,  1,2,3,4,5,  (0),(0),(0), // o5 +8+5+3=68
+    0x40,0x00,0x00,0x06,  0,0,0,0x06,  0,1,0,2,0,3,    (0),(0), // s3 +8+6+2=84
+    0x40,0x00,0x00,0x07,  0,0,0,0x07,  0,1,0,2,0,3,4,      (0), // t7 +8+7+1=100
+    0x40,0x00,0x00,0x08,  0,0,0,0x0c,  0,0,0,1,0,0,0,2,0,0,0,3, // l3 +8+12=120
 
-  //0x40,0x00,0x00,0x08,  0,0,0,0x04,  0,0,0,0x04, 'a','b','c','\0', // str4 +8+4+4=116
-    0x40,0x00,0x00,0x09,  0,0,0,0x0c,  0,0,0,1,0,0,0,2,0,0,0,3 // l3 +8+12=136
+    0x40,0x00,0x00,0x0b,  0,0,0,0x05,  0,0,0,0x01, '\0',(0),(0),(0),    // str1 +8+4+1+3=136
+    0x40,0x00,0x00,0x0c,  0,0,0,0x06,  0,0,0,0x02, 'a','\0',(0),(0),    // str2 +8+4+2+2=152
+    0x40,0x00,0x00,0x0d,  0,0,0,0x07,  0,0,0,0x03, 'a','b','\0',(0),    // str3 +8+4+3+1=168
+    0x30,0x00,0x00,0x0e,               0,0,0,0x04, 'a','b','c','\0',    // str4 +4+4+4=180
+    0x40,0x00,0x00,0x0f,  0,0,0,0x09,  0,0,0,0x05, 'a','b','c','d','\0' // str5 +8+4+5=197
   };
-  LengthCodeStruct value = { //LC  size
+  LengthCodeStruct value = { //LC Size
     0x01,                    // 0    1
     0x0102,                  // 1    2
     0x01020304,              // 2    4
@@ -578,8 +621,12 @@ TEST(mutable_tests, length_code_test)
     {1,2,3,4,5},             // 4    5
     {1,2,3},                 // 4    6
     {{1,2,3},4},             // 4    7
-  //"abc",                   // 4    4
-    {1,2,3}                  // 4   12
+    {1,2,3},                 // 4   12
+    "",                      // 4  4+1
+    "a",                     // 4  4+2
+    "ab",                    // 4  4+3
+    "abc",                   // 3  4+4
+    "abcd"                   // 4  4+5
   };
 
   LengthCodeStruct result;
