@@ -586,17 +586,32 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       size = 8;
     } else {
       ACE_CDR::ULong next_int;
-      if (!(*this >> next_int)) {
-        return false;
-      }
-      if (lc == 6) {
-        size = 4 * next_int;
-      } else if (lc == 7) {
-        size = 8 * next_int;
-      } else { // 4 or 5
+      if (lc == 4) {
+        if (!(*this >> next_int)) {
+          return false;
+        }
         size = next_int;
+      } else {
+        // write method peek() to save and reset:
+        // - current_
+        // - current_->rd_ptr()
+        // - current_->wr_ptr()
+        // - pos_
+        //if (!peek<int32_t>(next_int)) {
+        std::cout << "Replace with 'if (!peek(next_int)) {'\n";
+        if (!(*this >> next_int)) {
+          return false;
+        }
+        if (lc == 6) {
+          size = next_int * 4;
+        } else if (lc == 7) {
+          size = next_int * 8;
+        } else { // 5
+          size = next_int;
+        }
       }
     }
+    std::cout << std::hex << "emheader|lc|size[" << emheader << "|" << lc << "|" << size << "]\n";
     id = emheader & 0xfffffff;
   }
 
@@ -655,20 +670,15 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
       lc = 2;
     } else if (size == 8) {
       lc = 3;
-    } else if (size > 8 && (size % 8 == 0)) {
-      lc = 7; nextint = size / 8;
-    } else if (size > 4 && (size % 4 == 0)) {
-      lc = 6; nextint = size / 4;
-    } else if (size > 2 && (size % 2 == 0)) {
-      lc = 5; nextint = size;
     } else {
       lc = 4; nextint = size;
     }
     const ACE_CDR::ULong emheader = (lc << 28) | id;
+    std::cout << std::hex << "lc|id|emheader|nextint|size[" << lc << "|" << id << "|" << emheader << "|" << nextint << "|" << size << "]\n";
     if (!(*this << emheader)) {
       return false;
     }
-    if (nextint > 0) {
+    if (lc == 4) {
       return (*this << nextint);
     }
   }

@@ -106,6 +106,13 @@ struct AdditionalFieldMutableStruct {
 };
 
 @final
+struct Bool3 {
+  boolean a;
+  boolean b;
+  boolean c;
+};
+
+@final
 struct Octet5 {
   octet a;
   octet b;
@@ -122,35 +129,19 @@ struct Short3 {
 };
 
 @final
-struct Boolean3 {
-  boolean a;
-  boolean b;
-  boolean c;
-};
-
-@final
-struct LongLong2 {
-  long long a;
-  long long b;
-};
-
-@final
-struct Struct20 {
-  LongLong2 ll2;
-  long l;
-};
-
-@final
-struct Struct24 {
-  Struct20 a;
-  long b;
-};
-
-@final
 struct Struct7 {
   Short3 s3;
   octet o;
 };
+
+@final
+struct Long3 {
+  long a;
+  long b;
+  long c;
+};
+
+//typedef sequence<long, 3> Long3Seq;
 
 @mutable
 @OpenDDS::data_representation(XCDR1)
@@ -161,11 +152,11 @@ struct LengthCodeStruct {           //LC  size
   @id(2) long long_field;           // 2    4
   @id(3) long long long_long_field; // 3    8
 
-  @id(4) Octet5 octet5_field;       // 4    5
-  @id(5) Short3 short3_field;       // 5    6
-  @id(6) Struct20 struct20_field;   // 6  4x5
-  @id(7) Struct24 struct24_field;   // 7  8x3
+  @id(4) Bool3 b3;       // 4    3
+  @id(5) Octet5 o5;      // 4    5
+  @id(6) Short3 s3;      // 4    6
+  @id(7) Struct7 t7;     // 4    7
 
-  @id(8) Boolean3 boolean3_field;   // 4    3
-  @id(9) Struct7 struct7_field;     // 4    7
+//@id(8) string<4> str4; // 4    4
+  @id(9) Long3 l3;       // 4   12
 };
