@@ -82,13 +82,12 @@ void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
   EXPECT_EQ(a.l3.a, b.l3.a);
   EXPECT_EQ(a.l3.b, b.l3.b);
   EXPECT_EQ(a.l3.c, b.l3.c);
-/*
-  EXPECT_EQ(a.str1, b.str1);
-  EXPECT_EQ(a.str2, b.str2);
-  EXPECT_EQ(a.str3, b.str3);
-  EXPECT_EQ(a.str4, b.str4);
-  EXPECT_EQ(a.str5, b.str5);
-*/
+
+  EXPECT_STREQ(a.str1, b.str1);
+  EXPECT_STREQ(a.str2, b.str2);
+  EXPECT_STREQ(a.str3, b.str3);
+  //EXPECT_STREQ(a.str4, b.str4);
+  //EXPECT_STREQ(a.str5, b.str5);
 }
 
 template<typename TypeA, typename TypeB>
