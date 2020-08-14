@@ -655,7 +655,7 @@ bool TransportRegistry::create_new_transport_instance_for_participant(DDS::Domai
 
   if (TheServiceParticipant->belongs_to_domain_range(id)) {
     TransportTemplate tr_inst;
-    get_transport_template_info(cfg->name().c_str(), tr_inst);
+    get_transport_template_info(ACE_TEXT_ALWAYS_CHAR(cfg->name().c_str()), tr_inst);
 
     for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
          it != tr_inst.transport_info.end(); ++it) {
@@ -757,7 +757,7 @@ bool TransportRegistry::create_new_transport_instance_for_participant(DDS::Domai
     return true;
   } else {
     TransportEntry tr_inst;
-    get_transport_info(cfg->name().c_str(), tr_inst);
+    get_transport_info(ACE_TEXT_ALWAYS_CHAR(cfg->name().c_str()), tr_inst);
 
     for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
          it != tr_inst.transport_info.end(); ++it) {
