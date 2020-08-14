@@ -2351,7 +2351,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     code.push_back("if (!strm.write_delimiter(total_size)) {");
     code.push_back("  return false;");
     code.push_back("}");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code, may_be_parameter_list);
+    generate_dheader_code(may_be_delimited, not_only_delimited, code);
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
