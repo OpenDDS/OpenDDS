@@ -396,17 +396,13 @@ private:
     DCPS::SequenceNumber seq_;
   };
 
-  class SedpWriter : public Writer {
+  class SecurityWriter : public Writer {
   public:
-    SedpWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+    SecurityWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
       : Writer(pub_id, sedp, seq_init)
     {}
 
-    virtual ~SedpWriter();
-
-    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
-                                                const DCPS::RepoId& reader,
-                                                DCPS::SequenceNumber& sequence);
+    virtual ~SecurityWriter();
 
 #ifdef OPENDDS_SECURITY
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
@@ -419,7 +415,24 @@ private:
 #endif
   };
 
-  typedef DCPS::RcHandle<SedpWriter> SedpWriter_rch;
+  typedef DCPS::RcHandle<SecurityWriter> SecurityWriter_rch;
+
+
+  class LivelinessWriter : public Writer {
+  public:
+    LivelinessWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : Writer(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~LivelinessWriter();
+
+    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+  };
+
+  typedef DCPS::RcHandle<LivelinessWriter> LivelinessWriter_rch;
+
 
   class DiscoveryWriter : public Writer {
   public:
@@ -442,23 +455,23 @@ private:
   DiscoveryWriter_rch publications_writer_;
 
 #ifdef OPENDDS_SECURITY
-  DiscoveryWriter publications_secure_writer_;
+  DiscoveryWriter_rch publications_secure_writer_;
 #endif
 
   DiscoveryWriter_rch subscriptions_writer_;
 
 #ifdef OPENDDS_SECURITY
-  DiscoveryWriter subscriptions_secure_writer_;
+  DiscoveryWriter_rch subscriptions_secure_writer_;
 #endif
 
-  SedpWriter_rch participant_message_writer_;
+  LivelinessWriter_rch participant_message_writer_;
 
 #ifdef OPENDDS_SECURITY
-  SedpWriter_rch participant_message_secure_writer_;
-  SedpWriter_rch participant_stateless_message_writer_;
-  DiscoveryWriter dcps_participant_secure_writer_;
+  LivelinessWriter_rch participant_message_secure_writer_;
+  SecurityWriter_rch participant_stateless_message_writer_;
+  DiscoveryWriter_rch dcps_participant_secure_writer_;
 
-  SedpWriter_rch participant_volatile_message_secure_writer_;
+  SecurityWriter_rch participant_volatile_message_secure_writer_;
 #endif
 
   class TypeLookupWriter : public Writer {

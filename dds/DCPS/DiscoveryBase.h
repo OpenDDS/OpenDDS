@@ -912,7 +912,7 @@ namespace OpenDDS {
       {
         return -1;
       }
-      
+
 
       struct MatchingData {
         RepoId writer;
@@ -1215,6 +1215,7 @@ namespace OpenDDS {
       void
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
+        MonotonicTimePoint::now();
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {

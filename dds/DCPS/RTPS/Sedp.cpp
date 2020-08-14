@@ -280,7 +280,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
     make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), ref(*this))),
 #endif
 
-  participant_message_writer_(make_rch<SedpWriter>(
+  participant_message_writer_(make_rch<LivelinessWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), ref(*this))),
 
   type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
@@ -290,13 +290,13 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
     make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  participant_message_secure_writer_(make_rch<SedpWriter>(
+  participant_message_secure_writer_(make_rch<LivelinessWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), ref(*this))),
-  participant_stateless_message_writer_(make_rch<SedpWriter>(
+  participant_stateless_message_writer_(make_rch<SecurityWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), ref(*this))),
   dcps_participant_secure_writer_(make_rch<DiscoveryWriter>(
     make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2)),
-  participant_volatile_message_secure_writer_(make_rch<SedpWriter>(
+  participant_volatile_message_secure_writer_(make_rch<SecurityWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this))),
 #endif
 
@@ -3336,9 +3336,9 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
 }
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
-                                            const RepoId& reader,
-                                            DCPS::SequenceNumber& sequence)
+Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& pmd,
+                                                  const RepoId& reader,
+                                                  DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -3366,7 +3366,7 @@ Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
 
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                           const RepoId& reader,
                                           DCPS::SequenceNumber& sequence)
 {
@@ -3394,7 +3394,7 @@ Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatel
 }
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
                                                 const RepoId& reader,
                                                 DCPS::SequenceNumber& sequence)
 {
@@ -3570,11 +3570,15 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
 //-------------------------------------------------------------------------
 
-Sedp::SedpWriter::~SedpWriter()
+Sedp::SecurityWriter::~SecurityWriter()
 {
 }
 
 Sedp::DiscoveryWriter::~DiscoveryWriter()
+{
+}
+
+Sedp::LivelinessWriter::~LivelinessWriter()
 {
 }
 
