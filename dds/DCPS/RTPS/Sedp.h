@@ -165,7 +165,6 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
-  // TypeLookup
   bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                 const DCPS::RepoId& reader);
 
@@ -372,6 +371,7 @@ private:
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence);
 
+    void end_historic_samples(const DCPS::RepoId& reader);
 
   protected:
     void send_sample(const ACE_Message_Block& data,
@@ -416,28 +416,39 @@ private:
     DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
+#endif
+  };
 
+  typedef DCPS::RcHandle<SedpWriter> SedpWriter_rch;
+
+  class DiscoveryWriter : public Writer {
+  public:
+    DiscoveryWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : Writer(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~DiscoveryWriter();
+
+#ifdef OPENDDS_SECURITY
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
 #endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
-
-    void end_historic_samples(const DCPS::RepoId& reader);
   };
 
-  typedef DCPS::RcHandle<SedpWriter> SedpWriter_rch;
+  typedef DCPS::RcHandle<DiscoveryWriter> DiscoveryWriter_rch;
 
-  SedpWriter_rch publications_writer_;
+  DiscoveryWriter_rch publications_writer_;
 
 #ifdef OPENDDS_SECURITY
-  SedpWriter_rch publications_secure_writer_;
+  DiscoveryWriter publications_secure_writer_;
 #endif
 
-  SedpWriter_rch subscriptions_writer_;
+  DiscoveryWriter_rch subscriptions_writer_;
 
 #ifdef OPENDDS_SECURITY
-  SedpWriter_rch subscriptions_secure_writer_;
+  DiscoveryWriter subscriptions_secure_writer_;
 #endif
 
   SedpWriter_rch participant_message_writer_;
@@ -445,7 +456,7 @@ private:
 #ifdef OPENDDS_SECURITY
   SedpWriter_rch participant_message_secure_writer_;
   SedpWriter_rch participant_stateless_message_writer_;
-  SedpWriter_rch dcps_participant_secure_writer_;
+  DiscoveryWriter dcps_participant_secure_writer_;
 
   SedpWriter_rch participant_volatile_message_secure_writer_;
 #endif

@@ -13,6 +13,7 @@
 #include "RcHandle_T.h"
 #include "unique_ptr.h"
 #include "XTypes/TypeObject.h"
+#include "XTypes/TypeLookupService.h"
 
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
@@ -21,8 +22,6 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
-
-#include "dds/DCPS/XTypes/TypeLookupService.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"

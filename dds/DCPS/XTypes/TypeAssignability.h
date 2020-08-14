@@ -25,12 +25,17 @@ typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
-  TypeAssignability(TypeLookupService& tls) : tl_service(&tls) {};
+  TypeAssignability(TypeLookupService& tls) : tl_service_(&tls) {};
 
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
   bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeObject& tb) const;
+
+  void insert_entry(const TypeIdentifier& ti, const TypeObject& tobj)
+  {
+    tl_service_->add_type_objects_to_cache(ti, tobj);
+  }
 
 private:
   bool assignable_alias(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
@@ -84,21 +89,12 @@ private:
   bool get_struct_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
   bool get_union_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
 
-private:
-  TypeLookupService* tl_service;
+  TypeLookupService* tl_service_;
 
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
-    return tl_service->GetTypeObject(ti).minimal;
+    return tl_service_->get_type_objects(ti).minimal;
   }
-
-public:
-  void insert_entry(const TypeIdentifier& ti, const TypeObject& tobj)
-  {
-    tl_service->AddTypeObjectsToCache(ti, tobj);
-  }
-
-  static std::map<unsigned int, MinimalTypeObject> table_;
 };
 
 } // namepace XTypes

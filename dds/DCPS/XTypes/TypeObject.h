@@ -216,7 +216,7 @@ namespace XTypes {
 
     bool operator<(const TypeObjectHashId& other) const
     {
-      return (kind < other.kind) && hash < other.hash;
+      return (kind < other.kind) && (hash < other.hash);
     }
   };
 

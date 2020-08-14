@@ -1,16 +1,19 @@
-#pragma once
-#ifndef OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
-#define OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
-
 /*
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
+#define OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
+
 #include "TypeObject.h"
 
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/SequenceNumber.h>
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -23,36 +26,37 @@ public:
   ~TypeLookupService();
 
   // For TypeAssignability
-  const TypeObject& GetTypeObject(const TypeIdentifier& type_id) const;
-  void AddTypeObjectsToCache(const TypeIdentifier& ti, const TypeObject& tobj);
+  const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
+  void add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj);
 
   // For Type Lookup reply
-  void GetTypeObjects(const TypeIdentifierSeq& type_ids,
+  void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types,
     TypeIdentifierPairSeq& complete_to_minimal);
-  void AddTypeObjectsToCache(TypeIdentifierTypeObjectPairSeq& types);
+  void add_type_objects_to_cache(TypeIdentifierTypeObjectPairSeq& types);
 
-  bool TypeObjectInCache(const TypeIdentifier& ti);
+  bool type_object_in_cache(const TypeIdentifier& ti);
 
   OpenDDS::DCPS::SequenceNumber rpc_sequence_number_;
 
 protected:
   // Only minimal Type Objects for now
   typedef std::map<TypeIdentifier, TypeObject> TypeObjectMap;
-  TypeObjectMap type_object_map;
+  TypeObjectMap type_object_map_;
 
   typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
-  TypeIdentifierWithSizeSeqMap type_dependencies_map;
+  TypeIdentifierWithSizeSeqMap type_dependencies_map_;
 
-  void CollectTypesInfoFromCache(const TypeIdentifierSeq& type_ids,
+  void collect_types_info_from_cache(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types,
     TypeIdentifierPairSeq& complete_to_minimal,
     TypeIdentifierSeq& not_found);
 
-  TypeObject to_empty;
+  TypeObject to_empty_;
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
+
 } // namespace XTypes
 } // namespace OpenDDS
 

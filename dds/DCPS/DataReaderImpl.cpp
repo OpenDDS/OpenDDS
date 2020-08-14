@@ -38,8 +38,6 @@
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "dds/DCPS/XTypes/TypeLookupService.h"
-
 #include <tao/ORB_Core.h>
 
 #include <ace/Reactor.h>
@@ -1298,7 +1296,7 @@ DataReaderImpl::enable()
     ti_to_pair_seq.append(ti_to_pair);
     // TLS_TODO: verify implementation
     XTypes::TypeLookupService_rch type_lookup_service = participant->GetTypeLookupService();
-    type_lookup_service->AddTypeObjectsToCache(ti_to_pair_seq);
+    type_lookup_service->add_type_objects_to_cache(ti_to_pair_seq);
 
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
