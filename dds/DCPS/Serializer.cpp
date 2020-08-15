@@ -592,14 +592,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
         }
         size = next_int;
       } else {
-        // write method peek() to save and reset:
-        // - current_
-        // - current_->rd_ptr()
-        // - current_->wr_ptr()
-        // - pos_
-        //if (!peek<int32_t>(next_int)) {
-        std::cout << "Replace with 'if (!peek(next_int)) {'\n";
-        if (!(*this >> next_int)) {
+        if (!peek(next_int)) {
           return false;
         }
         if (lc == 6) {

@@ -141,7 +141,9 @@ struct Long3 {
   long c;
 };
 
-//typedef sequence<long, 3> Long3Seq;
+typedef sequence<octet, 3> Octet3S;
+typedef sequence<long, 3> Long3S;
+typedef sequence<long long, 3> LongLong3S;
 
 @mutable
 @OpenDDS::data_representation(XCDR1)
@@ -163,4 +165,13 @@ struct LengthCodeStruct { //LC Size
   @id(13) string<3> str3; // 4  4+3
   @id(14) string<4> str4; // 3  4+4
   @id(15) string<5> str5; // 4  4+5
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct LC567Struct { //LC Size
+  @id(0) Octet3S o3;     // 5    3
+  @id(1) Long3S l3;      // 6  4x3
+  @id(2) LongLong3S ll3; // 7  8x3
 };
