@@ -933,12 +933,14 @@ namespace OpenDDS {
       typedef OPENDDS_MAP_CMP(RepoId, MatchingData,
         GUID_tKeyLessThan) MatchingDataMap;
       typedef typename MatchingDataMap::iterator MatchingDataIter;
-      // TLS_TODO: is dedicated synchronisation needed for this buffer?
       MatchingDataMap matching_data_buffer_;
       DCPS::ReactorTask reactor_task_;
       typedef DCPS::PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
       DCPS::RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       const TimeDuration max_reply_period_;
+      // TLS_TODO: is dedicated synchronisation needed for matching_data_buffer_?
+      mutable ACE_Thread_Mutex matching_data_buffer_lock_;
+
 
       void
       match(const RepoId& writer, const RepoId& reader)
@@ -1099,6 +1101,7 @@ namespace OpenDDS {
 
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
+          ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
           // if the type object is not in cache, send RPC request
           MatchingData md;
           md.dwQos = dwQos;
@@ -1132,7 +1135,6 @@ namespace OpenDDS {
           //    send_type_lookup_request(type_ids, writer);
           //    type_lookup_reply_deadline_processor_->schedule(max_reply_period_);
           //    // TLS_TODO: sanity check on locks
-          //    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           //    return;
           //  }
           //} else if (!reader_local) {
@@ -1143,13 +1145,11 @@ namespace OpenDDS {
           //    send_type_lookup_request(type_ids, reader);
           //    type_lookup_reply_deadline_processor_->schedule(max_reply_period_);
           //    // TLS_TODO: sanity check on locks
-          //    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           //    return;
           //  }
           //}
 
           // TLS_TODO: sanity check on locks
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           match_continue(writer, reader);
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
@@ -1202,10 +1202,11 @@ namespace OpenDDS {
       void
       remove_expired_endpoints(const DCPS::MonotonicTimePoint& /*now*/)
       {
+        // TLS_TODO: sanity check on locks
+        ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (MonotonicTimePoint::now() - it->second.time_added_to_map >= max_reply_period_) {
-            // TLS_TODO: sanity check on locks
             matching_data_buffer_.erase(it->first);
           }
         }
@@ -1215,6 +1216,8 @@ namespace OpenDDS {
       void
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
+        // TLS_TODO: sanity check on locks
+        ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
         MonotonicTimePoint::now();
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
