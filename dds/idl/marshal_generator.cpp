@@ -396,18 +396,14 @@ namespace {
   // is_ser_func specifies whether this is a serialization operation
   void generate_dheader_code(const std::vector<std::string>& code, bool is_ser_func = true)
   {
-      string indent = "    ";
       if (is_ser_func) {
         be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
         be_global->impl_ << "  size_t total_size = 0;\n";
-        be_global->impl_ <<
-          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-      } else {
-        be_global->impl_ <<
-          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
       }
+      be_global->impl_ <<
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
       for (size_t i = 0; i < code.size(); ++i) {
-        be_global->impl_ << indent << code[i] << "\n";
+        be_global->impl_ << "    " << code[i] << "\n";
       }
       be_global->impl_ << "  }\n";
   }
