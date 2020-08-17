@@ -392,8 +392,6 @@ namespace {
 
   // Helper function to conditionally generate dheader-related code which is passed as the
   // "code" argument.
-  // may_be_delimited determines if the dheader is ever needed for this type.
-  // not_only_delimited determines if the dheader code is conditional based on the encoding.
   // code contains the lines of code to generate
   // is_ser_func specifies whether this is a serialization operation
   void generate_dheader_code(const std::vector<std::string>& code, bool is_ser_func = true)
