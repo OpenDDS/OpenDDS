@@ -3006,7 +3006,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     std::vector<string> code;
     code.push_back("serialized_size(encoding, total_size, uni);");
-    code.push_back("if (!strm.write_delimiter(total_size)) {);");
+    code.push_back("if (!strm.write_delimiter(total_size)) {");
     code.push_back("  return false;");
     code.push_back("}");
     generate_dheader_code(code);
