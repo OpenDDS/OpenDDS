@@ -90,12 +90,12 @@ DomainParticipantFactoryImpl::create_participant(
   // create a new transport instance for the new participant.
   DPMap::iterator i = participants_.find(domainId);
   if (i != participants_.end()) {
-    OPENDDS_STRING config_name = dp->get_unique_id();
+    ACE_TString config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
 
     bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, config_name);
 
     if (ret) {
-      TheTransportRegistry->bind_config(config_name, dp.in());
+      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), dp.in());
     } else {
       ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")

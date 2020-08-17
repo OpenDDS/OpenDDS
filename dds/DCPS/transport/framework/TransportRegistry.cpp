@@ -132,7 +132,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                            -1);
         }
         for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-          OPENDDS_STRING transport_id = it->first;
+          ACE_TString transport_id = ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str());
           ACE_Configuration_Section_Key inst_sect = it->second;
 
           ValueMap values;
@@ -159,7 +159,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             // Create the TransportInst object and load the transport
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
-            TransportInst_rch inst = create_inst(transport_id, transport_type);
+            TransportInst_rch inst = create_inst(ACE_TEXT_ALWAYS_CHAR(transport_id.c_str()), transport_type);
             if (!inst) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -251,8 +251,8 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
               // store the config name for the transport entry
               for (OPENDDS_VECTOR(TransportEntry)::iterator it = transports_.begin(); it != transports_.end(); ++it) {
-                if (it->transport_name == value) {
-                  it->config_name = config_id;
+                if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(it->transport_name.c_str()), value.c_str())) {
+                  it->config_name = ACE_TEXT_CHAR_TO_TCHAR(config_id.c_str());
                   break;
                 }
               }
@@ -636,15 +636,27 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
   return type_map_.count(name);
 }
 
-bool TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& config_name)
+int TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name)
 {
-  TransportConfig_rch cfg = get_config(domain_config_map_[id]);
+  if (domain_config_map_.find(id) == domain_config_map_.end()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                      ACE_TEXT("create_new_transport_instance_for_participant ")
+                      ACE_TEXT("domain_config_map_ has no information for Domain %d\n"),
+                      id),
+                     -1);
+  }
 
-  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + config_name;
-  config_name = "transport_config_" + config_name;
+  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(domain_config_map_[id].c_str()));
+
+  OPENDDS_STRING tmp = ACE_TEXT_ALWAYS_CHAR(config_name.c_str());
+  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + tmp;
+
+  tmp = "transport_config_" + tmp;
+  config_name = ACE_TEXT_CHAR_TO_TCHAR(tmp.c_str());
 
   OpenDDS::DCPS::TransportConfig_rch config =
-    TheTransportRegistry->create_config(config_name);
+    TheTransportRegistry->create_config(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()));
   OpenDDS::DCPS::TransportInst_rch inst =
     TheTransportRegistry->create_inst(inst_name, "rtps_udp");
 
@@ -655,7 +667,7 @@ bool TransportRegistry::create_new_transport_instance_for_participant(DDS::Domai
 
   if (TheServiceParticipant->belongs_to_domain_range(id)) {
     TransportTemplate tr_inst;
-    get_transport_template_info(ACE_TEXT_ALWAYS_CHAR(cfg->name().c_str()), tr_inst);
+    get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str()), tr_inst);
 
     for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
          it != tr_inst.transport_info.end(); ++it) {
@@ -757,7 +769,7 @@ bool TransportRegistry::create_new_transport_instance_for_participant(DDS::Domai
     return true;
   } else {
     TransportEntry tr_inst;
-    get_transport_info(ACE_TEXT_ALWAYS_CHAR(cfg->name().c_str()), tr_inst);
+    get_transport_info(ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str()), tr_inst);
 
     for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = tr_inst.transport_info.begin();
          it != tr_inst.transport_info.end(); ++it) {
@@ -781,7 +793,7 @@ bool TransportRegistry::create_new_transport_instance_for_participant(DDS::Domai
 
 void TransportRegistry::associate_domain_to_config(DDS::DomainId_t id, const OPENDDS_STRING& cfg)
 {
-  domain_config_map_[id] = cfg;
+  domain_config_map_[id] = ACE_TEXT_CHAR_TO_TCHAR(cfg.c_str());
 }
 
 
@@ -1019,7 +1031,7 @@ TransportRegistry::get_transport_info(const ACE_TString& config_name, TransportE
   bool ret = false;
   if (has_transports()) {
     for (OPENDDS_VECTOR(TransportEntry)::const_iterator i = transports_.begin(); i != transports_.end(); ++i) {
-      if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
+      if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), ACE_TEXT_ALWAYS_CHAR(i->config_name.c_str()))) {
         inst.transport_name = i->transport_name;
         inst.config_name = i->config_name;
         inst.transport_info = i->transport_info;

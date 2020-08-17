@@ -126,7 +126,7 @@ public:
 
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
-  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& config_name);
+  int create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name);
 
   // The TransportRegistry needs to know the domains for a given
   // config in order to know when to create new transport instances
@@ -179,8 +179,8 @@ private:
 
   struct TransportEntry
   {
-    OPENDDS_STRING transport_name;
-    OPENDDS_STRING config_name;
+    ACE_TString transport_name;
+    ACE_TString config_name;
     ValueMap transport_info;
   };
 
@@ -190,7 +190,7 @@ private:
 
   bool has_transports() const;
 
-  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_config_map_;
+  OPENDDS_MAP(DDS::DomainId_t, ACE_TString) domain_config_map_;
 };
 
 } // namespace DCPS
