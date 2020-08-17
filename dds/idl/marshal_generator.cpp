@@ -396,33 +396,23 @@ namespace {
   // not_only_delimited determines if the dheader code is conditional based on the encoding.
   // code contains the lines of code to generate
   // is_ser_func specifies whether this is a serialization operation
-  void generate_dheader_code(bool may_be_delimited, bool not_only_delimited,
-                             const std::vector<std::string>& code, bool is_ser_func = true)
+  void generate_dheader_code(const std::vector<std::string>& code, bool is_ser_func = true)
   {
-    if (may_be_delimited) {
-      string indent = "  ";
+      string indent = "    ";
       if (is_ser_func) {
-        be_global->impl_ << indent << "size_t total_size = 0;\n";
-      }
-      if (not_only_delimited) {
-        if (is_ser_func) {
-          be_global->impl_ <<
-            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-        } else {
-          be_global->impl_ <<
-            "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-        }
-        indent = "    ";
+        be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+        be_global->impl_ << "  size_t total_size = 0;\n";
+        be_global->impl_ <<
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+      } else {
+        be_global->impl_ <<
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
       }
       for (size_t i = 0; i < code.size(); ++i) {
         be_global->impl_ << indent << code[i] << "\n";
       }
-      if (not_only_delimited) {
-        be_global->impl_ << "  }\n";
-      }
-    }
+      be_global->impl_ << "  }\n";
   }
-
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq, AST_Typedef* td = 0)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -438,18 +428,6 @@ namespace {
 
     AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
-
-    AST_Decl* node = td;
-    if (td == 0) {
-      node = seq;
-    }
-    const ExtensibilityKind exten = be_global->extensibility(node);
-    const OpenDDS::DataRepresentation repr =
-      be_global->data_representations(node);
-    const bool not_final = exten != extensibilitykind_final;
-    const bool primitive = (elem_cls & CL_PRIMITIVE);
-    const bool may_be_delimited = not_final && repr.xcdr2 && !primitive;
-    const bool not_only_delimited = repr.not_only_xcdr2() && may_be_delimited;
 
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
@@ -492,7 +470,7 @@ namespace {
 
       std::vector<string> code;
       code.push_back("serialized_size_delimiter(encoding, size);");
-      generate_dheader_code(may_be_delimited, not_only_delimited, code, false);
+      generate_dheader_code(code, false);
 
       be_global->impl_ << const_unwrap <<
         "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
@@ -558,7 +536,7 @@ namespace {
       code.push_back("if (!strm.write_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
-      generate_dheader_code(may_be_delimited, not_only_delimited, code);
+      generate_dheader_code(code);
 
       be_global->impl_ << const_unwrap <<
         "  const CORBA::ULong length = " << get_length << ";\n";
@@ -628,7 +606,7 @@ namespace {
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
-      generate_dheader_code(may_be_delimited, not_only_delimited, code);
+      generate_dheader_code(code);
 
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
@@ -966,18 +944,6 @@ namespace {
     AST_Type* elem = resolveActualType(arr->base_type());
     Classification elem_cls = classify(elem);
 
-    AST_Decl* node = td;
-    if (td == 0) {
-      node = arr;
-    }
-    const ExtensibilityKind exten = be_global->extensibility(node);
-    const OpenDDS::DataRepresentation repr =
-      be_global->data_representations(node);
-    const bool not_final = exten != extensibilitykind_final;
-    const bool primitive = (elem_cls & CL_PRIMITIVE);
-    const bool may_be_delimited = not_final && repr.xcdr2 && !primitive;
-    const bool not_only_delimited = repr.not_only_xcdr2() && may_be_delimited;
-
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(elem->file_name().c_str());
@@ -996,7 +962,7 @@ namespace {
 
       std::vector<string> code;
       code.push_back("serialized_size_delimiter(encoding, size);");
-      generate_dheader_code(may_be_delimited, not_only_delimited, code, false);
+      generate_dheader_code(code, false);
 
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
@@ -1057,7 +1023,7 @@ namespace {
       code.push_back("if (!strm.write_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
-      generate_dheader_code(may_be_delimited, not_only_delimited, code);
+      generate_dheader_code(code);
       be_global->impl_ << const_unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (elem_cls & CL_PRIMITIVE) {
@@ -1102,7 +1068,7 @@ namespace {
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
-      generate_dheader_code(may_be_delimited, not_only_delimited, code);
+      generate_dheader_code(code);
 
       be_global->impl_ << unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
@@ -2302,7 +2268,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     std::vector<string> code;
     code.push_back("serialized_size_delimiter(encoding, size);");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code, false);
+    generate_dheader_code(code, false);
 
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
@@ -2334,24 +2300,18 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  serialized_size_list_end_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
     }
   }
-
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
 
-    if (may_be_delimited || may_be_parameter_list) {
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n";
-    }
-
     std::vector<string> code;
     code.push_back("serialized_size(strm.encoding(), total_size, stru);");
     code.push_back("if (!strm.write_delimiter(total_size)) {");
     code.push_back("  return false;");
     code.push_back("}");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code);
+    generate_dheader_code(code);
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
@@ -2416,7 +2376,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     code.push_back("if (!strm.read_delimiter(total_size)) {");
     code.push_back("  return false;");
     code.push_back("}");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code);
+    generate_dheader_code(code);
 
     if (may_be_parameter_list) {
       if (repr.xcdr2) {
@@ -3010,11 +2970,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const OpenDDS::DataRepresentation repr =
     be_global->data_representations(node);
 
-  const bool xcdr = repr.xcdr1 || repr.xcdr2;
-  const bool not_final = exten != extensibilitykind_final;
-  const bool may_be_delimited = not_final && repr.xcdr2;
-  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
-
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
       return special_unions[i].gen(cxx, discriminator, branches);
@@ -3031,7 +2986,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     std::vector<string> code;
     code.push_back("serialized_size_delimiter(encoding, size);");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code, false);
+    generate_dheader_code(code, false);
 
     const string align = getAlignment(discriminator);
     if (!align.empty()) {
@@ -3053,18 +3008,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
 
-    if (may_be_delimited) {
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n";
-    }
-
     std::vector<string> code;
-    code.push_back("const Encoding& encoding = strm.encoding();");
     code.push_back("serialized_size(encoding, total_size, uni);");
     code.push_back("if (!strm.write_delimiter(total_size)) {);");
     code.push_back("  return false;");
     code.push_back("}");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code);
+    generate_dheader_code(code);
 
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
@@ -3084,7 +3033,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     code.push_back("if (!strm.read_delimiter(total_size)) {");
     code.push_back("  return false;");
     code.push_back("}");
-    generate_dheader_code(may_be_delimited, not_only_delimited, code);
+    generate_dheader_code(code);
 
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n" <<
