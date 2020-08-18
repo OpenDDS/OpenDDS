@@ -208,7 +208,6 @@ void deserialize_compare(
   T result;
   ASSERT_TRUE(serializer >> result);
   EXPECT_PRED_FORMAT2(assert_values, expected, result);
-  std::cout << "deserialize_compare\n";
 }
 
 template<typename TypeA, typename TypeB>
@@ -257,7 +256,7 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
 
   serializer_test<Type>(encoding, expected_cdr);
 }
-/*
+
 // XCDR1 =====================================================================
 
 const unsigned char final_xcdr1_struct_expected[] = {
@@ -350,25 +349,13 @@ TEST(basic_tests, AppendableXcdr2Struct)
 }
 
 const unsigned char mutable_xcdr2_struct_expected[] = {
-  // Delimiter
-  0x00, 0x00, 0x00, 0x24, // +4 = 4
-  // short_field
-  0x00, 0x00, 0x00, 0x00, // PID  +4 = 8
-  0x7f, 0xff, // +2 = 10
-  // long_field
-  0x00, 0x00, // +2 pad = 12
-  0x00, 0x00, 0x00, 0x01, // PID  +4 = 16
-  0x7f, 0xff, 0xff, 0xff, // +4 = 20
-  // octet_field
-  0x00, 0x00, 0x00, 0x02, // PID  +4 = 24
-  0x01, // +1 = 25
-  // long_long_field
-  0x00, 0x00, 0x00, // +3 pad = 28
-  0x00, 0x00, 0x00, 0x03, // PID  +4 = 32
-  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 40
+  0x00,0,0,0x24, // +4=4 Delimiter
+  0x10,0,0,0x00, 0x7f,0xff,  (0),(0), // +4+2+(2)=12 short_field
+  0x20,0,0,0x01, 0x7f,0xff,0xff,0xff, // +4+4    =20 long_field
+  0x00,0,0,0x02, 0x01,   (0),(0),(0), // +4+1+(3)=28 octet_field
+  0x30,0,0,0x03, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // +4+8=40 long_long_field
 };
-*/
-/*
+
 TEST(basic_tests, MutableXcdr2Struct)
 {
   baseline_checks<MutableXcdr2Struct>(xcdr2, mutable_xcdr2_struct_expected);
@@ -419,22 +406,11 @@ const unsigned char mutable_struct_expected_xcdr1[] = {
 };
 
 const unsigned char mutable_struct_expected_xcdr2[] = {
-  // Delimiter
-  0x00, 0x00, 0x00, 0x24, // +4 = 4
-  // short_field
-  0x00, 0x00, 0x00, 0x04, // PID +4 = 8
-  0x7f, 0xff, // +2 = 10
-  // long_field
-  0x00, 0x00, // +2 pad = 12
-  0x00, 0x00, 0x00, 0x06, // PID +4 = 16
-  0x7f, 0xff, 0xff, 0xff, // +4 = 20
-  // octet_field
-  0x00, 0x00, 0x00, 0x08, // PID +4 = 24
-  0x01, // +1 = 25
-  // long_long_field
-  0x00, 0x00, 0x00, // +3 pad = 28
-  0x00, 0x00, 0x00, 0x0a, // PID +4 = 32
-  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 40
+  0x00,0,0,0x24, // +4=4 Delimiter
+  0x10,0,0,0x04, 0x7f,0xff,  (0),(0), // +4+2+(2)=12 short_field
+  0x20,0,0,0x06, 0x7f,0xff,0xff,0xff, // +4+4    =20 long_field
+  0x00,0,0,0x08, 0x01,   (0),(0),(0), // +4+1+(3)=28 octet_field
+  0x30,0,0,0x0a, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // +4+8=40 long_long_field
 };
 
 // Baseline ------------------------------------------------------------------
@@ -490,21 +466,11 @@ TEST(mutable_tests, to_reordered_xcdr2_test)
 TEST(mutable_tests, from_reordered_xcdr2_test)
 {
   const unsigned char expected[] = {
-    // Delimiter
-    0x00, 0x00, 0x00, 0x22, // +4 = 4
-    // long_field
-    0x00, 0x00, 0x00, 0x06, // PID +4 = 8
-    0x7f, 0xff, 0xff, 0xff, // +4 = 12
-    // long_long_field
-    0x00, 0x00, 0x00, 0x0a, // PID +4 = 16
-    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
-    // octet_field
-    0x00, 0x00, 0x00, 0x08, // PID +4 = 28
-    0x01, // +1 = 29
-    // short_field
-    0x00, 0x00, 0x00, // +3 pad = 32
-    0x00, 0x00, 0x00, 0x04, // PID +4 = 36
-    0x7f, 0xff // +2 = 38
+    0x00,0,0,0x22, // +4=4 Delimiter
+    0x20,0,0,0x06, 0x7f,0xff,0xff,0xff, // +4+4=12 long_field
+    0x30,0,0,0x0a, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=24 long_long_field
+    0x00,0,0,0x08, 0x01,   (0),(0),(0), // +4+1+(3)=32 octet_field
+    0x10,0,0,0x04, 0x7f,0xff            // +4+2    =38 short_field
   };
   amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr2, expected);
 }
@@ -561,76 +527,39 @@ TEST(mutable_tests, to_additional_field_xcdr2_test)
 TEST(mutable_tests, from_additional_field_must_understand_test)
 {
   const unsigned char additional_field_must_understand[] = {
-    // Delimiter
-    0x00, 0x00, 0x00, 0x2a, // +4 = 4
-    // long_field
-    0x00, 0x00, 0x00, 0x06, // PID +4 = 8
-    0x7f, 0xff, 0xff, 0xff, // +4 = 12
-    // additional_field @must_understand
-    0x80, 0x00, 0x00, 0x01, // PID +4 = 16
-    0x12, 0x34, 0x56, 0x78, // +4 = 20
-    // long_long_field
-    0x00, 0x00, 0x00, 0x0a, // PID +4 = 24
-    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 32
-    // octet_field
-    0x00, 0x00, 0x00, 0x08, // PID +4 = 36
-    0x01, // +1 = 37
-    // short_field
-    0x00, 0x00, 0x00, // +3 pad = 40
-    0x00, 0x00, 0x00, 0x04, // PID +4 = 44
-    0x7f, 0xff // +2 = 46
+    0x00,0x00,0x00,0x2a, // +4=4 Delimiter
+    0x20,0x00,0x00,0x06, 0x7f,0xff,0xff,0xff, // +4+4=12 long_field
+    0xa0,0x00,0x00,0x01, 0x12,0x34,0x56,0x78, // +4+4=20 additional_field @must_understand
+    0x30,0x00,0x00,0x0a, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=32 long_long_field
+    0x00,0x00,0x00,0x08, 0x01,   (0),(0),(0), // +4+1+(3)=40 octet_field
+    0x10,0x00,0x00,0x04, 0x7f,0xff            // +4+2    =46 short_field
   };
 
   // Deserialization should fail for unknown must_understand field
-  {
-    ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
-    Serializer serializer(&buffer, xcdr2);
-
-    MutableStruct result;
-    EXPECT_FALSE(serializer >> result);
-  }
+  ACE_Message_Block buffer(1024);
+  buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
+  Serializer serializer(&buffer, xcdr2);
+  MutableStruct result;
+  EXPECT_FALSE(serializer >> result);
 
   // Deserialize and Compare C++ Values
-  {
-    ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
-    Serializer serializer(&buffer, xcdr2);
-
-    AdditionalFieldMutableStruct result;
-    ASSERT_TRUE(serializer >> result);
-
-    AdditionalFieldMutableStruct value;
-    set_values(value);
-    EXPECT_PRED_FORMAT2(assert_values, value, result);
-  }
+  AdditionalFieldMutableStruct expected;
+  set_values(expected);
+  deserialize_compare(xcdr2, additional_field_must_understand, sizeof(additional_field_must_understand), expected);
 }
 
 TEST(mutable_tests, from_additional_field_xcdr2_test)
 {
   const unsigned char expected[] = {
-    // Delimiter
-    0x00, 0x00, 0x00, 0x2a, // +4 = 4
-    // long_field
-    0x00, 0x00, 0x00, 0x06, // PID +4 = 8
-    0x7f, 0xff, 0xff, 0xff, // +4 = 12
-    // additional_field
-    0x00, 0x00, 0x00, 0x01, // PID +4 = 16
-    0x12, 0x34, 0x56, 0x78, // +4 = 20
-    // long_long_field
-    0x00, 0x00, 0x00, 0x0a, // PID +4 = 24
-    0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 32
-    // octet_field
-    0x00, 0x00, 0x00, 0x08, // PID +4 = 36
-    0x01, // +1 = 37
-    // short_field
-    0x00, 0x00, 0x00, // +3 pad = 40
-    0x00, 0x00, 0x00, 0x04, // PID +4 = 44
-    0x7f, 0xff // +2 = 46
+    0x00,0x00,0x00,0x2a, // +4=4 Delimiter
+    0x20,0x00,0x00,0x06, 0x7f,0xff,0xff,0xff, // +4+4=12 long_field
+    0x20,0x00,0x00,0x01, 0x12,0x34,0x56,0x78, // +4+4=20 additional_field
+    0x30,0x00,0x00,0x0a, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=32 long_long_field
+    0x00,0x00,0x00,0x08, 0x01,   (0),(0),(0), // +4+1+(3)=40 octet_field
+    0x10,0x00,0x00,0x04, 0x7f,0xff            // +4+2    =46 short_field
   };
   amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2, expected);
 }
-*/
 
 TEST(mutable_tests, length_code_test)
 {
