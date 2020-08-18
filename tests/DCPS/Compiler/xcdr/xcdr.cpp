@@ -313,7 +313,77 @@ TEST(basic_tests, MutableXcdr12Struct)
 }
 
 // Appendable Tests ==========================================================
-// TODO(iguessthislldo)
+
+const unsigned char additional_nested_expected_xcdr2[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x18, // +4 = 4
+  // short_field
+  0x7f, 0xff, // +2 = 6
+  // long_field
+  0x00, 0x00, // +2 pad = 8
+  0x7f, 0xff, 0xff, 0xff, // +4 = 12
+  // octet_field
+  0x01, // +1 = 13
+  // long_long_field
+  0x00, 0x00, 0x00, // +3 pad = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
+  // additional_field (long)
+  0x12, 0x34, 0x56, 0x78 // +4 = 28
+};
+
+TEST(appendable_tests, FromNestedStruct)
+{
+  amalgam_serializer_test<NestedStruct, AdditionalFieldNestedStruct>(
+    xcdr2, appendable_xcdr2_struct_expected);
+}
+
+TEST(appendable_tests, FromAdditionalNestedStruct)
+{
+  amalgam_serializer_test<AdditionalFieldNestedStruct, NestedStruct>(
+    xcdr2, additional_nested_expected_xcdr2);
+}
+
+TEST(appendable_tests, BothAdditionalNestedStruct)
+{
+  serializer_test<AdditionalFieldNestedStruct>(
+    xcdr2, additional_nested_expected_xcdr2);
+}
+
+const unsigned char appendable_expected_xcdr2[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x2c, // +4 = 4
+  // Delimiter of the nested struct
+  0x00, 0x00, 0x00, 0x14, // +4 = 8
+  // Inner short_field
+  0x7f, 0xff, // +2 = 10
+  // Inner long_field
+  0x00, 0x00, // +2 pad = 12
+  0x7f, 0xff, 0xff, 0xff, // +4 = 16
+  // Inner octet_field
+  0x01, // +1 = 17
+  // Inner long_long_field
+  0x00, 0x00, 0x00, // +3 = 20
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 28
+  // short_field
+  0x7f, 0xff, // +2 = 30
+  // long_field
+  0x00, 0x00, // +2 = 32
+  0x7f, 0xff, 0xff, 0xff, // +4 = 36
+  // octet_field
+  0x01, // +1 = 37
+  // long_long_field
+  0x00, 0x00, 0x00, // +3 pad = 40
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 48
+};
+
+TEST(appendable_tests, BothAppendableStruct)
+{
+  AppendableStruct send, receive;
+  set_base_values<NestedStruct>(send.nested);
+  set_base_values<AppendableStruct>(send);
+  amalgam_serializer_test<AppendableStruct, AppendableStruct>(
+    xcdr2, appendable_expected_xcdr2, send, receive);
+}
 
 // Mutable Tests =============================================================
 

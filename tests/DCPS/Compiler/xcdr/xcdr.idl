@@ -69,7 +69,34 @@ struct MutableXcdr12Struct {
 };
 
 // Appendable Tests ==========================================================
-// TODO(iguessthislldo)
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct NestedStruct {
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableStruct {
+  NestedStruct nested;
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldNestedStruct {
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldAppendableStruct {
+  AdditionalFieldNestedStruct nested;
+  COMMON_FIELDS
+  long additional_field;
+};
 
 // Mutable Tests =============================================================
 // TODO(iguessthislldo): Add more fields

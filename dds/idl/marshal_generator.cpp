@@ -1898,7 +1898,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     string intro;
     if (may_be_delimited) {
       be_global->impl_ <<
-        "  size_t total_size = 0;\n";
+        "  size_t total_size = 0, start_pos = strm.pos();\n";
       const char* indent = "  ";
       if (not_only_delimited) {
         indent = "    ";
@@ -1926,7 +1926,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       if (repr.xcdr2) {
         be_global->impl_ << "\n"
-          "    if (strm.pos() >= total_size + uint32_cdr_size";
+          "    if (strm.pos() - start_pos >= total_size + uint32_cdr_size";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
             "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
@@ -1996,7 +1996,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         // TODO (sonndinh): When the stream ends before some fields on the
         // reader side get their values, are they set to their default values
         // or is this a place where try-construct comes into play?
-        expr += "  if (strm.pos() >= total_size) {\n";
+        expr += "  if (strm.pos() - start_pos >= total_size) {\n";
         expr += "    return true;\n";
         expr += "  }\n";
         expr += "  if (!";
@@ -2009,8 +2009,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += ")";
         }
       }
-      expr += "  if (strm.pos() < total_size) {\n";
-      expr += "    strm.skip(total_size - strm.pos());\n";
+      expr += "  if (strm.pos() - start_pos < total_size) {\n";
+      expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
       expr += "  }\n";
       expr += "  return true;\n";
       be_global->impl_ << intro << expr;
