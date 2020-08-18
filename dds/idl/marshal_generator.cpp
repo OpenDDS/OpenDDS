@@ -2225,8 +2225,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
   const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
-  const bool may_be_delimited = not_final && repr.xcdr2;
-  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
