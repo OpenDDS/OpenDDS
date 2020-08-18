@@ -314,6 +314,12 @@ TEST(basic_tests, MutableXcdr12Struct)
 
 // Appendable Tests ==========================================================
 
+TEST(appendable_tests, FromNestedStruct)
+{
+  amalgam_serializer_test<NestedStruct, AdditionalFieldNestedStruct>(
+    xcdr2, appendable_xcdr2_struct_expected);
+}
+
 const unsigned char additional_nested_expected_xcdr2[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x18, // +4 = 4
@@ -331,22 +337,27 @@ const unsigned char additional_nested_expected_xcdr2[] = {
   0x12, 0x34, 0x56, 0x78 // +4 = 28
 };
 
-TEST(appendable_tests, FromNestedStruct)
+void set_additional_nested_struct(AdditionalFieldNestedStruct& value)
 {
-  amalgam_serializer_test<NestedStruct, AdditionalFieldNestedStruct>(
-    xcdr2, appendable_xcdr2_struct_expected);
+  set_base_values<AdditionalFieldNestedStruct>(value);
+  value.additional_field = 0x12345678;
 }
 
 TEST(appendable_tests, FromAdditionalNestedStruct)
 {
+  AdditionalFieldNestedStruct send;
+  set_additional_nested_struct(send);
+  NestedStruct receive;
   amalgam_serializer_test<AdditionalFieldNestedStruct, NestedStruct>(
-    xcdr2, additional_nested_expected_xcdr2);
+    xcdr2, additional_nested_expected_xcdr2, send, receive);
 }
 
 TEST(appendable_tests, BothAdditionalNestedStruct)
 {
-  serializer_test<AdditionalFieldNestedStruct>(
-    xcdr2, additional_nested_expected_xcdr2);
+  AdditionalFieldNestedStruct send, receive;
+  set_additional_nested_struct(send);
+  amalgam_serializer_test<AdditionalFieldNestedStruct, AdditionalFieldNestedStruct>(
+    xcdr2, additional_nested_expected_xcdr2, send, receive);
 }
 
 const unsigned char appendable_expected_xcdr2[] = {
@@ -376,13 +387,83 @@ const unsigned char appendable_expected_xcdr2[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 48
 };
 
+void set_appendable_struct(AppendableStruct& value)
+{
+  set_base_values<NestedStruct>(value.nested);
+  set_base_values<AppendableStruct>(value);
+}
+
 TEST(appendable_tests, BothAppendableStruct)
 {
   AppendableStruct send, receive;
-  set_base_values<NestedStruct>(send.nested);
-  set_base_values<AppendableStruct>(send);
+  set_appendable_struct(send);
   amalgam_serializer_test<AppendableStruct, AppendableStruct>(
     xcdr2, appendable_expected_xcdr2, send, receive);
+}
+
+TEST(appendable_tests, FromAppendableStruct)
+{
+  AppendableStruct send;
+  set_appendable_struct(send);
+  AdditionalFieldAppendableStruct receive;
+  amalgam_serializer_test<AppendableStruct, AdditionalFieldAppendableStruct>(
+    xcdr2, appendable_expected_xcdr2, send, receive)
+}
+
+const unsigned char additional_appendable_expected_xcdr2[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x34, // +4 = 4
+  // Delimiter of the nested struct
+  0x00, 0x00, 0x00, 0x30, // +4 = 8
+  // Inner short_field
+  0x7f, 0xff, // +2 = 10
+  // Inner long_field
+  0x00, 0x00, // +2 pad = 12
+  0x7f, 0xff, 0xff, 0xff, // +4 = 16
+  // Inner octet_field
+  0x01, // +1 = 17
+  // Inner long_long_field
+  0x00, 0x00, 0x00, 0x00, // +3 pad = 20
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 28
+  // Inner additional_field
+  0x12, 0x34, 0x56, 0x78, // +4 = 32
+  // short_field
+  0x7f, 0xff, // +2 = 34
+  // long_field
+  0x00, 0x00, // +2 pad = 36
+  0x7f, 0xff, 0xff, 0xff, // +4 = 40
+  // octet_field
+  0x01, // +1 = 41
+  // long_long_field
+  0x00, 0x00, 0x00, // +3 pad = 44
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 52
+  // additional_field
+  0x12, 0x34, 0x56, 0x78 // +4 = 56
+};
+
+void set_additional_appendable_struct(AdditionalFieldAppendableStruct& value)
+{
+  set_additional_nested_struct(value.nested);
+  set_base_values<AdditionalFieldAppendableStruct>(value);
+  value.additional_field = 0x12345678;
+}
+
+TEST(appendable_tests, FromAdditionalAppendableStruct)
+{
+  AdditionalFieldAppendableStruct send;
+  set_additional_appendable_struct(send);
+  AppendableStruct receive;
+  amalgam_serializer_test<AdditionalFieldAppendableStruct, AppendableStruct>(
+    xcdr2, additional_appendable_expected_xcdr2, send, receive);
+}
+
+TEST(appendable_tests, BothAdditionalAppendableStruct)
+{
+  AdditionalFieldAppendableStruct send, receive;
+  set_additional_appendable_struct(send);
+  amalgam_serializer_test<AdditionalFieldAppendableStruct,
+                          AdditionalFieldAppendableStruct>(
+    xcdr2, additional_appendable_expected_xcdr2, send, receive);
 }
 
 // Mutable Tests =============================================================
