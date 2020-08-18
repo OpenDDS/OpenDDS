@@ -1985,8 +1985,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  return false;\n";
     } else {
       string expr;
-      expr += "  total_size += uint32_cdr_size;\n";
+      if (exten == extensibilitykind_appendable && repr.xcdr2) {
+        expr += "  total_size += uint32_cdr_size;\n";
+      }
       for (size_t i = 0; i < fields.size(); ++i) {
+        if (!(exten == extensibilitykind_appendable && repr.xcdr2)) {
+          if (i) expr += "\n    && ";
+        }
         const string field_name = fields[i]->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
@@ -1996,24 +2001,32 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         // TODO (sonndinh): When the stream ends before some fields on the
         // reader side get their values, are they set to their default values
         // or is this a place where try-construct comes into play?
-        expr += "  if (strm.pos() - start_pos >= total_size) {\n";
-        expr += "    return true;\n";
-        expr += "  }\n";
-        expr += "  if (!";
+        if (exten == extensibilitykind_appendable && repr.xcdr2) {
+          expr += "  if (strm.pos() - start_pos >= total_size) {\n";
+          expr += "    return true;\n";
+          expr += "  }\n";
+          expr += "  if (!";
+        }
         expr += streamCommon(
           field_name, fields[i]->field_type(), ">> stru", intro, cxx);
-        expr += ") {\n";
-        expr += "    return false;\n";
-        expr += "  }\n";
+        if (exten == extensibilitykind_appendable && repr.xcdr2) {
+          expr += ") {\n";
+          expr += "    return false;\n";
+          expr += "  }\n";
+        }
         if (!cond.empty()) {
           expr += ")";
         }
       }
-      expr += "  if (strm.pos() - start_pos < total_size) {\n";
-      expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
-      expr += "  }\n";
-      expr += "  return true;\n";
-      be_global->impl_ << intro << expr;
+      if (exten == extensibilitykind_appendable && repr.xcdr2) {
+        expr += "  if (strm.pos() - start_pos < total_size) {\n";
+        expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
+        expr += "  }\n";
+        expr += "  return true;\n";
+        be_global->impl_ << intro << expr;
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
   }
 

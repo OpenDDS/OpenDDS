@@ -407,7 +407,7 @@ TEST(appendable_tests, FromAppendableStruct)
   set_appendable_struct(send);
   AdditionalFieldAppendableStruct receive;
   amalgam_serializer_test<AppendableStruct, AdditionalFieldAppendableStruct>(
-    xcdr2, appendable_expected_xcdr2, send, receive)
+    xcdr2, appendable_expected_xcdr2, send, receive);
 }
 
 const unsigned char additional_appendable_expected_xcdr2[] = {
