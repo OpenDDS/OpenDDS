@@ -411,6 +411,7 @@ namespace {
       be_global->impl_ << "  }\n";
     }
   }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
