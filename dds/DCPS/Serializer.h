@@ -653,24 +653,21 @@ public:
   bool peek(T& t)
   {
     // save
-    const bool good_bit = good_bit_;
     ACE_Message_Block* current = current_;
-    char* rd_ptr = current_->rd_ptr();
-    char* wr_ptr = current_->wr_ptr();
+    char* const rd_ptr = current_->rd_ptr();
+    char* const wr_ptr = current_->wr_ptr();
+    //size_t pos = current_->pos_;
 
     // read
-    if (!align_r(sizeof(T))) {
+    if (!(*this >> t)) {
       return false;
     }
-    buffer_read(reinterpret_cast<char*>(&t), sizeof(T), swap_bytes());
 
     // reset
-    current->reset();
     current->wr_ptr(wr_ptr);
     current->rd_ptr(rd_ptr);
     current_ = current;
-    good_bit_ = good_bit;
-    return good_bit_;
+    return true;
   }
 
 private:

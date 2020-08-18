@@ -1811,7 +1811,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
     be_global->impl_ << intro << expr;
 
-    if (repr.xcdr1 && may_be_parameter_list) {
+    if (may_be_parameter_list) {
       be_global->impl_ <<
         "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }

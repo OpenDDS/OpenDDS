@@ -86,8 +86,8 @@ void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
   EXPECT_STREQ(a.str1, b.str1);
   EXPECT_STREQ(a.str2, b.str2);
   EXPECT_STREQ(a.str3, b.str3);
-  //EXPECT_STREQ(a.str4, b.str4);
-  //EXPECT_STREQ(a.str5, b.str5);
+  EXPECT_STREQ(a.str4, b.str4);
+  EXPECT_STREQ(a.str5, b.str5);
 }
 
 template<>
@@ -107,6 +107,13 @@ void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
   EXPECT_EQ(a.ll3[0], b.ll3[0]);
   EXPECT_EQ(a.ll3[1], b.ll3[1]);
   EXPECT_EQ(a.ll3[2], b.ll3[2]);
+
+  EXPECT_EQ(a.s3.length(), b.s3.length());
+  EXPECT_EQ(a.s3[0], b.s3[0]);
+  EXPECT_EQ(a.s3[1], b.s3[1]);
+
+  EXPECT_STREQ(a.str4, b.str4);
+  EXPECT_STREQ(a.str5, b.str5);
 }
 
 template<typename TypeA, typename TypeB>
@@ -187,6 +194,19 @@ bool operator==(const DataView& a, const DataView& b)
     << result.str();
 }
 
+template<typename T, size_t Message_Block_Size = 1024>
+void deserialize_compare(
+  const Encoding& encoding, const unsigned char data[], const size_t size, const T& expected)
+{
+  ACE_Message_Block mb(Message_Block_Size);
+  mb.copy((const char*)data, size);
+  Serializer serializer(&mb, encoding);
+  T result;
+  ASSERT_TRUE(serializer >> result);
+  EXPECT_PRED_FORMAT2(assert_values, expected, result);
+  std::cout << "deserialize_compare\n";
+}
+
 template<typename TypeA, typename TypeB>
 void amalgam_serializer_test(
   const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
@@ -233,7 +253,7 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
 
   serializer_test<Type>(encoding, expected_cdr);
 }
-
+/*
 // XCDR1 =====================================================================
 
 const unsigned char final_xcdr1_struct_expected[] = {
@@ -343,6 +363,7 @@ const unsigned char mutable_xcdr2_struct_expected[] = {
   0x00, 0x00, 0x00, 0x03, // PID  +4 = 32
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 40
 };
+*/
 /*
 TEST(basic_tests, MutableXcdr2Struct)
 {
@@ -610,7 +631,7 @@ TEST(mutable_tests, from_additional_field_xcdr2_test)
 TEST(mutable_tests, length_code_test)
 {
   const unsigned char expected[] = {
-    0x00,0x00,0x00,0x9d, // +4 = 4  Delimiter
+    0x00,0x00,0x00,0xc1, // +4 = 4  Delimiter
   //(MU<<31)+(LC<<28)+id    NEXTINT    Value and Pad(0) // Size (Type)
   //--------------------  -----------  -------------------------------------------
     0x00,0x00,0x00,0x00,               1,  (0),(0),(0), // 1 (octet)     +4+1+3=12
@@ -646,34 +667,36 @@ TEST(mutable_tests, length_code_test)
     "abc",                   // 3  4+4
     "abcd"                   // 4  4+5
   };
+  EXPECT_EQ(serialized_size(xcdr2, value), sizeof(expected));
   LengthCodeStruct result;
   amalgam_serializer_test<LengthCodeStruct, LengthCodeStruct>(xcdr2, expected, value, result);
 }
 
-TEST(mutable_tests, lc567_test)
+TEST(mutable_tests, read_lc567_test)
 {
-  const unsigned char expected[] = {
+  const unsigned char data[] = {
     0,0,0,0x9d, // Delimiter
     //MU,LC,id   NEXTINT   Value and Pad(0)
     0x50,0,0,0,  0,0,0,3,  1,2,3,(0), // o3
     0x60,0,0,1,  0,0,0,3,  0,0,0,1, 0,0,0,2, 0,0,0,3, // l3 4x3
     0x70,0,0,2,  0,0,0,3,  0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,2, 0,0,0,0,0,0,0,3, // ll3 8x3
+    0x30,0,0,3,            0,0,0,2,  0,1, 0,2, // s3 4+4 (bound=3; only 2 elements)
+    0x30,0,0,4,            0,0,0,4, 'a','b','c','\0', // str4 +4+4
+    0x50,0,0,5,  0,0,0,5, 'a','b','c','d','\0' // str5 +4+5
   };
-  LC567Struct value;
-  value.o3.length(3); value.l3.length(3); value.ll3.length(3);
-  value.o3[0] = 1;    value.l3[0] = 1;    value.ll3[0] = 1;
-  value.o3[1] = 2;    value.l3[1] = 2;    value.ll3[1] = 2;
-  value.o3[2] = 3;    value.l3[2] = 3;    value.ll3[2] = 3;
 
-  // Deserialize and Compare C++ Values
-  {
-    ACE_Message_Block buffer(1024);
-    buffer.copy((const char*)expected, sizeof(expected));
-    Serializer serializer(&buffer, xcdr2);
-    LC567Struct result;
-    ASSERT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(assert_values, value, result);
-  }
+  LC567Struct expected;
+  expected.o3.length(3); expected.l3.length(3); expected.ll3.length(3);
+  expected.o3[0] = 1;    expected.l3[0] = 1;    expected.ll3[0] = 1;
+  expected.o3[1] = 2;    expected.l3[1] = 2;    expected.ll3[1] = 2;
+  expected.o3[2] = 3;    expected.l3[2] = 3;    expected.ll3[2] = 3;
+  expected.s3.length(2);
+  expected.s3[0] = 1;
+  expected.s3[1] = 2;
+  expected.str4 = "abc";
+  expected.str5 = "abcd";
+
+  deserialize_compare(xcdr2, data, sizeof(data), expected);
 }
 
 int main(int argc, char* argv[])
