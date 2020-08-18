@@ -677,7 +677,14 @@ namespace XTypes {
                 && (sc_component_id().scc_index < other.sc_component_id().scc_index);
       case XTypes::EK_COMPLETE:
       case XTypes::EK_MINIMAL:
-        return (equivalence_hash() < other.equivalence_hash());
+        for (size_t i = 0; i < 14; ++i) {
+          if (equivalence_hash()[i] > other.equivalence_hash()[i]) {
+            return false;
+          } else if (equivalence_hash()[i] < other.equivalence_hash()[i]) {
+            return true;
+          }
+        }
+        return false;
       default:
         return false;
       };
