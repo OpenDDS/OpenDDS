@@ -1101,31 +1101,33 @@ namespace OpenDDS {
 
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
-          ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
-          // if the type object is not in cache, send RPC request
-          MatchingData md;
-          md.dwQos = dwQos;
-          md.pubQos = pubQos;
-          md.drQos = drQos;
-          md.subQos = subQos;
-          md.wTls = wTls;
-          md.rTls = rTls;
-          md.writer_type_info = writer_type_info;
-          md.reader_type_info = reader_type_info;
-          md.cfProp = cfProp;
-          md.writer = writer;
-          md.reader = reader;
-          md.time_added_to_map = MonotonicTimePoint::now();
+          {
+            ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
+            // if the type object is not in cache, send RPC request
+            MatchingData md;
+            md.dwQos = dwQos;
+            md.pubQos = pubQos;
+            md.drQos = drQos;
+            md.subQos = subQos;
+            md.wTls = wTls;
+            md.rTls = rTls;
+            md.writer_type_info = writer_type_info;
+            md.reader_type_info = reader_type_info;
+            md.cfProp = cfProp;
+            md.writer = writer;
+            md.reader = reader;
+            md.time_added_to_map = MonotonicTimePoint::now();
 
-          // store in the map by writer
-          MatchingDataIter md_it = matching_data_buffer_.find(writer);
-          if (md_it != matching_data_buffer_.end()) {
-            // TLS_TODO: is this scenario possible?
-            md_it->second = md;
-          } else {
-            matching_data_buffer_.insert(std::make_pair(writer, md));
+            // store in the map by writer
+            MatchingDataIter md_it = matching_data_buffer_.find(writer);
+            if (md_it != matching_data_buffer_.end()) {
+              // TLS_TODO: is this scenario possible?
+              md_it->second = md;
+            }
+            else {
+              matching_data_buffer_.insert(std::make_pair(writer, md));
+            }
           }
-
           // TLS_TODO: uncomment when ready
           //if (!writer_local) {
           //  if (!type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
