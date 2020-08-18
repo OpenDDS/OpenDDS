@@ -231,6 +231,8 @@ TEST(basic_tests, MutableXcdr1Struct)
 // XCDR2 =====================================================================
 
 const unsigned char final_xcdr2_struct_expected[] = {
+  //dheader
+  0x00, 0x00, 0x00, 0x14,
   // short_field
   0x7f, 0xff, // +2 = 2
   // long_field
