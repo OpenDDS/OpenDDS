@@ -500,6 +500,8 @@ Sedp::init(const RepoId& guid,
   }
   type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
+  max_type_lookup_service_reply_period_ = disco.config()->max_type_lookup_service_reply_period();
+
   return DDS::RETCODE_OK;
 }
 

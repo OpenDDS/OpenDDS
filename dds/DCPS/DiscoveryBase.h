@@ -214,7 +214,7 @@ namespace OpenDDS {
         , subscription_counter_(0)
         , topic_counter_(0)
         , reactor_task_(false)
-        , max_reply_period_(5)  // 5 sec sufficient?
+        , max_type_lookup_service_reply_period_(0)
 #ifdef OPENDDS_SECURITY
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
@@ -937,7 +937,7 @@ namespace OpenDDS {
       DCPS::ReactorTask reactor_task_;
       typedef DCPS::PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
       DCPS::RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
-      const TimeDuration max_reply_period_;
+      TimeDuration max_type_lookup_service_reply_period_;
       // TLS_TODO: is dedicated synchronisation needed for matching_data_buffer_?
       mutable ACE_Thread_Mutex matching_data_buffer_lock_;
 
@@ -1135,7 +1135,7 @@ namespace OpenDDS {
           //    type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
           //    md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
           //    send_type_lookup_request(type_ids, writer);
-          //    type_lookup_reply_deadline_processor_->schedule(max_reply_period_);
+          //    type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
           //    // TLS_TODO: sanity check on locks
           //    return;
           //  }
@@ -1145,7 +1145,7 @@ namespace OpenDDS {
           //    type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
           //    md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
           //    send_type_lookup_request(type_ids, reader);
-          //    type_lookup_reply_deadline_processor_->schedule(max_reply_period_);
+          //    type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
           //    // TLS_TODO: sanity check on locks
           //    return;
           //  }
@@ -1208,7 +1208,7 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
-          if (MonotonicTimePoint::now() - it->second.time_added_to_map >= max_reply_period_) {
+          if (MonotonicTimePoint::now() - it->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
             matching_data_buffer_.erase(it->first);
           }
         }
@@ -1251,24 +1251,30 @@ namespace OpenDDS {
         DataReaderCallbacks* drr = 0;
 
         // find by writer
-        MatchingDataIter md = matching_data_buffer_.find(writer);
-        if (md != matching_data_buffer_.end()) {
-          dwQos = md->second.dwQos;
-          pubQos = md->second.pubQos;
-          drQos = md->second.drQos;
-          subQos = md->second.subQos;
-          wTls = md->second.wTls;
-          rTls = md->second.rTls;
-          writer_type_info = md->second.writer_type_info;
-          reader_type_info = md->second.reader_type_info;
-          cfProp = md->second.cfProp;
-          matching_data_buffer_.erase(writer);
-        } else {
-          if (DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-              ACE_TEXT("match_continue failed\n")));
+        {
+          // TLS_TODO: sanity check on locks
+          ACE_GUARD(ACE_Thread_Mutex, g, matching_data_buffer_lock_);
+
+          MatchingDataIter md = matching_data_buffer_.find(writer);
+          if (md != matching_data_buffer_.end()) {
+            dwQos = md->second.dwQos;
+            pubQos = md->second.pubQos;
+            drQos = md->second.drQos;
+            subQos = md->second.subQos;
+            wTls = md->second.wTls;
+            rTls = md->second.rTls;
+            writer_type_info = md->second.writer_type_info;
+            reader_type_info = md->second.reader_type_info;
+            cfProp = md->second.cfProp;
+            matching_data_buffer_.erase(writer);
           }
-          return;
+          else {
+            if (DCPS_debug_level > 3) {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
+                ACE_TEXT("match_continue failed\n")));
+            }
+            return;
+          }
         }
 
         // Need to release lock, below, for callbacks into DCPS which could

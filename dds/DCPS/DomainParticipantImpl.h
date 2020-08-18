@@ -372,6 +372,8 @@ public:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
+  XTypes::TypeLookupService_rch GetTypeLookupService() { return type_lookup_service_; }
+
 #if defined(OPENDDS_SECURITY)
   void set_security_config(const Security::SecurityConfig_rch& config);
 
@@ -564,11 +566,7 @@ private:
 
   virtual int handle_exception(ACE_HANDLE fd);
 
-private:
   XTypes::TypeLookupService_rch type_lookup_service_;
-
-public:
-  XTypes::TypeLookupService_rch GetTypeLookupService() { return type_lookup_service_; }
 };
 
 } // namespace DCPS

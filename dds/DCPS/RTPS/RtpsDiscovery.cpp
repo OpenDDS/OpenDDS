@@ -74,6 +74,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_ice_(false)
   , use_ncm_(true)
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
+  , max_type_lookup_service_reply_period_(5, 0)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -586,6 +587,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                        ACE_TEXT("%C section has a Customization setting.\n"),
                        rtps_name.c_str()));
           }
+        } else if (name == "TypeLookupServiceReplyTimeout") {
+          const OPENDDS_STRING& value = it->second;
+          int timeout;
+          if (!DCPS::convertToInteger(value, timeout)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for TypeLookupServiceReplyTimeout in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
