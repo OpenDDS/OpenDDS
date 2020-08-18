@@ -114,6 +114,10 @@ void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
 
   EXPECT_STREQ(a.str4, b.str4);
   EXPECT_STREQ(a.str5, b.str5);
+
+  EXPECT_EQ(a.ls.length(), b.ls.length());
+  EXPECT_EQ(a.ls[0], b.ls[0]);
+  EXPECT_EQ(a.ls[1], b.ls[1]);
 }
 
 template<typename TypeA, typename TypeB>
@@ -675,14 +679,15 @@ TEST(mutable_tests, length_code_test)
 TEST(mutable_tests, read_lc567_test)
 {
   const unsigned char data[] = {
-    0,0,0,0x9d, // Delimiter
+    0,0,0,0x7c, // Delimiter +4=4
     //MU,LC,id   NEXTINT   Value and Pad(0)
-    0x50,0,0,0,  0,0,0,3,  1,2,3,(0), // o3
-    0x60,0,0,1,  0,0,0,3,  0,0,0,1, 0,0,0,2, 0,0,0,3, // l3 4x3
-    0x70,0,0,2,  0,0,0,3,  0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,2, 0,0,0,0,0,0,0,3, // ll3 8x3
-    0x30,0,0,3,            0,0,0,2,  0,1, 0,2, // s3 4+4 (bound=3; only 2 elements)
-    0x30,0,0,4,            0,0,0,4, 'a','b','c','\0', // str4 +4+4
-    0x50,0,0,5,  0,0,0,5, 'a','b','c','d','\0' // str5 +4+5
+    0x50,0,0,0,  0,0,0,3,  1,2,3,(0), // o3 +4+4+3+(1)=16
+    0x60,0,0,1,  0,0,0,3,  0,0,0,1, 0,0,0,2, 0,0,0,3, // l3 +4+4+4x3=36
+    0x70,0,0,2,  0,0,0,3,  0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,2, 0,0,0,0,0,0,0,3, // ll3 +4+4+8x3=68
+    0x30,0,0,3,            0,0,0,2,  0,1, 0,2, // s3 +4+4+4=80 (bound=3; only 2 elements)
+    0x30,0,0,4,            0,0,0,4, 'a','b','c','\0', // str4 +4+4+4=92
+    0x50,0,0,5,  0,0,0,5, 'a','b','c','d','\0',(0),(0),(0), // str5 +4+4+5+(3)=108
+    0x60,0,0,6,  0,0,0,2,  0,0,0,1, 0,0,0,2 // ls +4+4+4x2=124
   };
 
   LC567Struct expected;
@@ -690,9 +695,9 @@ TEST(mutable_tests, read_lc567_test)
   expected.o3[0] = 1;    expected.l3[0] = 1;    expected.ll3[0] = 1;
   expected.o3[1] = 2;    expected.l3[1] = 2;    expected.ll3[1] = 2;
   expected.o3[2] = 3;    expected.l3[2] = 3;    expected.ll3[2] = 3;
-  expected.s3.length(2);
-  expected.s3[0] = 1;
-  expected.s3[1] = 2;
+  expected.s3.length(2); expected.ls.length(2);
+  expected.s3[0] = 1;    expected.ls[0] = 1;
+  expected.s3[1] = 2;    expected.ls[1] = 2;
   expected.str4 = "abc";
   expected.str5 = "abcd";
 

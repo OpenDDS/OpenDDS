@@ -145,6 +145,7 @@ typedef sequence<octet, 3> Octet3S;
 typedef sequence<long, 3> Long3S;
 typedef sequence<long long, 3> LongLong3S;
 typedef sequence<short, 3> Short3S;
+typedef sequence<long> LongS;
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
@@ -173,7 +174,8 @@ struct LC567Struct {     //LC Size
   @id(0) Octet3S o3;     // 5    3
   @id(1) Long3S l3;      // 6  4x3
   @id(2) LongLong3S ll3; // 7  8x3
-  @id(3) Short3S s3;     // 3    8 (only 2 elements)
-  @id(4) string<4> str4; // 3  4+4
-  @id(5) string<5> str5; // 5  4+4
+  @id(3) Short3S s3;     // 3    4 (2 elements)
+  @id(4) string<4> str4; // 3    4
+  @id(5) string<5> str5; // 5    5
+  @id(6) LongS ls;       // 6  4x2 (2 elements)
 };

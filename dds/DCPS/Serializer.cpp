@@ -604,7 +604,6 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
         }
       }
     }
-    std::cout << std::hex << "emheader|lc|size[" << emheader << "|" << lc << "|" << size << "]\n";
     id = emheader & 0xfffffff;
   }
 
@@ -667,7 +666,6 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
       lc = 4; nextint = size;
     }
     const ACE_CDR::ULong emheader = (lc << 28) | id;
-    std::cout << std::hex << "lc|id|emheader|nextint|size[" << lc << "|" << id << "|" << emheader << "|" << nextint << "|" << size << "]\n";
     if (!(*this << emheader)) {
       return false;
     }
