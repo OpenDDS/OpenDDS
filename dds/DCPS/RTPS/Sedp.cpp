@@ -3298,7 +3298,7 @@ Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, plist);
 
   // Build and send RTPS message
@@ -3327,7 +3327,7 @@ Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, pmd);
 
   // Build and send RTPS message
@@ -3356,7 +3356,7 @@ Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatel
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
@@ -3386,7 +3386,7 @@ Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::Participant
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
@@ -3455,7 +3455,7 @@ Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, plist);
 
   DCPS::Message_Block_Ptr payload(
@@ -3606,7 +3606,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, type_lookup_request);
 
   // Build and send type lookup message
@@ -3637,7 +3637,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, type_lookup_reply);
 
   // Build and send type lookup message
@@ -4784,7 +4784,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
     } else if (locs.length()) {
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
-      DCPS::max_serialized_size_boolean(encoding, size);
+      DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
@@ -4796,7 +4796,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       rTls->length(1);
       (*rTls)[0] = tl;
     } else {
@@ -4826,7 +4826,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
     } else if (locs.length()) {
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
-      DCPS::max_serialized_size_boolean(encoding, size);
+      DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
@@ -4835,7 +4835,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       wTls->length(1);
       (*wTls)[0] = tl;
     } else {

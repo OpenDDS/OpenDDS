@@ -349,7 +349,7 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::OctetSeq32& seq)
   {
-    DCPS::serialized_size_ulong(encoding, size);
+    DCPS::primitive_serialized_size_ulong(encoding, size);
     if (seq.length() == 0) {
       return;
     }
