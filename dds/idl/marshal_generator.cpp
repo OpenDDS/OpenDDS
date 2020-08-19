@@ -396,11 +396,13 @@ namespace {
   // is_ser_func specifies whether this is a serialization operation
   void generate_dheader_code(const std::vector<std::string>& code, bool dheader_required, bool is_ser_func = true)
   {
+    if (is_ser_func) {
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    }
     //DHeader appears on aggregated types that are mutable or appendable in XCDR2
     //DHeader also appears on ALL sequences and arrays of non-primitives
     if (dheader_required) {
       if (is_ser_func) {
-        be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
         be_global->impl_ << "  size_t total_size = 0;\n";
       }
       be_global->impl_ <<
@@ -427,7 +429,7 @@ namespace {
 
     AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
-    const bool primitive = (elem_cls & CL_PRIMITIVE);
+    const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
         if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
@@ -942,7 +944,7 @@ namespace {
 
     AST_Type* elem = resolveActualType(arr->base_type());
     Classification elem_cls = classify(elem);
-    const bool primitive = (elem_cls & CL_PRIMITIVE);
+    const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(elem->file_name().c_str());
