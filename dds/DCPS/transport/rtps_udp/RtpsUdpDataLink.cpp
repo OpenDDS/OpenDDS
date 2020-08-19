@@ -2342,8 +2342,6 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
 
     prev_dst = GUID_UNKNOWN;
 
-    size_t submessage_length = 0;
-
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
