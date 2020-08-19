@@ -576,32 +576,19 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
 
     // Get Size
     const unsigned short lc = (emheader >> 28) & 0x7;
-    if (lc == 0) {
-      size = 1;
-    } else if (lc == 1) {
-      size = 2;
-    } else if (lc == 2) {
-      size = 4;
-    } else if (lc == 3) {
-      size = 8;
+    if (lc < 4) {
+      size = 1 << lc;
     } else {
       ACE_CDR::ULong next_int;
-      if (lc == 4) {
-        if (!(*this >> next_int)) {
-          return false;
-        }
+      if ((lc == 4) ? !(*this >> next_int) : !peek(next_int)) {
+        return false;
+      }
+      if (lc == 6) {
+        size = next_int * 4;
+      } else if (lc == 7) {
+        size = next_int * 8;
+      } else { // 4 or 5
         size = next_int;
-      } else {
-        if (!peek(next_int)) {
-          return false;
-        }
-        if (lc == 6) {
-          size = next_int * 4;
-        } else if (lc == 7) {
-          size = next_int * 8;
-        } else { // 5
-          size = next_int;
-        }
       }
     }
     id = emheader & 0xfffffff;
@@ -610,7 +597,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
   return true;
 }
 
-bool Serializer::write_parameter_id(unsigned id, size_t size)
+bool Serializer::write_parameter_id(const unsigned id, const size_t size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -651,26 +638,14 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
 
     reset_alignment();
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
-    // Compute Length Code (LC) and NEXTINT
-    ACE_CDR::ULong lc = 0;
-    ACE_CDR::ULong nextint = 0;
-    if (size == 1) {
-      lc = 0;
-    } else if (size == 2) {
-      lc = 1;
-    } else if (size == 4) {
-      lc = 2;
-    } else if (size == 8) {
-      lc = 3;
-    } else {
-      lc = 4; nextint = size;
-    }
+    // Compute Length Code, write EM Header and NEXTINT
+    const ACE_CDR::ULong lc = (size==1 ? 0 : size==2 ? 1 : size==4 ? 2 : size==8 ? 3 : 4);
     const ACE_CDR::ULong emheader = (lc << 28) | id;
     if (!(*this << emheader)) {
       return false;
     }
     if (lc == 4) {
-      return (*this << nextint);
+      return *this << ACE_CDR::ULong(size);
     }
   }
   return true;

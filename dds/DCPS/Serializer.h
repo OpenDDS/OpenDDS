@@ -624,7 +624,7 @@ public:
    *
    * Returns true if successful.
    */
-  bool write_parameter_id(unsigned id, size_t size);
+  bool write_parameter_id(const unsigned id, const size_t size);
 
   /**
    * Write the parameter ID that marks the end of XCDR1 parameter lists.
@@ -656,7 +656,6 @@ public:
     ACE_Message_Block* current = current_;
     char* const rd_ptr = current_->rd_ptr();
     char* const wr_ptr = current_->wr_ptr();
-    //size_t pos = current_->pos_;
 
     // read
     if (!(*this >> t)) {
