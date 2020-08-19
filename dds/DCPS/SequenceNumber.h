@@ -197,7 +197,7 @@ inline
 void serialized_size(const Encoding& encoding, size_t& size,
   const SequenceNumber& /*sn*/)
 {
-  max_serialized_size_ulong(encoding, size, 2);
+  primitive_serialized_size_ulong(encoding, size, 2);
 }
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;

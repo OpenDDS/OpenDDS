@@ -189,7 +189,7 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_Call& stru)
   {
-    max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.kind));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.kind));
     switch (stru.kind) {
     case XTypes::TypeLookup_getTypes_HashId:
       serialized_size(encoding, size, stru.getTypes);
@@ -267,7 +267,7 @@ namespace DCPS {
   void serialized_size(const Encoding& encoding, size_t& size,
     const XTypes::TypeLookup_Return& stru)
   {
-    max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.kind));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.kind));
     switch (stru.kind) {
     case XTypes::TypeLookup_getTypes_HashId: {
       serialized_size(encoding, size, stru.getTypes);
@@ -353,7 +353,7 @@ namespace DCPS {
     if (seq.length() == 0) {
       return;
     }
-    max_serialized_size_octet(encoding, size, seq.length());
+    primitive_serialized_size_octet(encoding, size, seq.length());
   }
 
   bool operator<<(Serializer& strm, const XTypes::OctetSeq32& seq)

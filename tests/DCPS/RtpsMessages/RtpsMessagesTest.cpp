@@ -28,14 +28,14 @@ struct TestMsg {
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
 {
-  max_serialized_size(encoding, size, stru.t.key);
+  primitive_serialized_size(encoding, size, stru.t.key);
   return true;
 }
 
 void serialized_size(
   const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
 {
-  max_serialized_size(encoding, size, stru.t.key);
+  primitive_serialized_size(encoding, size, stru.t.key);
 }
 
 bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)

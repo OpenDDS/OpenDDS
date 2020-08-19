@@ -6,8 +6,8 @@
  */
 
 #include "marshal_generator.h"
-#include "field_info.h"
 
+#include "field_info.h"
 #include "topic_keys.h"
 
 #include <utl_identifier.h>
@@ -157,7 +157,7 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
-  string getMaxSizeExprPrimitive(AST_Type* type,
+  string getSizeExprPrimitive(AST_Type* type,
     const string& count_expr = "count", const string& size_expr = "size",
     const string& encoding_expr = "encoding")
   {
@@ -168,15 +168,15 @@ namespace {
     const string first_args = encoding_expr + ", " + size_expr;
     switch (pt->pt()) {
     case AST_PredefinedType::PT_octet:
-      return "max_serialized_size_octet(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_octet(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_char:
-      return "max_serialized_size_char(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_char(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_wchar:
-      return "max_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_boolean:
-      return "max_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
     default:
-      return "max_serialized_size(" + first_args + ", " +
+      return "primitive_serialized_size(" + first_args + ", " +
         scoped(type->name()) + "(), " + count_expr + ")";
     }
   }
@@ -328,7 +328,7 @@ namespace {
       serialized_size.addArg("seq", "const " + cxx + "&");
       serialized_size.endArgs();
       be_global->impl_ <<
-        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    serialized_size(encoding, size, seq[i]);\n"
         "  }\n";
@@ -444,16 +444,16 @@ namespace {
       serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       serialized_size.endArgs();
       be_global->impl_ << const_unwrap <<
-        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(elem) <<
-          "  " + getMaxSizeExprPrimitive(elem, get_length) << ";\n";
+          "  " + getSizeExprPrimitive(elem, get_length) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -465,7 +465,7 @@ namespace {
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+            "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
           const string strlen_suffix = (elem_cls & CL_WIDE)
             ? " * OpenDDS::DCPS::char16_cdr_size;\n"
             : " + 1;\n";
@@ -670,16 +670,16 @@ namespace {
       serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_);
       serialized_size.endArgs();
       be_global->impl_ << sf.const_unwrap_ <<
-        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (sf.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (sf.as_cls_ & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(sf.as_act_) <<
-          "  " + getMaxSizeExprPrimitive(sf.as_act_, get_length) << ";\n";
+          "  " + getSizeExprPrimitive(sf.as_act_, get_length) << ";\n";
       } else if (sf.as_cls_ & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -691,7 +691,7 @@ namespace {
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (sf.as_cls_ & CL_STRING) {
           be_global->impl_ <<
-            "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+            "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
           const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
             ? " * OpenDDS::DCPS::char16_cdr_size;\n"
             : " + 1;\n";
@@ -917,23 +917,23 @@ namespace {
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
         if (n_elems > 1) {
           be_global->impl_ <<
-            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
+            "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, "
               << n_elems - 1 << ");\n";
         }
       } else if (elem_cls & CL_PRIMITIVE) {
         std::ostringstream n_elems_ss;
         n_elems_ss << n_elems;
         be_global->impl_ <<
-          "  " << getMaxSizeExprPrimitive(elem, n_elems_ss.str()) << ";\n";
+          "  " << getSizeExprPrimitive(elem, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            indent << "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" <<
+            indent << "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
@@ -1066,23 +1066,23 @@ namespace {
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
         if (af.n_elems_ > 1) {
           be_global->impl_ <<
-            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
+            "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, "
               << (af.n_elems_ - 1) << ");\n";
         }
       } else if (af.as_cls_ & CL_PRIMITIVE) {
         std::ostringstream n_elems_ss;
         n_elems_ss << af.n_elems_;
         be_global->impl_ <<
-          "  " << getMaxSizeExprPrimitive(af.as_act_, n_elems_ss.str()) << ";\n";
+          "  " << getSizeExprPrimitive(af.as_act_, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
         if (af.as_cls_ & CL_STRING) {
           be_global->impl_ <<
-            indent << "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" <<
+            indent << "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
@@ -1556,12 +1556,12 @@ namespace {
     const string indent = (is_union_member) ? "    " : "  ";
 
     if (fld_cls & CL_ENUM) {
-      return indent + "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+      return indent + "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
     } else if (fld_cls & CL_STRING) {
       const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
         : ("ACE_OS::strlen(" + qual + suffix + ")");
-      return indent + "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" +
+      return indent + "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" +
         indent + "size += " + get_size
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
@@ -1570,9 +1570,9 @@ namespace {
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
         return indent +
-          "max_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
+          "primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
       }
-      return indent + "max_serialized_size(encoding, size, " +
+      return indent + "primitive_serialized_size(encoding, size, " +
         getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
@@ -1729,7 +1729,7 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  if (stru.propagate) {\n"
-        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
         "    serialized_size(encoding, size, stru.value);\n"
         "  }\n";
@@ -1772,9 +1772,9 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  if (stru.propagate) {\n"
-        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
-        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.value.in()) + 1;\n"
         "  }\n";
     }
@@ -1859,7 +1859,7 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  serialized_size(encoding, size, stru.smHeader);\n"
-        "  max_serialized_size_octet(encoding, size, stru.content.length());\n";
+        "  primitive_serialized_size_octet(encoding, size, stru.content.length());\n";
     }
     {
       Function insertion("operator<<", "bool");
@@ -2948,10 +2948,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
     if (disc_cls & CL_ENUM) {
       be_global->impl_ <<
-        "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
     } else {
       be_global->impl_ <<
-        "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+        "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
@@ -3063,10 +3063,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (has_key) {
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
       } else {
         be_global->impl_ <<
-          "  max_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
+          "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
       }
     }
   }

@@ -1373,7 +1373,7 @@ operator>>(Serializer& s, Serializer::ToBoundedString<wchar_t> x)
 // predefined type methods
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::Short& /*value*/, size_t count)
 {
@@ -1383,7 +1383,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::UShort& /*value*/, size_t count)
 {
@@ -1393,7 +1393,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::Long& /*value*/, size_t count)
 {
@@ -1403,7 +1403,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::ULong& /*value*/, size_t count)
 {
@@ -1413,7 +1413,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::LongLong& /*value*/, size_t count)
 {
@@ -1423,7 +1423,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::ULongLong& /*value*/, size_t count)
 {
@@ -1433,7 +1433,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::Float& /*value*/, size_t count)
 {
@@ -1443,7 +1443,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::Double& /*value*/, size_t count)
 {
@@ -1453,7 +1453,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_CDR::LongDouble& /*value*/, size_t count)
 {
@@ -1464,7 +1464,7 @@ bool max_serialized_size(
 
 // predefined type method disambiguators.
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& /*encoding*/, size_t& size,
   const ACE_OutputCDR::from_boolean /*value*/, size_t count)
 {
@@ -1473,7 +1473,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& /*encoding*/, size_t& size,
   const ACE_OutputCDR::from_char /*value*/, size_t count)
 {
@@ -1482,7 +1482,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_OutputCDR::from_wchar /*value*/, size_t count)
 {
@@ -1492,7 +1492,7 @@ bool max_serialized_size(
 }
 
 ACE_INLINE
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& /*encoding*/, size_t& size,
   const ACE_OutputCDR::from_octet /*value*/, size_t count)
 {
@@ -1503,21 +1503,21 @@ bool max_serialized_size(
 // predefined type method explicit disambiguators.
 
 ACE_INLINE
-void max_serialized_size_boolean(const Encoding& /*encoding*/, size_t& size,
+void primitive_serialized_size_boolean(const Encoding& /*encoding*/, size_t& size,
   size_t count)
 {
   size += boolean_cdr_size * count;
 }
 
 ACE_INLINE
-void max_serialized_size_char(const Encoding& /*encoding*/, size_t& size,
+void primitive_serialized_size_char(const Encoding& /*encoding*/, size_t& size,
   size_t count)
 {
   size += char8_cdr_size * count;
 }
 
 ACE_INLINE
-void max_serialized_size_wchar(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_wchar(const Encoding& encoding, size_t& size,
   size_t count)
 {
   encoding.align(size, char16_cdr_size);
@@ -1525,14 +1525,14 @@ void max_serialized_size_wchar(const Encoding& encoding, size_t& size,
 }
 
 ACE_INLINE
-void max_serialized_size_octet(const Encoding& /*encoding*/, size_t& size,
+void primitive_serialized_size_octet(const Encoding& /*encoding*/, size_t& size,
   size_t count)
 {
   size += byte_cdr_size * count;
 }
 
 ACE_INLINE
-void max_serialized_size_ulong(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_ulong(const Encoding& encoding, size_t& size,
   size_t count)
 {
   encoding.align(size, uint32_cdr_size);
@@ -1540,16 +1540,10 @@ void max_serialized_size_ulong(const Encoding& encoding, size_t& size,
 }
 
 ACE_INLINE
-void serialized_size_ulong(const Encoding& encoding, size_t& size, size_t count)
-{
-  max_serialized_size_ulong(encoding, size, count);
-}
-
-ACE_INLINE
 void serialized_size_delimiter(const Encoding& encoding, size_t& size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    max_serialized_size_ulong(encoding, size);
+    primitive_serialized_size_ulong(encoding, size);
   }
 }
 
