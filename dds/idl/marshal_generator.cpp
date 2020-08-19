@@ -1986,7 +1986,14 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     } else {
       string expr;
       if (exten == extensibilitykind_appendable && repr.xcdr2) {
+        if (repr.not_only_xcdr2()) {
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+          expr += "  ";
+        }
         expr += "  total_size += uint32_cdr_size;\n";
+        if (repr.not_only_xcdr2()) {
+          expr += "  }\n";
+        }
       }
       for (size_t i = 0; i < fields.size(); ++i) {
         if (!(exten == extensibilitykind_appendable && repr.xcdr2)) {
@@ -1998,13 +2005,20 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += rtpsCustom.preFieldRead(field_name);
           expr += "(!(" + cond + ") || ";
         }
-        // TODO (sonndinh): When the stream ends before some fields on the
-        // reader side get their values, are they set to their default values
-        // or is this a place where try-construct comes into play?
+        // TODO (sonndinh): Integrate with try-construct for when the stream
+        // ends before some fields on the reader side get their values.
         if (exten == extensibilitykind_appendable && repr.xcdr2) {
-          expr += "  if (strm.pos() - start_pos >= total_size) {\n";
-          expr += "    return true;\n";
-          expr += "  }\n";
+          string indent = "";
+          if (repr.not_only_xcdr2()) {
+            expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+            indent = "  ";
+          }
+          expr += indent + "  if (strm.pos() - start_pos >= total_size) {\n";
+          expr += indent + "    return true;\n";
+          expr += indent + "  }\n";
+          if (repr.not_only_xcdr2()) {
+            expr += "  }\n";
+          }
           expr += "  if (!";
         }
         expr += streamCommon(
@@ -2019,9 +2033,17 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
       }
       if (exten == extensibilitykind_appendable && repr.xcdr2) {
-        expr += "  if (strm.pos() - start_pos < total_size) {\n";
-        expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
-        expr += "  }\n";
+        string indent = "";
+        if (repr.not_only_xcdr2()) {
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+          indent = "  ";
+        }
+        expr += indent + "  if (strm.pos() - start_pos < total_size) {\n";
+        expr += indent + "    strm.skip(total_size - strm.pos() + start_pos);\n";
+        expr += indent + "  }\n";
+        if (repr.not_only_xcdr2()) {
+          expr += "  }\n";
+        }
         expr += "  return true;\n";
         be_global->impl_ << intro << expr;
       } else {

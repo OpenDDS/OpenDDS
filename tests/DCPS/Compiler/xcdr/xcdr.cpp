@@ -358,6 +358,7 @@ TEST(appendable_tests, BothAdditionalNestedStruct)
   set_additional_nested_struct(send);
   amalgam_serializer_test<AdditionalFieldNestedStruct, AdditionalFieldNestedStruct>(
     xcdr2, additional_nested_expected_xcdr2, send, receive);
+  EXPECT_EQ(send.additional_field, receive.additional_field);
 }
 
 const unsigned char appendable_expected_xcdr2[] = {
@@ -393,12 +394,22 @@ void set_appendable_struct(AppendableStruct& value)
   set_base_values<AppendableStruct>(value);
 }
 
+template<typename TypeA, typename TypeB>
+void expect_values_equal_nested(const TypeA& a, const TypeB& b)
+{
+  EXPECT_EQ(a.nested.short_field, b.nested.short_field);
+  EXPECT_EQ(a.nested.long_field, b.nested.long_field);
+  EXPECT_EQ(a.nested.octet_field, b.nested.octet_field);
+  EXPECT_EQ(a.nested.long_long_field, b.nested.long_long_field);
+}
+
 TEST(appendable_tests, BothAppendableStruct)
 {
   AppendableStruct send, receive;
   set_appendable_struct(send);
   amalgam_serializer_test<AppendableStruct, AppendableStruct>(
     xcdr2, appendable_expected_xcdr2, send, receive);
+  expect_values_equal_nested(send, receive);
 }
 
 TEST(appendable_tests, FromAppendableStruct)
@@ -408,13 +419,14 @@ TEST(appendable_tests, FromAppendableStruct)
   AdditionalFieldAppendableStruct receive;
   amalgam_serializer_test<AppendableStruct, AdditionalFieldAppendableStruct>(
     xcdr2, appendable_expected_xcdr2, send, receive);
+  expect_values_equal_nested(send, receive);
 }
 
 const unsigned char additional_appendable_expected_xcdr2[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x34, // +4 = 4
   // Delimiter of the nested struct
-  0x00, 0x00, 0x00, 0x30, // +4 = 8
+  0x00, 0x00, 0x00, 0x18, // +4 = 8
   // Inner short_field
   0x7f, 0xff, // +2 = 10
   // Inner long_field
@@ -423,7 +435,7 @@ const unsigned char additional_appendable_expected_xcdr2[] = {
   // Inner octet_field
   0x01, // +1 = 17
   // Inner long_long_field
-  0x00, 0x00, 0x00, 0x00, // +3 pad = 20
+  0x00, 0x00, 0x00, // +3 pad = 20
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 28
   // Inner additional_field
   0x12, 0x34, 0x56, 0x78, // +4 = 32
@@ -455,6 +467,7 @@ TEST(appendable_tests, FromAdditionalAppendableStruct)
   AppendableStruct receive;
   amalgam_serializer_test<AdditionalFieldAppendableStruct, AppendableStruct>(
     xcdr2, additional_appendable_expected_xcdr2, send, receive);
+  expect_values_equal_nested(send, receive);
 }
 
 TEST(appendable_tests, BothAdditionalAppendableStruct)
@@ -464,6 +477,10 @@ TEST(appendable_tests, BothAdditionalAppendableStruct)
   amalgam_serializer_test<AdditionalFieldAppendableStruct,
                           AdditionalFieldAppendableStruct>(
     xcdr2, additional_appendable_expected_xcdr2, send, receive);
+
+  EXPECT_EQ(send.additional_field, receive.additional_field);
+  expect_values_equal_nested(send, receive);
+  EXPECT_EQ(send.nested.additional_field, receive.nested.additional_field);
 }
 
 // Mutable Tests =============================================================
