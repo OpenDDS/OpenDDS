@@ -580,7 +580,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       size = 1 << lc;
     } else {
       ACE_CDR::ULong next_int;
-      if ((lc == 4) ? !(*this >> next_int) : !peek(next_int)) {
+      if (lc == 4 ? !(*this >> next_int) : !peek(next_int)) {
         return false;
       }
       if (lc == 6) {
@@ -639,7 +639,7 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size)
     reset_alignment();
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
     // Compute Length Code, write EM Header and NEXTINT
-    const ACE_CDR::ULong lc = (size==1 ? 0 : size==2 ? 1 : size==4 ? 2 : size==8 ? 3 : 4);
+    const ACE_CDR::ULong lc = (size == 1 ? 0 : size == 2 ? 1 : size == 4 ? 2 : size == 8 ? 3 : 4);
     const ACE_CDR::ULong emheader = (lc << 28) | id;
     if (!(*this << emheader)) {
       return false;

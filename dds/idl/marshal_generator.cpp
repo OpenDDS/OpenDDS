@@ -1776,7 +1776,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     if (may_be_parameter_list) {
       /*
-       * For XCDR1 parameter lists this is used to hold the total size while
+       * For parameter lists this is used to hold the total size while
        * size is hijacked for field sizes because of alignment resets.
        */
       be_global->impl_ <<
