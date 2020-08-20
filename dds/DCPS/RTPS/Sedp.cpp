@@ -3697,7 +3697,7 @@ Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& s
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::take_tl_request - ")
               ACE_TEXT("failed to deserialize type lookup request\n")));
     return DDS::RETCODE_ERROR;
-    }
+  }
   if (type_lookup_request.data.kind == XTypes::TypeLookup_getTypes_HashId) {
     sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
                                                  type_lookup_reply.data.getTypes.result.types,

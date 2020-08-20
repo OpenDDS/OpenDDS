@@ -372,7 +372,7 @@ public:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
-  XTypes::TypeLookupService_rch GetTypeLookupService() { return type_lookup_service_; }
+  XTypes::TypeLookupService_rch get_type_lookup_service() { return type_lookup_service_; }
 
 #if defined(OPENDDS_SECURITY)
   void set_security_config(const Security::SecurityConfig_rch& config);

@@ -1540,7 +1540,7 @@ DataWriterImpl::enable()
   ti_to_pair.type_object = typesupport->getMinimalTypeObject();
   ti_to_pair_seq.append(ti_to_pair);
   // TLS_TODO: verify implementation
-  XTypes::TypeLookupService_rch type_lookup_service = participant->GetTypeLookupService();
+  XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_lookup_service->add_type_objects_to_cache(ti_to_pair_seq);
 
   this->publication_id_ =
