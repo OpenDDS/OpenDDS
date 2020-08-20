@@ -174,18 +174,11 @@ void EncapsulationHeader::options(ACE_UINT16 value)
 }
 
 ACE_INLINE
-bool max_serialized_size(const Encoding& /*encoding*/, size_t& size,
+bool serialized_size(const Encoding& /*encoding*/, size_t& size,
   const EncapsulationHeader& /*value*/)
 {
   size += 4;
   return true;
-}
-
-ACE_INLINE
-void serialized_size(const Encoding& encoding, size_t& size,
-  const EncapsulationHeader& value)
-{
-  max_serialized_size(encoding, size, value);
 }
 
 ACE_INLINE

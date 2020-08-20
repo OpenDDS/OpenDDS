@@ -123,6 +123,13 @@ namespace {
     },
   };
 
+  enum Encoding {
+    encoding_unaligned_cdr,
+    encoding_xcdr1,
+    encoding_xcdr2,
+    encoding_count
+  };
+
 } /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
@@ -1283,7 +1290,7 @@ namespace {
     throw string("Field not found.");
   }
 
-  bool is_bounded_type(AST_Type* type)
+  bool is_bounded_type(AST_Type* type, Encoding encoding)
   {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
@@ -1297,31 +1304,49 @@ namespace {
     if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
-      const Fields fields(dynamic_cast<AST_Structure*>(type));
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (!is_bounded_type((*i)->field_type())) {
-          bounded = false;
-          break;
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+        /**
+         * This is a workaround for not properly implementing
+         * max_serialized_size for XCDR.
+         */
+        bounded = false;
+      } else {
+        const Fields fields(dynamic_cast<AST_Structure*>(type));
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          if (!is_bounded_type((*i)->field_type(), encoding)) {
+            bounded = false;
+            break;
+          }
         }
       }
     } else if (fld_cls & CL_SEQUENCE) {
       if (fld_cls & CL_BOUNDED) {
         AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
-        if (!is_bounded_type(seq_node->base_type())) bounded = false;
+        if (!is_bounded_type(seq_node->base_type(), encoding)) bounded = false;
       } else {
         bounded = false;
       }
     } else if (fld_cls & CL_ARRAY) {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
-      if (!is_bounded_type(array_node->base_type())) bounded = false;
+      if (!is_bounded_type(array_node->base_type(), encoding)) bounded = false;
     } else if (fld_cls & CL_UNION) {
-      const Fields fields(dynamic_cast<AST_Union*>(type));
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (!is_bounded_type((*i)->field_type())) {
-          bounded = false;
-          break;
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+        /**
+         * This is a workaround for not properly implementing
+         * max_serialized_size for XCDR.
+         */
+        bounded = false;
+      } else {
+        const Fields fields(dynamic_cast<AST_Union*>(type));
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          if (!is_bounded_type((*i)->field_type(), encoding)) {
+            bounded = false;
+            break;
+          }
         }
       }
     }
@@ -1329,18 +1354,12 @@ namespace {
     return bounded;
   }
 
-  enum Encoding {
-    encoding_unaligned_cdr,
-    encoding_xcdr1,
-    encoding_xcdr2,
-    encoding_count
-  };
-
   /**
    * Convert a compiler Encoding value to the string name of the corresponding
    * OpenDDS::DCPS::Encoding::XcdrVersion.
    */
-  string encoding_to_xcdr_version(Encoding encoding) {
+  std::string encoding_to_xcdr_version(Encoding encoding)
+  {
     switch (encoding) {
     case encoding_xcdr1:
       return "Encoding::XCDR_VERSION_1";
@@ -1348,6 +1367,22 @@ namespace {
       return "Encoding::XCDR_VERSION_2";
     default:
       return "Encoding::XCDR_VERSION_NONE";
+    }
+  }
+
+  /**
+   * Convert a compiler Encoding value to the string name of the corresponding
+   * OpenDDS::DCPS::Encoding::Kind.
+   */
+  std::string encoding_to_encoding_kind(Encoding encoding)
+  {
+    switch (encoding) {
+    case encoding_xcdr1:
+      return "Encoding::KIND_XCDR1";
+    case encoding_xcdr2:
+      return "Encoding::KIND_XCDR2";
+    default:
+      return "Encoding::KIND_UNALIGNED_CDR";
     }
   }
 
@@ -2100,29 +2135,217 @@ namespace {
     return ss.str();
   }
 
+  bool is_bounded_topic_struct(AST_Type* type, Encoding encoding, bool key_only,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+  {
+    bool bounded = true;
+    if (key_only) {
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        AST_Structure* const struct_type = dynamic_cast<AST_Structure*>(type);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = find_type(struct_type, key_name);
+          if (!is_bounded_type(field_type, encoding)) {
+            bounded = false;
+            break;
+          }
+        }
+      } else {
+        const TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          if (!is_bounded_type(i.get_ast_type(), encoding)) {
+            bounded = false;
+            break;
+          }
+        }
+      }
+    } else {
+      bounded = is_bounded_type(type, encoding);
+    }
+    return bounded;
+  }
+
+  bool generate_marshal_traits_struct_bounds_functions(AST_Structure* node,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info, bool key_only)
+  {
+    const char* function_prefix = key_only ? "key_only_" : "";
+    AST_Type* const type_node = dynamic_cast<AST_Type*>(node);
+    const Fields fields(node);
+    const Fields::Iterator fields_end = fields.end();
+    const std::string name = scoped(node->name());
+
+    be_global->header_ <<
+      "  static bool " << function_prefix << "bounded(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      const bool bounded = is_bounded_topic_struct(type_node, encoding, key_only, keys, info);
+      be_global->header_ <<
+        "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+        "      return " << (bounded ? "true" : "false") << ";\n";
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return false;\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    be_global->header_ <<
+      "  static size_t " << function_prefix << "max_serialized_size(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
+        size_t size = 0;
+        if (key_only) {
+          if (!iterate_over_keys(encoding_unaligned_cdr, node, name, info, keys,
+                idl_max_serialized_size_iteration, &size, 0, 0)) {
+            return false;
+          }
+        } else {
+          for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+            idl_max_serialized_size(encoding, size, (*i)->field_type());
+          }
+        }
+        be_global->header_ <<
+          "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+          "      return " << size << ";\n";
+      }
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return 0;\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    return true;
+  }
+
+  bool generate_marshal_traits_struct(AST_Structure* node,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+  {
+    return
+      generate_marshal_traits_struct_bounds_functions(node, keys, info, false) && // All Fields
+      generate_marshal_traits_struct_bounds_functions(node, keys, info, true); // Key Fields
+  }
+
+  bool generate_marshal_traits_union(AST_Union* node, bool has_key)
+  {
+    be_global->header_ <<
+      "  static bool bounded(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      const bool bounded = is_bounded_type(node, encoding);
+      be_global->header_ <<
+        "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+        "      return " << (bounded ? "true" : "false") << ";\n";
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return false;\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    be_global->header_ <<
+      "  static size_t max_serialized_size(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      if (is_bounded_type(node, encoding)) {
+        size_t size = 0;
+        idl_max_serialized_size(encoding, size, node);
+        be_global->header_ <<
+          "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+          "      return " << size << ";\n";
+      }
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return 0;\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    be_global->header_ <<
+      "  static bool key_only_bounded(const Encoding& /*encoding*/)\n"
+      "  {\n"
+      // Union can only have discriminator as key, and the discriminator is always bounded.
+      "    return true;\n"
+      "  }\n"
+      "\n";
+
+    be_global->header_ <<
+      "  static size_t max_serialized_size(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      size_t size = 0;
+      if (has_key) {
+        idl_max_serialized_size(encoding, size, node->disc_type());
+      }
+      be_global->header_ <<
+        "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+        "      return " << size << ";\n";
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return 0;\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    return true;
+  }
+
   bool generate_marshal_traits(
     AST_Decl* node, const std::string& cxx,
     const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
-    bool is_bounded, bool key_is_bounded)
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
     be_global->header_ <<
       "template <>\n"
       "struct MarshalTraits<" << cxx << "> {\n"
-      "  static bool gen_is_bounded_size() { return " <<
-        (is_bounded ? "true" : "false") << "; }\n"
-      "  static bool gen_is_bounded_key_size() { return " <<
-        (key_is_bounded ? "true" : "false") << "; }\n"
-      "\n"
       "  static void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)\n"
       "  {\n"
         << fill_datareprseq(repr, "seq", "    ") <<
       "  }\n"
-      "\n"
+      "\n";
+
+    if (node->node_type() == AST_Decl::NT_struct) {
+      if (!generate_marshal_traits_struct(
+            dynamic_cast<AST_Structure*>(node), keys, info)) {
+        return false;
+      }
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      if (!generate_marshal_traits_union(
+            dynamic_cast<AST_Union*>(node), keys.count())) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+
     /*
      * This is used for the CDR header.
      * This is just for the base type, nested types can have different
      * extensibilities.
      */
+    be_global->header_ <<
       "  static Extensibility extensibility() { return ";
     switch (exten) {
     case extensibilitykind_final:
@@ -2496,102 +2719,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   // Only generate these methods if this is a topic type
   if (info || is_topic_type) {
-    bool is_bounded_struct = true;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      if (!is_bounded_type(fields[i]->field_type())) {
-        is_bounded_struct = false;
-        break;
-      }
-    }
-    {
-      Function max_serialized_size("max_serialized_size", "bool");
-      max_serialized_size.addArg("encoding", "const Encoding&");
-      max_serialized_size.addArg("size", "size_t&");
-      max_serialized_size.addArg("stru", "const " + cxx + "&");
-      max_serialized_size.endArgs();
-      if (is_bounded_struct) {
-        be_global->impl_ <<
-          "  switch (encoding.xcdr_version()) {\n";
-        for (unsigned e = 0; e < encoding_count; ++e) {
-          const Encoding encoding = static_cast<Encoding>(e);
-          size_t size = 0;
-          for (size_t i = 0; i < fields.size(); ++i) {
-            idl_max_serialized_size(encoding, size, fields[i]->field_type());
-          }
-          be_global->impl_ <<
-            "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-            "    size += " << size << ";\n"
-            "    break;\n";
-        }
-        be_global->impl_ <<
-          "  }\n"
-          "  return true;\n";
-      } else { // unbounded
-        be_global->impl_
-          << "  return false;\n";
-      }
-    }
-
-    // Generate key-related marshaling code
-    bool bounded_key = true;
-    if (info) {
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(node, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
-        if (!is_bounded_type(field_type)) {
-          bounded_key = false;
-          break;
-        }
-      }
-    } else {
-      const TopicKeys::Iterator finished = keys.end();
-      for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-        if (!is_bounded_type(i.get_ast_type())) {
-          bounded_key = false;
-          break;
-        }
-      }
-    }
-
-    {
-      Function max_serialized_size("max_serialized_size", "bool");
-      max_serialized_size.addArg("encoding", "const Encoding&");
-      max_serialized_size.addArg("size", "size_t&");
-      max_serialized_size.addArg("stru", "KeyOnly<const " + cxx + ">");
-      max_serialized_size.endArgs();
-
-      if (bounded_key) { // Only generate a size if the key is bounded
-        be_global->impl_ <<
-          "  switch (encoding.xcdr_version()) {\n";
-        for (unsigned e = 0; e < encoding_count; ++e) {
-          const Encoding encoding = static_cast<Encoding>(e);
-          size_t size = 0;
-          if (!iterate_over_keys(encoding, node, cxx, info, keys,
-              idl_max_serialized_size_iteration, &size, 0, 0)) {
-            return false;
-          }
-          be_global->impl_ <<
-            "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-            "    size += " << size << ";\n"
-            "    break;\n";
-        }
-        be_global->impl_ <<
-          "  }\n"
-          "  return true;\n";
-      } else { // unbounded
-        be_global->impl_
-          << "  return false;\n";
-      }
-    }
-
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -2756,8 +2883,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(
-        node, cxx, repr, exten, is_bounded_struct, bounded_key)) {
+    if (!generate_marshal_traits(node, cxx, repr, exten, keys, info)) {
       return false;
     }
   }
@@ -2998,61 +3124,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   const string key_only_wrap_out = getWrapper("uni.t._d()", discriminator, WD_OUTPUT);
 
-  const bool is_bounded = is_bounded_type(node);
-  {
-    Function max_serialized_size("max_serialized_size", "bool");
-    max_serialized_size.addArg("encoding", "const Encoding&");
-    max_serialized_size.addArg("size", "size_t&");
-    max_serialized_size.addArg("uni", "const " + cxx + "&");
-    max_serialized_size.endArgs();
-
-    if (is_bounded) {
-      be_global->impl_ <<
-        "  switch (encoding.xcdr_version()) {\n";
-      for (unsigned e = 0; e < encoding_count; ++e) {
-        const Encoding encoding = static_cast<Encoding>(e);
-        size_t size = 0;
-        idl_max_serialized_size(encoding, size, node);
-        be_global->impl_ <<
-          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-          "    size += " << size << ";\n"
-          "    break;\n";
-      }
-      be_global->impl_ <<
-        "  }\n"
-        "  return true;\n";
-    } else { // unbounded
-      be_global->impl_
-        << "  return false;\n";
-    }
-  }
-
-  {
-    Function max_serialized_size("max_serialized_size", "size_t");
-    max_serialized_size.addArg("encoding", "const Encoding&");
-    max_serialized_size.addArg("size", "size_t&");
-    max_serialized_size.addArg("uni", "KeyOnly<const " + cxx + ">");
-    max_serialized_size.endArgs();
-
-    if (has_key) {
-      be_global->impl_ <<
-        "  switch (encoding.xcdr_version()) {\n";
-      for (unsigned e = 0; e < encoding_count; ++e) {
-        const Encoding encoding = static_cast<Encoding>(e);
-        size_t size = 0;
-        idl_max_serialized_size(encoding, size, node->disc_type());
-        be_global->impl_ <<
-          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-          "    size += " << size << ";\n"
-          "    break;\n";
-      }
-      be_global->impl_ <<
-        "  }\n";
-    }
-    be_global->impl_
-      << "  return true; // Union key is always bounded.\n";
-  }
-
   {
     Function serialized_size("serialized_size", "void");
     serialized_size.addArg("encoding", "const Encoding&");
@@ -3100,7 +3171,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ << "  return true;\n";
   }
 
-  return generate_marshal_traits(
-    node, cxx, repr, exten, is_bounded,
-    true /* Only the discriminator, which is always bounded, can be the key */);
+  TopicKeys keys(node);
+  return generate_marshal_traits(node, cxx, repr, exten, keys);
 }

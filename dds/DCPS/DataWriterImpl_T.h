@@ -41,11 +41,7 @@ public:
 
   /**
    * Used to hold the encoding and get the buffer sizes needed to store the
-   * results of the encoding. This is used to isolate the RTPS CDR encapsulated
-   * mode from the classical OpenDDS mode.
-   *
-   * TODO(iguessthislldo): Remove this class if multiple DataWriter encoding
-   * modes aren't necessary?
+   * results of the encoding.
    */
   class EncodingMode {
   public:
@@ -62,25 +58,21 @@ public:
     EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
     : encoding_(kind, swap_the_bytes)
     , valid_(true)
-    , bounded_(MarshalTraitsType::gen_is_bounded_size())
     , buffer_size_(0)
-    , key_only_bounded_(MarshalTraitsType::gen_is_bounded_key_size())
     , key_only_buffer_size_(0)
     , header_size_(0)
     {
       if (encoding_.is_encapsulated()) {
         header_size_ = EncapsulationHeader::serialized_size;
       }
-      MessageType x;
+      bounded_ = MarshalTraitsType::bounded(encoding_);
       if (bounded_) {
-        TraitsType::max_serialized_size(encoding_, buffer_size_, x);
-        buffer_size_ += header_size_;
+        buffer_size_ = header_size_ + MarshalTraitsType::max_serialized_size(encoding_);
       }
+      key_only_bounded_ = MarshalTraitsType::key_only_bounded(encoding_);
       if (key_only_bounded_) {
-        const KeyOnlyType key_only_x(x);
-        TraitsType::max_serialized_size(
-          encoding_, key_only_buffer_size_, key_only_x);
-        key_only_buffer_size_ += header_size_;
+        key_only_buffer_size_ = header_size_ +
+          MarshalTraitsType::key_only_max_serialized_size(encoding_);
       }
     }
 
@@ -92,6 +84,16 @@ public:
     const Encoding& encoding() const
     {
       return encoding_;
+    }
+
+    bool bounded() const
+    {
+      return bounded_;
+    }
+
+    bool key_only_bounded() const
+    {
+      return key_only_bounded_;
     }
 
     /// Size of a buffer needed to store a sample if it's bounded
@@ -392,7 +394,7 @@ public:
     }
 
     // Set up allocator with reserved space for data if it is bounded
-    if (MarshalTraitsType::gen_is_bounded_size()) {
+    if (encoding_mode_.bounded()) {
       const size_t chunk_size = encoding_mode_.buffer_size();
       data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
       if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {

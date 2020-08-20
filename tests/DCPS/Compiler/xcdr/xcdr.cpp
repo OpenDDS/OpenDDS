@@ -167,12 +167,12 @@ void serializer_test(const Encoding& encoding, const DataView& expected_cdr)
 }
 
 template<typename Type>
-void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
+void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
+  bool expected_bounded, size_t expected_max_size = 0)
 {
   Type value;
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-  // TODO(iguessthislldo): Does not work for XCDR1 and XCDR2 Mutable and XCDR2 Appendable
-  /* EXPECT_EQ(max_serialized_size(encoding, value), expected_cdr.size); */
+  EXPECT_EQ(max_serialized_size(encoding, value), expected_bounded);
 
   serializer_test<Type>(encoding, expected_cdr);
 }

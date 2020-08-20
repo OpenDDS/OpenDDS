@@ -36,19 +36,17 @@ template <typename T>
 void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   using DCPS::Serializer;
   using DCPS::Encoding;
+  typedef DCPS::MarshalTraits<T> Traits;
 
   DCPS::KeyOnly<const T> ko(msg);
 
   static const size_t hash_limit = 16;
   std::memset(hash.value, 0, hash_limit);
 
-  Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
+  const Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
 
-  size_t max_key_size = 0;
-  max_serialized_size(encoding, max_key_size, ko);
-
-  if (DCPS::MarshalTraits<T>::gen_is_bounded_key_size() &&
-      max_key_size <= hash_limit) {
+  if (Traits::key_only_bounded(encoding) &&
+      Traits::key_only_max_serialized_size(encoding) <= hash_limit) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
     ACE_Message_Block mb(hash_limit);
@@ -58,9 +56,7 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
 
   } else {
     // We will use the hash of the marshaled key
-    size_t size = 0;
-    serialized_size(encoding, size, ko);
-    ACE_Message_Block mb(size);
+    ACE_Message_Block mb(serialized_size(encoding, ko));
     Serializer out_serializer(&mb, encoding);
     out_serializer << ko;
 
