@@ -1862,7 +1862,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    return false;\n"
           "  }\n";
       }
-      if (repr.xcdr1 && may_be_parameter_list) {
+      if (repr.xcdr1) {
         fields_encode <<
           "\n"
           "  if (!strm.write_list_end_parameter_id()) {\n"

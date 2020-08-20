@@ -483,6 +483,70 @@ TEST(appendable_tests, BothAdditionalAppendableStruct)
   EXPECT_EQ(send.nested.additional_field, receive.nested.additional_field);
 }
 
+const unsigned char appendable_expected2_xcdr2[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x28, // +4 = 4
+  // string_field
+  0x00, 0x00, 0x00, 0x0a, // + 4 = 8
+  0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x00,  // +10 = 18
+  // Delimiter of the nested struct
+  0x00, 0x00, // +2 pad = 20
+  0x00, 0x00, 0x00, 0x14, // +4 = 24
+  // Inner short_field
+  0x7f, 0xff, // +2 = 26
+  // Inner long_field
+  0x00, 0x00, // +2 pad = 28
+  0x7f, 0xff, 0xff, 0xff, // +4 = 32
+  // Inner octet_field
+  0x01, // +1 = 33
+  // Inner long_long_field
+  0x00, 0x00, 0x00, // +3 pad = 36
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 44
+};
+
+template<>
+::testing::AssertionResult assert_values(
+  const char* a_expr, const char* b_expr,
+  const AppendableStruct2& a, const AppendableStruct2& b)
+{
+  EXPECT_STREQ(a.string_field, b.string_field);
+  expect_values_equal(a.nested, b.nested);
+  if (::testing::Test::HasFailure()) {
+    return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
+  }
+  return ::testing::AssertionSuccess();
+}
+
+template<>
+void amalgam_serializer_test(
+  const Encoding& encoding, const DataView& expected_cdr,
+  AppendableStruct2& value, AppendableStruct2& result)
+{
+  ACE_Message_Block buffer(1024);
+
+  // Serialize and Compare CDR
+  {
+    Serializer serializer(&buffer, encoding);
+    ASSERT_TRUE(serializer << value);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+
+  // Deserialize and Compare C++ Values
+  {
+    Serializer serializer(&buffer, encoding);
+    ASSERT_TRUE(serializer >> result);
+    EXPECT_PRED_FORMAT2(assert_values, value, result);
+  }
+}
+
+TEST(appendable_tests, BothAppendableStruct2)
+{
+  AppendableStruct2 send, receive;
+  send.string_field = "abcdefghi";
+  set_base_values<NestedStruct>(send.nested);
+  amalgam_serializer_test(xcdr2, appendable_expected2_xcdr2, send, receive);
+}
+
 // Mutable Tests =============================================================
 
 const unsigned char mutable_struct_expected_xcdr1[] = {
