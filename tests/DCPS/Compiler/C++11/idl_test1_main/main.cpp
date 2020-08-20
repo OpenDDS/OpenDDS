@@ -9,7 +9,6 @@
 
 using OpenDDS::DCPS::Encoding;
 using OpenDDS::DCPS::Serializer;
-using OpenDDS::DCPS::max_serialized_size;
 using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 
@@ -380,9 +379,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const bool expected_bounded = false;
   const size_t expected_size = 79;
 
-  const size_t actual_max_size = max_serialized_size(encoding, my_foo);
+  const size_t actual_max_size =
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::max_serialized_size(encoding);
   const bool actual_bounded =
-    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::bounded(encoding);
   const size_t actual_size = serialized_size(encoding, my_foo);
 
   ACE_DEBUG((LM_DEBUG,"max_serialized_size(my_foo) => %B\n", actual_max_size));

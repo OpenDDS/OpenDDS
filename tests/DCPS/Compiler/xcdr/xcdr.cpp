@@ -166,13 +166,40 @@ void serializer_test(const Encoding& encoding, const DataView& expected_cdr)
   amalgam_serializer_test<Type, Type>(encoding, expected_cdr);
 }
 
+struct Bounded {
+  Bounded()
+  : bounded(false)
+  , max_size(0)
+  {
+  }
+
+  Bounded(size_t max_size)
+  : bounded(true)
+  , max_size(max_size)
+  {
+  }
+
+  bool bounded;
+  size_t max_size;
+
+  operator bool() const
+  {
+    return bounded;
+  }
+};
+
 template<typename Type>
 void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
-  bool expected_bounded, size_t expected_max_size = 0)
+  Bounded bounded = Bounded())
 {
   Type value;
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-  EXPECT_EQ(max_serialized_size(encoding, value), expected_bounded);
+  EXPECT_EQ(MarshalTraits<Type>::bounded(encoding), bounded);
+  // TODO: Check expected_max_size
+  /* if (bounded) { */
+  /*   EXPECT_EQ(MarshalTraits<Type>::max_serialized_size(encoding), bounded.max_size); */
+  /* } */
+  // TODO: KeyOnly
 
   serializer_test<Type>(encoding, expected_cdr);
 }
