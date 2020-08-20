@@ -2288,7 +2288,7 @@ namespace {
       "\n";
 
     be_global->header_ <<
-      "  static size_t max_serialized_size(const Encoding& encoding)\n"
+      "  static size_t key_only_max_serialized_size(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
