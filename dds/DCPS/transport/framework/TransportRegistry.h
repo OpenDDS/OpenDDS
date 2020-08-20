@@ -126,7 +126,7 @@ public:
 
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
-  int create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name);
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name);
 
   // The TransportRegistry needs to know the domains for a given
   // config in order to know when to create new transport instances
@@ -174,6 +174,8 @@ private:
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
   bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
+
+  bool process_customizations(const DDS::DomainId_t id, const TransportTemplate& tr_inst, ValueMap& customs);
 
   bool has_transport_templates() const;
 
