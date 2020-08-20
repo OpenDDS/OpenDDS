@@ -200,7 +200,7 @@ void PropertyStatBlock::finalize()
     } else {
       median_result = median_buffer_[(count / 2)];
     }
-    // calculate median absolute deviation (median of absolute valute of data deviation from median)
+    // calculate median absolute deviation (median of absolute value of data deviation from median)
     std::vector<double> mad_buffer(median_buffer_);
     for (size_t i = 0; i < count; ++i) {
       mad_buffer[i] = fabs(median_buffer_[i] - median_result);
@@ -278,4 +278,3 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
 }
 
 }
-
