@@ -16,7 +16,6 @@
 
 #include "Args.h"
 #include "SkipSerializeTypeSupportC.h"
-// #include "MessengerTypeSupportC.h"
 #include "Writer.h"
 
 const int num_instances_per_writer = 1;
