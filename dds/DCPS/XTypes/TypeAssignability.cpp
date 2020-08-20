@@ -321,9 +321,33 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
 
   // Extensibility kind must match
   const TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
-  if ((ta.struct_type.struct_flags & extensibility_mask) !=
-      (tb.struct_type.struct_flags & extensibility_mask)) {
+  const ACE_CDR::UShort a_exten = ta.struct_type.struct_flags & extensibility_mask;
+  if (a_exten != (tb.struct_type.struct_flags & extensibility_mask)) {
     return false;
+  }
+
+  // If T1 is appendable, then members with the same member_index have the
+  // same member ID, the same setting for the 'optional' attribute and the
+  // T1 member type is strongly assignable from the T2 member type.
+  // If T1 is final, then they meet the same condition as for T1 being
+  // appendable and in addition T1 and T2 have the same set of member IDs.
+  if (IS_FINAL == a_exten &&
+      ta.struct_type.member_seq.length() != tb.struct_type.member_seq.length()) {
+    return false;
+  }
+  if (IS_APPENDABLE == a_exten || IS_FINAL == a_exten) {
+    size_t num_members = std::min(ta.struct_type.member_seq.length(),
+                                  tb.struct_type.member_seq.length());
+    for (size_t i = 0; i < num_members; ++i) {
+      if (ta.struct_type.member_seq[i].common.member_id !=
+          tb.struct_type.member_seq[i].common.member_id ||
+          (ta.struct_type.member_seq[i].common.member_flags & IS_OPTIONAL) !=
+          (tb.struct_type.member_seq[i].common.member_flags & IS_OPTIONAL) ||
+          !strongly_assignable(ta.struct_type.member_seq[i].common.member_type_id,
+                               tb.struct_type.member_seq[i].common.member_type_id)) {
+        return false;
+      }
+    }
   }
 
   // Any members in T1 and T2 that have the same name also have
