@@ -43,3 +43,9 @@
 /RtpsMessageTypesTypeSupportS.cpp
 /RtpsMessageTypesTypeSupportS.h
 /RtpsMessageTypesTypeSupportS.inl
+/RtpsRpcC.cpp
+/RtpsRpcC.h
+/RtpsRpcC.inl
+/RtpsRpcS.h
+/RtpsRpcTypeSupportImpl.cpp
+/RtpsRpcTypeSupportImpl.h

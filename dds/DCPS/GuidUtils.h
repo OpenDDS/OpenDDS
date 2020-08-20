@@ -48,6 +48,11 @@ const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER        = { {0x00,0x01,
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER        = { {0x00,0x01,0x00}, 0xc7};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xc2};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xc7};
+// From XTypes spec:
+const EntityId_t ENTITYID_TL_SVC_REQ_WRITER                      = { {0x00,0x03,0x00}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REQ_READER                      = { {0x00,0x03,0x00}, 0xc4};
+const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER                    = { {0x00,0x03,0x01}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REPLY_READER                    = { {0x00,0x03,0x01}, 0xc4};
 ///@}
 
 /// Nil value for GUID.

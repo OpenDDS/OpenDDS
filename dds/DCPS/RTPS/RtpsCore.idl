@@ -211,6 +211,15 @@ module OpenDDS {
       1 << 10;
     const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
       1 << 11;
+    // As per chapter 9.3.2 of RTPS spec, bits 12 - 15 are used by XTypes
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER =
+      1 << 12;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER =
+      1 << 13;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER =
+      1 << 14;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER =
+      1 << 15;
 
     typedef unsigned long BuiltinEndpointQos_t;
     const BuiltinEndpointQos_t BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER =

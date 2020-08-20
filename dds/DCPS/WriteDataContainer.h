@@ -8,8 +8,6 @@
 #ifndef OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsCoreC.h"
 #include "DataSampleElement.h"
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
@@ -20,12 +18,14 @@
 #include "TimeTypes.h"
 #include "SporadicTask.h"
 
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsCoreC.h>
 
-#include "ace/Synch_Traits.h"
-#include "ace/Condition_T.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
-#include "ace/Reverse_Lock_T.h"
+#include <ace/Synch_Traits.h>
+#include <ace/Condition_T.h>
+#include <ace/Condition_Thread_Mutex.h>
+#include <ace/Condition_Recursive_Thread_Mutex.h>
+#include <ace/Reverse_Lock_T.h>
 
 #include <memory>
 
@@ -327,10 +327,10 @@ public:
 #endif
 
   /**
-   * Block until pending samples have either been delivered
-   * or dropped.
+   * Block until pending samples have either been delivered, dropped, or the
+   * deadline has passed. Blocks indefinitely if deadline is zero.
    */
-  void wait_pending();
+  void wait_pending(const MonotonicTimePoint& deadline);
 
   /**
    * Returns a vector of handles for the instances registered for this
