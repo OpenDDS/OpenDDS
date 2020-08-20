@@ -166,21 +166,23 @@ void serializer_test(const Encoding& encoding, const DataView& expected_cdr)
   amalgam_serializer_test<Type, Type>(encoding, expected_cdr);
 }
 
-struct Bounded {
-  Bounded()
-  : bounded(false)
+struct Bound {
+  bool bounded;
+  size_t max_size;
+
+  // Intentionally Left Implicit
+  Bound(bool bounded)
+  : bounded(bounded)
   , max_size(0)
   {
   }
 
-  Bounded(size_t max_size)
+  // Intentionally Left Implicit
+  Bound(size_t max_size)
   : bounded(true)
   , max_size(max_size)
   {
   }
-
-  bool bounded;
-  size_t max_size;
 
   operator bool() const
   {
@@ -190,16 +192,25 @@ struct Bounded {
 
 template<typename Type>
 void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
-  Bounded bounded = Bounded())
+  Bound bound = false)
 {
+  EXPECT_EQ(MarshalTraits<Type>::bounded(encoding), bound);
+  if (bound) {
+    EXPECT_EQ(MarshalTraits<Type>::max_serialized_size(encoding), bound.max_size);
+  }
+  /*
+   * TODO(iguessthislldo): Assuming key only size is bounded to 0 if the type
+   * as normal is bounded for now. Maybe add keys to types? If so also check
+   * key only serialization.
+   */
+  EXPECT_TRUE(MarshalTraits<Type>::key_only_bounded(encoding));
+  if (bound) {
+    EXPECT_EQ(MarshalTraits<Type>::key_only_max_serialized_size(encoding), size_t(0));
+  }
+
   Type value;
+  set_values(value);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-  EXPECT_EQ(MarshalTraits<Type>::bounded(encoding), bounded);
-  // TODO: Check expected_max_size
-  /* if (bounded) { */
-  /*   EXPECT_EQ(MarshalTraits<Type>::max_serialized_size(encoding), bounded.max_size); */
-  /* } */
-  // TODO: KeyOnly
 
   serializer_test<Type>(encoding, expected_cdr);
 }
@@ -218,10 +229,12 @@ const unsigned char final_xcdr1_struct_expected[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // +7 pad = 16
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
 };
+const size_t final_xcdr1_struct_max_size = 24;
 
 TEST(basic_tests, FinalXcdr1Struct)
 {
-  baseline_checks<FinalXcdr1Struct>(xcdr1, final_xcdr1_struct_expected);
+  baseline_checks<FinalXcdr1Struct>(xcdr1,
+    final_xcdr1_struct_expected, final_xcdr1_struct_max_size);
 }
 
 const DataView appendable_xcdr1_struct_expected(final_xcdr1_struct_expected);
@@ -269,10 +282,12 @@ const unsigned char final_xcdr2_struct_expected[] = {
   0x00, 0x00, 0x00, // +3 pad = 12
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 20
 };
+const size_t final_xcdr2_struct_max_size = 20;
 
 TEST(basic_tests, FinalXcdr2Struct)
 {
-  baseline_checks<FinalXcdr2Struct>(xcdr2, final_xcdr2_struct_expected);
+  baseline_checks<FinalXcdr2Struct>(xcdr2,
+    final_xcdr2_struct_expected, final_xcdr2_struct_max_size);
 }
 
 const unsigned char appendable_xcdr2_struct_expected[] = {
@@ -323,8 +338,10 @@ TEST(basic_tests, MutableXcdr2Struct)
 
 TEST(basic_tests, FinalXcdr12Struct)
 {
-  baseline_checks<FinalXcdr12Struct>(xcdr1, final_xcdr1_struct_expected);
-  baseline_checks<FinalXcdr12Struct>(xcdr2, final_xcdr2_struct_expected);
+  baseline_checks<FinalXcdr12Struct>(xcdr1,
+    final_xcdr1_struct_expected, final_xcdr1_struct_max_size);
+  baseline_checks<FinalXcdr12Struct>(xcdr2,
+    final_xcdr2_struct_expected, final_xcdr2_struct_max_size);
 }
 
 TEST(basic_tests, AppendableXcdr12Struct)
