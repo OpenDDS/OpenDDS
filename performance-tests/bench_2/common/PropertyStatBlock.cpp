@@ -187,7 +187,7 @@ void PropertyStatBlock::finalize()
   Builder::DoubleSeq ds;
   ds.length(static_cast<CORBA::ULong>(count));
   for (size_t i = 0; i < count; ++i) {
-    size_t pos = (count < median_buffer_.size() ? 0 : ((sample_count_->value.ull_prop() + 1 + i) % median_buffer_.size()));
+    size_t pos = (count < median_buffer_.size() ? i : ((sample_count_->value.ull_prop() + 1 + i) % median_buffer_.size()));
     ds[static_cast<CORBA::ULong>(i)] = median_buffer_[pos];
   }
   buff_prop->value.double_seq_prop(ds);
@@ -196,9 +196,9 @@ void PropertyStatBlock::finalize()
     // calculate median
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
     if (count % 2 == 0) {
-      median_result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;
+      median_result = (median_buffer_[(count / 2) - 1] + median_buffer_[count / 2]) / 2.0;
     } else {
-      median_result = median_buffer_[(count / 2) + 1];
+      median_result = median_buffer_[(count / 2)];
     }
     // calculate median absolute deviation (median of absolute valute of data deviation from median)
     std::vector<double> mad_buffer(median_buffer_);
@@ -207,9 +207,9 @@ void PropertyStatBlock::finalize()
     }
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
     if (count % 2 == 0) {
-      mad_result = (mad_buffer[count / 2] + mad_buffer[(count / 2) + 1]) / 2.0;
+      mad_result = (mad_buffer[(count / 2) - 1] + mad_buffer[count / 2]) / 2.0;
     } else {
-      mad_result = mad_buffer[(count / 2) + 1];
+      mad_result = mad_buffer[(count / 2)];
     }
   }
   median_->value.double_prop(median_result);
