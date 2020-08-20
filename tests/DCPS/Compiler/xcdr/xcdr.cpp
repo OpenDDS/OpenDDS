@@ -252,7 +252,7 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
   Type value;
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
   // TODO(iguessthislldo): Does not work for XCDR1 and XCDR2 Mutable and XCDR2 Appendable
-  // EXPECT_EQ(max_serialized_size(encoding, value), expected_cdr.size);
+  /* EXPECT_EQ(max_serialized_size(encoding, value), expected_cdr.size); */
 
   serializer_test<Type>(encoding, expected_cdr);
 }
