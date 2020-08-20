@@ -99,6 +99,8 @@ Serializer::buffer_read(char* dest, size_t size, bool swap)
 {
   size_t offset = 0;
 
+  size = strlen(dest) < size? strlen(dest) : size;
+
   while (size > offset) {
     offset = this->doread(dest, size, swap, offset);
   }
