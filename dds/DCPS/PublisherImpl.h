@@ -146,9 +146,13 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const;
   static bool validate_datawriter_qos(const DDS::DataWriterQos& qos,
-                                         const DDS::DataWriterQos& default_qos,
-                                         DDS::Topic_ptr a_topic,
-                                         DDS::DataWriterQos& dw_qos);
+                                      const DDS::DataWriterQos& default_qos,
+                                      DDS::Topic_ptr a_topic,
+                                      DDS::DataWriterQos& dw_qos);
+
+  bool prepare_to_delete_datawriters();
+  bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
+
 private:
   typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataWriterImpl_rch) DataWriterMap;
 

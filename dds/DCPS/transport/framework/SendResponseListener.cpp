@@ -22,8 +22,7 @@ SendResponseListener::SendResponseListener(const OPENDDS_STRING& msg_src)
 
 SendResponseListener::~SendResponseListener()
 {
-  OPENDDS_STRING caller_string("SendResponseListener::~SendResponseListener");
-  tracker_.wait_messages_pending(caller_string);
+  tracker_.wait_messages_pending("SendResponseListener::~SendResponseListener");
 }
 
 void

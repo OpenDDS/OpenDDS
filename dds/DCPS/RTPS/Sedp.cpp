@@ -39,6 +39,7 @@
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
@@ -257,36 +258,44 @@ using DCPS::Encoding;
 using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
 
+const Encoding sedp_encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   DCPS::EndpointManager<ParticipantData_t>(participant_id, lock),
   spdp_(owner),
-  publications_writer_(make_rch<Writer>(
+  publications_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  publications_secure_writer_(make_rch<Writer>(
+  publications_secure_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), ref(*this))),
 #endif
 
-  subscriptions_writer_(make_rch<Writer>(
+  subscriptions_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_writer_(make_rch<Writer>(
+  subscriptions_secure_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), ref(*this))),
 #endif
 
-  participant_message_writer_(make_rch<Writer>(
+  participant_message_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), ref(*this))),
 
+  type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
+    make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER), ref(*this))),
+
+  type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
+    make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this))),
+
 #ifdef OPENDDS_SECURITY
-  participant_message_secure_writer_(make_rch<Writer>(
+  participant_message_secure_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), ref(*this))),
-  participant_stateless_message_writer_(make_rch<Writer>(
+  participant_stateless_message_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), ref(*this))),
-  dcps_participant_secure_writer_(make_rch<Writer>(
+  dcps_participant_secure_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2)),
-  participant_volatile_message_secure_writer_(make_rch<Writer>(
+  participant_volatile_message_secure_writer_(make_rch<SedpWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this))),
 #endif
 
@@ -312,6 +321,14 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
 
   participant_message_reader_(make_rch<Reader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
+      ref(*this))),
+
+  type_lookup_request_reader_(make_rch<TypeLookupRequestReader>(
+      make_id(participant_id, ENTITYID_TL_SVC_REQ_READER),
+      ref(*this))),
+
+  type_lookup_reply_reader_(make_rch<TypeLookupReplyReader>(
+      make_id(participant_id, ENTITYID_TL_SVC_REPLY_READER),
       ref(*this))),
 
 #ifdef OPENDDS_SECURITY
@@ -471,6 +488,16 @@ Sedp::init(const RepoId& guid,
   dcps_participant_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
+
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    type_lookup_request_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
+  type_lookup_request_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    type_lookup_reply_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
+  type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
   return DDS::RETCODE_OK;
 }
@@ -885,6 +912,16 @@ Sedp::associate(const ParticipantData_t& pdata)
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     participant_message_reader_->assoc(peer);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    type_lookup_request_reader_->assoc(peer);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    type_lookup_reply_reader_->assoc(peer);
   }
 
   DCPS::unique_ptr<ParticipantData_t> dpd(new ParticipantData_t(pdata));
@@ -1334,6 +1371,18 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->participant_message_writer_->assoc(peer);
   }
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
+      avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_READER;
+    sedp_->type_lookup_request_writer_->assoc(peer);
+  }
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
+      avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    sedp_->type_lookup_reply_writer_->assoc(peer);
+  }
 
   //FUTURE: if/when topic propagation is supported, add it here
 
@@ -1410,6 +1459,20 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     }
     disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER, *participant_message_reader_);
+
+    if (local_avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+      disassociate_helper(avail, BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER, part,
+        ENTITYID_TL_SVC_REQ_READER, *type_lookup_request_writer_);
+    }
+    disassociate_helper(avail, BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER, part,
+      ENTITYID_TL_SVC_REQ_WRITER, *type_lookup_request_reader_);
+
+    if (local_avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+      disassociate_helper(avail, BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER, part,
+        ENTITYID_TL_SVC_REPLY_READER, *type_lookup_reply_writer_);
+    }
+    disassociate_helper(avail, BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER, part,
+      ENTITYID_TL_SVC_REPLY_WRITER, *type_lookup_reply_reader_);
 
     //FUTURE: if/when topic propagation is supported, add it here
 
@@ -1595,6 +1658,23 @@ Sedp::update_locators(const ParticipantData_t& pdata)
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     transport_inst_->update_locators(remote_id, remote_data);
   }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REQ_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+
 #ifdef OPENDDS_SECURITY
   if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
@@ -1939,6 +2019,8 @@ Sedp::shutdown()
   publications_reader_->shutting_down();
   subscriptions_reader_->shutting_down();
   participant_message_reader_->shutting_down();
+  type_lookup_request_reader_->shutting_down();
+  type_lookup_reply_reader_->shutting_down();
 #ifdef OPENDDS_SECURITY
   publications_secure_reader_->shutting_down();
   subscriptions_secure_reader_->shutting_down();
@@ -1950,6 +2032,8 @@ Sedp::shutdown()
   publications_writer_->shutting_down();
   subscriptions_writer_->shutting_down();
   participant_message_writer_->shutting_down();
+  type_lookup_request_writer_->shutting_down();
+  type_lookup_reply_writer_->shutting_down();
 #ifdef OPENDDS_SECURITY
   publications_secure_writer_->shutting_down();
   subscriptions_secure_writer_->shutting_down();
@@ -3206,25 +3290,24 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_parameter_list(const ParameterList& plist,
-                                   const RepoId& reader,
-                                   DCPS::SequenceNumber& sequence)
+Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
+                                       const RepoId& reader,
+                                       DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, plist);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, plist);
 
   // Build and send RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::MUTABLE) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
@@ -3236,25 +3319,24 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
-                                        const RepoId& reader,
-                                        DCPS::SequenceNumber& sequence)
+Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
+                                            const RepoId& reader,
+                                            DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, pmd);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, pmd);
 
   // Build and send RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << pmd) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3267,24 +3349,23 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
 
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
-Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                      const RepoId& reader,
-                                      DCPS::SequenceNumber& sequence)
+Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+                                          const RepoId& reader,
+                                          DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, msg);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
     DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3296,26 +3377,25 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                            const RepoId& reader,
-                                            DCPS::SequenceNumber& sequence)
+Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                                const RepoId& reader,
+                                                DCPS::SequenceNumber& sequence)
 {
   OPENDDS_ASSERT(sedp_.associated_volatile_readers_.count(reader) != 0);
 
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, msg);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
     DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), encoding);
+  Serializer serializer(payload.cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
     send_sample(payload, size, reader, sequence);
   } else {
@@ -3327,8 +3407,8 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                            const RepoId& reader, DCPS::SequenceNumber& sequence)
+Sedp::SedpWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
+                                                const RepoId& reader, DCPS::SequenceNumber& sequence)
 {
   ParameterList plist;
 
@@ -3363,10 +3443,8 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 #endif
 
 DDS::ReturnCode_t
-Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
+Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 {
-  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
-
   // Build param list for message
   Parameter param;
   param.guid(rid);
@@ -3377,8 +3455,8 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(encoding, size);
-  DCPS::serialized_size(encoding, size, plist);
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, plist);
 
   DCPS::Message_Block_Ptr payload(
     new ACE_Message_Block(
@@ -3392,9 +3470,9 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
     return DDS::RETCODE_ERROR;
   }
 
-  Serializer serializer(payload->cont(), encoding);
+  Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(encoding, DCPS::MUTABLE) &&
+  if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     // Send
     write_control_msg(move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
@@ -3409,7 +3487,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 }
 
 void
-Sedp::Writer::end_historic_samples(const RepoId& reader)
+Sedp::SedpWriter::end_historic_samples(const RepoId& reader)
 {
   DCPS::Message_Block_Ptr mb(
     new ACE_Message_Block(
@@ -3431,13 +3509,13 @@ Sedp::Writer::end_historic_samples(const RepoId& reader)
 }
 
 void
-Sedp::Writer::write_control_msg(DCPS::Message_Block_Ptr payload,
-                                size_t size,
-                                DCPS::MessageId id,
-                                DCPS::SequenceNumber seq)
+Sedp::SedpWriter::write_control_msg(DCPS::Message_Block_Ptr payload,
+                                    size_t size,
+                                    DCPS::MessageId id,
+                                    DCPS::SequenceNumber seq)
 {
   DCPS::DataSampleHeader header;
-  set_header_fields(header, size, GUID_UNKNOWN, seq, false, id);
+  Writer::set_header_fields(header, size, GUID_UNKNOWN, seq, false, id);
   // no need to serialize header since rtps_udp transport ignores it
   send_control(header, DCPS::move(payload));
 }
@@ -3471,6 +3549,133 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   const SystemTimePoint now = SystemTimePoint::now();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.value().sec());
   dsh.source_timestamp_nanosec_ = now.value().usec() * 1000;
+}
+
+//-------------------------------------------------------------------------
+
+Sedp::SedpWriter::~SedpWriter()
+{
+}
+
+//-------------------------------------------------------------------------
+
+Sedp::TypeLookupWriter::~TypeLookupWriter()
+{
+}
+
+Sedp::TypeLookupRequestWriter::~TypeLookupRequestWriter()
+{
+}
+
+Sedp::TypeLookupReplyWriter::~TypeLookupReplyWriter()
+{
+}
+
+Sedp::TypeLookupReader::~TypeLookupReader()
+{
+}
+
+Sedp::TypeLookupRequestReader::~TypeLookupRequestReader()
+{
+}
+
+Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
+{
+}
+
+DDS::ReturnCode_t
+Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+                                                        const DCPS::RepoId& reader,
+                                                        DCPS::SequenceNumber& sequence,
+                                                        DCPS::SequenceNumber& rpc_sequence,
+                                                        const DCPS::RepoId& participant_id)
+{
+  XTypes::TypeLookup_Request type_lookup_request;
+
+  type_lookup_request.data.getTypes.type_ids = type_ids;
+  type_lookup_request.data.kind = XTypes::TypeLookup_getTypes_HashId;
+
+  type_lookup_request.header.request_id.writer_guid = get_repo_id();
+
+  type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
+  type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
+
+  // As per chapter 7.6.3.3.4 of XTypes spec
+  const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") + DCPS::to_string(participant_id);
+  type_lookup_request.header.instance_name = instance_name.c_str();
+
+  // Determine message length
+  size_t size = 0;
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, type_lookup_request);
+
+  // Build and send type lookup message
+  ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
+    ACE_Message_Block::MB_DATA,
+    new ACE_Message_Block(size));
+  Serializer serializer(payload.cont(), sedp_encoding);
+  DCPS::EncapsulationHeader encap;
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
+      serializer << encap && serializer << type_lookup_request) {
+    send_sample(payload, size, reader, sequence);
+  } else {
+    result = DDS::RETCODE_ERROR;
+  }
+
+  delete payload.cont();
+  return result;
+}
+
+DDS::ReturnCode_t
+Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
+                                                    const RepoId& reader,
+                                                    DCPS::SequenceNumber& sequence,
+                                                    DDS::RPC::RemoteExceptionCode_t exception_code)
+{
+  type_lookup_reply.header.remote_ex = exception_code;
+
+  // Determine message length
+  size_t size = 0;
+  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::serialized_size(sedp_encoding, size, type_lookup_reply);
+
+  // Build and send type lookup message
+  ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
+    ACE_Message_Block::MB_DATA,
+    new ACE_Message_Block(size));
+  Serializer serializer(payload.cont(), sedp_encoding);
+  DCPS::EncapsulationHeader encap;
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
+      serializer << encap && serializer << type_lookup_reply) {
+    send_sample(payload, size, reader, sequence);
+  } else {
+    result = DDS::RETCODE_ERROR;
+  }
+
+  delete payload.cont();
+  return result;
+}
+
+DDS::ReturnCode_t
+Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& sample,
+                                               DCPS::Serializer& ser,
+                                               XTypes::TypeLookup_Request& type_lookup_request)
+{
+  // TODO: uncomment; anything else to do here?
+  // ser >> type_lookup_request;
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t
+Sedp::TypeLookupReplyReader::take_tl_reply(const DCPS::ReceivedDataSample& sample,
+                                           DCPS::Serializer& ser,
+                                           XTypes::TypeLookup_Reply& type_lookup_reply)
+{
+  // TODO: uncomment; anything else to do here?
+  // ser >> type_lookup_reply;
+  return DDS::RETCODE_OK;
 }
 
 //-------------------------------------------------------------------------
@@ -3779,6 +3984,22 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(pdata), true);
 #endif
 
+    } else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
+      // TODO: process request and send reply
+      XTypes::TypeLookup_Request type_lookup_request;
+      if (!sedp_.type_lookup_request_reader_->take_tl_request(sample, ser, type_lookup_request)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+          ACE_TEXT("failed to take type lookup request\n")));
+        return;
+      }
+    } else if (entity_id == ENTITYID_TL_SVC_REPLY_WRITER) {
+      // TODO: process reply
+      XTypes::TypeLookup_Reply type_lookup_reply;
+      if (!sedp_.type_lookup_reply_reader_->take_tl_reply(sample, ser, type_lookup_reply)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+          ACE_TEXT("failed to take type lookup reply\n")));
+        return;
+      }
     }
     break;
   }
@@ -4344,7 +4565,7 @@ void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant)
 {
   ACE_UNUSED_ARG(bSecureParticipant);
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
 
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
 
@@ -4360,7 +4581,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
 }
 
@@ -4368,7 +4589,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> 
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication_SecurityWrapper> wrapper)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_WRITER_SECURE, id, wrapper.release()));
 }
 #endif
@@ -4376,7 +4597,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication_S
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata.release()));
 }
 
@@ -4384,7 +4605,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription>
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> wrapper)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_READER_SECURE, id, wrapper.release()));
 }
 #endif
@@ -4392,7 +4613,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription_
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
 }
 
@@ -4400,7 +4621,7 @@ void
 Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
 #else
   ACE_UNUSED_ARG(which_bit);
@@ -4412,14 +4633,14 @@ Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 void
 Sedp::Task::enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_DATA_SECURE, id, data.release()));
 }
 
 void
 Sedp::Task::enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_STATELESS_DATA, id, data.release()));
 }
 
@@ -4427,7 +4648,7 @@ void
 Sedp::Task::enqueue_volatile_message_secure(
   DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data)
 {
-  if (spdp_->shutting_down()) { return; }
+  if (shutting_down_) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_VOLATILE_SECURE, id, data.release()));
 }
 #endif
@@ -4516,6 +4737,9 @@ Sedp::Task::svc()
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
                             ACE_TEXT("received MSG_STOP. Task exiting\n")));
+      }
+      while (!msg_queue_->is_empty() && getq(msg) != -1) {
+        delete msg;
       }
       return 0;
     }

@@ -9,10 +9,12 @@
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
 
 #include "Definitions.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "ace/Recursive_Thread_Mutex.h"
-#include "dds/DCPS/LocalObject.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "LocalObject.h"
+#include "PoolAllocator.h"
+
+#include <dds/DdsDcpsDomainC.h>
+
+#include <ace/Recursive_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

@@ -160,7 +160,7 @@ DataTypeBase* types[] = {
   &dt_wstring,
 #endif
 };
-const size_t type_count = sizeof(types) / sizeof(types);
+const size_t type_count = sizeof(types) / sizeof(types[0]);
 
 bool testType(const Encoding& encoding, DataTypeBase* type, bool reset = false)
 {
