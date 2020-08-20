@@ -62,7 +62,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace DDS {
-  struct OctetSeq;
+  class OctetSeq;
 }
 
 namespace OpenDDS {
