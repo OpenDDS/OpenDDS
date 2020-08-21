@@ -1152,10 +1152,10 @@ namespace OpenDDS {
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
-                send_type_lookup_request(type_ids, writer);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                // TLS_TODO: sanity check on locks
-                return;
+                //send_type_lookup_request(type_ids, writer);
+                //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+                //// TLS_TODO: sanity check on locks
+                //return;
               }
             } else if (!reader_local) {
               if (!type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
@@ -1169,10 +1169,10 @@ namespace OpenDDS {
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
-                send_type_lookup_request(type_ids, reader);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                // TLS_TODO: sanity check on locks
-                return;
+                //send_type_lookup_request(type_ids, reader);
+                //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+                //// TLS_TODO: sanity check on locks
+                //return;
               }
             }
 
