@@ -150,12 +150,17 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     // marshaled_size_ is # of bytes of submessage we have read from "mb"
     marshaled_size_ = starting_length - mb.total_length();
 
+    const ACE_CDR::UShort remaining = message_length_ - SMHDR_SZ;
+
     if (octetsToNextHeader == 0 && kind != PAD && kind != INFO_TS) {
       // see RTPS v2.1 section 9.4.5.1.3
       // In this case the current Submessage extends to the end of Message,
       // so we will use the message_length_ that was set in pdu_remaining().
-      octetsToNextHeader =
-        static_cast<ACE_CDR::UShort>(message_length_ - SMHDR_SZ);
+      octetsToNextHeader = remaining;
+
+    } else if (octetsToNextHeader > remaining) {
+      valid_ = false;
+      return;
     }
 
     if ((kind == DATA && (flags & (FLAG_D | FLAG_K_IN_DATA)))
