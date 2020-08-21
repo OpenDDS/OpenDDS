@@ -5,13 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/DdsDcpsCore.idl>
 module SkipSerialize {
-  @topic
-  struct Message {
-    string from;
-    string subject;
-    @key long subject_id;
-    string text;
+  @topic struct Message {
+    DDS::OctetSeq  serialized_data;
     long count;
   };
 };
