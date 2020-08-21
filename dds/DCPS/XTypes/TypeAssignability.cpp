@@ -353,19 +353,19 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
   // Any members in T1 and T2 that have the same name also have
   // the same ID, and vice versa
   MatchedSet matched_members;
-  for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
-    MemberId id_a = ta.struct_type.member_seq.members[i].common.member_id;
-    const NameHash& h_a = ta.struct_type.member_seq.members[i].detail.name_hash;
+  for (size_t i = 0; i < ta.struct_type.member_seq.length(); ++i) {
+    MemberId id_a = ta.struct_type.member_seq[i].common.member_id;
+    const NameHash& h_a = ta.struct_type.member_seq[i].detail.name_hash;
     ACE_CDR::ULong name_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
-    for (size_t j = 0; j < tb.struct_type.member_seq.members.size(); ++j) {
-      MemberId id_b = tb.struct_type.member_seq.members[j].common.member_id;
-      const NameHash& h_b = tb.struct_type.member_seq.members[j].detail.name_hash;
+    for (size_t j = 0; j < tb.struct_type.member_seq.length(); ++j) {
+      MemberId id_b = tb.struct_type.member_seq[j].common.member_id;
+      const NameHash& h_b = tb.struct_type.member_seq[j].detail.name_hash;
       ACE_CDR::ULong name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
       if ((name_a == name_b && id_a != id_b) || (id_a == id_b && name_a != name_b)) {
         return false;
       } else if (name_a == name_b && id_a == id_b) {
-        matched_members.push_back(std::make_pair(&ta.struct_type.member_seq.members[i],
-                                                 &tb.struct_type.member_seq.members[j]));
+        matched_members.push_back(std::make_pair(&ta.struct_type.member_seq[i],
+                                                 &tb.struct_type.member_seq[j]));
         break;
       }
     }
@@ -411,9 +411,9 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
   // Members for which both optional is false and must_understand is true in
   // either T1 or T2 appear in both T1 and T2.
   // Members marked as key in either T1 or T2 appear in both T1 and T2.
-  for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
-    const MemberFlag& flags = ta.struct_type.member_seq.members[i].common.member_flags;
-    MemberId id = ta.struct_type.member_seq.members[i].common.member_id;
+  for (size_t i = 0; i < ta.struct_type.member_seq.length(); ++i) {
+    const MemberFlag& flags = ta.struct_type.member_seq[i].common.member_flags;
+    MemberId id = ta.struct_type.member_seq[i].common.member_id;
     bool found = false;
     if ((flags & (IS_OPTIONAL | IS_MUST_UNDERSTAND)) == IS_MUST_UNDERSTAND) {
       for (size_t j = 0; j < matched_members.size(); ++j) {
@@ -441,9 +441,9 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
     }
   }
 
-  for (size_t i = 0; i < tb.struct_type.member_seq.members.size(); ++i) {
-    const MemberFlag& flags = tb.struct_type.member_seq.members[i].common.member_flags;
-    MemberId id = tb.struct_type.member_seq.members[i].common.member_id;
+  for (size_t i = 0; i < tb.struct_type.member_seq.length(); ++i) {
+    const MemberFlag& flags = tb.struct_type.member_seq[i].common.member_flags;
+    MemberId id = tb.struct_type.member_seq[i].common.member_id;
     bool found = false;
     if ((flags & (IS_OPTIONAL | IS_MUST_UNDERSTAND)) == IS_MUST_UNDERSTAND) {
       for (size_t j = 0; j < matched_members.size(); ++j) {
@@ -576,16 +576,16 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
         if (TK_UNION == tob->kind) {
           const MinimalUnionMemberSeq& mseq_a = toa->union_type.member_seq;
           const MinimalUnionMemberSeq& mseq_b = tob->union_type.member_seq;
-          for (size_t j = 0; j < mseq_b.members.size(); ++j) {
-            const UnionCaseLabelSeq& labels_b = mseq_b.members[j].common.label_seq;
-            for (size_t k = 0; k < mseq_a.members.size(); ++k) {
-              const UnionCaseLabelSeq& labels_a = mseq_a.members[k].common.label_seq;
+          for (size_t j = 0; j < mseq_b.length(); ++j) {
+            const UnionCaseLabelSeq& labels_b = mseq_b[j].common.label_seq;
+            for (size_t k = 0; k < mseq_a.length(); ++k) {
+              const UnionCaseLabelSeq& labels_a = mseq_a[k].common.label_seq;
               bool matched = false;
-              for (size_t p = 0; p < labels_b.members.size(); ++p) {
-                for (size_t q = 0; q < labels_a.members.size(); ++q) {
-                  if (labels_b.members[p] == labels_a.members[q]) {
-                    const TypeIdentifier& tib = mseq_b.members[j].common.type_id;
-                    const TypeIdentifier& tia = mseq_a.members[k].common.type_id;
+              for (size_t p = 0; p < labels_b.length(); ++p) {
+                for (size_t q = 0; q < labels_a.length(); ++q) {
+                  if (labels_b[p] == labels_a[q]) {
+                    const TypeIdentifier& tib = mseq_b[j].common.type_id;
+                    const TypeIdentifier& tia = mseq_a[k].common.type_id;
                     MinimalTypeObject kh_a, kh_b;
                     bool ret_b = hold_key(tib, kh_b);
                     bool ret_a = hold_key(tia, kh_a);
@@ -653,7 +653,7 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   }
 
   std::set<ACE_CDR::Long> labels_set_a;
-  for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
+  for (size_t i = 0; i < ta.union_type.member_seq.length(); ++i) {
     const UnionCaseLabelSeq& labels_a = ta.union_type.member_seq[i].common.label_seq;
     labels_set_a.insert(labels_a.members.begin(), labels_a.members.end());
   }
@@ -661,9 +661,9 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   // If extensibility is final, then the set of labels must be identical.
   // Assuming labels are mapped to values identically in both input types.
   if ((ta.union_type.union_flags & extensibility_mask) == IS_FINAL) {
-    for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
-      const UnionCaseLabelSeq& labels_b = tb.union_type.member_seq.members[i].common.label_seq;
-      for (size_t j = 0; j < labels_b.members.size(); ++j) {
+    for (size_t i = 0; i < tb.union_type.member_seq.length(); ++i) {
+      const UnionCaseLabelSeq& labels_b = tb.union_type.member_seq[i].common.label_seq;
+      for (size_t j = 0; j < labels_b.length(); ++j) {
         if (labels_set_a.find(labels_b.members[j]) == labels_set_a.end()) {
           return false;
         }
@@ -782,7 +782,7 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
     if ((flags_b & IS_DEFAULT) == IS_DEFAULT) {
       const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq[i].common.label_seq;
       for (size_t j = 0; j < ta.union_type.member_seq.length(); ++j) {
-        const UnionCaseLabelSeq& lable_seq_a = ta.union_type.member_seq[j].common.label_seq;
+        const UnionCaseLabelSeq& label_seq_a = ta.union_type.member_seq[j].common.label_seq;
         bool matched = false;
         for (size_t k = 0; k < label_seq_a.length(); ++k) {
           for (size_t t = 0; t < label_seq_b.length(); ++t) {
