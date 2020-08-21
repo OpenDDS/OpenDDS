@@ -1121,70 +1121,68 @@ namespace OpenDDS {
 
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
-          {
-            MatchingData md;
-            ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
+          MatchingData md;
+          ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
 
-            // if the type object is not in cache, send RPC request
-            md.dwQos = dwQos;
-            md.pubQos = pubQos;
-            md.drQos = drQos;
-            md.subQos = subQos;
-            md.wTls = wTls;
-            md.rTls = rTls;
-            md.writer_type_info = writer_type_info;
-            md.reader_type_info = reader_type_info;
-            md.cfProp = cfProp;
-            md.writer = writer;
-            md.reader = reader;
-            md.time_added_to_map = MonotonicTimePoint::now();
+          // if the type object is not in cache, send RPC request
+          md.dwQos = dwQos;
+          md.pubQos = pubQos;
+          md.drQos = drQos;
+          md.subQos = subQos;
+          md.wTls = wTls;
+          md.rTls = rTls;
+          md.writer_type_info = writer_type_info;
+          md.reader_type_info = reader_type_info;
+          md.cfProp = cfProp;
+          md.writer = writer;
+          md.reader = reader;
+          md.time_added_to_map = MonotonicTimePoint::now();
 
-            // TLS_TODO: rpc communication needs to be tested when XTypes are ready
-            if (!writer_local) {
-              if (!type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
-                XTypes::TypeIdentifierSeq type_ids;
-                type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
-                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-                if (md_it != matching_data_buffer_.end()) {
-                  // TLS_TODO: is this scenario possible?
-                  md_it->second = md;
-                } else {
-                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-                }
-                //send_type_lookup_request(type_ids, writer);
-                //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                //// TLS_TODO: sanity check on locks
-                //return;
+          // TLS_TODO: rpc communication needs to be tested when XTypes are ready
+          if (!writer_local) {
+            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
+              XTypes::TypeIdentifierSeq type_ids;
+              type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
+              md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
+              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+              if (md_it != matching_data_buffer_.end()) {
+                // TLS_TODO: is this scenario possible?
+                md_it->second = md;
+              } else {
+                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
               }
-            } else if (!reader_local) {
-              if (!type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
-                XTypes::TypeIdentifierSeq type_ids;
-                type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
-                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-                if (md_it != matching_data_buffer_.end()) {
-                  // TLS_TODO: is this scenario possible?
-                  md_it->second = md;
-                } else {
-                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-                }
-                //send_type_lookup_request(type_ids, reader);
-                //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                //// TLS_TODO: sanity check on locks
-                //return;
+              //send_type_lookup_request(type_ids, writer);
+              //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+              //// TLS_TODO: sanity check on locks
+              //return;
+            }
+          } else if (!reader_local) {
+            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
+              XTypes::TypeIdentifierSeq type_ids;
+              type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
+              md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
+              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+              if (md_it != matching_data_buffer_.end()) {
+                // TLS_TODO: is this scenario possible?
+                md_it->second = md;
+              } else {
+                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
               }
+              //send_type_lookup_request(type_ids, reader);
+              //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+              //// TLS_TODO: sanity check on locks
+              //return;
             }
-
-            MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-            if (md_it != matching_data_buffer_.end()) {
-              // TLS_TODO: is this scenario possible?
-              md_it->second = md;
-            } else {
-              matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-            }
-            match_continue(writer, reader);
           }
+
+          MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+          if (md_it != matching_data_buffer_.end()) {
+            // TLS_TODO: is this scenario possible?
+            md_it->second = md;
+          } else {
+            matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+          }
+          match_continue(writer, reader);
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
@@ -1251,11 +1249,14 @@ namespace OpenDDS {
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
         // TLS_TODO: sanity check on locks
+        // TLS_TODO: match_continue(it->second.writer, it->second.reader)
+        // will unlock '_lock'. Should it be locked here?
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {
-            match_continue(it->second.writer, it->second.reader);
+            return match_continue(it->second.writer, it->second.reader);
           }
         }
       }
