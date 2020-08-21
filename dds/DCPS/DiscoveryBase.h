@@ -959,7 +959,7 @@ namespace OpenDDS {
       typedef DCPS::PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
       DCPS::RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
-      mutable ACE_Recursive_Thread_Mutex matching_data_buffer_lock_;
+      ACE_Thread_Mutex matching_data_buffer_lock_;
 
 
       void
@@ -1123,7 +1123,7 @@ namespace OpenDDS {
                                 dwQos, drQos, pubQos, subQos)) {
           {
             MatchingData md;
-            ACE_GUARD(ACE_Recursive_Thread_Mutex, g, matching_data_buffer_lock_);
+            ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
 
             // if the type object is not in cache, send RPC request
             md.dwQos = dwQos;
@@ -1176,7 +1176,6 @@ namespace OpenDDS {
               }
             }
 
-            // TLS_TODO: sanity check on locks
             MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
             if (md_it != matching_data_buffer_.end()) {
               // TLS_TODO: is this scenario possible?
@@ -1184,9 +1183,8 @@ namespace OpenDDS {
             } else {
               matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
             }
+            match_continue(writer, reader);
           }
-
-          match_continue(writer, reader);
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
@@ -1239,7 +1237,7 @@ namespace OpenDDS {
       remove_expired_endpoints(const DCPS::MonotonicTimePoint& /*now*/)
       {
         // TLS_TODO: sanity check on locks
-        ACE_GUARD(ACE_Recursive_Thread_Mutex, g, matching_data_buffer_lock_);
+        ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (MonotonicTimePoint::now() - it->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
@@ -1253,7 +1251,7 @@ namespace OpenDDS {
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
         // TLS_TODO: sanity check on locks
-        ACE_GUARD(ACE_Recursive_Thread_Mutex, g, matching_data_buffer_lock_);
+        ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {
@@ -1282,11 +1280,7 @@ namespace OpenDDS {
         DataWriterCallbacks* dwr = 0;
         DataReaderCallbacks* drr = 0;
 
-        // find by writer
         {
-          // TLS_TODO: sanity check on locks
-          ACE_GUARD(ACE_Recursive_Thread_Mutex, g, matching_data_buffer_lock_);
-
           MatchingDataIter md = matching_data_buffer_.find(MatchingPair(writer, reader));
           if (md != matching_data_buffer_.end()) {
             dwQos = md->second.dwQos;
@@ -1304,14 +1298,13 @@ namespace OpenDDS {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
                 ACE_TEXT("match_continue failed\n")));
             }
+            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
+            ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
+            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+            ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
             return;
           }
         }
-
-        // Need to release lock, below, for callbacks into DCPS which could
-        // call into Spdp/Sedp.  Note that this doesn't unlock, it just constructs
-        // an ACE object which will be used below for unlocking.
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
         if (lpi != local_publications_.end()) {
@@ -1436,6 +1429,9 @@ namespace OpenDDS {
           add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos,
           octet_seq_type_info_writer
         };
+        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
+        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         static const bool writer_active = true;
 
