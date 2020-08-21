@@ -198,9 +198,10 @@ bool operator==(const DataView& a, const DataView& b)
     << result.str();
 }
 
-template<typename T, size_t message_block_size = 1024>
+template<typename T>
 void deserialize_compare(
-  const Encoding& encoding, const unsigned char data[], const size_t size, const T& expected)
+  const Encoding& encoding, const unsigned char data[], const size_t size,
+  const T& expected, const size_t message_block_size = 1024)
 {
   ACE_Message_Block mb(message_block_size);
   mb.copy((const char*)data, size);
