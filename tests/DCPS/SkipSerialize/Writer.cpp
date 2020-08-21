@@ -16,7 +16,6 @@
 
 #include "Args.h"
 #include "SkipSerializeTypeSupportC.h"
-// #include "MessengerTypeSupportC.h"
 #include "Writer.h"
 
 const int num_instances_per_writer = 1;
@@ -98,14 +97,15 @@ Writer::svc()
     }
 
     SkipSerialize::Message message;
-    message.subject_id = 99;
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from         = "Comic Book Guy";
-    message.subject      = "Review";
-    message.text         = "Worst. Movie. Ever.";
-    message.count        = 0;
+    message.serialized_data.length(4);
+    message.serialized_data[0] = 1;
+    message.serialized_data[1] = 2;
+    message.serialized_data[2] = 3;
+    message.serialized_data[3] = 4;
+    message.count = 0;
 
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;

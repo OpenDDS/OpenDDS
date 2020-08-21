@@ -68,29 +68,31 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           valid_ = false;
         }
 
-        std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                  << "         subject_id = " << message.subject_id   << std::endl
-                  << "         from       = " << message.from.in()    << std::endl
-                  << "         count      = " << message.count        << std::endl
-                  << "         text       = " << message.text.in()    << std::endl;
+        std::cout << "Message:" << std::endl
+                  << "         count      = " << message.count        << std::endl;
+        for (CORBA::ULong i = 0; i < message.serialized_data.length(); i++)
+        {
+          std::cout << "         data[" << i << "] = " << message.serialized_data[i] << std::endl;
 
-        if (std::string("Comic Book Guy") != message.from.in() &&
-            std::string("OpenDDS-Java") != message.from.in()) {
-          std::cout << "ERROR: Invalid message.from" << std::endl;
-          valid_ = false;
         }
-        if (std::string("Review") != message.subject.in()) {
-          std::cout << "ERROR: Invalid message.subject" << std::endl;
-          valid_ = false;
-        }
-        if (std::string("Worst. Movie. Ever.") != message.text.in()) {
-          std::cout << "ERROR: Invalid message.text" << std::endl;
-          valid_ = false;
-        }
-        if (message.subject_id != 99) {
-          std::cout << "ERROR: Invalid message.subject_id" << std::endl;
-          valid_ = false;
-        }
+        //TODO create check for new message similar to commented below
+        // if (std::string("Comic Book Guy") != message.from.in() &&
+        //     std::string("OpenDDS-Java") != message.from.in()) {
+        //   std::cout << "ERROR: Invalid message.from" << std::endl;
+        //   valid_ = false;
+        // }
+        // if (std::string("Review") != message.subject.in()) {
+        //   std::cout << "ERROR: Invalid message.subject" << std::endl;
+        //   valid_ = false;
+        // }
+        // if (std::string("Worst. Movie. Ever.") != message.text.in()) {
+        //   std::cout << "ERROR: Invalid message.text" << std::endl;
+        //   valid_ = false;
+        // }
+        // if (message.subject_id != 99) {
+        //   std::cout << "ERROR: Invalid message.subject_id" << std::endl;
+        //   valid_ = false;
+        // }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 

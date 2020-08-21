@@ -39,18 +39,3 @@ project(DDS*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test, opendds_o
     DataReaderListener.cpp
   }
 }
-
-project(DDS*StackSubscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
-
-  exename   = stack_subscriber
-  after    += DDS*idl
-  libs     += DDS*idl
-
-  Idl_Files {
-  }
-
-  Source_Files {
-    stack_subscriber.cpp
-    DataReaderListener.cpp
-  }
-}
