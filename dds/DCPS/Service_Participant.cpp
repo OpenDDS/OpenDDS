@@ -2202,7 +2202,7 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
 }
 
 void
-Service_Participant::get_global_transport_name(ACE_TString& name) const
+Service_Participant::get_global_transport_config_name(ACE_TString& name) const
 {
   name = global_transport_config_;
 }

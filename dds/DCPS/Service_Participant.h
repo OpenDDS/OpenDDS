@@ -402,7 +402,7 @@ public:
    */
   bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
-  void get_global_transport_name(ACE_TString& name) const;
+  void get_global_transport_config_name(ACE_TString& name) const;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
