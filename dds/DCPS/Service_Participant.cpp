@@ -1472,7 +1472,7 @@ Service_Participant::load_configuration(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
     if (config) {
       TransportRegistry::instance()->global_config(config);
-    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_)) {
+    } else if (TheTransportRegistry->config_has_transport_template(global_transport_config_)) {
       if (DCPS_debug_level > 0) {
         // This is not an error.
         ACE_DEBUG((LM_NOTICE,
@@ -1912,9 +1912,6 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
         }
       }
 
-      // store domain and associated config for template or multiple participant domain use
-      TheTransportRegistry->associate_domain_to_config(domainId, ACE_TEXT_ALWAYS_CHAR(global_transport_config_.c_str()));
-
       if (!perDomainDefaultTportConfig.empty()) {
         TransportRegistry* const reg = TransportRegistry::instance();
         TransportConfig_rch tc = reg->get_config(perDomainDefaultTportConfig);
@@ -2202,6 +2199,12 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
   }
 
   return false;
+}
+
+void
+Service_Participant::get_global_transport_name(ACE_TString& name) const
+{
+  name = global_transport_config_;
 }
 
 int

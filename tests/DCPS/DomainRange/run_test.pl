@@ -28,19 +28,19 @@ sub runTest {
     print "The DW in each domain sends 10 messages to its DR.\n";
     print "*********************************\n";
 
-    my $dw_static = 1;
-    my $dr_static = 1;
-    my $origin = 1;
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 2 -domain 2 -domain 4 -domain 7");
+    $test->process("beta", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 1 -domain 15 -domain 3");
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 2 -domain 2 -domain 15 -domain 4 -domain 7");
     $test->start_process("alpha");
+    $test->start_process("beta");
+
     sleep $delay;
 
     my $res = $test->finish(150);
     if ($res != 0) {
         print STDERR "ERROR: test returned $res\n";
         $result += $res;
-    }
+		}
 }
 
 runTest(0);

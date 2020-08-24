@@ -86,23 +86,29 @@ DomainParticipantFactoryImpl::create_participant(
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
-  // if a participant is already in the domain and rtps then
-  // create a new transport instance for the new participant.
-  DPMap::iterator i = participants_.find(domainId);
-  if (i != participants_.end()) {
-    ACE_TString config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
+  // if a participant is already in the domain and the global transport
+  // is a transport template then create a new transport instance for the
+  // new participant if per_participant is set.
+  ACE_TString global_transport_name;
+  TheServiceParticipant->get_global_transport_name(global_transport_name);
+  if (TheServiceParticipant->belongs_to_domain_range(domainId) &&
+      TheTransportRegistry->config_has_transport_template(global_transport_name)) {
+    DPMap::iterator i = participants_.find(domainId);
+    if (i != participants_.end()) {
+      ACE_TString config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
 
-    bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, config_name);
+      bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, config_name);
 
-    if (ret) {
-      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), dp.in());
-    } else {
-      ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-               ACE_TEXT("could not create new transport instance for participant.\n")));
+      if (ret) {
+        TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), dp.in());
+      } else {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                   ACE_TEXT("could not create new transport instance for participant.\n")));
 
-      return DDS::DomainParticipant::_nil();
+        return DDS::DomainParticipant::_nil();
+      }
     }
   }
 

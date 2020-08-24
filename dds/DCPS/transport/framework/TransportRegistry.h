@@ -128,13 +128,6 @@ public:
 
   bool create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name);
 
-  // The TransportRegistry needs to know the domains for a given
-  // config in order to know when to create new transport instances
-  // for separate participants in the same domain. This is called
-  // from the Service_Particpant since it knows if the GlobalTransportConfig
-  // has been set or overriden by a command line option.
-  void associate_domain_to_config(DDS::DomainId_t id, const OPENDDS_STRING& cfg);
-
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
@@ -191,8 +184,6 @@ private:
   bool get_transport_info(const ACE_TString& config_name, TransportEntry& inst);
 
   bool has_transports() const;
-
-  OPENDDS_MAP(DDS::DomainId_t, ACE_TString) domain_config_map_;
 };
 
 } // namespace DCPS

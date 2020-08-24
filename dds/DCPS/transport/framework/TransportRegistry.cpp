@@ -150,12 +150,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                -1);
             }
 
-            // store the transport info
-            TransportEntry entry;
-            entry.transport_name = transport_id;
-            entry.transport_info = values;
-            transports_.push_back(entry);
-
             // Create the TransportInst object and load the transport
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
@@ -170,6 +164,12 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
             instances.push_back(inst);
             inst->load(cf, inst_sect);
+
+            // store the transport info
+            TransportEntry entry;
+            entry.transport_name = transport_id;
+            entry.transport_info = values;
+            transports_.push_back(entry);
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -639,16 +639,7 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 bool
 TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name)
 {
-  if (domain_config_map_.find(id) == domain_config_map_.end()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-               ACE_TEXT("create_new_transport_instance_for_participant ")
-               ACE_TEXT("domain_config_map_ has no information for Domain %d\n"),
-               id));
-    return false;
-  }
-
-  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(domain_config_map_[id].c_str()));
+  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(TheServiceParticipant->get_global_transport_name().c_str()));
 
   OPENDDS_STRING tmp = ACE_TEXT_ALWAYS_CHAR(config_name.c_str());
   OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + tmp;
@@ -713,12 +704,6 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   config->instances_.push_back(inst);
   return true;
 }
-
-void TransportRegistry::associate_domain_to_config(DDS::DomainId_t id, const OPENDDS_STRING& cfg)
-{
-  domain_config_map_[id] = ACE_TEXT_CHAR_TO_TCHAR(cfg.c_str());
-}
-
 
 void
 TransportRegistry::release()
