@@ -639,7 +639,22 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 bool
 TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name)
 {
-  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(TheServiceParticipant->get_global_transport_name().c_str()));
+  ACE_TString global_transport_config_name;
+  TheServiceParticipant->get_global_transport_config_name(global_transport_config_name);
+
+  // check per_participant
+  TransportTemplate templ;
+  if(get_transport_template_info(global_transport_config_name, templ)) {
+    if (!templ.instantiate_per_participant) {
+      ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                  ACE_TEXT("create_new_transport_instance_for_participant: ")
+                  ACE_TEXT("transport_template missing instantiation_rule=per_participant\n")));
+      return false;
+    }
+  }
+
+  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(global_transport_config_name.c_str()));
 
   OPENDDS_STRING tmp = ACE_TEXT_ALWAYS_CHAR(config_name.c_str());
   OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + tmp;
