@@ -50,6 +50,7 @@ WorkerDataWriterListener::on_publication_matched(
   if (expected_match_count_ != 0) {
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataWriterListener reached expected count!" << std::endl;
+      wr_expected_match_cv.notify_all();
       if (datawriter_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }

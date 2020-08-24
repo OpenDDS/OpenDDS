@@ -191,6 +191,7 @@ WorkerDataReaderListener::on_subscription_matched(
   if (expected_match_count_ != 0) {
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
+      dr_expected_match_cv.notify_all();
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
