@@ -3347,15 +3347,15 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
 void
 RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
-  ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
-  AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
+  const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
     const GuidConverter conv(element->subscription_id());
     ACE_ERROR((LM_ERROR,
                "(%P|%t) RtpsUdpDataLink::durability_resend() - "
                "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
   } else {
-    send_strategy()->send_rtps_control(*msg, addrs);
+    const RtpsUdpSendStrategy::OverrideToken ot = send_strategy()->override_destinations(addrs);
+    send_strategy()->send(element);
   }
 }
 
