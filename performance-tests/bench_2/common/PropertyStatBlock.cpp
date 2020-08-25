@@ -44,7 +44,7 @@ void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, co
     }
   }
 
-  os << i1 << uname << " Statitics:" << std::endl;
+  os << i1 << uname << " Statistics:" << std::endl;
   const size_t my_w = sample_count_ ? (median_sample_overflow_ ? 10 : 7) : 5;
   os << i2 << name << std::setw(my_w) << std::setfill(' ') << " count" << " = " << sample_count_ << std::endl;
   if (sample_count_) {
