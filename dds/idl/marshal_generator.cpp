@@ -2929,6 +2929,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const OpenDDS::DataRepresentation repr =
     be_global->data_representations(node);
 
+  const bool xcdr = repr.xcdr1 || repr.xcdr2;
+  const bool not_final = exten != extensibilitykind_final;
+  const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
+  const bool may_be_delimited = not_final && repr.xcdr2;
+  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
+
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
       return special_unions[i].gen(cxx, discriminator, branches);
@@ -2946,6 +2952,19 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (!align.empty()) {
       be_global->impl_ << "  encoding.align(size, " << align << ");\n";
     }
+
+    if (may_be_delimited) {
+      be_global->impl_ <<
+        "  serialized_size_delimiter(encoding, size);\n";
+    }
+
+    if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  size_t xcdr1_pl_running_total = 0;\n";
+      be_global->impl_ <<
+        "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+    }
+
     if (disc_cls & CL_ENUM) {
       be_global->impl_ <<
         "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
@@ -2953,6 +2972,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
+
+    if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+    }
+
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
   }
@@ -2961,10 +2986,50 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
+
+    if (may_be_delimited || may_be_parameter_list) {
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n";
+    }
+
+    // Write the CDR Size if delimited.
+    if (may_be_delimited) {
+      be_global->impl_ <<
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+        "    size_t total_size = 0;\n"
+        "    serialized_size(encoding, total_size, stru);\n"
+        "    if (!strm.write_delimiter(total_size)) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n";
+    }
+
+    // Header for discriminator
+    if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  size_t size = 0;\n";
+
+      if (disc_cls & CL_ENUM) {
+        be_global->impl_ <<
+          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+      } else {
+        be_global->impl_ <<
+          "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+      }
+
+      be_global->impl_ <<
+        "  if (!strm.write_parameter_id(0, size)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  size = 0;\n";
+    }
+
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
     if (generateSwitchForUnion("uni._d()", streamCommon, branches,
-                               discriminator, "return", "<< ", cxx.c_str())) {
+                               discriminator, "return", "<< ", cxx.c_str(),
+                               false, true, true,
+                               may_be_parameter_list ? findSizeCommon : NULL)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -2974,13 +3039,93 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.addArg("strm", "Serializer&");
     extraction.addArg("uni", cxx + "&");
     extraction.endArgs();
-    be_global->impl_ <<
-      "  " << scoped(discriminator->name()) << " disc;\n" <<
-      streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-    if (generateSwitchForUnion("disc", streamCommon, branches,
-                               discriminator, "if", ">> ", cxx.c_str())) {
+
+    // DHEADER
+    if (may_be_delimited) {
       be_global->impl_ <<
-        "  return true;\n";
+        "  size_t total_size = 0;\n";
+      const char* indent = "  ";
+      if (not_only_delimited) {
+        indent = "    ";
+        be_global->impl_ <<
+          "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+      }
+      be_global->impl_ <<
+        indent << "if (!strm.read_delimiter(total_size)) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+      if (not_only_delimited) {
+        be_global->impl_ <<
+          "  }\n";
+      }
+    }
+
+    if (may_be_parameter_list) {
+      // Header for discriminator
+      be_global->impl_ <<
+        "  unsigned member_id;\n"
+        "  size_t field_size;\n";
+        
+      be_global->impl_ <<
+        "  bool must_understand = false;\n"
+        "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "    return false;\n"
+        "  }\n";
+
+      // Discriminator
+      be_global->impl_ <<
+        "  " << scoped(discriminator->name()) << " disc;\n" <<
+        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+
+      // Header for union member
+      be_global->impl_ <<
+        "  member_id = 0;\n"
+        "  field_size = 0;\n"
+        "  must_understand = false;\n"
+        "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "    return false;\n"
+        "  }\n";
+
+      std::ostringstream cases;
+      string intro;
+      for (size_t i = 0; i < branches.size(); ++i) {
+        const unsigned id = be_global->get_id(node, branches[i], i);
+        const string branch_name = branches[i]->local_name()->get_string();
+        cases <<
+          "  case " << id << ": {\n"
+          "    if (!" << streamCommon(branch_name, branches[i]->field_type(),
+          ">> uni", intro, cxx) << ") {\n"
+          "      return false;\n"
+          "    }\n"
+          "    uni._d(disc);\n"
+          "    break;\n"
+          "  }\n";
+      }
+
+      be_global->impl_ << intro <<
+        "  switch (member_id) {\n"
+        << cases.str() <<
+        "  default:\n"
+        "    if (must_understand) {\n"
+        "      if (DCPS_debug_level >= 8) {\n"
+        "        ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
+        << cxx.c_str() << "\\n\"), member_id));\n" <<
+        "      }\n"
+        "      return false;\n"
+        "    }\n"
+        "    strm.skip(field_size);\n"
+        "    break;\n"
+        "  }\n"
+        "  return false;\n";
+    } else {
+      be_global->impl_ <<
+        "  " << scoped(discriminator->name()) << " disc;\n" <<
+        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+      if (generateSwitchForUnion("disc", streamCommon, branches,
+        discriminator, "if", ">> ", cxx.c_str())) {
+        be_global->impl_ <<
+          "  return true;\n";
+      }
     }
   }
 
@@ -3061,6 +3206,18 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.endArgs();
 
     if (has_key) {
+      if (may_be_delimited) {
+        be_global->impl_ <<
+          "  serialized_size_delimiter(encoding, size);\n";
+      }
+
+      if (may_be_parameter_list) {
+        be_global->impl_ <<
+          "  size_t xcdr1_pl_running_total = 0;\n";
+        be_global->impl_ <<
+          "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+      }
+      
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
           "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
@@ -3078,6 +3235,43 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.endArgs();
 
     if (has_key) {
+      if (may_be_delimited || may_be_parameter_list) {
+        be_global->impl_ <<
+          "  const Encoding& encoding = strm.encoding();\n";
+      }
+
+      // Write the CDR Size if delimited.
+      if (may_be_delimited) {
+        be_global->impl_ <<
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+          "    size_t total_size = 0;\n"
+          "    serialized_size(encoding, total_size, stru);\n"
+          "    if (!strm.write_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "  }\n";
+      }
+
+      // Header for discriminator
+      if (may_be_parameter_list) {
+        be_global->impl_ <<
+          "  size_t size = 0;\n";
+
+        if (disc_cls & CL_ENUM) {
+          be_global->impl_ <<
+            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+        } else {
+          be_global->impl_ <<
+            "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+        }
+
+        be_global->impl_ <<
+          "  if (!strm.write_parameter_id(0, size)) {\n"
+          "    return false;\n"
+          "  }\n"
+          "  size = 0;\n";
+      }
+
       be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
     }
 
@@ -3091,6 +3285,39 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.endArgs();
 
     if (has_key) {
+      // DHEADER
+      if (may_be_delimited) {
+        be_global->impl_ <<
+          "  size_t total_size = 0;\n";
+        const char* indent = "  ";
+        if (not_only_delimited) {
+          indent = "    ";
+          be_global->impl_ <<
+            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+        }
+        be_global->impl_ <<
+          indent << "if (!strm.read_delimiter(total_size)) {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
+        if (not_only_delimited) {
+          be_global->impl_ <<
+            "  }\n";
+        }
+      }
+
+      if (may_be_parameter_list) {
+        // Header for discriminator
+        be_global->impl_ <<
+          "  unsigned member_id;\n"
+          "  size_t field_size;\n";
+
+        be_global->impl_ <<
+          "  bool must_understand = false;\n"
+          "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "    return false;\n"
+          "  }\n";
+      }
+
       be_global->impl_
         << "  " << scoped(discriminator->name()) << " disc;\n"
         << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
