@@ -200,11 +200,10 @@ bool operator==(const DataView& a, const DataView& b)
 
 template<typename T>
 void deserialize_compare(
-  const Encoding& encoding, const unsigned char data[], const size_t size,
-  const T& expected, const size_t message_block_size = 1024)
+  const Encoding& encoding, const DataView& data, const T& expected)
 {
-  ACE_Message_Block mb(message_block_size);
-  mb.copy((const char*)data, size);
+  ACE_Message_Block mb(data.size);
+  mb.copy((const char*)data.data, data.size);
   Serializer serializer(&mb, encoding);
   T result;
   ASSERT_TRUE(serializer >> result);
@@ -546,7 +545,7 @@ TEST(mutable_tests, from_additional_field_must_understand_test)
   // Deserialize and Compare C++ Values
   AdditionalFieldMutableStruct expected;
   set_values(expected);
-  deserialize_compare(xcdr2, additional_field_must_understand, sizeof(additional_field_must_understand), expected);
+  deserialize_compare(xcdr2, additional_field_must_understand, expected);
 }
 
 TEST(mutable_tests, from_additional_field_xcdr2_test)
@@ -631,7 +630,7 @@ TEST(mutable_tests, read_lc567_test)
   expected.str4 = "abc";
   expected.str5 = "abcd";
 
-  deserialize_compare(xcdr2, data, sizeof(data), expected);
+  deserialize_compare(xcdr2, data, expected);
 }
 
 int main(int argc, char* argv[])
