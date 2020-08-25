@@ -1009,6 +1009,11 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 
     qos_ = qos;
 
+    Observer::Rch observer = get_observer(Observer::e_QOS_CHANGED);
+    if (observer) {
+      observer->on_qos_changed(this);
+    }
+
     return DDS::RETCODE_OK;
 
   } else {
@@ -1557,6 +1562,13 @@ DataWriterImpl::enable()
   }
 
 #endif
+
+  if (writer_enabled_result == DDS::RETCODE_OK) {
+    Observer::Rch observer = get_observer(Observer::e_ENABLED);
+    if (observer) {
+      observer->on_enabled(this);
+    }
+  }
 
   return writer_enabled_result;
 }
@@ -2525,6 +2537,11 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 void
 DataWriterImpl::prepare_to_delete()
 {
+  Observer::Rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
+
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();

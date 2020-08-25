@@ -20,7 +20,7 @@ EntityImpl::EntityImpl()
   , status_changes_(0)
   , status_condition_(new StatusConditionImpl(this))
   , observer_()
-  , observer_mask_(Observer::e_NONE)
+  , events_(Observer::e_NONE)
 {
 }
 
@@ -82,6 +82,12 @@ EntityImpl::get_deleted()
   return this->entity_deleted_.value();
 }
 
+Observer::Rch EntityImpl::get_observer(const Observer::Event e)
+{
+  return (observer_ && (events_ & e)) ? observer_ :
+         parent() ? parent()->get_observer(e) : Observer::Rch();
+}
+
 void
 EntityImpl::notify_status_condition()
 {
@@ -110,10 +116,10 @@ EntityImpl::transport_config() const
   return transport_config_;
 }
 
-void EntityImpl::set_observer(Observer_rch observer, const Observer::EventMask mask)
+void EntityImpl::set_observer(Observer::Rch observer, const Observer::Event e)
 {
   observer_ = observer;
-  observer_mask_ = mask;
+  events_ = e;
 }
 
 } // namespace DCPS

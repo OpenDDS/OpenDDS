@@ -60,7 +60,7 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const { return RcHandle<EntityImpl>(); }
 
-  void set_observer(Observer_rch observer, const Observer::EventMask mask);
+  void set_observer(Observer::Rch observer, const Observer::Event e);
 
 protected:
   DDS::ReturnCode_t set_enabled();
@@ -68,6 +68,8 @@ protected:
   void set_deleted(bool state);
 
   bool get_deleted();
+
+  Observer::Rch get_observer(const Observer::Event e);
 
   /// The flag indicates the entity is enabled.
   ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
@@ -86,8 +88,8 @@ private:
 
   TransportConfig_rch transport_config_;
 
-  Observer_rch observer_;
-  Observer::EventMask observer_mask_;
+  Observer::Rch observer_;
+  Observer::Event events_;
 
   mutable ACE_Thread_Mutex lock_;
 };

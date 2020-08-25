@@ -889,6 +889,11 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
     qos_change(qos);
     qos_ = qos;
 
+    Observer::Rch observer = get_observer(Observer::e_QOS_CHANGED);
+    if (observer) {
+      observer->on_qos_changed(this);
+    }
+
     return DDS::RETCODE_OK;
 
   } else {
@@ -1279,19 +1284,24 @@ DataReaderImpl::enable()
     }
   }
 
+  DDS::ReturnCode_t return_value = DDS::RETCODE_OK;
   if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
-    DDS::ReturnCode_t return_value =
-        subscriber->reader_enabled(name.in(), this);
+    return_value = subscriber->reader_enabled(name.in(), this);
 
     if (this->monitor_) {
       this->monitor_->report();
     }
-
-    return return_value;
-  } else {
-    return DDS::RETCODE_OK;
   }
+
+  if (return_value == DDS::RETCODE_OK) {
+    Observer::Rch observer = get_observer(Observer::e_ENABLED);
+    if (observer) {
+      observer->on_enabled(this);
+    }
+  }
+
+  return return_value;
 }
 
 void
@@ -2395,6 +2405,11 @@ DataReaderImpl::statistics_enabled(
 void
 DataReaderImpl::prepare_to_delete()
 {
+  Observer::Rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
+
   this->set_deleted(true);
   this->stop_associating();
   this->send_final_acks();

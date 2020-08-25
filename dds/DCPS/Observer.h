@@ -35,7 +35,7 @@ public:
   typedef TAO_Objref_Out_T<Observer> Out;
   typedef RcHandle<Observer> Rch;
 
-  enum EventMask {
+  enum Event {
     e_ENABLED                = 0X0001 << 0,
     e_DELETED                = 0X0001 << 1,
     e_QOS_CHANGED            = 0X0001 << 2,
