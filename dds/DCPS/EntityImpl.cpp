@@ -20,7 +20,7 @@ EntityImpl::EntityImpl()
   , status_changes_(0)
   , status_condition_(new StatusConditionImpl(this))
   , observer_()
-  , observer_mask_(Observer::EventMask::None)
+  , observer_mask_(Observer::e_NONE)
 {
 }
 
