@@ -2499,13 +2499,13 @@ TEST(StructTypeTest, Assignable)
 {
   TypeAssignability test;
   MinimalStructType a, b;
-  a.struct_flags = IS_APPENDABLE;
+  a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
 
   // Primitive members
   MinimalStructMember ma1(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_UINT8)),
                           MinimalMemberDetail("m1"));
-  MinimalStructMember mb1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_CHAR8)),
+  MinimalStructMember mb1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_UINT8)),
                           MinimalMemberDetail("m1"));
   a.member_seq.append(ma1);
   b.member_seq.append(mb1);
@@ -2521,12 +2521,23 @@ TEST(StructTypeTest, Assignable)
                                                                    TypeIdentifier::makeString(false,
                                                                                               StringSTypeDefn(100))),
                                                 MinimalMemberDetail("inner_m2")));
-  inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_INT16)),
+  inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
                                                                    TypeIdentifier::makeString(false,
                                                                                               StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(inner_a)),
+                              TypeObject(MinimalTypeObject(inner_b))));
+
+  inner_a.struct_flags = IS_APPENDABLE;
+  inner_b.struct_flags = inner_a.struct_flags;
+  inner_b.member_seq.append(MinimalStructMember(CommonStructMember(3, StructMemberFlag(),
+                                                                   TypeIdentifier(TK_UINT32)),
+                                                MinimalMemberDetail("inner_m3")));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(inner_a)),
+                              TypeObject(MinimalTypeObject(inner_b))));
+
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
   MinimalStructMember ma2(CommonStructMember(2, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
@@ -2731,7 +2742,7 @@ void expect_false_different_names()
   MinimalStructType a, b;
 
   // Some members with the same name but different ID
-  a.struct_flags = IS_FINAL;
+  a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_UINT8)),
                           MinimalMemberDetail("m1"));
@@ -2748,7 +2759,7 @@ void expect_false_no_matched_member()
   MinimalStructType a, b;
 
   // There no members with the same ID
-  a.struct_flags = IS_FINAL;
+  a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_UINT8)),
                           MinimalMemberDetail("m1"));
@@ -2770,7 +2781,7 @@ void expect_false_key_erased()
 
   // KeyErased of members are not assignable
   MinimalStructType inner_a, inner_b;
-  inner_a.struct_flags = IS_FINAL;
+  inner_a.struct_flags = IS_MUTABLE;
   inner_b.struct_flags = inner_a.struct_flags;
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
@@ -3018,7 +3029,7 @@ void expect_false_key_holder()
   MinimalStructType a, b;
 
   MinimalStructType inner_a, inner_b;
-  inner_a.struct_flags = IS_FINAL;
+  inner_a.struct_flags = IS_MUTABLE;
   inner_b.struct_flags = inner_a.struct_flags;
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
@@ -3080,6 +3091,44 @@ void expect_false_key_holder()
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a2)), TypeObject(MinimalTypeObject(b2))));
 }
 
+void expect_false_appendable()
+{
+  TypeAssignability test;
+  MinimalStructType a, b;
+
+  a.struct_flags = IS_APPENDABLE;
+  b.struct_flags = a.struct_flags;
+  MinimalStructMember ma1(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_UINT8)),
+                          MinimalMemberDetail("m1"));
+  MinimalStructMember ma2(CommonStructMember(2, StructMemberFlag(), TypeIdentifier(TK_FLOAT32)),
+                          MinimalMemberDetail("m2"));
+  MinimalStructMember mb1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_BYTE)),
+                          MinimalMemberDetail("m1"));
+  a.member_seq.append(ma1).append(ma2);
+  b.member_seq.append(mb1);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+}
+
+void expect_false_final()
+{
+  TypeAssignability test;
+  MinimalStructType a, b;
+
+  a.struct_flags = IS_FINAL;
+  b.struct_flags = a.struct_flags;
+  MinimalStructMember ma1(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_UINT8)),
+                          MinimalMemberDetail("m1"));
+  MinimalStructMember ma2(CommonStructMember(2, StructMemberFlag(), TypeIdentifier(TK_FLOAT32)),
+                          MinimalMemberDetail("m2"));
+  MinimalStructMember mb1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_UINT8)),
+                          MinimalMemberDetail("m1"));
+  MinimalStructMember mb2(CommonStructMember(3, IS_KEY, TypeIdentifier(TK_FLOAT32)),
+                          MinimalMemberDetail("m3"));
+  a.member_seq.append(ma1).append(ma2);
+  b.member_seq.append(mb1).append(mb2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+}
+
 TEST(StructTypeTest, NotAssignable)
 {
   expect_false_different_extensibilities();
@@ -3094,6 +3143,8 @@ TEST(StructTypeTest, NotAssignable)
   expect_false_sequence_keys();
   expect_false_map_keys();
   expect_false_key_holder();
+  expect_false_appendable();
+  expect_false_final();
 }
 
 TEST(UnionTypeTest, Assignable)
@@ -3450,7 +3501,7 @@ TEST(UnionTypeTest, NotAssignable)
                             MinimalMemberDetail("member1"));
   MinimalUnionMember mb10_1(CommonUnionMember(1, IS_DEFAULT,
                                               TypeIdentifier::makeString(true, StringLTypeDefn(120)),
-                                              UnionCaseLabelSeq().append(20)),
+                                              UnionCaseLabelSeq().append(30)),
                             MinimalMemberDetail("member1"));
   a10.member_seq.append(ma10_1);
   b10.member_seq.append(mb10_1);

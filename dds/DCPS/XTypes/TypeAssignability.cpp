@@ -1871,7 +1871,8 @@ bool TypeAssignability::is_delimited_with_flags(TypeFlag flags) const
   } else { // Default extensibility is APPENDABLE (7.3.1.2.1.8)
     // Types with extensibility kind APPENDABLE are delimited
     // if serialized with encoding version 2 and are not
-    // delimited if serialized with encoding version 1
+    // delimited if serialized with encoding version 1.
+    // We are supporting XCDR2 in this iteration.
     return true;
   }
 }
