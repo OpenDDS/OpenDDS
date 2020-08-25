@@ -379,32 +379,39 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
 
   // For any member m2 of T2, if there is a member m1 of T1 with the same
   // ID, then the type KeyErased(m1.type) is-assignable-from the type
-  // KeyErased(m2.type)
+  // KeyErased(m2.type).
+  // We extend this rule for all members of T1 and T2 that have the same
+  // ID, i.e., for any pair of members m2 of T2 and m1 of T1 with the same
+  // ID where m1.type and m2.type are not aggregated, verify that
+  // m1.type is-assignable-from m2.type.
   for (size_t i = 0; i < matched_members.size(); ++i) {
     const CommonStructMember& member = matched_members[i].second->common;
     const MinimalTypeObject* toa = 0;
     const MinimalTypeObject* tob = 0;
-    bool type_matched = false;
+    bool aggregated_type_matched = false;
     // KeyErased(T) is defined only for struct and union
     if (get_struct_member(tob, member)) {
       if (!get_struct_member(toa, matched_members[i].first->common)) {
         return false;
       }
-      type_matched = true;
+      aggregated_type_matched = true;
     } else if (get_union_member(tob, member)) {
       if (!get_union_member(toa, matched_members[i].first->common)) {
         return false;
       }
-      type_matched = true;
+      aggregated_type_matched = true;
     }
 
-    if (type_matched) {
+    if (aggregated_type_matched) {
       MinimalTypeObject key_erased_a = *toa, key_erased_b = *tob;
       erase_key(key_erased_a);
       erase_key(key_erased_b);
       if (!assignable(TypeObject(key_erased_a), TypeObject(key_erased_b))) {
         return false;
       }
+    } else if (!assignable(matched_members[i].first->common.member_type_id,
+                           matched_members[i].second->common.member_type_id)) {
+      return false;
     }
   }
 
