@@ -2268,7 +2268,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  size_t size = 0;\n";
       std::ostringstream fields_encode;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], i);
+        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
         const string field_name = fields[i]->local_name()->get_string();
         fields_encode <<
           "\n" <<
@@ -2387,7 +2387,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       std::ostringstream cases;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], i);
+        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
         const string field_name = fields[i]->local_name()->get_string();
         cases <<
           "    case " << id << ": {\n"
