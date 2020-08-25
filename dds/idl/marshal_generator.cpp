@@ -390,6 +390,27 @@ namespace {
     return arg.str();
   }
 
+  // Helper function to conditionally generate dheader-related code which is passed as the
+  // "code" argument.
+  // code contains the lines of code to generate
+  // is_ser_func specifies whether this is a serialization operation
+  void generate_dheader_code(const std::vector<std::string>& code, bool dheader_required, bool is_ser_func = true)
+  {
+    //DHeader appears on aggregated types that are mutable or appendable in XCDR2
+    //DHeader also appears on ALL sequences and arrays of non-primitives
+    if (dheader_required) {
+      if (is_ser_func) {
+        be_global->impl_ << "  size_t total_size = 0;\n";
+      }
+      be_global->impl_ <<
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+      for (size_t i = 0; i < code.size(); ++i) {
+        be_global->impl_ << "    " << code[i] << "\n";
+      }
+      be_global->impl_ << "  }\n";
+    }
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -405,6 +426,7 @@ namespace {
 
     AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
+    const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
         if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
@@ -443,6 +465,11 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       serialized_size.endArgs();
+
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, !primitive, false);
+
       be_global->impl_ << const_unwrap <<
         "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
@@ -501,6 +528,15 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       insertion.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+
       be_global->impl_ << const_unwrap <<
         "  const CORBA::ULong length = " << get_length << ";\n";
       if (!seq->unbounded()) {
@@ -564,6 +600,14 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(use_cxx11 ? "wrap" : "seq", cxx);
       extraction.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
@@ -899,6 +943,7 @@ namespace {
 
     AST_Type* elem = resolveActualType(arr->base_type());
     Classification elem_cls = classify(elem);
+    const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(elem->file_name().c_str());
@@ -914,6 +959,11 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
       serialized_size.endArgs();
+
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, !primitive, false);
+
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
@@ -967,6 +1017,14 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
       insertion.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
       be_global->impl_ << const_unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (elem_cls & CL_PRIMITIVE) {
@@ -1006,6 +1064,14 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(use_cxx11 ? "wrap" : "arr", cxx);
       extraction.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+
       be_global->impl_ << unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
       if (elem_cls & CL_PRIMITIVE) {
@@ -2163,8 +2229,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
   const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
-  const bool may_be_delimited = not_final && repr.xcdr2;
-  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -2202,10 +2266,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  size_t xcdr1_pl_running_total = 0;\n";
     }
 
-    if (may_be_delimited) {
-      be_global->impl_ <<
-        "  serialized_size_delimiter(encoding, size);\n";
-    }
+    std::vector<string> code;
+    code.push_back("serialized_size_delimiter(encoding, size);");
+    generate_dheader_code(code, not_final, false);
 
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
@@ -2237,29 +2300,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  serialized_size_list_end_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
     }
   }
-
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
 
-    if (may_be_delimited || may_be_parameter_list) {
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n";
-    }
-
-    // Write the CDR Size if delimited.
-    if (may_be_delimited) {
-      be_global->impl_ <<
-        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
-        "    size_t total_size = 0;\n"
-        "    serialized_size(encoding, total_size, stru);\n"
-        "    if (!strm.write_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n"
-        "  }\n";
-    }
+    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    std::vector<string> code;
+    code.push_back("serialized_size(strm.encoding(), total_size, stru);");
+    code.push_back("if (!strm.write_delimiter(total_size)) {");
+    code.push_back("  return false;");
+    code.push_back("}");
+    generate_dheader_code(code, not_final);
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
@@ -2319,24 +2372,14 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.addArg("stru", cxx + "&");
     extraction.endArgs();
     string intro;
-    if (may_be_delimited) {
-      be_global->impl_ <<
-        "  size_t total_size = 0;\n";
-      const char* indent = "  ";
-      if (not_only_delimited) {
-        indent = "    ";
-        be_global->impl_ <<
-          "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-      }
-      be_global->impl_ <<
-        indent << "if (!strm.read_delimiter(total_size)) {\n" <<
-        indent << "  return false;\n" <<
-        indent << "}\n";
-      if (not_only_delimited) {
-        be_global->impl_ <<
-          "  }\n";
-      }
-    }
+
+    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    std::vector<string> code;
+    code.push_back("if (!strm.read_delimiter(total_size)) {");
+    code.push_back("  return false;");
+    code.push_back("}");
+    generate_dheader_code(code, not_final);
+
     if (may_be_parameter_list) {
       if (repr.xcdr2) {
         /**
@@ -2948,6 +2991,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.addArg("size", "size_t&");
     serialized_size.addArg("uni", "const " + cxx + "&");
     serialized_size.endArgs();
+
+    std::vector<string> code;
+    code.push_back("serialized_size_delimiter(encoding, size);");
+    generate_dheader_code(code, not_final, false);
+
     const string align = getAlignment(discriminator);
     if (!align.empty()) {
       be_global->impl_ << "  encoding.align(size, " << align << ");\n";
@@ -2994,14 +3042,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     // Write the CDR Size if delimited.
     if (may_be_delimited) {
-      be_global->impl_ <<
-        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
-        "    size_t total_size = 0;\n"
-        "    serialized_size(encoding, total_size, stru);\n"
-        "    if (!strm.write_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n"
-        "  }\n";
+      std::vector<string> code;
+      code.push_back("serialized_size(encoding, total_size, uni);");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, not_final);
     }
 
     // Header for discriminator
@@ -3042,22 +3088,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     // DHEADER
     if (may_be_delimited) {
-      be_global->impl_ <<
-        "  size_t total_size = 0;\n";
-      const char* indent = "  ";
-      if (not_only_delimited) {
-        indent = "    ";
-        be_global->impl_ <<
-          "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-      }
-      be_global->impl_ <<
-        indent << "if (!strm.read_delimiter(total_size)) {\n" <<
-        indent << "  return false;\n" <<
-        indent << "}\n";
-      if (not_only_delimited) {
-        be_global->impl_ <<
-          "  }\n";
-      }
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, not_final);
     }
 
     if (may_be_parameter_list) {
@@ -3242,14 +3278,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       // Write the CDR Size if delimited.
       if (may_be_delimited) {
-        be_global->impl_ <<
-          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
-          "    size_t total_size = 0;\n"
-          "    serialized_size(encoding, total_size, stru);\n"
-          "    if (!strm.write_delimiter(total_size)) {\n"
-          "      return false;\n"
-          "    }\n"
-          "  }\n";
+        std::vector<string> code;
+        code.push_back("serialized_size(encoding, total_size, uni);");
+        code.push_back("if (!strm.write_delimiter(total_size)) {");
+        code.push_back("  return false;");
+        code.push_back("}");
+        generate_dheader_code(code, not_final);
       }
 
       // Header for discriminator
@@ -3287,22 +3321,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (has_key) {
       // DHEADER
       if (may_be_delimited) {
-        be_global->impl_ <<
-          "  size_t total_size = 0;\n";
-        const char* indent = "  ";
-        if (not_only_delimited) {
-          indent = "    ";
-          be_global->impl_ <<
-            "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-        }
-        be_global->impl_ <<
-          indent << "if (!strm.read_delimiter(total_size)) {\n" <<
-          indent << "  return false;\n" <<
-          indent << "}\n";
-        if (not_only_delimited) {
-          be_global->impl_ <<
-            "  }\n";
-        }
+        be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+        std::vector<string> code;
+        code.push_back("if (!strm.read_delimiter(total_size)) {");
+        code.push_back("  return false;");
+        code.push_back("}");
+        generate_dheader_code(code, not_final);
       }
 
       if (may_be_parameter_list) {
