@@ -3101,7 +3101,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n";
- 
+
       be_global->impl_ <<
         "  bool must_understand = false;\n"
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
@@ -3253,7 +3253,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         be_global->impl_ <<
           "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
       }
- 
+
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
           "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
