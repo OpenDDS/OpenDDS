@@ -22,7 +22,7 @@ public:
 
   void set_datawriter(Builder::DataWriter& datawriter) override;
   void unset_datawriter(Builder::DataWriter& datawriter) override;
-  
+
   size_t get_match_count() { return match_count_; }
   size_t get_expected_match_count() { return expected_match_count_; }
 

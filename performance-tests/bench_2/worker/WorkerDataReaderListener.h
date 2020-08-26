@@ -35,7 +35,7 @@ public:
 
   void set_datareader(Builder::DataReader& datareader) override;
   void unset_datareader(Builder::DataReader& datareader) override;
-  
+
   size_t get_match_count() { return match_count_; }
   size_t get_expected_match_count() { return expected_match_count_; }
 
