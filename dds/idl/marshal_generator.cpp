@@ -2306,7 +2306,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
 
-    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    if (not_final) {
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    }
     std::vector<string> code;
     code.push_back("serialized_size(strm.encoding(), total_size, stru);");
     code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -2336,13 +2338,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    return false;\n"
           "  }\n";
       }
-      if (repr.xcdr1) {
-        fields_encode <<
-          "\n"
-          "  if (!strm.write_list_end_parameter_id()) {\n"
-          "    return false;\n"
-          "  }\n";
-      }
+      fields_encode <<
+        "\n"
+        "  if (!strm.write_list_end_parameter_id()) {\n"
+        "    return false;\n"
+        "  }\n";
       be_global->impl_ <<
         intro <<
         fields_encode.str() << "\n"
@@ -2373,16 +2373,18 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.endArgs();
     string intro;
 
-    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    if (not_final) {
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    }
     std::vector<string> code;
     code.push_back("if (!strm.read_delimiter(total_size)) {");
     code.push_back("  return false;");
     code.push_back("}");
-    if (not_final && repr.xcdr2) {
+    generate_dheader_code(code, not_final);
+    if (not_final) {
       be_global->impl_ <<
         "  size_t start_pos = strm.pos();\n";
     }
-    generate_dheader_code(code, not_final);
 
     if (may_be_parameter_list) {
       be_global->impl_ <<
@@ -2396,7 +2398,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
          * have the size, so we need to stop after we hit this offset.
          */
         be_global->impl_ << "\n"
-          "    if (strm.pos() - start_pos >= total_size + uint32_cdr_size";
+          "    if (strm.pos() - start_pos >= total_size";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
             "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
@@ -2455,6 +2457,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  return false;\n";
     } else {
       string expr;
+      /*
       if (exten == extensibilitykind_appendable && repr.xcdr2) {
         if (repr.not_only_xcdr2()) {
           expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
@@ -2465,9 +2468,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += "  }\n";
         }
       }
+      */
       for (size_t i = 0; i < fields.size(); ++i) {
-        if (!(exten == extensibilitykind_appendable && repr.xcdr2)) {
-          if (i) expr += "\n    && ";
+        if (i && exten != extensibilitykind_appendable) {
+          expr += "\n    && ";
         }
         const string field_name = fields[i]->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
@@ -2477,24 +2481,18 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
         // TODO (sonndinh): Integrate with try-construct for when the stream
         // ends before some fields on the reader side get their values.
-        if (exten == extensibilitykind_appendable && repr.xcdr2) {
-          string indent = "";
-          if (repr.not_only_xcdr2()) {
-            expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-            indent = "  ";
-          }
-          expr += indent + "  if (strm.pos() - start_pos >= total_size) {\n";
-          expr += indent + "    return true;\n";
-          expr += indent + "  }\n";
-          if (repr.not_only_xcdr2()) {
-            expr += "  }\n";
-          }
+        if (exten == extensibilitykind_appendable) {
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
+          expr += "    if (strm.pos() - start_pos >= total_size) {\n";
+          expr += "      return true;\n";
+          expr += "    }\n";
+          expr += "  }\n";
           expr += "  if (!";
         }
         if (!streamAnonymous(fields[i], ">>", intro, expr)) {
           expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
         }
-        if (exten == extensibilitykind_appendable && repr.xcdr2) {
+        if (exten == extensibilitykind_appendable) {
           expr += ") {\n";
           expr += "    return false;\n";
           expr += "  }\n";
@@ -2503,18 +2501,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += ")";
         }
       }
-      if (exten == extensibilitykind_appendable && repr.xcdr2) {
+      if (exten == extensibilitykind_appendable) {
         string indent = "";
-        if (repr.not_only_xcdr2()) {
-          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-          indent = "  ";
-        }
-        expr += indent + "  if (strm.pos() - start_pos < total_size) {\n";
-        expr += indent + "    strm.skip(total_size - strm.pos() + start_pos);\n";
-        expr += indent + "  }\n";
-        if (repr.not_only_xcdr2()) {
-          expr += "  }\n";
-        }
+        expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
+        expr += "      strm.pos() - start_pos < total_size) {\n";
+        expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
+        expr += "  }\n";
         expr += "  return true;\n";
         be_global->impl_ << intro << expr;
       } else {

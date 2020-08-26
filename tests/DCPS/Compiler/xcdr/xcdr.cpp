@@ -337,28 +337,30 @@ const unsigned char additional_nested_expected_xcdr2[] = {
   0x12, 0x34, 0x56, 0x78 // +4 = 28
 };
 
-void set_additional_nested_struct(AdditionalFieldNestedStruct& value)
+template<>
+void set_values(AdditionalFieldNestedStruct& value)
 {
-  set_base_values<AdditionalFieldNestedStruct>(value);
+  set_base_values(value);
   value.additional_field = 0x12345678;
 }
 
 TEST(appendable_tests, FromAdditionalNestedStruct)
 {
-  AdditionalFieldNestedStruct send;
-  set_additional_nested_struct(send);
-  NestedStruct receive;
   amalgam_serializer_test<AdditionalFieldNestedStruct, NestedStruct>(
-    xcdr2, additional_nested_expected_xcdr2, send, receive);
+    xcdr2, additional_nested_expected_xcdr2);
+}
+
+template<>
+void expect_values_equal(const AdditionalFieldNestedStruct& a,
+                         const AdditionalFieldNestedStruct& b)
+{
+  expect_values_equal_base(a, b);
+  EXPECT_EQ(a.additional_field, b.additional_field);
 }
 
 TEST(appendable_tests, BothAdditionalNestedStruct)
 {
-  AdditionalFieldNestedStruct send, receive;
-  set_additional_nested_struct(send);
-  amalgam_serializer_test<AdditionalFieldNestedStruct, AdditionalFieldNestedStruct>(
-    xcdr2, additional_nested_expected_xcdr2, send, receive);
-  EXPECT_EQ(send.additional_field, receive.additional_field);
+  serializer_test<AdditionalFieldNestedStruct>(xcdr2, additional_nested_expected_xcdr2);
 }
 
 const unsigned char appendable_expected_xcdr2[] = {
@@ -388,38 +390,42 @@ const unsigned char appendable_expected_xcdr2[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 48
 };
 
-void set_appendable_struct(AppendableStruct& value)
+template<>
+void set_values(AppendableStruct& value)
 {
-  set_base_values<NestedStruct>(value.nested);
-  set_base_values<AppendableStruct>(value);
+  set_base_values(value.nested);
+  set_base_values(value);
 }
 
 template<typename TypeA, typename TypeB>
-void expect_values_equal_nested(const TypeA& a, const TypeB& b)
+void expect_equal_with_nested(const TypeA& a, const TypeB& b)
 {
-  EXPECT_EQ(a.nested.short_field, b.nested.short_field);
-  EXPECT_EQ(a.nested.long_field, b.nested.long_field);
-  EXPECT_EQ(a.nested.octet_field, b.nested.octet_field);
-  EXPECT_EQ(a.nested.long_long_field, b.nested.long_long_field);
+  expect_values_equal_base(a, b);
+  expect_values_equal_base(a.nested, b.nested);
+}
+
+template<>
+void expect_values_equal(const AppendableStruct& a, const AppendableStruct& b)
+{
+  expect_equal_with_nested(a, b);
 }
 
 TEST(appendable_tests, BothAppendableStruct)
 {
-  AppendableStruct send, receive;
-  set_appendable_struct(send);
-  amalgam_serializer_test<AppendableStruct, AppendableStruct>(
-    xcdr2, appendable_expected_xcdr2, send, receive);
-  expect_values_equal_nested(send, receive);
+  serializer_test<AppendableStruct>(xcdr2, appendable_expected_xcdr2);
+}
+
+template<>
+void expect_values_equal(const AppendableStruct& a,
+                         const AdditionalFieldAppendableStruct& b)
+{
+  expect_equal_with_nested(a, b);
 }
 
 TEST(appendable_tests, FromAppendableStruct)
 {
-  AppendableStruct send;
-  set_appendable_struct(send);
-  AdditionalFieldAppendableStruct receive;
   amalgam_serializer_test<AppendableStruct, AdditionalFieldAppendableStruct>(
-    xcdr2, appendable_expected_xcdr2, send, receive);
-  expect_values_equal_nested(send, receive);
+    xcdr2, appendable_expected_xcdr2);
 }
 
 const unsigned char additional_appendable_expected_xcdr2[] = {
@@ -453,34 +459,40 @@ const unsigned char additional_appendable_expected_xcdr2[] = {
   0x12, 0x34, 0x56, 0x78 // +4 = 56
 };
 
-void set_additional_appendable_struct(AdditionalFieldAppendableStruct& value)
+template<>
+void set_values(AdditionalFieldAppendableStruct& value)
 {
-  set_additional_nested_struct(value.nested);
-  set_base_values<AdditionalFieldAppendableStruct>(value);
+  set_values(value.nested);
+  set_base_values(value);
   value.additional_field = 0x12345678;
+}
+
+template<>
+void expect_values_equal(const AdditionalFieldAppendableStruct& a,
+                         const AppendableStruct& b)
+{
+  expect_equal_with_nested(a, b);
 }
 
 TEST(appendable_tests, FromAdditionalAppendableStruct)
 {
-  AdditionalFieldAppendableStruct send;
-  set_additional_appendable_struct(send);
-  AppendableStruct receive;
   amalgam_serializer_test<AdditionalFieldAppendableStruct, AppendableStruct>(
-    xcdr2, additional_appendable_expected_xcdr2, send, receive);
-  expect_values_equal_nested(send, receive);
+    xcdr2, additional_appendable_expected_xcdr2);
+}
+
+template<>
+void expect_values_equal(const AdditionalFieldAppendableStruct& a,
+                         const AdditionalFieldAppendableStruct& b)
+{
+  expect_equal_with_nested(a, b);
+  EXPECT_EQ(a.additional_field, b.additional_field);
+  EXPECT_EQ(a.nested.additional_field, b.nested.additional_field);
 }
 
 TEST(appendable_tests, BothAdditionalAppendableStruct)
 {
-  AdditionalFieldAppendableStruct send, receive;
-  set_additional_appendable_struct(send);
-  amalgam_serializer_test<AdditionalFieldAppendableStruct,
-                          AdditionalFieldAppendableStruct>(
-    xcdr2, additional_appendable_expected_xcdr2, send, receive);
-
-  EXPECT_EQ(send.additional_field, receive.additional_field);
-  expect_values_equal_nested(send, receive);
-  EXPECT_EQ(send.nested.additional_field, receive.nested.additional_field);
+  serializer_test<AdditionalFieldAppendableStruct>(
+    xcdr2, additional_appendable_expected_xcdr2);
 }
 
 const unsigned char appendable_expected2_xcdr2[] = {
@@ -505,46 +517,23 @@ const unsigned char appendable_expected2_xcdr2[] = {
 };
 
 template<>
-::testing::AssertionResult assert_values(
-  const char* a_expr, const char* b_expr,
-  const AppendableStruct2& a, const AppendableStruct2& b)
+void set_values(AppendableStruct2& value)
 {
-  EXPECT_STREQ(a.string_field, b.string_field);
-  expect_values_equal(a.nested, b.nested);
-  if (::testing::Test::HasFailure()) {
-    return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
-  }
-  return ::testing::AssertionSuccess();
+  set_values(value.nested);
+  value.string_field = "abcdefghi";
 }
 
 template<>
-void amalgam_serializer_test(
-  const Encoding& encoding, const DataView& expected_cdr,
-  AppendableStruct2& value, AppendableStruct2& result)
+void expect_values_equal(const AppendableStruct2& a,
+                         const AppendableStruct2& b)
 {
-  ACE_Message_Block buffer(1024);
-
-  // Serialize and Compare CDR
-  {
-    Serializer serializer(&buffer, encoding);
-    ASSERT_TRUE(serializer << value);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-
-  // Deserialize and Compare C++ Values
-  {
-    Serializer serializer(&buffer, encoding);
-    ASSERT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(assert_values, value, result);
-  }
+  expect_values_equal(a.nested, b.nested);
+  EXPECT_STREQ(a.string_field, b.string_field);
 }
 
 TEST(appendable_tests, BothAppendableStruct2)
 {
-  AppendableStruct2 send, receive;
-  send.string_field = "abcdefghi";
-  set_base_values<NestedStruct>(send.nested);
-  amalgam_serializer_test(xcdr2, appendable_expected2_xcdr2, send, receive);
+  serializer_test<AppendableStruct2>(xcdr2, appendable_expected2_xcdr2);
 }
 
 // Mutable Tests =============================================================

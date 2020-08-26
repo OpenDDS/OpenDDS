@@ -70,11 +70,7 @@ struct MutableXcdr12Struct {
 
 // Appendable Tests ==========================================================
 
-@appendable
-@OpenDDS::data_representation(XCDR2)
-struct NestedStruct {
-  COMMON_FIELDS
-};
+typedef AppendableXcdr2Struct NestedStruct;
 
 @appendable
 @OpenDDS::data_representation(XCDR2)
