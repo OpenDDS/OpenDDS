@@ -1,0 +1,6 @@
+project: dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename = DomainRangeTest
+
+  IDL_FILES {
+  }
+}

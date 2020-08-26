@@ -209,6 +209,13 @@ void Serializer::endianness(Endianness value)
   this->encoding(encoding);
 }
 
+ACE_INLINE
+Endianness Serializer::endianness() const
+{
+  return encoding_.endianness();
+}
+
+
 // NOTE: I use the ternary operators in here for conditionals to help
 //       the compiler inline the code -- and it does end up fairly
 //       tight...
@@ -243,6 +250,9 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
     ? this->swapcpy(dest + remainder, this->current_->rd_ptr(), initial)
     : this->smemcpy(dest + offset, this->current_->rd_ptr(), initial);
   this->current_->rd_ptr(initial);
+
+  // Update the logical reading position in the stream.
+  pos_ += initial;
 
   //   smemcpy
   //
@@ -426,6 +436,7 @@ Serializer::skip(ACE_CDR::UShort n, int size)
   if (size > 1 && !align_r(std::min(size_t(size), encoding().max_align()))) {
     return false;
   }
+
   for (size_t len = static_cast<size_t>(n * size); len;) {
     if (!this->current_) {
       this->good_bit_ = false;
@@ -440,6 +451,10 @@ Serializer::skip(ACE_CDR::UShort n, int size)
       this->current_->rd_ptr(len);
       break;
     }
+  }
+
+  if (this->good_bit_) {
+    pos_ += n * size;
   }
   return this->good_bit();
 }
@@ -766,6 +781,7 @@ bool Serializer::align_r(size_t al)
   al = std::min(al, encoding().max_align());
   const size_t len =
     (al - ptrdiff_t(this->current_->rd_ptr()) + this->align_rshift_) % al;
+
   return skip(static_cast<ACE_CDR::UShort>(len));
 }
 
@@ -1107,16 +1123,13 @@ operator<<(Serializer& s, ACE_OutputCDR::from_string x)
 {
   // Include the null termination in the serialized data.
   ACE_CDR::ULong stringlen = 0;
-
   if (x.val_ != 0) {
     stringlen = 1 + static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x.val_));
     s << stringlen;
     s.buffer_write(reinterpret_cast<char*>(x.val_), stringlen, false);
-
   } else {
     s << ACE_CDR::ULong(0);
   }
-
   return s.good_bit() && ((x.bound_ == 0) || (stringlen - 1 <= x.bound_));
 }
 
@@ -1539,7 +1552,7 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size)
 
 ACE_INLINE
 void serialized_size_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
+  const Encoding& encoding, size_t& size, size_t& running_size)
 {
   const Encoding::XcdrVersion xcdr = encoding.xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -1548,18 +1561,22 @@ void serialized_size_parameter_id(
     // TODO(iguessthislldo): Extended PID
 
     // Save and Zero Size to Reset the Alignment
-    xcdr1_running_size += size;
+    running_size += size;
     size = 0;
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
+    if (running_size != 0 && size != 1 && size != 2 && size != 4 && size != 8) {
+      size += uint32_cdr_size; // nextint
+    }
     encoding.align(size, uint32_cdr_size);
-    size += uint32_cdr_size;
-    // TODO(iguessthislldo) LC
+    size += uint32_cdr_size; // emheader
+    running_size += size;
+    size = 0;
   }
 }
 
 ACE_INLINE
 void serialized_size_list_end_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
+  const Encoding& encoding, size_t& size, size_t& running_size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
     /*
@@ -1570,7 +1587,12 @@ void serialized_size_list_end_parameter_id(
     size += uint16_cdr_size * 2;
 
     // Restore Saved Totals from Alignment Resets
-    size += xcdr1_running_size;
+    size += running_size;
+  } else if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+    if (running_size != 0 && size != 1 && size != 2 && size != 4 && size != 8) {
+      size += uint32_cdr_size; // nextint
+    }
+    size += running_size;
   }
 }
 

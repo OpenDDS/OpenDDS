@@ -1,0 +1,137 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ShortSeq.pidl>
+
+module moduleA {
+
+typedef double Double3[3];
+typedef long Long2x3[2][3];
+typedef Double3 Double3_x2[2];
+typedef sequence<long> LongSeq;
+typedef sequence<long, 3> Long3Seq;
+typedef string String2x3x4[2][3][4];
+typedef string<10> BoundedString;
+
+struct MultiDimArrayStruct {
+  Long2x3 l2x3;
+  Double3_x2 d3_x2;
+  String2x3x4 str2x3x4;
+};
+
+struct NS {
+  long n;
+  string s;
+};
+
+typedef struct XYZ_ {
+  double x;
+  double y;
+  double z;
+} XYZ;
+
+typedef sequence<XYZ> XYZSequence;
+
+@topic
+struct TopicA {
+  @key Double3 d3_key;
+  @key long l3_key[3];
+  //@key Long2x3 l2x3_key;
+  //@key short s2x3_key[2][3];
+
+  char c;
+  float f;
+  MultiDimArrayStruct mda;
+
+  short s3[3];
+  long l2x3[2][3];
+  long l3x2[3][2];
+  short s2x3x4[2][3][4];
+  short s2x3x4_2nd[2][3][4];
+
+  LongSeq lseq;
+  Long3Seq l3seq;
+
+  sequence<short> ss;
+  sequence<short> ss_2nd;
+  sequence<long, 3> l3s;
+  sequence<long, 3> l3s_2nd;
+  sequence<long, 5> l5s;
+
+  string str;
+  BoundedString bstr;
+  string<20> bstr20;
+  sequence<string> strs;
+  //sequence<string<30>> str30s;
+  sequence<BoundedString> bstrs;
+
+  XYZ position;
+  XYZSequence positions;
+  sequence<XYZ> xyzs;
+  sequence<NS, 5> ns5s;
+
+  //test C++ keyword used as anonymous type field
+  //to see all escaping is done correctly
+  sequence<long, 3> _long; // _tao_seq_CORBA_Long__3 _cxx_long;
+  sequence<long, 3> break; // _tao_seq_CORBA_Long__3 _cxx_break;
+  sequence<long, 3> class; // _tao_seq_CORBA_Long__3 _cxx_class;
+};
+
+}; //moduleA
+
+
+#include <dds/DdsDcpsCore.idl>
+
+module moduleB {
+  typedef octet GuidPrefix_t[12]; //GUID prefix bytes - uniquely specify the participant
+  typedef octet EntityKey_t[3];   //Key portion of Entity identifier
+
+  struct EntityId_t { //Uniquely identify each entity within a participant
+    @key EntityKey_t entityKey;
+    @key octet entityKind;
+  };
+
+  struct GUID_t {
+    @key GuidPrefix_t guidPrefix;
+    @key EntityId_t entityId;
+  };
+
+  @topic
+  struct WriterEntry {
+    @key GUID_t guid;
+    string topic_name;
+    string type_name;
+    DDS::DataWriterQos data_writer_qos;
+    DDS::PublisherQos publisher_qos;
+  };
+
+  // anonymous types ---------- ---------- ----------
+
+  struct EntityId_a {
+    @key octet entityKey[3];
+    @key octet entityKind;
+  };
+
+  struct GUID_a {
+    @key octet guidPrefix[12];
+    @key EntityId_a entityId;
+  };
+
+  @topic
+  struct ReaderEntry {
+    @key GUID_a guid;
+    string topic_name;
+    string type_name;
+    DDS::DataReaderQos data_reader_qos;
+    DDS::SubscriberQos subscriber_qos;
+  };
+
+  @topic
+  struct GuidNameAddress {
+    @key GUID_a guid;
+    @key string name;
+    string address;
+  };
+
+  struct RelayHeader {
+    sequence<GUID_a> to;
+  };
+};

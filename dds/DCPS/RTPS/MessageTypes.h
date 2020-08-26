@@ -26,6 +26,9 @@ namespace OpenDDS {
       INFO_TS_SZ = 8, // size of InfoTimestampSubmessage with FLAG_I == 0
       INFO_SRC_SZ = 20; // size (octetsToNextHeader) of InfoSourceSubmessage
 
+    /// Alignment of RTPS Submessage
+    const size_t SM_ALIGN = 4;
+
     const OctetArray4
       PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
         { 0x00, 0x00, 0x00, 0x00 },

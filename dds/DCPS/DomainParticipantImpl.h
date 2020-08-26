@@ -380,6 +380,9 @@ public:
   }
 #endif
 
+  bool prepare_to_delete_datawriters();
+  bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
+
 private:
 
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);

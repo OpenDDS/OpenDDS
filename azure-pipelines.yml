@@ -9,7 +9,7 @@ schedules:
 
 jobs:
 - job: VisualStudio2019
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: windows-2019
   strategy:
@@ -108,7 +108,7 @@ jobs:
     displayName: Run Examples DCPS Messenger
 
 - job: VisualStudio2017
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: vs2017-win2016
   strategy:
@@ -200,7 +200,7 @@ jobs:
     displayName: Run Examples DCPS Messenger
 
 - job: Linux
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: ubuntu-18.04
   variables:
@@ -334,7 +334,7 @@ jobs:
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 
 - job: macOS
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: macOS-latest
   variables:

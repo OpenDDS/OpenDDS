@@ -53,6 +53,8 @@ const std::string Handshake_Request_Class_Ext("Req");
 const std::string Handshake_Reply_Class_Ext("Reply");
 const std::string Handshake_Final_Class_Ext("Final");
 
+const char* AuthenticationBuiltInImpl::PROPERTY_HANDSHAKE_DEBUG = "opendds.sec.auth.handshake_debug";
+
 struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
   SharedSecret(DDS::OctetSeq challenge1,
@@ -111,6 +113,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         LocalParticipantData::shared_ptr local_participant = DCPS::make_rch<LocalParticipantData>();
         local_participant->participant_guid = adjusted_participant_guid;
         local_participant->credentials = credentials;
+        for (unsigned i = 0; i < participant_qos.property.value.length(); ++i) {
+          if (std::strcmp(PROPERTY_HANDSHAKE_DEBUG,
+                          participant_qos.property.value[i].name.in()) == 0) {
+            local_participant->handshake_debug = true;
+          }
+        }
 
         {
           ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
@@ -345,7 +353,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
   message_out.add_bin_property("c.dsign_algo", local_credential_data.get_participant_cert().dsign_algo());
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
-  message_out.add_bin_property("hash_c1", hash_c1);
+  if (local_data.handshake_debug) {
+    message_out.add_bin_property("hash_c1", hash_c1);
+  }
 
   DDS::OctetSeq dhpub;
   diffie_hellman->pub_key(dhpub);
@@ -717,12 +727,19 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
   message_out.add_bin_property("c.dsign_algo", local_credential_data.get_participant_cert().dsign_algo());
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
-  message_out.add_bin_property("hash_c2", hash_c2);
+
+  if (local_data.handshake_debug) {
+    message_out.add_bin_property("hash_c2", hash_c2);
+  }
 
   diffie_hellman->pub_key(dh2);
   message_out.add_bin_property("dh2", dh2);
-  message_out.add_bin_property("hash_c1", hash_c1);
-  message_out.add_bin_property("dh1", dh1);
+
+  if (local_data.handshake_debug) {
+    message_out.add_bin_property("hash_c1", hash_c1);
+    message_out.add_bin_property("dh1", dh1);
+  }
+
   message_out.add_bin_property("challenge1", challenge1);
 
   TokenReader initiator_local_auth_request(remote_data.local_auth_request);
@@ -1116,10 +1133,13 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   OpenDDS::Security::TokenWriter final_msg(handshake_message_out, build_class_id(Handshake_Final_Class_Ext));
 
-  final_msg.add_bin_property("hash_c1", remote_data.hash_c1);
-  final_msg.add_bin_property("hash_c2", hash_c2);
-  final_msg.add_bin_property("dh1", dh1);
-  final_msg.add_bin_property("dh2", dh2);
+  if (local_data.handshake_debug) {
+    final_msg.add_bin_property("hash_c1", remote_data.hash_c1);
+    final_msg.add_bin_property("hash_c2", hash_c2);
+    final_msg.add_bin_property("dh1", dh1);
+    final_msg.add_bin_property("dh2", dh2);
+  }
+
   final_msg.add_bin_property("challenge1", challenge1);
   final_msg.add_bin_property("challenge2", challenge2);
 

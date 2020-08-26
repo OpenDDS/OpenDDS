@@ -200,7 +200,7 @@ class HorizontalHandler;
 // Sends to and receives from peers.
 class VerticalHandler : public RelayHandler {
 public:
-  typedef std::map<OpenDDS::DCPS::RepoId, std::set<ACE_INET_Addr>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, std::set<ACE_INET_Addr>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrSetMap;
 
   VerticalHandler(const RelayHandlerConfig& config,
                   const std::string& name,
@@ -214,14 +214,14 @@ public:
                   const CRYPTO_TYPE& crypto);
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 
-  GuidAddrMap::const_iterator find(const OpenDDS::DCPS::RepoId& guid) const
+  GuidAddrSetMap::const_iterator find(const OpenDDS::DCPS::RepoId& guid) const
   {
-    return guid_addr_map_.find(guid);
+    return guid_addr_set_map_.find(guid);
   }
 
-  GuidAddrMap::const_iterator end() const
+  GuidAddrSetMap::const_iterator end() const
   {
-    return guid_addr_map_.end();
+    return guid_addr_set_map_.end();
   }
 
 protected:
@@ -231,7 +231,7 @@ protected:
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     const GuidSet& /*to*/,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/) { return true; }
-  virtual void purge(const GuidAddr& /*ga*/) {}
+  virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -241,17 +241,17 @@ protected:
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
   void populate_address_map(AddressMap& address_map, const GuidSet& to);
 
-  virtual uint32_t local_active_participants() const override { return guid_addr_map_.size(); }
+  virtual uint32_t local_active_participants() const override { return guid_addr_set_map_.size(); }
 
   const AssociationTable& association_table_;
   GuidNameAddressDataWriter_ptr responsible_relay_writer_;
   GuidNameAddressDataReader_ptr responsible_relay_reader_;
   HorizontalHandler* horizontal_handler_;
-  GuidAddrMap guid_addr_map_;
-  typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidExpirationMap;
-  GuidExpirationMap guid_expiration_map_;
-  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidMap;
-  ExpirationGuidMap expiration_guid_map_;
+  GuidAddrSetMap guid_addr_set_map_;
+  typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidAddrExpirationMap;
+  GuidAddrExpirationMap guid_addr_expiration_map_;
+  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
+  ExpirationGuidAddrMap expiration_guid_addr_map_;
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -329,7 +329,7 @@ private:
                             const GuidSet& to,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
 
-  void purge(const GuidAddr& ga) override;
+  void purge(const OpenDDS::DCPS::RepoId& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
 };
 

@@ -298,7 +298,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "{\n"
       "  return OpenDDS::DCPS::getMinimalTypeObject<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
       "}\n\n"
-      "OpenDDS::DCPS::Extensibility " << short_name << "TypeSupportImpl::getExtensibility() const \n"
+      "OpenDDS::DCPS::Extensibility " << short_name << "TypeSupportImpl::getExtensibility() const\n"
       "{\n"
       "  return MarshalTraitsType::extensibility();\n"
       "}\n\n"
