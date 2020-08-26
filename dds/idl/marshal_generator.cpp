@@ -2461,20 +2461,30 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         if (i && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
         }
-        const string field_name = fields[i]->local_name()->get_string();
-        const string cond = rtpsCustom.getConditional(field_name);
-        if (!cond.empty()) {
-          expr += rtpsCustom.preFieldRead(field_name);
-          expr += "(!(" + cond + ") || ";
-        }
         // TODO (sonndinh): Integrate with try-construct for when the stream
         // ends before some fields on the reader side get their values.
         if (exten == extensibilitykind_appendable) {
-          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-          expr += "    if (strm.pos() - start_pos >= total_size) {\n";
-          expr += "      return true;\n";
-          expr += "    }\n";
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
+          expr += "      strm.pos() - start_pos >= total_size) {\n";
+          expr += "    return true;\n";
           expr += "  }\n";
+        }
+        const string field_name = fields[i]->local_name()->get_string();
+        const string cond = rtpsCustom.getConditional(field_name);
+        if (!cond.empty()) {
+          string prefix = rtpsCustom.preFieldRead(field_name);
+          if (exten == extensibilitykind_appendable) {
+            if (!prefix.empty()) {
+              prefix = prefix.substr(0, prefix.length() - 8);
+              expr += "  if (!" + prefix + ") {\n";
+              expr += "    return false;\n";
+              expr += "  }\n";
+            }
+            expr += "  if ((" + cond + ") && !";
+          } else {
+            expr += prefix + "(!(" + cond + ") || ";
+          }
+        } else if (exten == extensibilitykind_appendable) {
           expr += "  if (!";
         }
         if (!streamAnonymous(fields[i], ">>", intro, expr)) {
@@ -2484,13 +2494,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += ") {\n";
           expr += "    return false;\n";
           expr += "  }\n";
-        }
-        if (!cond.empty()) {
+        } else if (!cond.empty()) {
           expr += ")";
         }
       }
       if (exten == extensibilitykind_appendable) {
-        string indent = "";
         expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
         expr += "      strm.pos() - start_pos < total_size) {\n";
         expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
