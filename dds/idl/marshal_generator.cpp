@@ -3122,37 +3122,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "    return false;\n"
         "  }\n";
 
-      std::ostringstream cases;
-      string intro;
-      for (size_t i = 0; i < branches.size(); ++i) {
-        const unsigned id = be_global->get_id(node, branches[i], i);
-        const string branch_name = branches[i]->local_name()->get_string();
-        cases <<
-          "  case " << id << ": {\n"
-          "    if (!" << streamCommon(branch_name, branches[i]->field_type(),
-          ">> uni", intro, cxx) << ") {\n"
-          "      return false;\n"
-          "    }\n"
-          "    uni._d(disc);\n"
-          "    break;\n"
-          "  }\n";
+      if (generateSwitchForUnion("disc", streamCommon, branches,
+        discriminator, "if", ">> ", cxx.c_str(), false, true, true, NULL, true)) {
+        be_global->impl_ <<
+          "  return true;\n";
       }
-
-      be_global->impl_ << intro <<
-        "  switch (member_id) {\n"
-        << cases.str() <<
-        "  default:\n"
-        "    if (must_understand) {\n"
-        "      if (DCPS_debug_level >= 8) {\n"
-        "        ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
-        << cxx.c_str() << "\\n\"), member_id));\n" <<
-        "      }\n"
-        "      return false;\n"
-        "    }\n"
-        "    strm.skip(field_size);\n"
-        "    break;\n"
-        "  }\n"
-        "  return false;\n";
     } else {
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<

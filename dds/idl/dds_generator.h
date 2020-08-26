@@ -507,7 +507,7 @@ std::ostream& operator<<(std::ostream& o,
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
-                          size_t& n_labels, bool& has_default)
+                          size_t& n_labels, bool& has_default, bool use_id)
 {
   for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
     ++n_labels;
@@ -516,8 +516,13 @@ void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
       be_global->impl_ << "  default:";
       has_default = true;
     } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-      be_global->impl_ << "  case "
-        << getEnumLabel(label->label_val(), discriminator) << ':';
+      if (use_id) {
+        const unsigned id = be_global->get_id(NULL, branch, 0);
+        be_global->impl_ << "  case " << id << ':';
+      } else {
+        be_global->impl_ << "  case "
+          << getEnumLabel(label->label_val(), discriminator) << ':';
+      }
     } else {
       be_global->impl_ << "  case " << *label->label_val()->ev() << ':';
     }
@@ -635,7 +640,7 @@ bool generateSwitchBody(CommonFn commonFn,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
                         bool forceDisableDefault = false, bool parens = true,
-                        bool breaks = true, CommonFn commonFn2 = NULL)
+                        bool breaks = true, CommonFn commonFn2 = NULL, bool use_id = false)
 {
   size_t n_labels = 0;
   bool has_default = false;
@@ -653,7 +658,7 @@ bool generateSwitchBody(CommonFn commonFn,
         continue;
       }
     }
-    generateBranchLabels(branch, discriminator, n_labels, has_default);
+    generateBranchLabels(branch, discriminator, n_labels, has_default, use_id);
     generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix, uni, breaks, parens);
     be_global->impl_ <<
       "  }\n";
@@ -675,7 +680,7 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
                             AST_Type* discriminator, const char* statementPrefix,
                             const char* namePrefix = "", const char* uni = "",
                             bool forceDisableDefault = false, bool parens = true,
-                            bool breaks = true, CommonFn commonFn2 = NULL)
+                            bool breaks = true, CommonFn commonFn2 = NULL, bool use_id = false)
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
@@ -729,7 +734,7 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
       "  switch (" << switchExpr << ") {\n";
     bool b(generateSwitchBody(commonFn, branches, discriminator,
                               statementPrefix, namePrefix, uni,
-                              forceDisableDefault, parens, breaks, commonFn2));
+                              forceDisableDefault, parens, breaks, commonFn2, use_id));
     be_global->impl_ <<
       "  }\n";
     return b;
