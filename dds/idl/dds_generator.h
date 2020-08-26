@@ -507,8 +507,7 @@ std::ostream& operator<<(std::ostream& o,
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
-                          size_t& n_labels, bool& has_default,
-                          bool use_id, unsigned default_id)
+                          size_t& n_labels, bool& has_default)
 {
   for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
     ++n_labels;
@@ -517,13 +516,8 @@ void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
       be_global->impl_ << "  default:";
       has_default = true;
     } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-      if (use_id) {
-        const unsigned id = be_global->get_id(NULL, branch, default_id + j);
-        be_global->impl_ << "  case " << id << ':';
-      } else {
-        be_global->impl_ << "  case "
-          << getEnumLabel(label->label_val(), discriminator) << ':';
-      }
+      be_global->impl_ << "  case "
+        << getEnumLabel(label->label_val(), discriminator) << ':';
     } else {
       be_global->impl_ << "  case " << *label->label_val()->ev() << ':';
     }
@@ -564,7 +558,7 @@ void generateCaseBody(
   CommonFn commonFn, CommonFn commonFn2, AST_UnionBranch* branch,
   const char* statementPrefix, const char* namePrefix,
   const char* uni, bool generateBreaks, bool parens,
-  bool printing = false, unsigned default_id = 0)
+  bool printing = false, unsigned default_id = 0, AST_Structure* type = NULL)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -641,7 +635,8 @@ bool generateSwitchBody(CommonFn commonFn,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
                         bool forceDisableDefault = false, bool parens = true,
-                        bool breaks = true, CommonFn commonFn2 = NULL, bool use_id = false)
+                        bool breaks = true, CommonFn commonFn2 = NULL,
+                        AST_Structure* type = NULL)
 {
   size_t n_labels = 0;
   bool has_default = false;
@@ -659,8 +654,9 @@ bool generateSwitchBody(CommonFn commonFn,
         continue;
       }
     }
-    generateBranchLabels(branch, discriminator, n_labels, has_default, use_id, i);
-    generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix, uni, breaks, parens, false, i);
+    generateBranchLabels(branch, discriminator, n_labels, has_default);
+    generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
+                     uni, breaks, parens, false, i, type);
     be_global->impl_ <<
       "  }\n";
   }
@@ -681,7 +677,8 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
                             AST_Type* discriminator, const char* statementPrefix,
                             const char* namePrefix = "", const char* uni = "",
                             bool forceDisableDefault = false, bool parens = true,
-                            bool breaks = true, CommonFn commonFn2 = NULL, bool use_id = false)
+                            bool breaks = true, CommonFn commonFn2 = NULL,
+                            AST_Structure* type = NULL)
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
@@ -735,7 +732,8 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
       "  switch (" << switchExpr << ") {\n";
     bool b(generateSwitchBody(commonFn, branches, discriminator,
                               statementPrefix, namePrefix, uni,
-                              forceDisableDefault, parens, breaks, commonFn2, use_id));
+                              forceDisableDefault, parens, breaks,
+                              commonFn2, type));
     be_global->impl_ <<
       "  }\n";
     return b;

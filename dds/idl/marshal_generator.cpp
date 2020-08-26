@@ -3075,7 +3075,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (generateSwitchForUnion("uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
-                               may_be_parameter_list ? findSizeCommon : NULL)) {
+                               may_be_parameter_list ? findSizeCommon : NULL,
+                               may_be_parameter_list ? node : NULL)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3123,7 +3124,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  }\n";
 
       if (generateSwitchForUnion("disc", streamCommon, branches,
-        discriminator, "if", ">> ", cxx.c_str(), false, true, true, NULL, true)) {
+        discriminator, "if", ">> ", cxx.c_str(), false, true, true, NULL)) {
         be_global->impl_ <<
           "  return true;\n";
       }
