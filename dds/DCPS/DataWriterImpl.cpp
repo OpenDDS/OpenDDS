@@ -233,7 +233,12 @@ DataWriterImpl::add_association(const RepoId& yourId,
   data.remote_durable_ =
     (reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-  if (!associate(data, active)) {
+  if (associate(data, active)) {
+    Observer::Rch observer = get_observer(Observer::e_ASSOCIATED);
+    if (observer) {
+      observer->on_associated(this, data.remote_id_);
+    }
+  } else {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
@@ -602,6 +607,13 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                OPENDDS_STRING(writer_converter).c_str(),
                OPENDDS_STRING(reader_converter).c_str(),
                readers.length()));
+  }
+
+  Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < readers.length(); ++i) {
+      observer->on_disassociated(this, readers[i]);
+    }
   }
 
   // stop pending associations for these reader ids

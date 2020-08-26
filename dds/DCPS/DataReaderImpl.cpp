@@ -320,7 +320,12 @@ DataReaderImpl::add_association(const RepoId& yourId,
   //is held here anyway
   guard.release();
 
-  if (!associate(data, active)) {
+  if (associate(data, active)) {
+    Observer::Rch observer = get_observer(Observer::e_ASSOCIATED);
+    if (observer) {
+      observer->on_associated(this, data.remote_id_);
+    }
+  } else {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
@@ -460,6 +465,13 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
   if (writers.length() == 0) {
     return;
+  }
+
+  Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < writers.length(); ++i) {
+      observer->on_disassociated(this, writers[i]);
+    }
   }
 
   if (DCPS_debug_level >= 1) {
@@ -884,7 +896,6 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
         }
       }
     }
-
 
     qos_change(qos);
     qos_ = qos;
