@@ -507,7 +507,8 @@ std::ostream& operator<<(std::ostream& o,
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
-                          size_t& n_labels, bool& has_default, bool use_id)
+                          size_t& n_labels, bool& has_default,
+                          bool use_id, unsigned default_id)
 {
   for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
     ++n_labels;
@@ -517,7 +518,7 @@ void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
       has_default = true;
     } else if (discriminator->node_type() == AST_Decl::NT_enum) {
       if (use_id) {
-        const unsigned id = be_global->get_id(NULL, branch, 0);
+        const unsigned id = be_global->get_id(NULL, branch, default_id + j);
         be_global->impl_ << "  case " << id << ':';
       } else {
         be_global->impl_ << "  case "
@@ -563,7 +564,7 @@ void generateCaseBody(
   CommonFn commonFn, CommonFn commonFn2, AST_UnionBranch* branch,
   const char* statementPrefix, const char* namePrefix,
   const char* uni, bool generateBreaks, bool parens,
-  bool printing = false)
+  bool printing = false, unsigned default_id = 0)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -612,7 +613,7 @@ void generateCaseBody(
     const char* breakString = generateBreaks ? "    break;\n" : "";
     std::string intro;
     if (commonFn2) {
-      const unsigned id = be_global->get_id(NULL, branch, 0);
+      const unsigned id = be_global->get_id(NULL, branch, default_id);
       be_global->impl_ <<
         commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false) <<
         "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
@@ -658,8 +659,8 @@ bool generateSwitchBody(CommonFn commonFn,
         continue;
       }
     }
-    generateBranchLabels(branch, discriminator, n_labels, has_default, use_id);
-    generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix, uni, breaks, parens);
+    generateBranchLabels(branch, discriminator, n_labels, has_default, use_id, i);
+    generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix, uni, breaks, parens, false, i);
     be_global->impl_ <<
       "  }\n";
   }
