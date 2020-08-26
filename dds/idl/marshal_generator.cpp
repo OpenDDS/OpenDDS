@@ -2457,18 +2457,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  return false;\n";
     } else {
       string expr;
-      /*
-      if (exten == extensibilitykind_appendable && repr.xcdr2) {
-        if (repr.not_only_xcdr2()) {
-          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
-          expr += "  ";
-        }
-        expr += "  total_size += uint32_cdr_size;\n";
-        if (repr.not_only_xcdr2()) {
-          expr += "  }\n";
-        }
-      }
-      */
       for (size_t i = 0; i < fields.size(); ++i) {
         if (i && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
