@@ -306,7 +306,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             }
           }
         }
-               
+
         auto writeMap = process.get_writer_map();
         if (writeMap.size() > 0) {
           typedef std::map<std::string, std::shared_ptr<Builder::DataWriter>>::iterator WriteMapIt;
