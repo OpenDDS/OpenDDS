@@ -627,7 +627,7 @@ public:
    *
    * Returns true if successful.
    */
-  bool write_parameter_id(const unsigned id, const size_t size);
+  bool write_parameter_id(const unsigned id, const size_t size, const bool must_understand = false);
 
   /**
    * Write the parameter ID that marks the end of XCDR1 parameter lists.

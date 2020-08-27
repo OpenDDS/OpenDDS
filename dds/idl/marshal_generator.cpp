@@ -2323,10 +2323,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
         const string field_name = fields[i]->local_name()->get_string();
+        bool is_key = false;
+        be_global->check_key(fields[i], is_key);
         fields_encode <<
           "\n" <<
             findSizeCommon(field_name, fields[i]->field_type(), "stru", intro) <<
-          "  if (!strm.write_parameter_id(" << id << ", size)) {\n"
+          "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
           "    return false;\n"
           "  }\n"
           "  size = 0;\n"

@@ -600,7 +600,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
   return true;
 }
 
-bool Serializer::write_parameter_id(const unsigned id, const size_t size)
+bool Serializer::write_parameter_id(const unsigned id, const size_t size, const bool must_understand)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -643,7 +643,7 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size)
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
     // Compute Length Code, write EM Header and NEXTINT
     const ACE_CDR::ULong lc = (size == 1 ? 0 : size == 2 ? 1 : size == 4 ? 2 : size == 8 ? 3 : 4);
-    const ACE_CDR::ULong emheader = (lc << 28) | id;
+    const ACE_CDR::ULong emheader = (lc << 28) | id | (must_understand ? emheader_must_understand : 0);
     if (!(*this << emheader)) {
       return false;
     }
