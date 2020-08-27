@@ -2992,19 +2992,14 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.addArg("uni", "const " + cxx + "&");
     serialized_size.endArgs();
 
-    std::vector<string> code;
-    code.push_back("serialized_size_delimiter(encoding, size);");
-    generate_dheader_code(code, not_final, false);
-
     const string align = getAlignment(discriminator);
     if (!align.empty()) {
       be_global->impl_ << "  encoding.align(size, " << align << ");\n";
     }
 
-    if (may_be_delimited) {
-      be_global->impl_ <<
-        "  serialized_size_delimiter(encoding, size);\n";
-    }
+    std::vector<string> code;
+    code.push_back("serialized_size_delimiter(encoding, size);");
+    generate_dheader_code(code, not_final, false);
 
     if (may_be_parameter_list) {
       be_global->impl_ <<
