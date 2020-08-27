@@ -77,28 +77,28 @@ module DDS {
     };
     typedef sequence<BinaryProperty_t> BinaryPropertySeq;
 
-    @appendable
+    //@appendable
     struct PropertyQosPolicy {
         PropertySeq        value;
         BinaryPropertySeq  binary_value;
     };
 
-    @appendable
+    //@appendable
     struct UserDataQosPolicy {
                 OctetSeq value;
                 };
 
-    @appendable
+    //@appendable
     struct GroupDataQosPolicy {
                 OctetSeq value;
                 };
 
-    @appendable
+    //@appendable
     struct TopicDataQosPolicy {
                 OctetSeq value;
                 };
 
-    @appendable
+    //@appendable
     struct PartitionQosPolicy {
                 StringSeq name;
                 };
@@ -115,7 +115,7 @@ module DDS {
                 PERSISTENT_DURABILITY_QOS
                 };
 
-    @appendable
+    //@appendable
     struct DurabilityQosPolicy {
                 DurabilityQosPolicyKind kind;
                 };
@@ -129,12 +129,12 @@ module DDS {
         long                    max_samples_per_instance;
     };
 
-    @appendable
+    //@appendable
     struct DeadlineQosPolicy {
                 Duration_t period;
                 };
 
-    @appendable
+    //@appendable
     struct LatencyBudgetQosPolicy {
                 Duration_t duration;
                 };
@@ -145,7 +145,7 @@ module DDS {
                 MANUAL_BY_TOPIC_LIVELINESS_QOS
                 };
 
-    @appendable
+    //@appendable
     struct LivelinessQosPolicy {
                 LivelinessQosPolicyKind kind;
                 Duration_t lease_duration;
@@ -156,13 +156,13 @@ module DDS {
                 RELIABLE_RELIABILITY_QOS
                 };
 
-    @appendable
+    //@appendable
     struct ReliabilityQosPolicy {
                 ReliabilityQosPolicyKind kind;
                 Duration_t max_blocking_time;
                 };
 
-    @appendable
+    //@appendable
     enum DestinationOrderQosPolicyKind {
                 BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
                 BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
@@ -172,25 +172,25 @@ module DDS {
                 DestinationOrderQosPolicyKind kind;
                 };
 
-    @appendable
+    //@appendable
     struct HistoryQosPolicy {
                 HistoryQosPolicyKind kind;
                 long depth;
                 };
 
-    @appendable
+    //@appendable
     struct ResourceLimitsQosPolicy {
                 long max_samples;
                 long max_instances;
                 long max_samples_per_instance;
                 };
 
-    @appendable
+    //@appendable
     struct TransportPriorityQosPolicy {
                 long value;
                 };
 
-    @appendable
+    //@appendable
     struct LifespanQosPolicy {
                 Duration_t duration;
                 };
@@ -200,12 +200,12 @@ module DDS {
                 EXCLUSIVE_OWNERSHIP_QOS
                 };
 
-    @appendable
+    //@appendable
     struct OwnershipQosPolicy {
                 OwnershipQosPolicyKind kind;
                 };
 
-    @appendable
+    //@appendable
     struct OwnershipStrengthQosPolicy {
                 long value;
                 };
@@ -216,14 +216,14 @@ module DDS {
                 GROUP_PRESENTATION_QOS
                 };
 
-    @appendable
+    //@appendable
     struct PresentationQosPolicy {
                 PresentationQosPolicyAccessScopeKind access_scope;
                 boolean coherent_access;
                 boolean ordered_access;
                 };
 
-    @appendable
+    //@appendable
     struct TimeBasedFilterQosPolicy {
                 Duration_t minimum_separation;
                 };
@@ -238,7 +238,7 @@ module DDS {
     const DataRepresentationId_t XCDR2_DATA_REPRESENTATION = 2;
 
     typedef sequence<DataRepresentationId_t> DataRepresentationIdSeq;
-    @appendable
+    //@appendable
     struct DataRepresentationQosPolicy {
       DataRepresentationIdSeq value;
     };
@@ -256,7 +256,7 @@ module DDS {
     const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME =
       "TypeConsistencyEnforcement";
 
-    @appendable
+    //@appendable
     struct TypeConsistencyEnforcementQosPolicy {
       TypeConsistencyKind kind;
       boolean ignore_sequence_bounds;
@@ -267,7 +267,7 @@ module DDS {
     };
     */
 
-    @mutable
+    /* @mutable */
     struct TopicQos {
       TopicDataQosPolicy topic_data;
       DurabilityQosPolicy durability;
@@ -289,7 +289,7 @@ module DDS {
                 boolean autodispose_unregistered_instances;
                 };
 
-    @mutable
+    /* @mutable */
     struct DataWriterQos {
       DurabilityQosPolicy durability;
       DurabilityServiceQosPolicy durability_service;
@@ -325,7 +325,7 @@ module DDS {
                 Duration_t autopurge_disposed_samples_delay;
                 };
 
-    @mutable
+    /* @mutable */
     struct DataReaderQos {
       DurabilityQosPolicy durability;
       DeadlineQosPolicy deadline;
@@ -362,7 +362,7 @@ module DDS {
                 PropertyQosPolicy property; // DDS-Security 1.1 ptc/2017-09-26
                 };
 
-    @appendable
+    //@appendable
     struct BuiltinTopicKey_t {
                 BUILT_IN_TOPIC_KEY BuiltinTopicKeyValue value;
                 };
@@ -370,7 +370,7 @@ module DDS {
     // ----------------------------------------------------------------------
 
     BUILT_IN_TOPIC_TYPE
-    @mutable
+    /* @mutable */
     struct ParticipantBuiltinTopicData {
       BUILT_IN_TOPIC_KEY
       @id(0x0050) BuiltinTopicKey_t key;
@@ -378,7 +378,7 @@ module DDS {
     };
 
     BUILT_IN_TOPIC_TYPE
-    @mutable
+    /* @mutable */
     struct PublicationBuiltinTopicData {
       BUILT_IN_TOPIC_KEY
       @id(0x005A) BuiltinTopicKey_t key;
@@ -413,7 +413,7 @@ module DDS {
     };
 
     BUILT_IN_TOPIC_TYPE
-    @mutable
+    /* @mutable */
     struct SubscriptionBuiltinTopicData {
       @id(0x005A) BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
       @id(0x0050) BuiltinTopicKey_t participant_key;
@@ -448,7 +448,7 @@ module DDS {
     };
 
     BUILT_IN_TOPIC_TYPE
-    @mutable
+    /* @mutable */
     struct TopicBuiltinTopicData {
       BUILT_IN_TOPIC_KEY
       @id(0x005A) BuiltinTopicKey_t key;
