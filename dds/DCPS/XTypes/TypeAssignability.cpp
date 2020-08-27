@@ -336,8 +336,8 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
     return false;
   }
   if (IS_APPENDABLE == a_exten || IS_FINAL == a_exten) {
-    size_t num_members = std::min(ta.struct_type.member_seq.length(),
-                                  tb.struct_type.member_seq.length());
+    const size_t num_members = std::min(ta.struct_type.member_seq.length(),
+                                        tb.struct_type.member_seq.length());
     for (size_t i = 0; i < num_members; ++i) {
       if (ta.struct_type.member_seq[i].common.member_id !=
           tb.struct_type.member_seq[i].common.member_id ||
@@ -380,16 +380,15 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
   // For any member m2 of T2, if there is a member m1 of T1 with the same
   // ID, then the type KeyErased(m1.type) is-assignable-from the type
   // KeyErased(m2.type).
-  // We extend this rule for all members of T1 and T2 that have the same
-  // ID, i.e., for any pair of members m2 of T2 and m1 of T1 with the same
-  // ID where m1.type and m2.type are not aggregated, verify that
-  // m1.type is-assignable-from m2.type.
+  // For any non-aggregated type T, we consider that KeyErased(T) = T
+  // (whereas the spec only defines KeyErased for aggregated types).
+  // Consequently, this rule applies to any pair of members m2 of T2 and
+  // m1 of T1 with the same ID.
   for (size_t i = 0; i < matched_members.size(); ++i) {
     const CommonStructMember& member = matched_members[i].second->common;
     const MinimalTypeObject* toa = 0;
     const MinimalTypeObject* tob = 0;
     bool aggregated_type_matched = false;
-    // KeyErased(T) is defined only for struct and union
     if (get_struct_member(tob, member)) {
       if (!get_struct_member(toa, matched_members[i].first->common)) {
         return false;
