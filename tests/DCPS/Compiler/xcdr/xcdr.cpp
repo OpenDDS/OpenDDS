@@ -446,7 +446,6 @@ const unsigned char mutable_xcdr2_union_expected_short[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x0e, // +4 = 4
   // Discriminator EMHEADER
-  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
   0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
   0x00, 0x00, 0x00, 0x00, // +4 = 12
@@ -459,7 +458,6 @@ const unsigned char mutable_xcdr2_union_expected_long[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x10, // +4 = 4
   // Discriminator EMHEADER
-  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
   0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
   0x00, 0x00, 0x00, 0x01, // +4 = 12
@@ -472,7 +470,6 @@ const unsigned char mutable_xcdr2_union_expected_octet[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x0d, // +4 = 4
   // Discriminator EMHEADER
-  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
   0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
   0x00, 0x00, 0x00, 0x02, // +4 = 12
@@ -485,7 +482,6 @@ const unsigned char mutable_xcdr2_union_expected_long_long[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x14, // +4 = 4
   // Discriminator EMHEADER
-  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
   0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
   0x00, 0x00, 0x00, 0x03, // +4 = 12
@@ -599,6 +595,63 @@ TEST(mutable_tests, baseline_xcdr2_test)
 {
   baseline_checks<MutableStruct>(xcdr2, mutable_struct_expected_xcdr2);
 }
+
+const unsigned char mutable_union_expected_xcdr2_short[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0e, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x00, // +4 = 12
+  // short_field
+  0x10, 0x00, 0x00, 0x04, // PID  +4 = 16
+  0x7f, 0xff // +2 = 18
+};
+
+const unsigned char mutable_union_expected_xcdr2_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x10, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x01, // +4 = 12
+  // long_field
+  0x20, 0x00, 0x00, 0x06,// PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff // +4 = 20
+};
+
+const unsigned char mutable_union_expected_xcdr2_octet[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0d, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x02, // +4 = 12
+  // octet_field
+  0x00, 0x00, 0x00, 0x08, // PID  +4 = 16
+  0x01                    // +1 = 17
+};
+
+const unsigned char mutable_union_expected_xcdr2_long_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x14, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x03, // +4 = 12
+  // long_field
+  0x30, 0x00, 0x00, 0x0a, // PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
+};
+
+TEST(mutable_tests, baseline_xcdr2_test_union)
+{
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_short, E_SHORT_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_long, E_LONG_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_octet, E_OCTET_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_long_long, E_LONG_LONG_FIELD);
+}
+
 
 // Reordered Tests -----------------------------------------------------------
 // Test compatibility between two structures with different field orders.
