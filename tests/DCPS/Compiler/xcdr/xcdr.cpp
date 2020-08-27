@@ -24,6 +24,26 @@ void set_base_values(Type& value)
 }
 
 template <typename Type>
+void set_base_values_union(Type& value, CommonFields disc)
+{
+  switch (disc)
+  {
+  case E_SHORT_FIELD:
+    value.short_field(0x7fff);
+    break;
+  case E_LONG_FIELD:
+    value.long_field(0x7fffffff);
+    break;
+  case E_OCTET_FIELD:
+    value.octet_field(0x01);
+    break;
+  case E_LONG_LONG_FIELD:
+    value.long_long_field(0x7fffffffffffffff);
+    break;
+  }
+}
+
+template <typename Type>
 void set_values(Type& value)
 {
   set_base_values(value);
@@ -47,9 +67,36 @@ void expect_values_equal_base(const TypeA& a, const TypeB& b)
 }
 
 template<typename TypeA, typename TypeB>
+void expect_values_equal_base_union(const TypeA& a, const TypeB& b)
+{
+  EXPECT_EQ(a._d(), b._d());
+  switch (a._d())
+  {
+  case E_SHORT_FIELD:
+    EXPECT_EQ(a.short_field(), b.short_field());
+    break;
+  case E_LONG_FIELD:
+    EXPECT_EQ(a.long_field(), b.long_field());
+    break;
+  case E_OCTET_FIELD:
+    EXPECT_EQ(a.octet_field(), b.octet_field());
+    break;
+  case E_LONG_LONG_FIELD:
+    EXPECT_EQ(a.long_long_field(), b.long_long_field());
+    break;
+  }
+}
+
+template<typename TypeA, typename TypeB>
 void expect_values_equal(const TypeA& a, const TypeB& b)
 {
   expect_values_equal_base(a, b);
+}
+
+template<typename TypeA, typename TypeB>
+void expect_values_equal_union(const TypeA& a, const TypeB& b)
+{
+  expect_values_equal_base_union(a, b);
 }
 
 template<typename TypeA, typename TypeB>
@@ -58,6 +105,18 @@ template<typename TypeA, typename TypeB>
   const TypeA& a, const TypeB& b)
 {
   expect_values_equal(a, b);
+  if (::testing::Test::HasFailure()) {
+    return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
+  }
+  return ::testing::AssertionSuccess();
+}
+
+template<typename TypeA, typename TypeB>
+::testing::AssertionResult assert_values_union(
+  const char* a_expr, const char* b_expr,
+  const TypeA& a, const TypeB& b)
+{
+  expect_values_equal_union(a, b);
   if (::testing::Test::HasFailure()) {
     return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
   }
@@ -311,6 +370,124 @@ TEST(basic_tests, MutableXcdr12Struct)
   baseline_checks<MutableXcdr12Struct>(xcdr1, mutable_xcdr1_struct_expected);
   baseline_checks<MutableXcdr12Struct>(xcdr2, mutable_xcdr2_struct_expected);
 }
+
+// Union Tests =============================================================
+
+const unsigned char mutable_xcdr2_union_expected_short[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0e, // +4 = 4
+  // Discriminator EMHEADER
+  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
+  0x00, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x00, // +4 = 12
+  // short_field
+  0x00, 0x00, 0x00, 0x00, // PID  +4 = 16
+  0x7f, 0xff // +2 = 18
+};
+
+const unsigned char mutable_xcdr2_union_expected_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x10, // +4 = 4
+  // Discriminator EMHEADER
+  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
+  0x00, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x01, // +4 = 12
+  // long_field
+  0x00, 0x00, 0x00, 0x01,// PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff // +4 = 20
+};
+
+
+const unsigned char mutable_xcdr2_union_expected_octet[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0d, // +4 = 4
+  // Discriminator EMHEADER
+  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
+  0x00, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x02, // +4 = 12
+  // octet_field
+  0x00, 0x00, 0x00, 0x02, // PID  +4 = 16
+  0x01                    // +1 = 17
+};
+
+const unsigned char mutable_xcdr2_union_expected_long_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x14, // +4 = 4
+  // Discriminator EMHEADER
+  // 0xa0, 0x00, 0x00, 0x00, // PID  +4 = 8 - must understand flag
+  0x00, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x03, // +4 = 12
+  // long_field
+  0x00, 0x00, 0x00, 0x03, // PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
+};
+
+template<typename TypeA, typename TypeB>
+void amalgam_serializer_test_union(
+  const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
+{
+  ACE_Message_Block buffer(1024);
+
+  // Serialize and Compare CDR
+  {
+    Serializer serializer(&buffer, encoding);
+    ASSERT_TRUE(serializer << value);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+
+  // Deserialize and Compare C++ Values
+  {
+    Serializer serializer(&buffer, encoding);
+    ASSERT_TRUE(serializer >> result);
+    EXPECT_PRED_FORMAT2(assert_values_union, value, result);
+  }
+}
+
+template <typename Type>
+void set_values_union(Type& value, CommonFields disc)
+{
+  set_base_values_union(value, disc);
+}
+
+template<typename TypeA, typename TypeB>
+void amalgam_serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, CommonFields disc)
+{
+  TypeA value;
+  set_values_union(value, disc);
+  TypeB result;
+  amalgam_serializer_test_union<TypeA, TypeB>(encoding, expected_cdr, value, result);
+}
+
+template<typename Type>
+void serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, CommonFields disc)
+{
+  amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
+}
+
+template<typename Type>
+void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, CommonFields disc)
+{
+  Type value;
+  value._d(disc);
+
+  EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
+
+  serializer_test_union<Type>(encoding, expected_cdr, disc);
+}
+
+TEST(basic_tests, MutableXcdr12Union)
+{
+  //baseline_checks<MutableXcdr12Union>(xcdr1, mutable_xcdr1_union_expected);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+}
+
 
 // Appendable Tests ==========================================================
 // TODO(iguessthislldo)

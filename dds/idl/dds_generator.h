@@ -558,7 +558,7 @@ void generateCaseBody(
   CommonFn commonFn, CommonFn commonFn2, AST_UnionBranch* branch,
   const char* statementPrefix, const char* namePrefix,
   const char* uni, bool generateBreaks, bool parens,
-  bool printing = false, unsigned default_id = 0, AST_Structure* type = NULL)
+  bool printing = false, unsigned default_id = 0, AST_Structure* type = 0)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -656,7 +656,7 @@ bool generateSwitchBody(CommonFn commonFn,
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
     generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
-                     uni, breaks, parens, false, i, type);
+                     uni, breaks, parens, false, static_cast<unsigned>(i), type);
     be_global->impl_ <<
       "  }\n";
   }

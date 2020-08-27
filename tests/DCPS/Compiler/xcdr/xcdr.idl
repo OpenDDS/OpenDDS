@@ -68,6 +68,27 @@ struct MutableXcdr12Struct {
   COMMON_FIELDS
 };
 
+enum CommonFields {
+  E_SHORT_FIELD,
+  E_LONG_FIELD,
+  E_OCTET_FIELD,
+  E_LONG_LONG_FIELD
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableXcdr12Union switch (CommonFields) {
+case E_SHORT_FIELD:
+  short short_field;
+case E_LONG_FIELD:
+  long long_field;
+case E_OCTET_FIELD:
+  octet octet_field;
+case E_LONG_LONG_FIELD:
+  long long long_long_field;
+};
+
 // Appendable Tests ==========================================================
 // TODO(iguessthislldo)
 
@@ -103,4 +124,18 @@ struct AdditionalFieldMutableStruct {
   @id(10) long long long_long_field;
   @id(8) octet octet_field;
   @id(4) short short_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableUnion switch (CommonFields) {
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_LONG_LONG_FIELD:
+  @id(10) long long long_long_field;
 };
