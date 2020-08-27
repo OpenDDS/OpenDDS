@@ -829,7 +829,7 @@ TEST(mutable_tests, length_code_test)
 TEST(mutable_tests, read_lc567_test)
 {
   const unsigned char data[] = {
-    0,0,0,0x8b, // Delimiter +4=4
+    0,0,0,0x87, // Delimiter +4=4
     //MU,LC,id   NEXTINT   Value and Pad(0)
     0x50,0,0,0,  0,0,0,3,  1,2,3,(0), // o3 +4+4+3+(1)=16
     0x60,0,0,1,  0,0,0,3,  0,0,0,1, 0,0,0,2, 0,0,0,3, // l3 +4+4+4x3=36
