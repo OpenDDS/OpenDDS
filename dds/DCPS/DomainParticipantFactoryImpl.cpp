@@ -86,13 +86,13 @@ DomainParticipantFactoryImpl::create_participant(
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
-  // if a participant is already in the domain and the global transport
+  // if a participant is already in the domain and the specified transport
   // is a transport template then create a new transport instance for the
   // new participant if per_participant is set (checked before creating instance).
   ACE_TString transport_config_name;
   TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
-  if (TheServiceParticipant->belongs_to_domain_range(domainId) &&
-      TheTransportRegistry->config_has_transport_template(transport_config_name)) {
+
+  if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
     DPMap::iterator i = participants_.find(domainId);
     if (i != participants_.end()) {
       ACE_TString instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());

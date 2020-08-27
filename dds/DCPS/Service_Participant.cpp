@@ -1923,10 +1923,6 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
         } else {
           reg->domain_default_config(domainId, tc);
         }
-
-        domain_to_transport_name_map_[domainId] = perDomainDefaultTportConfig;
-      } else {
-        domain_to_transport_name_map_[domainId] = ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str());
       }
 
       // Check to see if the specified discovery configuration has been defined
@@ -2061,6 +2057,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       dcf.open();
       const ACE_Configuration_Section_Key& root = dcf.root_section();
 
+      // set the transport_config_name
+      domain_to_transport_name_map_[domainId] = dr_inst.transport_config_name;
+
       // create domain instance
       ACE_Configuration_Section_Key dsect;
       dcf.open_section(root, DOMAIN_SECTION_NAME, 1 /* create */, dsect);
@@ -2079,18 +2078,28 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         }
       }
 
-      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
-        // create transport instance add default transport config
-        TransportRegistry::instance()->create_transport_template_instance(domainId, this->global_transport_config_);
-        const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
-        dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
-                             ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
-                     config_instance_name.c_str()));
+      ACE_TString cfg_name;
+      if (get_transport_config_name(domainId, cfg_name)) {
+        if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
+          // create transport instance add default transport config
+          TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
+          const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
+          dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
+                               ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) Service_Participant::")
+                       ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
+                       config_instance_name.c_str()));
+          }
         }
+      } else {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                          ACE_TEXT("configure_domain_range_instance ")
+                          ACE_TEXT("transport config not found for domain %d\n"),
+                          domainId),
+                         -1);
       }
 
       //create matching discovery instance
@@ -2218,6 +2227,9 @@ Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TSt
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
   if ( it != domain_to_transport_name_map_.end()) {
     name = it->second.c_str();
+    return true;
+  } else if (global_transport_config_ != ACE_TEXT("")) {
+    name = global_transport_config_;
     return true;
   } else {
     return false;

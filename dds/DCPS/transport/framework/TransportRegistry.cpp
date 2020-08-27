@@ -61,6 +61,10 @@ TransportRegistry::close()
 const char TransportRegistry::DEFAULT_CONFIG_NAME[] = "_OPENDDS_DEFAULT_CONFIG";
 const char TransportRegistry::DEFAULT_INST_PREFIX[] = "_OPENDDS_";
 
+// transport template customizations
+const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_IP = "add_domain_id_to_ip_addr";
+const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_PORT = "add_domain_id_to_port";
+
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
   , released_(false)
@@ -887,29 +891,28 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
 
       size_t comma_pos = custom.find(',');
       if (comma_pos != OPENDDS_STRING::npos) {
-        val1 = custom.substr(0, comma_pos - 1);
+        val1 = custom.substr(0, comma_pos);
         // remove spaces
         val1.erase(std::remove(val1.begin(), val1.end(), ' '), val1.end());
 
         val2 = custom.substr(comma_pos + 1);
         val2.erase(std::remove(val2.begin(), val2.end(), ' '), val2.end());
 
-        add_to_ip = (val1 == "add_domain_id_to_ip_addr" || val2 == "add_domain_id_to_ip_addr");
-        add_to_port = (val1 == "add_domain_id_to_port" || val2 == "add_domain_id_to_port");
+        add_to_ip = (val1 == CUSTOM_ADD_DOMAIN_TO_IP || val2 == CUSTOM_ADD_DOMAIN_TO_IP);
+        add_to_port = (val1 == CUSTOM_ADD_DOMAIN_TO_PORT || val2 == CUSTOM_ADD_DOMAIN_TO_PORT);
 
       } else {
         custom.erase(std::remove(custom.begin(), custom.end(), ' '), custom.end());
 
-        add_to_ip = (custom == "add_domain_id_to_ip_addr");
-        add_to_port = (custom == "add_domain_id_to_ip_addr");
+        add_to_ip = (custom == CUSTOM_ADD_DOMAIN_TO_IP);
+        add_to_port = (custom == CUSTOM_ADD_DOMAIN_TO_PORT);
       }
 
       if (!add_to_ip && !add_to_port) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) TransportRegistry::process_customizations: ")
-                   ACE_TEXT("%C customization is not supported. Supported values are "),
-                   ACE_TEXT("'add_domain_id_to_ip_addr' and 'add_domain_id_to_ip_addr'\n"),
-                   custom.c_str()));
+                   ACE_TEXT("%C customization is not supported. Supported values are %C and %C\n"),
+                   custom.c_str(), CUSTOM_ADD_DOMAIN_TO_IP.c_str(), CUSTOM_ADD_DOMAIN_TO_PORT.c_str()));
         return false;
       }
 

@@ -155,6 +155,9 @@ private:
   mutable LockType lock_;
 
   // transport template support
+  static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
+  static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_PORT;
+
   struct TransportTemplate
   {
     OPENDDS_STRING transport_template_name;
