@@ -148,6 +148,7 @@ struct Long3 {
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct LengthCodeStruct { //LC Size
+  @key
   @id(0) octet o;         // 0    1
   @id(1) short s;         // 1    2
   @id(2) long l;          // 2    4
@@ -155,6 +156,7 @@ struct LengthCodeStruct { //LC Size
 
   @id(4) Bool3 b3;        // 4    3
   @id(5) Octet5 o5;       // 4    5
+  @key
   @id(6) Short3 s3;       // 4    6
   @id(7) Struct7 t7;      // 4    7
   @id(8) Long3 l3;        // 4   12
@@ -163,6 +165,7 @@ struct LengthCodeStruct { //LC Size
   @id(12) string<2> str2; // 4  4+2
   @id(13) string<3> str3; // 4  4+3
   @id(14) string<4> str4; // 3  4+4
+  @key
   @id(15) string<5> str5; // 4  4+5
 };
 
@@ -179,4 +182,6 @@ struct LC567Struct {            //LC Size
   @id(4) string<4> str4;        // 3    4
   @id(5) string<5> str5;        // 5    5
   @id(6) sequence<long> ls;     // 6  4x2 (2 elements)
+  @key
+  @id(7) string<7> str7;        // 5    7
 };
