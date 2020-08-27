@@ -1123,16 +1123,13 @@ operator<<(Serializer& s, ACE_OutputCDR::from_string x)
 {
   // Include the null termination in the serialized data.
   ACE_CDR::ULong stringlen = 0;
-
   if (x.val_ != 0) {
     stringlen = 1 + static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x.val_));
     s << stringlen;
     s.buffer_write(reinterpret_cast<char*>(x.val_), stringlen, false);
-
   } else {
     s << ACE_CDR::ULong(0);
   }
-
   return s.good_bit() && ((x.bound_ == 0) || (stringlen - 1 <= x.bound_));
 }
 
@@ -1555,7 +1552,7 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size)
 
 ACE_INLINE
 void serialized_size_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
+  const Encoding& encoding, size_t& size, size_t& running_size)
 {
   const Encoding::XcdrVersion xcdr = encoding.xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -1564,18 +1561,22 @@ void serialized_size_parameter_id(
     // TODO(iguessthislldo): Extended PID
 
     // Save and Zero Size to Reset the Alignment
-    xcdr1_running_size += size;
+    running_size += size;
     size = 0;
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
+    if (running_size != 0 && size != 1 && size != 2 && size != 4 && size != 8) {
+      size += uint32_cdr_size; // nextint
+    }
     encoding.align(size, uint32_cdr_size);
-    size += uint32_cdr_size;
-    // TODO(iguessthislldo) LC
+    size += uint32_cdr_size; // emheader
+    running_size += size;
+    size = 0;
   }
 }
 
 ACE_INLINE
 void serialized_size_list_end_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
+  const Encoding& encoding, size_t& size, size_t& running_size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
     /*
@@ -1586,7 +1587,12 @@ void serialized_size_list_end_parameter_id(
     size += uint16_cdr_size * 2;
 
     // Restore Saved Totals from Alignment Resets
-    size += xcdr1_running_size;
+    size += running_size;
+  } else if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+    if (running_size != 0 && size != 1 && size != 2 && size != 4 && size != 8) {
+      size += uint32_cdr_size; // nextint
+    }
+    size += running_size;
   }
 }
 

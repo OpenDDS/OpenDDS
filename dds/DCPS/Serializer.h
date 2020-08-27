@@ -627,7 +627,7 @@ public:
    *
    * Returns true if successful.
    */
-  bool write_parameter_id(unsigned id, size_t size);
+  bool write_parameter_id(const unsigned id, const size_t size, const bool must_understand = false);
 
   /**
    * Write the parameter ID that marks the end of XCDR1 parameter lists.
@@ -651,6 +651,28 @@ public:
    * Returns true if successful.
    */
   bool write_delimiter(size_t size);
+
+  template <typename T>
+  bool peek(T& t)
+  {
+    // save
+    const size_t pos = pos_;
+    ACE_Message_Block* current = current_;
+    char* const rd_ptr = current_->rd_ptr();
+    char* const wr_ptr = current_->wr_ptr();
+
+    // read
+    if (!(*this >> t)) {
+      return false;
+    }
+
+    // reset
+    current->wr_ptr(wr_ptr);
+    current->rd_ptr(rd_ptr);
+    current_ = current;
+    pos_ = pos;
+    return true;
+  }
 
 private:
   /// Read an array of values from the chain.

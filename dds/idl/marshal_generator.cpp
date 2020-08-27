@@ -2259,11 +2259,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     if (may_be_parameter_list) {
       /*
-       * For XCDR1 parameter lists this is used to hold the total size while
+       * For parameter lists this is used to hold the total size while
        * size is hijacked for field sizes because of alignment resets.
        */
       be_global->impl_ <<
-        "  size_t xcdr1_pl_running_total = 0;\n";
+        "  size_t mutable_running_total = 0;\n";
     }
 
     std::vector<string> code;
@@ -2284,7 +2284,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
       if (may_be_parameter_list) {
         expr +=
-          "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+          "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
       }
       if (!findSizeAnonymous(fields[i], "stru", intro, expr)) {
         expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
@@ -2295,9 +2295,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
     be_global->impl_ << intro << expr;
 
-    if (repr.xcdr1 && may_be_parameter_list) {
+    if (may_be_parameter_list) {
       be_global->impl_ <<
-        "  serialized_size_list_end_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }
   }
   {
@@ -2321,12 +2321,14 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  size_t size = 0;\n";
       std::ostringstream fields_encode;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], i);
+        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
         const string field_name = fields[i]->local_name()->get_string();
+        bool is_key = false;
+        be_global->check_key(fields[i], is_key);
         fields_encode <<
           "\n" <<
             findSizeCommon(field_name, fields[i]->field_type(), "stru", intro) <<
-          "  if (!strm.write_parameter_id(" << id << ", size)) {\n"
+          "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
           "    return false;\n"
           "  }\n"
           "  size = 0;\n"
@@ -2430,7 +2432,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       std::ostringstream cases;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], i);
+        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
         const string field_name = fields[i]->local_name()->get_string();
         cases <<
           "    case " << id << ": {\n"
@@ -3003,9 +3005,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (may_be_parameter_list) {
       be_global->impl_ <<
-        "  size_t xcdr1_pl_running_total = 0;\n";
+        "  size_t mutable_running_total = 0;\n";
       be_global->impl_ <<
-        "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+      be_global->impl_ <<
+        "  size = mutable_running_total;\n";
     }
 
     if (disc_cls & CL_ENUM) {
@@ -3018,7 +3022,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (may_be_parameter_list) {
       be_global->impl_ <<
-        "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+        "  mutable_running_total = 0;\n";
+      be_global->impl_ <<
+        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+      be_global->impl_ <<
+        "  size = mutable_running_total;\n";
     }
 
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
