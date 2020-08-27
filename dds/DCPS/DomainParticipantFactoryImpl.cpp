@@ -89,18 +89,18 @@ DomainParticipantFactoryImpl::create_participant(
   // if a participant is already in the domain and the global transport
   // is a transport template then create a new transport instance for the
   // new participant if per_participant is set (checked before creating instance).
-  ACE_TString global_transport_name;
-  TheServiceParticipant->get_global_transport_config_name(global_transport_name);
+  ACE_TString transport_config_name;
+  TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
   if (TheServiceParticipant->belongs_to_domain_range(domainId) &&
-      TheTransportRegistry->config_has_transport_template(global_transport_name)) {
+      TheTransportRegistry->config_has_transport_template(transport_config_name)) {
     DPMap::iterator i = participants_.find(domainId);
     if (i != participants_.end()) {
-      ACE_TString config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
+      ACE_TString instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
 
-      bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, config_name);
+      bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
 
       if (ret) {
-        TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), dp.in());
+        TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()), dp.in());
       } else {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")

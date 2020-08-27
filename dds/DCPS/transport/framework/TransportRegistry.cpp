@@ -637,14 +637,11 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 }
 
 bool
-TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& config_name)
+TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, ACE_TString& instance_config_name)
 {
-  ACE_TString global_transport_config_name;
-  TheServiceParticipant->get_global_transport_config_name(global_transport_config_name);
-
   // check per_participant
   TransportTemplate templ;
-  if(get_transport_template_info(global_transport_config_name, templ)) {
+  if(get_transport_template_info(transport_config_name, templ)) {
     if (!templ.instantiate_per_participant) {
       ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
@@ -654,16 +651,16 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
     }
   }
 
-  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(global_transport_config_name.c_str()));
+  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()));
 
-  OPENDDS_STRING tmp = ACE_TEXT_ALWAYS_CHAR(config_name.c_str());
+  OPENDDS_STRING tmp = ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str());
   OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + tmp;
 
   tmp = "transport_config_" + tmp;
-  config_name = ACE_TEXT_CHAR_TO_TCHAR(tmp.c_str());
+  instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(tmp.c_str());
 
   OpenDDS::DCPS::TransportConfig_rch config =
-    TheTransportRegistry->create_config(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()));
+    TheTransportRegistry->create_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()));
   OpenDDS::DCPS::TransportInst_rch inst =
     TheTransportRegistry->create_inst(inst_name, "rtps_udp");
 

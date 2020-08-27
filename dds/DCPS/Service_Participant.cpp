@@ -1923,6 +1923,10 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
         } else {
           reg->domain_default_config(domainId, tc);
         }
+
+        domain_to_transport_name_map_[domainId] = perDomainDefaultTportConfig;
+      } else {
+        domain_to_transport_name_map_[domainId] = ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str());
       }
 
       // Check to see if the specified discovery configuration has been defined
@@ -1945,7 +1949,8 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
+int
+Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 {
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_range_sect;
@@ -2023,11 +2028,17 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
                          domain_range.c_str(), dt_name.c_str()));
             }
             range_element.discovery_template_name = dt_name;
+          } else if (name == "DefaultTransportConfig") {
+            range_element.transport_config_name = dt_name;
+            range_element.domain_info[it->first] = it->second;
           } else {
             // key=val domain config option
             range_element.domain_info[it->first] = it->second;
           }
         }
+      }
+      if (this->global_transport_config_ != ACE_TEXT("")) {
+        range_element.transport_config_name = ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str());
       }
       domain_ranges_.push_back(range_element);
     }
@@ -2201,10 +2212,16 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
   return false;
 }
 
-void
-Service_Participant::get_global_transport_config_name(ACE_TString& name) const
+bool
+Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
 {
-  name = global_transport_config_;
+  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
+  if ( it != domain_to_transport_name_map_.end()) {
+    name = it->second.c_str();
+    return true;
+  } else {
+    return false;
+  }
 }
 
 int
@@ -2410,6 +2427,7 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
         inst.range_start = it->range_start;
         inst.range_end = it->range_end;
         inst.discovery_template_name = it->discovery_template_name;
+        inst.transport_config_name = it->transport_config_name;
         inst.customizations = it->customizations;
         inst.disc_info = it->disc_info;
         inst.domain_info = it->domain_info;

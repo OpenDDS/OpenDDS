@@ -402,7 +402,7 @@ public:
    */
   bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
-  void get_global_transport_config_name(ACE_TString& name) const;
+  bool get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
@@ -591,12 +591,15 @@ private:
     DDS::DomainId_t range_start;
     DDS::DomainId_t range_end;
     OPENDDS_STRING discovery_template_name;
+    OPENDDS_STRING transport_config_name;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) domain_info;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) disc_info;
 
     DomainRange() : range_start(-1), range_end(-1) {}
   };
+
+  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
 
   OPENDDS_VECTOR(DomainRange) domain_ranges_;
 
