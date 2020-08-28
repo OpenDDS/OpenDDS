@@ -607,7 +607,7 @@ void generateCaseBody(
     const char* breakString = generateBreaks ? "    break;\n" : "";
     std::string intro;
     if (commonFn2) {
-      const unsigned id = be_global->get_id(NULL, branch, default_id);
+      const unsigned id = be_global->get_id(0, branch, default_id);
       be_global->impl_ <<
         commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false) <<
         "    if (!strm.write_parameter_id(" << id << ", size)) {\n"

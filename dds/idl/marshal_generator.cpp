@@ -3006,8 +3006,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  size_t mutable_running_total = 0;\n";
       be_global->impl_ <<
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
-      be_global->impl_ <<
-        "  size = mutable_running_total;\n";
     }
 
     if (disc_cls & CL_ENUM) {
@@ -3020,15 +3018,16 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (may_be_parameter_list) {
       be_global->impl_ <<
-        "  mutable_running_total = 0;\n";
-      be_global->impl_ <<
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
-      be_global->impl_ <<
-        "  size = mutable_running_total;\n";
     }
 
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
+
+    if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+    }
   }
   {
     Function insertion("operator<<", "bool");
