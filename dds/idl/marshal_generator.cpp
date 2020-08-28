@@ -3211,9 +3211,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (may_be_parameter_list) {
         be_global->impl_ <<
-          "  size_t xcdr1_pl_running_total = 0;\n";
-        be_global->impl_ <<
-          "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
+          "  size_t mutable_running_total = 0;\n";
+          "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
       }
 
       if (disc_cls & CL_ENUM) {
@@ -3222,6 +3221,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       } else {
         be_global->impl_ <<
           "  max_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
+      }
+
+      if (may_be_parameter_list) {
+        be_global->impl_ <<
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
       }
     }
   }
