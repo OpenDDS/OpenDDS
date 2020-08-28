@@ -647,11 +647,11 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   TransportTemplate templ;
   if(get_transport_template_info(transport_config_name, templ)) {
     if (!templ.instantiate_per_participant) {
-      ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                  ACE_TEXT("create_new_transport_instance_for_participant: ")
-                  ACE_TEXT("transport_template missing instantiation_rule=per_participant\n")));
-      return false;
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                        ACE_TEXT("create_new_transport_instance_for_participant: ")
+                        ACE_TEXT("transport_template missing instantiation_rule=per_participant\n")),
+                      false);
     }
   }
 
@@ -674,18 +674,18 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   ach.open();
   ach.open_section(ach.root_section(), ACE_TEXT("the_transport_setup"), 1, sect_key);
 
-  if (TheServiceParticipant->belongs_to_domain_range(id)) {
+  if (TheServiceParticipant->belongs_to_domain_range(id) || config_has_transport_template(transport_config_name)) {
     TransportTemplate tr_inst;
 
     if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str()), tr_inst)) {
       ValueMap customs;
 
       if (!process_customizations(id, tr_inst, customs)) {
-        ACE_ERROR((LM_ERROR,
+        ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
                   ACE_TEXT("create_new_transport_instance_for_participant ")
-                  ACE_TEXT("could not process_customizations\n")));
-        return false;
+                  ACE_TEXT("could not process_customizations\n")),
+                 false);
       }
 
       // write
@@ -693,12 +693,12 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
         ach.set_string_value(sect_key, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
       }
     } else {
-      ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                  ACE_TEXT("create_new_transport_instance_for_participant ")
-                  ACE_TEXT("could not find transport_template for config %C\n"),
-                  cfg->name().c_str()));
-        return false;
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                        ACE_TEXT("create_new_transport_instance_for_participant ")
+                        ACE_TEXT("could not find transport_template for config %C\n"),
+                        cfg->name().c_str()),
+                       false);
     }
   } else {
     TransportEntry tr_inst;
@@ -794,11 +794,11 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
       ValueMap customs;
 
       if (!process_customizations(domain, tr_inst, customs)) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                  ACE_TEXT("create_new_transport_instance_for_participant ")
-                  ACE_TEXT("could not process_customizations\n")));
-        return false;
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                          ACE_TEXT("create_new_transport_instance_for_participant ")
+                          ACE_TEXT("could not process_customizations\n")),
+                         false);
       }
 
       // write
@@ -909,11 +909,11 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
       }
 
       if (!add_to_ip && !add_to_port) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) TransportRegistry::process_customizations: ")
-                   ACE_TEXT("%C customization is not supported. Supported values are %C and %C\n"),
-                   custom.c_str(), CUSTOM_ADD_DOMAIN_TO_IP.c_str(), CUSTOM_ADD_DOMAIN_TO_PORT.c_str()));
-        return false;
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) TransportRegistry::process_customizations: ")
+                          ACE_TEXT("%C customization is not supported. Supported values are %C and %C\n"),
+                          custom.c_str(), CUSTOM_ADD_DOMAIN_TO_IP.c_str(), CUSTOM_ADD_DOMAIN_TO_PORT.c_str()),
+                         false);
       }
 
       // only add_domain_id_to_ip_addr and add_domain_id_to_port are supported at this time.
@@ -929,12 +929,12 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
           int val = 0;
 
           if (!convertToInteger(custom, val)) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                       ACE_TEXT("process_customizations ")
-                       ACE_TEXT("could not convert %C to integer\n"),
-                       custom.c_str()));
-            return false;
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                              ACE_TEXT("process_customizations ")
+                              ACE_TEXT("could not convert %C to integer\n"),
+                              custom.c_str()),
+                             false);
           }
 
           val += id;
@@ -942,12 +942,12 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
           addr += "." + to_dds_string(val);
           addr += port;
         } else {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                     ACE_TEXT("process_customizations ")
-                     ACE_TEXT("could not add_domain_id_to_ip_addr for address %C\n"),
-                     idx->second.c_str()));
-          return false;
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                            ACE_TEXT("process_customizations ")
+                            ACE_TEXT("could not add_domain_id_to_ip_addr for address %C\n"),
+                            idx->second.c_str()),
+                           false);
         }
 
         if (DCPS_debug_level > 0) {
@@ -968,12 +968,12 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
           int rtpsPort = PB + DG * id + D2;
           addr += ":" + to_dds_string(rtpsPort);
         } else {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                     ACE_TEXT("process_customizations ")
-                     ACE_TEXT("could not add_domain_id_to_port for %C since port exists.\n"),
-                     idx->second.c_str()));
-          return false;
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                            ACE_TEXT("process_customizations ")
+                            ACE_TEXT("could not add_domain_id_to_port for %C since port exists.\n"),
+                            idx->second.c_str()),
+                           false);
         }
 
         if (DCPS_debug_level > 0) {
@@ -983,12 +983,12 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
                      it->first.c_str(), addr.c_str()));
         }
       } else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                   ACE_TEXT("process_customizations ")
-                   ACE_TEXT("No support for %C customization\n"),
-                   idx->second.c_str()));
-        return false;
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
+                          ACE_TEXT("process_customizations ")
+                          ACE_TEXT("No support for %C customization\n"),
+                          idx->second.c_str()),
+                        false);
       }
 
       customs[idx->first] = addr.c_str();
