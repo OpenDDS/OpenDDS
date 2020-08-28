@@ -28,8 +28,7 @@ sub runTest {
     print "The DW in each domain sends 10 messages to its DR.\n";
     print "*********************************\n";
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 2 -domain 2 -domain 4 -domain 7");
-    $test->process("beta", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 1 -domain 15 -domain 3");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 2 -domain 2 -domain 4 -domain 7 -domain 15");
 
     $test->start_process("alpha");
     $test->start_process("beta");
