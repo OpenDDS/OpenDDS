@@ -72,7 +72,7 @@ struct MutableXcdr12Struct {
   COMMON_FIELDS
 };
 
-enum CommonFields {
+enum UnionDisc {
   E_SHORT_FIELD,
   E_LONG_FIELD,
   E_OCTET_FIELD,
@@ -82,7 +82,7 @@ enum CommonFields {
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
-union MutableXcdr12Union switch (CommonFields) {
+union MutableXcdr12Union switch (UnionDisc) {
 case E_SHORT_FIELD:
   short short_field;
 case E_LONG_FIELD:
@@ -210,7 +210,7 @@ struct LC567Struct {            //LC Size
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
-union MutableUnion switch (CommonFields) {
+union MutableUnion switch (UnionDisc) {
 case E_SHORT_FIELD:
   @id(4) short short_field;
 case E_LONG_FIELD:

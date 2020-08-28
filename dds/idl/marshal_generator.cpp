@@ -2977,8 +2977,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
   const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
-  const bool may_be_delimited = not_final && repr.xcdr2;
-  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
@@ -3038,20 +3036,13 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
 
-    if (may_be_delimited || may_be_parameter_list) {
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n";
-    }
-
-    // Write the CDR Size if delimited.
-    if (may_be_delimited) {
-      std::vector<string> code;
-      code.push_back("serialized_size(encoding, total_size, uni);");
-      code.push_back("if (!strm.write_delimiter(total_size)) {");
-      code.push_back("  return false;");
-      code.push_back("}");
-      generate_dheader_code(code, not_final);
-    }
+    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    std::vector<string> code;
+    code.push_back("serialized_size(encoding, total_size, uni);");
+    code.push_back("if (!strm.write_delimiter(total_size)) {");
+    code.push_back("  return false;");
+    code.push_back("}");
+    generate_dheader_code(code, not_final);
 
     // Header for discriminator
     if (may_be_parameter_list) {
@@ -3078,8 +3069,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (generateSwitchForUnion("uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
-                               may_be_parameter_list ? findSizeCommon : NULL,
-                               may_be_parameter_list ? node : NULL)) {
+                               may_be_parameter_list ? findSizeCommon : 0,
+                               may_be_parameter_list ? node : 0)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3090,15 +3081,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.addArg("uni", cxx + "&");
     extraction.endArgs();
 
-    // DHEADER
-    if (may_be_delimited) {
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
-      std::vector<string> code;
-      code.push_back("if (!strm.read_delimiter(total_size)) {");
-      code.push_back("  return false;");
-      code.push_back("}");
-      generate_dheader_code(code, not_final);
-    }
+    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    std::vector<string> code;
+    code.push_back("if (!strm.read_delimiter(total_size)) {");
+    code.push_back("  return false;");
+    code.push_back("}");
+    generate_dheader_code(code, not_final);
 
     if (may_be_parameter_list) {
       // Header for discriminator
@@ -3127,7 +3115,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  }\n";
 
       if (generateSwitchForUnion("disc", streamCommon, branches,
-        discriminator, "if", ">> ", cxx.c_str(), false, true, true, NULL)) {
+        discriminator, "if", ">> ", cxx.c_str(), false, true, true, 0)) {
         be_global->impl_ <<
           "  return true;\n";
       }
@@ -3220,10 +3208,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.endArgs();
 
     if (has_key) {
-      if (may_be_delimited) {
-        be_global->impl_ <<
-          "  serialized_size_delimiter(encoding, size);\n";
-      }
+      be_global->impl_ << "  serialized_size_delimiter(encoding, size);\n";
 
       if (may_be_parameter_list) {
         be_global->impl_ <<
@@ -3249,20 +3234,17 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.endArgs();
 
     if (has_key) {
-      if (may_be_delimited || may_be_parameter_list) {
-        be_global->impl_ <<
-          "  const Encoding& encoding = strm.encoding();\n";
+      if (may_be_parameter_list) {
+        be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
       }
 
       // Write the CDR Size if delimited.
-      if (may_be_delimited) {
-        std::vector<string> code;
-        code.push_back("serialized_size(encoding, total_size, uni);");
-        code.push_back("if (!strm.write_delimiter(total_size)) {");
-        code.push_back("  return false;");
-        code.push_back("}");
-        generate_dheader_code(code, not_final);
-      }
+      std::vector<string> code;
+      code.push_back("serialized_size(encoding, total_size, uni);");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, not_final);
 
       // Header for discriminator
       if (may_be_parameter_list) {
@@ -3298,14 +3280,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (has_key) {
       // DHEADER
-      if (may_be_delimited) {
-        be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
-        std::vector<string> code;
-        code.push_back("if (!strm.read_delimiter(total_size)) {");
-        code.push_back("  return false;");
-        code.push_back("}");
-        generate_dheader_code(code, not_final);
-      }
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, not_final);
 
       if (may_be_parameter_list) {
         // Header for discriminator

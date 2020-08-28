@@ -24,10 +24,9 @@ void set_base_values(Type& value)
 }
 
 template <typename Type>
-void set_base_values_union(Type& value, CommonFields disc)
+void set_base_values_union(Type& value, UnionDisc disc)
 {
-  switch (disc)
-  {
+  switch (disc) {
   case E_SHORT_FIELD:
     value.short_field(0x7fff);
     break;
@@ -485,13 +484,13 @@ const unsigned char mutable_xcdr2_union_expected_long_long[] = {
 };
 
 template <typename Type>
-void set_values_union(Type& value, CommonFields disc)
+void set_values_union(Type& value, UnionDisc disc)
 {
   set_base_values_union(value, disc);
 }
 
 template<typename TypeA, typename TypeB>
-void amalgam_serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, CommonFields disc)
+void amalgam_serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
 {
   TypeA value;
   set_values_union(value, disc);
@@ -500,13 +499,13 @@ void amalgam_serializer_test_union(const Encoding& encoding, const DataView& exp
 }
 
 template<typename Type>
-void serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, CommonFields disc)
+void serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
 {
   amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
 }
 
 template<typename Type>
-void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, CommonFields disc)
+void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
 {
   Type value;
   value._d(disc);

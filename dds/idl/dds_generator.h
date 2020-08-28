@@ -635,8 +635,8 @@ bool generateSwitchBody(CommonFn commonFn,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
                         bool forceDisableDefault = false, bool parens = true,
-                        bool breaks = true, CommonFn commonFn2 = NULL,
-                        AST_Structure* type = NULL)
+                        bool breaks = true, CommonFn commonFn2 = 0,
+                        AST_Structure* type = 0)
 {
   size_t n_labels = 0;
   bool has_default = false;
@@ -677,8 +677,8 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
                             AST_Type* discriminator, const char* statementPrefix,
                             const char* namePrefix = "", const char* uni = "",
                             bool forceDisableDefault = false, bool parens = true,
-                            bool breaks = true, CommonFn commonFn2 = NULL,
-                            AST_Structure* type = NULL)
+                            bool breaks = true, CommonFn commonFn2 = 0,
+                            AST_Structure* type = 0)
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
