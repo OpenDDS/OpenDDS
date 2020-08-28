@@ -23,18 +23,15 @@ public:
   void set_datawriter(Builder::DataWriter& datawriter) override;
   void unset_datawriter(Builder::DataWriter& datawriter) override;
 
-  size_t get_match_count() { return match_count_; }
-  size_t get_expected_match_count() { return expected_match_count_; }
-
-  std::condition_variable wr_expected_match_cv;
-  std::mutex wr_expected_match_cv_mutex;
+  bool wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const;
 
 protected:
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   size_t expected_match_count_{0};
   size_t match_count_{0};
   Builder::DataWriter* datawriter_{0};
   Builder::PropertyIndex last_discovery_time_;
+  mutable std::condition_variable expected_match_cv;
 };
 
 }

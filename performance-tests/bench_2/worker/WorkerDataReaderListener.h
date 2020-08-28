@@ -36,14 +36,10 @@ public:
   void set_datareader(Builder::DataReader& datareader) override;
   void unset_datareader(Builder::DataReader& datareader) override;
 
-  size_t get_match_count() { return match_count_; }
-  size_t get_expected_match_count() { return expected_match_count_; }
-
-  std::condition_variable dr_expected_match_cv;
-  std::mutex dr_expected_match_cv_mutex;
+  bool wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const;
 
 protected:
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   bool durable_{false};
   bool reliable_{false};
   bool history_keep_all_{false};
@@ -55,6 +51,7 @@ protected:
   Builder::DataReader* datareader_{0};
   DataDataReader_var data_dr_;
   std::vector<DataHandler*> handlers_;
+  mutable std::condition_variable expected_match_cv;
 
   Builder::PropertyIndex last_discovery_time_;
   Builder::PropertyIndex lost_sample_count_;
