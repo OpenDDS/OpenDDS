@@ -529,7 +529,9 @@ namespace {
       insertion.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       insertion.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -601,7 +603,9 @@ namespace {
       extraction.addArg(use_cxx11 ? "wrap" : "seq", cxx);
       extraction.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
@@ -1018,7 +1022,9 @@ namespace {
       insertion.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
       insertion.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -1065,7 +1071,9 @@ namespace {
       extraction.addArg(use_cxx11 ? "wrap" : "arr", cxx);
       extraction.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
@@ -2306,7 +2314,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
 
-    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    be_global->impl_ <<
+      "  const Encoding& encoding = strm.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n";
     std::vector<string> code;
     code.push_back("serialized_size(strm.encoding(), total_size, stru);");
     code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -2375,7 +2385,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.endArgs();
     string intro;
 
-    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    be_global->impl_ <<
+      "  const Encoding& encoding = strm.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n";
     std::vector<string> code;
     code.push_back("if (!strm.read_delimiter(total_size)) {");
     code.push_back("  return false;");
@@ -3013,7 +3025,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
 
-    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    be_global->impl_ <<
+      "  const Encoding& encoding = strm.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n";
     std::vector<string> code;
     code.push_back("serialized_size(encoding, total_size, uni);");
     code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -3035,7 +3049,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.addArg("uni", cxx + "&");
     extraction.endArgs();
 
-    be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+    be_global->impl_ <<
+      "  const Encoding& encoding = strm.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n";
     std::vector<string> code;
     code.push_back("if (!strm.read_delimiter(total_size)) {");
     code.push_back("  return false;");
