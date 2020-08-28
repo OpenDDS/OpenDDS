@@ -13,6 +13,7 @@
 #include "Discovery.h"
 #include "PoolAllocator.h"
 #include "DomainParticipantFactoryImpl.h"
+#include "ConfigUtils.h"
 #include "unique_ptr.h"
 #include "ReactorTask.h"
 #include "NetworkConfigMonitor.h"
@@ -487,6 +488,12 @@ private:
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
 
+  /**
+   * Create and load a discovery config from a discovery template
+   */
+  int configure_discovery_template(DDS::DomainId_t domainId,
+                                   const OPENDDS_STRING& discovery_name);
+
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
 
@@ -592,16 +599,23 @@ private:
     DDS::DomainId_t range_end;
     OPENDDS_STRING discovery_template_name;
     OPENDDS_STRING transport_config_name;
-    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
-    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) domain_info;
-    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) disc_info;
+    ValueMap domain_info;
 
     DomainRange() : range_start(-1), range_end(-1) {}
+  };
+
+  struct DiscoveryInfo
+  {
+    OPENDDS_STRING discovery_name;
+    ValueMap customizations;
+    ValueMap disc_info;
   };
 
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
 
   OPENDDS_VECTOR(DomainRange) domain_ranges_;
+
+  OPENDDS_VECTOR(DiscoveryInfo) discovery_infos_;
 
   int parse_domain_range(const OPENDDS_STRING& range, int& start, int& end);
 
@@ -609,7 +623,11 @@ private:
 
   bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
 
+  bool process_customizations(DDS::DomainId_t id, const OPENDDS_STRING& discovery_name, ValueMap& customs);
+
   OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
+
+  bool is_discovery_template(const OPENDDS_STRING& name);
 
 public:
   /// Pointer to the monitor factory that is used to create

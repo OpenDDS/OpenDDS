@@ -86,29 +86,24 @@ DomainParticipantFactoryImpl::create_participant(
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
-  // if a participant is already in the domain and the specified transport
-  // is a transport template then create a new transport instance for the
-  // new participant if per_participant is set (checked before creating instance).
+  // if the specified transport is a transport template then create a new transport
+  // instance for the new participant if per_participant is set (checked before creating instance).
   ACE_TString transport_config_name;
   TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
 
   if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
-    DPMap::iterator i = participants_.find(domainId);
-    if (i != participants_.end()) {
-      ACE_TString instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
+    ACE_TString instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
 
-      bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
+    bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
 
-      if (ret) {
-        TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()), dp.in());
-      } else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                   ACE_TEXT("could not create new transport instance for participant.\n")));
-
-        return DDS::DomainParticipant::_nil();
-      }
+    if (ret) {
+      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()), dp.in());
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                 ACE_TEXT("could not create new transport instance for participant.\n")));
+      return DDS::DomainParticipant::_nil();
     }
   }
 
