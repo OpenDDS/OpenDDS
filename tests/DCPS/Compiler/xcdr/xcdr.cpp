@@ -161,8 +161,14 @@ void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
   EXPECT_EQ(a.ls[1], b.ls[1]);
 }
 
-template<typename TypeA, typename TypeB>
-void expect_values_equal_union(const TypeA& a, const TypeB& b)
+template<>
+void expect_values_equal(const MutableUnion& a, const MutableUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
+template<>
+void expect_values_equal(const MutableXcdr12Union& a, const MutableXcdr12Union& b)
 {
   expect_values_equal_base_union(a, b);
 }
@@ -173,18 +179,6 @@ template<typename TypeA, typename TypeB>
   const TypeA& a, const TypeB& b)
 {
   expect_values_equal(a, b);
-  if (::testing::Test::HasFailure()) {
-    return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
-  }
-  return ::testing::AssertionSuccess();
-}
-
-template<typename TypeA, typename TypeB>
-::testing::AssertionResult assert_values_union(
-  const char* a_expr, const char* b_expr,
-  const TypeA& a, const TypeB& b)
-{
-  expect_values_equal_union(a, b);
   if (::testing::Test::HasFailure()) {
     return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
   }
@@ -490,27 +484,6 @@ const unsigned char mutable_xcdr2_union_expected_long_long[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
 };
 
-template<typename TypeA, typename TypeB>
-void amalgam_serializer_test_union(
-  const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
-{
-  ACE_Message_Block buffer(1024);
-
-  // Serialize and Compare CDR
-  {
-    Serializer serializer(&buffer, encoding);
-    ASSERT_TRUE(serializer << value);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-
-  // Deserialize and Compare C++ Values
-  {
-    Serializer serializer(&buffer, encoding);
-    ASSERT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(assert_values_union, value, result);
-  }
-}
-
 template <typename Type>
 void set_values_union(Type& value, CommonFields disc)
 {
@@ -523,7 +496,7 @@ void amalgam_serializer_test_union(const Encoding& encoding, const DataView& exp
   TypeA value;
   set_values_union(value, disc);
   TypeB result;
-  amalgam_serializer_test_union<TypeA, TypeB>(encoding, expected_cdr, value, result);
+  amalgam_serializer_test<TypeA, TypeB>(encoding, expected_cdr, value, result);
 }
 
 template<typename Type>
