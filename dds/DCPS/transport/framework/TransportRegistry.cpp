@@ -921,14 +921,20 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
         size_t pos = addr.find_last_of(".");
         if (pos != OPENDDS_STRING::npos) {
           OPENDDS_STRING custom = addr.substr(pos + 1);
-          size_t cpos = custom.find(":");
+
           OPENDDS_STRING port = "";
+          OPENDDS_STRING last_octet = "";
+
+          size_t cpos = custom.find(":");
           if (cpos != OPENDDS_STRING::npos) {
             port = custom.substr(cpos);
+            last_octet = custom.substr(0, cpos);
+          } else {
+            last_octet = custom;
           }
           int val = 0;
 
-          if (!convertToInteger(custom, val)) {
+          if (!convertToInteger(last_octet, val)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
                               ACE_TEXT("process_customizations ")
@@ -940,7 +946,9 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
           val += id;
           addr = addr.substr(0, pos);
           addr += "." + to_dds_string(val);
-          addr += port;
+          if (port != "") {
+            addr += port;
+          }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
@@ -961,19 +969,36 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
       if (add_to_port) {
         size_t pos = addr.find_last_of(":");
         if (pos == OPENDDS_STRING::npos) {
-          // See 9.6.1.3 in the RTPS 2.2 protocol specification.
+          // use default port + domainId. See 9.6.1.3 in the RTPS 2.2 protocol specification.
           const int PB = 7400;
           const int DG = 250;
           const int D2 = 1;
           int rtpsPort = PB + DG * id + D2;
+          rtpsPort += id;
           addr += ":" + to_dds_string(rtpsPort);
         } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                            ACE_TEXT("process_customizations ")
-                            ACE_TEXT("could not add_domain_id_to_port for %C since port exists.\n"),
-                            idx->second.c_str()),
-                           false);
+          // address has a port supplied
+          int rtpsPort = -1;
+          if (convertToInteger(addr.substr(pos + 1), rtpsPort)) {
+            addr = addr.substr(0, pos);
+            rtpsPort += id;
+            addr += ":" + to_dds_string(rtpsPort);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                              ACE_TEXT("process_customizations ")
+                              ACE_TEXT("could not add_domain_id_to_port for %C.\n"),
+                              idx->second.c_str()),
+                             false);
+          }
+
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) TransportRegistry::")
+                     ACE_TEXT("process_customizations processing add_domain_id_to_port: %C ==> %C\n"),
+                     it->first.c_str(), addr.c_str()));
+          }
+
         }
 
         if (DCPS_debug_level > 0) {
