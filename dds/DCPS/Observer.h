@@ -10,9 +10,10 @@
 
 #include "RcObject.h"
 #include "Definitions.h"
-//#include "LocalObject.h"
 #include "SequenceNumber.h"
+#include "DataSampleElement.h"
 
+#include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -51,12 +52,15 @@ public:
 
   struct Sample
   {
-    GUID_t sender_;
-    GUID_t receiver_;
-    std::string topic_;
-    SequenceNumber seq_n_;
+    DDS::InstanceHandle_t instance_;
+    CORBA::ULong instance_state_;
     DDS::Time_t timestamp_;
-    void* data_;
+    SequenceNumber seq_n_;
+    const void* const data_;
+    static CORBA::ULong to_instance_state(const char message_id);
+    Sample(const DDS::InstanceHandle_t& i, const DataSampleElement& e, const DDS::Time_t& t);
+    Sample(const DDS::InstanceHandle_t& i, const CORBA::ULong instance_state,
+      const DDS::Time_t& t, const SequenceNumber& sn, const void* const data);
   };
 
   // 1) Reader/Writer enabled, QoS changed, deleted

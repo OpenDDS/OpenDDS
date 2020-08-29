@@ -1,0 +1,53 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+
+#include "Observer.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace DCPS {
+
+CORBA::ULong Observer::Sample::to_instance_state(const char message_id)
+{
+  switch (message_id) {
+    case UNREGISTER_INSTANCE:
+      return DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+    case DISPOSE_INSTANCE:
+    case DISPOSE_UNREGISTER_INSTANCE:
+      return DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+    default:
+      return DDS::ALIVE_INSTANCE_STATE;
+  }
+}
+
+Observer::Sample::Sample(const DDS::InstanceHandle_t& i, const DataSampleElement& e, const DDS::Time_t& t)
+  : instance_(i)
+  , instance_state_(to_instance_state(e.get_header().message_id_))
+  , timestamp_(t)
+  , seq_n_(e.get_header().sequence_)
+  , data_(e.get_sample())
+{}
+
+Observer::Sample::Sample(
+  const DDS::InstanceHandle_t& i,
+  const CORBA::ULong instance_state,
+  const DDS::Time_t& t,
+  const SequenceNumber& sn,
+  const void* const data)
+  : instance_(i)
+  , instance_state_(instance_state)
+  , timestamp_(t)
+  , seq_n_(sn)
+  , data_(data)
+{}
+
+} // namespace DCPS
+} // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

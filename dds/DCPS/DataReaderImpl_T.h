@@ -1273,6 +1273,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
 
   const InstanceState_rch state_obj = inst->instance_state_;
   if (state_obj->match(view_states, instance_states)) {
+    Observer::Rch observer = get_observer(Observer::e_SAMPLE_READ);
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
       if ((item->sample_state_ & sample_states)
@@ -1281,6 +1282,10 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
 #endif
           ) {
         results.insert_sample(item, inst, ++i);
+        if (observer) {
+          Observer::Sample s(a_handle, instance_states, item->source_timestamp_, item->sequence_, item->registered_data_);
+          observer->on_sample_read(this, s);
+        }
       }
     }
   } else if (DCPS_debug_level >= 8) {
@@ -1339,6 +1344,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
                                            DDS_OPERATION_TAKE);
 
   if (inst->instance_state_->match(view_states, instance_states)) {
+    Observer::Rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
       if ((item->sample_state_ & sample_states)
@@ -1347,6 +1353,10 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
 #endif
           ) {
         results.insert_sample(item, inst, ++i);
+        if (observer) {
+          Observer::Sample s(a_handle, instance_states, item->source_timestamp_, item->sequence_, item->registered_data_);
+          observer->on_sample_taken(this, s);
+        }
       }
     }
   }

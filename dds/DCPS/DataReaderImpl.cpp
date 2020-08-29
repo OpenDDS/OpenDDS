@@ -1659,6 +1659,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         sample.header_.message_id_));
     break;
   }
+
+  Observer::Rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+  if (observer) {
+    SubscriptionInstance_rch instance;
+    lookup_instance(sample, instance);
+    Observer::Sample s(instance->instance_handle_, instance->instance_state_,
+      {sample.header_.source_timestamp_sec_, sample.header_.source_timestamp_nanosec_},
+      sample.header_.sequence_, sample.sample_.get());
+    observer->on_sample_received(this, s);
+  }
 }
 
 RcHandle<EntityImpl>

@@ -1924,8 +1924,13 @@ DataWriterImpl::write(Message_Block_Ptr data,
 
   } else {
     guard.release();
-
     this->send(list, transaction_id);
+  }
+
+  Observer::Rch observer = get_observer(Observer::e_SAMPLE_SENT);
+  if (observer) {
+    Observer::Sample s(handle, *element, source_timestamp);
+    observer->on_sample_sent(this, s);
   }
 
   return DDS::RETCODE_OK;
