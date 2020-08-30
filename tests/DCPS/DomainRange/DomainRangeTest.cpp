@@ -36,7 +36,7 @@ const int TOTAL_WRITERS = 1;
 
 class WriterTask : public ACE_Task_Base {
 public:
-  WriterTask (const std::string& writer_id,
+  WriterTask (const OPENDDS_STRING& writer_id,
               DDS::DataWriter_var writer,
               int total_readers)
     : writer_id_(writer_id)
@@ -90,7 +90,7 @@ public:
   }
 
 private:
-  std::string writer_id_;
+  OPENDDS_STRING writer_id_;
   DDS::DataWriter_var writer_;
   int total_readers_;
 };
@@ -116,8 +116,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    std::string reader_id = "Reader";
-    const std::string writer_id = "Writer";
+    OPENDDS_STRING reader_id = "Reader";
+    const OPENDDS_STRING writer_id = "Writer";
 
     int num_participants = 1;
 
@@ -145,7 +145,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     OPENDDS_VECTOR(DDS::Subscriber_var) subscribers;
     OPENDDS_VECTOR(DDS::Topic_var) topics;
 
-    for (std::vector<DDS::DomainId_t>::const_iterator it = domains.begin(); it != domains.end(); ++it)
+    for (OPENDDS_VECTOR(DDS::DomainId_t)::const_iterator it = domains.begin(); it != domains.end(); ++it)
     {
       DDS::DomainId_t domain = *it;
 
