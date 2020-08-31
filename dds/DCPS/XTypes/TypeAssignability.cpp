@@ -319,27 +319,51 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
 
   // Extensibility kind must match
   const TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
-  if ((ta.struct_type.struct_flags & extensibility_mask) !=
-      (tb.struct_type.struct_flags & extensibility_mask)) {
+  const ACE_CDR::UShort a_exten = ta.struct_type.struct_flags & extensibility_mask;
+  if (a_exten != (tb.struct_type.struct_flags & extensibility_mask)) {
     return false;
+  }
+
+  // If T1 is appendable, then members with the same member_index have the
+  // same member ID, the same setting for the 'optional' attribute and the
+  // T1 member type is strongly assignable from the T2 member type.
+  // If T1 is final, then they meet the same condition as for T1 being
+  // appendable and in addition T1 and T2 have the same set of member IDs.
+  if (IS_FINAL == a_exten &&
+      ta.struct_type.member_seq.length() != tb.struct_type.member_seq.length()) {
+    return false;
+  }
+  if (IS_APPENDABLE == a_exten || IS_FINAL == a_exten) {
+    const size_t num_members = std::min(ta.struct_type.member_seq.length(),
+                                        tb.struct_type.member_seq.length());
+    for (size_t i = 0; i < num_members; ++i) {
+      if (ta.struct_type.member_seq[i].common.member_id !=
+          tb.struct_type.member_seq[i].common.member_id ||
+          (ta.struct_type.member_seq[i].common.member_flags & IS_OPTIONAL) !=
+          (tb.struct_type.member_seq[i].common.member_flags & IS_OPTIONAL) ||
+          !strongly_assignable(ta.struct_type.member_seq[i].common.member_type_id,
+                               tb.struct_type.member_seq[i].common.member_type_id)) {
+        return false;
+      }
+    }
   }
 
   // Any members in T1 and T2 that have the same name also have
   // the same ID, and vice versa
   MatchedSet matched_members;
-  for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
-    MemberId id_a = ta.struct_type.member_seq.members[i].common.member_id;
-    const NameHash& h_a = ta.struct_type.member_seq.members[i].detail.name_hash;
+  for (size_t i = 0; i < ta.struct_type.member_seq.length(); ++i) {
+    MemberId id_a = ta.struct_type.member_seq[i].common.member_id;
+    const NameHash& h_a = ta.struct_type.member_seq[i].detail.name_hash;
     ACE_CDR::ULong name_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
-    for (size_t j = 0; j < tb.struct_type.member_seq.members.size(); ++j) {
-      MemberId id_b = tb.struct_type.member_seq.members[j].common.member_id;
-      const NameHash& h_b = tb.struct_type.member_seq.members[j].detail.name_hash;
+    for (size_t j = 0; j < tb.struct_type.member_seq.length(); ++j) {
+      MemberId id_b = tb.struct_type.member_seq[j].common.member_id;
+      const NameHash& h_b = tb.struct_type.member_seq[j].detail.name_hash;
       ACE_CDR::ULong name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
       if ((name_a == name_b && id_a != id_b) || (id_a == id_b && name_a != name_b)) {
         return false;
       } else if (name_a == name_b && id_a == id_b) {
-        matched_members.push_back(std::make_pair(&ta.struct_type.member_seq.members[i],
-                                                 &tb.struct_type.member_seq.members[j]));
+        matched_members.push_back(std::make_pair(&ta.struct_type.member_seq[i],
+                                                 &tb.struct_type.member_seq[j]));
         break;
       }
     }
@@ -353,41 +377,47 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
 
   // For any member m2 of T2, if there is a member m1 of T1 with the same
   // ID, then the type KeyErased(m1.type) is-assignable-from the type
-  // KeyErased(m2.type)
+  // KeyErased(m2.type).
+  // For any non-aggregated type T, we consider that KeyErased(T) = T
+  // (whereas the spec only defines KeyErased for aggregated types).
+  // Consequently, this rule applies to any pair of members m2 of T2 and
+  // m1 of T1 with the same ID.
   for (size_t i = 0; i < matched_members.size(); ++i) {
     const CommonStructMember& member = matched_members[i].second->common;
     const MinimalTypeObject* toa = 0;
     const MinimalTypeObject* tob = 0;
-    bool type_matched = false;
-    // KeyErased(T) is defined only for struct and union
+    bool aggregated_type_matched = false;
     if (get_struct_member(tob, member)) {
       if (!get_struct_member(toa, matched_members[i].first->common)) {
         return false;
       }
-      type_matched = true;
+      aggregated_type_matched = true;
     } else if (get_union_member(tob, member)) {
       if (!get_union_member(toa, matched_members[i].first->common)) {
         return false;
       }
-      type_matched = true;
+      aggregated_type_matched = true;
     }
 
-    if (type_matched) {
+    if (aggregated_type_matched) {
       MinimalTypeObject key_erased_a = *toa, key_erased_b = *tob;
       erase_key(key_erased_a);
       erase_key(key_erased_b);
       if (!assignable(TypeObject(key_erased_a), TypeObject(key_erased_b))) {
         return false;
       }
+    } else if (!assignable(matched_members[i].first->common.member_type_id,
+                           matched_members[i].second->common.member_type_id)) {
+      return false;
     }
   }
 
   // Members for which both optional is false and must_understand is true in
   // either T1 or T2 appear in both T1 and T2.
   // Members marked as key in either T1 or T2 appear in both T1 and T2.
-  for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
-    const MemberFlag& flags = ta.struct_type.member_seq.members[i].common.member_flags;
-    MemberId id = ta.struct_type.member_seq.members[i].common.member_id;
+  for (size_t i = 0; i < ta.struct_type.member_seq.length(); ++i) {
+    const MemberFlag& flags = ta.struct_type.member_seq[i].common.member_flags;
+    MemberId id = ta.struct_type.member_seq[i].common.member_id;
     bool found = false;
     if ((flags & (IS_OPTIONAL | IS_MUST_UNDERSTAND)) == IS_MUST_UNDERSTAND) {
       for (size_t j = 0; j < matched_members.size(); ++j) {
@@ -415,9 +445,9 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
     }
   }
 
-  for (size_t i = 0; i < tb.struct_type.member_seq.members.size(); ++i) {
-    const MemberFlag& flags = tb.struct_type.member_seq.members[i].common.member_flags;
-    MemberId id = tb.struct_type.member_seq.members[i].common.member_id;
+  for (size_t i = 0; i < tb.struct_type.member_seq.length(); ++i) {
+    const MemberFlag& flags = tb.struct_type.member_seq[i].common.member_flags;
+    MemberId id = tb.struct_type.member_seq[i].common.member_id;
     bool found = false;
     if ((flags & (IS_OPTIONAL | IS_MUST_UNDERSTAND)) == IS_MUST_UNDERSTAND) {
       for (size_t j = 0; j < matched_members.size(); ++j) {
@@ -550,16 +580,16 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
         if (TK_UNION == tob->kind) {
           const MinimalUnionMemberSeq& mseq_a = toa->union_type.member_seq;
           const MinimalUnionMemberSeq& mseq_b = tob->union_type.member_seq;
-          for (size_t j = 0; j < mseq_b.members.size(); ++j) {
-            const UnionCaseLabelSeq& labels_b = mseq_b.members[j].common.label_seq;
-            for (size_t k = 0; k < mseq_a.members.size(); ++k) {
-              const UnionCaseLabelSeq& labels_a = mseq_a.members[k].common.label_seq;
+          for (size_t j = 0; j < mseq_b.length(); ++j) {
+            const UnionCaseLabelSeq& labels_b = mseq_b[j].common.label_seq;
+            for (size_t k = 0; k < mseq_a.length(); ++k) {
+              const UnionCaseLabelSeq& labels_a = mseq_a[k].common.label_seq;
               bool matched = false;
-              for (size_t p = 0; p < labels_b.members.size(); ++p) {
-                for (size_t q = 0; q < labels_a.members.size(); ++q) {
-                  if (labels_b.members[p] == labels_a.members[q]) {
-                    const TypeIdentifier& tib = mseq_b.members[j].common.type_id;
-                    const TypeIdentifier& tia = mseq_a.members[k].common.type_id;
+              for (size_t p = 0; p < labels_b.length(); ++p) {
+                for (size_t q = 0; q < labels_a.length(); ++q) {
+                  if (labels_b[p] == labels_a[q]) {
+                    const TypeIdentifier& tib = mseq_b[j].common.type_id;
+                    const TypeIdentifier& tia = mseq_a[k].common.type_id;
                     MinimalTypeObject kh_a, kh_b;
                     bool ret_b = hold_key(tib, kh_b);
                     bool ret_a = hold_key(tia, kh_a);
@@ -627,19 +657,17 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   }
 
   std::set<ACE_CDR::Long> labels_set_a;
-  for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
-    const UnionCaseLabelSeq& labels_a = ta.union_type.member_seq.members[i].common.label_seq;
-    for (size_t j = 0; j < labels_a.members.size(); ++j) {
-      labels_set_a.insert(labels_a.members[j]);
-    }
+  for (size_t i = 0; i < ta.union_type.member_seq.length(); ++i) {
+    const UnionCaseLabelSeq& labels_a = ta.union_type.member_seq[i].common.label_seq;
+    labels_set_a.insert(labels_a.members.begin(), labels_a.members.end());
   }
 
   // If extensibility is final, then the set of labels must be identical.
   // Assuming labels are mapped to values identically in both input types.
   if ((ta.union_type.union_flags & extensibility_mask) == IS_FINAL) {
-    for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
-      const UnionCaseLabelSeq& labels_b = tb.union_type.member_seq.members[i].common.label_seq;
-      for (size_t j = 0; j < labels_b.members.size(); ++j) {
+    for (size_t i = 0; i < tb.union_type.member_seq.length(); ++i) {
+      const UnionCaseLabelSeq& labels_b = tb.union_type.member_seq[i].common.label_seq;
+      for (size_t j = 0; j < labels_b.length(); ++j) {
         if (labels_set_a.find(labels_b.members[j]) == labels_set_a.end()) {
           return false;
         }
@@ -650,24 +678,18 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
       return false;
     }
   } else { // Must have at least one common label other than the default
-    // NOTE: We assume that there is a separate CommonUnionMember
-    // for the default label (if it is present) in cases where
-    // there are multiple labels for the default member. For instance,
-    // if "LABEL1", "LABEL2", and "default" are the labels for the
-    // default member, then there is one CommonUnionMember for "LABEL1"
-    // and "LABEL2", and another CommonUnionMember for "default", both
-    // represent the default member. The CommonUnionMember with "default"
-    // label is the only one that has IS_DEFAULT flag turned on.
+    // This implementation assumes that the default member has IS_DEFAULT
+    // flag turned on, but the label "default" does not map into a numeric
+    // value for storing on the member's UnionCaseLabelSeq. Instead, only
+    // the other labels, if any, for this default members will have their
+    // numeric values stored in its UnionCaseLabelSeq.
     bool found = false;
-    for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
-      const UnionMemberFlag& flags_b = tb.union_type.member_seq.members[i].common.member_flags;
-      if ((flags_b & IS_DEFAULT) != IS_DEFAULT) {
-        const UnionCaseLabelSeq& labels_b = tb.union_type.member_seq.members[i].common.label_seq;
-        for (size_t j = 0; j < labels_b.members.size(); ++j) {
-          if (labels_set_a.find(labels_b.members[j]) != labels_set_a.end()) {
-            found = true;
-            break;
-          }
+    for (size_t i = 0; i < tb.union_type.member_seq.length(); ++i) {
+      const UnionCaseLabelSeq& labels_b = tb.union_type.member_seq[i].common.label_seq;
+      for (size_t j = 0; j < labels_b.length(); ++j) {
+        if (labels_set_a.find(labels_b[j]) != labels_set_a.end()) {
+          found = true;
+          break;
         }
       }
       if (found) break;
@@ -687,27 +709,27 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   }
 
   // Both discriminators are keys or neither are keys
-  MemberFlag flags_a = ta.union_type.discriminator.common.member_flags;
-  MemberFlag flags_b = tb.union_type.discriminator.common.member_flags;
+  const MemberFlag& flags_a = ta.union_type.discriminator.common.member_flags;
+  const MemberFlag& flags_b = tb.union_type.discriminator.common.member_flags;
   if ((((flags_a & IS_KEY) == IS_KEY) && ((flags_b & IS_KEY) != IS_KEY)) ||
       (((flags_a & IS_KEY) != IS_KEY) && ((flags_b & IS_KEY) == IS_KEY))) {
     return false;
   }
 
-  // Members with the same id must have the same name, and vice versa
+  // Members with the same ID must have the same name, and vice versa
   std::map<MemberId, ACE_CDR::ULong> id_to_name_a;
   std::map<ACE_CDR::ULong, MemberId> name_to_id_a;
-  for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
-    MemberId id = ta.union_type.member_seq.members[i].common.member_id;
-    const NameHash& h = ta.union_type.member_seq.members[i].detail.name_hash;
+  for (size_t i = 0; i < ta.union_type.member_seq.length(); ++i) {
+    MemberId id = ta.union_type.member_seq[i].common.member_id;
+    const NameHash& h = ta.union_type.member_seq[i].detail.name_hash;
     ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
     id_to_name_a[id] = name;
     name_to_id_a[name] = id;
   }
 
-  for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
-    MemberId id = tb.union_type.member_seq.members[i].common.member_id;
-    const NameHash& h = tb.union_type.member_seq.members[i].detail.name_hash;
+  for (size_t i = 0; i < tb.union_type.member_seq.length(); ++i) {
+    MemberId id = tb.union_type.member_seq[i].common.member_id;
+    const NameHash& h = tb.union_type.member_seq[i].detail.name_hash;
     ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
     if (id_to_name_a.find(id) != id_to_name_a.end() &&
         id_to_name_a[id] != name) {
@@ -723,29 +745,54 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   // For all non-default labels in T2 that select some member in T1,
   // the type of the selected member in T1 is assignable from the
   // type of the T2 member
-  for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
-    const UnionMemberFlag& flags_b = tb.union_type.member_seq.members[i].common.member_flags;
-    if ((flags_b & IS_DEFAULT) != IS_DEFAULT) {
-      const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq.members[i].common.label_seq;
-      for (size_t j = 0; j < ta.union_type.member_seq.members.size(); ++j) {
-        // Consider a case when tb has multiple labels for a member, e.g.,
-        // "LABEL1" and "LABEL2" are associated with a member of type MemberB,
-        // and ta has two members, one has label "LABEL1" and
-        // type MemberA1, and the other has label "LABEL2" and
-        // type MemberA2. There are two possible ways to check assignability:
-        // (i) check whether BOTH MemberA1 and MemberA2 are assignable from
-        // MemberB since labels for MemberB match the labels of both MemberA1
-        // and MemberA2 (i.e., all must be assignable), or (ii) check EITHER
-        // MemberA1 OR MemberA2 is assignable from MemberB (i.e., one member
-        // of ta that is assignable is sufficient). The spec does not clearly
-        // say which way we should do it. For now we are going with method (i).
-        const UnionCaseLabelSeq& label_seq_a = ta.union_type.member_seq.members[j].common.label_seq;
+  for (size_t i = 0; i < tb.union_type.member_seq.length(); ++i) {
+    const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq[i].common.label_seq;
+    for (size_t j = 0; j < ta.union_type.member_seq.length(); ++j) {
+      // Consider a case when tb has multiple labels for a member, e.g.,
+      // "LABEL1" and "LABEL2" are associated with a member of type MemberB,
+      // and ta has two members, one has label "LABEL1" and
+      // type MemberA1, and the other has label "LABEL2" and
+      // type MemberA2. There are two possible ways to check assignability:
+      // (i) check whether BOTH MemberA1 and MemberA2 are assignable from
+      // MemberB since labels for MemberB match the labels of both MemberA1
+      // and MemberA2 (i.e., all must be assignable), or (ii) check EITHER
+      // MemberA1 OR MemberA2 is assignable from MemberB (i.e., one member
+      // of ta that is assignable is sufficient). The spec does not clearly
+      // say which way we should do it. For now we are going with method (i).
+      const UnionCaseLabelSeq& label_seq_a = ta.union_type.member_seq[j].common.label_seq;
+      bool matched = false;
+      for (size_t k = 0; k < label_seq_b.length(); ++k) {
+        for (size_t t = 0; t < label_seq_a.length(); ++t) {
+          if (label_seq_b.members[k] == label_seq_a.members[t]) {
+            const TypeIdentifier& tia = ta.union_type.member_seq[j].common.type_id;
+            const TypeIdentifier& tib = tb.union_type.member_seq[i].common.type_id;
+            if (!assignable(tia, tib)) {
+              return false;
+            }
+            matched = true;
+            break;
+          }
+        }
+        if (matched) break;
+      }
+    }
+  }
+
+  // If any non-default labels of T1 that select the default member of T2,
+  // the type of the member in T1 is assignable from the type of the default
+  // member in T2
+  for (size_t i = 0; i < tb.union_type.member_seq.length(); ++i) {
+    const UnionMemberFlag& flags_b = tb.union_type.member_seq[i].common.member_flags;
+    if ((flags_b & IS_DEFAULT) == IS_DEFAULT) {
+      const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq[i].common.label_seq;
+      for (size_t j = 0; j < ta.union_type.member_seq.length(); ++j) {
+        const UnionCaseLabelSeq& label_seq_a = ta.union_type.member_seq[j].common.label_seq;
         bool matched = false;
-        for (size_t k = 0; k < label_seq_b.members.size(); ++k) {
-          for (size_t t = 0; t < label_seq_a.members.size(); ++t) {
-            if (label_seq_b.members[k] == label_seq_a.members[t]) {
-              const TypeIdentifier& tia = ta.union_type.member_seq.members[j].common.type_id;
-              const TypeIdentifier& tib = tb.union_type.member_seq.members[i].common.type_id;
+        for (size_t k = 0; k < label_seq_a.length(); ++k) {
+          for (size_t t = 0; t < label_seq_b.length(); ++t) {
+            if (label_seq_a[k] == label_seq_b[t]) {
+              const TypeIdentifier& tia = ta.union_type.member_seq[j].common.type_id;
+              const TypeIdentifier& tib = tb.union_type.member_seq[i].common.type_id;
               if (!assignable(tia, tib)) {
                 return false;
               }
@@ -756,50 +803,20 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
           if (matched) break;
         }
       }
-    }
-  }
-
-  // If any non-default labels of T1 that select the default member of T2,
-  // the type of the member in T1 is assignable from the type of the default
-  // member in T2
-  for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
-    const UnionMemberFlag& flags_a = ta.union_type.member_seq.members[i].common.member_flags;
-    if ((flags_a & IS_DEFAULT) != IS_DEFAULT) {
-      const UnionCaseLabelSeq& label_seq_a = ta.union_type.member_seq.members[i].common.label_seq;
-      for (size_t j = 0; j < tb.union_type.member_seq.members.size(); ++j) {
-        const UnionMemberFlag& flags_b = tb.union_type.member_seq.members[j].common.member_flags;
-        if ((flags_b & IS_DEFAULT) == IS_DEFAULT) {
-          const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq.members[j].common.label_seq;
-          bool matched = false;
-          for (size_t k = 0; k < label_seq_a.members.size(); ++k) {
-            for (size_t t = 0; t < label_seq_b.members.size(); ++t) {
-              if (label_seq_a.members[k] == label_seq_b.members[t]) {
-                const TypeIdentifier& tia = ta.union_type.member_seq.members[i].common.type_id;
-                const TypeIdentifier& tib = tb.union_type.member_seq.members[j].common.type_id;
-                if (!assignable(tia, tib)) {
-                  return false;
-                }
-                matched = true;
-                break;
-              }
-            }
-            if (matched) break;
-          }
-        }
-      }
+      break;
     }
   }
 
   // If T1 and T2 both have default labels, the type of T1's default member
   // is assignable from the type of T2's default member
-  for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
-    const UnionMemberFlag& flags_a = ta.union_type.member_seq.members[i].common.member_flags;
+  for (size_t i = 0; i < ta.union_type.member_seq.length(); ++i) {
+    const UnionMemberFlag& flags_a = ta.union_type.member_seq[i].common.member_flags;
     if ((flags_a & IS_DEFAULT) == IS_DEFAULT) {
-      for (size_t j = 0; j < tb.union_type.member_seq.members.size(); ++j) {
-        const UnionMemberFlag& flags_b = tb.union_type.member_seq.members[j].common.member_flags;
+      for (size_t j = 0; j < tb.union_type.member_seq.length(); ++j) {
+        const UnionMemberFlag& flags_b = tb.union_type.member_seq[j].common.member_flags;
         if ((flags_b & IS_DEFAULT) == IS_DEFAULT) {
-          const TypeIdentifier& tia = ta.union_type.member_seq.members[i].common.type_id;
-          const TypeIdentifier& tib = tb.union_type.member_seq.members[j].common.type_id;
+          const TypeIdentifier& tia = ta.union_type.member_seq[i].common.type_id;
+          const TypeIdentifier& tib = tb.union_type.member_seq[j].common.type_id;
           if (!assignable(tia, tib)) {
             return false;
           }
@@ -1828,7 +1845,8 @@ bool TypeAssignability::is_delimited_with_flags(TypeFlag flags) const
   } else { // Default extensibility is APPENDABLE (7.3.1.2.1.8)
     // Types with extensibility kind APPENDABLE are delimited
     // if serialized with encoding version 2 and are not
-    // delimited if serialized with encoding version 1
+    // delimited if serialized with encoding version 1.
+    // We are supporting XCDR2 in this iteration.
     return true;
   }
 }

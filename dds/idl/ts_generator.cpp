@@ -233,7 +233,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "\n"
       "  void representations_allowed_by_type(::DDS::DataRepresentationIdSeq& seq);\n"
       "\n"
-      "  virtual const OpenDDS::XTypes::TypeObject& getMinimalTypeObject() const; \n"
+      "  virtual const OpenDDS::XTypes::TypeObject& getMinimalTypeObject() const;\n"
       "\n"
       "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
       "\n"
