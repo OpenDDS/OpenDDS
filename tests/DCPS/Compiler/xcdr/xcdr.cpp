@@ -856,11 +856,62 @@ TEST(mutable_tests, read_lc567_test)
   deserialize_compare(xcdr2, data, expected);
 }
 
-TEST(mutable_tests, MixedMutableStruct)
+template<>
+void set_values(MixedMutableStruct& value)
+{
+  set_values(value.struct_nested);
+  value.sequence_field.length(3);
+  value.sequence_field[0] = value.sequence_field[1] = value.sequence_field[2] = 0x7fff;
+  //  value.array_field[0] = 0x01;
+  //  value.array_field[1] = 0x02;
+  //  value.array_field[2] = 0x03;
+  //  value.array_field[3] = 0x04;
+  //  value.array_field[4] = 0x05;
+  //  value.union_nested._d(3);
+  //  value.union_nested.string_field("abcdefghi");
+}
+
+template<>
+void expect_values_equal(const MixedMutableStruct& a,
+                         const MixedMutableStruct& b)
+{
+  expect_values_equal(a.struct_nested, b.struct_nested);
+  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
+  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  }
+  //  for (size_t i = 0; i < 5; ++i) {
+  //    EXPECT_EQ(a.array_field[i], b.array_field[i]);
+  //  }
+  //  EXPECT_EQ(a.union_nested._d(), b.union_nested._d());
+  //  EXPECT_STREQ(a.union_nested.string_field(), b.union_nested.string_field());
+}
+
+TEST(mutable_tests, BothMixedMutableStruct)
 {
   const unsigned char expected[] = {
-                                    0x00, 0x00, 0x00, 0x00, // +4 Delimiter = 4
+    0x00, 0x00, 0x00, 0x42, // +4 DHEADER = 4
+    //MU,LC,ID   NEXTINT
+    0x40,0,0,1,  0,0,0,40, // +8 EMHEADER1 + NEXTINT of struct_nested = 12
+    // <<<<<< Begin struct_nested
+    0x00, 0x00, 0x00, 0x24, // +4 DHEADER = 16
+    //MU,LC,ID   NEXTINT   Value and Pad(0)
+    0x10,0,0,4,            0x7f,0xff,(0),(0),    // +8 short_field = 24
+    0x20,0,0,6,            0x7f,0xff,0xff,0xff,  // +8 long_field = 32
+    0x00,0,0,8,            0x01,(0),(0),(0),     // +8 octet_field = 40
+    0x30,0,0,10,           0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12 long_long_field = 52
+    // End struct_nested >>>>>>
+    0x40,0,0,2,  0,0,0,10, 0,0,0,3,0x7f,0xff,0x7f,0xff,0x7f,0xff // +18 sequence_field = 70
+    //    0x40,0,0,3,  0,0,0,5,  1,2,3,4,5,(0),(0),(0),// +16 array_field = 88
+    //    0x40,0,0,4,  0,0,0,34, // +8 EMHEADER1 + NEXTINT of union_nested = 96
+    // <<<<<< Begin union_nested
+    //    0x00, 0x00, 0x00, 0x1e, // +4 DHEADER = 100
+    //    0x10,0,0,0,            0x00,0x03,(0),(0),     // +8 discriminator = 108
+    //    0x40,0,0,3,  0,0,0,14, 0,0,0,10,'a','b','c','d','e','f','g','h','i','\0' // +22 string_field = 130
+    // End union_nested >>>>>>
   };
+
+  serializer_test<MixedMutableStruct>(xcdr2, expected);
 }
 
 TEST(extensibility_tests, NestingFinalStruct)
