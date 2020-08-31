@@ -2348,13 +2348,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    return false;\n"
           "  }\n";
       }
-      if (repr.xcdr1 && may_be_parameter_list) {
-        fields_encode <<
-          "\n"
-          "  if (!strm.write_list_end_parameter_id()) {\n"
-          "    return false;\n"
-          "  }\n";
-      }
+      fields_encode <<
+        "\n"
+        "  if (!strm.write_list_end_parameter_id()) {\n"
+        "    return false;\n"
+        "  }\n";
       be_global->impl_ <<
         intro <<
         fields_encode.str() << "\n"
@@ -2393,28 +2391,24 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     code.push_back("  return false;");
     code.push_back("}");
     generate_dheader_code(code, not_final);
+    if (not_final) {
+      be_global->impl_ <<
+        "  size_t start_pos = strm.pos();\n";
+    }
 
     if (may_be_parameter_list) {
-      if (repr.xcdr2) {
-        /**
-         * We don't have a PID marking the end in XCDR2 parameter lists, but we
-         * have the size, so we need to stop after we hit this offset.
-         *
-         * TODO(iguessthislldo): Replace this with a cleaner mechanism where
-         * the Serializer keeps track of the stream offset.
-         * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447056830
-         */
-        be_global->impl_ <<
-          "  const char* end_of_fields = strm.pos_rd() + total_size;\n";
-      }
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
         "  while (true) {\n";
 
       if (repr.xcdr2) {
+        /**
+         * We don't have a PID marking the end in XCDR2 parameter lists, but we
+         * have the size, so we need to stop after we hit this offset.
+         */
         be_global->impl_ << "\n"
-          "    if ((!strm.pos_rd() || strm.pos_rd() >= end_of_fields)";
+          "    if (strm.pos() - start_pos >= total_size";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
             "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
@@ -2474,21 +2468,56 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     } else {
       string expr;
       for (size_t i = 0; i < fields.size(); ++i) {
-        if (i) expr += "\n    && ";
+        if (i && exten != extensibilitykind_appendable) {
+          expr += "\n    && ";
+        }
+        // TODO (sonndinh): Integrate with try-construct for when the stream
+        // ends before some fields on the reader side get their values.
+        if (exten == extensibilitykind_appendable) {
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
+          expr += "      strm.pos() - start_pos >= total_size) {\n";
+          expr += "    return true;\n";
+          expr += "  }\n";
+        }
         const string field_name = fields[i]->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
-          expr += rtpsCustom.preFieldRead(field_name);
-          expr += "(!(" + cond + ") || ";
+          string prefix = rtpsCustom.preFieldRead(field_name);
+          if (exten == extensibilitykind_appendable) {
+            if (!prefix.empty()) {
+              prefix = prefix.substr(0, prefix.length() - 8);
+              expr += "  if (!" + prefix + ") {\n";
+              expr += "    return false;\n";
+              expr += "  }\n";
+            }
+            expr += "  if ((" + cond + ") && !";
+          } else {
+            expr += prefix + "(!(" + cond + ") || ";
+          }
+        } else if (exten == extensibilitykind_appendable) {
+          expr += "  if (!";
         }
         if (!streamAnonymous(fields[i], ">>", intro, expr)) {
           expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
         }
-        if (!cond.empty()) {
+        if (exten == extensibilitykind_appendable) {
+          expr += ") {\n";
+          expr += "    return false;\n";
+          expr += "  }\n";
+        } else if (!cond.empty()) {
           expr += ")";
         }
       }
-      be_global->impl_ << intro << "  return " << expr << ";\n";
+      if (exten == extensibilitykind_appendable) {
+        expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
+        expr += "      strm.pos() - start_pos < total_size) {\n";
+        expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
+        expr += "  }\n";
+        expr += "  return true;\n";
+        be_global->impl_ << intro << expr;
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
   }
 
