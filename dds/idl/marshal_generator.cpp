@@ -3237,11 +3237,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.endArgs();
 
     if (has_key) {
-      if (may_be_parameter_list) {
-        be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
-      }
-
-      // Write the CDR Size if delimited.
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
       std::vector<string> code;
       code.push_back("serialized_size(encoding, total_size, uni);");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
