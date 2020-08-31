@@ -97,9 +97,6 @@ Writer::svc()
     }
 
     SkipSerialize::Message message;
-
-    DDS::InstanceHandle_t handle = message_dw->register_instance(message);
-
     message.serialized_data.length(4);
     message.serialized_data[0] = '1';
     message.serialized_data[1] = '2';
@@ -109,7 +106,7 @@ Writer::svc()
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
       do {
-        error = message_dw->write(message, handle);
+        error = message_dw->write(message, DDS::HANDLE_NIL);
       } while (error == DDS::RETCODE_TIMEOUT);
 
       if (error != DDS::RETCODE_OK) {

@@ -36,6 +36,8 @@
 #include "SkipSerializeTypeSupportImpl.h"
 #include "Args.h"
 
+#include <dds/DCPS/DataReaderImpl_T.h>
+
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 
@@ -180,6 +182,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")),
                        EXIT_FAILURE);
     }
+
+    OpenDDS::DCPS::DataReaderImpl_T<SkipSerialize::Message> * dri_mt = dynamic_cast<OpenDDS::DCPS::DataReaderImpl_T<SkipSerialize::Message>*>(reader.in());
+    dri_mt->set_marshal_skip_serialize(true);
 
     // Block until Publisher completes
     DDS::StatusCondition_var condition = reader->get_statuscondition();

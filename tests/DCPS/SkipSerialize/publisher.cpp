@@ -16,6 +16,9 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
+#include <dds/DCPS/DataWriterImpl_T.h>
+
+
 #ifdef ACE_AS_STATIC_LIBS
 # ifndef OPENDDS_SAFETY_PROFILE
 #include <dds/DCPS/transport/udp/Udp.h>
@@ -182,6 +185,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                          EXIT_FAILURE);
       }
+
+      OpenDDS::DCPS::DataWriterImpl_T<SkipSerialize::Message> * dwi_mt = dynamic_cast<OpenDDS::DCPS::DataWriterImpl_T<SkipSerialize::Message>*>(dw.in());
+      dwi_mt->set_marshal_skip_serialize(true);
 
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;
