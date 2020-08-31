@@ -34,7 +34,7 @@ private:
 
   virtual ~RtpsCustomizedElement();
 
-  ElementPair fragment(size_t size);
+  TqePair fragment(size_t size);
   const ACE_Message_Block* msg_payload() const;
 
   SequenceNumber seq_, last_frag_;

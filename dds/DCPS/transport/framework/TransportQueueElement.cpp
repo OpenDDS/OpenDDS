@@ -39,8 +39,7 @@ TransportQueueElement::is_control(RepoId /*pub_id*/) const
   return false;
 }
 
-ElementPair
-TransportQueueElement::fragment(size_t size)
+TqePair TransportQueueElement::fragment(size_t size)
 {
   Message_Block_Ptr head;
   Message_Block_Ptr tail;
@@ -54,7 +53,7 @@ TransportQueueElement::fragment(size_t size)
     new TransportCustomizedElement(this, true);
   rest->set_msg(move(tail));
 
-  return ElementPair(frag, rest);
+  return TqePair(frag, rest);
 }
 
 ACE_Message_Block*

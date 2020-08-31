@@ -1,16 +1,21 @@
 #include "DelayedDurableTypeSupportImpl.h"
 
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/WaitSet.h"
-
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 #ifdef ACE_AS_STATIC_LIBS
-# include "dds/DCPS/RTPS/RtpsDiscovery.h"
-# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
+
+const unsigned large_sample_seq_size = 500;
+/*  static_cast<unsigned>( */
+/*     OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE); */
+const unsigned minimum_sample_count = 981;
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -24,9 +29,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Topic_var topic = dp->create_topic("MyTopic", type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
-  const bool verbose = argc > 2 && ACE_TString(argv[2]) == ACE_TEXT("-verbose");
+  bool verbose = false;
+  bool writer = false;
+  bool reader = false;
+  bool large_samples = false;
+  for (int i = 1; i < argc; ++i) {
+    ACE_TString arg(argv[i]);
+    if (arg == ACE_TEXT("--verbose")) {
+      verbose = true;
+    } else if (arg == ACE_TEXT("--writer")) {
+      writer = true;
+    } else if (arg == ACE_TEXT("--reader")) {
+      reader = true;
+    } else if (arg == ACE_TEXT("--large-samples")) {
+      large_samples = true;
+    } else {
+      ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
+      return 1;
+    }
+  }
 
-  if (argc > 1 && ACE_TString(argv[1]) == ACE_TEXT("-writer")) {
+  if (writer) {
     Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
     DataWriterQos dw_qos;
@@ -35,14 +58,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
                                                DEFAULT_STATUS_MASK);
     PropertyDataWriter_var pdw = PropertyDataWriter::_narrow(dw);
+
+    Property p;
+    if (large_samples) {
+      p.extra.length(large_sample_seq_size);
+    } else {
+      p.extra.length(0);
+    }
+    const int scale = large_samples ? 1 : 5;
+
     for (int i = 1; i <= 1000; ++i) {
-      Property p = {i, i};
+      p.key = i;
+      p.value = i;
       pdw->write(p, HANDLE_NIL);
     }
 
+    const int value_multi = 20;
     for (int c = 1; c < 75; ++c) {
       for (int i = 1; i <= 1000; i += 50) {
-        Property p = {i, i + c};
+        p.key = i;
+        p.value = i + c;
         pdw->write(p, HANDLE_NIL);
       }
       ACE_OS::sleep(ACE_Time_Value(0, 500 * 1000)); // 1/2 sec
@@ -51,7 +86,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-  } else if (argc > 1 && ACE_TString(argv[1]) == ACE_TEXT("-reader")) {
+  } else if (reader) {
     Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                DEFAULT_STATUS_MASK);
     DataReaderQos dr_qos;
@@ -66,7 +101,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                        ALIVE_INSTANCE_STATE);
     WaitSet_var ws = new WaitSet;
     ws->attach_condition(dr_rc);
-    int counter = 0;
+    unsigned counter = 0;
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
     bool done = false;
     while (!done) {
@@ -89,11 +124,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         for (unsigned int i = 0; i < data.length(); ++i) {
           ++counter;
           if (verbose) {
-            ACE_DEBUG((LM_DEBUG, "Counter: %d Instance: %d\n", counter, data[i].key));
+            ACE_DEBUG((LM_DEBUG, "Counter: %u Instance: %d\n", counter, data[i].key));
           }
 
-          if (counter == 981) {
-            ACE_DEBUG((LM_DEBUG, "Counter 981 at %T\n"));
+          if (counter == minimum_sample_count) {
+            ACE_DEBUG((LM_DEBUG, "Counter %u at %T\n", minimum_sample_count));
             done = true;
           }
         }
@@ -101,6 +136,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     ws->detach_condition(dr_rc);
     dr->delete_readcondition(dr_rc);
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Must pass either -writer or -reader\n"));
+    return 1;
   }
 
   topic = 0;

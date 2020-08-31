@@ -25,10 +25,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleElement;
-
 class TransportQueueElement;
-typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;
+typedef std::pair<TransportQueueElement*, TransportQueueElement*> TqePair;
+typedef OPENDDS_VECTOR(TransportQueueElement*) TqeVector;
 
 /**
  * @class TransportQueueElement
@@ -141,7 +140,7 @@ public:
   /// the newly-created elements will need to invoke non-const methods on it).
   /// Each element in the pair will contain its own serialized modified
   /// DataSampleHeader.
-  virtual ElementPair fragment(size_t size);
+  virtual TqePair fragment(size_t size);
 
   /// Is this QueueElement the result of fragmentation?
   virtual bool is_fragment() const { return false; }

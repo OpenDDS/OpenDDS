@@ -20,8 +20,7 @@ namespace DCPS {
 RtpsCustomizedElement::~RtpsCustomizedElement()
 {}
 
-ElementPair
-RtpsCustomizedElement::fragment(size_t size)
+TqePair RtpsCustomizedElement::fragment(size_t size)
 {
   Message_Block_Ptr head;
   Message_Block_Ptr tail;
@@ -40,7 +39,7 @@ RtpsCustomizedElement::fragment(size_t size)
   rest->set_fragment();
   rest->last_frag_ = fragNumbers.second;
 
-  return ElementPair(frag, rest);
+  return TqePair(frag, rest);
 }
 
 const ACE_Message_Block*

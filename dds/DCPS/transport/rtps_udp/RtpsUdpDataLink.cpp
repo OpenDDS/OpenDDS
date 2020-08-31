@@ -3351,11 +3351,18 @@ RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
   if (addrs.empty()) {
     const GuidConverter conv(element->subscription_id());
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) RtpsUdpDataLink::durability_resend() - "
+               "(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - "
                "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
-  } else {
-    const RtpsUdpSendStrategy::OverrideToken ot = send_strategy()->override_destinations(addrs);
-    send_strategy()->send(element);
+    return;
+  }
+
+  TqeVector to_send;
+  if (!send_strategy()->fragmentation_helper(element, to_send)) {
+    return;
+  }
+  const TqeVector::iterator end = to_send.end();
+  for (TqeVector::iterator i = to_send.begin(); i != end; ++i) {
+    send_strategy()->send_rtps_control(*const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
   }
 }
 

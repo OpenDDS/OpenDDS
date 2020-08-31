@@ -1066,7 +1066,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
           const size_t avail = this->space_available();
           if (element_length > avail) {
             VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
-            ElementPair ep = element->fragment(avail);
+            const TqePair ep = element->fragment(avail);
             element = ep.first;
             element_length = element->msg()->total_length();
             next_fragment = ep.second;
@@ -1536,7 +1536,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
       if (this->max_message_size()) { // fragmentation enabled
         this->header_.first_fragment_ = !element->is_fragment();
         VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting from queue\n"), 0);
-        ElementPair ep = element->fragment(avail);
+        const TqePair ep = element->fragment(avail);
         element = ep.first;
         element_length = element->msg()->total_length();
         this->queue_.replace_head(ep.second);
@@ -1915,6 +1915,39 @@ TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
 #pragma warning(pop)
 #endif
   return num_blocks;
+}
+
+bool TransportSendStrategy::fragmentation_helper(
+  TransportQueueElement* original_element, TqeVector& elements_to_send)
+{
+  const size_t space = space_available();
+  const bool fragmentation_allowed = max_message_size();
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+    "max_message_size: %B\n", max_message_size()));
+  for (TransportQueueElement* e = original_element; e;) {
+    const size_t esize = e->msg()->total_length();
+    if (esize > space) {
+      if (fragmentation_allowed) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+          "Fragmenting %B > %B\n", esize, space));
+        const TqePair pair = e->fragment(space);
+        elements_to_send.push_back(pair.first);
+        e = pair.second;
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+          "Fragment %B\n", elements_to_send.back()->msg()->total_length()));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+          "Left %B\n", e->msg()->total_length()));
+      } else {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::fragmentation_helper: "
+          "Could not fragment and message size, %B, is greater space available %B"));
+        return false;
+      }
+    } else {
+      elements_to_send.push_back(e);
+      e = 0;
+    }
+  }
+  return true;
 }
 
 // close namespaces

@@ -269,6 +269,12 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
                  "destination %s failed send: %m\n", addr_buff));
+      if (errno == EMSGSIZE) {
+        for (int i = 0; i < n; ++i) {
+          ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i: "
+              "iovec[%d].iov_len = %B\n", i, size_t(iov[i].iov_len)));
+        }
+      }
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;
@@ -716,12 +722,12 @@ RtpsUdpSendStrategy::stop_i()
 size_t RtpsUdpSendStrategy::max_message_size() const
 {
   // TODO: Make this conditional on if the message actually needs to do this.
-  return max_message_size_
+  return max_message_size_ ? max_message_size_
 #ifdef OPENDDS_SECURITY
     // Worst case scenario is full message encryption plus one submessage encryption.
     - MaxSecureSubmessageAdditionalSize - MaxSecureFullMessageAdditionalSize
 #endif
-    ;
+    : 0;
 }
 
 } // namespace DCPS
