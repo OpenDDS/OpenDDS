@@ -185,3 +185,49 @@ struct LC567Struct {            //LC Size
   @key
   @id(7) string<7> str7;        // 5    7
 };
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+union NestedUnion switch(octet) {
+case 1:
+  short short_field;
+case 2:
+  sequence<long> sequence_field;
+default:
+  string string_field;
+};
+
+typedef octet OctetArray[5];
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct MixedMutableStruct {
+  COMMON_FIELDS
+  Short3S s3_field;
+  OctetArray array_field;
+  NestedUnion union_field;
+};
+
+@final
+@OpenDDS::data_representation(XCDR2)
+struct NestingFinalStruct {
+  AppendableXcdr2Struct appendable_nested;
+  string string_field;
+  MutableXcdr2Struct mutable_nested;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct NestingAppendableStruct {
+  MutableXcdr2Struct mutable_nested;
+  string string_field;
+  FinalXcdr2Struct final_nested;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct NestingMutableStruct {
+  AppendableXcdr2Struct appendable_nested;
+  string string_field;
+  FinalXcdr2Struct final_nested;
+};

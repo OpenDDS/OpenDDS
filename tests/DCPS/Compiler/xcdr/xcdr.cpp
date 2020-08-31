@@ -635,6 +635,25 @@ TEST(mutable_tests, read_lc567_test)
   deserialize_compare(xcdr2, data, expected);
 }
 
+TEST(mutable_tests, MixedMutableStruct)
+{
+  const unsigned char expected[] = {
+                                    0x00, 0x00, 0x00, 0x00, // +4 Delimiter = 4
+  };
+}
+
+TEST(extensibility_tests, NestingFinalStruct)
+{
+}
+
+TEST(extensibility_tests, NestingAppendableStruct)
+{
+}
+
+TEST(extensibility_tests, NestingMutableStruct)
+{
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
