@@ -48,10 +48,6 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_reads() const {
-    return num_reads_;
-  }
-
   static bool is_reliable();
 
   bool is_valid() const;
@@ -60,7 +56,6 @@ private:
   typedef std::set<CORBA::Long> Counts;
 
   DDS::DataReader_var reader_;
-  long                num_reads_;
   Counts              counts_;
   bool                valid_;
   const bool          reliable_;

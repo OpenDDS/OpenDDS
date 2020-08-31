@@ -20,7 +20,6 @@
 #include <cstdlib>
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0)
   , valid_(true)
   , reliable_(is_reliable())
 {
@@ -40,8 +39,6 @@ DataReaderListenerImpl::is_reliable()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ++num_reads_;
-
   try {
     SkipSerialize::MessageDataReader_var message_dr =
       SkipSerialize::MessageDataReader::_narrow(reader);
