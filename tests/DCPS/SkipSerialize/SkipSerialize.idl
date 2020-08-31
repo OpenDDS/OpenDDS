@@ -9,6 +9,5 @@
 module SkipSerialize {
   @topic struct Message {
     DDS::OctetSeq  serialized_data;
-    long count;
   };
 };

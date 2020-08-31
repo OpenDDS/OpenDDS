@@ -63,17 +63,15 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
       if (si.valid_data) {
-        if (!counts_.insert(message.count).second) {
-          std::cout << "ERROR: Repeat ";
-          valid_ = false;
-        }
+        // if (!counts_.insert(message.count).second) { //JJA remove counts_
+        //   std::cout << "ERROR: Repeat ";
+        //   valid_ = false;
+        // }
 
-        std::cout << "Message:" << std::endl
-                  << "         count      = " << message.count        << std::endl;
+        std::cout << "Message:" << std::endl;
         for (CORBA::ULong i = 0; i < message.serialized_data.length(); i++)
         {
           std::cout << "         data[" << i << "] = " << message.serialized_data[i] << std::endl;
-
         }
         //TODO create check for new message similar to commented below
         // if (std::string("Comic Book Guy") != message.from.in() &&
@@ -165,53 +163,54 @@ void DataReaderListenerImpl::on_sample_lost(
 
 bool DataReaderListenerImpl::is_valid() const
 {
-  CORBA::Long expected = 0;
-  Counts::const_iterator count = counts_.begin();
-  bool valid_count = true;
-  while (count != counts_.end() && expected < num_messages) {
-    if (expected != *count) {
-      if (expected < *count) {
-        if (reliable_) {
-          // if missing multiple
-          const bool multi = (expected + 1 < *count);
-          std::cout << "ERROR: missing message" << (multi ? "s" : "")
-                    << " with count=" << expected;
-          if (multi) {
-            std::cout << " to count=" << (*count - 1);
-          }
-          std::cout << std::endl;
-          expected = *count;
-          // don't increment count;
-          valid_count = false;
-          continue;
-        }
-      }
-      else {
-        bool multi = false;
-        while (++count != counts_.end() && *count < expected) {
-          multi = true;
-        }
-        std::cout << "ERROR: received message" << (multi ? "s" : "")
-                  << " with a negative count" << std::endl;
-        valid_count = false;
-        continue;
-      }
-    }
+  // CORBA::Long expected = 0;
+  // Counts::const_iterator count = counts_.begin();
+  // bool valid_count = true;
+  // while (count != counts_.end() && expected < num_messages) {
+  //   if (expected != *count) {
+  //     if (expected < *count) {
+  //       if (reliable_) {
+  //         // if missing multiple
+  //         const bool multi = (expected + 1 < *count);
+  //         std::cout << "ERROR: missing message" << (multi ? "s" : "")
+  //                   << " with count=" << expected;
+  //         if (multi) {
+  //           std::cout << " to count=" << (*count - 1);
+  //         }
+  //         std::cout << std::endl;
+  //         expected = *count;
+  //         // don't increment count;
+  //         valid_count = false;
+  //         continue;
+  //       }
+  //     }
+  //     else {
+  //       bool multi = false;
+  //       while (++count != counts_.end() && *count < expected) {
+  //         multi = true;
+  //       }
+  //       std::cout << "ERROR: received message" << (multi ? "s" : "")
+  //                 << " with a negative count" << std::endl;
+  //       valid_count = false;
+  //       continue;
+  //     }
+  //   }
 
-    ++expected;
-    ++count;
-  }
+  //   ++expected;
+  //   ++count;
+  // }
 
-  if (count != counts_.end()) {
-    std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
-    valid_count = false;
-  }
-  // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if ((int)counts_.size() < num_messages &&
-           (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
-    std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
-    valid_count = false;
-  }
+  // if (count != counts_.end()) {
+  //   std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
+  //   valid_count = false;
+  // }
+  // // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
+  // else if ((int)counts_.size() < num_messages &&
+  //          (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
+  //   std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
+  //   valid_count = false;
+  // }
 
-  return valid_ && valid_count;
+  // return valid_ && valid_count;
+  return true;
 }

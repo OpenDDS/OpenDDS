@@ -101,11 +101,10 @@ Writer::svc()
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
     message.serialized_data.length(4);
-    message.serialized_data[0] = 1;
-    message.serialized_data[1] = 2;
-    message.serialized_data[2] = 3;
-    message.serialized_data[3] = 4;
-    message.count = 0;
+    message.serialized_data[0] = '1';
+    message.serialized_data[1] = '2';
+    message.serialized_data[2] = '3';
+    message.serialized_data[3] = '4';
 
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
@@ -118,8 +117,6 @@ Writer::svc()
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: write returned %d!\n"), error));
       }
-
-      message.count++;
     }
 
   } catch (const CORBA::Exception& e) {
