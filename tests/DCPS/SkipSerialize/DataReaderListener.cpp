@@ -63,34 +63,26 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
       if (si.valid_data) {
-        // if (!counts_.insert(message.count).second) { //JJA remove counts_
-        //   std::cout << "ERROR: Repeat ";
-        //   valid_ = false;
-        // }
 
         std::cout << "Message:" << std::endl;
         for (CORBA::ULong i = 0; i < message.serialized_data.length(); i++)
         {
           std::cout << "         data[" << i << "] = " << message.serialized_data[i] << std::endl;
         }
-        //TODO create check for new message similar to commented below
-        // if (std::string("Comic Book Guy") != message.from.in() &&
-        //     std::string("OpenDDS-Java") != message.from.in()) {
-        //   std::cout << "ERROR: Invalid message.from" << std::endl;
-        //   valid_ = false;
-        // }
-        // if (std::string("Review") != message.subject.in()) {
-        //   std::cout << "ERROR: Invalid message.subject" << std::endl;
-        //   valid_ = false;
-        // }
-        // if (std::string("Worst. Movie. Ever.") != message.text.in()) {
-        //   std::cout << "ERROR: Invalid message.text" << std::endl;
-        //   valid_ = false;
-        // }
-        // if (message.subject_id != 99) {
-        //   std::cout << "ERROR: Invalid message.subject_id" << std::endl;
-        //   valid_ = false;
-        // }
+
+        if (message.serialized_data.length() != 4) {
+          std::cout << "ERROR: Expected message.data to have a size of " << "0"
+                    << " but it is " << message.serialized_data.length() << "\n";
+          valid_ = false;
+        }
+
+        for (CORBA::ULong j = 0; j < message.serialized_data.length(); ++j) {
+          if (message.serialized_data[j] != ('0'+j+1) ) {
+            std::cout << "ERROR: Bad data at index " << j << " value is " << ('0'+j+1) << "\n";
+            valid_ = false;
+            break;
+          }
+        }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
@@ -163,54 +155,5 @@ void DataReaderListenerImpl::on_sample_lost(
 
 bool DataReaderListenerImpl::is_valid() const
 {
-  // CORBA::Long expected = 0;
-  // Counts::const_iterator count = counts_.begin();
-  // bool valid_count = true;
-  // while (count != counts_.end() && expected < num_messages) {
-  //   if (expected != *count) {
-  //     if (expected < *count) {
-  //       if (reliable_) {
-  //         // if missing multiple
-  //         const bool multi = (expected + 1 < *count);
-  //         std::cout << "ERROR: missing message" << (multi ? "s" : "")
-  //                   << " with count=" << expected;
-  //         if (multi) {
-  //           std::cout << " to count=" << (*count - 1);
-  //         }
-  //         std::cout << std::endl;
-  //         expected = *count;
-  //         // don't increment count;
-  //         valid_count = false;
-  //         continue;
-  //       }
-  //     }
-  //     else {
-  //       bool multi = false;
-  //       while (++count != counts_.end() && *count < expected) {
-  //         multi = true;
-  //       }
-  //       std::cout << "ERROR: received message" << (multi ? "s" : "")
-  //                 << " with a negative count" << std::endl;
-  //       valid_count = false;
-  //       continue;
-  //     }
-  //   }
-
-  //   ++expected;
-  //   ++count;
-  // }
-
-  // if (count != counts_.end()) {
-  //   std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
-  //   valid_count = false;
-  // }
-  // // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  // else if ((int)counts_.size() < num_messages &&
-  //          (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
-  //   std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
-  //   valid_count = false;
-  // }
-
-  // return valid_ && valid_count;
-  return true;
+  return valid_;
 }

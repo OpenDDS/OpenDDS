@@ -25,7 +25,6 @@ my $dbg_lvl = '-ORBDebugLevel 1';
 my $pub_opts = "$dbg_lvl";
 my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
-my $stack_based = 0;
 my $is_rtps_disc = 0;
 my $DCPSREPO;
 
@@ -63,11 +62,6 @@ elsif ($test->flag('nobits')) {
 elsif ($test->flag('ipv6')) {
     $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
     $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
-}
-elsif ($test->flag('stack')) {
-    $pub_opts .= " -t tcp";
-    $sub_opts .= " -t tcp";
-    $stack_based = 1;
 }
 elsif ($test->flag('rtps')) {
     $pub_opts .= " -DCPSConfigFile rtps.ini";
@@ -137,8 +131,7 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
                        "$repo_bit_opt") unless $is_rtps_disc;
 
 $test->process("publisher", "publisher", $pub_opts);
-my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
-$test->process("subscriber", $sub_exe, $sub_opts);
+$test->process("subscriber", "subscriber", $sub_opts);
 
 $test->start_process("subscriber");
 $test->start_process("publisher");
