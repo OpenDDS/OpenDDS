@@ -8,6 +8,7 @@
 #include "dds/DCPS/DisjointSequence.h"
 
 #include <unordered_map>
+#include <condition_variable>
 
 namespace Bench {
 

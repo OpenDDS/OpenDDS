@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataWriterListener.h"
+#include <condition_variable>
 
 namespace Bench {
 

@@ -275,7 +275,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       if (config.wait_for_discovery_seconds > 0) {
 
         const std::chrono::seconds timeoutPeriod(config.wait_for_discovery_seconds);
-        std::chrono::system_clock::time_point timeout_time;
+        const std::chrono::system_clock::time_point timeout_time = std::chrono::system_clock::now() + timeoutPeriod;
 
         auto readMap = process.get_reader_map();
         if (readMap.size() > 0) {
@@ -285,7 +285,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           for (ReadMapIt it = readMap.begin(); it != readMap.end(); ++it) {
             dtRdrPtr = it->second;
             Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
-            timeout_time = std::chrono::system_clock::now() + timeoutPeriod;
 
             if (wdrl->wait_for_expected_match(timeout_time)) {
               Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
@@ -304,7 +303,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           for (WriteMapIt it = writeMap.begin(); it != writeMap.end(); ++it) {
             dtWtrPtr = it->second;
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
-            timeout_time = std::chrono::system_clock::now() + timeoutPeriod;
 
             if (wdwl->wait_for_expected_match(timeout_time)) {
               Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
