@@ -1,0 +1,23 @@
+project(OpenDDSUtil): dds_taolib {
+  sharedname = OpenDDS_Util
+  dynamicflags = OPENDDS_UTIL_BUILD_DLL
+  includes += $(DDS_ROOT) $(DDS_ROOT)/dds
+  libout = $(DDS_ROOT)/lib
+
+  Source_Files {
+    Hash.h
+    SafetyProfileStreams.h
+    Serializer.h
+    XTypes
+    debug.h
+  }
+
+  Header_Files {
+    Hash.cpp
+    SafetyProfileStreams.cpp
+    Serializer.cpp
+    XTypes
+    debug.cpp
+  }
+
+}

@@ -1,0 +1,6 @@
+project: dds_taolib {
+  after += OpenDDSUtil
+  libs += OpenDDS_Util
+  includes += $(DDS_ROOT)
+  libpaths += $(DDS_ROOT)/lib
+}

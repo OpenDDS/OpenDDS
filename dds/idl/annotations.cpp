@@ -17,6 +17,9 @@ void Annotations::register_all()
   register_one<IdAnnotation>();
   register_one<AutoidAnnotation>();
   register_one<HashidAnnotation>();
+  register_one<OptionalAnnotation>();
+  register_one<MustUnderstandAnnotation>();
+  register_one<ExternalAnnotation>();
   register_one<ExtensibilityAnnotation>();
   register_one<FinalAnnotation>();
   register_one<AppendableAnnotation>();
@@ -89,14 +92,27 @@ AST_Expression::AST_ExprValue* get_annotation_member_ev(
 {
   AST_Annotation_Member* member =
     dynamic_cast<AST_Annotation_Member*>((*appl)[member_name]);
-  AST_Expression::AST_ExprValue* ev = 0;
-  if (member) {
-    AST_Expression* e = member->value();
-    if (e) {
-      ev = e->ev();
-    }
+  if (!member) {
+    return 0;
   }
+
+  AST_Expression* e = member->value();
+  if (!e) {
+    return 0;
+  }
+
+  return e->ev();
+}
+
+bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
+                                      const char* member_name,
+                                      const bool* default_value)
+{
+  AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
   if (!ev) {
+    if (default_value) {
+      return *default_value;
+    }
     idl_global->err()->misc_error(
       (std::string("Found null pointer while getting value of member \"") +
         member_name + "\" of annotation \"" +
@@ -104,25 +120,45 @@ AST_Expression::AST_ExprValue* get_annotation_member_ev(
       appl);
     BE_abort();
   }
-  return ev;
+  return ev->u.bval;
 }
 
-bool get_bool_annotation_member_value(
-  AST_Annotation_Appl* appl, const char* member_name)
+ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
+                                           const char* member_name,
+                                           const ACE_UINT32* default_value)
 {
-  return get_annotation_member_ev(appl, member_name)->u.bval;
+  AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
+  if (!ev) {
+    if (default_value) {
+      return *default_value;
+    }
+    idl_global->err()->misc_error(
+      (std::string("Found null pointer while getting value of member \"") +
+        member_name + "\" of annotation \"" +
+        appl->local_name()->get_string() + "\"").c_str(),
+      appl);
+    BE_abort();
+  }
+  return ev->u.ulval;
 }
 
-ACE_UINT32 get_u32_annotation_member_value(
-  AST_Annotation_Appl* appl, const char* member_name)
+std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
+                                            const char* member_name,
+                                            const std::string* default_value)
 {
-  return get_annotation_member_ev(appl, member_name)->u.ulval;
-}
-
-std::string get_str_annotation_member_value(
-  AST_Annotation_Appl* appl, const char* member_name)
-{
-  UTL_String* idlstr = get_annotation_member_ev(appl, member_name)->u.strval;
+  AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
+  if (!ev) {
+    if (default_value) {
+      return *default_value;
+    }
+    idl_global->err()->misc_error(
+      (std::string("Found null pointer while getting value of member \"") +
+        member_name + "\" of annotation \"" +
+        appl->local_name()->get_string() + "\"").c_str(),
+      appl);
+    BE_abort();
+  }
+  UTL_String* idlstr = ev->u.strval;
   if (!idlstr) {
     idl_global->err()->misc_error(
       (std::string("Found null pointer while getting string value of member \"") +
@@ -135,24 +171,24 @@ std::string get_str_annotation_member_value(
 }
 
 template<>
-bool AnnotationWithValue<bool>::value_from_appl(
-  AST_Annotation_Appl* appl) const
+bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl,
+                                                const bool* default_value) const
 {
-  return appl ? get_bool_annotation_member_value(appl, "value") : default_value();
+  return get_bool_annotation_member_value(appl, "value", default_value);
 }
 
 template<>
-ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(
-  AST_Annotation_Appl* appl) const
+ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl,
+                                                            const ACE_UINT32* default_value) const
 {
-  return appl ? get_u32_annotation_member_value(appl, "value") : default_value();
+  return get_u32_annotation_member_value(appl, "value", default_value);
 }
 
 template<>
-std::string AnnotationWithValue<std::string>::value_from_appl(
-  AST_Annotation_Appl* appl) const
+std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl,
+                                                              const std::string* default_value) const
 {
-  return appl ? get_str_annotation_member_value(appl, "value") : default_value();
+  return get_str_annotation_member_value(appl, "value", default_value);
 }
 
 // @key ======================================================================
@@ -172,16 +208,15 @@ std::string KeyAnnotation::name() const
 
 bool KeyAnnotation::union_value(AST_Union* node) const
 {
-  return value_from_appl(node->disc_annotations().find(declaration()));
+  AST_Annotation_Appl* appl = node->disc_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl, default_value());
 }
 
 // @topic ====================================================================
 
 TopicAnnotation::TopicAnnotation()
 {
-  platforms_.insert("*");
-  platforms_.insert("DDS");
-  platforms_.insert("OpenDDS");
 }
 
 std::string TopicAnnotation::definition() const
@@ -198,25 +233,12 @@ std::string TopicAnnotation::name() const
   return "topic";
 }
 
-bool TopicAnnotation::node_value(AST_Decl* node) const
+TopicValue TopicAnnotation::value_from_appl(AST_Annotation_Appl* appl, const TopicValue*) const
 {
-  if (node) {
-    for (AST_Annotation_Appls::iterator i = node->annotations().begin();
-        i != node->annotations().end(); ++i) {
-      if (value_from_appl(i->get())) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool TopicAnnotation::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  if (appl && appl->annotation_decl() == declaration()) {
-    return platforms_.count(get_str_annotation_member_value(appl, "platform"));
-  }
-  return false;
+  TopicValue value;
+  value.name = get_str_annotation_member_value(appl, "name", &value.name);
+  value.platform = get_str_annotation_member_value(appl, "platform", &value.platform);
+  return value;
 }
 
 // @nested ===================================================================
@@ -283,11 +305,6 @@ std::string AutoidAnnotation::name() const
   return "autoid";
 }
 
-AutoidKind AutoidAnnotation::default_value() const
-{
-  return autoidkind_sequential;
-}
-
 // @hashid ===================================================================
 
 std::string HashidAnnotation::definition() const
@@ -301,6 +318,51 @@ std::string HashidAnnotation::definition() const
 std::string HashidAnnotation::name() const
 {
   return "hashid";
+}
+
+// @optional =================================================================
+
+std::string OptionalAnnotation::definition() const
+{
+  return
+    "@annotation optional {\n"
+    "  boolean value default TRUE;"
+    "};\n";
+}
+
+std::string OptionalAnnotation::name() const
+{
+  return "optional";
+}
+
+// @must_understand =================================================================
+
+std::string MustUnderstandAnnotation::definition() const
+{
+  return
+    "@annotation must_understand {\n"
+    "  boolean value default TRUE;"
+    "};\n";
+}
+
+std::string MustUnderstandAnnotation::name() const
+{
+  return "must_understand";
+}
+
+// @external =================================================================
+
+std::string ExternalAnnotation::definition() const
+{
+  return
+    "@annotation external {\n"
+    "  boolean value default TRUE;"
+    "};\n";
+}
+
+std::string ExternalAnnotation::name() const
+{
+  return "external";
 }
 
 // @extensibility ============================================================
@@ -379,6 +441,13 @@ std::string TryConstructAnnotation::name() const
   return "try_construct";
 }
 
+TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) const
+{
+  AST_Annotation_Appl* appl = node->disc_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl, default_value());
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
@@ -416,19 +485,19 @@ namespace OpenDDS {
         AST_Annotation_Appl* appl = i->get();
         if (appl && appl->annotation_decl() == declaration()) {
           found = true;
-          value.add(value_from_appl(appl));
+          value.add(value_from_appl(appl, 0));
         }
       }
     }
     return found;
   }
 
-  DataRepresentation DataRepresentationAnnotation::value_from_appl(
-    AST_Annotation_Appl* appl) const
+  DataRepresentation DataRepresentationAnnotation::value_from_appl(AST_Annotation_Appl* appl,
+                                                                   const DataRepresentation* default_value) const
   {
     DataRepresentation value;
     if (appl && appl->annotation_decl() == declaration()) {
-      switch (get_u32_annotation_member_value(appl, "kind")) {
+      switch (get_u32_annotation_member_value(appl, "kind", reinterpret_cast<const ACE_UINT32*>(default_value))) {
       case 0: // Kind_t::XCDR1
         value.xcdr1 = true;
         break;

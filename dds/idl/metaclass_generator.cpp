@@ -451,7 +451,7 @@ namespace {
         key_count = info->key_list_.size();
       }
     } else { // Union
-      key_count = be_global->has_key(union_node) ? 1 : 0;
+      key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
     }
 
     be_global->impl_ <<

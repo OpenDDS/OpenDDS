@@ -93,7 +93,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       return true;
     }
   } else if (be_global->is_topic_type(union_node)) {
-    key_count = be_global->has_key(union_node) ? 1 : 0;
+    key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
   } else {
     return true;
   }

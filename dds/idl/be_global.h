@@ -186,7 +186,7 @@ public:
   /**
    * Check if the discriminator in a union has been declared a key.
    */
-  bool has_key(AST_Union* node);
+  bool union_discriminator_is_key(AST_Union* node);
 
   /**
    * Give a warning that looks like one from tao_idl
@@ -209,13 +209,24 @@ public:
   bool warn_about_dcps_data_type();
 
   ExtensibilityKind extensibility(AST_Decl* node) const;
+  AutoidKind autoid(AST_Decl* node) const;
+  bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
+  bool hashid(AST_Decl* node, std::string& value) const;
+  bool is_optional(AST_Decl* node) const;
+  bool is_must_understand(AST_Decl* node) const;
+  bool is_key(AST_Decl* node) const;
+  bool is_external(AST_Decl* node) const;
+  bool is_plain(AST_Decl* node) const;
 
   TryConstructFailAction try_construct(AST_Decl* node) const;
+  TryConstructFailAction union_discriminator_try_construct(AST_Union* node);
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
   unsigned get_id(
     AST_Structure* type, AST_Field* member, unsigned index) const;
+
+  bool is_nested(AST_Decl* node);
 
 private:
   /// Name of the IDL file we are processing.
@@ -237,7 +248,6 @@ private:
   ExtensibilityKind default_extensibility_;
   OpenDDS::DataRepresentation default_data_representation_;
 
-  bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);
 };
 

@@ -35,7 +35,6 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
   std::memcpy(name_hash, result, sizeof name_hash);
 }
 
-
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
   : kind_(kind)
   , active_(0)
@@ -145,9 +144,58 @@ TypeIdentifier& TypeIdentifier::operator=(const TypeIdentifier& other)
   return *this;
 }
 
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StringSTypeDefn& sdefn)
+{
+  kind(k);
+  string_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StringLTypeDefn& ldefn)
+{
+  kind(k);
+  string_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainSequenceSElemDefn& sdefn)
+{
+  kind(k);
+  seq_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainSequenceLElemDefn& ldefn)
+{
+  kind(k);
+  seq_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArraySElemDefn& sdefn)
+{
+  kind(k);
+  array_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArrayLElemDefn& ldefn)
+{
+  kind(k);
+  array_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHash& eh)
+{
+  kind(k);
+  std::memcpy(equivalence_hash(), eh, sizeof eh);
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponentId& id)
+{
+  kind(k);
+  sc_component_id() = id;
+}
 
 TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 {
+  OPENDDS_ASSERT(type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE);
+
   const Encoding& encoding = get_typeobject_encoding();
   size_t size = serialized_size(encoding, type_object);
   ACE_Message_Block buff(size);
@@ -159,14 +207,10 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 
   // First 14 bytes of MD5 of the serialized TypeObject using XCDR
   // version 2 with Little Endian encoding
-  EquivalenceHash eh;
-  std::memcpy(eh, result, sizeof eh);
+  TypeIdentifier ti(type_object.kind);
+  std::memcpy(ti.equivalence_hash(), result, sizeof(EquivalenceHash));
 
-  if (type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE) {
-    return TypeIdentifier::make(type_object.kind, eh);
-  }
-
-  return TypeIdentifier();
+  return ti;
 }
 
 void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
@@ -188,6 +232,68 @@ void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq)
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
               ACE_TEXT("deserialization of type information failed.\n")));
   }
+}
+
+// TODO: Test with color.
+ACE_CDR::ULong hash_member_name_to_id(const std::string& name)
+{
+  // TODO: Check algorithm.
+  ACE_CDR::ULong name_hash;
+
+  unsigned char result[16];
+  DCPS::MD5Hash(result, name.c_str(), name.size());
+
+  std::memcpy(&name_hash, result, sizeof name_hash);
+  return name_hash & 0x0FFFFFFF;
+}
+
+// TODO: Test with color.
+void hash_member_name(NameHash& name_hash, const std::string& name)
+{
+  unsigned char result[16];
+  DCPS::MD5Hash(result, name.c_str(), name.size());
+
+  std::memcpy(&name_hash, result, sizeof name_hash);
+}
+
+bool is_fully_descriptive(const TypeIdentifier& ti)
+{
+  switch (ti.kind()) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TI_STRING8_SMALL:
+  case TI_STRING8_LARGE:
+  case TI_STRING16_SMALL:
+  case TI_STRING16_LARGE:
+    return true;
+  case TI_PLAIN_SEQUENCE_SMALL:
+    return ti.seq_sdefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_SEQUENCE_LARGE:
+    return ti.seq_ldefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_ARRAY_SMALL:
+    return ti.array_sdefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_ARRAY_LARGE:
+    return ti.array_ldefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_MAP_SMALL:
+    return ti.map_sdefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_MAP_LARGE:
+    return ti.map_ldefn().header.equiv_kind == EK_BOTH;
+  }
+
+  return false;
 }
 
 
@@ -2839,119 +2945,6 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& seq)
     }
   }
   return true;
-}
-
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<void>()
-{
-  static const XTypes::TypeIdentifier ti;
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Boolean>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_BOOLEAN);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Octet>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_BYTE);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Short>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_INT16);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Long>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_INT32);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongLong>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_INT64);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::UShort>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT16);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULong>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT32);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULongLong>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT64);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Float>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT32);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Double>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT64);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongDouble>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT128);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_CHAR8);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_CHAR16);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char*>()
-{
-  static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(false, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::WChar*>()
-{
-  static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(true, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
-  return ti;
 }
 
 } // namespace DCPS

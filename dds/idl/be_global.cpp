@@ -646,15 +646,22 @@ bool BE_GlobalData::is_topic_type(AST_Decl* node)
 {
   TopicAnnotation* topic = dynamic_cast<TopicAnnotation*>(
     builtin_annotations_["::@topic"]);
-  return topic->node_value(node) || !is_nested(node);
+  TopicValue value;
+  return topic->node_value_exists(node, value);
 }
 
 bool BE_GlobalData::is_nested(AST_Decl* node)
 {
+  // @topic overrides @nested and @default_nested.
+  if (is_topic_type(node)) {
+    return false;
+  }
+
   NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
     builtin_annotations_["::@nested"]);
-  if (nested->find_on(node)) {
-    return nested->node_value(node);
+  bool value;
+  if (nested->node_value_exists(node, value)) {
+    return value;
   }
 
   return is_default_nested(node->defined_in());
@@ -666,8 +673,9 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
   DefaultNestedAnnotation* default_nested = dynamic_cast<DefaultNestedAnnotation*>(
     builtin_annotations_["::@default_nested"]);
   if (module) {
-    if (default_nested->find_on(module)) {
-      return default_nested->node_value(module);
+    bool value;
+    if (default_nested->node_value_exists(module, value)) {
+      return value;
     }
 
     return is_default_nested(module->defined_in());
@@ -679,10 +687,11 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
 bool BE_GlobalData::check_key(AST_Field* node, bool& value)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  value = key->absent_value;
   return key->node_value_exists(node, value);
 }
 
-bool BE_GlobalData::has_key(AST_Union* node)
+bool BE_GlobalData::union_discriminator_is_key(AST_Union* node)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
   return key->union_value(node);
@@ -748,12 +757,108 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
   return value;
 }
 
+AutoidKind BE_GlobalData::autoid(AST_Decl* node) const
+{
+  AutoidAnnotation* autoid_annotation =
+    dynamic_cast<AutoidAnnotation*>(
+      builtin_annotations_["::@autoid"]);
+  AutoidKind value = autoid_annotation->absent_value;
+  autoid_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::id(AST_Decl* node, ACE_CDR::ULong& value) const
+{
+  IdAnnotation* id_annotation =
+    dynamic_cast<IdAnnotation*>(builtin_annotations_["::@id"]);
+  return id_annotation->node_value_exists(node, value);
+}
+
+bool BE_GlobalData::hashid(AST_Decl* node, std::string& value) const
+{
+  HashidAnnotation* hashid_annotation =
+    dynamic_cast<HashidAnnotation*>(builtin_annotations_["::@hashid"]);
+  return hashid_annotation->node_value_exists(node, value);
+}
+
+bool BE_GlobalData::is_optional(AST_Decl* node) const
+{
+  OptionalAnnotation* optional_annotation =
+    dynamic_cast<OptionalAnnotation*>(
+      builtin_annotations_["::@optional"]);
+  bool value = optional_annotation->absent_value;
+  optional_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_must_understand(AST_Decl* node) const
+{
+  MustUnderstandAnnotation* must_understand_annotation =
+    dynamic_cast<MustUnderstandAnnotation*>(
+      builtin_annotations_["::@must_understand"]);
+  bool value = must_understand_annotation->absent_value;
+  must_understand_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_key(AST_Decl* node) const
+{
+  KeyAnnotation* key_annotation =
+    dynamic_cast<KeyAnnotation*>(
+      builtin_annotations_["::@key"]);
+  bool value = key_annotation->absent_value;
+  key_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_external(AST_Decl* node) const
+{
+  ExternalAnnotation* external_annotation =
+    dynamic_cast<ExternalAnnotation*>(
+      builtin_annotations_["::@external"]);
+  bool value = external_annotation->absent_value;
+  external_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_plain(AST_Decl* node) const
+{
+  ExternalAnnotation* external_annotation =
+    dynamic_cast<ExternalAnnotation*>(
+      builtin_annotations_["::@external"]);
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(
+      builtin_annotations_["::@try_construct"]);
+
+  for (AST_Annotation_Appls::iterator i = node->annotations().begin();
+       i != node->annotations().end(); ++i) {
+    AST_Annotation_Appl* appl = i->get();
+    if (appl &&
+        appl->annotation_decl() != external_annotation->declaration() &&
+        appl->annotation_decl() != try_construct_annotation->declaration()) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
 {
   TryConstructAnnotation* try_construct_annotation =
     dynamic_cast<TryConstructAnnotation*>(
       builtin_annotations_["::@try_construct"]);
-  return try_construct_annotation->node_value(node);
+  TryConstructFailAction value = try_construct_annotation->absent_value;
+  try_construct_annotation->node_value_exists(node, value);
+  return value;
+}
+
+TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Union* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(
+                                          builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->union_value(node);
 }
 
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(

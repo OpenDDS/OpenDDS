@@ -3068,7 +3068,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  const bool has_key = be_global->has_key(node);
+  const bool has_key = be_global->union_discriminator_is_key(node);
   const bool is_topic_type = be_global->is_topic_type(node);
 
   if (!is_topic_type) {
