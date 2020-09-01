@@ -1054,7 +1054,7 @@ const unsigned char nesting_mutable_struct_xcdr2[] = {
   0x00, 0x00, 0x00, 0x68, // +4 DHEADER = 4
   //MU,LC,ID   NEXTINT   Value and pad(0)
   0x40,0,0,0,  0,0,0,16, 0,0,0,12,'h','e','l','l','o',' ','w','o','r','l','d','\0', // +24 string_field = 28
-  0x40,0,0,1,  0,0,0,18, // +8 EMHEADER1 + NEXTINT of appendable_nested = 36
+  0x40,0,0,1,  0,0,0,0x18, // +8 EMHEADER1 + NEXTINT of appendable_nested = 36
   // <<<<<< Begin appendable_nested
   0x00, 0x00, 0x00, 0x14, // +4 DHEADER of appendable_nested = 40
   0x7f,0xff,(0),(0),    // +4 short_field = 44
@@ -1062,8 +1062,8 @@ const unsigned char nesting_mutable_struct_xcdr2[] = {
   0x01,(0),(0),(0),     // +4 octet_field = 52
   0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8 long_long_field = 60
   // End appendable_nested >>>>>>
-  0x40,0,0,2,  0,0,0,11, 0,0,0,7,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,(0), // +20 sequence_field = 80
-  0x40,0,0,3,  0,0,0,14, // +8 EMHEADER1 + NEXTINT of final_nested = 88
+  0x40,0,0,2,  0,0,0,0x0b, 0,0,0,7,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,(0), // +20 sequence_field = 80
+  0x40,0,0,3,  0,0,0,0x14, // +8 EMHEADER1 + NEXTINT of final_nested = 88
   // <<<<<< Begin final_nested
   0x7f,0xff,(0),(0),    // +4 short_field = 92
   0x7f,0xff,0xff,0xff,  // +4 long_field = 96
