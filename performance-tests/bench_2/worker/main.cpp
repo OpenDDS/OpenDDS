@@ -43,15 +43,15 @@
 #include "WorkerPublisherListener.h"
 #include "WorkerParticipantListener.h"
 #include "WriteAction.h"
+#include "DataReader.h"
+#include "DataWriter.h"
 
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <mutex>
 #include <thread>
 #include <iomanip>
-#include <condition_variable>
 
 #include <util.h>
 #include <json_conversion.h>
@@ -170,6 +170,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.enable_time = ZERO;
   config.start_time = ZERO;
   config.stop_time = ZERO;
+  config.wait_for_discovery = false;
+  config.wait_for_discovery_seconds = 0;
 
   if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
@@ -223,6 +225,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TimeStamp process_start_begin_time = ZERO, process_start_end_time = ZERO;
   Builder::TimeStamp process_stop_begin_time = ZERO, process_stop_end_time = ZERO;
   Builder::TimeStamp process_destruction_begin_time = ZERO, process_destruction_end_time = ZERO;
+  Builder::TimeStamp process_start_discovery_time = ZERO, process_stop_discovery_time = ZERO;
 
   set_global_properties(config.properties);
 
@@ -237,8 +240,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   try {
     std::string line;
-    std::condition_variable cv;
-    std::mutex cv_mutex;
 
     do_wait(config.create_time, "create", false);
 
@@ -265,6 +266,58 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_enable_end_time = Builder::get_hr_time();
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
+
+    Log::log() << "Starting Discovery Check." << std::endl;
+
+    process_start_discovery_time = Builder::get_sys_time();
+
+    if (config.wait_for_discovery) {
+      if (config.wait_for_discovery_seconds > 0) {
+
+        const std::chrono::seconds timeoutPeriod(config.wait_for_discovery_seconds);
+        const std::chrono::system_clock::time_point timeout_time = std::chrono::system_clock::now() + timeoutPeriod;
+
+        auto readMap = process.get_reader_map();
+        if (readMap.size() > 0) {
+          typedef std::map<std::string, std::shared_ptr<Builder::DataReader>>::iterator ReadMapIt;
+          std::shared_ptr<Builder::DataReader> dtRdrPtr(nullptr);
+
+          for (ReadMapIt it = readMap.begin(); it != readMap.end(); ++it) {
+            dtRdrPtr = it->second;
+            Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
+
+            if (wdrl->wait_for_expected_match(timeout_time)) {
+              Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
+            }
+            else {
+              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+            }
+          }
+        }
+
+        auto writeMap = process.get_writer_map();
+        if (writeMap.size() > 0) {
+          typedef std::map<std::string, std::shared_ptr<Builder::DataWriter>>::iterator WriteMapIt;
+          std::shared_ptr<Builder::DataWriter> dtWtrPtr(nullptr);
+
+          for (WriteMapIt it = writeMap.begin(); it != writeMap.end(); ++it) {
+            dtWtrPtr = it->second;
+            Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
+
+            if (wdwl->wait_for_expected_match(timeout_time)) {
+              Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
+            }
+            else {
+              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+            }
+          }
+        }
+      }
+    }
+
+    process_stop_discovery_time = Builder::get_sys_time();
+
+    Log::log() << "Discovery Time Check." << process_stop_discovery_time - process_start_discovery_time << std::endl << std::endl;
 
     do_wait(config.start_time, "start");
 
