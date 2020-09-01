@@ -887,43 +887,194 @@ void expect_values_equal(const MixedMutableStruct& a,
   //  EXPECT_STREQ(a.union_nested.string_field(), b.union_nested.string_field());
 }
 
+const unsigned char mixed_mutable_struct_xcdr2[] = {
+  0x00, 0x00, 0x00, 0x42, // +4 DHEADER = 4
+  //MU,LC,ID   NEXTINT
+  0x40,0,0,1,  0,0,0,40, // +8 EMHEADER1 + NEXTINT of struct_nested = 12
+  // <<<<<< Begin struct_nested
+  0x00, 0x00, 0x00, 0x24, // +4 DHEADER = 16
+  //MU,LC,ID   NEXTINT   Value and Pad(0)
+  0x10,0,0,4,            0x7f,0xff,(0),(0),    // +8 short_field = 24
+  0x20,0,0,6,            0x7f,0xff,0xff,0xff,  // +8 long_field = 32
+  0x00,0,0,8,            0x01,(0),(0),(0),     // +8 octet_field = 40
+  0x30,0,0,10,           0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12 long_long_field = 52
+  // End struct_nested >>>>>>
+  0x40,0,0,2,  0,0,0,10, 0,0,0,3,0x7f,0xff,0x7f,0xff,0x7f,0xff // +18 sequence_field = 70
+  //    0x40,0,0,3,  0,0,0,5,  1,2,3,4,5,(0),(0),(0),// +16 array_field = 88
+  //    0x40,0,0,4,  0,0,0,34, // +8 EMHEADER1 + NEXTINT of union_nested = 96
+  // <<<<<< Begin union_nested
+  //    0x00, 0x00, 0x00, 0x1e, // +4 DHEADER = 100
+  //    0x10,0,0,0,            0x00,0x03,(0),(0),     // +8 discriminator = 108
+  //    0x40,0,0,3,  0,0,0,14, 0,0,0,10,'a','b','c','d','e','f','g','h','i','\0' // +22 string_field = 130
+  // End union_nested >>>>>>
+};
+
 TEST(mutable_tests, BothMixedMutableStruct)
 {
-  const unsigned char expected[] = {
-    0x00, 0x00, 0x00, 0x42, // +4 DHEADER = 4
-    //MU,LC,ID   NEXTINT
-    0x40,0,0,1,  0,0,0,40, // +8 EMHEADER1 + NEXTINT of struct_nested = 12
-    // <<<<<< Begin struct_nested
-    0x00, 0x00, 0x00, 0x24, // +4 DHEADER = 16
-    //MU,LC,ID   NEXTINT   Value and Pad(0)
-    0x10,0,0,4,            0x7f,0xff,(0),(0),    // +8 short_field = 24
-    0x20,0,0,6,            0x7f,0xff,0xff,0xff,  // +8 long_field = 32
-    0x00,0,0,8,            0x01,(0),(0),(0),     // +8 octet_field = 40
-    0x30,0,0,10,           0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12 long_long_field = 52
-    // End struct_nested >>>>>>
-    0x40,0,0,2,  0,0,0,10, 0,0,0,3,0x7f,0xff,0x7f,0xff,0x7f,0xff // +18 sequence_field = 70
-    //    0x40,0,0,3,  0,0,0,5,  1,2,3,4,5,(0),(0),(0),// +16 array_field = 88
-    //    0x40,0,0,4,  0,0,0,34, // +8 EMHEADER1 + NEXTINT of union_nested = 96
-    // <<<<<< Begin union_nested
-    //    0x00, 0x00, 0x00, 0x1e, // +4 DHEADER = 100
-    //    0x10,0,0,0,            0x00,0x03,(0),(0),     // +8 discriminator = 108
-    //    0x40,0,0,3,  0,0,0,14, 0,0,0,10,'a','b','c','d','e','f','g','h','i','\0' // +22 string_field = 130
-    // End union_nested >>>>>>
-  };
-
-  serializer_test<MixedMutableStruct>(xcdr2, expected);
+  serializer_test<MixedMutableStruct>(xcdr2, mixed_mutable_struct_xcdr2);
 }
 
-TEST(extensibility_tests, NestingFinalStruct)
+template<>
+void expect_values_equal(const MixedMutableStruct& a,
+                         const ModifiedMixedMutableStruct& b)
 {
+  expect_values_equal_base(a.struct_nested, b.struct_nested);
 }
 
-TEST(extensibility_tests, NestingAppendableStruct)
+TEST(mutable_tests, FromMixedMutableStruct)
 {
+  amalgam_serializer_test<MixedMutableStruct, ModifiedMixedMutableStruct>(
+    xcdr2, mixed_mutable_struct_xcdr2);
 }
 
-TEST(extensibility_tests, NestingMutableStruct)
+template<>
+void set_values(NestingFinalStruct& value)
 {
+  value.string_field = "make sense";
+  set_values(value.appendable_nested);
+  value.sequence_field.length(3);
+  value.sequence_field[0] = value.sequence_field[1] = value.sequence_field[2] = 0x1234;
+  set_values(value.mutable_nested);
+}
+
+template<>
+void expect_values_equal(const NestingFinalStruct& a,
+                         const NestingFinalStruct& b)
+{
+  EXPECT_STREQ(a.string_field, b.string_field);
+  expect_values_equal_base(a.appendable_nested, b.appendable_nested);
+  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
+  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  }
+  expect_values_equal_base(a.mutable_nested, b.mutable_nested);
+}
+
+const unsigned char nesting_final_struct_xcdr2[] = {
+  0,0,0,11,'m','a','k','e',' ','s','e','n','s','e','\0',(0), // +16 string_field = 16
+  // <<<<<< Begin appendable_nested
+  0x00, 0x00, 0x00, 0x14, // +4 DHEADER of appendable_nested = 20
+  0x7f,0xff,(0),(0),    // +4 short_field = 24
+  0x7f,0xff,0xff,0xff,  // +4 long_field = 28
+  0x01,(0),(0),(0),     // +4 octet_field = 32
+  0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8 long_long_field = 40
+  // End appendable_nested >>>>>>
+  0,0,0,3,0x12,0x34,0x12,0x34,0x12,0x34,(0),(0), // +12 sequence_field = 52
+  // <<<<<< Begin mutable_nested
+  0x00, 0x00, 0x00, 0x24, // +4 DHEADER of mutable_nested = 56
+  //MU,LC,ID   NEXTINT   Value and Pad(0)
+  0x10,0,0,0,            0x7f,0xff,(0),(0),    // +8 short_field = 64
+  0x20,0,0,1,            0x7f,0xff,0xff,0xff,  // +8 long_field = 72
+  0x00,0,0,2,            0x01,(0),(0),(0),     // +8 octet_field = 80
+  0x30,0,0,3,            0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // +12 long_long_field = 92
+  // End mutable_nested >>>>>>
+};
+
+TEST(mixed_exten_tests, NestingFinalStruct)
+{
+  serializer_test<NestingFinalStruct>(xcdr2, nesting_final_struct_xcdr2);
+}
+
+template<>
+void set_values(NestingAppendableStruct& value)
+{
+  value.string_field = "hello world";
+  set_values(value.mutable_nested);
+  value.sequence_field.length(3);
+  for (size_t i = 0; i < value.sequence_field.length(); ++i) {
+    value.sequence_field[i] = 0x7fffffff;
+  }
+  set_values(value.final_nested);
+}
+
+template<>
+void expect_values_equal(const NestingAppendableStruct& a,
+                         const NestingAppendableStruct& b)
+{
+  EXPECT_STREQ(a.string_field, b.string_field);
+  expect_values_equal_base(a.mutable_nested, b.mutable_nested);
+  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
+  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  }
+  expect_values_equal_base(a.final_nested, b.final_nested);
+}
+
+const unsigned char nesting_appendable_struct_xcdr2[] = {
+  0x00, 0x00, 0x00, 0x5c, // +4 DHEADER = 4
+  0,0,0,12,'h','e','l','l','o',' ','w','o','r','l','d','\0', // +16 string_field = 20
+  // <<<<<< Begin mutable_nested
+  0x00, 0x00, 0x00, 0x24, // +4 DHEADER of mutable_nested = 24
+  //MU,LC,ID   NEXTINT   Value and Pad(0)
+  0x10,0,0,0,            0x7f,0xff,(0),(0),    // +8 short_field = 32
+  0x20,0,0,1,            0x7f,0xff,0xff,0xff,  // +8 long_field = 40
+  0x00,0,0,2,            0x01,(0),(0),(0),     // +8 octet_field = 48
+  0x30,0,0,3,            0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12 long_long_field = 60
+  // End mutable_nested >>>>>>
+  0,0,0,3,0x7f,0xff,0xff,0xff,0x7f,0xff,0xff,0xff,0x7f,0xff,0xff,0xff, // +16 sequence_field = 76
+  // <<<<<< Begin final_nested
+  0x7f,0xff,(0),(0),    // +4 short_field = 80
+  0x7f,0xff,0xff,0xff,  // +4 long_field = 84
+  0x01,(0),(0),(0),     // +4 octet_field = 88
+  0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // +8 long_long_field = 96
+  // End final_nested >>>>>>
+};
+
+TEST(mixed_exten_tests, NestingAppendableStruct)
+{
+  serializer_test<NestingAppendableStruct>(xcdr2, nesting_appendable_struct_xcdr2);
+}
+
+template<>
+void set_values(NestingMutableStruct& value)
+{
+  value.string_field = "hello world";
+  set_values(value.appendable_nested);
+  value.sequence_field.length(7);
+  for (size_t i = 0; i < value.sequence_field.length(); ++i) {
+    value.sequence_field[i] = 0x7f;
+  }
+  set_values(value.final_nested);
+}
+
+template<>
+void expect_values_equal(const NestingMutableStruct& a,
+                         const NestingMutableStruct& b)
+{
+  EXPECT_STREQ(a.string_field, b.string_field);
+  expect_values_equal_base(a.appendable_nested, b.appendable_nested);
+  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
+  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  }
+  expect_values_equal_base(a.final_nested, b.final_nested);
+}
+
+const unsigned char nesting_mutable_struct_xcdr2[] = {
+  0x00, 0x00, 0x00, 0x68, // +4 DHEADER = 4
+  //MU,LC,ID   NEXTINT   Value and pad(0)
+  0x40,0,0,0,  0,0,0,16, 0,0,0,12,'h','e','l','l','o',' ','w','o','r','l','d','\0', // +24 string_field = 28
+  0x40,0,0,1,  0,0,0,18, // +8 EMHEADER1 + NEXTINT of appendable_nested = 36
+  // <<<<<< Begin appendable_nested
+  0x00, 0x00, 0x00, 0x14, // +4 DHEADER of appendable_nested = 40
+  0x7f,0xff,(0),(0),    // +4 short_field = 44
+  0x7f,0xff,0xff,0xff,  // +4 long_field = 48
+  0x01,(0),(0),(0),     // +4 octet_field = 52
+  0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8 long_long_field = 60
+  // End appendable_nested >>>>>>
+  0x40,0,0,2,  0,0,0,11, 0,0,0,7,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,(0), // +20 sequence_field = 80
+  0x40,0,0,3,  0,0,0,14, // +8 EMHEADER1 + NEXTINT of final_nested = 88
+  // <<<<<< Begin final_nested
+  0x7f,0xff,(0),(0),    // +4 short_field = 92
+  0x7f,0xff,0xff,0xff,  // +4 long_field = 96
+  0x01,(0),(0),(0),     // +4 octet_field = 100
+  0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // +8 long_long_field = 108
+  // End final_nested >>>>>>
+};
+
+TEST(mixed_exten_tests, NestingMutableStruct)
+{
+  serializer_test<NestingMutableStruct>(xcdr2, nesting_mutable_struct_xcdr2);
 }
 
 int main(int argc, char* argv[])

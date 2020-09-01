@@ -260,7 +260,7 @@ struct NestingFinalStruct {
 struct NestingAppendableStruct {
   string string_field;
   MutableXcdr2Struct mutable_nested;
-  sequence<short> sequence_field;
+  sequence<long> sequence_field;
   FinalXcdr2Struct final_nested;
 };
 
@@ -269,6 +269,6 @@ struct NestingAppendableStruct {
 struct NestingMutableStruct {
   string string_field;
   AppendableXcdr2Struct appendable_nested;
-  sequence<short> sequence_field;
+  sequence<octet> sequence_field;
   FinalXcdr2Struct final_nested;
 };
