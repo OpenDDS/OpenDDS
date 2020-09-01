@@ -3035,7 +3035,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     code.push_back("}");
     generate_dheader_code(code, not_final);
 
-    // Header for discriminator
+    // EMHEADER for discriminator
     if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  size_t size = 0;\n";
@@ -3080,7 +3080,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     generate_dheader_code(code, not_final);
 
     if (exten == extensibilitykind_mutable) {
-      // Header for discriminator
+      // EMHEADER for discriminator
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
@@ -3089,12 +3089,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "    return false;\n"
         "  }\n";
 
-      // Discriminator
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
 
-      // Header for union member
       be_global->impl_ <<
         "  member_id = 0;\n"
         "  field_size = 0;\n"
