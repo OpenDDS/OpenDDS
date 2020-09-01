@@ -2402,7 +2402,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       fn = ";";
       string field_name = fields[0]->local_name()->get_string();
 
-      const char* get_len, *set_len, *get_buffer, *buffer_pre = "";
+      const char* get_len;
+      const char* set_len;
+      const char* get_buffer;
+      const char* buffer_pre = "";
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
         get_len = "size";
         set_len = "resize";
