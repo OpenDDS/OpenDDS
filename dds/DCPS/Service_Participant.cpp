@@ -159,6 +159,7 @@ static bool got_log_fname = false;
 static bool got_log_verbose = false;
 static bool got_default_address = false;
 static bool got_bidir_giop = false;
+static bool got_internal_thread_reporting_interval = false;
 static bool got_monitor = false;
 
 Service_Participant::Service_Participant()
@@ -571,6 +572,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       bidir_giop_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_bidir_giop = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInternalThreadReportingInterval"))) != 0) {
+      internal_thread_reporting_ = TimeDuration(ACE_OS::atoi(currentArg));
+      arg_shifter.consume_arg();
+      got_internal_thread_reporting_interval = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);

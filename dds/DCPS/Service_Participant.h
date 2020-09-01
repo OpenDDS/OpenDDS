@@ -703,6 +703,9 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
+  /// Enable Internal Thread Status Monitoring
+  TimeDuration internal_thread_reporting_;
+
   /// Enable Monitor functionality
   bool monitor_enabled_;
 
