@@ -992,8 +992,8 @@ protected:
     if (marshal_skip_serialize_) {
       if(!MarshalTraitsType::from_message_block(static_cast<MessageType &>(*data), static_cast<ACE_Message_Block &>(*sample.sample_)))
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::dds_demarshal\n")
-                  ACE_TEXT("attempting to skip serialize but bad from_message_block.")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+                   ACE_TEXT("attempting to skip serialize but bad from_message_block.\n")));
       }
       store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
       return;
