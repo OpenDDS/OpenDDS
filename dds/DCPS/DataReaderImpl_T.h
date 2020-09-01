@@ -989,8 +989,7 @@ protected:
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
 
-    if(marshal_skip_serialize_)
-    {
+    if (marshal_skip_serialize_) {
       if(!MarshalTraitsType::from_message_block(static_cast<MessageType &>(*data), static_cast<ACE_Message_Block &>(*sample.sample_)))
       {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::dds_demarshal\n")
