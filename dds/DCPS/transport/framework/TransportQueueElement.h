@@ -27,6 +27,7 @@ namespace DCPS {
 
 class TransportQueueElement;
 typedef std::pair<TransportQueueElement*, TransportQueueElement*> TqePair;
+extern const TqePair null_tqe_pair;
 typedef OPENDDS_VECTOR(TransportQueueElement*) TqeVector;
 
 /**
@@ -140,6 +141,8 @@ public:
   /// the newly-created elements will need to invoke non-const methods on it).
   /// Each element in the pair will contain its own serialized modified
   /// DataSampleHeader.
+  ///
+  /// If the fragmentation fails, a copy of null_tqe_pair is returned.
   virtual TqePair fragment(size_t size);
 
   /// Is this QueueElement the result of fragmentation?

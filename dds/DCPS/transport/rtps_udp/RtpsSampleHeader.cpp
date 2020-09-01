@@ -622,8 +622,6 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                         Message_Block_Ptr& head, Message_Block_Ptr& tail)
 {
   using namespace RTPS;
-  static const SequenceRange unknown_range(SequenceNumber::SEQUENCENUMBER_UNKNOWN(),
-                                           SequenceNumber::SEQUENCENUMBER_UNKNOWN());
   size_t data_offset = 0;
   const char* rd = orig.rd_ptr();
   ACE_CDR::ULong starting_frag, sample_size;
@@ -645,7 +643,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
           ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
             "attempting to fragment a Data submessage with no payload.\n"));
         }
-        return unknown_range;
+        return unknown_sequence_range;
       }
       found_data = true;
       starting_frag = 1;
@@ -672,7 +670,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
         ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
           "invalid octetsToNextHeader encountered while fragmenting.\n"));
       }
-      return unknown_range;
+      return unknown_sequence_range;
     }
   }
 

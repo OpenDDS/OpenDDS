@@ -26,6 +26,9 @@ TqePair RtpsCustomizedElement::fragment(size_t size)
   Message_Block_Ptr tail;
   const SequenceRange fragNumbers =
     RtpsSampleHeader::split(*msg(), size, head, tail);
+  if (fragNumbers == unknown_sequence_range) {
+    return TqePair(0, 0);
+  }
 
   RtpsCustomizedElement* frag =
     new RtpsCustomizedElement(0, move(head));

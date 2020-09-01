@@ -1067,6 +1067,11 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
           if (element_length > avail) {
             VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
             const TqePair ep = element->fragment(avail);
+            if (ep == null_tqe_pair) {
+              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::send: "
+                "Element Fragmentation Failed\n"));
+              return;
+            }
             element = ep.first;
             element_length = element->msg()->total_length();
             next_fragment = ep.second;
@@ -1537,6 +1542,11 @@ TransportSendStrategy::get_packet_elems_from_queue()
         this->header_.first_fragment_ = !element->is_fragment();
         VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting from queue\n"), 0);
         const TqePair ep = element->fragment(avail);
+        if (ep == null_tqe_pair) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::get_packet_elems_from_queue: "
+            "Element Fragmentation Failed\n"));
+          return;
+        }
         element = ep.first;
         element_length = element->msg()->total_length();
         this->queue_.replace_head(ep.second);
@@ -1927,21 +1937,28 @@ bool TransportSendStrategy::fragmentation_helper(
   for (TransportQueueElement* e = original_element; e;) {
     const size_t esize = e->msg()->total_length();
     if (esize > space) {
-      if (fragmentation_allowed) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-          "Fragmenting %B > %B\n", esize, space));
-        const TqePair pair = e->fragment(space);
-        elements_to_send.push_back(pair.first);
-        e = pair.second;
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-          "Fragment %B\n", elements_to_send.back()->msg()->total_length()));
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-          "Left %B\n", e->msg()->total_length()));
-      } else {
+      if (!fragmentation_allowed) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::fragmentation_helper: "
-          "Could not fragment and message size, %B, is greater space available %B"));
+          "message size, %B, is greater than space available, %B, but can't "
+          "fragment because max_message_size is 0",
+          esize, space));
         return false;
       }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+        "message size %B > space %B: Fragmenting\n", esize, space));
+      const TqePair pair = e->fragment(space);
+      if (pair == null_tqe_pair) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::fragmentation_helper: "
+          "Element Fragmentation Failed\n"));
+        return false;
+      }
+      elements_to_send.push_back(pair.first);
+      e = pair.second;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+        "Fragment %B\n", elements_to_send.back()->msg()->total_length()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+        "Left %B\n", e->msg()->total_length()));
     } else {
       elements_to_send.push_back(e);
       e = 0;
