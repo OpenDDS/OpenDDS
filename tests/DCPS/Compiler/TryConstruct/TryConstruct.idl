@@ -278,7 +278,7 @@ module TryCon {
     @try_construct(DISCARD) boolean bo_d;
     @try_construct(USE_DEFAULT) boolean bo_ud;
     @try_construct(TRIM) boolean bo_t;
-    //integer types  
+    //integer types
     @try_construct(DISCARD) short s_d;
     @try_construct(USE_DEFAULT) short s_ud;
     @try_construct(TRIM) short s_t;
