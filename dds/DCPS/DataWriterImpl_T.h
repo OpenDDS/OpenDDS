@@ -347,8 +347,8 @@ private:
       mb.reset(tmp_mb);
       if(!MarshalTraitsType::to_message_block(*mb, instance_data))
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::dds_demarshal\n")
-                  ACE_TEXT("attempting to skip serialize but bad from_message_block.")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+                   ACE_TEXT("attempting to skip serialize but bad from_message_block.\n")));
       }
       return mb.release();
     }
