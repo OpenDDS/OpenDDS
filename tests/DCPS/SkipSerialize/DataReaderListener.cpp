@@ -20,7 +20,7 @@
 #include <cstdlib>
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  , valid_(true)
+  : valid_(true)
   , reliable_(is_reliable())
 {
   std::cout << "Transport is " << (reliable_ ? "" : "UN-") << "RELIABLE" <<  std::endl;
