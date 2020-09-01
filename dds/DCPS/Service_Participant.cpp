@@ -16,7 +16,6 @@
 #include "DataDurabilityCache.h"
 #include "GuidConverter.h"
 #include "MonitorFactory.h"
-#include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
@@ -1176,6 +1175,8 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   const Discovery::RepoKey instance_name = get_discovery_template_instance_name(domain);
   DomainRange dr_inst;
 
+  RepoKeyDiscoveryMap::const_iterator location;
+
   // Find if this domain has a repo key (really a discovery key)
   // mapped to it.
   DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
@@ -1186,7 +1187,18 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
     in_range = get_domain_range_info(domain, dr_inst);
   }
 
-  RepoKeyDiscoveryMap::const_iterator location = this->discoveryMap_.find(repo);
+  // check to see if this domain has a discovery template
+  // and if the template instance has already been loaded.
+  if (!in_range && is_discovery_template(repo)) {
+    location = this->discoveryMap_.find(instance_name);
+    if (location == this->discoveryMap_.end()) {
+      if (configure_discovery_template(domain, repo)) {
+        repo = instance_name;
+      }
+    }
+  }
+
+  location = this->discoveryMap_.find(repo);
 
   if (location == this->discoveryMap_.end()) {
     if (in_range) {
@@ -1472,7 +1484,7 @@ Service_Participant::load_configuration(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
     if (config) {
       TransportRegistry::instance()->global_config(config);
-    } else if (TransportRegistry::instance()->config_has_transport_template(global_transport_config_)) {
+    } else if (TheTransportRegistry->config_has_transport_template(global_transport_config_)) {
       if (DCPS_debug_level > 0) {
         // This is not an error.
         ACE_DEBUG((LM_NOTICE,
@@ -1881,8 +1893,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
                        domain_name.c_str(), repoKey.c_str()));
           }
         } else if (name == "DiscoveryConfig") {
-          repoKey = it->second;
-
+           repoKey = it->second;
         } else if (name == "DefaultTransportConfig") {
           if (it->second == "$file") {
             // When the special string of "$file" is used, substitute the file name
@@ -1945,7 +1956,8 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
+int
+Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 {
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_range_sect;
@@ -2023,11 +2035,17 @@ int Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
                          domain_range.c_str(), dt_name.c_str()));
             }
             range_element.discovery_template_name = dt_name;
+          } else if (name == "DefaultTransportConfig") {
+            range_element.transport_config_name = dt_name;
+            range_element.domain_info[it->first] = it->second;
           } else {
             // key=val domain config option
             range_element.domain_info[it->first] = it->second;
           }
         }
+      }
+      if (this->global_transport_config_ != ACE_TEXT("")) {
+        range_element.transport_config_name = ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str());
       }
       domain_ranges_.push_back(range_element);
     }
@@ -2050,13 +2068,16 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       dcf.open();
       const ACE_Configuration_Section_Key& root = dcf.root_section();
 
+      // set the transport_config_name
+      domain_to_transport_name_map_[domainId] = dr_inst.transport_config_name;
+
       // create domain instance
       ACE_Configuration_Section_Key dsect;
       dcf.open_section(root, DOMAIN_SECTION_NAME, 1 /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
       dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), 1 /* create */, dsub_sect);
       dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
-      for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = dr_inst.domain_info.begin();
+      for (ValueMap::const_iterator it = dr_inst.domain_info.begin();
            it != dr_inst.domain_info.end();
            ++it) {
         dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
@@ -2068,18 +2089,28 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         }
       }
 
-      if (TransportRegistry::instance()->config_has_transport_template(this->global_transport_config_)) {
-        // create transport instance add default transport config
-        TransportRegistry::instance()->create_transport_template_instance(domainId, this->global_transport_config_);
-        const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
-        dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
-                             ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
-                     config_instance_name.c_str()));
+      ACE_TString cfg_name;
+      if (get_transport_config_name(domainId, cfg_name)) {
+        if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
+          // create transport instance add default transport config
+          TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
+          const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
+          dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
+                               ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) Service_Participant::")
+                       ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
+                       config_instance_name.c_str()));
+          }
         }
+      } else {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                          ACE_TEXT("configure_domain_range_instance ")
+                          ACE_TEXT("transport config not found for domain %d\n"),
+                          domainId),
+                         -1);
       }
 
       //create matching discovery instance
@@ -2087,62 +2118,11 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
       dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
-      for (OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator it = dr_inst.disc_info.begin();
-           it != dr_inst.disc_info.end();
-           ++it) {
-        // customization.
-        OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING)::const_iterator idx = dr_inst.customizations.find(it->first);
-        if (idx != dr_inst.customizations.end()) {
-          // only AddDomainID is supported at this time.
-          if (idx->second == "AddDomainId") {
-            OPENDDS_STRING addr = it->second;
-            size_t pos = addr.find_last_of(".");
-            if (pos != OPENDDS_STRING::npos) {
-              OPENDDS_STRING custom = addr.substr(pos + 1);
-              int val = 0;
-              if (!convertToInteger(custom, val)) {
-              ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range_instance ")
-                        ACE_TEXT("could not convert %s to integer\n"),
-                        custom.c_str()),
-                       -1);
-              }
-              val += domainId;
-              addr = addr.substr(0, pos);
-              addr += "." + to_dds_string(val);
-            } else {
-              ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range_instance ")
-                        ACE_TEXT("could not AddDomainId for %s\n"),
-                        idx->second.c_str()),
-                       -1);
-            }
-            dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(addr.c_str()));
-            if (DCPS_debug_level > 0) {
-              ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) Service_Participant::")
-                         ACE_TEXT("configure_domain_range_instance processing AddDomainId: %C=%C\n"),
-                         it->first.c_str(), addr.c_str()));
-            }
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("configure_domain_range_instance ")
-                        ACE_TEXT("No support for %s customization\n"),
-                        idx->second.c_str()),
-                       -1);
-          }
 
-        } else {
-          dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
-          if (DCPS_debug_level > 0) {
-              ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) Service_Participant::")
-                         ACE_TEXT("configure_domain_range_instance adding config %C=%Cs\n"),
-                         it->first.c_str(), it->second.c_str()));
-            }
+      ValueMap discovery_settings;
+      if (process_customizations(domainId, dr_inst.discovery_template_name, discovery_settings)) {
+        for (ValueMap::const_iterator ds_it = discovery_settings.begin(); ds_it != discovery_settings.end(); ++ds_it) {
+          dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(ds_it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(ds_it->second.c_str()));
         }
       }
 
@@ -2188,6 +2168,34 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
   return 0;
 }
 
+
+bool
+Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
+{
+  for (OPENDDS_VECTOR(DomainRange)::const_iterator i = domain_ranges_.begin(); i != domain_ranges_.end(); ++i) {
+    if (domainId >= i->range_start && domainId <= i->range_end) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool
+Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
+{
+  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
+  if ( it != domain_to_transport_name_map_.end()) {
+    name = ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str());
+    return true;
+  } else if (global_transport_config_ != ACE_TEXT("")) {
+    name = global_transport_config_;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 int
 Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
                                                   const ACE_TCHAR* section_name)
@@ -2222,100 +2230,146 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-int Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
+int
+Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, const OPENDDS_STRING& discovery_name)
 {
-  if (has_domain_range()) {
-    // open the rtps_discovery config sections
-    cf.open();
-    const ACE_Configuration_Section_Key& root = cf.root_section();
-    ACE_Configuration_Section_Key rtps_sect;
+  ValueMap discovery_settings;
+  if (process_customizations(domainId, discovery_name, discovery_settings)) {
+    Discovery::RepoKey name = get_discovery_template_instance_name(domainId);
 
-    if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
-      ValueMap vm;
+    if (discoveryMap_.find(name) == discoveryMap_.end()) {
+      ACE_Configuration_Heap dcf;
+      dcf.open();
+      const ACE_Configuration_Section_Key& root = dcf.root_section();
 
-      if (pullValues(cf, rtps_sect, vm) > 0) {
-      // There are values inside [rtps_discovery]
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                        ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
-                       -1);
+      //create discovery instance
+      ACE_Configuration_Section_Key sect;
+      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      ACE_Configuration_Section_Key sub_sect;
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+
+      for (ValueMap::const_iterator ds_it = discovery_settings.begin(); ds_it != discovery_settings.end(); ++ds_it) {
+        dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(ds_it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(ds_it->second.c_str()));
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::configure_discovery_template ")
+                     ACE_TEXT("setting %C = %C\n"),
+                     ds_it->first.c_str(), ds_it->second.c_str()));
+        }
       }
 
-      // Process the subsections of this section (the individual domains)
-      KeyList keys;
-      if (processSections(cf, rtps_sect, keys) != 0) {
+      // load discovery
+      int status = this->load_discovery_configuration(dcf, RTPS_SECTION_NAME);
+
+      if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                          ACE_TEXT("too many nesting layers in the [rtps_discovery] section.\n")),
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template ")
+                          ACE_TEXT("load_discovery_configuration() returned %d\n"),
+                          status),
                          -1);
       }
+    } else {
+      // already configured. not necessarily an error
+      if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Discovery config %C already exists\n"),
+                     name.c_str()));
+        }
 
-      // copy the discovery information to the domain_range struct
-      for (OPENDDS_VECTOR(DomainRange)::iterator dr_it = domain_ranges_.begin();
-         dr_it != domain_ranges_.end(); ++dr_it) {
-        // Loop through the [rtps_discovery/*] sections looking for template
-        for (KeyList::const_iterator disc_it = keys.begin(); disc_it != keys.end(); ++disc_it) {
-          if (dr_it->discovery_template_name == disc_it->first) {
+    }
+  } else {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template ")
+                      ACE_TEXT("process_customizations() returned false\n")),
+                     -1);
+  }
+
+  return 0;
+}
+
+
+int
+Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
+{
+  // open the rtps_discovery config sections
+  cf.open();
+  const ACE_Configuration_Section_Key& root = cf.root_section();
+  ACE_Configuration_Section_Key rtps_sect;
+
+  if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
+    ValueMap vm;
+    if (pullValues(cf, rtps_sect, vm) > 0) {
+    // There are values inside [rtps_discovery]
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                      ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
+                     -1);
+    }
+
+    // Process the subsections of this section (the individual domains)
+    KeyList keys;
+    if (processSections(cf, rtps_sect, keys) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                        ACE_TEXT("too many nesting layers in the [rtps_discovery] section.\n")),
+                       -1);
+    }
+
+    // store the discovery information
+    for (KeyList::const_iterator disc_it = keys.begin(); disc_it != keys.end(); ++disc_it) {
+      DiscoveryInfo dinfo;
+      dinfo.discovery_name = disc_it->first;
+
+      ValueMap values;
+      if (pullValues(cf, disc_it->second, values) > 0) {
+        for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+          // check for customizations
+          if (it->first == ACE_TEXT_ALWAYS_CHAR(CUSTOMIZATION_SECTION_NAME)) {
+            OPENDDS_STRING customization = it->second;
             if (DCPS_debug_level > 0) {
-             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                       ACE_TEXT("Found DomainRange DiscoveryTemplate match for [rtps_discovery/%s]\n"),
-                       disc_it->first.c_str()));
+              ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates ")
+                         ACE_TEXT("loading customizations [Customization/%C]\n"),
+                         customization.c_str()));
             }
 
-            ValueMap values;
-            if (pullValues(cf, disc_it->second, values) > 0) {
-              for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-                // check for customizations
-                if (it->first == ACE_TEXT_ALWAYS_CHAR(CUSTOMIZATION_SECTION_NAME)) {
-                  OPENDDS_STRING customization = it->second;
-                  if (DCPS_debug_level > 0) {
-                    ACE_DEBUG((LM_DEBUG,
-                               ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates ")
-                               ACE_TEXT("loading customizations [Customization/%C]\n"),
-                               customization.c_str()));
+            ACE_Configuration_Section_Key custom_sect;
+            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
+              ValueMap vcm;
+              if (pullValues(cf, custom_sect, vcm) > 0) {
+                ACE_ERROR_RETURN((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                                  ACE_TEXT("Customization sections must have a subsection name\n")),
+                                 -1);
+              }
+
+              // Process the subsections of the custom section
+              KeyList keys;
+              if (processSections(cf, custom_sect, keys) != 0) {
+                ACE_ERROR_RETURN((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                                  ACE_TEXT("too many nesting layers in the [Customization] section.\n")),
+                                 -1);
+              }
+
+              // add customizations to domain range
+              for (KeyList::const_iterator iter = keys.begin(); iter != keys.end(); ++iter) {
+                if (customization == iter->first) {
+                  ValueMap values;
+                  pullValues(cf, iter->second, values);
+                  for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+                    dinfo.customizations[it->first] = it->second;
                   }
-
-                  ACE_Configuration_Section_Key custom_sect;
-                  if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
-                    ValueMap vcm;
-
-                    if (pullValues(cf, custom_sect, vcm) > 0) {
-                      ACE_ERROR_RETURN((LM_ERROR,
-                                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                        ACE_TEXT("Customization sections must have a subsection name\n")),
-                                       -1);
-                    }
-
-                    // Process the subsections of the custom section
-                    KeyList keys;
-                    if (processSections(cf, custom_sect, keys) != 0) {
-                      ACE_ERROR_RETURN((LM_ERROR,
-                                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                        ACE_TEXT("too many nesting layers in the [Customization] section.\n")),
-                                       -1);
-                    }
-
-                    // add customizations to domain range
-                    for (KeyList::const_iterator iter = keys.begin(); iter != keys.end(); ++iter) {
-                      if (customization == iter->first) {
-                        ValueMap values;
-                        pullValues(cf, iter->second, values);
-
-                        for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-                          dr_it->customizations[it->first] = it->second;
-                        }
-                      }
-                    }
-                  }
-                } else {
-                  dr_it->disc_info[it->first] = it->second;
                 }
               }
             }
+          } else {
+              dinfo.disc_info[it->first] = it->second;
           }
         }
       }
+
+      discovery_infos_.push_back(dinfo);
     }
   }
 
@@ -2379,10 +2433,11 @@ int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& st
 bool
 Service_Participant::has_domain_range() const
 {
-  return domain_ranges_.size() > 0;
+  return !domain_ranges_.empty();
 }
 
-bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)
+bool
+Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)
 {
   if (has_domain_range()) {
     for (OPENDDS_VECTOR(DomainRange)::iterator it = domain_ranges_.begin();
@@ -2391,8 +2446,7 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
         inst.range_start = it->range_start;
         inst.range_end = it->range_end;
         inst.discovery_template_name = it->discovery_template_name;
-        inst.customizations = it->customizations;
-        inst.disc_info = it->disc_info;
+        inst.transport_config_name = it->transport_config_name;
         inst.domain_info = it->domain_info;
 
         if (DCPS_debug_level > 0) {
@@ -2409,12 +2463,84 @@ bool Service_Participant::get_domain_range_info(const DDS::DomainId_t id, Domain
   return false;
 }
 
+bool
+Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_STRING& discovery_name, ValueMap& customs)
+{
+  // get the discovery info
+  OPENDDS_VECTOR(DiscoveryInfo)::const_iterator dit;
+  for (dit = discovery_infos_.begin(); dit != discovery_infos_.end(); ++dit) {
+    if (discovery_name == dit->discovery_name) {
+      break;
+    }
+  }
+
+  if (dit != discovery_infos_.end()) {
+    // add discovery info to customs
+    for (ValueMap::const_iterator i = dit->disc_info.begin(); i != dit->disc_info.end(); ++i) {
+      customs[i->first] = i->second;
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Service_Participant::")
+                   ACE_TEXT("process_customizations adding config %C=%C\n"),
+                   i->first.c_str(), i->second.c_str()));
+      }
+    }
+
+    // update customs valuemap with any customizations
+    for (ValueMap::const_iterator i = dit->customizations.begin(); i != dit->customizations.end(); ++i) {
+      if (i->first == "InteropMulticastOverride" && i->second == "AddDomainId") {
+        OPENDDS_STRING addr = customs["InteropMulticastOverride"];
+        size_t pos = addr.find_last_of(".");
+        if (pos != OPENDDS_STRING::npos) {
+          OPENDDS_STRING custom = addr.substr(pos + 1);
+          int val = 0;
+          if (!convertToInteger(custom, val)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                              ACE_TEXT("process_Customizations ")
+                              ACE_TEXT("could not convert %C to integer\n"),
+                              custom.c_str()),
+                             false);
+          }
+          val += id;
+          addr = addr.substr(0, pos);
+          addr += "." + to_dds_string(val);
+        } else {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                            ACE_TEXT("configure_domain_range_instance ")
+                            ACE_TEXT("could not AddDomainId for %s\n"),
+                            customs["InteropMulticastOverride"].c_str()),
+                           false);
+        }
+
+        customs["InteropMulticastOverride"] = addr;
+      }
+    }
+  }
+
+  return true;
+}
+
 Discovery::RepoKey
 Service_Participant::get_discovery_template_instance_name(const DDS::DomainId_t id)
 {
   OpenDDS::DCPS::Discovery::RepoKey configured_name = "rtps_template_instance_";
   configured_name += to_dds_string(id);
   return configured_name;
+}
+
+bool
+Service_Participant::is_discovery_template(const OPENDDS_STRING& name)
+{
+  OPENDDS_VECTOR(DiscoveryInfo)::const_iterator i;
+  for (i = discovery_infos_.begin(); i != discovery_infos_.end(); ++i) {
+    if (i->discovery_name == name && !i->customizations.empty()) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
