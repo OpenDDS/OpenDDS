@@ -1,10 +1,9 @@
-#ifndef OPENDDS_RTPS_TYPE_LOOKUP_H_
-#define OPENDDS_RTPS_TYPE_LOOKUP_H_
-
 /*
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+#ifndef OPENDDS_RTPS_TYPE_LOOKUP_H_
+#define OPENDDS_RTPS_TYPE_LOOKUP_H_
 
 #include "RtpsRpcTypeSupportImpl.h"
 #include <dds/DCPS/XTypes/TypeObject.h>

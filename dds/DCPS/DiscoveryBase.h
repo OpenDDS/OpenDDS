@@ -6,7 +6,6 @@
 #ifndef OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 #define OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "dds/DCPS/TopicDetails.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
@@ -132,7 +131,7 @@ namespace OpenDDS {
     };
 
     template <typename DiscoveredParticipantData_>
-    class EndpointManager : public virtual DCPS::RcEventHandler {
+    class EndpointManager : public virtual RcEventHandler {
     protected:
 
       struct DiscoveredSubscription : PoolAllocationBase {
@@ -940,13 +939,13 @@ namespace OpenDDS {
 
         bool operator<(const MatchingPair& a_other) const
         {
-          if (DCPS::GUID_tKeyLessThan()(this->writer_, a_other.writer_)) return true;
+          if (GUID_tKeyLessThan()(this->writer_, a_other.writer_)) return true;
 
-          if (DCPS::GUID_tKeyLessThan()(a_other.writer_, this->writer_)) return false;
+          if (GUID_tKeyLessThan()(a_other.writer_, this->writer_)) return false;
 
-          if (DCPS::GUID_tKeyLessThan()(this->reader_, a_other.reader_)) return true;
+          if (GUID_tKeyLessThan()(this->reader_, a_other.reader_)) return true;
 
-          if (DCPS::GUID_tKeyLessThan()(a_other.reader_, this->reader_)) return false;
+          if (GUID_tKeyLessThan()(a_other.reader_, this->reader_)) return false;
 
           return false;
         }
@@ -955,9 +954,9 @@ namespace OpenDDS {
       typedef std::map<MatchingPair, MatchingData> MatchingDataMap;
       typedef typename MatchingDataMap::iterator MatchingDataIter;
       MatchingDataMap matching_data_buffer_;
-      DCPS::ReactorTask reactor_task_;
-      typedef DCPS::PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
-      DCPS::RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
+      ReactorTask reactor_task_;
+      typedef PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
+      RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
       ACE_Thread_Mutex matching_data_buffer_lock_;
 
@@ -1232,7 +1231,7 @@ namespace OpenDDS {
       }
 
       void
-      remove_expired_endpoints(const DCPS::MonotonicTimePoint& /*now*/)
+      remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
       {
         // TLS_TODO: sanity check on locks
         ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);

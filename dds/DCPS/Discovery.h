@@ -262,7 +262,7 @@ public:
 
   virtual void set_type_lookup_service(DDS::DomainId_t domainId,
     const RepoId& participantId,
-    XTypes::TypeLookupService_rch type_lookup_service_) {}
+    XTypes::TypeLookupService_rch type_lookup_service) {}
 
   virtual bool supports_liveliness() const { return false; }
 

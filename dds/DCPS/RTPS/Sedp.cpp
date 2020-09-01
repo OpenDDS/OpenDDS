@@ -3167,7 +3167,6 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                     const DCPS::RepoId& reader)
 {
-  // TLS_TODO: verify reader
   DCPS::RepoId reader_ = reader;
   reader_.entityId = ENTITYID_TL_SVC_REPLY_READER;
   DCPS::SequenceNumber sequence = 0;
@@ -3369,8 +3368,8 @@ Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& 
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
 Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                          const RepoId& reader,
-                                          DCPS::SequenceNumber& sequence)
+                                              const RepoId& reader,
+                                              DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -3397,8 +3396,8 @@ Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantSt
 
 DDS::ReturnCode_t
 Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                                const RepoId& reader,
-                                                DCPS::SequenceNumber& sequence)
+                                                    const RepoId& reader,
+                                                    DCPS::SequenceNumber& sequence)
 {
   OPENDDS_ASSERT(sedp_.associated_volatile_readers_.count(reader) != 0);
 
@@ -3427,7 +3426,7 @@ Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::Partici
 
 DDS::ReturnCode_t
 Sedp::DiscoveryWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                const RepoId& reader, DCPS::SequenceNumber& sequence)
+                                                     const RepoId& reader, DCPS::SequenceNumber& sequence)
 {
   ParameterList plist;
 
