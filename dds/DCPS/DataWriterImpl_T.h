@@ -291,7 +291,7 @@ public:
   }
 
   ACE_INLINE
-  virtual bool get_marshal_skip_serialize()
+  virtual bool get_marshal_skip_serialize() bool
   {
     return marshal_skip_serialize_;
   }
