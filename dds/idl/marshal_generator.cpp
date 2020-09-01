@@ -2974,9 +2974,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const OpenDDS::DataRepresentation repr =
     be_global->data_representations(node);
 
-  const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
-  const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
@@ -2992,19 +2990,13 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.addArg("uni", "const " + cxx + "&");
     serialized_size.endArgs();
 
-    const string align = getAlignment(discriminator);
-    if (!align.empty()) {
-      be_global->impl_ << "  encoding.align(size, " << align << ");\n";
-    }
-
     std::vector<string> code;
     code.push_back("serialized_size_delimiter(encoding, size);");
     generate_dheader_code(code, not_final, false);
 
-    if (may_be_parameter_list) {
+    if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
-        "  size_t mutable_running_total = 0;\n";
-      be_global->impl_ <<
+        "  size_t mutable_running_total = 0;\n"
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
 
@@ -3016,7 +3008,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
 
-    if (may_be_parameter_list) {
+    if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
@@ -3024,7 +3016,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
 
-    if (may_be_parameter_list) {
+    if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }
@@ -3044,7 +3036,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     generate_dheader_code(code, not_final);
 
     // Header for discriminator
-    if (may_be_parameter_list) {
+    if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  size_t size = 0;\n";
 
@@ -3068,8 +3060,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (generateSwitchForUnion("uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
-                               may_be_parameter_list ? findSizeCommon : 0,
-                               may_be_parameter_list ? node : 0)) {
+                               exten == extensibilitykind_mutable ? findSizeCommon : 0,
+                               exten == extensibilitykind_mutable ? node : 0)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3087,13 +3079,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     code.push_back("}");
     generate_dheader_code(code, not_final);
 
-    if (may_be_parameter_list) {
+    if (exten == extensibilitykind_mutable) {
       // Header for discriminator
       be_global->impl_ <<
         "  unsigned member_id;\n"
-        "  size_t field_size;\n";
-
-      be_global->impl_ <<
+        "  size_t field_size;\n"
         "  bool must_understand = false;\n"
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
@@ -3123,7 +3113,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
       if (generateSwitchForUnion("disc", streamCommon, branches,
-        discriminator, "if", ">> ", cxx.c_str())) {
+          discriminator, "if", ">> ", cxx.c_str())) {
         be_global->impl_ <<
           "  return true;\n";
       }
@@ -3207,9 +3197,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.endArgs();
 
     if (has_key) {
-      be_global->impl_ << "  serialized_size_delimiter(encoding, size);\n";
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, not_final, false);
 
-      if (may_be_parameter_list) {
+      if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
           "  size_t mutable_running_total = 0;\n";
           "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
@@ -3223,7 +3215,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "  max_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
       }
 
-      if (may_be_parameter_list) {
+      if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
           "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
       }
@@ -3246,7 +3238,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       generate_dheader_code(code, not_final);
 
       // Header for discriminator
-      if (may_be_parameter_list) {
+      if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
           "  size_t size = 0;\n";
 
@@ -3286,13 +3278,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       code.push_back("}");
       generate_dheader_code(code, not_final);
 
-      if (may_be_parameter_list) {
+      if (exten == extensibilitykind_mutable) {
         // Header for discriminator
         be_global->impl_ <<
           "  unsigned member_id;\n"
-          "  size_t field_size;\n";
-
-        be_global->impl_ <<
+          "  size_t field_size;\n"
           "  bool must_understand = false;\n"
           "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "    return false;\n"

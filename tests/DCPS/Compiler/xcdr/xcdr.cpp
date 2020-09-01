@@ -69,8 +69,7 @@ template<typename TypeA, typename TypeB>
 void expect_values_equal_base_union(const TypeA& a, const TypeB& b)
 {
   EXPECT_EQ(a._d(), b._d());
-  switch (a._d())
-  {
+  switch (a._d()) {
   case E_SHORT_FIELD:
     EXPECT_EQ(a.short_field(), b.short_field());
     break;
