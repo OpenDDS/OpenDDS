@@ -658,9 +658,9 @@ public:
     BoundConstructionFailure
   };
 
-  ConstructionStatus read_construction_status();
+  ConstructionStatus get_construction_status() const;
 
-  void write_construction_status(ConstructionStatus cs);
+  void set_construction_status(ConstructionStatus cs);
 
   template <typename T>
   bool peek(T& t)

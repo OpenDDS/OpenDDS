@@ -1,5 +1,5 @@
 /***
- * 
+ *
  * ORDER OF IDL MATTERS
  * DO NOT ADD MEMBERS ANYWHERE BUT THE END OF THE OBJECT
  * OR YOU WILL BREAK THE TEST
@@ -272,7 +272,7 @@ TEST(TestTryCon, string)
     }
   }
 }
-TEST(TestTryCon, DISCARD) 
+TEST(TestTryCon, DISCARD)
 {
   {
     TryCon::DiscardStructString1 sent;
@@ -392,7 +392,7 @@ TEST(TestTryCon, USE_DEFAULT)
   sent.ns.usb_ud.length(1);
   sent.ns.ns_ud.str64_d = "HELLO";
   sent.ns.ns_ud.str64_ud = "WORLD";
-  sent.ns.ns_ud.str64_t = "GOODBYE";  
+  sent.ns.ns_ud.str64_t = "GOODBYE";
   sent.ns.nu_ud._d(VALUE1);
   sent.ns.nu_ud.u_b(false);
   for (ACE_INT16 i = 0; i < 10; i++) sent.ns.sa_mud[i] = 0;
@@ -428,7 +428,7 @@ TEST(TestTryCon, USE_DEFAULT)
   expected.ns.usb_ud.length(0);
   expected.ns.ns_ud.str64_d = "";
   expected.ns.ns_ud.str64_ud = "";
-  expected.ns.ns_ud.str64_t = "";  
+  expected.ns.ns_ud.str64_t = "";
   expected.ns.nu_ud._d(VALUE1);
   expected.ns.nu_ud.u_b(false);
   for (ACE_INT16 i = 0; i < 10; i++) expected.ns.sa_mud[i] = 0;
@@ -479,7 +479,7 @@ TEST(TestTryCon, USE_DEFAULT)
     EXPECT_EQ(actual.ns.usb_ud.length(), expected.ns.usb_ud.length());
     EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_d.in(), expected.ns.ns_ud.str64_d.in()));
     EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_ud.in(), expected.ns.ns_ud.str64_ud.in()));
-    EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_t.in(), expected.ns.ns_ud.str64_t.in()));  
+    EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_t.in(), expected.ns.ns_ud.str64_t.in()));
     EXPECT_EQ(actual.ns.nu_ud._d(), expected.ns.nu_ud._d());
     EXPECT_EQ(actual.ns.nu_ud.u_b(), expected.ns.nu_ud.u_b());
     for (ACE_INT16 i = 0; i < 10; i++) {
@@ -643,7 +643,7 @@ TEST(TestTryCon, TRIM)
       Serializer serializer(data.get(), xcdr1);
       EXPECT_TRUE(serializer >> actual);
     }
-    EXPECT_FALSE(strcmp(actual.str20_t.in(), expected.str20_t.in())); 
+    EXPECT_FALSE(strcmp(actual.str20_t.in(), expected.str20_t.in()));
     EXPECT_FALSE(wcscmp(actual.wstr20_t.in(), expected.wstr20_t.in()));
     EXPECT_EQ(actual.psu_t.length(), expected.psu_t.length());
     EXPECT_EQ(actual.psb_t.length(), expected.psb_t.length());
