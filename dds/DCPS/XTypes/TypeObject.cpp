@@ -9,8 +9,6 @@
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Hash.h"
 
-#include <dds/DdsDcpsCoreC.h>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -213,7 +211,7 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
   return ti;
 }
 
-void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
+void serialize_type_info(const TypeInformation& type_info, DCPS::OctetSeq& seq)
 {
   seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
   DCPS::MessageBlockHelper helper(seq);
@@ -224,7 +222,7 @@ void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
   }
 }
 
-void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq)
+void deserialize_type_info(TypeInformation& type_info, const DCPS::OctetSeq& seq)
 {
   DCPS::MessageBlockHelper helper(seq);
   DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());

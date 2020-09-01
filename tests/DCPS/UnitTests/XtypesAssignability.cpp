@@ -4,6 +4,119 @@
 
 using namespace OpenDDS::XTypes;
 
+namespace {
+  TypeIdentifier makeString(bool wide, const StringSTypeDefn& string_sdefn)
+  {
+    TypeIdentifier ti(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
+    ti.string_sdefn() = string_sdefn;
+    return ti;
+  }
+
+  TypeIdentifier makeString(bool wide, const StringLTypeDefn& string_ldefn)
+  {
+    TypeIdentifier ti(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
+    ti.string_ldefn() = string_ldefn;
+    return ti;
+  }
+
+  TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
+                                          const SBound& bound)
+  {
+    TypeIdentifier ti(TI_PLAIN_SEQUENCE_SMALL);
+    ti.seq_sdefn() = PlainSequenceSElemDefn
+      (
+       PlainCollectionHeader
+       (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
+        CollectionElementFlag()), // TODO [anonymous]: Set this
+       bound,
+       base_type);
+    return ti;
+  }
+
+  TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
+                                          const LBound& bound)
+  {
+    TypeIdentifier ti(TI_PLAIN_SEQUENCE_LARGE);
+    ti.seq_ldefn() = PlainSequenceLElemDefn
+      (
+       PlainCollectionHeader
+       (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
+        CollectionElementFlag()), // TODO [anonymous]: Set this.
+       bound,
+       base_type);
+    return ti;
+  }
+
+  TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
+                                       const SBoundSeq& bound_seq)
+  {
+    TypeIdentifier ti(TI_PLAIN_ARRAY_SMALL);
+    ti.array_sdefn() = PlainArraySElemDefn
+      (
+       PlainCollectionHeader
+       (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
+        CollectionElementFlag()), // TODO [anonymous]: Set this
+       bound_seq,
+       base_type);
+    return ti;
+  }
+
+  TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
+                                       const LBoundSeq& bound_seq)
+  {
+    TypeIdentifier ti(TI_PLAIN_ARRAY_LARGE);
+    ti.array_ldefn() = PlainArrayLElemDefn
+      (
+       PlainCollectionHeader
+       (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
+        CollectionElementFlag()), // TODO [anonymous]: Set this.
+       bound_seq,
+       base_type);
+    return ti;
+  }
+
+  TypeIdentifier make(ACE_CDR::Octet k,
+                             const PlainMapSTypeDefn& map_sdefn)
+  {
+    TypeIdentifier ti(k);
+    ti.map_sdefn() = map_sdefn;
+    return ti;
+  }
+
+  TypeIdentifier make(ACE_CDR::Octet k,
+                             const PlainMapLTypeDefn& map_ldefn)
+  {
+    TypeIdentifier ti(k);
+    ti.map_ldefn() = map_ldefn;
+    return ti;
+  }
+
+  TypeIdentifier make(ACE_CDR::Octet k,
+                             const StronglyConnectedComponentId& sc_component_id)
+  {
+    TypeIdentifier ti(k);
+    ti.sc_component_id() = sc_component_id;
+    return ti;
+  }
+
+  TypeIdentifier make(ACE_CDR::Octet k,
+                             const EquivalenceHash& equivalence_hash)
+  {
+    TypeIdentifier ti(k);
+    std::memcpy(ti.equivalence_hash(), equivalence_hash, sizeof equivalence_hash);
+    return ti;
+  }
+
+  TypeIdentifier make(ACE_CDR::Octet k,
+                             const ExtendedTypeDefn& extended_defn)
+  {
+    TypeIdentifier ti(k);
+    ti.extended_defn() = extended_defn;
+    return ti;
+  }
+
+}
+
 TEST(PrimitiveTypesTest, Assignable)
 {
   TypeAssignability test;
@@ -647,37 +760,37 @@ TEST(SequenceTypeTest, Assignable)
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
-  seq_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
-  seq_b.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(200));
+  seq_a.element.common.type = makeString(false, StringSTypeDefn(100));
+  seq_b.element.common.type = makeString(false, StringSTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
-  seq_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
-  seq_b.element.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(200));
+  seq_a.element.common.type = makeString(false, StringSTypeDefn(100));
+  seq_b.element.common.type = makeString(false, StringLTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
-  seq_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(100));
-  seq_b.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(200));
+  seq_a.element.common.type = makeString(true, StringSTypeDefn(100));
+  seq_b.element.common.type = makeString(true, StringSTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
-  seq_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(100));
-  seq_b.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(200));
+  seq_a.element.common.type = makeString(true, StringSTypeDefn(100));
+  seq_b.element.common.type = makeString(true, StringLTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
   // Sequence of plain sequence of integer
-  seq_a.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT32),
-                                                                static_cast<SBound>(50));
-  seq_b.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT32),
-                                                                static_cast<LBound>(150));
+  seq_a.element.common.type = makePlainSequence(TypeIdentifier(TK_INT32),
+                                                static_cast<SBound>(50));
+  seq_b.element.common.type = makePlainSequence(TypeIdentifier(TK_INT32),
+                                                static_cast<LBound>(150));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
   // Sequence of plain array of integer
   SBoundSeq bounds_a;
   bounds_a.append(10).append(20).append(30);
-  seq_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
+  seq_a.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
   LBoundSeq bounds_b;
   bounds_b.append(10).append(20).append(30);
-  seq_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
+  seq_b.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
@@ -686,7 +799,7 @@ TEST(SequenceTypeTest, Assignable)
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 8;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
@@ -695,7 +808,7 @@ TEST(SequenceTypeTest, Assignable)
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT16);
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 16;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -703,7 +816,7 @@ TEST(SequenceTypeTest, Assignable)
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT32);
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 32;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -711,7 +824,7 @@ TEST(SequenceTypeTest, Assignable)
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 64;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -786,29 +899,29 @@ TEST(SequenceTypeTest, NotAssignable)
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
-  seq_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
-  seq_b.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
+  seq_a.element.common.type = makeString(false, StringSTypeDefn(50));
+  seq_b.element.common.type = makeString(true, StringLTypeDefn(100));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
-  seq_a.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
-  seq_b.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
+  seq_a.element.common.type = makeString(true, StringLTypeDefn(100));
+  seq_b.element.common.type = makeString(false, StringSTypeDefn(50));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
   // Sequence of plain sequence of integer
-  seq_a.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                static_cast<SBound>(50));
-  seq_b.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT64),
-                                                                static_cast<LBound>(150));
+  seq_a.element.common.type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<SBound>(50));
+  seq_b.element.common.type = makePlainSequence(TypeIdentifier(TK_INT64),
+                                                static_cast<LBound>(150));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
   // Sequence of plain array of integer
   SBoundSeq bounds_a;
   bounds_a.append(10).append(20).append(30);
-  seq_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
+  seq_a.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
   LBoundSeq bounds_b;
   bounds_b.append(10).append(20).append(40);
-  seq_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
+  seq_b.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
@@ -816,7 +929,7 @@ TEST(SequenceTypeTest, NotAssignable)
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
@@ -825,7 +938,7 @@ TEST(SequenceTypeTest, NotAssignable)
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT16);
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 17;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -833,7 +946,7 @@ TEST(SequenceTypeTest, NotAssignable)
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT32);
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 34;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -841,7 +954,7 @@ TEST(SequenceTypeTest, NotAssignable)
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  seq_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 13;
   TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -916,37 +1029,37 @@ TEST(ArrayTypeTest, Assignable)
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 
-  arr_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
-  arr_b.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(200));
+  arr_a.element.common.type = makeString(false, StringSTypeDefn(100));
+  arr_b.element.common.type = makeString(false, StringSTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
-  arr_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
-  arr_b.element.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(200));
+  arr_a.element.common.type = makeString(false, StringSTypeDefn(100));
+  arr_b.element.common.type = makeString(false, StringLTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
-  arr_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(100));
-  arr_b.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(200));
+  arr_a.element.common.type = makeString(true, StringSTypeDefn(100));
+  arr_b.element.common.type = makeString(true, StringSTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
-  arr_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(100));
-  arr_b.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(200));
+  arr_a.element.common.type = makeString(true, StringSTypeDefn(100));
+  arr_b.element.common.type = makeString(true, StringLTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 
   // Array of plain sequence of integer
-  arr_a.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT32),
-                                                                static_cast<SBound>(50));
-  arr_b.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT32),
-                                                                static_cast<LBound>(150));
+  arr_a.element.common.type = makePlainSequence(TypeIdentifier(TK_INT32),
+                                                static_cast<SBound>(50));
+  arr_b.element.common.type = makePlainSequence(TypeIdentifier(TK_INT32),
+                                                static_cast<LBound>(150));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
   // Array of plain array of integer
   SBoundSeq bounds_a;
   bounds_a.append(10).append(20).append(30);
-  arr_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
+  arr_a.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
   LBoundSeq bounds_b;
   bounds_b.append(10).append(20).append(30);
-  arr_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
+  arr_b.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 
@@ -955,7 +1068,7 @@ TEST(ArrayTypeTest, Assignable)
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 8;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
@@ -964,7 +1077,7 @@ TEST(ArrayTypeTest, Assignable)
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT16);
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 16;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
@@ -972,7 +1085,7 @@ TEST(ArrayTypeTest, Assignable)
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT32);
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 32;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
@@ -980,7 +1093,7 @@ TEST(ArrayTypeTest, Assignable)
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 64;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
@@ -1055,29 +1168,29 @@ TEST(ArrayTypeTest, NotAssignable)
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 
-  arr_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
-  arr_b.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
+  arr_a.element.common.type = makeString(false, StringSTypeDefn(50));
+  arr_b.element.common.type = makeString(true, StringLTypeDefn(100));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
-  arr_a.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
-  arr_b.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
+  arr_a.element.common.type = makeString(true, StringLTypeDefn(100));
+  arr_b.element.common.type = makeString(false, StringSTypeDefn(50));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 
   // Array of plain sequence of integer
-  arr_a.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                static_cast<SBound>(50));
-  arr_b.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT64),
-                                                                static_cast<LBound>(150));
+  arr_a.element.common.type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<SBound>(50));
+  arr_b.element.common.type = makePlainSequence(TypeIdentifier(TK_INT64),
+                                                static_cast<LBound>(150));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
   // Array of plain array of integer
   SBoundSeq bounds_a;
   bounds_a.append(10).append(20).append(30);
-  arr_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
+  arr_a.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_a);
   LBoundSeq bounds_b;
   bounds_b.append(10).append(20).append(40);
-  arr_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
+  arr_b.element.common.type = makePlainArray(TypeIdentifier(TK_UINT16), bounds_b);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 
@@ -1085,7 +1198,7 @@ TEST(ArrayTypeTest, NotAssignable)
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
@@ -1094,7 +1207,7 @@ TEST(ArrayTypeTest, NotAssignable)
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT16);
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 17;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
@@ -1102,7 +1215,7 @@ TEST(ArrayTypeTest, NotAssignable)
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT32);
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 34;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
@@ -1110,7 +1223,7 @@ TEST(ArrayTypeTest, NotAssignable)
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  arr_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 13;
   TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
@@ -1210,44 +1323,44 @@ TEST(MapTypeTest, Assignable)
   map_b.element.common.type = TypeIdentifier(TK_CHAR8);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(70));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(50));
+  map_b.key.common.type = makeString(false, StringLTypeDefn(70));
   map_a.element.common.type = TypeIdentifier(TK_CHAR16);
   map_b.element.common.type = TypeIdentifier(TK_CHAR16);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(200));
-  map_a.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(50));
-  map_b.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(100));
+  map_b.key.common.type = makeString(false, StringLTypeDefn(200));
+  map_a.element.common.type = makeString(true, StringLTypeDefn(50));
+  map_b.element.common.type = makeString(true, StringSTypeDefn(70));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
-  map_a.key.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(123));
-  map_b.key.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(321));
-  map_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(150));
-  map_b.element.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(80));
+  map_a.key.common.type = makeString(true, StringLTypeDefn(123));
+  map_b.key.common.type = makeString(true, StringLTypeDefn(321));
+  map_a.element.common.type = makeString(false, StringSTypeDefn(150));
+  map_b.element.common.type = makeString(false, StringLTypeDefn(80));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
   // Map of plain sequences
-  map_a.key.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(45));
-  map_b.key.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(56));
-  map_a.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                static_cast<SBound>(50));
-  map_b.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                static_cast<LBound>(100));
+  map_a.key.common.type = makeString(true, StringSTypeDefn(45));
+  map_b.key.common.type = makeString(true, StringLTypeDefn(56));
+  map_a.element.common.type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<SBound>(50));
+  map_b.element.common.type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<LBound>(100));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
   // Map of plain arrays
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(78));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(67));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(78));
+  map_b.key.common.type = makeString(false, StringLTypeDefn(67));
   SBoundSeq bounds_a;
   bounds_a.append(30).append(20).append(40);
-  map_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::makeString(false, StringSTypeDefn(50)), bounds_a);
+  map_a.element.common.type = makePlainArray(makeString(false, StringSTypeDefn(50)), bounds_a);
   LBoundSeq bounds_b;
   bounds_b.append(30).append(20).append(40);
-  map_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::makeString(false, StringLTypeDefn(100)), bounds_b);
+  map_b.element.common.type = makePlainArray(makeString(false, StringLTypeDefn(100)), bounds_b);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
   // Map of plain maps
@@ -1258,13 +1371,13 @@ TEST(MapTypeTest, Assignable)
                            TypeIdentifier(TK_FLOAT64),
                            CollectionElementFlag(),
                            TypeIdentifier(TK_UINT16));
-  map_a.element.common.type = TypeIdentifier::make(TI_PLAIN_MAP_SMALL, elem_a);
+  map_a.element.common.type = make(TI_PLAIN_MAP_SMALL, elem_a);
   PlainMapLTypeDefn elem_b(PlainCollectionHeader(EquivalenceKind(EK_MINIMAL), CollectionElementFlag()),
                            static_cast<LBound>(100),
                            TypeIdentifier(TK_FLOAT64),
                            CollectionElementFlag(),
                            TypeIdentifier(TK_UINT16));
-  map_b.element.common.type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, elem_b);
+  map_b.element.common.type = make(TI_PLAIN_MAP_LARGE, elem_b);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
@@ -1273,7 +1386,7 @@ TEST(MapTypeTest, Assignable)
   map_a.element.common.type = TypeIdentifier(TK_UINT8);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 7;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
@@ -1284,7 +1397,7 @@ TEST(MapTypeTest, Assignable)
   map_b.key.common.type = TypeIdentifier(TK_INT16);
   map_a.element.common.type = TypeIdentifier(TK_UINT16);
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 15;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
@@ -1294,17 +1407,17 @@ TEST(MapTypeTest, Assignable)
   map_b.key.common.type = TypeIdentifier(TK_INT64);
   map_a.element.common.type = TypeIdentifier(TK_UINT32);
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 31;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(60));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(80));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(60));
+  map_b.key.common.type = makeString(false, StringSTypeDefn(80));
   map_a.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 63;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
@@ -1402,44 +1515,44 @@ TEST(MapTypeTest, NotAssignable)
   map_b.element.common.type = TypeIdentifier(TK_CHAR16);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(70));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(50));
+  map_b.key.common.type = makeString(false, StringLTypeDefn(70));
   map_a.element.common.type = TypeIdentifier(TK_CHAR16);
-  map_b.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(50));
+  map_b.element.common.type = makeString(true, StringSTypeDefn(50));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
-  map_b.key.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(200));
-  map_a.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(50));
-  map_b.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(100));
+  map_b.key.common.type = makeString(true, StringLTypeDefn(200));
+  map_a.element.common.type = makeString(true, StringLTypeDefn(50));
+  map_b.element.common.type = makeString(true, StringSTypeDefn(70));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
-  map_a.key.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(123));
-  map_b.key.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(321));
-  map_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(150));
-  map_b.element.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(80));
+  map_a.key.common.type = makeString(true, StringLTypeDefn(123));
+  map_b.key.common.type = makeString(true, StringLTypeDefn(321));
+  map_a.element.common.type = makeString(true, StringSTypeDefn(150));
+  map_b.element.common.type = makeString(false, StringLTypeDefn(80));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
   // Map of plain sequences
-  map_a.key.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(45));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(56));
-  map_a.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                static_cast<SBound>(50));
-  map_b.element.common.type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT64),
-                                                                static_cast<LBound>(100));
+  map_a.key.common.type = makeString(true, StringSTypeDefn(45));
+  map_b.key.common.type = makeString(false, StringLTypeDefn(56));
+  map_a.element.common.type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<SBound>(50));
+  map_b.element.common.type = makePlainSequence(TypeIdentifier(TK_INT64),
+                                                static_cast<LBound>(100));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
   // Map of plain arrays
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(78));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(67));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(78));
+  map_b.key.common.type = makeString(false, StringLTypeDefn(67));
   SBoundSeq bounds_a;
   bounds_a.append(30).append(20).append(40);
-  map_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::makeString(true, StringSTypeDefn(50)), bounds_a);
+  map_a.element.common.type = makePlainArray(makeString(true, StringSTypeDefn(50)), bounds_a);
   LBoundSeq bounds_b;
   bounds_b.append(30).append(20).append(40);
-  map_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::makeString(false, StringLTypeDefn(100)), bounds_b);
+  map_b.element.common.type = makePlainArray(makeString(false, StringLTypeDefn(100)), bounds_b);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
   // Map of plain maps
@@ -1450,13 +1563,13 @@ TEST(MapTypeTest, NotAssignable)
                            TypeIdentifier(TK_FLOAT64),
                            CollectionElementFlag(),
                            TypeIdentifier(TK_UINT16));
-  map_a.element.common.type = TypeIdentifier::make(TI_PLAIN_MAP_SMALL, elem_a);
+  map_a.element.common.type = make(TI_PLAIN_MAP_SMALL, elem_a);
   PlainMapLTypeDefn elem_b(PlainCollectionHeader(EquivalenceKind(EK_MINIMAL), CollectionElementFlag()),
                            static_cast<LBound>(100),
                            TypeIdentifier(TK_FLOAT64),
                            CollectionElementFlag(),
                            TypeIdentifier(TK_UINT32));
-  map_b.element.common.type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, elem_b);
+  map_b.element.common.type = make(TI_PLAIN_MAP_LARGE, elem_b);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
@@ -1465,7 +1578,7 @@ TEST(MapTypeTest, NotAssignable)
   map_a.element.common.type = TypeIdentifier(TK_UINT8);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
@@ -1476,7 +1589,7 @@ TEST(MapTypeTest, NotAssignable)
   map_b.key.common.type = TypeIdentifier(TK_INT16);
   map_a.element.common.type = TypeIdentifier(TK_UINT16);
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 17;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
@@ -1486,17 +1599,17 @@ TEST(MapTypeTest, NotAssignable)
   map_b.key.common.type = TypeIdentifier(TK_INT64);
   map_a.element.common.type = TypeIdentifier(TK_UINT32);
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 33;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
-  map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(60));
-  map_b.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(80));
+  map_a.key.common.type = makeString(false, StringSTypeDefn(60));
+  map_b.key.common.type = makeString(false, StringSTypeDefn(80));
   map_a.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
+  map_b.element.common.type = make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 15;
   TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
@@ -1541,19 +1654,19 @@ void expect_true_non_alias_to_alias()
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_CHAR16)));
 
   // String
-  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
+  ali_a.body.common.related_type = makeString(false, StringSTypeDefn(70));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                              TypeIdentifier::makeString(false, StringLTypeDefn(120))));
-  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
+                              makeString(false, StringLTypeDefn(120))));
+  ali_a.body.common.related_type = makeString(true, StringSTypeDefn(70));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                              TypeIdentifier::makeString(true, StringLTypeDefn(120))));
+                              makeString(true, StringLTypeDefn(120))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<SBound>(100));
+  ali_a.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<SBound>(100));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                              TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                 static_cast<LBound>(200))));
+                              makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<LBound>(200))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier(TK_UINT32);
@@ -1562,9 +1675,9 @@ void expect_true_non_alias_to_alias()
   // Array
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
-  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
+  ali_a.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                              TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a)));
+                              makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a)));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier(TK_FLOAT32);
@@ -1576,14 +1689,14 @@ void expect_true_non_alias_to_alias()
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  ali_a.body.common.related_type = make(TI_PLAIN_MAP_LARGE, plain_map_a);
   PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
                                 static_cast<SBound>(200),
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                              TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b)));
+                              make(TI_PLAIN_MAP_SMALL, plain_map_b)));
   MinimalMapType map_b;
   map_b.header.common.bound = 500;
   map_b.key.common.type = TypeIdentifier(TK_UINT32);
@@ -1605,7 +1718,7 @@ void expect_true_non_alias_to_alias()
                                literal_seq);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(enum_a))));
 
@@ -1626,26 +1739,26 @@ void expect_true_non_alias_to_alias()
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(bitmask_a))));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT8)));
 
   bitmask_a.header.common.bit_bound = 14;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT16)));
 
   bitmask_a.header.common.bit_bound = 31;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT32)));
 
   bitmask_a.header.common.bit_bound = 60;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT64)));
 }
@@ -1688,18 +1801,18 @@ void expect_true_alias_to_non_alias()
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_CHAR16), TypeObject(MinimalTypeObject(ali_a))));
 
   // String
-  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  EXPECT_TRUE(test.assignable(TypeIdentifier::makeString(false, StringLTypeDefn(130)),
+  ali_a.body.common.related_type = makeString(false, StringSTypeDefn(70));
+  EXPECT_TRUE(test.assignable(makeString(false, StringLTypeDefn(130)),
                               TypeObject(MinimalTypeObject(ali_a))));
-  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  EXPECT_TRUE(test.assignable(TypeIdentifier::makeString(true, StringLTypeDefn(130)),
+  ali_a.body.common.related_type = makeString(true, StringSTypeDefn(70));
+  EXPECT_TRUE(test.assignable(makeString(true, StringLTypeDefn(130)),
                               TypeObject(MinimalTypeObject(ali_a))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<SBound>(100));
-  EXPECT_TRUE(test.assignable(TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                 static_cast<LBound>(200)),
+  ali_a.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<SBound>(100));
+  EXPECT_TRUE(test.assignable(makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                static_cast<LBound>(200)),
                               TypeObject(MinimalTypeObject(ali_a))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
@@ -1709,8 +1822,8 @@ void expect_true_alias_to_non_alias()
   // Array
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
-  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
-  EXPECT_TRUE(test.assignable(TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a),
+  ali_a.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
+  EXPECT_TRUE(test.assignable(makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a),
                               TypeObject(MinimalTypeObject(ali_a))));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
@@ -1723,13 +1836,13 @@ void expect_true_alias_to_non_alias()
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  ali_a.body.common.related_type = make(TI_PLAIN_MAP_LARGE, plain_map_a);
   PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
                                 static_cast<SBound>(200),
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  EXPECT_TRUE(test.assignable(TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b),
+  EXPECT_TRUE(test.assignable(make(TI_PLAIN_MAP_SMALL, plain_map_b),
                               TypeObject(MinimalTypeObject(ali_a))));
   MinimalMapType map_b;
   map_b.header.common.bound = 500;
@@ -1752,7 +1865,7 @@ void expect_true_alias_to_non_alias()
                                literal_seq);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(enum_a)), TypeObject(MinimalTypeObject(ali_a))));
 
@@ -1773,26 +1886,26 @@ void expect_true_alias_to_non_alias()
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(bitmask_a)), TypeObject(MinimalTypeObject(ali_a))));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT8), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 14;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT16), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 31;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT32), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 60;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT64), TypeObject(MinimalTypeObject(ali_a))));
 }
@@ -1850,39 +1963,39 @@ void expect_true_alias_to_alias()
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // String
-  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  ali_b.body.common.related_type = TypeIdentifier::makeString(false, StringLTypeDefn(700));
+  ali_a.body.common.related_type = makeString(false, StringSTypeDefn(70));
+  ali_b.body.common.related_type = makeString(false, StringLTypeDefn(700));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
-  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
-  ali_b.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(200));
+  ali_a.body.common.related_type = makeString(true, StringLTypeDefn(100));
+  ali_b.body.common.related_type = makeString(true, StringSTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<SBound>(100));
-  ali_b.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<LBound>(200));
+  ali_a.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<SBound>(100));
+  ali_b.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<LBound>(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier(TK_UINT32);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(seq_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Array
   SBoundSeq bounds;
   bounds.append(50).append(60).append(70);
-  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds);
-  ali_b.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds);
+  ali_a.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds);
+  ali_b.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier(TK_FLOAT32);
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(arr_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
@@ -1892,20 +2005,20 @@ void expect_true_alias_to_alias()
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  ali_a.body.common.related_type = make(TI_PLAIN_MAP_LARGE, plain_map_a);
   PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
                                 static_cast<SBound>(200),
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  ali_b.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b);
+  ali_b.body.common.related_type = make(TI_PLAIN_MAP_SMALL, plain_map_b);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalMapType map_b;
   map_b.header.common.bound = 500;
   map_b.key.common.type = TypeIdentifier(TK_UINT32);
   map_b.element.common.type = TypeIdentifier(TK_INT64);
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(map_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
@@ -1923,7 +2036,7 @@ void expect_true_alias_to_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()),
                                               MinimalMemberDetail("LITERAL5")));
@@ -1931,7 +2044,7 @@ void expect_true_alias_to_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(5))),
                                literal_seq);
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(enum_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
@@ -1952,10 +2065,10 @@ void expect_true_alias_to_alias()
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT8);
@@ -1963,21 +2076,21 @@ void expect_true_alias_to_alias()
 
   bitmask_a.header.common.bit_bound = 14;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT16);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 31;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT32);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 60;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT64);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
@@ -2027,19 +2140,19 @@ void expect_false_non_alias_to_alias()
   ali_a.body.common.related_type = TypeIdentifier(TK_CHAR16);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_FLOAT32)));
 
-  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
+  ali_a.body.common.related_type = makeString(false, StringSTypeDefn(70));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                               TypeIdentifier::makeString(true, StringLTypeDefn(120))));
-  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
+                               makeString(true, StringLTypeDefn(120))));
+  ali_a.body.common.related_type = makeString(true, StringSTypeDefn(70));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                               TypeIdentifier::makeString(false, StringLTypeDefn(120))));
+                               makeString(false, StringLTypeDefn(120))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<SBound>(100));
+  ali_a.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<SBound>(100));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                               TypeIdentifier::makePlainSequence(TypeIdentifier(TK_FLOAT32),
-                                                                  static_cast<LBound>(200))));
+                               makePlainSequence(TypeIdentifier(TK_FLOAT32),
+                                                 static_cast<LBound>(200))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier(TK_CHAR16);
@@ -2048,9 +2161,9 @@ void expect_false_non_alias_to_alias()
   // Array
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
-  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
+  ali_a.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                               TypeIdentifier::makePlainArray(TypeIdentifier(TK_INT32), bounds_a)));
+                               makePlainArray(TypeIdentifier(TK_INT32), bounds_a)));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier(TK_UINT64);
@@ -2062,14 +2175,14 @@ void expect_false_non_alias_to_alias()
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  ali_a.body.common.related_type = make(TI_PLAIN_MAP_LARGE, plain_map_a);
   PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
                                 static_cast<SBound>(200),
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_INT32));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
-                               TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b)));
+                               make(TI_PLAIN_MAP_SMALL, plain_map_b)));
   MinimalMapType map_b;
   map_b.header.common.bound = 500;
   map_b.key.common.type = TypeIdentifier(TK_UINT32);
@@ -2091,7 +2204,7 @@ void expect_false_non_alias_to_alias()
                                literal_seq);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag(IS_DEFAULT)),
@@ -2118,7 +2231,7 @@ void expect_false_non_alias_to_alias()
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 10;
@@ -2127,19 +2240,19 @@ void expect_false_non_alias_to_alias()
 
   bitmask_a.header.common.bit_bound = 14;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT8)));
 
   bitmask_a.header.common.bit_bound = 31;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT16)));
 
   bitmask_a.header.common.bit_bound = 60;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT32)));
 }
@@ -2182,18 +2295,18 @@ void expect_false_alias_to_non_alias()
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_FLOAT128), TypeObject(MinimalTypeObject(ali_a))));
 
   // String
-  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  EXPECT_FALSE(test.assignable(TypeIdentifier::makeString(true, StringLTypeDefn(130)),
+  ali_a.body.common.related_type = makeString(false, StringSTypeDefn(70));
+  EXPECT_FALSE(test.assignable(makeString(true, StringLTypeDefn(130)),
                                TypeObject(MinimalTypeObject(ali_a))));
-  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  EXPECT_FALSE(test.assignable(TypeIdentifier::makeString(false, StringLTypeDefn(130)),
+  ali_a.body.common.related_type = makeString(true, StringSTypeDefn(70));
+  EXPECT_FALSE(test.assignable(makeString(false, StringLTypeDefn(130)),
                                TypeObject(MinimalTypeObject(ali_a))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<SBound>(100));
-  EXPECT_FALSE(test.assignable(TypeIdentifier::makePlainSequence(TypeIdentifier(TK_FLOAT128),
-                                                                  static_cast<LBound>(200)),
+  ali_a.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<SBound>(100));
+  EXPECT_FALSE(test.assignable(makePlainSequence(TypeIdentifier(TK_FLOAT128),
+                                                 static_cast<LBound>(200)),
                                TypeObject(MinimalTypeObject(ali_a))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
@@ -2203,8 +2316,8 @@ void expect_false_alias_to_non_alias()
   // Array
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
-  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
-  EXPECT_FALSE(test.assignable(TypeIdentifier::makePlainArray(TypeIdentifier(TK_BYTE), bounds_a),
+  ali_a.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds_a);
+  EXPECT_FALSE(test.assignable(makePlainArray(TypeIdentifier(TK_BYTE), bounds_a),
                                TypeObject(MinimalTypeObject(ali_a))));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
@@ -2217,13 +2330,13 @@ void expect_false_alias_to_non_alias()
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_INT32));
-  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  ali_a.body.common.related_type = make(TI_PLAIN_MAP_LARGE, plain_map_a);
   PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
                                 static_cast<SBound>(200),
                                 TypeIdentifier(TK_FLOAT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_INT32));
-  EXPECT_FALSE(test.assignable(TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b),
+  EXPECT_FALSE(test.assignable(make(TI_PLAIN_MAP_SMALL, plain_map_b),
                                TypeObject(MinimalTypeObject(ali_a))));
   MinimalMapType map_b;
   map_b.header.common.bound = 500;
@@ -2246,7 +2359,7 @@ void expect_false_alias_to_non_alias()
                                literal_seq);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(6, EnumeratedLiteralFlag()),
@@ -2273,7 +2386,7 @@ void expect_false_alias_to_non_alias()
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
@@ -2282,19 +2395,19 @@ void expect_false_alias_to_non_alias()
 
   bitmask_a.header.common.bit_bound = 14;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT32), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 31;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT64), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 60;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT16), TypeObject(MinimalTypeObject(ali_a))));
 }
@@ -2352,39 +2465,39 @@ void expect_false_alias_to_alias()
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // String
-  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  ali_b.body.common.related_type = TypeIdentifier::makeString(false, StringLTypeDefn(700));
+  ali_a.body.common.related_type = makeString(true, StringSTypeDefn(70));
+  ali_b.body.common.related_type = makeString(false, StringLTypeDefn(700));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
-  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringLTypeDefn(100));
-  ali_b.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(200));
+  ali_a.body.common.related_type = makeString(false, StringLTypeDefn(100));
+  ali_b.body.common.related_type = makeString(true, StringSTypeDefn(200));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_INT64),
-                                                                     static_cast<SBound>(100));
-  ali_b.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                     static_cast<LBound>(200));
+  ali_a.body.common.related_type = makePlainSequence(TypeIdentifier(TK_INT64),
+                                                     static_cast<SBound>(100));
+  ali_b.body.common.related_type = makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                     static_cast<LBound>(200));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier(TK_FLOAT64);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(seq_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Array
   SBoundSeq bounds;
   bounds.append(50).append(60).append(70);
-  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_FLOAT32), bounds);
-  ali_b.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier(TK_BYTE), bounds);
+  ali_a.body.common.related_type = makePlainArray(TypeIdentifier(TK_FLOAT32), bounds);
+  ali_b.body.common.related_type = makePlainArray(TypeIdentifier(TK_BYTE), bounds);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier(TK_INT32);
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(arr_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
@@ -2394,20 +2507,20 @@ void expect_false_alias_to_alias()
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_UINT32));
-  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  ali_a.body.common.related_type = make(TI_PLAIN_MAP_LARGE, plain_map_a);
   PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
                                 static_cast<SBound>(200),
                                 TypeIdentifier(TK_INT64),
                                 CollectionElementFlag(),
                                 TypeIdentifier(TK_CHAR16));
-  ali_b.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b);
+  ali_b.body.common.related_type = make(TI_PLAIN_MAP_SMALL, plain_map_b);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalMapType map_b;
   map_b.header.common.bound = 500;
   map_b.key.common.type = TypeIdentifier(TK_UINT32);
   map_b.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(map_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
@@ -2425,7 +2538,7 @@ void expect_false_alias_to_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()),
@@ -2434,7 +2547,7 @@ void expect_false_alias_to_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(1))),
                                literal_seq_b);
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(enum_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
@@ -2455,12 +2568,12 @@ void expect_false_alias_to_alias()
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 11;
   TypeLookup::get_equivalence_hash(hash);
-  ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_b.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT16);
@@ -2468,21 +2581,21 @@ void expect_false_alias_to_alias()
 
   bitmask_a.header.common.bit_bound = 14;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT32);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 31;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT16);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 60;
   TypeLookup::get_equivalence_hash(hash);
-  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  ali_a.body.common.related_type = make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT32);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
@@ -2518,13 +2631,13 @@ TEST(StructTypeTest, Assignable)
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
-                                                                   TypeIdentifier::makeString(false,
+                                                                   makeString(false,
                                                                                               StringSTypeDefn(100))),
                                                 MinimalMemberDetail("inner_m2")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
-                                                                   TypeIdentifier::makeString(false,
+                                                                   makeString(false,
                                                                                               StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(inner_a)),
@@ -2540,11 +2653,11 @@ TEST(StructTypeTest, Assignable)
 
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma2(CommonStructMember(2, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma2(CommonStructMember(2, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m2"));
   TypeLookup::insert_entry(ma2.common.member_type_id, MinimalTypeObject(inner_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb2(CommonStructMember(2, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb2(CommonStructMember(2, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m2"));
   TypeLookup::insert_entry(mb2.common.member_type_id, MinimalTypeObject(inner_b));
   a.member_seq.append(ma2);
@@ -2561,9 +2674,9 @@ TEST(StructTypeTest, Assignable)
 
   // String key members
   MinimalStructMember ma3(CommonStructMember(3, StructMemberFlag(),
-                                             TypeIdentifier::makeString(true, StringSTypeDefn(120))),
+                                             makeString(true, StringSTypeDefn(120))),
                           MinimalMemberDetail("m3"));
-  MinimalStructMember mb3(CommonStructMember(3, IS_KEY, TypeIdentifier::makeString(true, StringLTypeDefn(100))),
+  MinimalStructMember mb3(CommonStructMember(3, IS_KEY, makeString(true, StringLTypeDefn(100))),
                           MinimalMemberDetail("m3"));
   a.member_seq.append(ma3);
   b.member_seq.append(mb3);
@@ -2588,11 +2701,11 @@ TEST(StructTypeTest, Assignable)
   MinimalEnumeratedType enum_a(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_a);
   MinimalEnumeratedType enum_b(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_b);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma4(CommonStructMember(4, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma4(CommonStructMember(4, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m4"));
   TypeLookup::insert_entry(ma4.common.member_type_id, MinimalTypeObject(enum_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb4(CommonStructMember(4, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb4(CommonStructMember(4, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m4"));
   TypeLookup::insert_entry(mb4.common.member_type_id, MinimalTypeObject(enum_b));
   a.member_seq.append(ma4);
@@ -2606,11 +2719,11 @@ TEST(StructTypeTest, Assignable)
   seq_b.header.common.bound = 60;
   seq_b.element.common.type = TypeIdentifier(TK_FLOAT64);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma5(CommonStructMember(5, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma5(CommonStructMember(5, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
   TypeLookup::insert_entry(ma5.common.member_type_id, MinimalTypeObject(seq_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb5(CommonStructMember(5, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb5(CommonStructMember(5, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
   TypeLookup::insert_entry(mb5.common.member_type_id, MinimalTypeObject(seq_b));
   a.member_seq.append(ma5);
@@ -2622,12 +2735,12 @@ TEST(StructTypeTest, Assignable)
   seq_a2.header.common.bound = 120;
   seq_a2.element.common.type = TypeIdentifier(TK_UINT64);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma6(CommonStructMember(6, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma6(CommonStructMember(6, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m6"));
   TypeLookup::insert_entry(ma6.common.member_type_id, MinimalTypeObject(seq_a2));
   MinimalStructMember mb6(CommonStructMember(6, IS_KEY,
-                                             TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT64),
-                                                                               static_cast<SBound>(70))),
+                                             makePlainSequence(TypeIdentifier(TK_UINT64),
+                                                               static_cast<SBound>(70))),
                           MinimalMemberDetail("m6"));
   a.member_seq.append(ma6);
   b.member_seq.append(mb6);
@@ -2642,11 +2755,11 @@ TEST(StructTypeTest, Assignable)
   map_b.key.common.type = TypeIdentifier(TK_UINT64);
   map_b.element.common.type = TypeIdentifier(TK_FLOAT128);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma7(CommonStructMember(7, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma7(CommonStructMember(7, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
   TypeLookup::insert_entry(ma7.common.member_type_id, MinimalTypeObject(map_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb7(CommonStructMember(7, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb7(CommonStructMember(7, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
   TypeLookup::insert_entry(mb7.common.member_type_id, MinimalTypeObject(map_b));
   a.member_seq.append(ma7);
@@ -2659,13 +2772,13 @@ TEST(StructTypeTest, Assignable)
   map_a2.key.common.type = TypeIdentifier(TK_INT32);
   map_a2.element.common.type = TypeIdentifier(TK_FLOAT32);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m8"));
   TypeLookup::insert_entry(ma8.common.member_type_id, MinimalTypeObject(map_a2));
   PlainMapLTypeDefn plain_map(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()), 160,
                               TypeIdentifier(TK_FLOAT32), CollectionElementFlag(),
                               TypeIdentifier(TK_INT32));
-  MinimalStructMember mb8(CommonStructMember(8, IS_KEY, TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map)),
+  MinimalStructMember mb8(CommonStructMember(8, IS_KEY, make(TI_PLAIN_MAP_LARGE, plain_map)),
                           MinimalMemberDetail("m8"));
   a.member_seq.append(ma8);
   b.member_seq.append(mb8);
@@ -2678,28 +2791,28 @@ TEST(StructTypeTest, Assignable)
   uni_a.discriminator.common.member_flags = 0;
   uni_b.discriminator.common.member_flags = 0;
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
-                                                               TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                                               makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
                                              MinimalMemberDetail("inner1")));
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(2, IS_DEFAULT,
-                                                               TypeIdentifier::makeString(false, StringSTypeDefn(100)),
+                                                               makeString(false, StringSTypeDefn(100)),
                                                                UnionCaseLabelSeq().append(4).append(5).append(6)),
                                              MinimalMemberDetail("inner2")));
   uni_b.discriminator.common.type_id = TypeIdentifier(TK_CHAR8);
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(1, IS_DEFAULT,
-                                                               TypeIdentifier::makeString(false, StringSTypeDefn(130)),
+                                                               makeString(false, StringSTypeDefn(130)),
                                                                UnionCaseLabelSeq().append(1).append(2)),
                                              MinimalMemberDetail("inner1")));
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(2, UnionMemberFlag(),
-                                                               TypeIdentifier::makeString(false, StringLTypeDefn(150)),
+                                                               makeString(false, StringLTypeDefn(150)),
                                                                UnionCaseLabelSeq().append(3).append(4)),
                                              MinimalMemberDetail("inner2")));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
   TypeLookup::insert_entry(ma9.common.member_type_id, MinimalTypeObject(uni_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb9(CommonStructMember(9, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb9(CommonStructMember(9, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
   TypeLookup::insert_entry(mb9.common.member_type_id, MinimalTypeObject(uni_b));
   a.member_seq.append(ma9);
@@ -2785,22 +2898,22 @@ void expect_false_key_erased()
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
-                                                                   TypeIdentifier::makeString(false,
+                                                                   makeString(false,
                                                                                               StringSTypeDefn(100))),
                                                 MinimalMemberDetail("inner_m2")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_INT16)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
-                                                                   TypeIdentifier::makeString(true,
+                                                                   makeString(true,
                                                                                               StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(ma1.common.member_type_id, MinimalTypeObject(inner_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb1(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb1(CommonStructMember(1, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(mb1.common.member_type_id, MinimalTypeObject(inner_b));
   a.member_seq.append(ma1);
@@ -2812,29 +2925,29 @@ void expect_false_key_erased()
   uni_a.discriminator.common.member_flags = IS_KEY;
   uni_a.discriminator.common.type_id = TypeIdentifier(TK_CHAR8);
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
-                                                               TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                                               makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
                                              MinimalMemberDetail("inner1")));
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(2, IS_DEFAULT,
-                                                               TypeIdentifier::makeString(false, StringSTypeDefn(100)),
+                                                               makeString(false, StringSTypeDefn(100)),
                                                                UnionCaseLabelSeq().append(4).append(5).append(6)),
                                              MinimalMemberDetail("inner2")));
   uni_b.discriminator.common.member_flags = IS_KEY;
   uni_b.discriminator.common.type_id = TypeIdentifier(TK_BYTE);
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(1, IS_DEFAULT,
-                                                               TypeIdentifier::makeString(false, StringSTypeDefn(130)),
+                                                               makeString(false, StringSTypeDefn(130)),
                                                                UnionCaseLabelSeq().append(1).append(2)),
                                              MinimalMemberDetail("inner1")));
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(2, UnionMemberFlag(),
-                                                               TypeIdentifier::makeString(false, StringLTypeDefn(150)),
+                                                               makeString(false, StringLTypeDefn(150)),
                                                                UnionCaseLabelSeq().append(3).append(4)),
                                              MinimalMemberDetail("inner2")));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
   TypeLookup::insert_entry(ma9.common.member_type_id, MinimalTypeObject(uni_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb9(CommonStructMember(9, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb9(CommonStructMember(9, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
   TypeLookup::insert_entry(mb9.common.member_type_id, MinimalTypeObject(uni_b));
   a2.member_seq.append(ma9);
@@ -2890,10 +3003,10 @@ void expect_false_string_keys()
   MinimalStructType a, b;
 
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(),
-                                             TypeIdentifier::makeString(true, StringSTypeDefn(120))),
+                                             makeString(true, StringSTypeDefn(120))),
                           MinimalMemberDetail("m1"));
   MinimalStructMember mb1(CommonStructMember(1, IS_KEY,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(200))),
+                                             makeString(true, StringLTypeDefn(200))),
                           MinimalMemberDetail("m1"));
   a.member_seq.append(ma1);
   b.member_seq.append(mb1);
@@ -2922,11 +3035,11 @@ void expect_false_enum_keys()
   MinimalEnumeratedType enum_b(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_b);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(ma1.common.member_type_id, MinimalTypeObject(enum_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb1(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb1(CommonStructMember(1, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(mb1.common.member_type_id, MinimalTypeObject(enum_b));
   a.member_seq.append(ma1);
@@ -2947,11 +3060,11 @@ void expect_false_sequence_keys()
   seq_b.element.common.type = TypeIdentifier(TK_UINT64);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma5(CommonStructMember(5, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma5(CommonStructMember(5, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
   TypeLookup::insert_entry(ma5.common.member_type_id, MinimalTypeObject(seq_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb5(CommonStructMember(5, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb5(CommonStructMember(5, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
   TypeLookup::insert_entry(mb5.common.member_type_id, MinimalTypeObject(seq_b));
   a.member_seq.append(ma5);
@@ -2964,12 +3077,12 @@ void expect_false_sequence_keys()
   seq_a2.header.common.bound = 320;
   seq_a2.element.common.type = TypeIdentifier(TK_FLOAT64);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma6(CommonStructMember(6, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma6(CommonStructMember(6, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m6"));
   TypeLookup::insert_entry(ma6.common.member_type_id, MinimalTypeObject(seq_a));
   MinimalStructMember mb6(CommonStructMember(6, IS_KEY,
-                                             TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
-                                                                               static_cast<LBound>(200))),
+                                             makePlainSequence(TypeIdentifier(TK_UINT32),
+                                                               static_cast<LBound>(200))),
                           MinimalMemberDetail("m6"));
   a2.member_seq.append(ma6);
   b2.member_seq.append(mb6);
@@ -2991,11 +3104,11 @@ void expect_false_map_keys()
   map_b.element.common.type = TypeIdentifier(TK_FLOAT128);
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma7(CommonStructMember(7, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma7(CommonStructMember(7, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
   TypeLookup::insert_entry(ma7.common.member_type_id, MinimalTypeObject(map_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb7(CommonStructMember(7, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb7(CommonStructMember(7, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
   TypeLookup::insert_entry(mb7.common.member_type_id, MinimalTypeObject(map_b));
   a.member_seq.append(ma7);
@@ -3009,13 +3122,13 @@ void expect_false_map_keys()
   map_a2.key.common.type = TypeIdentifier(TK_INT32);
   map_a2.element.common.type = TypeIdentifier(TK_FLOAT32);
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m8"));
   TypeLookup::insert_entry(ma8.common.member_type_id, MinimalTypeObject(map_a2));
   PlainMapLTypeDefn plain_map(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()), 300,
                               TypeIdentifier(TK_FLOAT32), CollectionElementFlag(),
                               TypeIdentifier(TK_INT32));
-  MinimalStructMember mb8(CommonStructMember(8, IS_KEY, TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map)),
+  MinimalStructMember mb8(CommonStructMember(8, IS_KEY, make(TI_PLAIN_MAP_LARGE, plain_map)),
                           MinimalMemberDetail("m8"));
   a2.member_seq.append(ma8);
   b2.member_seq.append(mb8);
@@ -3033,22 +3146,22 @@ void expect_false_key_holder()
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
-                                                                   TypeIdentifier::makeString(false,
+                                                                   makeString(false,
                                                                                               StringSTypeDefn(100))),
                                                 MinimalMemberDetail("inner_m2")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_INT16)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
-                                                                   TypeIdentifier::makeString(false,
+                                                                   makeString(false,
                                                                                               StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EquivalenceHash hash;
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(ma1.common.member_type_id, MinimalTypeObject(inner_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb1(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb1(CommonStructMember(1, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(mb1.common.member_type_id, MinimalTypeObject(inner_b));
   a.member_seq.append(ma1);
@@ -3060,29 +3173,29 @@ void expect_false_key_holder()
   uni_a.discriminator.common.type_id = TypeIdentifier(TK_CHAR8);
   uni_a.discriminator.common.member_flags = 0;
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
-                                                               TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                                               makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
                                              MinimalMemberDetail("inner1")));
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(2, IS_DEFAULT,
-                                                               TypeIdentifier::makeString(false, StringSTypeDefn(100)),
+                                                               makeString(false, StringSTypeDefn(100)),
                                                                UnionCaseLabelSeq().append(4).append(5).append(6)),
                                              MinimalMemberDetail("inner2")));
   uni_b.discriminator.common.type_id = TypeIdentifier(TK_CHAR8);
   uni_b.discriminator.common.member_flags = 0;
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(1, IS_DEFAULT,
-                                                               TypeIdentifier::makeString(false, StringSTypeDefn(130)),
+                                                               makeString(false, StringSTypeDefn(130)),
                                                                UnionCaseLabelSeq().append(10).append(20)),
                                              MinimalMemberDetail("inner1")));
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(2, UnionMemberFlag(),
-                                                               TypeIdentifier::makeString(false, StringLTypeDefn(150)),
+                                                               makeString(false, StringLTypeDefn(150)),
                                                                UnionCaseLabelSeq().append(30).append(40)),
                                              MinimalMemberDetail("inner2")));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember ma2(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember ma2(CommonStructMember(1, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(ma2.common.member_type_id, MinimalTypeObject(uni_a));
   TypeLookup::get_equivalence_hash(hash);
-  MinimalStructMember mb2(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+  MinimalStructMember mb2(CommonStructMember(1, IS_KEY, make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
   TypeLookup::insert_entry(mb2.common.member_type_id, MinimalTypeObject(uni_b));
   a2.member_seq.append(ma2);
@@ -3189,11 +3302,11 @@ TEST(UnionTypeTest, Assignable)
   a2.discriminator.common.member_flags = 0;
   b2.discriminator.common.member_flags = 0;
   MinimalUnionMember ma2_1(CommonUnionMember(1, UnionMemberFlag(),
-                                             TypeIdentifier::makeString(true, StringSTypeDefn(60)),
+                                             makeString(true, StringSTypeDefn(60)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb2_1(CommonUnionMember(1, UnionMemberFlag(),
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(100)),
+                                             makeString(true, StringLTypeDefn(100)),
                                              UnionCaseLabelSeq().append(10)),
                            MinimalMemberDetail("member1"));
   a2.member_seq.append(ma2_1);
@@ -3209,14 +3322,14 @@ TEST(UnionTypeTest, Assignable)
   a3.discriminator.common.member_flags = IS_KEY;
   b3.discriminator.common.member_flags = IS_KEY;
   MinimalUnionMember ma3_1(CommonUnionMember(1, UnionMemberFlag(),
-                                             TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                             makeString(false, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember ma3_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_FLOAT32),
                                              UnionCaseLabelSeq().append(30)),
                            MinimalMemberDetail("member2"));
   MinimalUnionMember mb3_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(false, StringLTypeDefn(100)),
+                                             makeString(false, StringLTypeDefn(100)),
                                              UnionCaseLabelSeq().append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb3_2(CommonUnionMember(4, UnionMemberFlag(), TypeIdentifier(TK_FLOAT32),
@@ -3235,14 +3348,14 @@ TEST(UnionTypeTest, Assignable)
   a4.discriminator.common.member_flags = 0;
   b4.discriminator.common.member_flags = 0;
   MinimalUnionMember ma4_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                             makeString(true, StringLTypeDefn(220)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember ma4_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_FLOAT128),
                                              UnionCaseLabelSeq().append(40)),
                            MinimalMemberDetail("member2"));
   MinimalUnionMember mb4_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(120)),
+                                             makeString(true, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb4_2(CommonUnionMember(5, UnionMemberFlag(), TypeIdentifier(TK_FLOAT128),
@@ -3391,14 +3504,14 @@ TEST(UnionTypeTest, NotAssignable)
   a6.discriminator.common.member_flags = IS_KEY;
   b6.discriminator.common.member_flags = IS_KEY;
   MinimalUnionMember ma6_1(CommonUnionMember(1, UnionMemberFlag(),
-                                             TypeIdentifier::makeString(true, StringSTypeDefn(60)),
+                                             makeString(true, StringSTypeDefn(60)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember ma6_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_INT32),
                                              UnionCaseLabelSeq().append(30)),
                            MinimalMemberDetail("member2"));
   MinimalUnionMember mb6_1(CommonUnionMember(1, UnionMemberFlag(),
-                                             TypeIdentifier::makeString(false, StringLTypeDefn(100)),
+                                             makeString(false, StringLTypeDefn(100)),
                                              UnionCaseLabelSeq().append(10)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb6_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_INT32),
@@ -3417,14 +3530,14 @@ TEST(UnionTypeTest, NotAssignable)
   a7.discriminator.common.member_flags = 0;
   b7.discriminator.common.member_flags = 0;
   MinimalUnionMember ma7_1(CommonUnionMember(1, UnionMemberFlag(),
-                                             TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                             makeString(false, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember ma7_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_FLOAT32),
                                              UnionCaseLabelSeq().append(30)),
                            MinimalMemberDetail("member2"));
   MinimalUnionMember mb7_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(100)),
+                                             makeString(true, StringLTypeDefn(100)),
                                              UnionCaseLabelSeq().append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb7_2(CommonUnionMember(4, UnionMemberFlag(), TypeIdentifier(TK_FLOAT32),
@@ -3443,14 +3556,14 @@ TEST(UnionTypeTest, NotAssignable)
   a8.discriminator.common.member_flags = IS_KEY;
   b8.discriminator.common.member_flags = IS_KEY;
   MinimalUnionMember ma8_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                             makeString(true, StringLTypeDefn(220)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember ma8_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_FLOAT128),
                                              UnionCaseLabelSeq().append(40)),
                            MinimalMemberDetail("member2"));
   MinimalUnionMember mb8_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                             makeString(false, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb8_2(CommonUnionMember(5, UnionMemberFlag(), TypeIdentifier(TK_FLOAT128),
@@ -3469,14 +3582,14 @@ TEST(UnionTypeTest, NotAssignable)
   a9.discriminator.common.member_flags = 0;
   b9.discriminator.common.member_flags = 0;
   MinimalUnionMember ma9_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                             makeString(true, StringLTypeDefn(220)),
                                              UnionCaseLabelSeq().append(10).append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember ma9_2(CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_FLOAT128),
                                              UnionCaseLabelSeq().append(40)),
                            MinimalMemberDetail("member2"));
   MinimalUnionMember mb9_1(CommonUnionMember(1, IS_DEFAULT,
-                                             TypeIdentifier::makeString(true, StringLTypeDefn(120)),
+                                             makeString(true, StringLTypeDefn(120)),
                                              UnionCaseLabelSeq().append(20)),
                            MinimalMemberDetail("member1"));
   MinimalUnionMember mb9_2(CommonUnionMember(5, UnionMemberFlag(), TypeIdentifier(TK_FLOAT128),
@@ -3495,11 +3608,11 @@ TEST(UnionTypeTest, NotAssignable)
   a10.discriminator.common.member_flags = 0;
   b10.discriminator.common.member_flags = 0;
   MinimalUnionMember ma10_1(CommonUnionMember(1, IS_DEFAULT,
-                                              TypeIdentifier::makeString(true, StringLTypeDefn(220)),
+                                              makeString(true, StringLTypeDefn(220)),
                                               UnionCaseLabelSeq().append(10).append(20)),
                             MinimalMemberDetail("member1"));
   MinimalUnionMember mb10_1(CommonUnionMember(1, IS_DEFAULT,
-                                              TypeIdentifier::makeString(true, StringLTypeDefn(120)),
+                                              makeString(true, StringLTypeDefn(120)),
                                               UnionCaseLabelSeq().append(30)),
                             MinimalMemberDetail("member1"));
   a10.member_seq.append(ma10_1);

@@ -227,7 +227,9 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
   //get message block from octet seq then deser to a type info
   XTypes::TypeInformation ti;
-  XTypes::deserialize_type_info(ti, reader.serializedTypeInfo);
+  DCPS::OctetSeq seq;
+  copy(seq, reader.serializedTypeInfo);
+  XTypes::deserialize_type_info(ti, seq);
 
   AssociationData data;
   data.remote_id_ = reader.readerId;

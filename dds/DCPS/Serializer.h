@@ -61,12 +61,19 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace DDS {
-  class OctetSeq;
-}
-
 namespace OpenDDS {
 namespace DCPS {
+
+class OctetSeq {
+public:
+  void length(size_t size) { data_.resize(size); }
+  size_t length() const { return data_.size(); }
+  const void* get_buffer() const { return data_.data(); }
+  void* get_buffer() { return const_cast<char*>(data_.data()); }
+
+private:
+  std::string data_;
+};
 
 enum Endianness {
   ENDIAN_BIG = 0,
@@ -312,8 +319,8 @@ public:
   /**
    * This constructor receives an already populated OctetSeq so the write pointer is advanced
    */
-  explicit MessageBlockHelper(const DDS::OctetSeq& seq);
-  explicit MessageBlockHelper(DDS::OctetSeq& seq);
+  explicit MessageBlockHelper(const DCPS::OctetSeq& seq);
+  explicit MessageBlockHelper(DCPS::OctetSeq& seq);
   operator ACE_Message_Block*() { return &mb_; }
 
 private:
