@@ -314,8 +314,7 @@ private:
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
-    if(marshal_skip_serialize_)
-    {
+    if (marshal_skip_serialize_) {
       size_t effective_size = 0, padding = 0;
       if (marshaled_size_) {
         effective_size = marshaled_size_;
