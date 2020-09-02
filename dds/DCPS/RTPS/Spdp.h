@@ -166,7 +166,7 @@ public:
 #ifdef ACE_HAS_IPV6
   u_short get_ipv6_spdp_port() const { return tport_ ? tport_->ipv6_uni_port_ : 0; }
 
-  u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
+  u_short get_ipv6_sedp_port() const { return sedp_->ipv6_local_address().get_port_number(); }
 #endif
 
   void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_->rtps_relay_address(address); }

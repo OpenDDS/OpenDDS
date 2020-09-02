@@ -183,7 +183,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   sedp_->init(guid_, *disco, domain_);
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+  ICE::Endpoint* endpoint = sedp_->get_ice_endpoint();
   if (endpoint) {
     RepoId l = guid_;
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
@@ -310,7 +310,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
     throw std::runtime_error("unable to retrieve participant security attributes");
   }
 
-  sedp_.init_security(identity_handle, perm_handle, crypto_handle);
+  sedp_->init_security(identity_handle, perm_handle, crypto_handle);
 }
 #endif
 
@@ -345,7 +345,7 @@ Spdp::~Spdp()
       DiscoveredParticipantIter part = participants_.find(*participant_id);
       if (part != participants_.end()) {
 #ifdef OPENDDS_SECURITY
-        ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
@@ -361,7 +361,7 @@ Spdp::~Spdp()
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+  ICE::Endpoint* endpoint = sedp_->get_ice_endpoint();
   if (endpoint) {
     RepoId l = guid_;
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
@@ -393,13 +393,13 @@ Spdp::write_secure_updates()
   const Security::SPDPdiscoveredParticipantData pdata =
     build_local_pdata(Security::DPDK_SECURE);
 
-  sedp_.write_dcps_participant_secure(pdata, GUID_UNKNOWN);
+  sedp_->write_dcps_participant_secure(pdata, GUID_UNKNOWN);
 }
 
 void
 Spdp::write_secure_disposes()
 {
-  sedp_.write_dcps_participant_dispose(guid_);
+  sedp_->write_dcps_participant_dispose(guid_);
 }
 #endif
 
@@ -606,7 +606,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
       // Associate the stateless reader / writer for handshakes & auth requests
-      sedp_.associate_preauth(iter->second.pdata_);
+      sedp_->associate_preauth(iter->second.pdata_);
     }
 #endif
 
@@ -691,7 +691,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
 #ifdef OPENDDS_SECURITY
-      ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+      ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
       }
@@ -854,7 +854,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (sedp_.ignoring(guid)) {
+  if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
     // asked us to ignore.
     return;
@@ -1045,7 +1045,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     dp.auth_req_msg_.message_data[0] = dp.local_auth_request_token_;
     // Send the auth req immediately to reset the remote if they are
     // still authenticated with us.
-    if (sedp_.write_stateless_message(dp.auth_req_msg_, make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER)) != DDS::RETCODE_OK) {
+    if (sedp_->write_stateless_message(dp.auth_req_msg_, make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER)) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::attempt_authentication() - ")
                    ACE_TEXT("Unable to write auth req message.\n")));
@@ -1390,7 +1390,7 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
       const DCPS::MonotonicTimePoint ptime = pos->first;
       const RepoId part_id = pos->second;
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-        ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
@@ -1435,7 +1435,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
-        if (sedp_.write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
+        if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
                        ACE_TEXT("Unable to write auth req message retry.\n")));
@@ -1449,7 +1449,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
         }
       }
       if (pit->second.have_handshake_msg_) {
-        if (sedp_.write_stateless_message(pit->second.handshake_msg_, reader) != DDS::RETCODE_OK) {
+        if (sedp_->write_stateless_message(pit->second.handshake_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
                        ACE_TEXT("Unable to write handshake message retry.\n")));
@@ -1556,7 +1556,7 @@ Spdp::send_handshake_message(const DCPS::RepoId& guid,
   dp.handshake_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
 
   const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-  const DDS::ReturnCode_t retval = sedp_.write_stateless_message(dp.handshake_msg_, reader);
+  const DDS::ReturnCode_t retval = sedp_->write_stateless_message(dp.handshake_msg_, reader);
   dp.have_handshake_msg_ = true;
   dp.stateless_msg_deadline_ = schedule_handshake_resend(config_->auth_resend_period(), guid);
   return retval;
@@ -1608,7 +1608,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_.rekey_volatile(iter->second.pdata_);
+    sedp_->rekey_volatile(iter->second.pdata_);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -1735,10 +1735,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   // notify Sedp of association
   // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
 
-  sedp_.associate(iter->second.pdata_);
-  sedp_.associate_volatile(iter->second.pdata_);
-  sedp_.associate_secure_writers_to_readers(iter->second.pdata_);
-  sedp_.associate_secure_readers_to_writers(iter->second.pdata_);
+  sedp_->associate(iter->second.pdata_);
+  sedp_->associate_volatile(iter->second.pdata_);
+  sedp_->associate_secure_writers_to_readers(iter->second.pdata_);
+  sedp_->associate_secure_readers_to_writers(iter->second.pdata_);
   iter->second.security_builtins_associated_ = true;
 
   iter->second.bit_ih_ = bit_instance_handle;
@@ -1799,7 +1799,7 @@ Spdp::remove_expired_participants()
             OPENDDS_STRING(conv).c_str()));
         }
 #ifdef OPENDDS_SECURITY
-        ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
@@ -2313,7 +2313,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #ifdef OPENDDS_SECURITY
   if (!outer_->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
-    ICE::Endpoint* sedp_endpoint = outer_->sedp_.get_ice_endpoint();
+    ICE::Endpoint* sedp_endpoint = outer_->sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
     }
@@ -2372,7 +2372,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 #ifdef OPENDDS_SECURITY
   if (!outer_->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
-    ICE::Endpoint* sedp_endpoint = outer_->sedp_.get_ice_endpoint();
+    ICE::Endpoint* sedp_endpoint = outer_->sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
     }
@@ -3131,7 +3131,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
     msg.source_endpoint_guid = GUID_UNKNOWN;
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(pcts);
 
-    if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
+    if (sedp_->write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
     }
@@ -3482,7 +3482,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     return;
   }
 
-  ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find("SEDP");
     if (sedp_pos != ai_map.end()) {
