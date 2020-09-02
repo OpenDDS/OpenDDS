@@ -968,7 +968,6 @@ namespace OpenDDS {
     DataReaderImpl::qos_change(qos);
   }
 
-  ACE_INLINE
   virtual void set_marshal_skip_serialize(bool value)
   {
     marshal_skip_serialize_ = value;
