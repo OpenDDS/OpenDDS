@@ -8,6 +8,6 @@
 #include <dds/DdsDcpsCore.idl>
 module SkipSerialize {
   @topic struct Message {
-    DDS::OctetSeq  serialized_data;
+    DDS::OctetSeq serialized_data;
   };
 };
