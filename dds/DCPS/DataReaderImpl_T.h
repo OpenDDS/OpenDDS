@@ -75,7 +75,8 @@ namespace OpenDDS {
     typedef typename TraitsType::DataReaderType Interface;
 
     DataReaderImpl_T (void)
-    : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this))), marshal_skip_serialize_(false)
+    : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this)))
+    , marshal_skip_serialize_(false)
     {
     }
 
