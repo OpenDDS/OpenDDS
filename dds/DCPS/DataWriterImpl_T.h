@@ -490,6 +490,7 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
+      char* wr = tmp_mb->wr_ptr();
       if (encapsulated) {
         EncapsulationHeader encap;
         if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
@@ -509,6 +510,10 @@ private:
           ACE_TEXT("data serialization error.\n"),
           TraitsType::type_name()));
         return 0;
+      }
+      if (encapsulated) {
+        unsigned char padding = (tmp_mb->wr_ptr() - wr) % 4;
+        wr[3] &= (padding | 0xfc);
       }
     }
 
