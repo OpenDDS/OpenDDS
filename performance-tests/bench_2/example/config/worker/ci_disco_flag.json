@@ -3,8 +3,9 @@
   "start_time": { "sec": -3, "nsec": 0 },
   "stop_time": { "sec": -10, "nsec": 0 },
   "destruction_time": { "sec": -1, "nsec": 0 },
-  "wait_for_discovery":true,
-  "wait_for_discovery_seconds":30,
+
+  "wait_for_discovery": true,
+  "wait_for_discovery_seconds": 30,
 
   "process": {
     "config_sections": [

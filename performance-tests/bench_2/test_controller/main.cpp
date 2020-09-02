@@ -199,7 +199,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Try To Load Scenario
   std::string scenario_path = join_path(test_context_path, "config", "scenario", scenario_id + ".json");
-  ScenarioPrototype scenario_prototype;
+  ScenarioPrototype scenario_prototype{};
   std::ifstream scenario_file(scenario_path);
   if (scenario_file.is_open()) {
     if (!json_2_idl(scenario_file, scenario_prototype)) {
@@ -273,7 +273,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ScenarioManager scenario_manager(bench_root, test_context_path, overrides, dds_entities);
 
     // Part 1: Get What Needs to be Broadcast
-    AllocatedScenario allocated_scenario;
+    AllocatedScenario allocated_scenario{};
     if (preallocated_scenario_input_path.size()) {
       std::cout << "Loading Scenario Allocation from File..." << std::endl;
       std::ifstream file(preallocated_scenario_input_path);
