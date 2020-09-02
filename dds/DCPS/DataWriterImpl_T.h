@@ -289,7 +289,6 @@ public:
     marshal_skip_serialize_ = value;
   }
 
-  ACE_INLINE
   virtual bool get_marshal_skip_serialize() const
   {
     return marshal_skip_serialize_;
