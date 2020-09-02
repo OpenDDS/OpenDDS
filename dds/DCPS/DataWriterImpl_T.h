@@ -511,7 +511,7 @@ private:
           TraitsType::type_name()));
         return 0;
       }
-      if (encapsulated && (encoding.kind() == Encoding::KIND_XCDR1 
+      if (encapsulated && (encoding.kind() == Encoding::KIND_XCDR1
           || encoding.kind() == Encoding::KIND_XCDR2)) {
         unsigned char padding = (tmp_mb->wr_ptr() - wr) % 4;
         wr[3] |= (padding & 0x03);
