@@ -34,84 +34,14 @@ if ($test->flag('thread_per')) {
 }
 
 my $flag_found = 1;
-if ($test->flag('udp')) {
-    $pub_opts .= " -DCPSConfigFile pub_udp.ini";
-    $sub_opts .= " -DCPSConfigFile sub_udp.ini";
-}
-elsif ($test->flag('multicast')) {
-    $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
-    $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
-}
-elsif ($test->flag('default_tcp')) {
-    $pub_opts .= " -t tcp";
-    $sub_opts .= " -t tcp";
-}
-elsif ($test->flag('default_udp')) {
-    $pub_opts .= " -t udp";
-    $sub_opts .= " -t udp";
-}
-elsif ($test->flag('default_multicast')) {
-    $pub_opts .= " -t multicast";
-    $sub_opts .= " -t multicast";
-}
-elsif ($test->flag('nobits')) {
-    # nobits handled by TestFramework
-    $pub_opts .= ' -DCPSConfigFile pub.ini';
-    $sub_opts .= ' -DCPSConfigFile sub.ini';
-}
-elsif ($test->flag('ipv6')) {
-    $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
-    $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
-}
-elsif ($test->flag('rtps')) {
-    $pub_opts .= " -DCPSConfigFile rtps.ini";
-    $sub_opts .= " -DCPSConfigFile rtps.ini";
-}
-elsif ($test->flag('rtps_disc')) {
+if ($test->flag('rtps_disc')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
-}
-elsif ($test->flag('rtps_disc_half_sec_pub')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
-    $is_rtps_disc = 1;
-}
-elsif ($test->flag('rtps_disc_half_sec_sub')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
-    $is_rtps_disc = 1;
-}
-elsif ($test->flag('rtps_disc_sec')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
-    $is_rtps_disc = 1;
-}
-elsif ($test->flag('rtps_disc_tcp')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
-    $is_rtps_disc = 1;
-}
-elsif ($test->flag('rtps_disc_tcp_udp')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
-    $is_rtps_disc = 1;
-}
-elsif ($test->flag('rtps_unicast')) {
-    $test->{nobits} = 1;
-    $pub_opts .= " -DCPSConfigFile rtps_uni.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_uni.ini";
-}
-elsif ($test->flag('shmem')) {
-    $pub_opts .= " -DCPSConfigFile shmem.ini";
-    $sub_opts .= " -DCPSConfigFile shmem.ini";
 }
 elsif ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
-    my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
-                        nobits stack shmem
-                        rtps rtps_disc rtps_unicast rtps_disc_tcp/);
-    push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
+    my @tests = ('', qw/rtps_disc/);
     for my $test (@tests) {
         $status += system($^X, $0, @original_ARGV, $test);
     }
@@ -119,8 +49,8 @@ elsif ($test->flag('all')) {
 }
 else {
     $flag_found = 0;
-    $pub_opts .= ' -DCPSConfigFile pub.ini';
-    $sub_opts .= ' -DCPSConfigFile sub.ini';
+    $pub_opts .= ' -DCPSConfigFile rtps_disc.ini';
+    $sub_opts .= ' -DCPSConfigFile rtps_disc.ini';
 }
 
 $test->report_unused_flags(!$flag_found);
