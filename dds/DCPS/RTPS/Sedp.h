@@ -681,8 +681,6 @@ private:
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
   void write_durable_subscription_data(const DCPS::RepoId& reader, bool secure);
 
-  void write_durable_participant_message_data(const DCPS::RepoId& reader);
-
   DDS::ReturnCode_t add_publication_i(const DCPS::RepoId& rid,
                                       LocalPublication& pub);
 
@@ -717,10 +715,6 @@ private:
   DDS::ReturnCode_t write_subscription_data_unsecure(const DCPS::RepoId& rid,
                                                      LocalSubscription& pub,
                                                      const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
-
-  DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
-                                                   LocalParticipantMessage& part,
-                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
