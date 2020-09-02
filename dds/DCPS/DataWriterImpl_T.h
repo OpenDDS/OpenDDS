@@ -513,7 +513,7 @@ private:
       }
       if (encapsulated) {
         unsigned char padding = (tmp_mb->wr_ptr() - wr) % 4;
-        wr[3] &= (padding | 0xfc);
+        wr[3] |= (padding & 0x03);
       }
     }
 
