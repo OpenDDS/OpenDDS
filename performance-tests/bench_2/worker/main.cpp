@@ -164,23 +164,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   using Builder::ZERO;
 
-  typedef TAO::unbounded_value_sequence<Bench::WorkerConfig> WorkerConfigs;
-  WorkerConfigs configs;
-  configs.length(100000);
-  for (size_t i = 0; i < configs.length(); ++i) {
-    assert(configs[i].create_time.sec == 0);
-    assert(configs[i].create_time.nsec == 0);
-    assert(configs[i].enable_time.sec == 0);
-    assert(configs[i].enable_time.nsec == 0);
-    assert(configs[i].start_time.sec == 0);
-    assert(configs[i].start_time.nsec == 0);
-    assert(configs[i].stop_time.sec == 0);
-    assert(configs[i].stop_time.nsec == 0);
-    assert(configs[i].destruction_time.sec == 0);
-    assert(configs[i].destruction_time.nsec == 0);
-  }
-
-
   Bench::WorkerConfig config{};
 
   config.create_time = ZERO;
