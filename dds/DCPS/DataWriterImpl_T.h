@@ -284,7 +284,6 @@ public:
     return data_allocator_.get();
   };
 
-  ACE_INLINE
   virtual void set_marshal_skip_serialize(bool value)
   {
     marshal_skip_serialize_ = value;
