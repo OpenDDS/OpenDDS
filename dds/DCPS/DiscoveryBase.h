@@ -131,7 +131,7 @@ namespace OpenDDS {
     };
 
     template <typename DiscoveredParticipantData_>
-    class EndpointManager : public virtual RcEventHandler {
+    class EndpointManager : public RcEventHandler {
     protected:
 
       struct DiscoveredSubscription : PoolAllocationBase {

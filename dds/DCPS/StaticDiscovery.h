@@ -213,13 +213,13 @@ public:
                     const DDS::DomainParticipantQos& qos,
                     const EndpointRegistry& registry)
     : LocalParticipant<StaticEndpointManager>(qos)
-    , endpoint_manager_(guid, lock_, registry, *this)
+    , endpoint_manager_(DCPS::make_rch<StaticEndpointManager>(guid, DCPS::ref(lock_), registry, DCPS::ref(*this)))
   {}
 
   void init_bit(const DDS::Subscriber_var& bit_subscriber)
   {
     bit_subscriber_ = bit_subscriber;
-    endpoint_manager_.init_bit();
+    endpoint_manager_->init_bit();
   }
 
   void fini_bit()
@@ -228,9 +228,9 @@ public:
   }
 
 private:
-  virtual StaticEndpointManager& endpoint_manager() { return endpoint_manager_; }
+  virtual StaticEndpointManager& endpoint_manager() { return *endpoint_manager_; }
 
-  StaticEndpointManager endpoint_manager_;
+  DCPS::RcHandle<StaticEndpointManager> endpoint_manager_;
 };
 
 class OpenDDS_Dcps_Export StaticDiscovery

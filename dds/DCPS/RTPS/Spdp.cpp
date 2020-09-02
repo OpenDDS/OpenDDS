@@ -179,8 +179,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 #endif
 
   guid = guid_; // may have changed in SpdpTransport constructor
-  sedp_.ignore(guid);
-  sedp_.init(guid_, *disco, domain_);
+  sedp_->ignore(guid);
+  sedp_->init(guid_, *disco, domain_);
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
@@ -208,7 +208,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
-  , sedp_(guid_, *this, lock_)
+  , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
@@ -371,7 +371,7 @@ Spdp::~Spdp()
 
   // ensure sedp's task queue is drained before data members are being
   // deleted
-  sedp_.shutdown();
+  sedp_->shutdown();
 
   // release lock for reset of event handler, which may delete transport
   tport_->close();
@@ -562,7 +562,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  if (sedp_.ignoring(guid)) {
+  if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
     // asked us to ignore.
     return;
@@ -733,7 +733,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       // Participant may have been removed while lock released
       if (iter != participants_.end()) {
         if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
-          sedp_.update_locators(pdata);
+          sedp_->update_locators(pdata);
         }
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
@@ -832,7 +832,7 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter&
 
   // notify Sedp of association
   // Sedp may call has_discovered_participant, which is why the participant must be added before this call to associate.
-  sedp_.associate(dp_iter->second.pdata_);
+  sedp_->associate(dp_iter->second.pdata_);
 
   dp_iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1883,7 +1883,7 @@ Spdp::fini_bit()
   // request for SpdpTransport(actually Reactor) thread and Sedp::Task
   // to acknowledge
   tport_->acknowledge();
-  sedp_.acknowledge();
+  sedp_->acknowledge();
   // wait for the 2 acknowledgements
   wait_for_acks_.wait_for_acks(2);
 }
@@ -1965,8 +1965,8 @@ Spdp::build_local_pdata(
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
       0,
-      sedp_.unicast_locators(),
-      sedp_.multicast_locators(),
+      sedp_->unicast_locators(),
+      sedp_->multicast_locators(),
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
@@ -2787,7 +2787,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INE
 void
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
-  sedp_.signal_liveliness(kind);
+  sedp_->signal_liveliness(kind);
 }
 
 bool

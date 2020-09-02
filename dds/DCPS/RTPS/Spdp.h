@@ -161,7 +161,7 @@ public:
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
-  u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
+  u_short get_sedp_port() const { return sedp_->local_address().get_port_number(); }
 
 #ifdef ACE_HAS_IPV6
   u_short get_ipv6_spdp_port() const { return tport_ ? tport_->ipv6_uni_port_ : 0; }
@@ -169,9 +169,9 @@ public:
   u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
 #endif
 
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_->rtps_relay_address(address); }
 
-  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
+  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
@@ -183,7 +183,7 @@ public:
 #endif
                                       );
 protected:
-  Sedp& endpoint_manager() { return sedp_; }
+  Sedp& endpoint_manager() { return *sedp_; }
   void remove_discovered_participant_i(DiscoveredParticipantIter iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -392,7 +392,7 @@ private:
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
-  Sedp sedp_;
+  DCPS::RcHandle<Sedp>  sedp_;
   // wait for acknowledgments from SpdpTransport and Sedp::Task
   // when BIT is being removed (fini_bit)
   WaitForAcks wait_for_acks_;
