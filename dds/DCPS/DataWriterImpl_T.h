@@ -473,7 +473,7 @@ private:
       if (encapsulated && (encoding.kind() == Encoding::KIND_XCDR1
         || encoding.kind() == Encoding::KIND_XCDR2)) {
         unsigned char padding = (tmp_mb->wr_ptr() - wr) % 4;
-        wr[3] |= (padding & 0x03);
+        wr[serializer.swap_bytes() ? 0 : 3] |= (padding & 0x03);
       }
     } else { // OpenDDS::DCPS::FULL_MARSHALING
       ACE_NEW_MALLOC_RETURN(tmp_mb,
@@ -519,7 +519,7 @@ private:
       if (encapsulated && (encoding.kind() == Encoding::KIND_XCDR1
           || encoding.kind() == Encoding::KIND_XCDR2)) {
         unsigned char padding = (tmp_mb->wr_ptr() - wr) % 4;
-        wr[3] |= (padding & 0x03);
+        wr[serializer.swap_bytes() ? 0 : 3] |= (padding & 0x03);
       }
     }
 
