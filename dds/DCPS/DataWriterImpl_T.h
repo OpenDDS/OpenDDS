@@ -417,6 +417,8 @@ public:
 
 private:
 
+  static const int PADDING_MARKER_BYTE_INDEX = 3;
+
   /**
    * Serialize the instance data.
    *
@@ -449,7 +451,7 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      char* wr = tmp_mb->wr_ptr();
+      char* const wr = mb->wr_ptr();
       if (encapsulated) {
         EncapsulationHeader encap;
         if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
@@ -471,7 +473,7 @@ private:
         return 0;
       }
       if (encapsulated) {
-        EncapsulationHeader::set_padding_marker(wr[3], tmp_mb->wr_ptr() - wr);
+        EncapsulationHeader::set_padding_marker(wr[PADDING_MARKER_BYTE_INDEX], mb->wr_ptr() - wr);
       }
     } else { // OpenDDS::DCPS::FULL_MARSHALING
       ACE_NEW_MALLOC_RETURN(tmp_mb,
@@ -493,7 +495,7 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      char* wr = tmp_mb->wr_ptr();
+      char* const wr = mb->wr_ptr();
       if (encapsulated) {
         EncapsulationHeader encap;
         if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
@@ -515,7 +517,7 @@ private:
         return 0;
       }
       if (encapsulated) {
-        EncapsulationHeader::set_padding_marker(wr[3], tmp_mb->wr_ptr() - wr);
+        EncapsulationHeader::set_padding_marker(wr[PADDING_MARKER_BYTE_INDEX], mb->wr_ptr() - wr);
       }
     }
 
