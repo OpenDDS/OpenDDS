@@ -449,6 +449,7 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
+      char* wr = tmp_mb->wr_ptr();
       if (encapsulated) {
         EncapsulationHeader encap;
         if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
@@ -469,7 +470,11 @@ private:
           TraitsType::type_name()));
         return 0;
       }
-
+      if (encapsulated && (encoding.kind() == Encoding::KIND_XCDR1
+        || encoding.kind() == Encoding::KIND_XCDR2)) {
+        unsigned char padding = (tmp_mb->wr_ptr() - wr) % 4;
+        wr[3] |= (padding & 0x03);
+      }
     } else { // OpenDDS::DCPS::FULL_MARSHALING
       ACE_NEW_MALLOC_RETURN(tmp_mb,
         static_cast<ACE_Message_Block*>(
