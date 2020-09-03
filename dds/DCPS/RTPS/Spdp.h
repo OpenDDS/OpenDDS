@@ -238,7 +238,7 @@ private:
     virtual int handle_input(ACE_HANDLE h);
     virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
-    void open();
+    void open(const DCPS::ReactorTask_rch& reactor_task);
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
@@ -246,13 +246,13 @@ private:
     void send(WriteFlags flags);
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
-    void close();
+    void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
 #ifdef ACE_HAS_IPV6
     bool open_unicast_ipv6_socket(u_short port);
 #endif
-    void acknowledge();
+    void acknowledge(const DCPS::ReactorTask_rch& reactor_task);
 
     void join_multicast_group(const DCPS::NetworkInterface& nic,
                               bool all_interfaces = false);
@@ -296,7 +296,6 @@ private:
     OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    DCPS::ReactorTask reactor_task_;
     DCPS::RcHandle<DCPS::JobQueue> job_queue_;
     typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;

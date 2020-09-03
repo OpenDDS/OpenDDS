@@ -35,11 +35,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport& transport,
-    const MulticastSessionFactory_rch& session_factory,
-    MulticastPeer local_peer,
-    MulticastInst& config,
-    ReactorTask* reactor_task,
-    bool is_active)
+                                     const MulticastSessionFactory_rch& session_factory,
+                                     MulticastPeer local_peer,
+                                     MulticastInst& config,
+                                     const ReactorTask_rch &reactor_task,
+                                     bool is_active)
 : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
   session_factory_(session_factory),
   local_peer_(local_peer),

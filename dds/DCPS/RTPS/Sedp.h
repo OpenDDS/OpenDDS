@@ -38,6 +38,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
 #endif
 
 #include "ace/Atomic_Op.h"
@@ -59,14 +60,12 @@ class Spdp;
 class WaitForAcks;
 
 #ifdef OPENDDS_SECURITY
-struct DiscoveredPublication_SecurityWrapper;
-struct DiscoveredSubscription_SecurityWrapper;
 typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
 #else
 typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
 
-class Sedp : public DCPS::EndpointManager<ParticipantData_t> {
+  class Sedp : public DCPS::EndpointManager<ParticipantData_t>, public DCPS::RcObject {
 public:
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
@@ -174,6 +173,8 @@ public:
 
   void stun_server_address(const ACE_INET_Addr& address);
 
+  DCPS::ReactorTask_rch reactor_task() const;
+
 private:
 
   class AssociationComplete : public DCPS::JobQueue::Job {
@@ -192,88 +193,204 @@ private:
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 #endif
 
-  struct Msg : public DCPS::PoolAllocationBase {
-    enum MsgType {
-      MSG_PARTICIPANT,
-      MSG_WRITER,
-      MSG_READER,
-      MSG_PARTICIPANT_DATA,
-      MSG_REMOVE_FROM_PUB_BIT,
-      MSG_REMOVE_FROM_SUB_BIT,
-      MSG_FINI_BIT,
-      MSG_STOP,
+  class MsgBase : public DCPS::JobQueue::Job {
+  public:
+    MsgBase(DCPS::WeakRcHandle<Sedp> sedp,
+            DCPS::MessageId id)
+      : sedp_(sedp)
+      , id_(id)
+    {}
 
-#ifdef OPENDDS_SECURITY
-      MSG_PARTICIPANT_STATELESS_DATA,
-      MSG_PARTICIPANT_VOLATILE_SECURE,
-      MSG_PARTICIPANT_DATA_SECURE,
-      MSG_WRITER_SECURE,
-      MSG_READER_SECURE,
-      MSG_DCPS_PARTICIPANT_SECURE
-#endif
-
-    } type_;
-
-    DCPS::MessageId id_;
-
-    union {
-      const ParticipantData_t* dpdata_;
-
-      const DiscoveredPublication* wdata_;
-
-#ifdef OPENDDS_SECURITY
-      const DiscoveredPublication_SecurityWrapper* wdata_secure_;
-#endif
-
-      const DiscoveredSubscription* rdata_;
-
-#ifdef OPENDDS_SECURITY
-      const DiscoveredSubscription_SecurityWrapper* rdata_secure_;
-#endif
-
-      const ParticipantMessageData* pmdata_;
-      DDS::InstanceHandle_t ih_;
-
-#ifdef OPENDDS_SECURITY
-      const DDS::Security::ParticipantGenericMessage* pgmdata_;
-#endif
-    };
-
-    Msg(MsgType mt, DCPS::MessageId id, const ParticipantData_t* dpdata)
-      : type_(mt), id_(id), dpdata_(dpdata) {}
-
-    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredPublication* wdata)
-      : type_(mt), id_(id), wdata_(wdata) {}
-
-#ifdef OPENDDS_SECURITY
-    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredPublication_SecurityWrapper* wdata)
-      : type_(mt), id_(id), wdata_secure_(wdata) {}
-#endif
-
-    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredSubscription* rdata)
-      : type_(mt), id_(id), rdata_(rdata) {}
-
-#ifdef OPENDDS_SECURITY
-    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredSubscription_SecurityWrapper* rdata)
-      : type_(mt), id_(id), rdata_secure_(rdata) {}
-#endif
-
-    Msg(MsgType mt, DCPS::MessageId id, const ParticipantMessageData* pmdata)
-      : type_(mt), id_(id), pmdata_(pmdata) {}
-
-    Msg(MsgType mt, DCPS::MessageId id, DDS::InstanceHandle_t ih)
-      : type_(mt), id_(id), ih_(ih) {}
-
-#ifdef OPENDDS_SECURITY
-    Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
-      : type_(mt), id_(id), pgmdata_(data) {}
-#endif
-    virtual ~Msg();
-
-    static const char* msgTypeToString(MsgType type);
-    const char* msgTypeToString() const;
+  protected:
+    DCPS::WeakRcHandle<Sedp> sedp_;
+    const DCPS::MessageId id_;
   };
 
+  class MSG_PARTICIPANT : public MsgBase {
+  public:
+    MSG_PARTICIPANT(DCPS::WeakRcHandle<Sedp> sedp,
+                    DCPS::MessageId id,
+                    const ParticipantData_t data)
+      : MsgBase(sedp, id)
+      , data_(data)
+    {}
+
+    void execute();
+
+  private:
+    const ParticipantData_t data_;
+  };
+
+  class MSG_WRITER : public MsgBase {
+  public:
+    MSG_WRITER(DCPS::WeakRcHandle<Sedp> sedp,
+               DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DiscoveredPublication& data() { return data_; }
+    void execute();
+
+  private:
+    DiscoveredPublication data_;
+  };
+
+  class MSG_READER : public MsgBase {
+  public:
+    MSG_READER(DCPS::WeakRcHandle<Sedp> sedp,
+               DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DiscoveredSubscription& data() { return data_; }
+    void execute();
+
+  private:
+    DiscoveredSubscription data_;
+  };
+
+  class MSG_PARTICIPANT_DATA : public MsgBase {
+  public:
+    MSG_PARTICIPANT_DATA(DCPS::WeakRcHandle<Sedp> sedp,
+                         DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    ParticipantMessageData& data() { return data_; }
+    void execute();
+
+  private:
+    ParticipantMessageData data_;
+  };
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  class MSG_REMOVE_FROM_PUB_BIT : public MsgBase {
+  public:
+    MSG_REMOVE_FROM_PUB_BIT(DCPS::WeakRcHandle<Sedp> sedp,
+                            DCPS::MessageId id,
+                            DDS::InstanceHandle_t ih)
+      : MsgBase(sedp, id)
+      , ih_(ih)
+    {}
+
+    void execute();
+
+  private:
+    const DDS::InstanceHandle_t ih_;
+  };
+
+  class MSG_REMOVE_FROM_SUB_BIT : public MsgBase {
+  public:
+    MSG_REMOVE_FROM_SUB_BIT(DCPS::WeakRcHandle<Sedp> sedp,
+                            DCPS::MessageId id,
+                            DDS::InstanceHandle_t ih)
+      : MsgBase(sedp, id)
+      , ih_(ih)
+    {}
+
+    void execute();
+
+  private:
+    const DDS::InstanceHandle_t ih_;
+  };
+#endif /* DDS_HAS_MINIMUM_BIT */
+
+  // TODO: Is this class necessary?
+  class MSG_FINI_BIT : public MsgBase {
+  public:
+    MSG_FINI_BIT(DCPS::WeakRcHandle<Sedp> sedp)
+      : MsgBase(sedp, DCPS::REQUEST_ACK)
+    {}
+
+    void execute();
+  };
+
+#ifdef OPENDDS_SECURITY
+  class MSG_PARTICIPANT_STATELESS_DATA : public MsgBase {
+  public:
+    MSG_PARTICIPANT_STATELESS_DATA(DCPS::WeakRcHandle<Sedp> sedp,
+                                   DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DDS::Security::ParticipantGenericMessage& data() { return data_; }
+    void execute();
+
+  private:
+    DDS::Security::ParticipantGenericMessage data_;
+  };
+
+  class MSG_PARTICIPANT_VOLATILE_SECURE : public MsgBase {
+  public:
+    MSG_PARTICIPANT_VOLATILE_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
+                                    DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DDS::Security::ParticipantGenericMessage& data() { return data_; }
+    void execute();
+
+  private:
+    DDS::Security::ParticipantGenericMessage data_;
+  };
+
+  class MSG_PARTICIPANT_DATA_SECURE : public MsgBase {
+  public:
+    MSG_PARTICIPANT_DATA_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
+                                DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    ParticipantMessageData& data() { return data_; }
+    void execute();
+
+  private:
+    ParticipantMessageData data_;
+  };
+
+  class MSG_WRITER_SECURE : public MsgBase {
+  public:
+    MSG_WRITER_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
+                      DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DiscoveredPublication_SecurityWrapper& data() { return data_; }
+    void execute();
+
+  private:
+    DiscoveredPublication_SecurityWrapper data_;
+  };
+
+  class MSG_READER_SECURE : public MsgBase {
+  public:
+    MSG_READER_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
+                      DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DiscoveredSubscription_SecurityWrapper& data() { return data_; }
+    void execute();
+
+  private:
+    DiscoveredSubscription_SecurityWrapper data_;
+  };
+
+  class MSG_DCPS_PARTICIPANT_SECURE : public MsgBase {
+  public:
+    MSG_DCPS_PARTICIPANT_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
+                                DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    ParticipantData_t& data() { return data_; }
+    void execute();
+
+  private:
+    ParticipantData_t data_;
+  };
+
+#endif
 
   class Endpoint : public DCPS::TransportClient {
   public:
@@ -481,74 +598,6 @@ private:
   Reader_rch participant_volatile_message_secure_reader_;
   Reader_rch dcps_participant_secure_reader_;
 #endif
-
-  static const size_t TASK_MQ_BYTES = sizeof(Msg) * 1024 * 32;
-
-  struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
-    explicit Task(Sedp* sedp)
-      : ACE_Task_Ex<ACE_MT_SYNCH, Msg>(0, new ACE_Message_Queue_Ex<Msg, ACE_MT_SYNCH>(TASK_MQ_BYTES, TASK_MQ_BYTES))
-      , spdp_(&sedp->spdp_)
-      , sedp_(sedp)
-      , shutting_down_(false)
-    {
-      delete_msg_queue_ = true;
-      activate();
-    }
-    ~Task();
-
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant = false);
-
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata);
-
-#ifdef OPENDDS_SECURITY
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication_SecurityWrapper> wrapper);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> wrapper);
-#endif
-
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
-    void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
-
-#ifdef OPENDDS_SECURITY
-    void enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
-    void enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
-    void enqueue_volatile_message_secure(
-      DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data);
-#endif
-
-    void acknowledge();
-    void shutdown();
-
-  private:
-    int svc();
-
-    void svc_i(const ParticipantData_t* pdata);
-
-#ifdef OPENDDS_SECURITY
-    void svc_secure_i(DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData* pdata);
-#endif
-
-    void svc_i(DCPS::MessageId id, const DiscoveredPublication* wdata);
-    void svc_i(DCPS::MessageId id, const DiscoveredSubscription* rdata);
-
-#ifdef OPENDDS_SECURITY
-    void svc_i(DCPS::MessageId id, const DiscoveredPublication_SecurityWrapper* wrapper);
-    void svc_i(DCPS::MessageId id, const DiscoveredSubscription_SecurityWrapper* wrapper);
-#endif
-
-    void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
-    void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
-
-#ifdef OPENDDS_SECURITY
-    void svc_participant_message_data_secure(DCPS::MessageId id, const ParticipantMessageData* data);
-    void svc_stateless_message(DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* data);
-    void svc_volatile_message_secure(DCPS::MessageId id, const DDS::Security::ParticipantVolatileMessageSecure* data);
-#endif
-
-    Spdp* spdp_;
-    Sedp* sedp_;
-    bool shutting_down_;
-  } task_;
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;

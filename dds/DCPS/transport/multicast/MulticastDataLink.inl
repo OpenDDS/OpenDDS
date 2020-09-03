@@ -46,7 +46,7 @@ MulticastDataLink::config()
   return transport().config();
 }
 
-ACE_INLINE ReactorTask*
+ACE_INLINE ReactorTask_rch
 MulticastDataLink::reactor_task()
 {
   return this->reactor_task_;

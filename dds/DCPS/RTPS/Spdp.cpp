@@ -365,7 +365,7 @@ Spdp::~Spdp()
   sedp_.shutdown();
 
   // release lock for reset of event handler, which may delete transport
-  tport_->close();
+  tport_->close(sedp_.reactor_task());
   eh_.reset();
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -1866,7 +1866,7 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
-  tport_->open();
+  tport_->open(sedp_.reactor_task());
 }
 
 void
@@ -1876,7 +1876,7 @@ Spdp::fini_bit()
   wait_for_acks_.reset();
   // request for SpdpTransport(actually Reactor) thread and Sedp::Task
   // to acknowledge
-  tport_->acknowledge();
+  tport_->acknowledge(sedp_.reactor_task());
   sedp_.acknowledge();
   // wait for the 2 acknowledgements
   wait_for_acks_.wait_for_acks(2);
@@ -1999,7 +1999,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   , lease_duration_(outer_->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
-  , reactor_task_(false)
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
 {
@@ -2088,10 +2087,8 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
 }
 
 void
-Spdp::SpdpTransport::open()
+Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 {
-  reactor_task_.open(0);
-
 #ifdef OPENDDS_SECURITY
   // Add the endpoint before any sending and receiving occurs.
   ICE::Endpoint* endpoint = get_ice_endpoint();
@@ -2101,7 +2098,7 @@ Spdp::SpdpTransport::open()
   }
 #endif
 
-  ACE_Reactor* reactor = reactor_task_.get_reactor();
+  ACE_Reactor* reactor = reactor_task->get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
@@ -2123,21 +2120,21 @@ Spdp::SpdpTransport::open()
   }
 #endif
 
-  local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task_.interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
+  local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
   local_sender_->enable(outer_->config_->resend_period());
 
 #ifdef OPENDDS_SECURITY
-  handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
-  handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
+  handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
+  handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
 #endif
 
-  relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay);
+  relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
   if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
       outer_->config_->use_rtps_relay()) {
     relay_sender_->enable(false, outer_->config_->spdp_rtps_relay_send_period());
   }
 
-  relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay_beacon);
+  relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay_beacon);
   if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
@@ -2218,7 +2215,7 @@ Spdp::SpdpTransport::dispose_unregister()
 }
 
 void
-Spdp::SpdpTransport::close()
+Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
 {
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
@@ -2253,7 +2250,7 @@ Spdp::SpdpTransport::close()
     local_sender_->disable_and_wait();
   }
 
-  ACE_Reactor* reactor = reactor_task_.get_reactor();
+  ACE_Reactor* reactor = reactor_task->get_reactor();
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
   reactor->remove_handler(multicast_socket_.get_handle(), mask);
@@ -2262,7 +2259,6 @@ Spdp::SpdpTransport::close()
   reactor->remove_handler(multicast_ipv6_socket_.get_handle(), mask);
   reactor->remove_handler(unicast_ipv6_socket_.get_handle(), mask);
 #endif
-  reactor_task_.stop();
 }
 
 void
@@ -2654,9 +2650,9 @@ Spdp::SpdpTransport::handle_exception(ACE_HANDLE)
 }
 
 void
-Spdp::SpdpTransport::acknowledge()
+Spdp::SpdpTransport::acknowledge(const DCPS::ReactorTask_rch& reactor_task)
 {
-  ACE_Reactor* reactor = reactor_task_.get_reactor();
+  ACE_Reactor* reactor = reactor_task->get_reactor();
   reactor->notify(this);
 }
 

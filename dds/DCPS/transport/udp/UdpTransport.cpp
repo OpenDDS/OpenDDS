@@ -44,8 +44,7 @@ UdpDataLink_rch
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
                             Priority priority, bool active)
 {
-  ReactorTask_rch rtask (reactor_task());
-  UdpDataLink_rch link(make_rch<UdpDataLink>(ref(*this), priority, rtask.in(), active));
+  UdpDataLink_rch link(make_rch<UdpDataLink>(ref(*this), priority, reactor_task(), active));
   // Configure link with transport configuration and reactor task:
 
   // Open logical connection:
