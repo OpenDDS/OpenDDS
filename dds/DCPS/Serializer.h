@@ -263,6 +263,8 @@ public:
 
   OPENDDS_STRING to_string() const;
 
+  void set_padding_marker(char& options, size_t size);
+
 private:
   /// The first two bytes as a big endian integer
   Kind kind_;

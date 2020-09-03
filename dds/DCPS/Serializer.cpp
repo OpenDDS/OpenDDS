@@ -196,6 +196,13 @@ bool EncapsulationHeader::to_encoding(
   return true;
 }
 
+void EncapsulationHeader::set_padding_marker(char& options, size_t size)
+{
+  size_t aligned = size;
+  align(aligned, 4);
+  options |= ((aligned - size) & 0x03);
+}
+
 OPENDDS_STRING EncapsulationHeader::to_string() const
 {
   switch (kind_) {
