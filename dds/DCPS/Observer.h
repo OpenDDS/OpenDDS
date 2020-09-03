@@ -27,7 +27,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class Observer
+class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
 {
 public:
@@ -36,18 +36,20 @@ public:
   typedef TAO_Objref_Out_T<Observer> Out;
   typedef RcHandle<Observer> Rch;
 
-  enum Event {
-    e_ENABLED                = 0X0001 << 0,
-    e_DELETED                = 0X0001 << 1,
-    e_QOS_CHANGED            = 0X0001 << 2,
-    e_ASSOCIATED             = 0X0001 << 3,
-    e_DISASSOCIATED          = 0X0001 << 4,
-    e_ASSOCIATED_QOS_CHANGED = 0X0001 << 5,
-    e_SAMPLE_SENT            = 0X0001 << 6,
-    e_SAMPLE_RECEIVED        = 0X0001 << 7,
-    e_SAMPLE_READ            = 0X0001 << 8,
-    e_SAMPLE_TAKEN           = 0X0001 << 9,
-    e_NONE                   = 0X0000
+  typedef unsigned long Event;
+  enum : unsigned long {
+    e_ENABLED                = 0x0001 << 0,
+    e_DELETED                = 0x0001 << 1,
+    e_QOS_CHANGED            = 0x0001 << 2,
+    e_ASSOCIATED             = 0x0001 << 3,
+    e_DISASSOCIATED          = 0x0001 << 4,
+    e_ASSOCIATED_QOS_CHANGED = 0x0001 << 5,
+    e_SAMPLE_SENT            = 0x0001 << 6,
+    e_SAMPLE_RECEIVED        = 0x0001 << 7,
+    e_SAMPLE_READ            = 0x0001 << 8,
+    e_SAMPLE_TAKEN           = 0x0001 << 9,
+    e_NONE                   = 0x0000,
+    e_ALL                    = 0xffff
   };
 
   struct Sample
