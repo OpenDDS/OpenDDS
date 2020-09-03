@@ -72,6 +72,27 @@ struct MutableXcdr12Struct {
   COMMON_FIELDS
 };
 
+enum UnionDisc {
+  E_SHORT_FIELD,
+  E_LONG_FIELD,
+  E_OCTET_FIELD,
+  E_LONG_LONG_FIELD
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableXcdr12Union switch (UnionDisc) {
+case E_SHORT_FIELD:
+  short short_field;
+case E_LONG_FIELD:
+  long long_field;
+case E_OCTET_FIELD:
+  octet octet_field;
+case E_LONG_LONG_FIELD:
+  long long long_long_field;
+};
+
 // Appendable Tests ==========================================================
 
 typedef AppendableXcdr2Struct NestedStruct;
@@ -215,36 +236,51 @@ struct LC567Struct {            //LC Size
   @id(7) string<7> str7;        // 5    7
 };
 
-//@mutable
-//@OpenDDS::data_representation(XCDR2)
-//union NestedUnion switch(short) {
-//case 1:
-//  short short_field;
-//case 2:
-//  sequence<long> sequence_field;
-//default:
-//  string string_field;
-//};
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableUnion switch (UnionDisc) {
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_LONG_LONG_FIELD:
+  @id(10) long long long_long_field;
+};
 
-typedef octet OctetArray[5];
+typedef sequence<long> LongSeq;
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+union NestedUnion switch(short) {
+case 1:
+  @id(1) short short_field;
+case 2:
+  @id(2) LongSeq sequence_field;
+default:
+  @id(3) string string_field;
+};
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct MixedMutableStruct {
   @id(1) MutableStruct struct_nested;
   @id(2) sequence<short> sequence_field;
-  // TODO (sonndinh): add these fields when they're implemented.
-  //  @id(3) OctetArray array_field;
-  //  @id(4) NestedUnion union_nested;
+  @id(3) NestedUnion union_nested;
+  @id(4) sequence<string> sequence_field2;
 };
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct ModifiedMixedMutableStruct {
-  //  @id(3) OctetArray array_field;
+  @id(3) NestedUnion union_nested;
+  @id(4) sequence<string> sequence_field2;
   @id(1) MutableStruct struct_nested;
-  //  @id(4) NestedUnion union_nested;
 };
+
+// Mixed Extensibility Tests =================================================
 
 @final
 @OpenDDS::data_representation(XCDR2)
