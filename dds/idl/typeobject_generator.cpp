@@ -760,21 +760,26 @@ print(const OpenDDS::XTypes::MinimalTypeObject& minimal)
   case OpenDDS::XTypes::TK_BITSET:
     idl_global->err()->misc_error("Bitset output is not supported");
     BE_abort();
+    break;
   case OpenDDS::XTypes::TK_SEQUENCE:
     idl_global->err()->misc_error("Sequence output is not supported");
     BE_abort();
+    break;
   case OpenDDS::XTypes::TK_ARRAY:
     idl_global->err()->misc_error("Array output is not supported");
     BE_abort();
+    break;
   case OpenDDS::XTypes::TK_MAP:
     idl_global->err()->misc_error("Map output is not supported");
     BE_abort();
+    break;
   case OpenDDS::XTypes::TK_ENUM:
     print(minimal.enumerated_type);
     break;
   case OpenDDS::XTypes::TK_BITMASK:
     idl_global->err()->misc_error("Bitmask output is not supported");
     BE_abort();
+    break;
   }
 
   be_global->impl_ << ")";
@@ -985,6 +990,7 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
   case AST_ConcreteType::NT_enum_val:
     idl_global->err()->misc_error("Unexpected AST type", type);
     BE_abort();
+    break;
   }
 
   in_progress_.erase(type);

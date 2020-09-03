@@ -1532,9 +1532,13 @@ namespace XTypes {
   OpenDDS_Dcps_Export
   void deserialize_type_info(TypeInformation& type_info, const DCPS::OctetSeq& seq);
 
+  OpenDDS_Dcps_Export
   ACE_CDR::ULong hash_member_name_to_id(const std::string& name);
+
+  OpenDDS_Dcps_Export
   void hash_member_name(NameHash& name_hash, const std::string& name);
 
+  OpenDDS_Dcps_Export
   bool is_fully_descriptive(const TypeIdentifier& ti);
 
 } // namespace XTypes

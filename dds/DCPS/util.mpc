@@ -1,6 +1,6 @@
 project(OpenDDSUtil): dds_taolib {
   sharedname = OpenDDS_Util
-  dynamicflags = OPENDDS_UTIL_BUILD_DLL
+  dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
   libout = $(DDS_ROOT)/lib
 
