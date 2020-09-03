@@ -410,10 +410,10 @@ Sedp::init(const RepoId& guid,
   // Configure and enable each reader/writer
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
-  const bool reliable = true, durable = true;
+  const bool reliable = true, durable = true, nondurable = false;
 
 #ifdef OPENDDS_SECURITY
-  const bool besteffort = false, nondurable = false;
+  const bool besteffort = false;
 #endif
 
   if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
