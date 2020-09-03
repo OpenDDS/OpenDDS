@@ -23,18 +23,23 @@ class OpenDDS_Dcps_Export TransportCustomizedElement
   : public TransportQueueElement {
 
 public:
-  TransportCustomizedElement(TransportQueueElement* orig,
-                             bool fragment);
+  TransportCustomizedElement(TransportQueueElement* orig);
+
+  void set_fragment(TransportQueueElement* orig);
 
   virtual RepoId publication_id() const;
   void set_publication_id(const RepoId& id);
+
+  RepoId subscription_id() const;
+  void set_subscription_id(const RepoId& id);
+
+  SequenceNumber sequence() const;
+  void set_sequence(const SequenceNumber& value);
 
   virtual const ACE_Message_Block* msg() const;
   void set_msg(Message_Block_Ptr m);
 
   virtual const ACE_Message_Block* msg_payload() const;
-
-  virtual SequenceNumber sequence() const;
 
   virtual bool owned_by_transport() { return false; }
 
@@ -48,18 +53,14 @@ protected:
   virtual bool requires_exclusive_packet() const { return exclusive_; }
   void set_requires_exclusive() { exclusive_ = true; }
 
-  void set_fragment() { fragment_ = true; }
-
-
   virtual ~TransportCustomizedElement();
 
-
 private:
-  RepoId subscription_id() const;
-
   TransportQueueElement* orig_;
   Message_Block_Ptr msg_;
   RepoId publication_id_;
+  RepoId subscription_id_;
+  SequenceNumber sequence_;
   bool fragment_, exclusive_;
 };
 

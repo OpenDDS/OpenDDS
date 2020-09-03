@@ -47,12 +47,12 @@ TqePair TransportQueueElement::fragment(size_t size)
   Message_Block_Ptr tail;
   DataSampleHeader::split(*msg(), size, head, tail);
 
-  TransportCustomizedElement* frag = new TransportCustomizedElement(0, true);
-  frag->set_publication_id(publication_id());
+  TransportCustomizedElement* frag = new TransportCustomizedElement(0);
+  frag->set_fragment(this);
   frag->set_msg(move(head));
 
-  TransportCustomizedElement* rest =
-    new TransportCustomizedElement(this, true);
+  TransportCustomizedElement* rest = new TransportCustomizedElement(this);
+  frag->set_fragment(this);
   rest->set_msg(move(tail));
 
   return TqePair(frag, rest);

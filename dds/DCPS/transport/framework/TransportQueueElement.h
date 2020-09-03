@@ -27,7 +27,7 @@ namespace DCPS {
 
 class TransportQueueElement;
 typedef std::pair<TransportQueueElement*, TransportQueueElement*> TqePair;
-extern const TqePair null_tqe_pair;
+extern OpenDDS_Dcps_Export const TqePair null_tqe_pair;
 typedef OPENDDS_VECTOR(TransportQueueElement*) TqeVector;
 
 /**
