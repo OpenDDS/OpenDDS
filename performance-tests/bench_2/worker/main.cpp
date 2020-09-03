@@ -164,7 +164,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   using Builder::ZERO;
 
-  Bench::WorkerConfig config;
+  Bench::WorkerConfig config{};
 
   config.create_time = ZERO;
   config.enable_time = ZERO;
@@ -267,11 +267,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
 
-    Log::log() << "Starting Discovery Check." << std::endl;
-
-    process_start_discovery_time = Builder::get_sys_time();
-
     if (config.wait_for_discovery) {
+
+      Log::log() << "Starting Discovery Check." << std::endl;
+
+      process_start_discovery_time = Builder::get_sys_time();
+
       if (config.wait_for_discovery_seconds > 0) {
 
         const std::chrono::seconds timeoutPeriod(config.wait_for_discovery_seconds);
@@ -313,11 +314,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           }
         }
       }
+
+      process_stop_discovery_time = Builder::get_sys_time();
+
+      Log::log() << "Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
     }
-
-    process_stop_discovery_time = Builder::get_sys_time();
-
-    Log::log() << "Discovery Time Check." << process_stop_discovery_time - process_start_discovery_time << std::endl << std::endl;
 
     do_wait(config.start_time, "start");
 
