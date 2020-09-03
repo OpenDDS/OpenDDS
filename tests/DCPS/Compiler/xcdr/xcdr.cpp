@@ -1084,7 +1084,7 @@ void expect_values_equal(const MixedMutableStruct& a,
 }
 
 const unsigned char mixed_mutable_struct_xcdr2[] = {
-  0x00, 0x00, 0x00, 0xab, // +4 DHEADER = 4 (TODO: update)
+  0x00, 0x00, 0x00, 0xaf, // +4 DHEADER = 4
   //MU,LC,ID   NEXTINT
   0x40,0,0,1,  0,0,0,0x28, // +8 EMHEADER1 + NEXTINT of struct_nested = 12
   // <<<<<< Begin struct_nested
