@@ -330,7 +330,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
+      {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0};
 #endif
     pub.publication_->add_association(writerid, ra, true);
     pub.publication_->association_complete(readerid);
@@ -495,7 +495,7 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
+      {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0, 0};
 
 #endif
     dwr->add_association(writerid, ra, true);
