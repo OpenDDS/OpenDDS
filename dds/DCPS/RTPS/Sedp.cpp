@@ -283,12 +283,6 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   participant_message_writer_(make_rch<LivelinessWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), ref(*this))),
 
-  type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
-    make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER), ref(*this))),
-
-  type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
-    make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this))),
-
 #ifdef OPENDDS_SECURITY
   participant_message_secure_writer_(make_rch<LivelinessWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), ref(*this))),
@@ -299,6 +293,12 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   participant_volatile_message_secure_writer_(make_rch<SecurityWriter>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this))),
 #endif
+
+  type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
+    make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER), ref(*this))),
+
+  type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
+    make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this))),
 
   publications_reader_(make_rch<Reader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
@@ -324,14 +324,6 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
       ref(*this))),
 
-  type_lookup_request_reader_(make_rch<TypeLookupRequestReader>(
-      make_id(participant_id, ENTITYID_TL_SVC_REQ_READER),
-      ref(*this))),
-
-  type_lookup_reply_reader_(make_rch<TypeLookupReplyReader>(
-      make_id(participant_id, ENTITYID_TL_SVC_REPLY_READER),
-      ref(*this))),
-
 #ifdef OPENDDS_SECURITY
   participant_message_secure_reader_(make_rch<Reader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER),
@@ -346,6 +338,14 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER),
       ref(*this))),
 #endif
+
+  type_lookup_request_reader_(make_rch<TypeLookupRequestReader>(
+    make_id(participant_id, ENTITYID_TL_SVC_REQ_READER),
+    ref(*this))),
+
+  type_lookup_reply_reader_(make_rch<TypeLookupReplyReader>(
+    make_id(participant_id, ENTITYID_TL_SVC_REPLY_READER),
+    ref(*this))),
 
   task_(this),
 
