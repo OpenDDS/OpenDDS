@@ -13,6 +13,21 @@ using namespace OpenDDS::DCPS;
 const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
 const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
 // Big Endian just so it's easier to write expected CDR
+const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
+
+void change_endianness(
+  unsigned char* strm, const unsigned* layout, const size_t layout_size)
+{
+  size_t begin = 0;
+  for (size_t i = 0; i < layout_size; ++i) {
+    unsigned length = layout[i];
+    // Swap bytes
+    for (size_t j = 0; j < length/2; ++j) {
+      std::swap(strm[begin + j], strm[begin + length - 1 - j]);
+    }
+    begin += length;
+  }
+}
 
 template <typename Type>
 void set_base_values(Type& value)
@@ -48,12 +63,10 @@ void set_values(Type& value)
   set_base_values(value);
 }
 
-template <>
-void set_values<AdditionalFieldMutableStruct>(
-  AdditionalFieldMutableStruct& value)
+template <typename Type>
+void set_values_union(Type& value, UnionDisc disc)
 {
-  set_base_values(value);
-  value.additional_field = 0x12345678;
+  set_base_values_union(value, disc);
 }
 
 template<typename TypeA, typename TypeB>
@@ -91,86 +104,6 @@ void expect_values_equal(const TypeA& a, const TypeB& b)
   expect_values_equal_base(a, b);
 }
 
-template<>
-void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
-{
-  EXPECT_EQ(a.o, b.o);
-  EXPECT_EQ(a.s, b.s);
-  EXPECT_EQ(a.l, b.l);
-  EXPECT_EQ(a.ll, b.ll);
-
-  EXPECT_EQ(a.b3.a, b.b3.a);
-  EXPECT_EQ(a.b3.b, b.b3.b);
-  EXPECT_EQ(a.b3.c, b.b3.c);
-
-  EXPECT_EQ(a.o5.a, b.o5.a);
-  EXPECT_EQ(a.o5.b, b.o5.b);
-  EXPECT_EQ(a.o5.c, b.o5.c);
-  EXPECT_EQ(a.o5.d, b.o5.d);
-  EXPECT_EQ(a.o5.e, b.o5.e);
-
-  EXPECT_EQ(a.s3.x, b.s3.x);
-  EXPECT_EQ(a.s3.y, b.s3.y);
-  EXPECT_EQ(a.s3.z, b.s3.z);
-
-  EXPECT_EQ(a.t7.s3.x, b.t7.s3.x);
-  EXPECT_EQ(a.t7.s3.y, b.t7.s3.y);
-  EXPECT_EQ(a.t7.s3.z, b.t7.s3.z);
-  EXPECT_EQ(a.t7.o, b.t7.o);
-
-  EXPECT_EQ(a.l3.a, b.l3.a);
-  EXPECT_EQ(a.l3.b, b.l3.b);
-  EXPECT_EQ(a.l3.c, b.l3.c);
-
-  EXPECT_STREQ(a.str1, b.str1);
-  EXPECT_STREQ(a.str2, b.str2);
-  EXPECT_STREQ(a.str3, b.str3);
-  EXPECT_STREQ(a.str4, b.str4);
-  EXPECT_STREQ(a.str5, b.str5);
-}
-
-template<>
-void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
-{
-  EXPECT_EQ(a.o3.length(), b.o3.length());
-  EXPECT_EQ(a.o3[0], b.o3[0]);
-  EXPECT_EQ(a.o3[1], b.o3[1]);
-  EXPECT_EQ(a.o3[2], b.o3[2]);
-
-  EXPECT_EQ(a.l3.length(), b.l3.length());
-  EXPECT_EQ(a.l3[0], b.l3[0]);
-  EXPECT_EQ(a.l3[1], b.l3[1]);
-  EXPECT_EQ(a.l3[2], b.l3[2]);
-
-  EXPECT_EQ(a.ll3.length(), b.ll3.length());
-  EXPECT_EQ(a.ll3[0], b.ll3[0]);
-  EXPECT_EQ(a.ll3[1], b.ll3[1]);
-  EXPECT_EQ(a.ll3[2], b.ll3[2]);
-
-  EXPECT_EQ(a.s3.length(), b.s3.length());
-  EXPECT_EQ(a.s3[0], b.s3[0]);
-  EXPECT_EQ(a.s3[1], b.s3[1]);
-
-  EXPECT_STREQ(a.str4, b.str4);
-  EXPECT_STREQ(a.str5, b.str5);
-
-  EXPECT_EQ(a.ls.length(), b.ls.length());
-  EXPECT_EQ(a.ls[0], b.ls[0]);
-  EXPECT_EQ(a.ls[1], b.ls[1]);
-}
-
-template<>
-void expect_values_equal(const MutableUnion& a, const MutableUnion& b)
-{
-  expect_values_equal_base_union(a, b);
-}
-
-template<>
-void expect_values_equal(const MutableXcdr12Union& a, const MutableXcdr12Union& b)
-{
-  expect_values_equal_base_union(a, b);
-}
-
 template<typename TypeA, typename TypeB>
 ::testing::AssertionResult assert_values(
   const char* a_expr, const char* b_expr,
@@ -194,6 +127,12 @@ struct DataView {
   DataView(const ACE_Message_Block& mb)
   : data(mb.base())
   , size(mb.length())
+  {
+  }
+
+  DataView(const unsigned char* const array, const size_t array_size)
+  : data(reinterpret_cast<const char*>(array))
+  , size(array_size)
   {
   }
 
@@ -291,10 +230,25 @@ void amalgam_serializer_test(const Encoding& encoding, const DataView& expected_
   amalgam_serializer_test<TypeA, TypeB>(encoding, expected_cdr, value, result);
 }
 
+template<typename TypeA, typename TypeB>
+void amalgam_serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
+{
+  TypeA value;
+  set_values_union(value, disc);
+  TypeB result;
+  amalgam_serializer_test<TypeA, TypeB>(encoding, expected_cdr, value, result);
+}
+
 template<typename Type>
 void serializer_test(const Encoding& encoding, const DataView& expected_cdr)
 {
   amalgam_serializer_test<Type, Type>(encoding, expected_cdr);
+}
+
+template<typename Type>
+void serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
+{
+  amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
 }
 
 template<typename Type>
@@ -307,6 +261,19 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
 
   serializer_test<Type>(encoding, expected_cdr);
 }
+
+template<typename Type>
+void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
+{
+  Type value;
+  value._d(disc);
+  EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
+  serializer_test_union<Type>(encoding, expected_cdr, disc);
+}
+
+#define STREAM_DATA \
+  static const unsigned char expected[]; \
+  static const unsigned layout[];
 
 // XCDR1 =====================================================================
 
@@ -432,7 +399,7 @@ TEST(basic_tests, MutableXcdr12Struct)
   baseline_checks<MutableXcdr12Struct>(xcdr2, mutable_xcdr2_struct_expected);
 }
 
-// Union Tests =============================================================
+// Union Tests -----------------------------------------------------
 
 const unsigned char mutable_xcdr2_union_expected_short[] = {
   // Delimiter
@@ -482,34 +449,10 @@ const unsigned char mutable_xcdr2_union_expected_long_long[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
 };
 
-template <typename Type>
-void set_values_union(Type& value, UnionDisc disc)
+template<>
+void expect_values_equal(const MutableXcdr12Union& a, const MutableXcdr12Union& b)
 {
-  set_base_values_union(value, disc);
-}
-
-template<typename TypeA, typename TypeB>
-void amalgam_serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
-{
-  TypeA value;
-  set_values_union(value, disc);
-  TypeB result;
-  amalgam_serializer_test<TypeA, TypeB>(encoding, expected_cdr, value, result);
-}
-
-template<typename Type>
-void serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
-{
-  amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
-}
-
-template<typename Type>
-void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
-{
-  Type value;
-  value._d(disc);
-  EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-  serializer_test_union<Type>(encoding, expected_cdr, disc);
+  expect_values_equal_base_union(a, b);
 }
 
 TEST(basic_tests, MutableXcdr12Union)
@@ -518,6 +461,68 @@ TEST(basic_tests, MutableXcdr12Union)
   baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
   baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
   baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+}
+
+// No Data-representation Annotation Tests -----------------------------------
+
+TEST(basic_tests, NoDataRepFinalStruct)
+{
+  baseline_checks<NoDataRepFinalStruct>(xcdr2, final_xcdr2_struct_expected);
+}
+
+TEST(basic_tests, NoDataRepAppendableStruct)
+{
+  baseline_checks<NoDataRepAppendableStruct>(xcdr2, appendable_xcdr2_struct_expected);
+}
+
+TEST(basic_tests, NoDataRepMutableStruct)
+{
+  baseline_checks<NoDataRepMutableStruct>(xcdr2, mutable_xcdr2_struct_expected);
+}
+/*
+template<>
+void expect_values_equal(const NoDataRepFinalUnion& a,
+                         const NoDataRepFinalUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
+TEST(basic_tests, NoDataRepFinalUnion)
+{
+  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+}
+
+template<>
+void expect_values_equal(const NoDataRepAppendableUnion& a,
+                         const NoDataRepAppendableUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
+TEST(basic_tests, NoDataRepAppendableUnion)
+{
+  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+}
+*/
+template<>
+void expect_values_equal(const NoDataRepMutableUnion& a,
+                         const NoDataRepMutableUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
+TEST(basic_tests, NoDataRepMutableUnion)
+{
+  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
 }
 
 // Appendable Tests ==========================================================
@@ -833,6 +838,12 @@ const unsigned char mutable_union_expected_xcdr2_long_long[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
 };
 
+template<>
+void expect_values_equal(const MutableUnion& a, const MutableUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
 TEST(mutable_tests, baseline_xcdr2_test_union)
 {
   baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_short, E_SHORT_FIELD);
@@ -893,6 +904,14 @@ TEST(mutable_tests, from_reordered_xcdr2_test)
 
 // Additional Field Tests ----------------------------------------------------
 // Test compatibility between two structures with different fields
+
+template <>
+void set_values<AdditionalFieldMutableStruct>(
+  AdditionalFieldMutableStruct& value)
+{
+  set_base_values(value);
+  value.additional_field = 0x12345678;
+}
 
 TEST(mutable_tests, to_additional_field_xcdr1_test)
 {
@@ -977,6 +996,44 @@ TEST(mutable_tests, from_additional_field_xcdr2_test)
   amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2, expected);
 }
 
+template<>
+void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
+{
+  EXPECT_EQ(a.o, b.o);
+  EXPECT_EQ(a.s, b.s);
+  EXPECT_EQ(a.l, b.l);
+  EXPECT_EQ(a.ll, b.ll);
+
+  EXPECT_EQ(a.b3.a, b.b3.a);
+  EXPECT_EQ(a.b3.b, b.b3.b);
+  EXPECT_EQ(a.b3.c, b.b3.c);
+
+  EXPECT_EQ(a.o5.a, b.o5.a);
+  EXPECT_EQ(a.o5.b, b.o5.b);
+  EXPECT_EQ(a.o5.c, b.o5.c);
+  EXPECT_EQ(a.o5.d, b.o5.d);
+  EXPECT_EQ(a.o5.e, b.o5.e);
+
+  EXPECT_EQ(a.s3.x, b.s3.x);
+  EXPECT_EQ(a.s3.y, b.s3.y);
+  EXPECT_EQ(a.s3.z, b.s3.z);
+
+  EXPECT_EQ(a.t7.s3.x, b.t7.s3.x);
+  EXPECT_EQ(a.t7.s3.y, b.t7.s3.y);
+  EXPECT_EQ(a.t7.s3.z, b.t7.s3.z);
+  EXPECT_EQ(a.t7.o, b.t7.o);
+
+  EXPECT_EQ(a.l3.a, b.l3.a);
+  EXPECT_EQ(a.l3.b, b.l3.b);
+  EXPECT_EQ(a.l3.c, b.l3.c);
+
+  EXPECT_STREQ(a.str1, b.str1);
+  EXPECT_STREQ(a.str2, b.str2);
+  EXPECT_STREQ(a.str3, b.str3);
+  EXPECT_STREQ(a.str4, b.str4);
+  EXPECT_STREQ(a.str5, b.str5);
+}
+
 TEST(mutable_tests, length_code_test)
 {
   const unsigned char expected[] = {
@@ -1019,6 +1076,36 @@ TEST(mutable_tests, length_code_test)
   EXPECT_EQ(serialized_size(xcdr2, value), sizeof(expected));
   LengthCodeStruct result;
   amalgam_serializer_test<LengthCodeStruct, LengthCodeStruct>(xcdr2, expected, value, result);
+}
+
+template<>
+void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
+{
+  EXPECT_EQ(a.o3.length(), b.o3.length());
+  EXPECT_EQ(a.o3[0], b.o3[0]);
+  EXPECT_EQ(a.o3[1], b.o3[1]);
+  EXPECT_EQ(a.o3[2], b.o3[2]);
+
+  EXPECT_EQ(a.l3.length(), b.l3.length());
+  EXPECT_EQ(a.l3[0], b.l3[0]);
+  EXPECT_EQ(a.l3[1], b.l3[1]);
+  EXPECT_EQ(a.l3[2], b.l3[2]);
+
+  EXPECT_EQ(a.ll3.length(), b.ll3.length());
+  EXPECT_EQ(a.ll3[0], b.ll3[0]);
+  EXPECT_EQ(a.ll3[1], b.ll3[1]);
+  EXPECT_EQ(a.ll3[2], b.ll3[2]);
+
+  EXPECT_EQ(a.s3.length(), b.s3.length());
+  EXPECT_EQ(a.s3[0], b.s3[0]);
+  EXPECT_EQ(a.s3[1], b.s3[1]);
+
+  EXPECT_STREQ(a.str4, b.str4);
+  EXPECT_STREQ(a.str5, b.str5);
+
+  EXPECT_EQ(a.ls.length(), b.ls.length());
+  EXPECT_EQ(a.ls[0], b.ls[0]);
+  EXPECT_EQ(a.ls[1], b.ls[1]);
 }
 
 TEST(mutable_tests, read_lc567_test)
@@ -1128,6 +1215,8 @@ TEST(mutable_tests, FromMixedMutableStruct)
     xcdr2, mixed_mutable_struct_xcdr2);
 }
 
+// Mixed Extensibility Tests ================================================
+
 template<>
 void set_values(NestingFinalStruct& value)
 {
@@ -1201,7 +1290,11 @@ void expect_values_equal(const NestingAppendableStruct& a,
   expect_values_equal_base(a.final_nested, b.final_nested);
 }
 
-const unsigned char nesting_appendable_struct_xcdr2[] = {
+struct NestingAppendableStructXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char NestingAppendableStructXcdr2BE::expected[] = {
   0x00, 0x00, 0x00, 0x5c, // +4 DHEADER = 4
   0,0,0,12,'h','e','l','l','o',' ','w','o','r','l','d','\0', // +16 string_field = 20
   // <<<<<< Begin mutable_nested
@@ -1221,9 +1314,30 @@ const unsigned char nesting_appendable_struct_xcdr2[] = {
   // End final_nested >>>>>>
 };
 
+const unsigned NestingAppendableStructXcdr2BE::layout[] = {4,4,1,1,1,1,1,1,1,1,1,1,1,1,
+                                                           4,4,2,2,4,4,4,1,3,4,8,4,4,4,
+                                                           4,2,2,4,1,3,8};
+
 TEST(mixed_exten_tests, NestingAppendableStruct)
 {
-  serializer_test<NestingAppendableStruct>(xcdr2, nesting_appendable_struct_xcdr2);
+  serializer_test<NestingAppendableStruct>(xcdr2, NestingAppendableStructXcdr2BE::expected);
+}
+
+template<typename Type, typename BigEndianData>
+void test_little_endian() {
+  size_t length = sizeof(BigEndianData::expected);
+  unsigned char* strm_le = new unsigned char[length];
+  std::memcpy(strm_le, BigEndianData::expected, length);
+  change_endianness(strm_le, BigEndianData::layout,
+                    sizeof(BigEndianData::layout)/sizeof(unsigned));
+
+  serializer_test<Type>(xcdr2_le, DataView(strm_le, length));
+  delete[] strm_le;
+}
+
+TEST(mixed_exten_tests, NestingAppendableStructLE)
+{
+  test_little_endian<NestingAppendableStruct, NestingAppendableStructXcdr2BE>();
 }
 
 template<>
@@ -1251,7 +1365,11 @@ void expect_values_equal(const NestingMutableStruct& a,
   expect_values_equal_base(a.final_nested, b.final_nested);
 }
 
-const unsigned char nesting_mutable_struct_xcdr2[] = {
+struct NestingMutableStructXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char NestingMutableStructXcdr2BE::expected[] = {
   0x00, 0x00, 0x00, 0x68, // +4 DHEADER = 4
   //MU,LC,ID   NEXTINT   Value and pad(0)
   0x40,0,0,0,  0,0,0,16, 0,0,0,12,'h','e','l','l','o',' ','w','o','r','l','d','\0', // +24 string_field = 28
@@ -1273,11 +1391,27 @@ const unsigned char nesting_mutable_struct_xcdr2[] = {
   // End final_nested >>>>>>
 };
 
+const unsigned NestingMutableStructXcdr2BE::layout[] = {4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,
+                                                        4,4,4,2,2,4,1,3,8,4,4,4,1,1,1,1,
+                                                        1,1,1,1,4,4,2,2,4,1,3,8};
+
 TEST(mixed_exten_tests, NestingMutableStruct)
 {
-  serializer_test<NestingMutableStruct>(xcdr2, nesting_mutable_struct_xcdr2);
+  serializer_test<NestingMutableStruct>(xcdr2, NestingMutableStructXcdr2BE::expected);
 }
 
+TEST(mixed_exten_tests, NestingMutableStructLE)
+{
+  size_t length = sizeof(NestingMutableStructXcdr2BE::expected);
+  unsigned char* strm_le = new unsigned char[length];
+  std::memcpy(strm_le, NestingMutableStructXcdr2BE::expected, length);
+  change_endianness(strm_le, NestingMutableStructXcdr2BE::layout,
+                    sizeof(NestingMutableStructXcdr2BE::layout)/sizeof(unsigned));
+
+  serializer_test<NestingMutableStruct>(xcdr2_le, DataView(strm_le, length));
+  delete[] strm_le;
+}
+  
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);

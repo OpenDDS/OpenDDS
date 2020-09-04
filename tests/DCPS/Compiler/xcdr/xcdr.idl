@@ -2,12 +2,21 @@
 #include <tao/ShortSeq.pidl>
 #include <tao/OctetSeq.pidl>
 
-// TODO(iguessthislldo): Add more fields
 #define COMMON_FIELDS \
   short short_field; \
   long long_field; \
   octet octet_field; \
-  long long long_long_field; \
+  long long long_long_field;
+
+#define COMMON_BRANCHES \
+  case E_SHORT_FIELD: \
+    short short_field; \
+  case E_LONG_FIELD: \
+    long long_field; \
+  case E_OCTET_FIELD: \
+    octet octet_field; \
+  case E_LONG_LONG_FIELD: \
+    long long long_long_field;
 
 // Generic XCDR1 Tests =======================================================
 
@@ -83,14 +92,37 @@ enum UnionDisc {
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
 union MutableXcdr12Union switch (UnionDisc) {
-case E_SHORT_FIELD:
-  short short_field;
-case E_LONG_FIELD:
-  long long_field;
-case E_OCTET_FIELD:
-  octet octet_field;
-case E_LONG_LONG_FIELD:
-  long long long_long_field;
+  COMMON_BRANCHES
+};
+
+@final
+struct NoDataRepFinalStruct {
+  COMMON_FIELDS
+};
+
+@appendable
+struct NoDataRepAppendableStruct {
+  COMMON_FIELDS
+};
+
+@mutable
+struct NoDataRepMutableStruct {
+  COMMON_FIELDS
+};
+
+@final
+union NoDataRepFinalUnion switch(UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@appendable
+union NoDataRepAppendableUnion switch(UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@mutable
+union NoDataRepMutableUnion switch(UnionDisc) {
+  COMMON_BRANCHES
 };
 
 // Appendable Tests ==========================================================
