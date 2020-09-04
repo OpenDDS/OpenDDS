@@ -6,26 +6,26 @@
  */
 
 #include "RtpsSampleHeader.h"
+
 #include "RtpsUdpSendStrategy.h"
 
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DisjointSequence.h"
-
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
+#include <dds/DCPS/transport/framework/TransportSendListener.h>
 
 #include <cstring>
 
 #ifndef __ACE_INLINE__
-#include "RtpsSampleHeader.inl"
+#  include "RtpsSampleHeader.inl"
 #endif
 
 namespace {
@@ -709,6 +709,12 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   const size_t max_data = size - sz, orig_payload = orig.cont()->total_length();
   const ACE_CDR::UShort frags =
     static_cast<ACE_CDR::UShort>(std::min(max_data, orig_payload) / FRAG_SIZE);
+  if (frags == 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsSampleHeader::split: "
+      "Number of Fragments is Zero: min(%B, %B) / FRAG_SIZE\n",
+      max_data, orig_payload));
+    return unknown_sequence_range;
+  }
   write(head, frags, swap_bytes);
   write(head, FRAG_SIZE, swap_bytes);
   write(head, sample_size, swap_bytes);

@@ -3,6 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <DCPS/DdsDcps_pch.h>
+
 #include "SequenceNumber.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

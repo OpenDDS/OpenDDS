@@ -23,7 +23,7 @@ class OpenDDS_Dcps_Export TransportCustomizedElement
   : public TransportQueueElement {
 
 public:
-  TransportCustomizedElement(TransportQueueElement* orig);
+  explicit TransportCustomizedElement(TransportQueueElement* orig);
 
   void set_fragment(TransportQueueElement* orig);
 

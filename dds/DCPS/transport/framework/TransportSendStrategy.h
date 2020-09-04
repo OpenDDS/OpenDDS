@@ -149,6 +149,8 @@ public:
   /**
    * This is a simpler alternative to TransportSendStrategy::send for achieving
    * fragmentation.
+   *
+   * Return false if the operation failed.
    */
   bool fragmentation_helper(
     TransportQueueElement* original_element, TqeVector& elements_to_send);

@@ -6,7 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TransportSendStrategy.h"
+
 #include "RemoveAllVisitor.h"
 #include "TransportInst.h"
 #include "ThreadSynchStrategy.h"
@@ -19,12 +21,13 @@
 #include "PacketRemoveVisitor.h"
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
-#include "ace/Reverse_Lock_T.h"
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <ace/Reverse_Lock_T.h>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
@@ -1937,21 +1940,18 @@ bool TransportSendStrategy::fragmentation_helper(
 {
   const size_t space = space_available();
   const bool fragmentation_allowed = max_message_size();
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-    "max_message_size: %B\n", max_message_size()));
   for (TransportQueueElement* e = original_element; e;) {
     const size_t esize = e->msg()->total_length();
     if (esize > space) {
       if (!fragmentation_allowed) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::fragmentation_helper: "
           "message size, %B, is greater than space available, %B, but can't "
-          "fragment because max_message_size is 0",
-          esize, space));
+          "fragment because max_message_size is 0\n", esize, space));
         return false;
       }
 
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-        "message size %B > space %B: Fragmenting\n", esize, space));
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+          "message size %B > space %B: Fragmenting\n", esize, space), 0);
       const TqePair pair = e->fragment(space);
       if (pair == null_tqe_pair) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::fragmentation_helper: "
@@ -1960,10 +1960,10 @@ bool TransportSendStrategy::fragmentation_helper(
       }
       elements_to_send.push_back(pair.first);
       e = pair.second;
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-        "Fragment %B\n", elements_to_send.back()->msg()->total_length()));
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
-        "Left %B\n", e->msg()->total_length()));
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+        "Fragment %B\n", elements_to_send.back()->msg()->total_length()), 0);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+        "Left %B\n", e->msg()->total_length()), 0);
     } else {
       elements_to_send.push_back(e);
       e = 0;
@@ -1972,8 +1972,7 @@ bool TransportSendStrategy::fragmentation_helper(
   return true;
 }
 
-// close namespaces
-}
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
