@@ -198,7 +198,7 @@ bool EncapsulationHeader::to_encoding(
 
 void EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
 {
-  mb->rd_ptr()[padding_marker_byte_index] |= ((Encoding::ALIGN_XCDR2 - mb->length() % Encoding::ALIGN_XCDR2) & 0x03);
+  mb->rd_ptr()[padding_marker_byte_index] |= ((padding_marker_alignmet - mb->length() % padding_marker_alignmet) & 0x03);
 }
 
 OPENDDS_STRING EncapsulationHeader::to_string() const

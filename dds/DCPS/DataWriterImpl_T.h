@@ -492,7 +492,6 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      char* const wr = mb->wr_ptr();
       if (encapsulated) {
         EncapsulationHeader encap;
         if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
