@@ -275,6 +275,35 @@ void baseline_checks_union(const Encoding& encoding, const DataView& expected_cd
   static const unsigned char expected[]; \
   static const unsigned layout[];
 
+template<typename BigEndianData>
+unsigned char* setup_little_endian()
+{
+  size_t length = sizeof(BigEndianData::expected);
+  unsigned char* strm_le = new unsigned char[length];
+  std::memcpy(strm_le, BigEndianData::expected, length);
+  change_endianness(strm_le, BigEndianData::layout,
+                    sizeof(BigEndianData::layout)/sizeof(unsigned));
+  return strm_le;
+}
+
+template<typename Type, typename BigEndianData>
+void test_little_endian()
+{
+  unsigned char* strm_le = setup_little_endian<BigEndianData>();
+  serializer_test<Type>(
+    xcdr2_le, DataView(strm_le, sizeof(BigEndianData::expected)));
+  delete[] strm_le;
+}
+
+template<typename TypeA, typename TypeB, typename BigEndianData>
+void test_little_endian()
+{
+  unsigned char* strm_le = setup_little_endian<BigEndianData>();
+  amalgam_serializer_test<TypeA, TypeB>(
+    xcdr2_le, DataView(strm_le, sizeof(BigEndianData::expected)));
+  delete[] strm_le;
+}
+
 // XCDR1 =====================================================================
 
 const unsigned char final_xcdr1_struct_expected[] = {
@@ -902,7 +931,7 @@ TEST(mutable_tests, from_reordered_xcdr2_test)
   amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr2, expected);
 }
 
-// Additional Field Tests ----------------------------------------------------
+// ---------- AdditionalFieldMutableStruct
 // Test compatibility between two structures with different fields
 
 template <>
@@ -996,6 +1025,7 @@ TEST(mutable_tests, from_additional_field_xcdr2_test)
   amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2, expected);
 }
 
+// ---------- LengthCodeStruct
 template<>
 void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
 {
@@ -1036,7 +1066,7 @@ void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
 
 TEST(mutable_tests, length_code_test)
 {
-  const unsigned char expected[] = {
+  unsigned char expected[] = {
     0x00,0x00,0x00,0xc1, // +4 = 4  Delimiter
   //(MU<<31)+(LC<<28)+id    NEXTINT    Value and Pad(0) // Size (Type)
   //--------------------  -----------  -------------------------------------------
@@ -1057,6 +1087,12 @@ TEST(mutable_tests, length_code_test)
     0x30,0x00,0x00,0x0e,               0,0,0,0x04, 'a','b','c','\0',    // str4 +4+4+4=180
     0xc0,0x00,0x00,0x0f,  0,0,0,0x09,  0,0,0,0x05, 'a','b','c','d','\0' // str5 +8+4+5=197 @key
   };
+
+  const unsigned layout[] = {4,4,1,3,4,2,2,4,4,4,8,4,4,1,1,1,1,4,4,1,1,1,1,
+                             1,3,4,4,2,2,2,2,4,4,2,2,2,1,1,4,4,4,4,4,4,4,4,
+                             1,3,4,4,4,1,1,2,4,4,4,1,1,1,1,4,4,1,1,1,1,4,4,
+                             4,1,1,1,1,1};
+
   LengthCodeStruct value = { //LC Size
     0x01,                    // 0    1
     0x0102,                  // 1    2
@@ -1076,8 +1112,14 @@ TEST(mutable_tests, length_code_test)
   EXPECT_EQ(serialized_size(xcdr2, value), sizeof(expected));
   LengthCodeStruct result;
   amalgam_serializer_test<LengthCodeStruct, LengthCodeStruct>(xcdr2, expected, value, result);
+
+  // Little-endian test
+  change_endianness(expected, layout, sizeof(layout)/sizeof(unsigned));
+  LengthCodeStruct result_le;
+  amalgam_serializer_test<LengthCodeStruct, LengthCodeStruct>(xcdr2_le, expected, value, result_le);
 }
 
+// ---------- LC567Struct
 template<>
 void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
 {
@@ -1110,7 +1152,7 @@ void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
 
 TEST(mutable_tests, read_lc567_test)
 {
-  const unsigned char data[] = {
+  unsigned char data[] = {
     0,0,0,0x87, // Delimiter +4=4
     //MU,LC,id   NEXTINT   Value and Pad(0)
     0x50,0,0,0,  0,0,0,3,  1,2,3,(0), // o3 +4+4+3+(1)=16
@@ -1122,6 +1164,10 @@ TEST(mutable_tests, read_lc567_test)
     0x60,0,0,6,  0,0,0,2,  0,0,0,1, 0,0,0,2, // ls +4+4+4x2=124
     0xd0,0,0,7,  0,0,0,7, 'a','b','c','d','e','f','\0' // str7 +4+4+7=139 @key
   };
+
+  const unsigned layout[] = {4,4,4,1,1,1,1,4,4,4,4,4,4,4,8,8,
+                             8,4,4,2,2,4,4,1,1,1,1,4,4,1,1,1,
+                             1,1,1,1,1,4,4,4,4,4,4,1,1,1,1,1,1,1};
 
   LC567Struct expected;
   expected.o3.length(3); expected.l3.length(3); expected.ll3.length(3);
@@ -1136,8 +1182,13 @@ TEST(mutable_tests, read_lc567_test)
   expected.str7 = "abcdef";
 
   deserialize_compare(xcdr2, data, expected);
+
+  // Little-endian test
+  change_endianness(data, layout, sizeof(layout)/sizeof(unsigned));
+  deserialize_compare(xcdr2_le, data, expected);
 }
 
+// ---------- MixedMutableStruct
 template<>
 void set_values(MixedMutableStruct& value)
 {
@@ -1170,7 +1221,11 @@ void expect_values_equal(const MixedMutableStruct& a,
   }
 }
 
-const unsigned char mixed_mutable_struct_xcdr2[] = {
+struct MixedMutableStructXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char MixedMutableStructXcdr2BE::expected[] = {
   0x00, 0x00, 0x00, 0xaf, // +4 DHEADER = 4
   //MU,LC,ID   NEXTINT
   0x40,0,0,1,  0,0,0,0x28, // +8 EMHEADER1 + NEXTINT of struct_nested = 12
@@ -1197,9 +1252,20 @@ const unsigned char mixed_mutable_struct_xcdr2[] = {
   0,0,0,11,'m','y',' ','s','t','r','i','n','g','3','\0'  // +15 3rd elem of sequence_field2 = 179
 };
 
+const unsigned MixedMutableStructXcdr2BE::layout[] = {4,4,4,4,4,2,2,4,4,4,1,3,4,8,4,4,
+                                                      4,2,2,2,2,4,4,4,4,2,2,4,4,4,1,1,
+                                                      1,1,1,1,1,1,1,1,2,4,4,4,4,4,1,1,
+                                                      1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,
+                                                      1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1};
+
 TEST(mutable_tests, BothMixedMutableStruct)
 {
-  serializer_test<MixedMutableStruct>(xcdr2, mixed_mutable_struct_xcdr2);
+  serializer_test<MixedMutableStruct>(xcdr2, MixedMutableStructXcdr2BE::expected);
+}
+
+TEST(mutable_tests, BothMixedMutableStructLE)
+{
+  test_little_endian<MixedMutableStruct, MixedMutableStructXcdr2BE>();
 }
 
 template<>
@@ -1212,11 +1278,18 @@ void expect_values_equal(const MixedMutableStruct& a,
 TEST(mutable_tests, FromMixedMutableStruct)
 {
   amalgam_serializer_test<MixedMutableStruct, ModifiedMixedMutableStruct>(
-    xcdr2, mixed_mutable_struct_xcdr2);
+    xcdr2, MixedMutableStructXcdr2BE::expected);
+}
+
+TEST(mutable_tests, FromMixedMutableStructLE)
+{
+  test_little_endian<MixedMutableStruct, ModifiedMixedMutableStruct,
+                     MixedMutableStructXcdr2BE>();
 }
 
 // Mixed Extensibility Tests ================================================
 
+// ---------- NestingFinalStruct
 template<>
 void set_values(NestingFinalStruct& value)
 {
@@ -1240,7 +1313,11 @@ void expect_values_equal(const NestingFinalStruct& a,
   expect_values_equal_base(a.mutable_nested, b.mutable_nested);
 }
 
-const unsigned char nesting_final_struct_xcdr2[] = {
+struct NestingFinalStructXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char NestingFinalStructXcdr2BE::expected[] = {
   0,0,0,11,'m','a','k','e',' ','s','e','n','s','e','\0',(0), // +16 string_field = 16
   // <<<<<< Begin appendable_nested
   0x00, 0x00, 0x00, 0x14, // +4 DHEADER of appendable_nested = 20
@@ -1260,11 +1337,21 @@ const unsigned char nesting_final_struct_xcdr2[] = {
   // End mutable_nested >>>>>>
 };
 
+const unsigned NestingFinalStructXcdr2BE::layout[] = {4,1,1,1,1,1,1,1,1,1,1,1,1,
+                                                      4,2,2,4,1,3,8,4,2,2,2,2,4,
+                                                      4,2,2,4,4,4,1,3,4,8};
+
 TEST(mixed_exten_tests, NestingFinalStruct)
 {
-  serializer_test<NestingFinalStruct>(xcdr2, nesting_final_struct_xcdr2);
+  serializer_test<NestingFinalStruct>(xcdr2, NestingFinalStructXcdr2BE::expected);
 }
 
+TEST(mixed_exten_tests, NestingFinalStructLE)
+{
+  test_little_endian<NestingFinalStruct, NestingFinalStructXcdr2BE>();
+}
+
+// ---------- NestingAppendableStruct
 template<>
 void set_values(NestingAppendableStruct& value)
 {
@@ -1323,23 +1410,12 @@ TEST(mixed_exten_tests, NestingAppendableStruct)
   serializer_test<NestingAppendableStruct>(xcdr2, NestingAppendableStructXcdr2BE::expected);
 }
 
-template<typename Type, typename BigEndianData>
-void test_little_endian() {
-  size_t length = sizeof(BigEndianData::expected);
-  unsigned char* strm_le = new unsigned char[length];
-  std::memcpy(strm_le, BigEndianData::expected, length);
-  change_endianness(strm_le, BigEndianData::layout,
-                    sizeof(BigEndianData::layout)/sizeof(unsigned));
-
-  serializer_test<Type>(xcdr2_le, DataView(strm_le, length));
-  delete[] strm_le;
-}
-
 TEST(mixed_exten_tests, NestingAppendableStructLE)
 {
   test_little_endian<NestingAppendableStruct, NestingAppendableStructXcdr2BE>();
 }
 
+// ---------- NestingMutableStruct
 template<>
 void set_values(NestingMutableStruct& value)
 {
@@ -1402,16 +1478,9 @@ TEST(mixed_exten_tests, NestingMutableStruct)
 
 TEST(mixed_exten_tests, NestingMutableStructLE)
 {
-  size_t length = sizeof(NestingMutableStructXcdr2BE::expected);
-  unsigned char* strm_le = new unsigned char[length];
-  std::memcpy(strm_le, NestingMutableStructXcdr2BE::expected, length);
-  change_endianness(strm_le, NestingMutableStructXcdr2BE::layout,
-                    sizeof(NestingMutableStructXcdr2BE::layout)/sizeof(unsigned));
-
-  serializer_test<NestingMutableStruct>(xcdr2_le, DataView(strm_le, length));
-  delete[] strm_le;
+  test_little_endian<NestingMutableStruct, NestingMutableStructXcdr2BE>();
 }
-  
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
