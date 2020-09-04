@@ -46,6 +46,7 @@
 
 #include "Definitions.h"
 #include "PoolAllocator.h"
+#include "Message_Block_Ptr.h"
 
 #include <tao/String_Alloc.h>
 
@@ -243,6 +244,7 @@ public:
   };
 
   const static size_t serialized_size = 4;
+  const static size_t padding_marker_byte_index = 3;
 
   EncapsulationHeader();
 
@@ -263,7 +265,7 @@ public:
 
   OPENDDS_STRING to_string() const;
 
-  static void set_padding_marker(char& options, size_t size);
+  static void set_encapsulation_options(Message_Block_Ptr& mb);
 
 private:
   /// The first two bytes as a big endian integer

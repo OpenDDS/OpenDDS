@@ -196,11 +196,9 @@ bool EncapsulationHeader::to_encoding(
   return true;
 }
 
-static const int FOUR_BYTE_ALIGNMENT = 4;
-
-void EncapsulationHeader::set_padding_marker(char& options, size_t size)
+void EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
 {
-  options |= ((FOUR_BYTE_ALIGNMENT - size % FOUR_BYTE_ALIGNMENT) & 0x03);
+  mb->rd_ptr()[padding_marker_byte_index] |= ((Encoding::ALIGN_XCDR2 - mb->length() % Encoding::ALIGN_XCDR2) & 0x03);
 }
 
 OPENDDS_STRING EncapsulationHeader::to_string() const
