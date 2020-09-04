@@ -65,7 +65,7 @@ typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
 typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
 
-  class Sedp : public DCPS::EndpointManager<ParticipantData_t>, public DCPS::RcObject {
+class Sedp : public DCPS::EndpointManager<ParticipantData_t>, public DCPS::RcObject {
 public:
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
@@ -82,9 +82,6 @@ public:
                                   DDS::Security::PermissionsHandle perm_handle,
                                   DDS::Security::ParticipantCryptoHandle crypto_handle);
 #endif
-
-  /// request for acknowledgement from all Sedp threads (Task)
-  void acknowledge();
 
   void shutdown();
   DCPS::LocatorSeq unicast_locators() const;
@@ -173,7 +170,9 @@ public:
 
   void stun_server_address(const ACE_INET_Addr& address);
 
-  DCPS::ReactorTask_rch reactor_task() const;
+  DCPS::ReactorTask_rch reactor_task() const { return reactor_task_; }
+
+  DCPS::JobQueue_rch job_queue() const { return job_queue_; }
 
 private:
 
@@ -206,11 +205,11 @@ private:
     const DCPS::MessageId id_;
   };
 
-  class MSG_PARTICIPANT : public MsgBase {
+  class MsgParticipantData : public MsgBase {
   public:
-    MSG_PARTICIPANT(DCPS::WeakRcHandle<Sedp> sedp,
-                    DCPS::MessageId id,
-                    const ParticipantData_t data)
+    MsgParticipantData(DCPS::WeakRcHandle<Sedp> sedp,
+                       DCPS::MessageId id,
+                       const ParticipantData_t data)
       : MsgBase(sedp, id)
       , data_(data)
     {}
@@ -221,10 +220,10 @@ private:
     const ParticipantData_t data_;
   };
 
-  class MSG_WRITER : public MsgBase {
+  class MsgDiscoveredPublication : public MsgBase {
   public:
-    MSG_WRITER(DCPS::WeakRcHandle<Sedp> sedp,
-               DCPS::MessageId id)
+    MsgDiscoveredPublication(DCPS::WeakRcHandle<Sedp> sedp,
+                             DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -235,10 +234,10 @@ private:
     DiscoveredPublication data_;
   };
 
-  class MSG_READER : public MsgBase {
+  class MsgDiscoveredSubscription : public MsgBase {
   public:
-    MSG_READER(DCPS::WeakRcHandle<Sedp> sedp,
-               DCPS::MessageId id)
+    MsgDiscoveredSubscription(DCPS::WeakRcHandle<Sedp> sedp,
+                              DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -249,10 +248,10 @@ private:
     DiscoveredSubscription data_;
   };
 
-  class MSG_PARTICIPANT_DATA : public MsgBase {
+  class MsgParticipantMessageData : public MsgBase {
   public:
-    MSG_PARTICIPANT_DATA(DCPS::WeakRcHandle<Sedp> sedp,
-                         DCPS::MessageId id)
+    MsgParticipantMessageData(DCPS::WeakRcHandle<Sedp> sedp,
+                              DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -264,11 +263,11 @@ private:
   };
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  class MSG_REMOVE_FROM_PUB_BIT : public MsgBase {
+  class MsgRemoveFromPubBit : public MsgBase {
   public:
-    MSG_REMOVE_FROM_PUB_BIT(DCPS::WeakRcHandle<Sedp> sedp,
-                            DCPS::MessageId id,
-                            DDS::InstanceHandle_t ih)
+    MsgRemoveFromPubBit(DCPS::WeakRcHandle<Sedp> sedp,
+                        DCPS::MessageId id,
+                        DDS::InstanceHandle_t ih)
       : MsgBase(sedp, id)
       , ih_(ih)
     {}
@@ -279,11 +278,11 @@ private:
     const DDS::InstanceHandle_t ih_;
   };
 
-  class MSG_REMOVE_FROM_SUB_BIT : public MsgBase {
+  class MsgRemoveFromSubBit : public MsgBase {
   public:
-    MSG_REMOVE_FROM_SUB_BIT(DCPS::WeakRcHandle<Sedp> sedp,
-                            DCPS::MessageId id,
-                            DDS::InstanceHandle_t ih)
+    MsgRemoveFromSubBit(DCPS::WeakRcHandle<Sedp> sedp,
+                        DCPS::MessageId id,
+                        DDS::InstanceHandle_t ih)
       : MsgBase(sedp, id)
       , ih_(ih)
     {}
@@ -295,49 +294,39 @@ private:
   };
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  // TODO: Is this class necessary?
-  class MSG_FINI_BIT : public MsgBase {
-  public:
-    MSG_FINI_BIT(DCPS::WeakRcHandle<Sedp> sedp)
-      : MsgBase(sedp, DCPS::REQUEST_ACK)
-    {}
-
-    void execute();
-  };
-
 #ifdef OPENDDS_SECURITY
-  class MSG_PARTICIPANT_STATELESS_DATA : public MsgBase {
+  class MsgParticipantStatelessData : public MsgBase {
   public:
-    MSG_PARTICIPANT_STATELESS_DATA(DCPS::WeakRcHandle<Sedp> sedp,
-                                   DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DDS::Security::ParticipantGenericMessage& data() { return data_; }
-    void execute();
-
-  private:
-    DDS::Security::ParticipantGenericMessage data_;
-  };
-
-  class MSG_PARTICIPANT_VOLATILE_SECURE : public MsgBase {
-  public:
-    MSG_PARTICIPANT_VOLATILE_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
-                                    DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DDS::Security::ParticipantGenericMessage& data() { return data_; }
-    void execute();
-
-  private:
-    DDS::Security::ParticipantGenericMessage data_;
-  };
-
-  class MSG_PARTICIPANT_DATA_SECURE : public MsgBase {
-  public:
-    MSG_PARTICIPANT_DATA_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantStatelessData(DCPS::WeakRcHandle<Sedp> sedp,
                                 DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DDS::Security::ParticipantGenericMessage& data() { return data_; }
+    void execute();
+
+  private:
+    DDS::Security::ParticipantGenericMessage data_;
+  };
+
+  class MsgParticipantVolatileSecure : public MsgBase {
+  public:
+    MsgParticipantVolatileSecure(DCPS::WeakRcHandle<Sedp> sedp,
+                                 DCPS::MessageId id)
+      : MsgBase(sedp, id)
+    {}
+
+    DDS::Security::ParticipantGenericMessage& data() { return data_; }
+    void execute();
+
+  private:
+    DDS::Security::ParticipantGenericMessage data_;
+  };
+
+  class MsgParticipantMessageDataSecure : public MsgBase {
+  public:
+    MsgParticipantMessageDataSecure(DCPS::WeakRcHandle<Sedp> sedp,
+                                    DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -348,10 +337,10 @@ private:
     ParticipantMessageData data_;
   };
 
-  class MSG_WRITER_SECURE : public MsgBase {
+  class MsgDiscoveredPublicationSecure : public MsgBase {
   public:
-    MSG_WRITER_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
-                      DCPS::MessageId id)
+    MsgDiscoveredPublicationSecure(DCPS::WeakRcHandle<Sedp> sedp,
+                                   DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -362,10 +351,10 @@ private:
     DiscoveredPublication_SecurityWrapper data_;
   };
 
-  class MSG_READER_SECURE : public MsgBase {
+  class MsgDiscoveredSubscriptionSecure : public MsgBase {
   public:
-    MSG_READER_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
-                      DCPS::MessageId id)
+    MsgDiscoveredSubscriptionSecure(DCPS::WeakRcHandle<Sedp> sedp,
+                                    DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -376,10 +365,10 @@ private:
     DiscoveredSubscription_SecurityWrapper data_;
   };
 
-  class MSG_DCPS_PARTICIPANT_SECURE : public MsgBase {
+  class MsgParticipantDataSecure : public MsgBase {
   public:
-    MSG_DCPS_PARTICIPANT_SECURE(DCPS::WeakRcHandle<Sedp> sedp,
-                                DCPS::MessageId id)
+    MsgParticipantDataSecure(DCPS::WeakRcHandle<Sedp> sedp,
+                             DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
 
@@ -602,6 +591,8 @@ private:
   // Transport
   DCPS::TransportInst_rch transport_inst_;
   DCPS::TransportConfig_rch transport_cfg_;
+  DCPS::ReactorTask_rch reactor_task_;
+  DCPS::JobQueue_rch job_queue_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
@@ -883,19 +874,6 @@ protected:
   void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
                            const DCPS::RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client);
   void replay_durable_data_for(const DCPS::RepoId& remote_sub_id);
-};
-
-/// A class to wait on acknowledgments from other threads
-class WaitForAcks {
-public:
-  WaitForAcks();
-  void ack();
-  void wait_for_acks(unsigned int num_acks);
-  void reset();
-private:
-  ACE_Thread_Mutex lock_;
-  ACE_Condition_Thread_Mutex cond_;
-  unsigned int acks_;
 };
 
 bool locators_changed(const ParticipantProxy_t& x,

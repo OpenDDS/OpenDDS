@@ -1869,23 +1869,20 @@ Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
   tport_->open(sedp_.reactor_task());
 }
 
+class Noop : public DCPS::ReactorInterceptor::Command {
+public:
+  void execute() {}
+};
+
 void
 Spdp::fini_bit()
 {
   bit_subscriber_ = 0;
-  wait_for_acks_.reset();
-  // request for SpdpTransport(actually Reactor) thread and Sedp::Task
-  // to acknowledge
-  tport_->acknowledge(sedp_.reactor_task());
-  sedp_.acknowledge();
-  // wait for the 2 acknowledgements
-  wait_for_acks_.wait_for_acks(2);
-}
-
-WaitForAcks&
-Spdp::wait_for_acks()
-{
-  return wait_for_acks_;
+  DCPS::ReactorTask_rch reactor_task = sedp_.reactor_task();
+  if (!reactor_task->is_shut_down()) {
+    DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(new Noop());
+    command->wait();
+  }
 }
 
 bool
@@ -2111,8 +2108,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
-
 #ifdef OPENDDS_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
   if (outer_->is_security_enabled()) {
@@ -2147,8 +2142,8 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
     nic.add_default_addrs();
     const bool all = multicast_interface_.empty();
-    job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                             ChangeMulticastGroup::CMG_JOIN, all));
+    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                                          ChangeMulticastGroup::CMG_JOIN, all));
   }
 }
 
@@ -2642,20 +2637,6 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   return 0;
 }
 
-int
-Spdp::SpdpTransport::handle_exception(ACE_HANDLE)
-{
-  outer_->wait_for_acks().ack();
-  return 0;
-}
-
-void
-Spdp::SpdpTransport::acknowledge(const DCPS::ReactorTask_rch& reactor_task)
-{
-  ACE_Reactor* reactor = reactor_task->get_reactor();
-  reactor->notify(this);
-}
-
 ICE::Endpoint*
 Spdp::SpdpTransport::get_ice_endpoint()
 {
@@ -2713,7 +2694,7 @@ Spdp::SpdpTransport::host_addresses() const
 void
 Spdp::SpdpTransport::send(const ACE_INET_Addr& address, const STUN::Message& message)
 {
-  DCPS::RcHandle<DCPS::JobQueue> job_queue = outer_->job_queue();
+  DCPS::RcHandle<DCPS::JobQueue> job_queue = outer_->sedp_.job_queue();
   if (job_queue) {
     job_queue->enqueue(DCPS::make_rch<SendStun>(rchandle_from(this), address, message));
   }
@@ -2751,7 +2732,7 @@ Spdp::SpdpTransport::stun_server_address() const
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
-  job_queue_->enqueue(DCPS::make_rch<IceConnect>(rchandle_from(this->outer_), guids, addr, true));
+  outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<IceConnect>(rchandle_from(this->outer_), guids, addr, true));
 }
 
 void
@@ -2770,7 +2751,7 @@ Spdp::IceConnect::execute()
 void
 Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
-  job_queue_->enqueue(DCPS::make_rch<IceConnect>(rchandle_from(this->outer_), guids, addr, false));
+  outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<IceConnect>(rchandle_from(this->outer_), guids, addr, false));
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif /* OPENDDS_SECURITY */
@@ -3017,15 +2998,15 @@ void
 Spdp::SpdpTransport::add_address(const DCPS::NetworkInterface& nic,
                                  const ACE_INET_Addr&)
 {
-  job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                           ChangeMulticastGroup::CMG_JOIN));
+  outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                                          ChangeMulticastGroup::CMG_JOIN));
 }
 
 void Spdp::SpdpTransport::remove_address(const DCPS::NetworkInterface& nic,
                                          const ACE_INET_Addr&)
 {
-  job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                           ChangeMulticastGroup::CMG_LEAVE));
+  outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                                          ChangeMulticastGroup::CMG_LEAVE));
 }
 
 bool

@@ -67,6 +67,8 @@ private:
   }
 };
 
+typedef RcHandle<JobQueue> JobQueue_rch;
+
 } // namespace DCPS
 } // namespace OpenDDS
 
