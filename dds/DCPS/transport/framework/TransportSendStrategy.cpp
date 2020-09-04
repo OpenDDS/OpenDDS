@@ -1003,7 +1003,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         : /* not fragmenting */ element_length;
 
       if ((exclusive && (this->elems_.size() != 0))
-          || (this->space_available() < space_needed)) {
+          || (current_space_available() < space_needed)) {
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Element won't fit in current packet or requires exclusive"
@@ -1063,7 +1063,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
         this->header_.last_fragment_ = false;
         if (max_message_size) { // fragmentation enabled
-          const size_t avail = this->space_available();
+          const size_t avail = current_space_available();
           if (element_length > avail) {
             VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
             const TqePair ep = element->fragment(avail);
@@ -1533,7 +1533,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
     // Flag used to determine if the element requires a packet all to itself.
     const bool exclusive_packet = element->requires_exclusive_packet();
 
-    const size_t avail = this->space_available();
+    const size_t avail = current_space_available();
 
     bool frag = false;
     if (element_length > avail) {
@@ -1895,14 +1895,19 @@ void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
   element->data_delivered();
 }
 
-size_t TransportSendStrategy::space_available() const
+size_t TransportSendStrategy::space_available(size_t already_used) const
 {
-  const size_t used = this->max_header_size_ + this->header_.length_,
-    max_msg = this->max_message_size();
+  const size_t used = max_header_size_ + already_used;
+  const size_t max_msg = max_message_size();
   if (max_msg) {
-    return std::min(this->max_size_ - used, max_msg - used);
+    return std::min(static_cast<size_t>(max_size_), max_msg) - used;
   }
-  return this->max_size_ - used;
+  return max_size_ - used;
+}
+
+size_t TransportSendStrategy::current_space_available() const
+{
+  return space_available(header_.length_);
 }
 
 int
