@@ -133,7 +133,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     }
   }
 
-  // TODO: Review these.
   available_builtin_endpoints_ =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
