@@ -12,22 +12,7 @@ using namespace OpenDDS::DCPS;
 
 const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
 const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
-// Big Endian just so it's easier to write expected CDR
 const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
-
-void change_endianness(
-  unsigned char* strm, const unsigned* layout, const size_t layout_size)
-{
-  size_t begin = 0;
-  for (size_t i = 0; i < layout_size; ++i) {
-    unsigned length = layout[i];
-    // Swap bytes
-    for (size_t j = 0; j < length/2; ++j) {
-      std::swap(strm[begin + j], strm[begin + length - 1 - j]);
-    }
-    begin += length;
-  }
-}
 
 template <typename Type>
 void set_base_values(Type& value)
@@ -275,6 +260,20 @@ void baseline_checks_union(const Encoding& encoding, const DataView& expected_cd
   static const unsigned char expected[]; \
   static const unsigned layout[];
 
+void change_endianness(
+  unsigned char* strm, const unsigned* layout, const size_t layout_size)
+{
+  size_t begin = 0;
+  for (size_t i = 0; i < layout_size; ++i) {
+    const unsigned length = layout[i];
+    // Swap bytes
+    for (size_t j = 0; j < length/2; ++j) {
+      std::swap(strm[begin + j], strm[begin + length - 1 - j]);
+    }
+    begin += length;
+  }
+}
+
 template<typename BigEndianData>
 unsigned char* setup_little_endian()
 {
@@ -292,6 +291,15 @@ void test_little_endian()
   unsigned char* strm_le = setup_little_endian<BigEndianData>();
   serializer_test<Type>(
     xcdr2_le, DataView(strm_le, sizeof(BigEndianData::expected)));
+  delete[] strm_le;
+}
+
+template<typename Type, typename BigEndianData>
+void test_little_endian_union(UnionDisc disc)
+{
+  unsigned char* strm_le = setup_little_endian<BigEndianData>();
+  serializer_test_union<Type>(
+    xcdr2_le, DataView(strm_le, sizeof(BigEndianData::expected)), disc);
   delete[] strm_le;
 }
 
@@ -319,14 +327,14 @@ const unsigned char final_xcdr1_struct_expected[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
 };
 
-TEST(basic_tests, FinalXcdr1Struct)
+TEST(BasicTests, FinalXcdr1Struct)
 {
   baseline_checks<FinalXcdr1Struct>(xcdr1, final_xcdr1_struct_expected);
 }
 
 const DataView appendable_xcdr1_struct_expected(final_xcdr1_struct_expected);
 
-TEST(basic_tests, AppendableXcdr1Struct)
+TEST(BasicTests, AppendableXcdr1Struct)
 {
   baseline_checks<AppendableXcdr1Struct>(xcdr1, appendable_xcdr1_struct_expected);
 }
@@ -350,14 +358,18 @@ const unsigned char mutable_xcdr1_struct_expected[] = {
   0x3f, 0x02, 0x00, 0x00 // +4 = 40
 };
 
-TEST(basic_tests, MutableXcdr1Struct)
+TEST(BasicTests, MutableXcdr1Struct)
 {
   baseline_checks<MutableXcdr1Struct>(xcdr1, mutable_xcdr1_struct_expected);
 }
 
 // XCDR2 =====================================================================
 
-const unsigned char final_xcdr2_struct_expected[] = {
+struct FinalXcdr2StructExpectedBE {
+  STREAM_DATA
+};
+
+const unsigned char FinalXcdr2StructExpectedBE::expected[] = {
   // short_field
   0x7f, 0xff, // +2 = 2
   // long_field
@@ -369,13 +381,23 @@ const unsigned char final_xcdr2_struct_expected[] = {
   0x00, 0x00, 0x00, // +3 pad = 12
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 20
 };
+const unsigned FinalXcdr2StructExpectedBE::layout[] = {2,2,4,1,3,8};
 
-TEST(basic_tests, FinalXcdr2Struct)
+TEST(BasicTests, FinalXcdr2Struct)
 {
-  baseline_checks<FinalXcdr2Struct>(xcdr2, final_xcdr2_struct_expected);
+  baseline_checks<FinalXcdr2Struct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
 }
 
-const unsigned char appendable_xcdr2_struct_expected[] = {
+TEST(BasicTests, FinalXcdr2StructLE)
+{
+  test_little_endian<FinalXcdr2Struct, FinalXcdr2StructExpectedBE>();
+}
+
+struct AppendableXcdr2StructExpectedBE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableXcdr2StructExpectedBE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x14, // +4 = 4
   // short_field
@@ -389,94 +411,141 @@ const unsigned char appendable_xcdr2_struct_expected[] = {
   0x00, 0x00, 0x00, // +3 pad = 16
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 24
 };
+const unsigned AppendableXcdr2StructExpectedBE::layout[] = {4,2,2,4,1,3,8};
 
-TEST(basic_tests, AppendableXcdr2Struct)
+TEST(BasicTests, AppendableXcdr2Struct)
 {
-  baseline_checks<AppendableXcdr2Struct>(xcdr2, appendable_xcdr2_struct_expected);
+  baseline_checks<AppendableXcdr2Struct>(xcdr2, AppendableXcdr2StructExpectedBE::expected);
 }
 
-const unsigned char mutable_xcdr2_struct_expected[] = {
+TEST(BasicTests, AppendableXcdr2StructLE)
+{
+  test_little_endian<AppendableXcdr2Struct, AppendableXcdr2StructExpectedBE>();
+}
+
+struct MutableXcdr2StructExpectedBE {
+  STREAM_DATA
+};
+
+const unsigned char MutableXcdr2StructExpectedBE::expected[] = {
   0x00,0,0,0x24, // +4=4 Delimiter
   0x10,0,0,0x00, 0x7f,0xff,  (0),(0), // +4+2+(2)=12 short_field
   0x20,0,0,0x01, 0x7f,0xff,0xff,0xff, // +4+4    =20 long_field
   0x00,0,0,0x02, 0x01,   (0),(0),(0), // +4+1+(3)=28 octet_field
   0x30,0,0,0x03, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // +4+8=40 long_long_field
 };
+const unsigned MutableXcdr2StructExpectedBE::layout[] = {4,4,2,2,4,4,4,1,3,4,8};
 
-TEST(basic_tests, MutableXcdr2Struct)
+TEST(BasicTests, MutableXcdr2Struct)
 {
-  baseline_checks<MutableXcdr2Struct>(xcdr2, mutable_xcdr2_struct_expected);
+  baseline_checks<MutableXcdr2Struct>(xcdr2, MutableXcdr2StructExpectedBE::expected);
+}
+
+TEST(BasicTests, MutableXcdr2StructLE)
+{
+  test_little_endian<MutableXcdr2Struct, MutableXcdr2StructExpectedBE>();
 }
 
 // XCDR1 and XCDR2 ===========================================================
 
-TEST(basic_tests, FinalXcdr12Struct)
+TEST(BasicTests, FinalXcdr12Struct)
 {
   baseline_checks<FinalXcdr12Struct>(xcdr1, final_xcdr1_struct_expected);
-  baseline_checks<FinalXcdr12Struct>(xcdr2, final_xcdr2_struct_expected);
+  baseline_checks<FinalXcdr12Struct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
 }
 
-TEST(basic_tests, AppendableXcdr12Struct)
+TEST(BasicTests, FinalXcdr12StructLE)
+{
+  test_little_endian<FinalXcdr12Struct, FinalXcdr2StructExpectedBE>();
+}
+
+TEST(BasicTests, AppendableXcdr12Struct)
 {
   baseline_checks<AppendableXcdr12Struct>(xcdr1, appendable_xcdr1_struct_expected);
-  baseline_checks<AppendableXcdr12Struct>(xcdr2, appendable_xcdr2_struct_expected);
+  baseline_checks<AppendableXcdr12Struct>(xcdr2, AppendableXcdr2StructExpectedBE::expected);
 }
 
-TEST(basic_tests, MutableXcdr12Struct)
+TEST(BasicTests, AppendableXcdr12StructLE)
+{
+  test_little_endian<AppendableXcdr12Struct, AppendableXcdr2StructExpectedBE>();
+}
+
+TEST(BasicTests, MutableXcdr12Struct)
 {
   baseline_checks<MutableXcdr12Struct>(xcdr1, mutable_xcdr1_struct_expected);
-  baseline_checks<MutableXcdr12Struct>(xcdr2, mutable_xcdr2_struct_expected);
+  baseline_checks<MutableXcdr12Struct>(xcdr2, MutableXcdr2StructExpectedBE::expected);
+}
+
+TEST(BasicTests, MutableXcdr12StructLE)
+{
+  test_little_endian<MutableXcdr12Struct, MutableXcdr2StructExpectedBE>();
 }
 
 // Union Tests -----------------------------------------------------
 
-const unsigned char mutable_xcdr2_union_expected_short[] = {
+struct MutableXcdr2UnionExpectedShortBE {
+  STREAM_DATA
+};
+
+const unsigned char MutableXcdr2UnionExpectedShortBE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x0e, // +4 = 4
-  // Discriminator EMHEADER
-  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
-  0x00, 0x00, 0x00, 0x00, // +4 = 12
+  0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
+  0x00, 0x00, 0x00, 0x00, // +4 value = 12
   // short_field
-  0x10, 0x00, 0x00, 0x00, // PID  +4 = 16
-  0x7f, 0xff // +2 = 18
+  0x10, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 16
+  0x7f, 0xff // +2 value = 18
+};
+const unsigned MutableXcdr2UnionExpectedShortBE::layout[] = {4,4,4,4,2};
+
+struct MutableXcdr2UnionExpectedLongBE {
+  STREAM_DATA
 };
 
-const unsigned char mutable_xcdr2_union_expected_long[] = {
+const unsigned char MutableXcdr2UnionExpectedLongBE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x10, // +4 = 4
-  // Discriminator EMHEADER
-  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
-  0x00, 0x00, 0x00, 0x01, // +4 = 12
+  0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
+  0x00, 0x00, 0x00, 0x01, // +4 value = 12
   // long_field
-  0x20, 0x00, 0x00, 0x01,// PID  +4 = 16
-  0x7f, 0xff, 0xff, 0xff // +4 = 20
+  0x20, 0x00, 0x00, 0x01,// +4 EMHEADER1 = 16
+  0x7f, 0xff, 0xff, 0xff // +4 value = 20
+};
+const unsigned MutableXcdr2UnionExpectedLongBE::layout[] = {4,4,4,4,4};
+
+struct MutableXcdr2UnionExpectedOctetBE {
+  STREAM_DATA
 };
 
-const unsigned char mutable_xcdr2_union_expected_octet[] = {
+const unsigned char MutableXcdr2UnionExpectedOctetBE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x0d, // +4 = 4
-  // Discriminator EMHEADER
-  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
-  0x00, 0x00, 0x00, 0x02, // +4 = 12
+  0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
+  0x00, 0x00, 0x00, 0x02, // +4 value = 12
   // octet_field
-  0x00, 0x00, 0x00, 0x02, // PID  +4 = 16
-  0x01                    // +1 = 17
+  0x00, 0x00, 0x00, 0x02, // +4 EMHEADER1 = 16
+  0x01                    // +1 value = 17
+};
+const unsigned MutableXcdr2UnionExpectedOctetBE::layout[] = {4,4,4,4,1};
+
+struct MutableXcdr2UnionExpectedLongLongBE {
+  STREAM_DATA
 };
 
-const unsigned char mutable_xcdr2_union_expected_long_long[] = {
+const unsigned char MutableXcdr2UnionExpectedLongLongBE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x14, // +4 = 4
-  // Discriminator EMHEADER
-  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
   // Discriminator
-  0x00, 0x00, 0x00, 0x03, // +4 = 12
+  0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
+  0x00, 0x00, 0x00, 0x03, // +4 value = 12
   // long_field
-  0x30, 0x00, 0x00, 0x03, // PID  +4 = 16
-  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
+  0x30, 0x00, 0x00, 0x03, // +4 EMHEADER1 = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 value = 24
 };
+const unsigned MutableXcdr2UnionExpectedLongLongBE::layout[] = {4,4,4,4,8};
 
 template<>
 void expect_values_equal(const MutableXcdr12Union& a, const MutableXcdr12Union& b)
@@ -484,29 +553,45 @@ void expect_values_equal(const MutableXcdr12Union& a, const MutableXcdr12Union& 
   expect_values_equal_base_union(a, b);
 }
 
-TEST(basic_tests, MutableXcdr12Union)
+TEST(BasicTests, MutableXcdr12Union)
 {
-  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
-  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
-  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
-  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(
+    xcdr2, MutableXcdr2UnionExpectedShortBE::expected, E_SHORT_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(
+    xcdr2, MutableXcdr2UnionExpectedLongBE::expected, E_LONG_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(
+    xcdr2, MutableXcdr2UnionExpectedOctetBE::expected, E_OCTET_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(
+    xcdr2, MutableXcdr2UnionExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
+}
+
+TEST(BasicTests, MutableXcdr12UnionLE)
+{
+  test_little_endian_union<MutableXcdr12Union,
+                           MutableXcdr2UnionExpectedShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<MutableXcdr12Union,
+                           MutableXcdr2UnionExpectedLongBE>(E_LONG_FIELD);
+  test_little_endian_union<MutableXcdr12Union,
+                           MutableXcdr2UnionExpectedOctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<MutableXcdr12Union,
+                           MutableXcdr2UnionExpectedLongLongBE>(E_LONG_LONG_FIELD);
 }
 
 // No Data-representation Annotation Tests -----------------------------------
 
-TEST(basic_tests, NoDataRepFinalStruct)
+TEST(BasicTests, NoDataRepFinalStruct)
 {
-  baseline_checks<NoDataRepFinalStruct>(xcdr2, final_xcdr2_struct_expected);
+  baseline_checks<NoDataRepFinalStruct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
 }
 
-TEST(basic_tests, NoDataRepAppendableStruct)
+TEST(BasicTests, NoDataRepAppendableStruct)
 {
-  baseline_checks<NoDataRepAppendableStruct>(xcdr2, appendable_xcdr2_struct_expected);
+  baseline_checks<NoDataRepAppendableStruct>(xcdr2, AppendableXcdr2StructExpectedBE::expected);
 }
 
-TEST(basic_tests, NoDataRepMutableStruct)
+TEST(BasicTests, NoDataRepMutableStruct)
 {
-  baseline_checks<NoDataRepMutableStruct>(xcdr2, mutable_xcdr2_struct_expected);
+  baseline_checks<NoDataRepMutableStruct>(xcdr2, MutableXcdr2StructExpectedBE::expected);
 }
 /*
 template<>
@@ -539,6 +624,7 @@ TEST(basic_tests, NoDataRepAppendableUnion)
   baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
 }
 */
+
 template<>
 void expect_values_equal(const NoDataRepMutableUnion& a,
                          const NoDataRepMutableUnion& b)
@@ -546,23 +632,44 @@ void expect_values_equal(const NoDataRepMutableUnion& a,
   expect_values_equal_base_union(a, b);
 }
 
-TEST(basic_tests, NoDataRepMutableUnion)
+TEST(BasicTests, NoDataRepMutableUnion)
 {
-  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
-  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
-  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
-  baseline_checks_union<NoDataRepMutableUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(
+    xcdr2, MutableXcdr2UnionExpectedShortBE::expected, E_SHORT_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(
+    xcdr2, MutableXcdr2UnionExpectedLongBE::expected, E_LONG_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(
+    xcdr2, MutableXcdr2UnionExpectedOctetBE::expected, E_OCTET_FIELD);
+  baseline_checks_union<NoDataRepMutableUnion>(
+    xcdr2, MutableXcdr2UnionExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
+}
+
+TEST(BasicTests, NoDataRepMutableUnionLE)
+{
+  test_little_endian_union<NoDataRepMutableUnion,
+                           MutableXcdr2UnionExpectedShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<NoDataRepMutableUnion,
+                           MutableXcdr2UnionExpectedLongBE>(E_LONG_FIELD);
+  test_little_endian_union<NoDataRepMutableUnion,
+                           MutableXcdr2UnionExpectedOctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<NoDataRepMutableUnion,
+                           MutableXcdr2UnionExpectedLongLongBE>(E_LONG_LONG_FIELD);
 }
 
 // Appendable Tests ==========================================================
 
-TEST(appendable_tests, FromNestedStruct)
+TEST(AppendableTests, FromNestedStruct)
 {
   amalgam_serializer_test<NestedStruct, AdditionalFieldNestedStruct>(
-    xcdr2, appendable_xcdr2_struct_expected);
+    xcdr2, AppendableXcdr2StructExpectedBE::expected);
 }
 
-const unsigned char additional_nested_expected_xcdr2[] = {
+// ---------- AdditionalFieldNestedStruct
+struct AdditionalNestedExpectedXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char AdditionalNestedExpectedXcdr2BE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x18, // +4 = 4
   // short_field
@@ -578,6 +685,7 @@ const unsigned char additional_nested_expected_xcdr2[] = {
   // additional_field (long)
   0x12, 0x34, 0x56, 0x78 // +4 = 28
 };
+const unsigned AdditionalNestedExpectedXcdr2BE::layout[] = {4,2,2,4,1,3,8,4};
 
 template<>
 void set_values(AdditionalFieldNestedStruct& value)
@@ -586,10 +694,16 @@ void set_values(AdditionalFieldNestedStruct& value)
   value.additional_field = 0x12345678;
 }
 
-TEST(appendable_tests, FromAdditionalNestedStruct)
+TEST(AppendableTests, FromAdditionalNestedStruct)
 {
   amalgam_serializer_test<AdditionalFieldNestedStruct, NestedStruct>(
-    xcdr2, additional_nested_expected_xcdr2);
+    xcdr2, AdditionalNestedExpectedXcdr2BE::expected);
+}
+
+TEST(AppendableTests, FromAdditionalNestedStructLE)
+{
+  test_little_endian<AdditionalFieldNestedStruct, NestedStruct,
+                     AdditionalNestedExpectedXcdr2BE>();
 }
 
 template<>
@@ -600,12 +714,23 @@ void expect_values_equal(const AdditionalFieldNestedStruct& a,
   EXPECT_EQ(a.additional_field, b.additional_field);
 }
 
-TEST(appendable_tests, BothAdditionalNestedStruct)
+TEST(AppendableTests, BothAdditionalNestedStruct)
 {
-  serializer_test<AdditionalFieldNestedStruct>(xcdr2, additional_nested_expected_xcdr2);
+  serializer_test<AdditionalFieldNestedStruct>(
+    xcdr2, AdditionalNestedExpectedXcdr2BE::expected);
 }
 
-const unsigned char appendable_expected_xcdr2[] = {
+TEST(AppendableTests, BothAdditionalNestedStructLE)
+{
+  test_little_endian<AdditionalFieldNestedStruct, AdditionalNestedExpectedXcdr2BE>();
+}
+
+// ---------- AppendableStruct
+struct AppendableExpectedXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableExpectedXcdr2BE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x2c, // +4 = 4
   // Delimiter of the nested struct
@@ -631,6 +756,7 @@ const unsigned char appendable_expected_xcdr2[] = {
   0x00, 0x00, 0x00, // +3 pad = 40
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 48
 };
+const unsigned AppendableExpectedXcdr2BE::layout[] = {4,4,2,2,4,1,3,8,2,2,4,1,3,8};
 
 template<>
 void set_values(AppendableStruct& value)
@@ -652,9 +778,14 @@ void expect_values_equal(const AppendableStruct& a, const AppendableStruct& b)
   expect_equal_with_nested(a, b);
 }
 
-TEST(appendable_tests, BothAppendableStruct)
+TEST(AppendableTests, BothAppendableStruct)
 {
-  serializer_test<AppendableStruct>(xcdr2, appendable_expected_xcdr2);
+  serializer_test<AppendableStruct>(xcdr2, AppendableExpectedXcdr2BE::expected);
+}
+
+TEST(AppendableTests, BothAppendableStructLE)
+{
+  test_little_endian<AppendableStruct, AppendableExpectedXcdr2BE>();
 }
 
 template<>
@@ -664,13 +795,24 @@ void expect_values_equal(const AppendableStruct& a,
   expect_equal_with_nested(a, b);
 }
 
-TEST(appendable_tests, FromAppendableStruct)
+TEST(AppendableTests, FromAppendableStruct)
 {
   amalgam_serializer_test<AppendableStruct, AdditionalFieldAppendableStruct>(
-    xcdr2, appendable_expected_xcdr2);
+    xcdr2, AppendableExpectedXcdr2BE::expected);
 }
 
-const unsigned char additional_appendable_expected_xcdr2[] = {
+TEST(AppendableTests, FromAppendableStructLE)
+{
+  test_little_endian<AppendableStruct, AdditionalFieldAppendableStruct,
+                     AppendableExpectedXcdr2BE>();
+}
+
+// ---------- AdditionalFieldAppendableStruct
+struct AdditionalAppendableExpectedXcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char AdditionalAppendableExpectedXcdr2BE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x34, // +4 = 4
   // Delimiter of the nested struct
@@ -700,6 +842,8 @@ const unsigned char additional_appendable_expected_xcdr2[] = {
   // additional_field
   0x12, 0x34, 0x56, 0x78 // +4 = 56
 };
+const unsigned AdditionalAppendableExpectedXcdr2BE::layout[] = {4,4,2,2,4,1,3,8,
+                                                                4,2,2,4,1,3,8,4};
 
 template<>
 void set_values(AdditionalFieldAppendableStruct& value)
@@ -716,10 +860,16 @@ void expect_values_equal(const AdditionalFieldAppendableStruct& a,
   expect_equal_with_nested(a, b);
 }
 
-TEST(appendable_tests, FromAdditionalAppendableStruct)
+TEST(AppendableTests, FromAdditionalAppendableStruct)
 {
   amalgam_serializer_test<AdditionalFieldAppendableStruct, AppendableStruct>(
-    xcdr2, additional_appendable_expected_xcdr2);
+    xcdr2, AdditionalAppendableExpectedXcdr2BE::expected);
+}
+
+TEST(AppendableTests, FromAdditionalAppendableStructLE)
+{
+  test_little_endian<AdditionalFieldAppendableStruct, AppendableStruct,
+                     AdditionalAppendableExpectedXcdr2BE>();
 }
 
 template<>
@@ -731,13 +881,24 @@ void expect_values_equal(const AdditionalFieldAppendableStruct& a,
   EXPECT_EQ(a.nested.additional_field, b.nested.additional_field);
 }
 
-TEST(appendable_tests, BothAdditionalAppendableStruct)
+TEST(AppendableTests, BothAdditionalAppendableStruct)
 {
   serializer_test<AdditionalFieldAppendableStruct>(
-    xcdr2, additional_appendable_expected_xcdr2);
+    xcdr2, AdditionalAppendableExpectedXcdr2BE::expected);
 }
 
-const unsigned char appendable_expected2_xcdr2[] = {
+TEST(AppendableTests, BothAdditionalAppendableStructLE)
+{
+  test_little_endian<AdditionalFieldAppendableStruct,
+                     AdditionalAppendableExpectedXcdr2BE>();
+}
+
+// ---------- AppendableStruct2
+struct AppendableExpected2Xcdr2BE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableExpected2Xcdr2BE::expected[] = {
   // Delimiter
   0x00, 0x00, 0x00, 0x28, // +4 = 4
   // string_field
@@ -757,6 +918,8 @@ const unsigned char appendable_expected2_xcdr2[] = {
   0x00, 0x00, 0x00, // +3 pad = 36
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 44
 };
+const unsigned AppendableExpected2Xcdr2BE::layout[] = {4,4,1,1,1,1,1,1,
+                                                       1,1,1,1,2,4,2,2,4,1,3,8};
 
 template<>
 void set_values(AppendableStruct2& value)
@@ -773,9 +936,14 @@ void expect_values_equal(const AppendableStruct2& a,
   EXPECT_STREQ(a.string_field, b.string_field);
 }
 
-TEST(appendable_tests, BothAppendableStruct2)
+TEST(AppendableTests, BothAppendableStruct2)
 {
-  serializer_test<AppendableStruct2>(xcdr2, appendable_expected2_xcdr2);
+  serializer_test<AppendableStruct2>(xcdr2, AppendableExpected2Xcdr2BE::expected);
+}
+
+TEST(AppendableTests, BothAppendableStruct2LE)
+{
+  test_little_endian<AppendableStruct2, AppendableExpected2Xcdr2BE>();
 }
 
 // Mutable Tests =============================================================
@@ -914,7 +1082,14 @@ TEST(MutableTests, BaselineXcdr2TestUnion)
 
 TEST(MutableTests, BaselineXcdr2TestUnionLE)
 {
-  // TODO (sonndinh): do this
+  test_little_endian_union<MutableUnion,
+                           MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<MutableUnion,
+                           MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+  test_little_endian_union<MutableUnion,
+                           MutableUnionExpectedXcdr2OctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<MutableUnion,
+                           MutableUnionExpectedXcdr2LongLongBE>(E_LONG_LONG_FIELD);
 }
 
 // ---------- ReorderedMutableStruct
