@@ -40,7 +40,7 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appNa
     entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(),
         OpenDDS::DCPS::Observer::e_ENABLED | OpenDDS::DCPS::Observer::e_DELETED
       | OpenDDS::DCPS::Observer::e_ASSOCIATED | OpenDDS::DCPS::Observer::e_DISASSOCIATED
-      | OpenDDS::DCPS::Observer::e_QOS_CHANGED | OpenDDS::DCPS::Observer::e_ASSOCIATED_QOS_CHANGED
+      | OpenDDS::DCPS::Observer::e_QOS_CHANGED
       );
   } catch (const CORBA::Exception& e) {
     ACE_ERROR((LM_ERROR, "CORBA::Exception: %C\n", e._info().c_str()));

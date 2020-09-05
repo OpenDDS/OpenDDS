@@ -22,7 +22,8 @@ public:
   Publisher(int argc, ACE_TCHAR* argv[]);
   int run();
 private:
-  int waitForSubscriber();
+  int waitForSubscriber() const;
+  void change_writer_qos();
   Domain domain_;
   Messenger::MessageDataWriter_var writer_;
 };
@@ -62,16 +63,28 @@ int Publisher::run()
     if (r != ::DDS::RETCODE_OK) {
       std::cerr << "Publisher write returned code " << r << std::endl;
     }
+    if (msg.count == 2) {
+      change_writer_qos();
+    }
     ACE_OS::sleep(ACE_Time_Value(0, 300000)); // sleep 300 ms
   }
   return 0;
 }
 
-int Publisher::waitForSubscriber()
+int Publisher::waitForSubscriber() const
 {
   std::cout << "Publisher waiting for subscriber..." << std::endl;
   DDS::DataWriter_var writer = DDS::DataWriter::_narrow(writer_);
   return Utils::wait_match(writer, Domain::N_READER);
+}
+
+void Publisher::change_writer_qos()
+{
+  DDS::DataWriterQos qos;
+  if (writer_->get_qos(qos) == DDS::RETCODE_OK) {
+    Domain::change_qos(qos, "abc");
+    writer_->set_qos(qos);
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])

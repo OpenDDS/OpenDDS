@@ -23,6 +23,7 @@ private:
   public:
     Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable);
     int waitForPublisherDone();
+    void change_qos();
   private:
     DDS::DataReaderListener_var listener_;
     DDS::DataReader_var reader_;
@@ -82,14 +83,15 @@ Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, cons
     if (CORBA::is_nil(reader_.in())) {
       throw ACE_TEXT("create_datareader failed.");
     }
-/*
+
     auto entity = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(reader_.ptr());
     entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(),
         OpenDDS::DCPS::Observer::e_SAMPLE_RECEIVED
       | OpenDDS::DCPS::Observer::e_SAMPLE_READ
       | OpenDDS::DCPS::Observer::e_SAMPLE_TAKEN
     );
-*/
+
+    change_qos();
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception in Subscriber::Reader:");
     throw;
@@ -120,6 +122,15 @@ int Subscriber::Reader::waitForPublisherDone()
     }
   } catch (...) { ret = 1; }
   return (waitSet.detach_condition(status) == DDS::RETCODE_OK ? 0 : 1) + ret;
+}
+
+void Subscriber::Reader::change_qos()
+{
+  DDS::DataReaderQos qos;
+  if (reader_->get_qos(qos) == DDS::RETCODE_OK) {
+    Domain::change_qos(qos, "cba");
+    reader_->set_qos(qos);
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])

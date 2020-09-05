@@ -28,26 +28,49 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr dr)
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    Messenger::Message msg;
-    DDS::SampleInfo si;
-    DDS::ReturnCode_t status = msg_dr->take_next_sample(msg, si) ;
-    if (status == DDS::RETCODE_OK) {
-      if (si.valid_data) {
-        ++received_;
-        std::cout << reader_ << " received " << msg.subject << msg.subject_id << ':' << msg.count << ':' << msg.text << std::endl;
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
-      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-      } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: on_data_available() ERROR: %d\n"), si.instance_state));
-      }
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: on_data_available() ERROR: status: %d\n"), status));
-    }
+    if (received_ == 3) {
+      take(msg_dr);
+    } else { take_next_sample(msg_dr); }
+
+    ++received_;
+    //if (received_ == 1) {
+    //  msg_dr->change_qos();
+    //}
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
     throw;
+  }
+}
+
+void DataReaderListenerImpl::take(Messenger::MessageDataReader_var mdr)
+{
+  Messenger::MessageSeq msgs;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t r = mdr->take(msgs, infos, DDS::LENGTH_UNLIMITED,
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (r != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take() ERROR: %d\n"), r));
+  }
+  std::cout << reader_ << " take() " << msgs.length() << " messages\n";
+}
+
+void DataReaderListenerImpl::take_next_sample(Messenger::MessageDataReader_var mdr)
+{
+  Messenger::Message m;
+  DDS::SampleInfo i;
+  DDS::ReturnCode_t r = mdr->take_next_sample(m, i) ;
+  if (r == DDS::RETCODE_OK) {
+    if (i.valid_data) {
+      std::cout << reader_ << ": take_next_sample " << m.subject << m.subject_id << ':' << m.count << ':' << m.text << std::endl;
+    } else if (i.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+    } else if (i.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take_next_sample() ERROR: %d\n"), i.instance_state));
+    }
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take_next_sample() ERROR: r: %d\n"), r));
   }
 }
 

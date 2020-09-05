@@ -1,4 +1,6 @@
 #pragma once
+#include "MessengerC.h"
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/LocalObject.h>
 #include <set>
@@ -16,6 +18,8 @@ public:
   virtual void on_sample_rejected(DDS::DataReader_ptr, const DDS::SampleRejectedStatus&);
   virtual void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus&);
 private:
+  void take(Messenger::MessageDataReader_var mdr);
+  void take_next_sample(Messenger::MessageDataReader_var mdr);
   const std::string reader_;
   long received_;
 };

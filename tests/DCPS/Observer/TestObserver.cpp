@@ -76,12 +76,14 @@ void TestObserver::on_deleted(DDS::DataReader_ptr r)
 
 void TestObserver::on_qos_changed(DDS::DataWriter_ptr w)
 {
-  std::cout << "on_qos_changed" << to_str(w) << std::endl;
+  DDS::DataWriterQos qos;
+  std::cout << "on_qos_changed" << to_str(w) << (w->get_qos(qos) == DDS::RETCODE_OK ? qos_str(qos) : "\n");
 }
 
 void TestObserver::on_qos_changed(DDS::DataReader_ptr r)
 {
-  std::cout << "on_qos_changed" << to_str(r) << std::endl;
+  DDS::DataReaderQos qos;
+  std::cout << "on_qos_changed" << to_str(r) << (r->get_qos(qos) == DDS::RETCODE_OK ? qos_str(qos) : "\n");
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
@@ -105,16 +107,6 @@ void TestObserver::on_disassociated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::
 void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId)
 {
   std::cout << "on_disassociated" << to_str(r) << " from writer " << writerId << std::endl;
-}
-
-void TestObserver::on_associated_qos_changed(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId)
-{
-  std::cout << "on_associated_qos_changed" << to_str(w) << " with reader " << readerId << std::endl;
-}
-
-void TestObserver::on_associated_qos_changed(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId)
-{
-  std::cout << "on_associated_qos_changed" << to_str(r) << " with writer " << writerId << std::endl;
 }
 
 // ========== ========== ========== ========== ========== ========== ==========

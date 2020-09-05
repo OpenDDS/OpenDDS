@@ -1394,6 +1394,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
+  SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
   case INSTANCE_REGISTRATION: {
@@ -1419,7 +1420,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     // This also adds to the sample container and makes any callbacks
     // and condition modifications.
 
-    SubscriptionInstance_rch instance;
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
@@ -1662,9 +1662,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   Observer::Rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
   if (observer) {
-    SubscriptionInstance_rch instance;
-    lookup_instance(sample, instance);
-    Observer::Sample s(instance->instance_handle_, instance->instance_state_,
+    Observer::Sample s(
+      instance ? instance->instance_handle_ : 0,
+      instance ? instance->instance_state_ : 0,
       {sample.header_.source_timestamp_sec_, sample.header_.source_timestamp_nanosec_},
       sample.header_.sequence_, sample.sample_.get());
     observer->on_sample_received(this, s);

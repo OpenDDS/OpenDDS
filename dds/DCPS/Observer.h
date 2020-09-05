@@ -38,18 +38,17 @@ public:
 
   typedef unsigned long Event;
   enum : unsigned long {
-    e_ENABLED                = 0x0001 << 0,
-    e_DELETED                = 0x0001 << 1,
-    e_QOS_CHANGED            = 0x0001 << 2,
-    e_ASSOCIATED             = 0x0001 << 3,
-    e_DISASSOCIATED          = 0x0001 << 4,
-    e_ASSOCIATED_QOS_CHANGED = 0x0001 << 5,
-    e_SAMPLE_SENT            = 0x0001 << 6,
-    e_SAMPLE_RECEIVED        = 0x0001 << 7,
-    e_SAMPLE_READ            = 0x0001 << 8,
-    e_SAMPLE_TAKEN           = 0x0001 << 9,
-    e_NONE                   = 0x0000,
-    e_ALL                    = 0xffff
+    e_ENABLED         = 0x0001 << 0,
+    e_DELETED         = 0x0001 << 1,
+    e_QOS_CHANGED     = 0x0001 << 2,
+    e_ASSOCIATED      = 0x0001 << 3,
+    e_DISASSOCIATED   = 0x0001 << 4,
+    e_SAMPLE_SENT     = 0x0001 << 5,
+    e_SAMPLE_RECEIVED = 0x0001 << 6,
+    e_SAMPLE_READ     = 0x0001 << 7,
+    e_SAMPLE_TAKEN    = 0x0001 << 8,
+    e_NONE            = 0x0000,
+    e_ALL             = 0xffff
   };
 
   struct Sample
@@ -83,9 +82,6 @@ public:
 
   virtual void on_disassociated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
   virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
-
-  virtual void on_associated_qos_changed(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
-  virtual void on_associated_qos_changed(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
 
   // 3) DataWriter sample sent
   //    - Writer Id, seq#, timestamp, instance handle, instance state, data payload
