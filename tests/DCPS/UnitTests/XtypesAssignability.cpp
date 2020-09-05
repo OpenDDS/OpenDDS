@@ -3,11 +3,11 @@
 #include "gtest/gtest.h"
 
 using namespace OpenDDS::XTypes;
+using namespace OpenDDS::DCPS;
 
 TEST(PrimitiveTypesTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TK_BOOLEAN);
   tib.kind(tia.kind());
@@ -94,8 +94,7 @@ TEST(PrimitiveTypesTest, Assignable)
 
 TEST(PrimitiveTypesTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TK_BOOLEAN);
   tib.kind(TK_BYTE);
@@ -182,8 +181,7 @@ TEST(PrimitiveTypesTest, NotAssignable)
 
 TEST(StringTypesTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TI_STRING8_SMALL);
   tib.kind(TI_STRING8_SMALL);
@@ -275,8 +273,7 @@ void string_expect_false(const TypeAssignability& test, const TypeIdentifier& ti
 
 TEST(StringTypesTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TI_STRING8_SMALL);
   string_expect_false(test, tia, tib);
@@ -327,8 +324,7 @@ protected:
 
 TEST_F(EnumTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
                               TypeObject(MinimalTypeObject(enum_b_))));
 
@@ -342,8 +338,7 @@ TEST_F(EnumTypeTest, Assignable)
 
 TEST_F(EnumTypeTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   // Do not have identical literal sets
   enum_a_.enum_flags = IS_FINAL;
   enum_b_.enum_flags = enum_a_.enum_flags;
@@ -453,8 +448,7 @@ TEST_F(EnumTypeTest, NotAssignable)
 
 TEST(BitmaskTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalBitmaskType bitmask_a, bitmask_b;
   bitmask_a.header.common.bit_bound = 16;
   bitmask_b.header.common.bit_bound = bitmask_a.header.common.bit_bound;
@@ -486,8 +480,7 @@ TEST(BitmaskTypeTest, Assignable)
 
 TEST(BitmaskTypeTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalBitmaskType bitmask_a;
   bitmask_a.header.common.bit_bound = 32;
   MinimalTypeObject tobj_a(bitmask_a);
@@ -599,8 +592,7 @@ static void get_equivalence_hash(EquivalenceHash& out)
 
 TEST(SequenceTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalSequenceType seq_a, seq_b;
   seq_a.header.common.bound = 10;
   seq_b.header.common.bound = 20;
@@ -739,8 +731,7 @@ TEST(SequenceTypeTest, Assignable)
 
 TEST(SequenceTypeTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalSequenceType seq_a, seq_b;
   seq_a.header.common.bound = 10;
   seq_b.header.common.bound = 20;
@@ -870,8 +861,7 @@ TEST(SequenceTypeTest, NotAssignable)
 
 TEST(ArrayTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalArrayType arr_a, arr_b;
   arr_a.header.common.bound_seq.append(10).append(20).append(30);
   arr_b.header.common.bound_seq.append(10).append(20).append(30);
@@ -1010,8 +1000,7 @@ TEST(ArrayTypeTest, Assignable)
 
 TEST(ArrayTypeTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalArrayType arr_a, arr_b;
   arr_a.header.common.bound_seq.append(10).append(20).append(30);
   arr_b.header.common.bound_seq.append(10).append(20).append(30);
@@ -1141,8 +1130,7 @@ TEST(ArrayTypeTest, NotAssignable)
 
 TEST(MapTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalMapType map_a, map_b;
   map_a.header.common.bound = 50;
   map_b.header.common.bound = 100;
@@ -1336,8 +1324,7 @@ TEST(MapTypeTest, Assignable)
 
 TEST(MapTypeTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalMapType map_a, map_b;
   map_a.header.common.bound = 50;
   map_b.header.common.bound = 100;
@@ -1529,8 +1516,7 @@ TEST(MapTypeTest, NotAssignable)
 
 void expect_true_non_alias_to_alias()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -1677,8 +1663,7 @@ void expect_true_non_alias_to_alias()
 
 void expect_true_alias_to_non_alias()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -1825,8 +1810,7 @@ void expect_true_alias_to_non_alias()
 
 void expect_true_alias_to_alias()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a, ali_b;
 
   // Primitive types
@@ -2019,8 +2003,7 @@ TEST(AliasTypeTest, Assignable)
 
 void expect_false_non_alias_to_alias()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -2174,8 +2157,7 @@ void expect_false_non_alias_to_alias()
 
 void expect_false_alias_to_non_alias()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -2330,8 +2312,7 @@ void expect_false_alias_to_non_alias()
 
 void expect_false_alias_to_alias()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a, ali_b;
 
   // Primitive types
@@ -2527,8 +2508,7 @@ TEST(AliasTypeTest, NotAssignable)
 
 TEST(StructTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
   a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
@@ -2740,8 +2720,7 @@ TEST(StructTypeTest, Assignable)
 
 void expect_false_different_extensibilities()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Different extensibility kinds
@@ -2752,8 +2731,7 @@ void expect_false_different_extensibilities()
 
 void expect_false_different_ids()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Some members with the same name but different ID
@@ -2770,8 +2748,7 @@ void expect_false_different_ids()
 
 void expect_false_different_names()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Some members with the same name but different ID
@@ -2788,8 +2765,7 @@ void expect_false_different_names()
 
 void expect_false_no_matched_member()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // There no members with the same ID
@@ -2810,8 +2786,7 @@ void expect_false_no_matched_member()
 
 void expect_false_key_erased()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // KeyErased of members are not assignable
@@ -2880,8 +2855,7 @@ void expect_false_key_erased()
 
 void expect_false_not_optional_must_understand()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_MUTABLE;
@@ -2903,8 +2877,7 @@ void expect_false_not_optional_must_understand()
 
 void expect_false_keys_must_in_both()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_MUTABLE;
@@ -2924,8 +2897,7 @@ void expect_false_keys_must_in_both()
 
 void expect_false_string_keys()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(),
@@ -2941,8 +2913,7 @@ void expect_false_string_keys()
 
 void expect_false_enum_keys()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   MinimalEnumeratedLiteralSeq literal_seq_a, literal_seq_b;
@@ -2976,8 +2947,7 @@ void expect_false_enum_keys()
 
 void expect_false_sequence_keys()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Sequence key members
@@ -3019,8 +2989,7 @@ void expect_false_sequence_keys()
 
 void expect_false_map_keys()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Map key members
@@ -3066,8 +3035,7 @@ void expect_false_map_keys()
 
 void expect_false_key_holder()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   MinimalStructType inner_a, inner_b;
@@ -3135,8 +3103,7 @@ void expect_false_key_holder()
 
 void expect_false_appendable()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_APPENDABLE;
@@ -3154,8 +3121,7 @@ void expect_false_appendable()
 
 void expect_false_final()
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_FINAL;
@@ -3193,8 +3159,7 @@ TEST(StructTypeTest, NotAssignable)
 
 TEST(UnionTypeTest, Assignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
 
   // Extensibility
@@ -3301,8 +3266,7 @@ TEST(UnionTypeTest, Assignable)
 
 TEST(UnionTypeTest, NotAssignable)
 {
-  TypeLookupService tls;
-  TypeAssignability test(tls);
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
 
   // Different extensibility kinds

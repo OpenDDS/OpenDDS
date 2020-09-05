@@ -287,6 +287,11 @@ namespace XTypes {
     explicit StringSTypeDefn(const SBound a_bound)
       : bound(a_bound)
     {}
+
+    bool operator<(const StringSTypeDefn& other) const
+    {
+      return bound < other.bound;
+    }
   };
 
   // 4 Bytes
@@ -298,6 +303,11 @@ namespace XTypes {
     explicit StringLTypeDefn(const LBound a_bound)
       : bound(a_bound)
     {}
+
+    bool operator<(const StringLTypeDefn& other) const
+    {
+      return bound < other.bound;
+    }
   };
 
   struct PlainCollectionHeader {
@@ -436,6 +446,13 @@ namespace XTypes {
       , scc_length(a_scc_length)
       , scc_index(a_scc_index)
     {}
+
+    bool operator<(const StronglyConnectedComponentId& other) const
+    {
+      return (sc_component_id < other.sc_component_id)
+        && (scc_length < other.scc_length)
+        && (scc_index < other.scc_index);
+    }
   };
 
   // Future extensibility
@@ -671,23 +688,21 @@ namespace XTypes {
       }
 
       switch (kind_) {
-      case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
-        return (sc_component_id().sc_component_id < other.sc_component_id().sc_component_id)
-                && (sc_component_id().scc_length < other.sc_component_id().scc_length)
-                && (sc_component_id().scc_index < other.sc_component_id().scc_index);
-      case XTypes::EK_COMPLETE:
-      case XTypes::EK_MINIMAL:
-        for (size_t i = 0; i < 14; ++i) {
-          if (equivalence_hash()[i] > other.equivalence_hash()[i]) {
-            return false;
-          } else if (equivalence_hash()[i] < other.equivalence_hash()[i]) {
-            return true;
-          }
-        }
-        return false;
+      case TI_STRONGLY_CONNECTED_COMPONENT:
+        return (sc_component_id() < other.sc_component_id());
+      case EK_COMPLETE:
+      case EK_MINIMAL:
+        return (memcmp(equivalence_hash(), other.equivalence_hash(), sizeof equivalence_hash()) < 0);
+      case TI_STRING8_SMALL:
+      case TI_STRING16_SMALL:
+        return string_sdefn() < other.string_sdefn();
+      case TI_STRING8_LARGE:
+      case TI_STRING16_LARGE:
+        return string_ldefn() < other.string_ldefn();
+
       default:
         return false;
-      };
+      }
     }
 
   private:

@@ -25,7 +25,7 @@ typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
-  TypeAssignability(TypeLookupService& tls) : tl_service_(&tls) {};
+  explicit TypeAssignability(XTypes::TypeLookupService_rch tls) : tl_service_(tls) {};
 
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
   bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
@@ -89,7 +89,7 @@ private:
   bool get_struct_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
   bool get_union_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
 
-  TypeLookupService* tl_service_;
+  XTypes::TypeLookupService_rch tl_service_;
 
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {

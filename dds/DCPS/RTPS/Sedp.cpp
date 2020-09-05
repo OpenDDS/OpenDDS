@@ -3167,12 +3167,11 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                     const DCPS::RepoId& reader)
 {
-  DCPS::RepoId reader_ = reader;
-  reader_.entityId = ENTITYID_TL_SVC_REPLY_READER;
+  const DCPS::RepoId remote_reader = make_id(reader, ENTITYID_TL_SVC_REPLY_READER);
   DCPS::SequenceNumber sequence = 0;
 
   return DDS::RETCODE_OK == type_lookup_request_writer_->send_type_lookup_request(type_ids,
-                                                                                  reader,
+                                                                                  remote_reader,
                                                                                   sequence,
                                                                                   type_lookup_service_->rpc_sequence_number_,
                                                                                   participant_id_);

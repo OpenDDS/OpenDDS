@@ -213,7 +213,7 @@ public:
                     const DDS::DomainParticipantQos& qos,
                     const EndpointRegistry& registry)
     : LocalParticipant<StaticEndpointManager>(qos)
-    , endpoint_manager_(DCPS::make_rch<StaticEndpointManager>(guid, DCPS::ref(lock_), registry, DCPS::ref(*this)))
+    , endpoint_manager_(DCPS::make_rch<StaticEndpointManager>(guid, ref(lock_), ref(registry), ref(*this)))
   {}
 
   void init_bit(const DDS::Subscriber_var& bit_subscriber)
