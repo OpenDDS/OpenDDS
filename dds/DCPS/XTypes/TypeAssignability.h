@@ -25,7 +25,7 @@ typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
-  explicit TypeAssignability(XTypes::TypeLookupService_rch tls) : tl_service_(tls) {};
+  explicit TypeAssignability(XTypes::TypeLookupService_rch tls) : tl_service_(tls) {}
 
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
   bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;

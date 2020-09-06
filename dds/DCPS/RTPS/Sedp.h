@@ -512,7 +512,7 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sample,
+    DDS::ReturnCode_t send_tl_reply(const DCPS::ReceivedDataSample& sample,
       XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
