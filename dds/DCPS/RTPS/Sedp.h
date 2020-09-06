@@ -512,10 +512,8 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
-      const DCPS::RepoId& reader,
-      DCPS::SequenceNumber& sequence,
-      DDS::RPC::RemoteExceptionCode_t exception_code);
+    DDS::ReturnCode_t TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sample,
+      XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
@@ -588,8 +586,11 @@ private:
 
     virtual ~TypeLookupRequestReader();
 
-    DDS::ReturnCode_t take_tl_request(const DCPS::ReceivedDataSample& sample,
-      DCPS::Serializer& ser,
+    DDS::ReturnCode_t take_tl_request(DCPS::Serializer& ser,
+      XTypes::TypeLookup_Reply& type_lookup_reply);
+
+  private:
+    DDS::ReturnCode_t process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
       XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
@@ -606,8 +607,7 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
-    DDS::ReturnCode_t take_tl_reply(const DCPS::ReceivedDataSample& sample,
-      DCPS::Serializer& ser);
+    DDS::ReturnCode_t take_tl_reply(DCPS::Serializer& ser);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;

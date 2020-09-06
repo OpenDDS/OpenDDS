@@ -10,6 +10,7 @@
 
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/TypeSupportImpl.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -34,6 +35,7 @@ public:
     TypeIdentifierTypeObjectPairSeq& types,
     TypeIdentifierPairSeq& complete_to_minimal);
   void add_type_objects_to_cache(TypeIdentifierTypeObjectPairSeq& types);
+  void add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport);
 
   bool type_object_in_cache(const TypeIdentifier& ti);
 

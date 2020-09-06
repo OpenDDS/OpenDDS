@@ -808,9 +808,9 @@ namespace OpenDDS {
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
-      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
-                                            const DCPS::RepoId& reader)
-      { return true; };
+      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq&,
+                                            const DCPS::RepoId&)
+      { return true; }
 
       void match_endpoints(RepoId repoId, const TopicDetails& td,
                            bool remove = false)
@@ -939,13 +939,13 @@ namespace OpenDDS {
 
         bool operator<(const MatchingPair& a_other) const
         {
-          if (GUID_tKeyLessThan()(this->writer_, a_other.writer_)) return true;
+          if (GUID_tKeyLessThan()(writer_, a_other.writer_)) return true;
 
-          if (GUID_tKeyLessThan()(a_other.writer_, this->writer_)) return false;
+          if (GUID_tKeyLessThan()(a_other.writer_, writer_)) return false;
 
-          if (GUID_tKeyLessThan()(this->reader_, a_other.reader_)) return true;
+          if (GUID_tKeyLessThan()(reader_, a_other.reader_)) return true;
 
-          if (GUID_tKeyLessThan()(a_other.reader_, this->reader_)) return false;
+          if (GUID_tKeyLessThan()(a_other.reader_, reader_)) return false;
 
           return false;
         }
