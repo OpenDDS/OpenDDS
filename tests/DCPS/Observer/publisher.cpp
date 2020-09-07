@@ -16,6 +16,8 @@
 #include <assert.h>
 #include <iostream>
 
+using namespace OpenDDS::DCPS;
+
 class Publisher
 {
 public:
@@ -31,13 +33,13 @@ private:
 Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publisher")
 {
   DDS::Publisher_var pub = domain_.participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-    DDS::PublisherListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::PublisherListener::_nil(), DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(pub.in())) {
     throw ACE_TEXT("create_publisher failed.");
   }
 
   DDS::DataWriter_var dw = pub->create_datawriter(domain_.topic.in(), DATAWRITER_QOS_DEFAULT,
-    DDS::DataWriterListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DataWriterListener::_nil(), DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(dw.in())) {
     throw ACE_TEXT("create_datawriter failed.");
   }
@@ -46,9 +48,8 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
     throw ACE_TEXT("TestMsgDataWriter::_narrow failed.");
   }
 
-  //auto entity = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(pub.ptr());
-  auto entity = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(dw.ptr());
-  entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(), OpenDDS::DCPS::Observer::e_SAMPLE_SENT);
+  auto entity = dynamic_cast<EntityImpl*>(dw.ptr());
+  entity->set_observer(make_rch<TestObserver>(), Observer::e_SAMPLE_SENT);
 }
 
 int Publisher::run()

@@ -11,35 +11,17 @@ use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
-sub do_test {
-  my $reliable = shift;
-  my $test = new PerlDDS::TestFramework();
+my $test = new PerlDDS::TestFramework();
 
-  $test->process('publisher', 'publisher', " -DCPSConfigFile rtps_disc.ini");
-  $test->process('subscriber', 'subscriber', " -DCPSConfigFile rtps_disc.ini -r $reliable");
+$test->process('publisher', 'publisher', " -DCPSConfigFile rtps_disc.ini");
+$test->process('subscriber', 'subscriber', " -DCPSConfigFile rtps_disc.ini");
 
-  $test->start_process('subscriber');
-  $test->start_process('publisher');
+$test->start_process('subscriber');
+$test->start_process('publisher');
 
-#  my $result = $test->finish(60);
-  my $result = $test->finish(30);
-  if ($result != 0) {
-    print STDERR "ERROR: test returned $result\n";
-  }
-  return $result;
+my $result = $test->finish(30);
+if ($result != 0) {
+  print STDERR "ERROR: test returned $result\n";
 }
-
-print "\nTesting best-effort readers:\n";
-my $result = do_test("00");
-#my $result = do_test("11");
-
-#print "\nTesting reliable readers:\n";
-#$result += do_test("11");
-
-#print "\nTesting best-effort and reliable readers:\n";
-#$result += do_test("01");
-
-#print "\nTesting reliable and best-effort readers:\n";
-#$result += do_test("10");
 
 exit $result;

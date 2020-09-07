@@ -8,6 +8,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <iostream>
 
+using namespace OpenDDS::DCPS;
+
 const char* Domain::TEST_TOPIC = "TestObserver Topic";
 const char* Domain::TEST_TOPIC_TYPE  = "TestObserver Type";
 
@@ -19,7 +21,7 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appNa
     }
 
     participant = dpf->create_participant(ID, PARTICIPANT_QOS_DEFAULT,
-      DDS::DomainParticipantListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::DomainParticipantListener::_nil(), DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(participant.in())) {
       throw ACE_TEXT("create_participant failed.");
     }
@@ -30,18 +32,17 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appNa
     }
 
     topic = participant->create_topic(TEST_TOPIC, TEST_TOPIC_TYPE,
-      TOPIC_QOS_DEFAULT, DDS::TopicListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      TOPIC_QOS_DEFAULT, DDS::TopicListener::_nil(), DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(topic.in())) {
       throw ACE_TEXT("create_topic failed.");
     }
 
-    auto entity = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(participant.ptr());
-  //entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(), OpenDDS::DCPS::Observer::e_ALL);
-    entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(),
-        OpenDDS::DCPS::Observer::e_ENABLED | OpenDDS::DCPS::Observer::e_DELETED
-      | OpenDDS::DCPS::Observer::e_ASSOCIATED | OpenDDS::DCPS::Observer::e_DISASSOCIATED
-      | OpenDDS::DCPS::Observer::e_QOS_CHANGED
-      );
+    // register for all writers and readers in this DomainParticipant
+    auto entity = dynamic_cast<EntityImpl*>(participant.ptr());
+    entity->set_observer(make_rch<TestObserver>(),
+      Observer::e_ENABLED | Observer::e_DELETED | Observer::e_QOS_CHANGED |
+      Observer::e_ASSOCIATED | Observer::e_DISASSOCIATED
+    );
   } catch (const CORBA::Exception& e) {
     ACE_ERROR((LM_ERROR, "CORBA::Exception: %C\n", e._info().c_str()));
     cleanup();
