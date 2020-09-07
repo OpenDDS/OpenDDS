@@ -76,8 +76,11 @@ void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& t
   XTypes::TypeInformation type_info;
   typesupport.to_type_info(type_info);
 
-  type_object_map_.insert(std::pair<TypeIdentifier, TypeObject>(type_info.minimal.typeid_with_size.type_id,
-                                                                typesupport.getMinimalTypeObject()));
+  TypeIdentifierWithSizeSeqMap::iterator it_type_id_with_size_seq = type_dependencies_map_.find(type_info.minimal.typeid_with_size.type_id);
+  if (it_type_id_with_size_seq == type_dependencies_map_.end()) {
+    type_object_map_.insert(std::pair<TypeIdentifier, TypeObject>(type_info.minimal.typeid_with_size.type_id,
+                                                                  typesupport.getMinimalTypeObject()));
+  }
 }
 
 

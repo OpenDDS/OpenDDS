@@ -918,15 +918,15 @@ namespace OpenDDS {
         RepoId writer;
         RepoId reader;
         SequenceNumber rpc_sequence_number;
-        const DDS::DataWriterQos* dwQos;
-        const DDS::PublisherQos* pubQos;
-        const DDS::DataReaderQos* drQos;
-        const DDS::SubscriberQos* subQos;
+        DDS::DataWriterQos dwQos;
+        DDS::PublisherQos pubQos;
+        DDS::DataReaderQos drQos;
+        DDS::SubscriberQos subQos;
         TransportLocatorSeq* wTls;
         TransportLocatorSeq* rTls;
         XTypes::TypeInformation* reader_type_info;
         XTypes::TypeInformation* writer_type_info;
-        const ContentFilterProperty_t* cfProp;
+        ContentFilterProperty_t cfProp;
         MonotonicTimePoint time_added_to_map;
       };
 
@@ -1124,15 +1124,15 @@ namespace OpenDDS {
           ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
 
           // if the type object is not in cache, send RPC request
-          md.dwQos = dwQos;
-          md.pubQos = pubQos;
-          md.drQos = drQos;
-          md.subQos = subQos;
+          md.dwQos = *dwQos;
+          md.pubQos = *pubQos;
+          md.drQos = *drQos;
+          md.subQos = *subQos;
           md.wTls = wTls;
           md.rTls = rTls;
           md.writer_type_info = writer_type_info;
           md.reader_type_info = reader_type_info;
-          md.cfProp = cfProp;
+          md.cfProp = *cfProp;
           md.writer = writer;
           md.reader = reader;
           md.time_added_to_map = MonotonicTimePoint::now();
@@ -1150,10 +1150,23 @@ namespace OpenDDS {
               } else {
                 matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
               }
-              send_type_lookup_request(type_ids, writer);
-              type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+              switch (writer_type_info->minimal.typeid_with_size.type_id.kind()) {
+                case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+                case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+                case XTypes::TI_PLAIN_ARRAY_SMALL:
+                case XTypes::TI_PLAIN_ARRAY_LARGE:
+                case XTypes::TI_PLAIN_MAP_SMALL:
+                case XTypes::TI_PLAIN_MAP_LARGE:
+                  break;
+                default:
+                  send_type_lookup_request(type_ids, writer);
+                  type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+                  return;
+              }
+              //send_type_lookup_request(type_ids, writer);
+              //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
               //// TLS_TODO: sanity check on locks
-              return;
+              //return;
             }
           } else if (!reader_local) {
             if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
@@ -1167,10 +1180,23 @@ namespace OpenDDS {
               } else {
                 matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
               }
-              send_type_lookup_request(type_ids, reader);
-              type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+              switch (reader_type_info->minimal.typeid_with_size.type_id.kind()) {
+              case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+              case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+              case XTypes::TI_PLAIN_ARRAY_SMALL:
+              case XTypes::TI_PLAIN_ARRAY_LARGE:
+              case XTypes::TI_PLAIN_MAP_SMALL:
+              case XTypes::TI_PLAIN_MAP_LARGE:
+                break;
+              default:
+                send_type_lookup_request(type_ids, writer);
+                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+                return;
+              }
+              //send_type_lookup_request(type_ids, reader);
+              //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
               //// TLS_TODO: sanity check on locks
-              return;
+              //return;
             }
           }
 
@@ -1268,15 +1294,15 @@ namespace OpenDDS {
         DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(reader);
         DiscoveredPublicationIter dpi = discovered_publications_.find(writer);
 
-        const DDS::DataWriterQos* dwQos = 0;
-        const DDS::PublisherQos* pubQos = 0;
-        const DDS::DataReaderQos* drQos = 0;
-        const DDS::SubscriberQos* subQos = 0;
+        DDS::DataWriterQos dwQos;
+        DDS::PublisherQos pubQos;
+        DDS::DataReaderQos drQos;
+        DDS::SubscriberQos subQos;
         TransportLocatorSeq* wTls = 0;
         TransportLocatorSeq* rTls = 0;
         XTypes::TypeInformation* reader_type_info;
         XTypes::TypeInformation* writer_type_info;
-        const ContentFilterProperty_t* cfProp = 0;
+        ContentFilterProperty_t cfProp;
         DataWriterCallbacks* dwr = 0;
         DataReaderCallbacks* drr = 0;
 
@@ -1413,20 +1439,20 @@ namespace OpenDDS {
         DDS::OctetSeq octet_seq_type_info_reader;
         XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
         const ReaderAssociation ra = {
-          add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
+          add_security_info(*rTls, writer, reader), reader, subQos, drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-          cfProp->filterClassName, cfProp->filterExpression,
+          cfProp.filterClassName, cfProp.filterExpression,
 #else
           "", "",
 #endif
-          cfProp->expressionParameters,
+          cfProp.expressionParameters,
           octet_seq_type_info_reader
         };
 
         DDS::OctetSeq octet_seq_type_info_writer;
         XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
         const WriterAssociation wa = {
-          add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos,
+          add_security_info(*wTls, writer, reader), writer, pubQos, dwQos,
           octet_seq_type_info_writer
         };
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
