@@ -10,12 +10,6 @@ public:
   static const CORBA::Long N_READER = 2;
   static const CORBA::Long N_MSG = 5;
 
-  DDS::DomainParticipant_var participant;
-  DDS::Topic_var topic;
-
-  Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame);
-  ~Domain();
-
   template<typename Qos>
   static void change_qos(Qos& qos, const std::string& data) {
     qos.user_data.value.length(data.length());
@@ -23,6 +17,12 @@ public:
       qos.user_data.value[i] = data[i];
     }
   }
+
+  DDS::DomainParticipant_var participant;
+  DDS::Topic_var topic;
+
+  Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame);
+  ~Domain();
 
 private:
   void cleanup();

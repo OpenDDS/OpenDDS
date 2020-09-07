@@ -21,7 +21,7 @@ public:
 private:
   class Reader {
   public:
-    Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable);
+    Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable, const OpenDDS::DCPS::Observer::Event e);
     int waitForPublisherDone();
     void change_qos();
   private:
@@ -53,29 +53,27 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subsc
       break;
     }
   }
-/*
+
+  // register Observer::e_SAMPLE_RECEIVED for all readers in this subscriber
   auto entity = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(sub_.ptr());
   entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(),
-      OpenDDS::DCPS::Observer::e_SAMPLE_RECEIVED
-    | OpenDDS::DCPS::Observer::e_SAMPLE_READ
-    | OpenDDS::DCPS::Observer::e_SAMPLE_TAKEN
-  );
-*/
+                       OpenDDS::DCPS::Observer::e_SAMPLE_RECEIVED);
 }
 
 int Subscriber::run() {
-  Reader reader1("Reader1", sub_, domain_, reliable_[0]);
-  Reader reader2("Reader2", sub_, domain_, reliable_[1]);
+  Reader reader1("Reader1", sub_, domain_, reliable_[0], OpenDDS::DCPS::Observer::e_SAMPLE_READ);
+  Reader reader2("Reader2", sub_, domain_, reliable_[1], OpenDDS::DCPS::Observer::e_SAMPLE_TAKEN);
   int r1 = reader1.waitForPublisherDone();
   int r2 = reader2.waitForPublisherDone();
   return r1 + r2;
 }
 
-Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable)
+Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable, const OpenDDS::DCPS::Observer::Event e)
   : listener_(new DataReaderListenerImpl(name))
 {
   try {
-    std::cout << name << ": " << (reliable ? "reliable" : "best-effort") << std::endl;
+    std::cout << name << '(' << (reliable ? "reliable" : "best-effort") << ") observes " <<
+      (e & OpenDDS::DCPS::Observer::e_SAMPLE_READ ? "e_SAMPLE_READ" : "e_SAMPLE_TAKEN") << std::endl;
     DDS::DataReaderQos qos;
     s->get_default_datareader_qos(qos);
     qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
@@ -84,12 +82,9 @@ Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, cons
       throw ACE_TEXT("create_datareader failed.");
     }
 
+    // register the specified Observer::Event for this reader
     auto entity = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(reader_.ptr());
-    entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(),
-        OpenDDS::DCPS::Observer::e_SAMPLE_RECEIVED
-      | OpenDDS::DCPS::Observer::e_SAMPLE_READ
-      | OpenDDS::DCPS::Observer::e_SAMPLE_TAKEN
-    );
+    entity->set_observer(OpenDDS::DCPS::make_rch<TestObserver>(), e);
 
     change_qos();
   } catch (const CORBA::Exception& e) {

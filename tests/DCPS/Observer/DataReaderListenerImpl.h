@@ -18,7 +18,9 @@ public:
   virtual void on_sample_rejected(DDS::DataReader_ptr, const DDS::SampleRejectedStatus&);
   virtual void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus&);
 private:
+  void read(Messenger::MessageDataReader_var mdr);
   void take(Messenger::MessageDataReader_var mdr);
+  void read_next_sample(Messenger::MessageDataReader_var mdr);
   void take_next_sample(Messenger::MessageDataReader_var mdr);
   const std::string reader_;
   long received_;

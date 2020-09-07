@@ -11,7 +11,6 @@
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
-#include "DataSampleElement.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -26,6 +25,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+class OpenDDS_Dcps_Export DataSampleElement;
+class OpenDDS_Dcps_Export ReceivedDataSample;
+class OpenDDS_Dcps_Export ReceivedDataElement;
 
 class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
@@ -59,8 +62,10 @@ public:
     SequenceNumber seq_n_;
     const void* const data_;
     static CORBA::ULong to_instance_state(const char message_id);
-    Sample(const DDS::InstanceHandle_t& i, const DataSampleElement& e, const DDS::Time_t& t);
-    Sample(const DDS::InstanceHandle_t& i, const CORBA::ULong instance_state,
+    Sample(const DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t);
+    Sample(const ReceivedDataSample& s, const DDS::InstanceHandle_t i = 0);
+    Sample(const ReceivedDataElement& s, const DDS::InstanceHandle_t i = 0, const CORBA::ULong instance_state = 0);
+    Sample(const DDS::InstanceHandle_t i, const CORBA::ULong instance_state,
       const DDS::Time_t& t, const SequenceNumber& sn, const void* const data);
   };
 

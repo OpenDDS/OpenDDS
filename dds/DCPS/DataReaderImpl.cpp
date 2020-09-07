@@ -1662,11 +1662,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   Observer::Rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
   if (observer) {
-    Observer::Sample s(
-      instance ? instance->instance_handle_ : 0,
-      instance ? instance->instance_state_ : 0,
-      {sample.header_.source_timestamp_sec_, sample.header_.source_timestamp_nanosec_},
-      sample.header_.sequence_, sample.sample_.get());
+    Observer::Sample s(sample, instance ? instance->instance_handle_ : 0);
     observer->on_sample_received(this, s);
   }
 }

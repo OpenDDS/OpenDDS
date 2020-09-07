@@ -27,18 +27,26 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr dr)
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: TestMsgDataReader::_narrow failed!\n")));
       ACE_OS::exit(EXIT_FAILURE);
     }
-
-    if (received_ == 3) {
-      take(msg_dr);
-    } else { take_next_sample(msg_dr); }
-
-    ++received_;
-    //if (received_ == 1) {
-    //  msg_dr->change_qos();
-    //}
+    switch (++received_) {
+      case 1: read(msg_dr); break;
+      case 2: read_next_sample(msg_dr); break;
+      case 3: take(msg_dr); break;
+      default: take_next_sample(msg_dr); break;
+    }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
     throw;
+  }
+}
+
+void DataReaderListenerImpl::read(Messenger::MessageDataReader_var mdr)
+{
+  Messenger::MessageSeq msgs;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t r = mdr->read(msgs, infos, DDS::LENGTH_UNLIMITED,
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (r != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: read() ERROR: %d\n"), r));
   }
 }
 
@@ -51,7 +59,26 @@ void DataReaderListenerImpl::take(Messenger::MessageDataReader_var mdr)
   if (r != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take() ERROR: %d\n"), r));
   }
-  std::cout << reader_ << " take() " << msgs.length() << " messages\n";
+}
+
+void DataReaderListenerImpl::read_next_sample(Messenger::MessageDataReader_var mdr)
+{
+  Messenger::Message m;
+  DDS::SampleInfo i;
+  DDS::ReturnCode_t r = mdr->read_next_sample(m, i) ;
+  if (r == DDS::RETCODE_OK) {
+    if (i.valid_data) {
+      std::cout << reader_ << ": read_next_sample " << m.subject << m.subject_id << ':' << m.count << ':' << m.text << std::endl;
+    } else if (i.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+    } else if (i.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: read_next_sample() ERROR: %d\n"), i.instance_state));
+    }
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: read_next_sample() ERROR: r: %d\n"), r));
+  }
 }
 
 void DataReaderListenerImpl::take_next_sample(Messenger::MessageDataReader_var mdr)

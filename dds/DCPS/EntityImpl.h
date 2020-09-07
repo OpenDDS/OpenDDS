@@ -62,14 +62,14 @@ public:
 
   void set_observer(Observer::Rch observer, const Observer::Event e);
 
+  Observer::Rch get_observer(const Observer::Event e);
+
 protected:
   DDS::ReturnCode_t set_enabled();
 
   void set_deleted(bool state);
 
   bool get_deleted();
-
-  Observer::Rch get_observer(const Observer::Event e);
 
   /// The flag indicates the entity is enabled.
   ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;

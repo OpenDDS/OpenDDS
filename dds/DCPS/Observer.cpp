@@ -5,8 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-
 #include "Observer.h"
+#include "DataSampleElement.h"
+#include "ReceivedDataElementList.h"
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,7 +28,7 @@ CORBA::ULong Observer::Sample::to_instance_state(const char message_id)
   }
 }
 
-Observer::Sample::Sample(const DDS::InstanceHandle_t& i, const DataSampleElement& e, const DDS::Time_t& t)
+Observer::Sample::Sample(const DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t)
   : instance_(i)
   , instance_state_(to_instance_state(e.get_header().message_id_))
   , timestamp_(t)
@@ -34,8 +36,24 @@ Observer::Sample::Sample(const DDS::InstanceHandle_t& i, const DataSampleElement
   , data_(e.get_sample())
 {}
 
+Observer::Sample::Sample(const ReceivedDataSample& s, const DDS::InstanceHandle_t i)
+  : instance_(i)
+  , instance_state_(to_instance_state(s.header_.message_id_))
+  , timestamp_{s.header_.source_timestamp_sec_, s.header_.source_timestamp_nanosec_}
+  , seq_n_(s.header_.sequence_)
+  , data_(s.sample_.get())
+{}
+
+Observer::Sample::Sample(const ReceivedDataElement& s, const DDS::InstanceHandle_t i, const CORBA::ULong instance_state)
+  : instance_(i)
+  , instance_state_(to_instance_state(instance_state))
+  , timestamp_(s.source_timestamp_)
+  , seq_n_(s.sequence_)
+  , data_(s.registered_data_)
+{}
+
 Observer::Sample::Sample(
-  const DDS::InstanceHandle_t& i,
+  const DDS::InstanceHandle_t i,
   const CORBA::ULong instance_state,
   const DDS::Time_t& t,
   const SequenceNumber& sn,

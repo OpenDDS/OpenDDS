@@ -226,8 +226,9 @@ namespace OpenDDS {
                                              DDS::SampleInfo& sample_info)
   {
     bool found_data = false;
-
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
+
+    Observer::Rch observer = get_observer(Observer::e_SAMPLE_READ);
 
     const typename InstanceMap::iterator the_end = instance_map_.end();
     for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
@@ -246,6 +247,11 @@ namespace OpenDDS {
           }
           ptr->instance_state_->sample_info(sample_info, item);
           item->sample_state_ = DDS::READ_SAMPLE_STATE;
+
+          if (observer) {
+            Observer::Sample s(*item, sample_info.instance_handle, sample_info.instance_state);
+            observer->on_sample_read(this, s);
+          }
 
           if (!most_recent_generation) {
             most_recent_generation = ptr->instance_state_->most_recent_generation(item);
@@ -279,6 +285,8 @@ namespace OpenDDS {
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
+    Observer::Rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
+
     const typename InstanceMap::iterator the_end = instance_map_.end();
     for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
       DDS::InstanceHandle_t handle = it->second;
@@ -301,8 +309,12 @@ namespace OpenDDS {
             received_data = *static_cast<MessageType*>(item->registered_data_);
           }
           ptr->instance_state_->sample_info(sample_info, item);
-
           item->sample_state_ = DDS::READ_SAMPLE_STATE;
+
+          if (observer) {
+            Observer::Sample s(*item, sample_info.instance_handle, sample_info.instance_state);
+            observer->on_sample_taken(this, s);
+          }
 
           if (!most_recent_generation) {
             most_recent_generation = ptr->instance_state_->most_recent_generation(item);
@@ -761,7 +773,6 @@ namespace OpenDDS {
                                  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
                                  DDS::InstanceStateMask instance_states)
   {
-
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
                       this->sample_lock_,
@@ -1126,6 +1137,8 @@ private:
 #endif
                                            DDS_OPERATION_READ);
 
+  Observer::Rch observer = get_observer(Observer::e_SAMPLE_READ);
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (!group_coherent_ordered) {
 #endif
@@ -1144,6 +1157,11 @@ private:
 #endif
               ) {
             results.insert_sample(item, inst, ++i);
+
+            if (observer) {
+              Observer::Sample s(*item, handle, instance_states);
+              observer->on_sample_read(this, s);
+            }
           }
         }
       }
@@ -1152,6 +1170,12 @@ private:
   } else {
     const RakeData item = group_coherent_ordered_data_.get_data();
     results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
+    if (observer) {
+      typename InstanceMap::iterator i = instance_map_.begin();
+      const DDS::InstanceHandle_t handle = (i != instance_map_.end()) ? i->second : 0;
+      Observer::Sample s(*(item.rde_), handle, instance_states);
+      observer->on_sample_read(this, s);
+    }
   }
 #endif
 
@@ -1204,6 +1228,8 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
 #endif
                                            DDS_OPERATION_TAKE);
 
+  Observer::Rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (!group_coherent_ordered) {
 #endif
@@ -1222,6 +1248,11 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
 #endif
               ) {
             results.insert_sample(item, inst, ++i);
+
+            if (observer) {
+              Observer::Sample s(*item, handle, instance_states);
+              observer->on_sample_taken(this, s);
+            }
           }
         }
       }
@@ -1283,7 +1314,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
           ) {
         results.insert_sample(item, inst, ++i);
         if (observer) {
-          Observer::Sample s(a_handle, instance_states, item->source_timestamp_, item->sequence_, item->registered_data_);
+          Observer::Sample s(*item, a_handle, instance_states);
           observer->on_sample_read(this, s);
         }
       }
@@ -1354,7 +1385,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
           ) {
         results.insert_sample(item, inst, ++i);
         if (observer) {
-          Observer::Sample s(a_handle, instance_states, item->source_timestamp_, item->sequence_, item->registered_data_);
+          Observer::Sample s(*item, a_handle, instance_states);
           observer->on_sample_taken(this, s);
         }
       }
