@@ -946,7 +946,8 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
   case AST_ConcreteType::NT_string:
   case AST_ConcreteType::NT_wstring:
   case AST_ConcreteType::NT_pre_defined:
-    break;
+  case AST_ConcreteType::NT_fixed:
+      break;
 
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
@@ -960,7 +961,6 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
   case AST_ConcreteType::NT_eventtype_fwd:
   case AST_ConcreteType::NT_valuebox:
   case AST_ConcreteType::NT_type:
-  case AST_ConcreteType::NT_fixed:
   case AST_ConcreteType::NT_porttype:
   case AST_ConcreteType::NT_provides:
   case AST_ConcreteType::NT_uses:
@@ -1431,6 +1431,12 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
       }
       break;
     }
+
+  case AST_ConcreteType::NT_fixed: {
+    minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
+    break;
+  }
+
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
   case AST_ConcreteType::NT_native:
@@ -1443,7 +1449,6 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
   case AST_ConcreteType::NT_eventtype_fwd:
   case AST_ConcreteType::NT_valuebox:
   case AST_ConcreteType::NT_type:
-  case AST_ConcreteType::NT_fixed:
   case AST_ConcreteType::NT_porttype:
   case AST_ConcreteType::NT_provides:
   case AST_ConcreteType::NT_uses:

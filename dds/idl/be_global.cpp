@@ -644,17 +644,18 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 
 bool BE_GlobalData::is_topic_type(AST_Decl* node)
 {
-  TopicAnnotation* topic = dynamic_cast<TopicAnnotation*>(
-    builtin_annotations_["::@topic"]);
-  TopicValue value;
-  return topic->node_value_exists(node, value);
+  return !is_nested(node);
 }
 
 bool BE_GlobalData::is_nested(AST_Decl* node)
 {
-  // @topic overrides @nested and @default_nested.
-  if (is_topic_type(node)) {
-    return false;
+  {
+    // @topic overrides @nested and @default_nested.
+    TopicAnnotation* topic = dynamic_cast<TopicAnnotation*>(builtin_annotations_["::@topic"]);
+    TopicValue value;
+    if (topic->node_value_exists(node, value)) {
+      return false;
+    }
   }
 
   NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
