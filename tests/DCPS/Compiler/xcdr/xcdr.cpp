@@ -39,6 +39,8 @@ void set_base_values_union(Type& value, UnionDisc disc)
   case E_LONG_LONG_FIELD:
     value.long_long_field(0x7fffffffffffffff);
     break;
+  default:
+    break;
   }
 }
 
@@ -79,6 +81,8 @@ void expect_values_equal_base_union(const TypeA& a, const TypeB& b)
     break;
   case E_LONG_LONG_FIELD:
     EXPECT_EQ(a.long_long_field(), b.long_long_field());
+    break;
+  default:
     break;
   }
 }
@@ -312,6 +316,15 @@ void test_little_endian()
   delete[] strm_le;
 }
 
+template<typename TypeA, typename TypeB, typename BigEndianData>
+void test_little_endian_union(UnionDisc disc)
+{
+  unsigned char* strm_le = setup_little_endian<BigEndianData>();
+  amalgam_serializer_test_union<TypeA, TypeB>(
+    xcdr2_le, DataView(strm_le, sizeof(BigEndianData::expected)), disc);
+  delete[] strm_le;
+}
+
 // XCDR1 =====================================================================
 
 const unsigned char final_xcdr1_struct_expected[] = {
@@ -541,7 +554,7 @@ const unsigned char MutableXcdr2UnionExpectedLongLongBE::expected[] = {
   // Discriminator
   0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
   0x00, 0x00, 0x00, 0x03, // +4 value = 12
-  // long_field
+  // long_long_field
   0x30, 0x00, 0x00, 0x03, // +4 EMHEADER1 = 16
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 value = 24
 };
@@ -593,7 +606,48 @@ TEST(BasicTests, NoDataRepMutableStruct)
 {
   baseline_checks<NoDataRepMutableStruct>(xcdr2, MutableXcdr2StructExpectedBE::expected);
 }
-/*
+
+// ---------- NoDataRepFinalUnion
+struct NoDataRepFinalUnionExpectedShortBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepFinalUnionExpectedShortBE::expected[] = {
+  0x00, 0x00, 0x00, 0x00, // +4 discriminator = 4
+  0x7f, 0xff // +2 short_field = 6
+};
+const unsigned NoDataRepFinalUnionExpectedShortBE::layout[] = {4,2};
+
+struct NoDataRepFinalUnionExpectedLongBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepFinalUnionExpectedLongBE::expected[] = {
+  0x00, 0x00, 0x00, 0x01, // +4 discriminator = 4
+  0x7f, 0xff, 0xff, 0xff // +4 long_field = 8
+};
+const unsigned NoDataRepFinalUnionExpectedLongBE::layout[] = {4,4};
+
+struct NoDataRepFinalUnionExpectedOctetBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepFinalUnionExpectedOctetBE::expected[] = {
+  0x00, 0x00, 0x00, 0x02, // +4 discriminator = 4
+  0x01 // +1 octet_field = 5
+};
+const unsigned NoDataRepFinalUnionExpectedOctetBE::layout[] = {4,1};
+
+struct NoDataRepFinalUnionExpectedLongLongBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepFinalUnionExpectedLongLongBE::expected[] = {
+  0x00, 0x00, 0x00, 0x03, // +4 discriminator = 4
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 long_long_field = 12
+};
+const unsigned NoDataRepFinalUnionExpectedLongLongBE::layout[] = {4,8};
+
 template<>
 void expect_values_equal(const NoDataRepFinalUnion& a,
                          const NoDataRepFinalUnion& b)
@@ -601,13 +655,74 @@ void expect_values_equal(const NoDataRepFinalUnion& a,
   expect_values_equal_base_union(a, b);
 }
 
-TEST(basic_tests, NoDataRepFinalUnion)
+TEST(BasicTests, NoDataRepFinalUnion)
 {
-  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
-  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
-  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
-  baseline_checks_union<NoDataRepFinalUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(
+    xcdr2, NoDataRepFinalUnionExpectedShortBE::expected, E_SHORT_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(
+    xcdr2, NoDataRepFinalUnionExpectedLongBE::expected, E_LONG_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(
+    xcdr2, NoDataRepFinalUnionExpectedOctetBE::expected, E_OCTET_FIELD);
+  baseline_checks_union<NoDataRepFinalUnion>(
+    xcdr2, NoDataRepFinalUnionExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
 }
+
+TEST(BasicTests, NoDataRepFinalUnionLE)
+{
+  test_little_endian_union<NoDataRepFinalUnion,
+                           NoDataRepFinalUnionExpectedShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<NoDataRepFinalUnion,
+                           NoDataRepFinalUnionExpectedLongBE>(E_LONG_FIELD);
+  test_little_endian_union<NoDataRepFinalUnion,
+                           NoDataRepFinalUnionExpectedOctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<NoDataRepFinalUnion,
+                           NoDataRepFinalUnionExpectedLongLongBE>(E_LONG_LONG_FIELD);
+}
+
+// ---------- NoDataRepAppendableUnion
+struct NoDataRepAppendableUnionExpectedShortBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepAppendableUnionExpectedShortBE::expected[] = {
+  0x00, 0x00, 0x00, 0x06, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x00, // +4 discriminator = 8
+  0x7f, 0xff // +2 short_field = 10
+};
+const unsigned NoDataRepAppendableUnionExpectedShortBE::layout[] = {4,4,2};
+
+struct NoDataRepAppendableUnionExpectedLongBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepAppendableUnionExpectedLongBE::expected[] = {
+  0x00, 0x00, 0x00, 0x08, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x01, // +4 discriminator = 8
+  0x7f, 0xff, 0xff, 0xff  // +4 long_field = 12
+};
+const unsigned NoDataRepAppendableUnionExpectedLongBE::layout[] = {4,4,4};
+
+struct NoDataRepAppendableUnionExpectedOctetBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepAppendableUnionExpectedOctetBE::expected[] = {
+  0x00, 0x00, 0x00, 0x05, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x02, // +4 discriminator = 8
+  0x01  // +1 octet_field = 9
+};
+const unsigned NoDataRepAppendableUnionExpectedOctetBE::layout[] = {4,4,1};
+
+struct NoDataRepAppendableUnionExpectedLongLongBE {
+  STREAM_DATA
+};
+
+const unsigned char NoDataRepAppendableUnionExpectedLongLongBE::expected[] = {
+  0x00, 0x00, 0x00, 0x0c, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x03, // +4 discriminator = 8
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +4 long_long_field = 16
+};
+const unsigned NoDataRepAppendableUnionExpectedLongLongBE::layout[] = {4,4,8};
 
 template<>
 void expect_values_equal(const NoDataRepAppendableUnion& a,
@@ -616,15 +731,31 @@ void expect_values_equal(const NoDataRepAppendableUnion& a,
   expect_values_equal_base_union(a, b);
 }
 
-TEST(basic_tests, NoDataRepAppendableUnion)
+TEST(BasicTests, NoDataRepAppendableUnion)
 {
-  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
-  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
-  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
-  baseline_checks_union<NoDataRepAppendableUnion>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(
+    xcdr2, NoDataRepAppendableUnionExpectedShortBE::expected, E_SHORT_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(
+    xcdr2, NoDataRepAppendableUnionExpectedLongBE::expected, E_LONG_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(
+    xcdr2, NoDataRepAppendableUnionExpectedOctetBE::expected, E_OCTET_FIELD);
+  baseline_checks_union<NoDataRepAppendableUnion>(
+    xcdr2, NoDataRepAppendableUnionExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
 }
-*/
 
+TEST(BasicTests, NoDataRepAppendableUnionLE)
+{
+  test_little_endian_union<NoDataRepAppendableUnion,
+                           NoDataRepAppendableUnionExpectedShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<NoDataRepAppendableUnion,
+                           NoDataRepAppendableUnionExpectedLongBE>(E_LONG_FIELD);
+  test_little_endian_union<NoDataRepAppendableUnion,
+                           NoDataRepAppendableUnionExpectedOctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<NoDataRepAppendableUnion,
+                           NoDataRepAppendableUnionExpectedLongLongBE>(E_LONG_LONG_FIELD);
+}
+
+// ---------- NoDataRepMutableUnion
 template<>
 void expect_values_equal(const NoDataRepMutableUnion& a,
                          const NoDataRepMutableUnion& b)
@@ -946,6 +1077,81 @@ TEST(AppendableTests, BothAppendableStruct2LE)
   test_little_endian<AppendableStruct2, AppendableExpected2Xcdr2BE>();
 }
 
+// ---------- AppendableUnion
+struct AppendableUnionXcdr2ExpectedShortBE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableUnionXcdr2ExpectedShortBE::expected[] = {
+  0x00, 0x00, 0x00, 0x06, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x00, // +4 discriminator = 8
+  0x7f, 0xff // +2 short_field = 10
+};
+const unsigned AppendableUnionXcdr2ExpectedShortBE::layout[] = {4,4,2};
+
+struct AppendableUnionXcdr2ExpectedLongBE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableUnionXcdr2ExpectedLongBE::expected[] = {
+  0x00, 0x00, 0x00, 0x08, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x01, // +4 discriminator = 8
+  0x7f, 0xff, 0xff, 0xff  // +4 long_field = 12
+};
+const unsigned AppendableUnionXcdr2ExpectedLongBE::layout[] = {4,4,4};
+
+struct AppendableUnionXcdr2ExpectedOctetBE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableUnionXcdr2ExpectedOctetBE::expected[] = {
+  0x00, 0x00, 0x00, 0x05, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x02, // +4 discriminator = 8
+  0x01 // +1 octet_field = 9
+};
+const unsigned AppendableUnionXcdr2ExpectedOctetBE::layout[] = {4,4,1};
+
+struct AppendableUnionXcdr2ExpectedLongLongBE {
+  STREAM_DATA
+};
+
+const unsigned char AppendableUnionXcdr2ExpectedLongLongBE::expected[] = {
+  0x00, 0x00, 0x00, 0x0c, // +4 Dheader = 4
+  0x00, 0x00, 0x00, 0x03, // +4 discriminator = 8
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 long_long_field = 9
+};
+const unsigned AppendableUnionXcdr2ExpectedLongLongBE::layout[] = {4,4,8};
+
+template<>
+void expect_values_equal(const AppendableUnion& a, const ModifiedAppendableUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
+TEST(AppendableTests, FromAppendableUnion)
+{
+  amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
+    xcdr2, AppendableUnionXcdr2ExpectedShortBE::expected, E_SHORT_FIELD);
+  amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
+    xcdr2, AppendableUnionXcdr2ExpectedLongBE::expected, E_LONG_FIELD);
+  amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
+    xcdr2, AppendableUnionXcdr2ExpectedOctetBE::expected, E_OCTET_FIELD);
+  amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
+    xcdr2, AppendableUnionXcdr2ExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
+}
+
+TEST(AppendableTests, FromAppendableUnionLE)
+{
+  test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
+                           AppendableUnionXcdr2ExpectedShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
+                           AppendableUnionXcdr2ExpectedLongBE>(E_LONG_FIELD);
+  test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
+                           AppendableUnionXcdr2ExpectedOctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
+                           AppendableUnionXcdr2ExpectedLongLongBE>(E_LONG_LONG_FIELD);
+}
+
 // Mutable Tests =============================================================
 
 // ---------- MutableStruct
@@ -1090,6 +1296,88 @@ TEST(MutableTests, BaselineXcdr2TestUnionLE)
                            MutableUnionExpectedXcdr2OctetBE>(E_OCTET_FIELD);
   test_little_endian_union<MutableUnion,
                            MutableUnionExpectedXcdr2LongLongBE>(E_LONG_LONG_FIELD);
+}
+
+template<typename TypeA, typename TypeB>
+void expect_values_equal_base_union2(const TypeA& a, const TypeB& b)
+{
+  EXPECT_EQ(a._d(), b._d());
+  switch(a._d()) {
+  case E_SHORT_FIELD:
+    EXPECT_EQ(a.short_field(), b.short_field());
+    break;
+  case E_LONG_FIELD:
+    EXPECT_EQ(a.long_field(), b.long_field());
+    break;
+  default:
+    break;
+  }
+}
+
+template<>
+void expect_values_equal(const MutableUnion& a, const ModifiedMutableUnion& b)
+{
+  expect_values_equal_base_union2(a, b);
+}
+
+TEST(MutableTests, FromMutableUnion)
+{
+  amalgam_serializer_test_union<MutableUnion, ModifiedMutableUnion>(
+    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
+  amalgam_serializer_test_union<MutableUnion, ModifiedMutableUnion>(
+    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
+}
+
+TEST(MutableTests, FromMutableUnionLE)
+{
+  test_little_endian_union<MutableUnion, ModifiedMutableUnion,
+                           MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<MutableUnion, ModifiedMutableUnion,
+                           MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+}
+
+// ---------- ModifiedMutableUnion
+template<>
+void set_values_union(ModifiedMutableUnion& value, UnionDisc disc)
+{
+  switch (disc) {
+  case E_SHORT_FIELD:
+    value.short_field(0x7fff);
+    break;
+  case E_LONG_FIELD:
+    value.long_field(0x7fffffff);
+    break;
+  case E_ADDITIONAL_FIELD:
+    value.additional_field(0x7eeeeeee);
+    break;
+  default:
+    break;
+  }
+}
+
+template<>
+void expect_values_equal(const ModifiedMutableUnion& a, const MutableUnion& b)
+{
+  expect_values_equal_base_union2(a, b);
+}
+
+TEST(MutableTests, FromModifiedMutableUnion)
+{
+  amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
+    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
+  amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
+    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
+  // TODO (sonndinh): test try-construct behavior when additional_field of
+  // ModifiedMutableUnion is selected
+}
+
+TEST(MutableTests, FromModifiedMutableUnionLE)
+{
+  test_little_endian_union<ModifiedMutableUnion, MutableUnion,
+                           MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<ModifiedMutableUnion, MutableUnion,
+                           MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+  // TODO (sonndinh): similarly, test try-construct of additional_field here
 }
 
 // ---------- ReorderedMutableStruct
