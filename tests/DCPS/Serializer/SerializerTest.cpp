@@ -713,7 +713,6 @@ bool runEncapsulationOptionsTest()
     mb.reset(tmp_mb);
 
     OpenDDS::DCPS::Serializer serializer(mb.get(), encodings[5]);
-  
     serializer << encap;
     serializer.write_octet_array(arr, i);
 
@@ -728,7 +727,7 @@ bool runEncapsulationOptionsTest()
         << i << " bytes, padding marker alignment: " << padding_marker_alignment << std::endl;
     }
   }
-  
+
   return true;
 }
 
