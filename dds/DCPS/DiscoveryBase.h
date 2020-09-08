@@ -922,10 +922,10 @@ namespace OpenDDS {
         DDS::PublisherQos pubQos;
         DDS::DataReaderQos drQos;
         DDS::SubscriberQos subQos;
-        TransportLocatorSeq* wTls;
-        TransportLocatorSeq* rTls;
-        XTypes::TypeInformation* reader_type_info;
-        XTypes::TypeInformation* writer_type_info;
+        TransportLocatorSeq wTls;
+        TransportLocatorSeq rTls;
+        XTypes::TypeInformation reader_type_info;
+        XTypes::TypeInformation writer_type_info;
         ContentFilterProperty_t cfProp;
         MonotonicTimePoint time_added_to_map;
       };
@@ -1128,10 +1128,10 @@ namespace OpenDDS {
           md.pubQos = *pubQos;
           md.drQos = *drQos;
           md.subQos = *subQos;
-          md.wTls = wTls;
-          md.rTls = rTls;
-          md.writer_type_info = writer_type_info;
-          md.reader_type_info = reader_type_info;
+          md.wTls = *wTls;
+          md.rTls = *rTls;
+          md.writer_type_info = *writer_type_info;
+          md.reader_type_info = *reader_type_info;
           md.cfProp = *cfProp;
           md.writer = writer;
           md.reader = reader;
@@ -1150,23 +1150,13 @@ namespace OpenDDS {
               } else {
                 matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
               }
-              switch (writer_type_info->minimal.typeid_with_size.type_id.kind()) {
-                case XTypes::TI_PLAIN_SEQUENCE_SMALL:
-                case XTypes::TI_PLAIN_SEQUENCE_LARGE:
-                case XTypes::TI_PLAIN_ARRAY_SMALL:
-                case XTypes::TI_PLAIN_ARRAY_LARGE:
-                case XTypes::TI_PLAIN_MAP_SMALL:
-                case XTypes::TI_PLAIN_MAP_LARGE:
-                  break;
-                default:
-                  send_type_lookup_request(type_ids, writer);
-                  type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                  return;
-              }
-              //send_type_lookup_request(type_ids, writer);
-              //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-              //// TLS_TODO: sanity check on locks
-              //return;
+              send_type_lookup_request(type_ids, writer);
+              type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+              // TLS_TODO: sanity check on locks
+              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
+              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
+              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+              return;
             }
           } else if (!reader_local) {
             if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
@@ -1180,23 +1170,13 @@ namespace OpenDDS {
               } else {
                 matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
               }
-              switch (reader_type_info->minimal.typeid_with_size.type_id.kind()) {
-              case XTypes::TI_PLAIN_SEQUENCE_SMALL:
-              case XTypes::TI_PLAIN_SEQUENCE_LARGE:
-              case XTypes::TI_PLAIN_ARRAY_SMALL:
-              case XTypes::TI_PLAIN_ARRAY_LARGE:
-              case XTypes::TI_PLAIN_MAP_SMALL:
-              case XTypes::TI_PLAIN_MAP_LARGE:
-                break;
-              default:
-                send_type_lookup_request(type_ids, writer);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                return;
-              }
-              //send_type_lookup_request(type_ids, reader);
-              //type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-              //// TLS_TODO: sanity check on locks
-              //return;
+              send_type_lookup_request(type_ids, reader);
+              type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+              // TLS_TODO: sanity check on locks
+              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
+              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
+              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+              return;
             }
           }
 
@@ -1287,7 +1267,7 @@ namespace OpenDDS {
       }
 
       void
-      match_continue(const RepoId& writer, const RepoId& reader)
+        match_continue(const RepoId& writer, const RepoId& reader)
       {
         bool call_writer = false, call_reader = false, writer_local = false, reader_local = false;
 
@@ -1298,10 +1278,10 @@ namespace OpenDDS {
         DDS::PublisherQos pubQos;
         DDS::DataReaderQos drQos;
         DDS::SubscriberQos subQos;
-        TransportLocatorSeq* wTls = 0;
-        TransportLocatorSeq* rTls = 0;
-        XTypes::TypeInformation* reader_type_info;
-        XTypes::TypeInformation* writer_type_info;
+        TransportLocatorSeq wTls;
+        TransportLocatorSeq rTls;
+        XTypes::TypeInformation reader_type_info;
+        XTypes::TypeInformation writer_type_info;
         ContentFilterProperty_t cfProp;
         DataWriterCallbacks* dwr = 0;
         DataReaderCallbacks* drr = 0;
@@ -1363,83 +1343,15 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         if (is_security_enabled()) {
-          DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
-          if (call_reader) {
-            RepoId writer_participant = writer;
-            writer_participant.entityId = ENTITYID_PARTICIPANT;
-            DatareaderCryptoHandleMap::const_iterator iter =
-              local_reader_crypto_handles_.find(reader);
-
-            // It might not exist due to security attributes, and that's OK
-            if (iter != local_reader_crypto_handles_.end()) {
-              DDS::Security::DatareaderCryptoHandle drch = iter->second;
-              DDS::Security::DatawriterCryptoHandle dwch =
-                generate_remote_matched_writer_crypto_handle(writer_participant, drch);
-              remote_writer_crypto_handles_[writer] = dwch;
-              DatawriterCryptoTokenSeqMap::iterator t_iter =
-                pending_remote_writer_crypto_tokens_.find(writer);
-              if (t_iter != pending_remote_writer_crypto_tokens_.end()) {
-                DDS::Security::SecurityException se;
-                if (!keyexg->set_remote_datawriter_crypto_tokens(iter->second, dwch, t_iter->second, se)) {
-                  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                    ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
-                    ACE_TEXT("Unable to set pending remote datawriter crypto tokens with ")
-                    ACE_TEXT("crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-                    se.code, se.minor_code, se.message.in()));
-                }
-                pending_remote_writer_crypto_tokens_.erase(t_iter);
-              }
-              EndpointSecurityAttributesMap::const_iterator s_iter =
-                local_reader_security_attribs_.find(reader);
-              // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
-              if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) {
-                create_and_send_datareader_crypto_tokens(drch, reader, dwch, writer);
-              }
-            }
-          }
-
-          if (call_writer) {
-            RepoId reader_participant = reader;
-            reader_participant.entityId = ENTITYID_PARTICIPANT;
-            DatawriterCryptoHandleMap::const_iterator iter =
-              local_writer_crypto_handles_.find(writer);
-
-            // It might not exist due to security attributes, and that's OK
-            if (iter != local_writer_crypto_handles_.end()) {
-              DDS::Security::DatawriterCryptoHandle dwch = iter->second;
-              DDS::Security::DatareaderCryptoHandle drch =
-                generate_remote_matched_reader_crypto_handle(
-                  reader_participant, dwch, relay_only_readers_.count(reader));
-              remote_reader_crypto_handles_[reader] = drch;
-              DatareaderCryptoTokenSeqMap::iterator t_iter =
-                pending_remote_reader_crypto_tokens_.find(reader);
-              if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
-                DDS::Security::SecurityException se;
-                if (!keyexg->set_remote_datareader_crypto_tokens(iter->second, drch, t_iter->second, se)) {
-                  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                    ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
-                    ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto ")
-                    ACE_TEXT("key exchange plugin. Security Exception[%d.%d]: %C\n"),
-                    se.code, se.minor_code, se.message.in()));
-                }
-                pending_remote_reader_crypto_tokens_.erase(t_iter);
-              }
-              EndpointSecurityAttributesMap::const_iterator s_iter =
-                local_writer_security_attribs_.find(writer);
-              if (s_iter != local_writer_security_attribs_.end() &&
-                (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
-                create_and_send_datawriter_crypto_tokens(dwch, writer, drch, reader);
-              }
-            }
-          }
+          match_continue_security_enabled(writer, reader, call_writer, call_reader);
         }
 #endif
 
         // Copy reader and writer association data prior to releasing lock
         DDS::OctetSeq octet_seq_type_info_reader;
-        XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
+        XTypes::serialize_type_info(reader_type_info, octet_seq_type_info_reader);
         const ReaderAssociation ra = {
-          add_security_info(*rTls, writer, reader), reader, subQos, drQos,
+          add_security_info(rTls, writer, reader), reader, subQos, drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
           cfProp.filterClassName, cfProp.filterExpression,
 #else
@@ -1450,9 +1362,9 @@ namespace OpenDDS {
         };
 
         DDS::OctetSeq octet_seq_type_info_writer;
-        XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
+        XTypes::serialize_type_info(writer_type_info, octet_seq_type_info_writer);
         const WriterAssociation wa = {
-          add_security_info(*wTls, writer, reader), writer, pubQos, dwQos,
+          add_security_info(wTls, writer, reader), writer, pubQos, dwQos,
           octet_seq_type_info_writer
         };
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
@@ -1463,7 +1375,7 @@ namespace OpenDDS {
 
         if (call_writer) {
           if (DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
               ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
           }
           DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
@@ -1477,7 +1389,7 @@ namespace OpenDDS {
 
         } else if (call_reader) {
           if (DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
               ACE_TEXT("adding reader %C association for writer %C\n"), OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
           }
           drr->add_association(reader, wa, !writer_active);
@@ -1487,12 +1399,87 @@ namespace OpenDDS {
         if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
           if (DCPS_debug_level > 3) {
             ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) EndpointManager::match - ")
+              ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
               ACE_TEXT("calling writer %C association_complete for %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
           }
           dwr->association_complete(reader);
         }
       }
+
+#ifdef OPENDDS_SECURITY
+      void match_continue_security_enabled(const RepoId& writer, const RepoId& reader, bool call_writer, bool call_reader)
+      {
+        DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
+        if (call_reader) {
+          RepoId writer_participant = writer;
+          writer_participant.entityId = ENTITYID_PARTICIPANT;
+          DatareaderCryptoHandleMap::const_iterator iter =
+            local_reader_crypto_handles_.find(reader);
+
+          // It might not exist due to security attributes, and that's OK
+          if (iter != local_reader_crypto_handles_.end()) {
+            DDS::Security::DatareaderCryptoHandle drch = iter->second;
+            DDS::Security::DatawriterCryptoHandle dwch =
+              generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+            remote_writer_crypto_handles_[writer] = dwch;
+            DatawriterCryptoTokenSeqMap::iterator t_iter =
+              pending_remote_writer_crypto_tokens_.find(writer);
+            if (t_iter != pending_remote_writer_crypto_tokens_.end()) {
+              DDS::Security::SecurityException se;
+              if (!keyexg->set_remote_datawriter_crypto_tokens(iter->second, dwch, t_iter->second, se)) {
+                ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match_continue_security_enabled() - ")
+                  ACE_TEXT("Unable to set pending remote datawriter crypto tokens with ")
+                  ACE_TEXT("crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                  se.code, se.minor_code, se.message.in()));
+              }
+              pending_remote_writer_crypto_tokens_.erase(t_iter);
+            }
+            EndpointSecurityAttributesMap::const_iterator s_iter =
+              local_reader_security_attribs_.find(reader);
+            // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
+            if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) {
+              create_and_send_datareader_crypto_tokens(drch, reader, dwch, writer);
+            }
+          }
+        }
+
+        if (call_writer) {
+          RepoId reader_participant = reader;
+          reader_participant.entityId = ENTITYID_PARTICIPANT;
+          DatawriterCryptoHandleMap::const_iterator iter =
+            local_writer_crypto_handles_.find(writer);
+
+          // It might not exist due to security attributes, and that's OK
+          if (iter != local_writer_crypto_handles_.end()) {
+            DDS::Security::DatawriterCryptoHandle dwch = iter->second;
+            DDS::Security::DatareaderCryptoHandle drch =
+              generate_remote_matched_reader_crypto_handle(
+                reader_participant, dwch, relay_only_readers_.count(reader));
+            remote_reader_crypto_handles_[reader] = drch;
+            DatareaderCryptoTokenSeqMap::iterator t_iter =
+              pending_remote_reader_crypto_tokens_.find(reader);
+            if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
+              DDS::Security::SecurityException se;
+              if (!keyexg->set_remote_datareader_crypto_tokens(iter->second, drch, t_iter->second, se)) {
+                ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match_continue_security_enabled() - ")
+                  ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto ")
+                  ACE_TEXT("key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                  se.code, se.minor_code, se.message.in()));
+              }
+              pending_remote_reader_crypto_tokens_.erase(t_iter);
+            }
+            EndpointSecurityAttributesMap::const_iterator s_iter =
+              local_writer_security_attribs_.find(writer);
+            if (s_iter != local_writer_security_attribs_.end() &&
+              (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
+              create_and_send_datawriter_crypto_tokens(dwch, writer, drch, reader);
+            }
+          }
+        }
+      }
+#endif
 
       virtual bool is_expectant_opendds(const GUID_t& endpoint) const = 0;
 

@@ -81,6 +81,10 @@ namespace XTypes {
       return members[i];
     }
 
+    bool operator<(const Sequence& other) const { return members < other.members; }
+    bool operator>(const Sequence& other) const { return members > other.members; }
+
+
     T* get_buffer() { return &members[0]; }
     const T* get_buffer() const { return &members[0]; }
   };
@@ -321,6 +325,24 @@ namespace XTypes {
       : equiv_kind(a_equiv_kind)
       , element_flags(a_element_flags)
     {}
+
+    bool operator<(const PlainCollectionHeader& other) const
+    {
+      if (equiv_kind < other.equiv_kind) return true;
+      if (equiv_kind > other.equiv_kind) return false;
+      if (element_flags < other.element_flags) return true;
+      if (element_flags > other.element_flags) return false;
+      return false;
+    }
+
+    bool operator>(const PlainCollectionHeader& other) const
+    {
+      if (equiv_kind > other.equiv_kind) return true;
+      if (equiv_kind < other.equiv_kind) return false;
+      if (element_flags > other.element_flags) return true;
+      if (element_flags < other.element_flags) return false;
+      return false;
+    }
   };
 
   struct PlainSequenceSElemDefn {
@@ -337,6 +359,18 @@ namespace XTypes {
       , bound(a_bound)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainSequenceSElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (header > other.header) return false;
+      if (bound < other.bound) return true;
+      if (bound > other.bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (element_identifier > other.element_identifier) return false;
+      return false;
+    }
+
   };
 
   struct PlainSequenceLElemDefn {
@@ -353,6 +387,17 @@ namespace XTypes {
       , bound(a_bound)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainSequenceLElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (header > other.header) return false;
+      if (bound < other.bound) return true;
+      if (bound > other.bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (element_identifier > other.element_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainArraySElemDefn {
@@ -369,6 +414,17 @@ namespace XTypes {
       , array_bound_seq(a_array_bound_seq)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainArraySElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (header > other.header) return false;
+      if (array_bound_seq < other.array_bound_seq) return true;
+      if (array_bound_seq > other.array_bound_seq) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (element_identifier > other.element_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainArrayLElemDefn {
@@ -385,6 +441,17 @@ namespace XTypes {
       , array_bound_seq(a_array_bound_seq)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainArrayLElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (header > other.header) return false;
+      if (array_bound_seq < other.array_bound_seq) return true;
+      if (array_bound_seq > other.array_bound_seq) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (element_identifier > other.element_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainMapSTypeDefn {
@@ -407,6 +474,21 @@ namespace XTypes {
       , key_flags(a_key_flags)
       , key_identifier(a_key_identifier)
     {}
+
+    bool operator<(const PlainMapSTypeDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (header > other.header) return false;
+      if (bound < other.bound) return true;
+      if (bound > other.bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (element_identifier > other.element_identifier) return false;
+      if (key_flags < other.key_flags) return true;
+      if (key_flags > other.key_flags) return false;
+      if (key_identifier < other.key_identifier) return true;
+      if (key_identifier > other.key_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainMapLTypeDefn {
@@ -429,6 +511,21 @@ namespace XTypes {
       , key_flags(a_key_flags)
       , key_identifier(a_key_identifier)
     {}
+
+    bool operator<(const PlainMapLTypeDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (header > other.header) return false;
+      if (bound < other.bound) return true;
+      if (bound > other.bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (element_identifier > other.element_identifier) return false;
+      if (key_flags < other.key_flags) return true;
+      if (key_flags > other.key_flags) return false;
+      if (key_identifier < other.key_identifier) return true;
+      if (key_identifier > other.key_identifier) return false;
+      return false;
+    }
   };
 
   // Used for Types that have cyclic dependencies with other types
@@ -699,6 +796,20 @@ namespace XTypes {
       case TI_STRING8_LARGE:
       case TI_STRING16_LARGE:
         return string_ldefn() < other.string_ldefn();
+
+      // TLS_TODO: write comparison operators to suppprt code below
+      case TI_PLAIN_SEQUENCE_SMALL:
+        return seq_sdefn() < other.seq_sdefn();
+      case TI_PLAIN_SEQUENCE_LARGE:
+        return seq_ldefn() < other.seq_ldefn();
+      case TI_PLAIN_ARRAY_SMALL:
+        return array_sdefn() < other.array_sdefn();
+      case TI_PLAIN_ARRAY_LARGE:
+        return array_ldefn() < other.array_ldefn();
+      case TI_PLAIN_MAP_SMALL:
+        return map_sdefn() < other.map_sdefn();
+      case TI_PLAIN_MAP_LARGE:
+        return map_ldefn() < other.map_ldefn();
 
       default:
         return false;
