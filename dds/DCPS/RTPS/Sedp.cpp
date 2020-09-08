@@ -3686,14 +3686,14 @@ Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sampl
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupRequestReader::take_tl_request(DCPS::Serializer& ser,
+Sedp::TypeLookupRequestReader::process_tl_request(DCPS::Serializer& ser,
                                                XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   // TLS_TODO: verify request processing
   XTypes::TypeLookup_Request type_lookup_request;
 
   if (!(ser >> type_lookup_request)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::take_tl_request - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_tl_request - ")
               ACE_TEXT("failed to deserialize type lookup request\n")));
     return DDS::RETCODE_ERROR;
   }
@@ -4054,7 +4054,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     } else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
       // TLS_TODO: verify request processing
       XTypes::TypeLookup_Reply type_lookup_reply;
-      if (DDS::RETCODE_OK != sedp_.type_lookup_request_reader_->take_tl_request(ser, type_lookup_reply)) {
+      if (DDS::RETCODE_OK != sedp_.type_lookup_request_reader_->process_tl_request(ser, type_lookup_reply)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to take type lookup request\n")));
         return;

@@ -586,7 +586,7 @@ private:
 
     virtual ~TypeLookupRequestReader();
 
-    DDS::ReturnCode_t take_tl_request(DCPS::Serializer& ser,
+    DDS::ReturnCode_t process_tl_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
 
   private:

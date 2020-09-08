@@ -930,28 +930,8 @@ namespace OpenDDS {
         MonotonicTimePoint time_added_to_map;
       };
 
-      struct MatchingPair {
-        MatchingPair(RepoId writer, RepoId reader)
-          : writer_(writer), reader_(reader) {}
 
-        RepoId writer_;
-        RepoId reader_;
-
-        bool operator<(const MatchingPair& a_other) const
-        {
-          if (GUID_tKeyLessThan()(writer_, a_other.writer_)) return true;
-
-          if (GUID_tKeyLessThan()(a_other.writer_, writer_)) return false;
-
-          if (GUID_tKeyLessThan()(reader_, a_other.reader_)) return true;
-
-          if (GUID_tKeyLessThan()(a_other.reader_, reader_)) return false;
-
-          return false;
-        }
-      };
-
-      typedef std::map<MatchingPair, MatchingData> MatchingDataMap;
+      typedef std::map<std::pair<RepoId, RepoId>, MatchingData> MatchingDataMap;
       typedef typename MatchingDataMap::iterator MatchingDataIter;
       MatchingDataMap matching_data_buffer_;
       ReactorTask reactor_task_;
@@ -1143,12 +1123,12 @@ namespace OpenDDS {
               XTypes::TypeIdentifierSeq type_ids;
               type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
               md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
-              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+              MatchingDataIter md_it = matching_data_buffer_.find(std::make_pair(writer, reader));
               if (md_it != matching_data_buffer_.end()) {
                 // TLS_TODO: is this scenario possible?
                 md_it->second = md;
               } else {
-                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+                matching_data_buffer_.insert(std::make_pair(std::make_pair(writer, reader), md));
               }
               switch (writer_type_info->minimal.typeid_with_size.type_id.kind()) {
                 case XTypes::TI_PLAIN_SEQUENCE_SMALL:
@@ -1178,7 +1158,7 @@ namespace OpenDDS {
                 // TLS_TODO: is this scenario possible?
                 md_it->second = md;
               } else {
-                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+                matching_data_buffer_.insert(std::make_pair(std::make_pair(writer, reader), md));
               }
               switch (reader_type_info->minimal.typeid_with_size.type_id.kind()) {
               case XTypes::TI_PLAIN_SEQUENCE_SMALL:
@@ -1200,12 +1180,12 @@ namespace OpenDDS {
             }
           }
 
-          MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+          MatchingDataIter md_it = matching_data_buffer_.find(std::make_pair(writer, reader));
           if (md_it != matching_data_buffer_.end()) {
             // TLS_TODO: is this scenario possible?
             md_it->second = md;
           } else {
-            matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+            matching_data_buffer_.insert(std::make_pair(std::make_pair(writer, reader), md));
           }
           match_continue(writer, reader);
         } else if (already_matched) { // break an existing associtaion
@@ -1307,7 +1287,7 @@ namespace OpenDDS {
         DataReaderCallbacks* drr = 0;
 
         {
-          MatchingDataIter md = matching_data_buffer_.find(MatchingPair(writer, reader));
+          MatchingDataIter md = matching_data_buffer_.find(std::make_pair(writer, reader));
           if (md != matching_data_buffer_.end()) {
             dwQos = md->second.dwQos;
             pubQos = md->second.pubQos;
@@ -1318,7 +1298,7 @@ namespace OpenDDS {
             writer_type_info = md->second.writer_type_info;
             reader_type_info = md->second.reader_type_info;
             cfProp = md->second.cfProp;
-            matching_data_buffer_.erase(MatchingPair(writer, reader));
+            matching_data_buffer_.erase(std::make_pair(writer, reader));
           } else {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
