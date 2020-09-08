@@ -26,9 +26,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleElement;
-class ReceivedDataSample;
-class ReceivedDataElement;
+class OpenDDS_Dcps_Export DataSampleElement;
+class OpenDDS_Dcps_Export ReceivedDataSample;
+class OpenDDS_Dcps_Export ReceivedDataElement;
 
 class OpenDDS_Dcps_Export Observer
   : public virtual RcObject

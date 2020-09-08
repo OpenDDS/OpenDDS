@@ -66,17 +66,7 @@ void DataReaderListenerImpl::read_next_sample(Messenger::MessageDataReader_var m
   Messenger::Message m;
   DDS::SampleInfo i;
   DDS::ReturnCode_t r = mdr->read_next_sample(m, i) ;
-  if (r == DDS::RETCODE_OK) {
-    if (i.valid_data) {
-      std::cout << reader_ << ": read_next_sample " << m.subject << m.subject_id << ':' << m.count << ':' << m.text << std::endl;
-    } else if (i.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
-    } else if (i.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: read_next_sample() ERROR: %d\n"), i.instance_state));
-    }
-  } else {
+  if (r != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: read_next_sample() ERROR: r: %d\n"), r));
   }
 }
@@ -86,17 +76,7 @@ void DataReaderListenerImpl::take_next_sample(Messenger::MessageDataReader_var m
   Messenger::Message m;
   DDS::SampleInfo i;
   DDS::ReturnCode_t r = mdr->take_next_sample(m, i) ;
-  if (r == DDS::RETCODE_OK) {
-    if (i.valid_data) {
-      std::cout << reader_ << ": take_next_sample " << m.subject << m.subject_id << ':' << m.count << ':' << m.text << std::endl;
-    } else if (i.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
-    } else if (i.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take_next_sample() ERROR: %d\n"), i.instance_state));
-    }
-  } else {
+  if (r != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take_next_sample() ERROR: r: %d\n"), r));
   }
 }
