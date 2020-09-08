@@ -10,6 +10,8 @@
 #include "be_util.h"
 #include "be_extern.h"
 
+#include "dds/DCPS/XTypes/TypeObject.h"
+
 #include <ast_generator.h>
 #include <global_extern.h>
 #include <idl_defines.h>
@@ -59,6 +61,10 @@ BE_GlobalData::BE_GlobalData()
   , default_extensibility_(extensibilitykind_appendable)
 {
   default_data_representation_.set_all(true);
+
+  platforms_.insert("*");
+  platforms_.insert("DDS");
+  platforms_.insert("OpenDDS");
 }
 
 BE_GlobalData::~BE_GlobalData()
@@ -654,7 +660,9 @@ bool BE_GlobalData::is_nested(AST_Decl* node)
     TopicAnnotation* topic = dynamic_cast<TopicAnnotation*>(builtin_annotations_["::@topic"]);
     TopicValue value;
     if (topic->node_value_exists(node, value)) {
-      return false;
+      if (platforms_.count(value.platform)) {
+        return false;
+      }
     }
   }
 
@@ -876,17 +884,20 @@ OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   return value;
 }
 
-unsigned BE_GlobalData::get_id(
-  AST_Structure* type, AST_Field* member, unsigned index) const
+ACE_CDR::ULong BE_GlobalData::get_id(AST_Field* field, AutoidKind auto_id, ACE_CDR::ULong& member_id) const
 {
-  // TODO: Support @hashid and @autoid
-  ACE_UNUSED_ARG(type);
-
-  IdAnnotation* id_annotation =
-    dynamic_cast<IdAnnotation*>(builtin_annotations_["::@id"]);
-  ACE_UINT32 value;
-  if (!id_annotation->node_value_exists(member, value)) {
-    value = index;
+  std::string hash_id;
+  if (id(field, member_id)) {
+    // @id
+    return member_id++;
+  } else if (hashid(field, hash_id)) {
+    // @hashid
+    return OpenDDS::XTypes::hash_member_name_to_id(hash_id);
+  } else if (auto_id == autoidkind_hash) {
+    // auto_id == autoidkind_hash
+    return OpenDDS::XTypes::hash_member_name_to_id(field->local_name()->get_string());
+  } else {
+    // auto_id == autoidkind_sequential
+    return member_id++;
   }
-  return value;
 }

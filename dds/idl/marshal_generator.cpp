@@ -2330,8 +2330,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "  size_t size = 0;\n";
       std::ostringstream fields_encode;
+      const AutoidKind auto_id = be_global->autoid(node);
+      ACE_CDR::ULong member_id = 0;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
+        const ACE_CDR::ULong id = be_global->get_id(fields[i], auto_id, member_id);
         const string field_name = fields[i]->local_name()->get_string();
         bool is_key = false;
         be_global->check_key(fields[i], is_key);
@@ -2443,8 +2445,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 
       std::ostringstream cases;
+      const AutoidKind auto_id = be_global->autoid(node);
+      ACE_CDR::ULong member_id = 0;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
+        const ACE_CDR::ULong id = be_global->get_id(fields[i], auto_id, member_id);
         const string field_name = fields[i]->local_name()->get_string();
         cases <<
           "    case " << id << ": {\n"

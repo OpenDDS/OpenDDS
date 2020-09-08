@@ -1056,20 +1056,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
 
         OpenDDS::XTypes::MinimalUnionMember member;
 
-        std::string hashid;
-        if (be_global->id(branch, member_id)) {
-          // @id
-          member.common.member_id = member_id;
-        } else if (be_global->hashid(branch, hashid)) {
-          // @hashid
-          member.common.member_id = OpenDDS::XTypes::hash_member_name_to_id(hashid);
-        } else if (auto_id == autoidkind_hash) {
-          // auto_id == autoidkind_hash
-          member.common.member_id = OpenDDS::XTypes::hash_member_name_to_id(branch->local_name()->get_string());
-        } else {
-          // auto_id == autoidkind_sequential
-          member.common.member_id = member_id;
-        }
+        member.common.member_id = be_global->get_id(branch, auto_id, member_id);
 
         member.common.member_flags = try_construct_to_member_flag(trycon);
 
@@ -1142,20 +1129,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
 
         OpenDDS::XTypes::MinimalStructMember member;
 
-        std::string hashid;
-        if (be_global->id(field, member_id)) {
-          // @id
-          member.common.member_id = member_id;
-        } else if (be_global->hashid(field, hashid)) {
-          // @hashid
-          member.common.member_id = OpenDDS::XTypes::hash_member_name_to_id(hashid);
-        } else if (auto_id == autoidkind_hash) {
-          // auto_id == autoidkind_hash
-          member.common.member_id = OpenDDS::XTypes::hash_member_name_to_id(field->local_name()->get_string());
-        } else {
-          // auto_id == autoidkind_sequential
-          member.common.member_id = member_id;
-        }
+        member.common.member_id = be_global->get_id(field, auto_id, member_id);
 
         member.common.member_flags = try_construct_to_member_flag(trycon);
 

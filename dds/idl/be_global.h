@@ -223,8 +223,7 @@ public:
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
-  unsigned get_id(
-    AST_Structure* type, AST_Field* member, unsigned index) const;
+  ACE_CDR::ULong get_id(AST_Field* field, AutoidKind auto_id, ACE_CDR::ULong& member_id) const;
 
   bool is_nested(AST_Decl* node);
 
@@ -249,6 +248,8 @@ private:
   OpenDDS::DataRepresentation default_data_representation_;
 
   bool is_default_nested(UTL_Scope* scope);
+
+  std::set<std::string> platforms_;
 };
 
 class BE_Comment_Guard {
