@@ -245,7 +245,7 @@ public:
 
   const static size_t serialized_size = 4;
   const static size_t padding_marker_byte_index = 3;
-  const static int padding_marker_alignmet = 4;
+  const static int padding_marker_alignment = 4;
 
   EncapsulationHeader();
 
@@ -266,7 +266,7 @@ public:
 
   OPENDDS_STRING to_string() const;
 
-  static void set_encapsulation_options(Message_Block_Ptr& mb);
+  static bool set_encapsulation_options(Message_Block_Ptr& mb);
 
 private:
   /// The first two bytes as a big endian integer
