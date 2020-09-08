@@ -26,9 +26,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export DataSampleElement;
-class OpenDDS_Dcps_Export ReceivedDataSample;
-class OpenDDS_Dcps_Export ReceivedDataElement;
+class DataSampleElement;
+class ReceivedDataSample;
+class ReceivedDataElement;
 
 class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
@@ -40,7 +40,7 @@ public:
   typedef RcHandle<Observer> Rch;
 
   typedef unsigned long Event;
-  enum : unsigned long {
+  enum {
     e_ENABLED         = 0x0001 << 0,
     e_DELETED         = 0x0001 << 1,
     e_QOS_CHANGED     = 0x0001 << 2,

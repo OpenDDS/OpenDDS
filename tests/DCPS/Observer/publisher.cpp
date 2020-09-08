@@ -48,7 +48,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
     throw ACE_TEXT("TestMsgDataWriter::_narrow failed.");
   }
 
-  auto entity = dynamic_cast<EntityImpl*>(dw.ptr());
+  EntityImpl* entity = dynamic_cast<EntityImpl*>(dw.ptr());
   entity->set_observer(make_rch<TestObserver>(), Observer::e_SAMPLE_SENT);
 }
 

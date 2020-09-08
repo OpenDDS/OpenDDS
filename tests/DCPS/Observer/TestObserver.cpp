@@ -8,6 +8,8 @@
 #include "TestObserver.h"
 #include <dds/DCPS/DataWriterImpl.h>
 #include <dds/DCPS/DataReaderImpl.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/OS_NS_time.h>
 
@@ -19,9 +21,9 @@ std::string TestObserver::to_str(DDS::DataWriter_ptr w)
 {
   std::ostringstream o;
   o << " writer ";
-  auto p = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(w);
+  OpenDDS::DCPS::DataWriterImpl* p = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(w);
   if (p) {
-    o << p->get_publication_id();
+    o << to_str(p->get_publication_id());
   }
   return o.str();
 }
@@ -30,9 +32,9 @@ std::string TestObserver::to_str(DDS::DataReader_ptr r)
 {
   std::ostringstream o;
   o << " reader ";
-  auto p = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(r);
+  OpenDDS::DCPS::DataReaderImpl* p = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(r);
   if (p) {
-    o << p->get_subscription_id();
+    o << to_str(p->get_subscription_id());
   }
   return o.str();
 }
@@ -49,6 +51,11 @@ std::string TestObserver::to_str(const Sample& s)
     << t << "SequenceN: " << s.seq_n_.getValue() << '\n'
     << t << "Data     : " << s.data_ << '\n';
   return o.str();
+}
+
+std::string TestObserver::to_str(const OpenDDS::DCPS::GUID_t& guid)
+{
+  return OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(guid));
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
@@ -91,22 +98,22 @@ void TestObserver::on_qos_changed(DDS::DataReader_ptr r)
 
 void TestObserver::on_associated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId)
 {
-  std::cout << "on_associated" << to_str(w) << " with reader " << readerId << std::endl;
+  std::cout << "on_associated" << to_str(w) << " with reader " << to_str(readerId) << std::endl;
 }
 
 void TestObserver::on_associated(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId)
 {
-  std::cout << "on_associated" << to_str(r) << " with writer " << writerId << std::endl;
+  std::cout << "on_associated" << to_str(r) << " with writer " << to_str(writerId) << std::endl;
 }
 
 void TestObserver::on_disassociated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId)
 {
-  std::cout << "on_disassociated" << to_str(w) << " from reader " << readerId << std::endl;
+  std::cout << "on_disassociated" << to_str(w) << " from reader " << to_str(readerId) << std::endl;
 }
 
 void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId)
 {
-  std::cout << "on_disassociated" << to_str(r) << " from writer " << writerId << std::endl;
+  std::cout << "on_disassociated" << to_str(r) << " from writer " << to_str(writerId) << std::endl;
 }
 
 // ========== ========== ========== ========== ========== ========== ==========

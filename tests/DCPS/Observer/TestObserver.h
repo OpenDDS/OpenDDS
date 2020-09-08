@@ -43,6 +43,7 @@ private:
   static std::string to_str(DDS::DataWriter_ptr w);
   static std::string to_str(DDS::DataReader_ptr w);
   static std::string to_str(const Sample& s);
+  static std::string to_str(const OpenDDS::DCPS::GUID_t& guid);
 
   template<typename Qos>
   static std::string qos_str(const Qos& qos) {
