@@ -9,13 +9,20 @@
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <set>
+
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
-const unsigned large_sample_seq_size = 500;
-/*  static_cast<unsigned>( */
-/*     OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE); */
+const unsigned large_sample_seq_size =
+ static_cast<unsigned>(
+    OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE);
 const unsigned minimum_sample_count = 981;
+
+int scale(int value, bool large_samples)
+{
+  return value * (large_samples ? 1 : 10);
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -62,27 +69,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     Property p;
     if (large_samples) {
       p.extra.length(large_sample_seq_size);
+      for (unsigned i = 0; i < large_sample_seq_size; ++i) {
+        p.extra[i] = i % 256;
+      }
     } else {
       p.extra.length(0);
     }
-    const int scale = large_samples ? 1 : 5;
 
-    for (int i = 1; i <= 1000; ++i) {
+    for (int i = 1; i <= scale(100, large_samples); ++i) {
       p.key = i;
       p.value = i;
       pdw->write(p, HANDLE_NIL);
     }
 
-    const int value_multi = 20;
     for (int c = 1; c < 75; ++c) {
-      for (int i = 1; i <= 1000; i += 50) {
+      for (int i = 1; i <= scale(100, large_samples); i += scale(5, large_samples)) {
         p.key = i;
         p.value = i + c;
         pdw->write(p, HANDLE_NIL);
       }
       ACE_OS::sleep(ACE_Time_Value(0, 500 * 1000)); // 1/2 sec
       if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "Count: %d\n", c));
+        ACE_DEBUG((LM_DEBUG, "writer: Count: %d\n", c));
       }
     }
 
@@ -103,6 +111,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ws->attach_condition(dr_rc);
     unsigned counter = 0;
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
+    std::set<int> instances;
     bool done = false;
     while (!done) {
       ConditionSeq active;
@@ -123,15 +132,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         }
         for (unsigned int i = 0; i < data.length(); ++i) {
           ++counter;
+          instances.insert(data[i].key);
           if (verbose) {
-            ACE_DEBUG((LM_DEBUG, "Counter: %u Instance: %d\n", counter, data[i].key));
+            ACE_DEBUG((LM_DEBUG, "reader: Counter: %u Instance: %d\n", counter, data[i].key));
           }
 
           if (counter == minimum_sample_count) {
-            ACE_DEBUG((LM_DEBUG, "Counter %u at %T\n", minimum_sample_count));
+            ACE_DEBUG((LM_DEBUG, "reader: Counter reached %u at %T\n", minimum_sample_count));
             done = true;
           }
         }
+      }
+    }
+    for (int i = 1; i <= scale(100, large_samples); ++i) {
+      if (instances.count(i) == 0) {
+        ACE_ERROR((LM_ERROR, "ERROR: Reader Missing Instance %d\n", i));
       }
     }
     ws->detach_condition(dr_rc);
