@@ -4035,6 +4035,11 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
+  if (config().rtps_relay_only_) {
+    addresses.insert(config().rtps_relay_address());
+    return;
+  }
+
   ACE_INET_Addr normal_addr;
   ACE_INET_Addr ice_addr;
   static const ACE_INET_Addr NO_ADDR;

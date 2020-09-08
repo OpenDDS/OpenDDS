@@ -8,6 +8,7 @@
 #include "dds/DCPS/DisjointSequence.h"
 
 #include <unordered_map>
+#include <condition_variable>
 
 namespace Bench {
 
@@ -36,8 +37,10 @@ public:
   void set_datareader(Builder::DataReader& datareader) override;
   void unset_datareader(Builder::DataReader& datareader) override;
 
+  bool wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const;
+
 protected:
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   bool durable_{false};
   bool reliable_{false};
   bool history_keep_all_{false};
@@ -49,6 +52,7 @@ protected:
   Builder::DataReader* datareader_{0};
   DataDataReader_var data_dr_;
   std::vector<DataHandler*> handlers_;
+  mutable std::condition_variable expected_match_cv;
 
   Builder::PropertyIndex last_discovery_time_;
   Builder::PropertyIndex lost_sample_count_;
