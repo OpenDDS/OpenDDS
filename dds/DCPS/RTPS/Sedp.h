@@ -607,7 +607,7 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
-    DDS::ReturnCode_t take_tl_reply(DCPS::Serializer& ser);
+    DDS::ReturnCode_t process_tl_reply(DCPS::Serializer& ser);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;

@@ -1153,7 +1153,7 @@ namespace OpenDDS {
               XTypes::TypeIdentifierSeq type_ids;
               type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
               md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
-              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+              MatchingDataIter md_it = matching_data_buffer_.find(std::make_pair(writer, reader));
               if (md_it != matching_data_buffer_.end()) {
                 // TLS_TODO: is this scenario possible?
                 md_it->second = md;
