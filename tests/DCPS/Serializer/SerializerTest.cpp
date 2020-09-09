@@ -710,7 +710,7 @@ bool runEncapsulationOptionsTest()
     std::cerr << "EncapsulationHeader::from_encoding failed" << std::endl;
     return false;
   }
-  
+
   bool status = true;
   for (unsigned int i = 1; i <= OpenDDS::DCPS::EncapsulationHeader::padding_marker_alignment; i++) {
     OpenDDS::DCPS::Message_Block_Ptr mb;
