@@ -56,6 +56,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  bool failed = false;
+
   if (writer) {
     Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
@@ -112,24 +114,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     unsigned counter = 0;
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
     std::set<int> instances;
-    bool done = false;
-    while (!done) {
+    while (true) {
       ConditionSeq active;
-      Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
-      ReturnCode_t ret = ws->wait(active, infinite);
-      if (ret != RETCODE_OK) {
-        return 1;
+      const Duration_t max_wait = {10, 0};
+      ReturnCode_t ret = ws->wait(active, max_wait);
+      if (ret == RETCODE_TIMEOUT) {
+        if (verbose) {
+          ACE_DEBUG((LM_DEBUG, "reader: Timedout\n"));
+        }
+        break;
+      } else if (ret != RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
+        failed = true;
+        break;
       }
-      while (!done) {
-        ::PropertySeq data;
-        SampleInfoSeq info;
-        ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
-        if (ret == RETCODE_NO_DATA) {
-          break;
-        }
-        if (ret != RETCODE_OK) {
-          return 1;
-        }
+      ::PropertySeq data;
+      SampleInfoSeq info;
+      while ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
         for (unsigned int i = 0; i < data.length(); ++i) {
           ++counter;
           instances.insert(data[i].key);
@@ -139,20 +140,30 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
           if (counter == minimum_sample_count) {
             ACE_DEBUG((LM_DEBUG, "reader: Counter reached %u at %T\n", minimum_sample_count));
-            done = true;
           }
         }
       }
+      if (ret != RETCODE_NO_DATA && ret != RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
+        failed = true;
+        break;
+      }
+    }
+    if (counter < minimum_sample_count) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader failed to get %d samples, got only %d\n",
+        minimum_sample_count, counter));
+      failed = true;
     }
     for (int i = 1; i <= scale(100, large_samples); ++i) {
       if (instances.count(i) == 0) {
         ACE_ERROR((LM_ERROR, "ERROR: Reader Missing Instance %d\n", i));
+        failed = true;
       }
     }
     ws->detach_condition(dr_rc);
     dr->delete_readcondition(dr_rc);
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Must pass either -writer or -reader\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
     return 1;
   }
 
@@ -160,5 +171,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
-  return 0;
+  return failed ? 1 : 0;
 }
