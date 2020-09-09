@@ -1,4 +1,6 @@
 #include "common.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include <ace/ACE.h>
 #include <ace/Message_Block.h>
@@ -700,24 +702,33 @@ bool runEncapsulationOptionsTest()
 {
   std::cerr << "\nRunning encapsulation options tests...\n";
   const CORBA::Octet arr[4] = {0};
-  const OpenDDS::DCPS::EncapsulationHeader encap;
-  OpenDDS::DCPS::unique_ptr<OpenDDS::DCPS::MessageBlockAllocator> mb_allocator_;
+  OpenDDS::DCPS::EncapsulationHeader encap;
+  const OpenDDS::DCPS::Encoding encoding = OpenDDS::DCPS::Encoding(
+    OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
 
+  if (!encap.from_encoding(encoding, OpenDDS::DCPS::APPENDABLE)) {
+    std::cerr << "EncapsulationHeader::from_encoding failed" << std::endl;
+    return false;
+  }
+  
+  bool status = true;
   for (unsigned int i = 1; i <= OpenDDS::DCPS::EncapsulationHeader::padding_marker_alignment; i++) {
     OpenDDS::DCPS::Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
     ACE_NEW_RETURN(tmp_mb,
       ACE_Message_Block(4 + i, ACE_Message_Block::MB_DATA),
-      0);
+      false);
     mb.reset(tmp_mb);
 
-    OpenDDS::DCPS::Serializer serializer(mb.get(), encodings[5]);
-    serializer << encap;
-    serializer.write_octet_array(arr, i);
+    OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
+    if (!(serializer << encap) || !serializer.write_octet_array(arr, i)) {
+      std::cerr << "Serialization failed in runEncapsulationOptionsTest" << std::endl;
+        return false;
+    }
 
     if (!OpenDDS::DCPS::EncapsulationHeader::set_encapsulation_options(mb)) {
-      std::cerr << "EncapsulationHeader::set_encapsulation_options failed" << std::endl << "size: " << mb->length();
+      std::cerr << "EncapsulationHeader::set_encapsulation_options failed. " << "Size: " << mb->length() << std::endl;
       return false;
     }
 
@@ -725,10 +736,11 @@ bool runEncapsulationOptionsTest()
     if (padding_marker_alignment != (OpenDDS::DCPS::EncapsulationHeader::padding_marker_alignment - i)) {
       std::cerr << "EncapsulationHeader::set_encapsulation_options failed for "
         << i << " bytes, padding marker alignment: " << padding_marker_alignment << std::endl;
+      status = false;
     }
   }
 
-  return true;
+  return status;
 }
 
 int

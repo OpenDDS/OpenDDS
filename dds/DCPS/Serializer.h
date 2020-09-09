@@ -245,7 +245,7 @@ public:
 
   const static size_t serialized_size = 4;
   const static size_t padding_marker_byte_index = 3;
-  const static int padding_marker_alignment = 4;
+  const static size_t padding_marker_alignment = 4;
 
   EncapsulationHeader();
 
