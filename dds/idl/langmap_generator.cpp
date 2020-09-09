@@ -568,7 +568,7 @@ struct GeneratorBase
         nm << "::" << nm << "(const " << nm << "& other)\n"
         "{\n"
         "  this->_discriminator = other._discriminator;\n";
-      generateSwitchForUnion("this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
@@ -580,7 +580,7 @@ struct GeneratorBase
         "  }\n\n"
         "  _reset();\n"
         "  this->_discriminator = other._discriminator;\n";
-      generateSwitchForUnion("this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "  return *this;\n"
         "}\n\n";
@@ -589,7 +589,7 @@ struct GeneratorBase
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
         "  if (this->_discriminator != rhs._discriminator) return false;\n";
-      if (generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
+      if (generateSwitchForUnion(u, "this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
         be_global->impl_ <<
           "  return false;\n";
       }
@@ -599,7 +599,7 @@ struct GeneratorBase
       be_global->impl_ <<
         "void " << nm << "::_reset()\n"
         "{\n";
-      generateSwitchForUnion("this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
@@ -1678,13 +1678,13 @@ struct Cxx11Generator : GeneratorBase
       nm << "::" << nm << "(const " << nm << "& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion("_disc", union_copy, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_copy, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "::" << nm << '(' << nm << "&& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion("_disc", union_move, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_move, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
@@ -1692,7 +1692,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (this == &rhs) {\n"
       "    return *this;\n"
       "  }\n";
-    generateSwitchForUnion("rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1702,7 +1702,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (this == &rhs) {\n"
       "    return *this;\n"
       "  }\n";
-    generateSwitchForUnion("rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1712,7 +1712,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (_set && d != _disc) {\n"
       "    _reset();\n"
       "  }\n";
-    generateSwitchForUnion("d", union_activate, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "d", union_activate, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _set = true;\n"
       "  _disc = d;\n"
@@ -1720,7 +1720,7 @@ struct Cxx11Generator : GeneratorBase
       "void " << nm << "::_reset()\n"
       "{\n"
       "  if (!_set) return;\n";
-    generateSwitchForUnion("_disc", union_reset, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_reset, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _set = false;\n"
       "}\n\n"

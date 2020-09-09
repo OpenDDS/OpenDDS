@@ -35,6 +35,7 @@ namespace {
 
   typedef is_special_case is_special_union;
   typedef bool (*gen_special_union)(const string& cxx,
+                                    AST_Union* u,
                                     AST_Type* discriminator,
                                     const std::vector<AST_UnionBranch*>& branches);
 
@@ -67,6 +68,7 @@ namespace {
 
   bool isRtpsSpecialUnion(const string& cxx);
   bool genRtpsSpecialUnion(const string& cxx,
+                           AST_Union* u,
                            AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches);
 
@@ -2863,7 +2865,7 @@ namespace {
       || cxx == "OpenDDS::RTPS::Submessage";
   }
 
-  bool genRtpsParameter(AST_Type* discriminator,
+  bool genRtpsParameter(AST_Union* u, AST_Type* discriminator,
                         const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = "OpenDDS::RTPS::Parameter";
@@ -2873,7 +2875,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("uni", "const " + cxx + "&");
       serialized_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
       be_global->impl_ <<
         "  size += 4; // parameterId & length\n";
@@ -2918,7 +2920,7 @@ namespace {
       insertData.addArg("strm", "Serializer&");
       insertData.addArg("uni", "const " + cxx + "&");
       insertData.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
+      generateSwitchForUnion(u, "uni._d()", streamCommon, branches, discriminator,
                              "return", "<< ", cxx.c_str());
     }
     {
@@ -2946,7 +2948,7 @@ namespace {
         "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
         "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
-      generateSwitchBody(streamCommon, branches, discriminator,
+      generateSwitchBody(u, streamCommon, branches, discriminator,
                          "return", ">> ", cxx.c_str(), true);
       be_global->impl_ <<
         "  default:\n"
@@ -2962,7 +2964,7 @@ namespace {
     return true;
   }
 
-  bool genRtpsSubmessage(AST_Type* discriminator,
+  bool genRtpsSubmessage(AST_Union* u, AST_Type* discriminator,
                          const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = "OpenDDS::RTPS::Submessage";
@@ -2972,7 +2974,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("uni", "const " + cxx + "&");
       serialized_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
     }
     {
@@ -2980,7 +2982,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", streamCommon, branches,
                              discriminator, "return", "<< ", cxx.c_str());
     }
     {
@@ -2993,13 +2995,13 @@ namespace {
     return true;
   }
 
-  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
+  bool genRtpsSpecialUnion(const string& cxx, AST_Union* u, AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches)
   {
     if (cxx == "OpenDDS::RTPS::Parameter") {
-      return genRtpsParameter(discriminator, branches);
+      return genRtpsParameter(u, discriminator, branches);
     } else if (cxx == "OpenDDS::RTPS::Submessage") {
-      return genRtpsSubmessage(discriminator, branches);
+      return genRtpsSubmessage(u, discriminator, branches);
     } else {
       return false;
     }
@@ -3023,7 +3025,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
-      return special_unions[i].gen(cxx, discriminator, branches);
+      return special_unions[i].gen(cxx, node, discriminator, branches);
     }
   }
 
@@ -3058,7 +3060,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
 
-    generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
+    generateSwitchForUnion(node, "uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
@@ -3104,11 +3106,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
-    if (generateSwitchForUnion("uni._d()", streamCommon, branches,
+    if (generateSwitchForUnion(node, "uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
-                               exten == extensibilitykind_mutable ? findSizeCommon : 0,
-                               exten == extensibilitykind_mutable ? node : 0)) {
+                               exten == extensibilitykind_mutable ? findSizeCommon : 0)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3150,7 +3151,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "    return false;\n"
         "  }\n";
 
-      if (generateSwitchForUnion("disc", streamCommon, branches,
+      if (generateSwitchForUnion(node, "disc", streamCommon, branches,
         discriminator, "if", ">> ", cxx.c_str(), false, true, true, 0)) {
         be_global->impl_ <<
           "  return true;\n";
@@ -3159,7 +3160,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-      if (generateSwitchForUnion("disc", streamCommon, branches,
+      if (generateSwitchForUnion(node, "disc", streamCommon, branches,
           discriminator, "if", ">> ", cxx.c_str())) {
         be_global->impl_ <<
           "  return true;\n";
@@ -3250,7 +3251,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n";
+          "  size_t mutable_running_total = 0;\n"
           "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
       }
 
