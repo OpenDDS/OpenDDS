@@ -1,6 +1,4 @@
 #include "common.h"
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/DCPS_Utils.h"
 
 #include <ace/ACE.h>
 #include <ace/Message_Block.h>
@@ -724,11 +722,11 @@ bool runEncapsulationOptionsTest()
     OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
     if (!(serializer << encap) || !serializer.write_octet_array(arr, i)) {
       std::cerr << "Serialization failed in runEncapsulationOptionsTest" << std::endl;
-        return false;
+      return false;
     }
 
     if (!OpenDDS::DCPS::EncapsulationHeader::set_encapsulation_options(mb)) {
-      std::cerr << "EncapsulationHeader::set_encapsulation_options failed. " << "Size: " << mb->length() << std::endl;
+      std::cerr << "EncapsulationHeader::set_encapsulation_options failed. Size: " << mb->length() << std::endl;
       return false;
     }
 
