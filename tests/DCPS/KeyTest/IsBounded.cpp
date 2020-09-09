@@ -23,26 +23,25 @@ template<typename Type>
 bool assert_impl(
   const char* type_name, bool expected_bounded, size_t expected_size)
 {
-  bool failed = false;
-  Type value;
+  typedef MarshalTraits<Type> Traits;
 
-  const bool actual_bounded = MarshalTraits<Type>::gen_is_bounded_size();
+  const bool actual_bounded = Traits::bounded(encoding);
   if (actual_bounded != expected_bounded) {
     ACE_ERROR((LM_ERROR, "KeyTest/IsBounded: ERROR: %C: "
       "expected to%C be bounded, but it is%C\n",
       type_name, expected_bounded ? "" : " not", actual_bounded ? "" : "n't"));
-    failed = true;
+    return true;
   }
 
-  const size_t actual_size = max_serialized_size(encoding, value);
+  const size_t actual_size = Traits::max_serialized_size(encoding);
   if (actual_size != expected_size) {
     ACE_ERROR((LM_ERROR, "KeyTest/IsBounded: ERROR: %C: "
       "expected max size to be %B, but it is %B\n",
       type_name, expected_size, actual_size));
-    failed = true;
+    return true;
   }
 
-  return failed;
+  return false;
 }
 
 template<typename Type>

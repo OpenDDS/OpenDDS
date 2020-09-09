@@ -25,12 +25,14 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
                    size_t expected_pad, size_t expected_ms_align,
                    const char* name)
 {
+  typedef OpenDDS::DCPS::MarshalTraits<FOO> MarshalTraits;
+
   const size_t expected_cs_align = expected_cs + expected_pad;
 
-  const bool bounded = OpenDDS::DCPS::MarshalTraits<FOO>::gen_is_bounded_size();
+  const bool bounded = MarshalTraits::bounded(unaligned_encoding);
 
-  const size_t ms = OpenDDS::DCPS::max_serialized_size(unaligned_encoding, in_foo);
-  const size_t ms_align = OpenDDS::DCPS::max_serialized_size(aligned_encoding, in_foo);
+  const size_t ms = MarshalTraits::max_serialized_size(unaligned_encoding);
+  const size_t ms_align = MarshalTraits::max_serialized_size(aligned_encoding);
   const size_t cs = OpenDDS::DCPS::serialized_size(unaligned_encoding, in_foo);
   const size_t cs_align = OpenDDS::DCPS::serialized_size(aligned_encoding, in_foo);
 

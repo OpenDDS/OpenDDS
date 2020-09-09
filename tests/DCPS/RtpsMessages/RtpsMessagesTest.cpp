@@ -25,13 +25,6 @@ struct TestMsg {
   TAO::String_Manager value;
 };
 
-bool max_serialized_size(
-  const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
-{
-  primitive_serialized_size(encoding, size, stru.t.key);
-  return true;
-}
-
 void serialized_size(
   const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
 {
@@ -47,8 +40,20 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<TestMsg> {
-static bool gen_is_bounded_size() { return false; }
-static bool gen_is_bounded_key_size() { return true; }
+  static bool bounded(const Encoding&)
+  {
+    return false;
+  }
+
+  static bool key_only_bounded(const Encoding&)
+  {
+    return true;
+  }
+
+  size_t key_only_max_serialized_size(const Encoding&)
+  {
+    return uint32_cdr_size;
+  }
 };
 } }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
@@ -57,13 +62,6 @@ struct BigKey {
   CORBA::Octet key[24];
   TAO::String_Manager value;
 };
-
-bool max_serialized_size(
-  const Encoding&, size_t& size, KeyOnly<const BigKey>&)
-{
-  size += 24;
-  return true;
-}
 
 void serialized_size(
   const Encoding&, size_t& size, KeyOnly<const BigKey>&)
@@ -80,8 +78,20 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<BigKey> {
-inline static bool gen_is_bounded_size() { return true; }
-inline static bool gen_is_bounded_key_size() { return true; }
+  static bool bounded(const Encoding&)
+  {
+    return true;
+  }
+
+  static bool key_only_bounded(const Encoding&)
+  {
+    return true;
+  }
+
+  size_t key_only_max_serialized_size(const Encoding&)
+  {
+    return 24;
+  }
 };
 } }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
