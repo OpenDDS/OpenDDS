@@ -796,8 +796,6 @@ namespace XTypes {
       case TI_STRING8_LARGE:
       case TI_STRING16_LARGE:
         return string_ldefn() < other.string_ldefn();
-
-      // TLS_TODO: write comparison operators to suppprt code below
       case TI_PLAIN_SEQUENCE_SMALL:
         return seq_sdefn() < other.seq_sdefn();
       case TI_PLAIN_SEQUENCE_LARGE:
