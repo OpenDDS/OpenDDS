@@ -938,7 +938,7 @@ PubDriver::allocator_test ()
   foo2.handle_value = handle;
   foo2.writer_id = 0;
 
-  const bounded = MarshalTraits< ::Xyz::Foo>::bounded(encoding);
+  const bool bounded = MarshalTraits< ::Xyz::Foo>::bounded(encoding);
 
   // Allocate serialized foo data from pre-allocated pool
   for (size_t i = 1; i <= n_chunks; i ++) {

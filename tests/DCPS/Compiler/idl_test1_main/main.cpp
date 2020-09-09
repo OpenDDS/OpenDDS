@@ -353,27 +353,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "NOTE: _dcps_has_key(foo) returned false\n"));
   }
 
-  const size_t expected_max_size = 0;
   const bool expected_bounded = false;
   const size_t expected_size = 79;
 
-  const size_t actual_max_size =
-    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::max_serialized_size(encoding);
   const bool actual_bounded =
     OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::bounded(encoding);
   const size_t actual_size = serialized_size(encoding, my_foo);
 
-  ACE_DEBUG((LM_DEBUG,"max_serialized_size(my_foo) => %B\n", actual_max_size));
   ACE_DEBUG((LM_DEBUG,"gen_is_bounded_size(my_foo) => %d\n", int(actual_bounded)));
   ACE_DEBUG((LM_DEBUG,"serialized_size(my_foo) => %B\n", actual_size));
-
-  if (actual_max_size != expected_max_size) {
-    ACE_ERROR((LM_ERROR,
-      "max_serialized_size(my_foo) failed: returned %B when was expecting %B\n",
-      actual_max_size, expected_max_size));
-    failed = true;
-  }
-
 
   if (actual_bounded != expected_bounded) {
     ACE_ERROR((LM_ERROR,
@@ -391,8 +379,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   // test serializing
 
-  const size_t buff_size = actual_bounded ? actual_max_size : actual_size;
-  ACE_Message_Block mb(buff_size);
+  ACE_Message_Block mb(actual_size);
   Serializer ss(&mb, encoding);
   Serializer ss2(&mb, encoding);
 

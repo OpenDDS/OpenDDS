@@ -2723,7 +2723,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
-      serialized_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      serialized_size.addArg("stru", "const KeyOnly<const " + cxx + ">");
       serialized_size.endArgs();
 
       be_global->impl_ <<
@@ -3128,7 +3128,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     Function serialized_size("serialized_size", "void");
     serialized_size.addArg("encoding", "const Encoding&");
     serialized_size.addArg("size", "size_t&");
-    serialized_size.addArg("uni", "KeyOnly<const " + cxx + ">");
+    serialized_size.addArg("uni", "const KeyOnly<const " + cxx + ">");
     serialized_size.endArgs();
 
     if (has_key) {

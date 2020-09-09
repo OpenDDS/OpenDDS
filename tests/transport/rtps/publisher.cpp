@@ -307,7 +307,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   size_t size = serialized_size(encoding, hdr);
   serialized_size(encoding, size, it);
   serialized_size(encoding, size, ds);
-  serialized_size_ulong(encoding, size);
+  primitive_serialized_size_ulong(encoding, size);
   serialized_size(encoding, size, data);
 
   ACE_Message_Block msg(size);
@@ -356,7 +356,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     size = 0;
     KeyOnly<const TestMsg> ko_instance_data(control_sample);
     // TODO(iguessthislldo): Convert
-    serialized_size_ulong(encoding, size); // encap
+    primitive_serialized_size_ulong(encoding, size); // encap
     serialized_size(encoding, size, ko_instance_data);
     dsh.message_length_ = static_cast<ACE_UINT32>(size);
 
@@ -479,7 +479,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   // Calculate the data buffer length
   size = 0;
   // TODO(iguessthislldo): convert
-  serialized_size_ulong(encoding, size); // encap
+  primitive_serialized_size_ulong(encoding, size); // encap
   serialized_size(encoding, size, data);
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
 
@@ -516,7 +516,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   // Calculate the data buffer length
   size = 0;
   // TODO(iguessthislldo): convert
-  serialized_size_ulong(encoding, size); // encap
+  primitive_serialized_size_ulong(encoding, size); // encap
   serialized_size(encoding, size, data);
   dsh2.message_length_ = static_cast<ACE_UINT32>(size);
 

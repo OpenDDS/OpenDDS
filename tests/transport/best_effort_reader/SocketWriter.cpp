@@ -122,7 +122,7 @@ size_t SocketWriter::msgSize(const InfoTimestampSubmessage& t,
   size_t size = serialized_size(encoding, hdr_);
   serialized_size(encoding, size, t);
   serialized_size(encoding, size, d);
-  serialized_size_ulong(encoding, size);
+  primitive_serialized_size_ulong(encoding, size);
   serialized_size(encoding, size, m);
   return size;
 }

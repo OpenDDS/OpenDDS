@@ -26,7 +26,7 @@ struct TestMsg {
 };
 
 void serialized_size(
-  const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
+  const Encoding& encoding, size_t& size, const KeyOnly<const TestMsg>& stru)
 {
   primitive_serialized_size(encoding, size, stru.t.key);
 }
@@ -50,9 +50,9 @@ struct MarshalTraits<TestMsg> {
     return true;
   }
 
-  size_t key_only_max_serialized_size(const Encoding&)
+  static size_t key_only_max_serialized_size(const Encoding&)
   {
-    return uint32_cdr_size;
+    return 4;
   }
 };
 } }
@@ -64,7 +64,7 @@ struct BigKey {
 };
 
 void serialized_size(
-  const Encoding&, size_t& size, KeyOnly<const BigKey>&)
+  const Encoding&, size_t& size, const KeyOnly<const BigKey>&)
 {
   size += 24;
 }
@@ -88,7 +88,7 @@ struct MarshalTraits<BigKey> {
     return true;
   }
 
-  size_t key_only_max_serialized_size(const Encoding&)
+  static size_t key_only_max_serialized_size(const Encoding&)
   {
     return 24;
   }

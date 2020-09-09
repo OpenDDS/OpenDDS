@@ -47,8 +47,25 @@ bool operator>>(Serializer& strm, KeyOnly<TestMsg> stru);
 
 template <>
 struct MarshalTraits<TestMsg> {
-  static bool gen_is_bounded_size() { return false; }
-  static bool gen_is_bounded_key_size() { return true; }
+  static bool bounded(const Encoding&)
+  {
+    return false;
+  }
+
+  static size_t max_serialized_size(const Encoding&)
+  {
+    return 0;
+  }
+
+  static bool key_only_bounded(const Encoding&)
+  {
+    return true;
+  }
+
+  static size_t key_only_max_serialized_size(const Encoding&)
+  {
+    return uint32_cdr_size;
+  }
 };
 
 }

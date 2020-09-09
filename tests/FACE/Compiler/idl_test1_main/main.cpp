@@ -301,33 +301,32 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   const bool expected_bounded = false;
-  const size_t expected_find_size = 97;
+  const size_t expected_size = 97;
 
-  size_t ms = OpenDDS::DCPS::max_serialized_size(encoding_plain_native, my_foo);
-  const bool bounded = OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
-  size_t cs = serialized_size(encoding_plain_native, my_foo);
+  const bool actual_bounded =
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::bounded(encoding_unaligned_native);
+  const size_t actual_size = serialized_size(encoding_unaligned_native, my_foo);
 
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_max_marshaled_size(my_foo) => %B\n", ms));
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_is_bounded_size(my_foo) => %d\n", int(bounded)));
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_find_size(my_foo) => %B\n", cs));
+  ACE_DEBUG((LM_DEBUG, "bounded(my_foo) => %d\n", int(actual_bounded)));
+  ACE_DEBUG((LM_DEBUG, "serialized_size(my_foo) => %B\n", actual_size));
 
-  if (bounded != expected_bounded) {
-    ACE_ERROR((LM_ERROR, "OpenDDS::DCPS::gen_is_bounded_size(Foo) failed - expected %d got %d\n",
-      int(expected_bounded), int(bounded)));
+  if (actual_bounded != expected_bounded) {
+    ACE_ERROR((LM_ERROR,
+      "gen_is_bounded_size(my_foo) failed: expected %d got %d\n",
+      int(expected_bounded), int(actual_bounded)));
     failed = true;
   }
 
-  if (!bounded && cs != expected_find_size) {
+  if (actual_size != expected_size) {
     ACE_ERROR((LM_ERROR,
-      "OpenDDS::DCPS::gen_find_size(Foo) returned %B when was expecting %B\n",
-      cs, expected_find_size));
+      "serialized_size(my_foo) failed: returned %B when was expecting %B\n",
+      actual_size, expected_size));
     failed = true;
   }
 
   // test serializing
 
-  const size_t buff_size = bounded ? ms : cs;
-  ACE_Message_Block mb(buff_size);
+  ACE_Message_Block mb(actual_size);
   OpenDDS::DCPS::Serializer ss(&mb, encoding_unaligned_native);
   OpenDDS::DCPS::Serializer ss2(&mb, encoding_unaligned_native);
 
