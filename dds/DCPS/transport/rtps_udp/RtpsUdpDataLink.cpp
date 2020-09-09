@@ -2806,7 +2806,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (!ri->second.durable_data_.empty()) {
     if (Transport_debug_level > 5) {
       const GuidConverter local_conv(id_), remote_conv(remote);
-      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                  "local %C has durable for remote %C\n",
                  OPENDDS_STRING(local_conv).c_str(),
                  OPENDDS_STRING(remote_conv).c_str()));
@@ -2816,7 +2816,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                  acknack.readerSNState.bitmapBase.low);
     const SequenceNumber& dd_last = ri->second.durable_data_.rbegin()->first;
     if (Transport_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                  "check ack %q against last durable %q\n",
                  ack.getValue(), dd_last.getValue()));
     }
@@ -2824,7 +2824,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       // Reader acknowledges durable data, we no longer need to store it
       ri->second.durable_data_.swap(pendingCallbacks);
       if (Transport_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                    "durable data acked\n"));
       }
     } else {
@@ -2853,7 +2853,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         for (; it != ri->second.durable_data_.end()
              && it->first <= psr[i].second; ++it) {
           if (Transport_debug_level > 5) {
-            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                        "durable resend %d\n", int(it->first.getValue())));
           }
           link->durability_resend(it->second);
@@ -2873,7 +2873,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       }
       if (!gaps.empty()) {
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps:\n"));
           gaps.dump();
         }
@@ -2887,7 +2887,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         // All nacks were below the start of the durable data.
           requests.insert(SequenceRange(requests.high(), dd_first.previous()));
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps for all requests:\n"));
           requests.dump();
         }
@@ -2904,7 +2904,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                                     std::min(psr[i].second, dd_first)));
         }
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps for some requests:\n"));
           gaps.dump();
         }
@@ -2922,7 +2922,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       ri->second.cur_cumulative_ack_ = ack;
     } else if (ri->second.durable_ && !ri->second.expecting_durable_data()) {
       // Count increased but ack decreased.  Replay durable data for the reader.
-      ACE_DEBUG((LM_DEBUG, "Enqueuing ReplayDurableData\n"));
+      if (Transport_debug_level > 5) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received: Enqueuing ReplayDurableData\n"));
+      }
       link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
       ri->second.durable_timestamp_ = MonotonicTimePoint::zero_value;
     }
