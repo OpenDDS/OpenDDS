@@ -300,41 +300,41 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
     make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this))),
 
-  publications_reader_(make_rch<Reader>(
+  publications_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
       ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  publications_secure_reader_(make_rch<Reader>(
+  publications_secure_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER),
       ref(*this))),
 #endif
 
-  subscriptions_reader_(make_rch<Reader>(
+  subscriptions_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
       ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_reader_(make_rch<Reader>(
+  subscriptions_secure_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER),
       ref(*this))),
 #endif
 
-  participant_message_reader_(make_rch<Reader>(
+  participant_message_reader_(make_rch<LivelinessReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
       ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  participant_message_secure_reader_(make_rch<Reader>(
+  participant_message_secure_reader_(make_rch<LivelinessReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER),
       ref(*this))),
-  participant_stateless_message_reader_(make_rch<Reader>(
+  participant_stateless_message_reader_(make_rch<SecurityReader_rch>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER),
       ref(*this))),
-  participant_volatile_message_secure_reader_(make_rch<Reader>(
+  participant_volatile_message_secure_reader_(make_rch<SecurityReader_rch>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER),
       ref(*this))),
-  dcps_participant_secure_reader_(make_rch<Reader>(
+  dcps_participant_secure_reader_(make_rch<DiscoveryReader_rch>(
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER),
       ref(*this))),
 #endif
@@ -3739,6 +3739,18 @@ Sedp::TypeLookupReplyReader::process_tl_reply(DCPS::Serializer& ser)
 //-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
+{
+}
+
+Sedp::DiscoveryReader::~DiscoveryReader()
+{
+}
+
+Sedp::LivelinessReader::~LivelinessReader()
+{
+}
+
+Sedp::SecurityReader::~SecurityReader()
 {
 }
 

@@ -545,25 +545,58 @@ private:
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
 
-  Reader_rch publications_reader_;
+  class DiscoveryReader : public Reader {
+  public:
+    DiscoveryReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~DiscoveryReader();
+  };
+
+  typedef DCPS::RcHandle<DiscoveryReader> DiscoveryReader_rch;
+
+  DiscoveryReader_rch publications_reader_;
 
 #ifdef OPENDDS_SECURITY
-  Reader_rch publications_secure_reader_;
+  DiscoveryReader_rch publications_secure_reader_;
 #endif
 
-  Reader_rch subscriptions_reader_;
+  DiscoveryReader_rch subscriptions_reader_;
 
 #ifdef OPENDDS_SECURITY
-  Reader_rch subscriptions_secure_reader_;
+  DiscoveryReader_rch subscriptions_secure_reader_;
 #endif
 
-  Reader_rch participant_message_reader_;
+  class LivelinessReader : public Reader {
+  public:
+    LivelinessReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~LivelinessReader();
+  };
+
+  typedef DCPS::RcHandle<LivelinessReader> LivelinessReader_rch;
+
+  LivelinessReader_rch participant_message_reader_;
+
+  class SecurityReader : public Reader {
+  public:
+    SecurityReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~SecurityReader();
+  };
+
+  typedef DCPS::RcHandle<SecurityReader> SecurityReader_rch;
 
 #ifdef OPENDDS_SECURITY
-  Reader_rch participant_message_secure_reader_;
-  Reader_rch participant_stateless_message_reader_;
-  Reader_rch participant_volatile_message_secure_reader_;
-  Reader_rch dcps_participant_secure_reader_;
+  LivelinessWriter_rch participant_message_secure_reader_;
+  SecurityReader_rch participant_stateless_message_reader_;
+  SecurityReader_rch participant_volatile_message_secure_reader_;
+  DiscoveryReader_rch dcps_participant_secure_reader_;
 #endif
 
   class TypeLookupReader : public Reader {
