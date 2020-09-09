@@ -324,7 +324,7 @@ default:
 
 // DHEADER is not generated for anonymous sequence of string,
 // so make a name for it here
-typedef sequence<string> StringSeq;
+typedef sequence<string> StringSequence;
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
@@ -332,14 +332,14 @@ struct MixedMutableStruct {
   @id(1) MutableStruct struct_nested;
   @id(2) sequence<short> sequence_field;
   @id(3) NestedUnion union_nested;
-  @id(4) StringSeq sequence_field2;
+  @id(4) StringSequence sequence_field2;
 };
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct ModifiedMixedMutableStruct {
   @id(3) NestedUnion union_nested;
-  @id(4) StringSeq sequence_field2;
+  @id(4) StringSequence sequence_field2;
   @id(1) MutableStruct struct_nested;
 };
 
