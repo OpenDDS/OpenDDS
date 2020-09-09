@@ -19,10 +19,10 @@ typedef sequence<@try_construct(TRIM) wstr20> BoundWStringSeq_t;
 typedef sequence<@try_construct(DISCARD) wstr20> BoundWStringSeq_d;
 
 //array for use in struct, union, and sequence
-typedef short ShortArray[10];
-typedef str64 str64Array[15];
+typedef short ShortArray[15];
+typedef str64 str64Array[10];
 typedef str20 str20Array[10];
-
+typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
 //enum for use in struct, union, and sequence
 enum EnumType {VALUE1, VALUE2};
 
@@ -61,18 +61,87 @@ typedef sequence<ShortArray, 3> ShortArraySeqBound2;
 typedef sequence<ShortSeqUnbound> SeqShortSeqUnboundUnbound;
 typedef sequence<ShortSeqUnbound, 2> SeqShortSeqUnboundBound;
 typedef sequence<ShortSeqUnbound, 3> SeqShortSeqUnboundBound2;
-typedef sequence<ShortSeqBound> SeqShortSeqBoundUnbound;
+typedef sequence<@try_construct(TRIM) ShortSeqBound> SeqShortSeqBoundUnbound;
 typedef sequence<ShortSeqBound2> SeqShortSeqBoundUnbound2;
-typedef sequence<ShortSeqBound, 2> SeqShortSeqBoundBound;
+typedef sequence<@try_construct(TRIM) ShortSeqBound, 2> SeqShortSeqBoundBound;
 typedef sequence<ShortSeqBound2, 3> SeqShortSeqBoundBound2;
+
+
+//arrays
+//enum
+typedef EnumType EnumArr[3];
+//primitives
+typedef short ShortArr[3];
+typedef unsigned short UnsignedShortArr[3];
+//string
+typedef str64 StringArr[3];
+//wstring
+typedef wstr64 WideStringArr[3];
+//multi-dimensional arrays
+typedef short ShortArrTwoDim[3][3];
+typedef short ShortArrThreeDim[3][3][3];
+//sequence
+typedef ShortSeqUnbound ArrSeqUnbound[3];
+typedef ShortSeqBound ArrSeqBound[3];
+
+//anon seq
+//enum
+struct AnonSeqStruct { 
+  sequence<EnumType> AnonEnumSeqUnbound;
+  sequence<EnumType, 2> AnonEnumSeqBound;
+  sequence<EnumType, 3> AnonEnumSeqBound2;
+  //primitives
+  sequence<short> AnonShortSeqUnbound;
+  sequence<short, 2> AnonShortSeqBound;
+  sequence<short, 3> AnonShortSeqBound2;
+  sequence<unsigned short> AnonUnsignedShortSeqUnbound;
+  sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
+  sequence<unsigned short, 3> AnonUnsignedShortSeqBound2;
+  //string
+  sequence<str64> AnonStringSeqUnbound;
+  sequence<str64, 2> AnonStringSeqBound;
+  sequence<str64, 3> AnonStringSeqBound2;
+  //wstring
+  sequence<wstr64> AnonWideStringSeqUnbound;
+  sequence<wstr64, 2> AnonWideStringSeqBound;
+  sequence<wstr64, 3> AnonWideStringSeqBound2;
+  //array
+  sequence<ShortArray> AnonShortArraySeqUnbound;
+  sequence<ShortArray, 2> AnonShortArraySeqBound;
+  sequence<ShortArray, 3> AnonShortArraySeqBound2;
+  //sequence
+  sequence<ShortSeqUnbound> AnonSeqShortSeqUnboundUnbound;
+  sequence<ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
+  sequence<ShortSeqUnbound, 3> AnonSeqShortSeqUnboundBound2;
+  sequence<ShortSeqBound> AnonSeqShortSeqBoundUnbound;
+  sequence<ShortSeqBound2> AnonSeqShortSeqBoundUnbound2;
+  sequence<ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
+  sequence<ShortSeqBound2, 3> AnonSeqShortSeqBoundBound2;
+};
+
+//anon arr
+//enum
+  struct AnonArrStruct { 
+  EnumType AnonEnumArr[3];
+  //primitives
+  short AnonShortArr[3];
+  unsigned short AnonUnsignedShortArr[3];
+  //string
+  str64 AnonStringArr[3];
+  //wstring
+  wstr64 AnonWideStringArr[3];
+  //multi-dimensional arrays
+  short AnonShortArrTwoDim[3][3];
+  short AnonShortArrThreeDim[3][3][3];
+  //sequence
+  ShortSeqUnbound AnonArrSeqUnbound[3];
+  ShortSeqBound AnonArrSeqBound[3];
+};
 
 //nested struct for use in struct, union, and sequence
 @mutable
 @OpenDDS::data_representation(XCDR1)
 struct NestedStruct {
-  // @try_construct(DISCARD) ShortArray sa_d;
-  // @try_construct(USE_DEFAULT) ShortArray sa_ud;
-  // @try_construct(TRIM) ShortArray sa_t;
   @try_construct(DISCARD) str64 str64_d;
   @try_construct(USE_DEFAULT) str64 str64_ud;
   @try_construct(TRIM) str64 str64_t;
@@ -361,12 +430,115 @@ module TryCon {
     @try_construct(TRIM) StructSeqBoundTrim ssb_t;
     @try_construct(TRIM) ShortArraySeqUnbound sasu_t;
     @try_construct(TRIM) ShortArraySeqBound sasb_t;
-    @try_construct(TRIM) SeqShortSeqUnboundUnbound sssuu_t;
+    //unbounded so no trim
+    SeqShortSeqUnboundUnbound sssuu_t;
     @try_construct(TRIM) SeqShortSeqUnboundBound sssub_t;
-    @try_construct(TRIM) SeqShortSeqBoundUnbound sssbu_t;
+    //unbounded so no trim
+    SeqShortSeqBoundUnbound sssbu_t;
     @try_construct(TRIM) SeqShortSeqBoundBound sssbb_t;
     @try_construct(TRIM) UnionSeqUnbound usu_t;
     @try_construct(TRIM) UnionSeqBound usb_t;
+  };
+  @topic
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct AnonSeqStruct {
+    sequence<EnumType, 3> AnonEnumSeqBound;
+    //primitives
+    sequence<short, 3> AnonShortSeqBound;
+    sequence<unsigned short, 3> AnonUnsignedShortSeqBound;
+    //string
+    sequence<str64, 3> AnonStringSeqBound;
+    //wstring
+    sequence<wstr64, 3> AnonWideStringSeqBound;
+    //array
+    sequence<ShortArray, 3> AnonShortArraySeqBound;
+    //sequence
+    sequence<ShortSeqUnbound> AnonShortSeqUnboundUnbound;
+    sequence<ShortSeqUnbound, 3> AnonSeqShortSeqUnboundBound;
+    sequence<ShortSeqBound2> AnonSeqShortSeqBoundUnbound;
+    sequence<ShortSeqBound2, 3> AnonSeqShortSeqBoundBound;
+  };
+  @topic
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct AnonSeqStructTrim { 
+    @try_construct(TRIM) sequence<EnumType, 2> AnonEnumSeqBound;
+    //primitives
+    @try_construct(TRIM) sequence<short, 2> AnonShortSeqBound;
+    @try_construct(TRIM) sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
+    //string
+    @try_construct(TRIM) sequence<@try_construct(TRIM) str20, 2> AnonStringSeqBound;
+    //wstring
+    @try_construct(TRIM) sequence<@try_construct(TRIM) wstr20, 2> AnonWideStringSeqBound;
+    //array
+    @try_construct(TRIM) sequence<ShortArray, 2> AnonShortArraySeqBound;
+    //sequence
+    @try_construct(TRIM) sequence<ShortSeqUnbound> AnonShortSeqUnboundUnbound;
+    @try_construct(TRIM) sequence<ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
+    @try_construct(TRIM) sequence<@try_construct(TRIM) ShortSeqBound> AnonSeqShortSeqBoundUnbound;
+    @try_construct(TRIM) sequence<@try_construct(TRIM) ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
+  };
+  @topic
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct AnonSeqStructDefault { 
+    @try_construct(USE_DEFAULT) sequence< EnumType, 2> AnonEnumSeqBound;
+    //primitives
+    @try_construct(USE_DEFAULT) sequence<short, 2> AnonShortSeqBound;
+    @try_construct(USE_DEFAULT) sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
+    //string
+    @try_construct(USE_DEFAULT) sequence<str20, 2> AnonStringSeqBound;
+    //wstring
+    @try_construct(USE_DEFAULT) sequence<wstr20, 2> AnonWideStringSeqBound;
+    //array
+    @try_construct(USE_DEFAULT) sequence<ShortArray, 2> AnonShortArraySeqBound;
+    //sequence
+    @try_construct(USE_DEFAULT) sequence<ShortSeqUnbound> AnonShortSeqUnboundUnbound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqBound> AnonSeqShortSeqBoundUnbound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
+  };
+  @topic
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct AnonArrStruct {
+    //string
+    str64 AnonStringArr[3];
+    //wstring
+    wstr64 AnonWideStringArr[3];
+    //array
+    str64Array AnonArrayArr[3];
+    //sequence
+    ShortSeqBound2 AnonArrShortSeqBound[3];
+  };
+
+  @topic
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct AnonArrStructTrim {
+    //string
+    str20 AnonStringArr @try_construct(TRIM) [3];
+    //wstring
+    wstr20 AnonWideStringArr @try_construct(TRIM) [3];
+    //array
+    str20ArrayTrim AnonArrayArr [3];
+    //sequence
+    ShortSeqBound AnonArrShortSeqBound @try_construct(TRIM) [3];
+  };
+
+  @topic
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct AnonArrStructUseDefault {
+    //string
+    str20 AnonStringArr @try_construct(USE_DEFAULT) [3];
+    //wstring
+    wstr20 AnonWideStringArr @try_construct(USE_DEFAULT) [3];
+    //array
+    str20Array AnonArrayArr @try_construct(USE_DEFAULT) [3];
+    //sequence
+    ShortSeqBound AnonArrShortSeqBound @try_construct(USE_DEFAULT) [3];
   };
   @mutable
   @OpenDDS::data_representation(XCDR1)
@@ -376,7 +548,7 @@ module TryCon {
   @mutable
   @OpenDDS::data_representation(XCDR1)
   struct DiscardStructString2 {
-    @try_construct(DISCARD) str20 str20_d;
+    str20 str20_d;
   };
   @mutable
   @OpenDDS::data_representation(XCDR1)
@@ -386,9 +558,8 @@ module TryCon {
   @mutable
   @OpenDDS::data_representation(XCDR1)
   struct DiscardStructWString2 {
-    @try_construct(DISCARD) wstr20 wstr20_d;
+    wstr20 wstr20_d;
   };
-  //TODO: SEUQENCES
   @mutable
   @OpenDDS::data_representation(XCDR1)
   struct DiscardStructStruct1 {
@@ -397,7 +568,7 @@ module TryCon {
   @mutable
   @OpenDDS::data_representation(XCDR1)
   struct DiscardStructStruct2 {
-    @try_construct(DISCARD) NestedStructTrim ns;
+    NestedStructTrim ns;
   };
   @mutable
   @OpenDDS::data_representation(XCDR1)
@@ -407,6 +578,41 @@ module TryCon {
   @mutable
   @OpenDDS::data_representation(XCDR1)
   struct DiscardStructArray2 {
-    @try_construct(DISCARD) str20Array sa;
+    str20Array sa;
+  };
+
+  typedef sequence<str64> ss_64;
+  typedef sequence<str20> ss_20;
+
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct DiscardStructSequence1 {
+    ss_64 ss64;
+  };
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct DiscardStructSequence2 {
+    ss_20 ss20;
+  };
+
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct DiscardStructArrayAnon1 {
+    str64 saa64[3];
+  };
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct DiscardStructArrayAnon2 {
+    str20 saa20[3];
+  };
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct DiscardStructSequenceAnon1 {
+    sequence <str64> ssa64;
+  };
+  @mutable
+  @OpenDDS::data_representation(XCDR1)
+  struct DiscardStructSequenceAnon2 {
+    sequence <str20> ssa20;
   };
 };
