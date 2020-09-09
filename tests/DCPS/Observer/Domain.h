@@ -8,7 +8,7 @@ public:
   static const char* TEST_TOPIC;
   static const char* TEST_TOPIC_TYPE;
   static const CORBA::Long N_READER = 2;
-  static const CORBA::Long N_MSG = 5;
+  static const CORBA::Long N_MSG = 6;
 
   template<typename Qos>
   static void change_qos(Qos& qos, const std::string& data) {

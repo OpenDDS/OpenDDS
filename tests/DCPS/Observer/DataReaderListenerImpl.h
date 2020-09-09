@@ -20,6 +20,8 @@ public:
 private:
   void read(Messenger::MessageDataReader_var mdr);
   void take(Messenger::MessageDataReader_var mdr);
+  void read_instance(Messenger::MessageDataReader_var mdr, DDS::InstanceHandle_t i);
+  void take_instance(Messenger::MessageDataReader_var mdr, DDS::InstanceHandle_t i);
   void read_next_sample(Messenger::MessageDataReader_var mdr);
   void take_next_sample(Messenger::MessageDataReader_var mdr);
   const std::string reader_;

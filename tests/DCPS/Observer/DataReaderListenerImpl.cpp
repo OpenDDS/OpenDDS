@@ -27,11 +27,16 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr dr)
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: TestMsgDataReader::_narrow failed!\n")));
       ACE_OS::exit(EXIT_FAILURE);
     }
+
+    Messenger::Message msg = {"", "Observer", 1, "test", 1, 0, 0};
+    DDS::InstanceHandle_t instance = msg_dr->lookup_instance(msg);
     switch (++received_) {
       case 1: read(msg_dr); break;
-      case 2: read_next_sample(msg_dr); break;
-      case 3: take(msg_dr); break;
-      default: take_next_sample(msg_dr); break;
+      case 2: read_instance(msg_dr, instance); break;
+      case 3: take_instance(msg_dr, instance); break;
+      case 4: read_next_sample(msg_dr); break;
+      case 5: take_next_sample(msg_dr); break;
+      default: take(msg_dr); break;
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
@@ -58,6 +63,28 @@ void DataReaderListenerImpl::take(Messenger::MessageDataReader_var mdr)
     DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   if (r != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take() ERROR: %d\n"), r));
+  }
+}
+
+void DataReaderListenerImpl::read_instance(Messenger::MessageDataReader_var mdr, DDS::InstanceHandle_t i)
+{
+  Messenger::MessageSeq msgs;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t r = mdr->read_instance(msgs, infos, DDS::LENGTH_UNLIMITED, i,
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (r != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: read_instance() ERROR: %d\n"), r));
+  }
+}
+
+void DataReaderListenerImpl::take_instance(Messenger::MessageDataReader_var mdr, DDS::InstanceHandle_t i)
+{
+  Messenger::MessageSeq msgs;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t r = mdr->take_instance(msgs, infos, DDS::LENGTH_UNLIMITED, i,
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (r != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: take_instance() ERROR: %d\n"), r));
   }
 }
 
