@@ -17,7 +17,6 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 const unsigned large_sample_seq_size =
  static_cast<unsigned>(
     OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE);
-const unsigned minimum_sample_count = 981;
 
 int scale(int value, bool large_samples)
 {
@@ -97,6 +96,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
   } else if (reader) {
+    ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
+
     Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                DEFAULT_STATUS_MASK);
     DataReaderQos dr_qos;
@@ -112,7 +113,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     WaitSet_var ws = new WaitSet;
     ws->attach_condition(dr_rc);
     unsigned counter = 0;
-    ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
+    const unsigned minimum_sample_count = large_samples ? 95 : 981;
     std::set<int> instances;
     while (true) {
       ConditionSeq active;
