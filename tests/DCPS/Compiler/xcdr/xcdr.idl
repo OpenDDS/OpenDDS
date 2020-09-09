@@ -72,8 +72,59 @@ struct MutableXcdr12Struct {
   COMMON_FIELDS
 };
 
+enum UnionDisc {
+  E_SHORT_FIELD,
+  E_LONG_FIELD,
+  E_OCTET_FIELD,
+  E_LONG_LONG_FIELD
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableXcdr12Union switch (UnionDisc) {
+case E_SHORT_FIELD:
+  short short_field;
+case E_LONG_FIELD:
+  long long_field;
+case E_OCTET_FIELD:
+  octet octet_field;
+case E_LONG_LONG_FIELD:
+  long long long_long_field;
+};
+
 // Appendable Tests ==========================================================
-// TODO(iguessthislldo)
+
+typedef AppendableXcdr2Struct NestedStruct;
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableStruct {
+  NestedStruct nested;
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldNestedStruct {
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldAppendableStruct {
+  AdditionalFieldNestedStruct nested;
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableStruct2 {
+  string string_field;
+  NestedStruct nested;
+};
 
 // Mutable Tests =============================================================
 // TODO(iguessthislldo): Add more fields
@@ -184,4 +235,18 @@ struct LC567Struct {            //LC Size
   @id(6) sequence<long> ls;     // 6  4x2 (2 elements)
   @key
   @id(7) string<7> str7;        // 5    7
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableUnion switch (UnionDisc) {
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_LONG_LONG_FIELD:
+  @id(10) long long long_long_field;
 };

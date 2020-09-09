@@ -2350,13 +2350,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    return false;\n"
           "  }\n";
       }
-      if (repr.xcdr1 && may_be_parameter_list) {
-        fields_encode <<
-          "\n"
-          "  if (!strm.write_list_end_parameter_id()) {\n"
-          "    return false;\n"
-          "  }\n";
-      }
+      fields_encode <<
+        "\n"
+        "  if (!strm.write_list_end_parameter_id()) {\n"
+        "    return false;\n"
+        "  }\n";
       be_global->impl_ <<
         intro <<
         fields_encode.str() << "\n"
@@ -2395,28 +2393,24 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     code.push_back("  return false;");
     code.push_back("}");
     generate_dheader_code(code, not_final);
+    if (not_final) {
+      be_global->impl_ <<
+        "  size_t start_pos = strm.pos();\n";
+    }
 
     if (may_be_parameter_list) {
-      if (repr.xcdr2) {
-        /**
-         * We don't have a PID marking the end in XCDR2 parameter lists, but we
-         * have the size, so we need to stop after we hit this offset.
-         *
-         * TODO(iguessthislldo): Replace this with a cleaner mechanism where
-         * the Serializer keeps track of the stream offset.
-         * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447056830
-         */
-        be_global->impl_ <<
-          "  const char* end_of_fields = strm.pos_rd() + total_size;\n";
-      }
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
         "  while (true) {\n";
 
       if (repr.xcdr2) {
+        /**
+         * We don't have a PID marking the end in XCDR2 parameter lists, but we
+         * have the size, so we need to stop after we hit this offset.
+         */
         be_global->impl_ << "\n"
-          "    if ((!strm.pos_rd() || strm.pos_rd() >= end_of_fields)";
+          "    if (strm.pos() - start_pos >= total_size";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
             "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
@@ -2478,21 +2472,56 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     } else {
       string expr;
       for (size_t i = 0; i < fields.size(); ++i) {
-        if (i) expr += "\n    && ";
+        if (i && exten != extensibilitykind_appendable) {
+          expr += "\n    && ";
+        }
+        // TODO (sonndinh): Integrate with try-construct for when the stream
+        // ends before some fields on the reader side get their values.
+        if (exten == extensibilitykind_appendable) {
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
+          expr += "      strm.pos() - start_pos >= total_size) {\n";
+          expr += "    return true;\n";
+          expr += "  }\n";
+        }
         const string field_name = fields[i]->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
-          expr += rtpsCustom.preFieldRead(field_name);
-          expr += "(!(" + cond + ") || ";
+          string prefix = rtpsCustom.preFieldRead(field_name);
+          if (exten == extensibilitykind_appendable) {
+            if (!prefix.empty()) {
+              prefix = prefix.substr(0, prefix.length() - 8);
+              expr += "  if (!" + prefix + ") {\n";
+              expr += "    return false;\n";
+              expr += "  }\n";
+            }
+            expr += "  if ((" + cond + ") && !";
+          } else {
+            expr += prefix + "(!(" + cond + ") || ";
+          }
+        } else if (exten == extensibilitykind_appendable) {
+          expr += "  if (!";
         }
         if (!streamAnonymous(fields[i], ">>", intro, expr)) {
           expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
         }
-        if (!cond.empty()) {
+        if (exten == extensibilitykind_appendable) {
+          expr += ") {\n";
+          expr += "    return false;\n";
+          expr += "  }\n";
+        } else if (!cond.empty()) {
           expr += ")";
         }
       }
-      be_global->impl_ << intro << "  return " << expr << ";\n";
+      if (exten == extensibilitykind_appendable) {
+        expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
+        expr += "      strm.pos() - start_pos < total_size) {\n";
+        expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
+        expr += "  }\n";
+        expr += "  return true;\n";
+        be_global->impl_ << intro << expr;
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
   }
 
@@ -2989,6 +3018,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const ExtensibilityKind exten = be_global->extensibility(node);
   const OpenDDS::DataRepresentation repr =
     be_global->data_representations(node);
+
   const bool not_final = exten != extensibilitykind_final;
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
@@ -3009,10 +3039,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     code.push_back("serialized_size_delimiter(encoding, size);");
     generate_dheader_code(code, not_final, false);
 
-    const string align = getAlignment(discriminator);
-    if (!align.empty()) {
-      be_global->impl_ << "  encoding.align(size, " << align << ");\n";
+    if (exten == extensibilitykind_mutable) {
+      be_global->impl_ <<
+        "  size_t mutable_running_total = 0;\n"
+        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
+
     if (disc_cls & CL_ENUM) {
       be_global->impl_ <<
         "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
@@ -3020,8 +3052,19 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
+
+    if (exten == extensibilitykind_mutable) {
+      be_global->impl_ <<
+        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+    }
+
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
+
+    if (exten == extensibilitykind_mutable) {
+      be_global->impl_ <<
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+    }
   }
   {
     Function insertion("operator<<", "bool");
@@ -3039,10 +3082,33 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     code.push_back("}");
     generate_dheader_code(code, not_final);
 
+    // EMHEADER for discriminator
+    if (exten == extensibilitykind_mutable) {
+      be_global->impl_ <<
+        "  size_t size = 0;\n";
+
+      if (disc_cls & CL_ENUM) {
+        be_global->impl_ <<
+          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+      } else {
+        be_global->impl_ <<
+          "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+      }
+
+      be_global->impl_ <<
+        "  if (!strm.write_parameter_id(0, size)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  size = 0;\n";
+    }
+
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
     if (generateSwitchForUnion("uni._d()", streamCommon, branches,
-                               discriminator, "return", "<< ", cxx.c_str())) {
+                               discriminator, "return", "<< ", cxx.c_str(),
+                               false, true, true,
+                               exten == extensibilitykind_mutable ? findSizeCommon : 0,
+                               exten == extensibilitykind_mutable ? node : 0)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3062,13 +3128,42 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     code.push_back("}");
     generate_dheader_code(code, not_final);
 
-    be_global->impl_ <<
-      "  " << scoped(discriminator->name()) << " disc;\n" <<
-      streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-    if (generateSwitchForUnion("disc", streamCommon, branches,
-                               discriminator, "if", ">> ", cxx.c_str())) {
+    if (exten == extensibilitykind_mutable) {
+      // EMHEADER for discriminator
       be_global->impl_ <<
-        "  return true;\n";
+        "  unsigned member_id;\n"
+        "  size_t field_size;\n"
+        "  bool must_understand = false;\n"
+        "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "    return false;\n"
+        "  }\n";
+
+      be_global->impl_ <<
+        "  " << scoped(discriminator->name()) << " disc;\n" <<
+        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+
+      be_global->impl_ <<
+        "  member_id = 0;\n"
+        "  field_size = 0;\n"
+        "  must_understand = false;\n"
+        "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "    return false;\n"
+        "  }\n";
+
+      if (generateSwitchForUnion("disc", streamCommon, branches,
+        discriminator, "if", ">> ", cxx.c_str(), false, true, true, 0)) {
+        be_global->impl_ <<
+          "  return true;\n";
+      }
+    } else {
+      be_global->impl_ <<
+        "  " << scoped(discriminator->name()) << " disc;\n" <<
+        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+      if (generateSwitchForUnion("disc", streamCommon, branches,
+          discriminator, "if", ">> ", cxx.c_str())) {
+        be_global->impl_ <<
+          "  return true;\n";
+      }
     }
   }
 
@@ -3149,12 +3244,27 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.endArgs();
 
     if (has_key) {
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, not_final, false);
+
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  size_t mutable_running_total = 0;\n";
+          "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+      }
+
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
           "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
       } else {
         be_global->impl_ <<
           "  max_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
+      }
+
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
       }
     }
   }
@@ -3166,6 +3276,34 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.endArgs();
 
     if (has_key) {
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("serialized_size(encoding, total_size, uni);");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, not_final);
+
+      // EMHEADER for discriminator
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  size_t size = 0;\n";
+
+        if (disc_cls & CL_ENUM) {
+          be_global->impl_ <<
+            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+        } else {
+          be_global->impl_ <<
+            "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+        }
+
+        be_global->impl_ <<
+          "  if (!strm.write_parameter_id(0, size)) {\n"
+          "    return false;\n"
+          "  }\n"
+          "  size = 0;\n";
+      }
+
       be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
     }
 
@@ -3179,6 +3317,25 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.endArgs();
 
     if (has_key) {
+      // DHEADER
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, not_final);
+
+      if (exten == extensibilitykind_mutable) {
+        // EMHEADER for discriminator
+        be_global->impl_ <<
+          "  unsigned member_id;\n"
+          "  size_t field_size;\n"
+          "  bool must_understand = false;\n"
+          "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "    return false;\n"
+          "  }\n";
+      }
+
       be_global->impl_
         << "  " << scoped(discriminator->name()) << " disc;\n"
         << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
