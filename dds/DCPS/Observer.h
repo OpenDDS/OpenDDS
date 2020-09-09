@@ -11,6 +11,8 @@
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
+#include "DataSampleElement.h"
+#include "ReceivedDataElementList.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -26,9 +28,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export DataSampleElement;
 class OpenDDS_Dcps_Export ReceivedDataSample;
-class OpenDDS_Dcps_Export ReceivedDataElement;
 
 class OpenDDS_Dcps_Export Observer
   : public virtual RcObject

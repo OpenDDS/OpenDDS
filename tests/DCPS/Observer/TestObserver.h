@@ -54,6 +54,27 @@ private:
     o << '\n';
     return o.str();
   }
+
+  struct Stats
+  {
+    unsigned int w_enabled_, w_deleted_, w_qos_changed_; // group 1 writer
+    unsigned int r_enabled_, r_deleted_, r_qos_changed_; // group 1 reader
+    unsigned int w_associated_, w_disassociated_; // group 2 writer
+    unsigned int r_associated_, r_disassociated_; // group 2 reader
+    unsigned int sent_, received_, read_, taken_; // group 3 writer/reader
+
+    Stats() :
+      w_enabled_(0), w_deleted_(0), w_qos_changed_(0),
+      r_enabled_(0), r_deleted_(0), r_qos_changed_(0),
+      w_associated_(0) , w_disassociated_(0),
+      r_associated_(0) , r_disassociated_(0),
+      sent_(0), received_(0), read_(0), taken_(0) {}
+
+    bool w_g1_g2() const;
+    bool r_g1_g2() const;
+  };
+  Stats stats_;
+  //lock
 };
 
 #endif // OPENDDS_DCPS_TESTOBSERVER_H
