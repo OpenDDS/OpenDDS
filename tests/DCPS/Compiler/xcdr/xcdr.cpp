@@ -24,6 +24,25 @@ void set_base_values(Type& value)
 }
 
 template <typename Type>
+void set_base_values_union(Type& value, UnionDisc disc)
+{
+  switch (disc) {
+  case E_SHORT_FIELD:
+    value.short_field(0x7fff);
+    break;
+  case E_LONG_FIELD:
+    value.long_field(0x7fffffff);
+    break;
+  case E_OCTET_FIELD:
+    value.octet_field(0x01);
+    break;
+  case E_LONG_LONG_FIELD:
+    value.long_long_field(0x7fffffffffffffff);
+    break;
+  }
+}
+
+template <typename Type>
 void set_values(Type& value)
 {
   set_base_values(value);
@@ -44,6 +63,26 @@ void expect_values_equal_base(const TypeA& a, const TypeB& b)
   EXPECT_EQ(a.long_field, b.long_field);
   EXPECT_EQ(a.octet_field, b.octet_field);
   EXPECT_EQ(a.long_long_field, b.long_long_field);
+}
+
+template<typename TypeA, typename TypeB>
+void expect_values_equal_base_union(const TypeA& a, const TypeB& b)
+{
+  EXPECT_EQ(a._d(), b._d());
+  switch (a._d()) {
+  case E_SHORT_FIELD:
+    EXPECT_EQ(a.short_field(), b.short_field());
+    break;
+  case E_LONG_FIELD:
+    EXPECT_EQ(a.long_field(), b.long_field());
+    break;
+  case E_OCTET_FIELD:
+    EXPECT_EQ(a.octet_field(), b.octet_field());
+    break;
+  case E_LONG_LONG_FIELD:
+    EXPECT_EQ(a.long_long_field(), b.long_long_field());
+    break;
+  }
 }
 
 template<typename TypeA, typename TypeB>
@@ -118,6 +157,18 @@ void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
   EXPECT_EQ(a.ls.length(), b.ls.length());
   EXPECT_EQ(a.ls[0], b.ls[0]);
   EXPECT_EQ(a.ls[1], b.ls[1]);
+}
+
+template<>
+void expect_values_equal(const MutableUnion& a, const MutableUnion& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
+template<>
+void expect_values_equal(const MutableXcdr12Union& a, const MutableXcdr12Union& b)
+{
+  expect_values_equal_base_union(a, b);
 }
 
 template<typename TypeA, typename TypeB>
@@ -380,6 +431,97 @@ TEST(basic_tests, MutableXcdr12Struct)
   baseline_checks<MutableXcdr12Struct>(xcdr1, mutable_xcdr1_struct_expected);
   baseline_checks<MutableXcdr12Struct>(xcdr2, mutable_xcdr2_struct_expected);
 }
+
+// Union Tests =============================================================
+
+const unsigned char mutable_xcdr2_union_expected_short[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0e, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x00, // +4 = 12
+  // short_field
+  0x10, 0x00, 0x00, 0x00, // PID  +4 = 16
+  0x7f, 0xff // +2 = 18
+};
+
+const unsigned char mutable_xcdr2_union_expected_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x10, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x01, // +4 = 12
+  // long_field
+  0x20, 0x00, 0x00, 0x01,// PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff // +4 = 20
+};
+
+const unsigned char mutable_xcdr2_union_expected_octet[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0d, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x02, // +4 = 12
+  // octet_field
+  0x00, 0x00, 0x00, 0x02, // PID  +4 = 16
+  0x01                    // +1 = 17
+};
+
+const unsigned char mutable_xcdr2_union_expected_long_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x14, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x03, // +4 = 12
+  // long_field
+  0x30, 0x00, 0x00, 0x03, // PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
+};
+
+template <typename Type>
+void set_values_union(Type& value, UnionDisc disc)
+{
+  set_base_values_union(value, disc);
+}
+
+template<typename TypeA, typename TypeB>
+void amalgam_serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
+{
+  TypeA value;
+  set_values_union(value, disc);
+  TypeB result;
+  amalgam_serializer_test<TypeA, TypeB>(encoding, expected_cdr, value, result);
+}
+
+template<typename Type>
+void serializer_test_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
+{
+  amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
+}
+
+template<typename Type>
+void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
+{
+  Type value;
+  value._d(disc);
+
+  EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
+
+  serializer_test_union<Type>(encoding, expected_cdr, disc);
+}
+
+TEST(basic_tests, MutableXcdr12Union)
+{
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_short, E_SHORT_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long, E_LONG_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_octet, E_OCTET_FIELD);
+  baseline_checks_union<MutableXcdr12Union>(xcdr2, mutable_xcdr2_union_expected_long_long, E_LONG_LONG_FIELD);
+}
+
 
 // Appendable Tests ==========================================================
 
@@ -645,6 +787,63 @@ TEST(mutable_tests, baseline_xcdr2_test)
 {
   baseline_checks<MutableStruct>(xcdr2, mutable_struct_expected_xcdr2);
 }
+
+const unsigned char mutable_union_expected_xcdr2_short[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0e, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x00, // +4 = 12
+  // short_field
+  0x10, 0x00, 0x00, 0x04, // PID  +4 = 16
+  0x7f, 0xff // +2 = 18
+};
+
+const unsigned char mutable_union_expected_xcdr2_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x10, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x01, // +4 = 12
+  // long_field
+  0x20, 0x00, 0x00, 0x06,// PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff // +4 = 20
+};
+
+const unsigned char mutable_union_expected_xcdr2_octet[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x0d, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x02, // +4 = 12
+  // octet_field
+  0x00, 0x00, 0x00, 0x08, // PID  +4 = 16
+  0x01                    // +1 = 17
+};
+
+const unsigned char mutable_union_expected_xcdr2_long_long[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x14, // +4 = 4
+  // Discriminator EMHEADER
+  0x20, 0x00, 0x00, 0x00, // PID  +4 = 8
+  // Discriminator
+  0x00, 0x00, 0x00, 0x03, // +4 = 12
+  // long_field
+  0x30, 0x00, 0x00, 0x0a, // PID  +4 = 16
+  0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 = 24
+};
+
+TEST(mutable_tests, baseline_xcdr2_test_union)
+{
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_short, E_SHORT_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_long, E_LONG_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_octet, E_OCTET_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, mutable_union_expected_xcdr2_long_long, E_LONG_LONG_FIELD);
+}
+
 
 // Reordered Tests -----------------------------------------------------------
 // Test compatibility between two structures with different field orders.

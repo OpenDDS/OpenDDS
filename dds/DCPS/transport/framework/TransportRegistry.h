@@ -18,6 +18,7 @@
 #include "TransportConfig_rch.h"
 #include "TransportConfig.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ConfigUtils.h"
 #include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -125,6 +126,8 @@ public:
 
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, ACE_TString& instance_config_name);
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
@@ -152,20 +155,38 @@ private:
   mutable LockType lock_;
 
   // transport template support
+  static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
+  static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_PORT;
+
   struct TransportTemplate
   {
     OPENDDS_STRING transport_template_name;
     OPENDDS_STRING config_name;
     bool instantiate_per_participant;
-    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
-    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) transport_info;
+    ValueMap customizations;
+    ValueMap transport_info;
   };
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
   bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
 
-  bool has_transport_template() const;
+  bool process_customizations(const DDS::DomainId_t id, const TransportTemplate& tr_inst, ValueMap& customs);
+
+  bool has_transport_templates() const;
+
+  struct TransportEntry
+  {
+    ACE_TString transport_name;
+    ACE_TString config_name;
+    ValueMap transport_info;
+  };
+
+  OPENDDS_VECTOR(TransportEntry) transports_;
+
+  bool get_transport_info(const ACE_TString& config_name, TransportEntry& inst);
+
+  bool has_transports() const;
 };
 
 } // namespace DCPS

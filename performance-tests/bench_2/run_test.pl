@@ -49,6 +49,10 @@ elsif ($test->flag('echo_frag')) {
   $tc_opts .= " ci_echo_frag --override-start-time 15";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('mixed')) {
+  $tc_opts .= " ci_mixed --override-start-time 15";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('sm10')) {
   $tc_opts .= " showtime_mixed_10 --override-start-time 25";
   $is_rtps_disc = 1;

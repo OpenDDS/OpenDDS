@@ -709,6 +709,9 @@ private:
   typedef LocalParticipantMessageMap::iterator LocalParticipantMessageIter;
   typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
   LocalParticipantMessageMap local_participant_messages_;
+#ifdef OPENDDS_SECURITY
+  LocalParticipantMessageMap local_participant_messages_secure_;
+#endif
 
   void process_discovered_writer_data(DCPS::MessageId message_id,
                                       const DCPS::DiscoveredWriterData& wdata,
@@ -817,6 +820,10 @@ private:
 
   void write_durable_participant_message_data(const DCPS::RepoId& reader);
 
+#ifdef OPENDDS_SECURITY
+  void write_durable_participant_message_data_secure(const DCPS::RepoId& reader);
+#endif
+
   DDS::ReturnCode_t add_publication_i(const DCPS::RepoId& rid,
                                       LocalPublication& pub);
 
@@ -855,16 +862,13 @@ private:
   DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
-
-  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
-
 #ifdef OPENDDS_SECURITY
-  DCPS::SequenceNumber secure_automatic_liveliness_seq_;
-  DCPS::SequenceNumber secure_manual_liveliness_seq_;
+  DDS::ReturnCode_t write_participant_message_data_secure(const DCPS::RepoId& rid,
+                                                          LocalParticipantMessage& part,
+                                                          const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 #endif
 
-  DCPS::SequenceNumber automatic_liveliness_seq_;
-  DCPS::SequenceNumber manual_liveliness_seq_;
+  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 protected:
 
