@@ -469,7 +469,15 @@ private:
           TraitsType::type_name()));
         return 0;
       }
-
+      if (encapsulated) {
+        if (!EncapsulationHeader::set_encapsulation_options(mb)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+            ACE_TEXT("set_encapsulation_options error.\n"),
+            TraitsType::type_name()));
+          return 0;
+        }
+      }
     } else { // OpenDDS::DCPS::FULL_MARSHALING
       ACE_NEW_MALLOC_RETURN(tmp_mb,
         static_cast<ACE_Message_Block*>(
@@ -509,6 +517,15 @@ private:
           ACE_TEXT("data serialization error.\n"),
           TraitsType::type_name()));
         return 0;
+      }
+      if (encapsulated) {
+        if (!EncapsulationHeader::set_encapsulation_options(mb)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+            ACE_TEXT("set_encapsulation_options error.\n"),
+            TraitsType::type_name()));
+          return 0;
+        }
       }
     }
 
