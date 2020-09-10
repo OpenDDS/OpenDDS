@@ -52,9 +52,25 @@ ICE::Endpoint*
 RtpsUdpTransport::get_ice_endpoint()
 {
 #ifdef OPENDDS_SECURITY
-  return (config().use_ice_) ? &ice_endpoint_ : 0;
+  return (config().use_ice()) ? &ice_endpoint_ : 0;
 #else
   return 0;
+#endif
+}
+
+void
+RtpsUdpTransport::use_ice_now(bool after)
+{
+  // Update the config.
+  const bool before = config().use_ice();
+  config().use_ice(after);
+
+#ifdef OPENDDS_SECURITY
+  if (before && !after) {
+    stop_ice();
+  } else if (!before && after) {
+    start_ice();
+  }
 #endif
 }
 
@@ -68,11 +84,11 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   link->local_crypto_handle(local_crypto_handle_);
 #endif
 
-  if (config().use_ice_) {
+  if (config().use_ice()) {
     if (reactor()->remove_handler(unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                         ACE_TEXT("failed to unregister handler for unicast ")
                         ACE_TEXT("socket %d\n"),
                         unicast_socket_.get_handle()),
@@ -82,7 +98,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
     if (reactor()->remove_handler(ipv6_unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                         ACE_TEXT("failed to unregister handler for ipv6 unicast ")
                         ACE_TEXT("socket %d\n"),
                         ipv6_unicast_socket_.get_handle()),
@@ -457,30 +473,8 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   create_reactor_task();
 
 #ifdef OPENDDS_SECURITY
-  if (config.use_ice_) {
-    ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
-    if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
-                                    ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                        ACE_TEXT("failed to register handler for unicast ")
-                        ACE_TEXT("socket %d\n"),
-                        unicast_socket_.get_handle()),
-                       false);
-    }
-#ifdef ACE_HAS_IPV6
-    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), &ice_endpoint_,
-                                    ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                        ACE_TEXT("failed to register handler for ipv6 unicast ")
-                        ACE_TEXT("socket %d\n"),
-                        ipv6_unicast_socket_.get_handle()),
-                       false);
-    }
-#endif
+  if (config.use_ice()) {
+    start_ice();
   }
 #endif
 
@@ -512,8 +506,8 @@ RtpsUdpTransport::shutdown_i()
   link_.reset();
 
 #ifdef OPENDDS_SECURITY
-  if(config().use_ice_) {
-    ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
+  if(config().use_ice()) {
+    stop_ice();
   }
 #endif
 }
@@ -670,6 +664,71 @@ ACE_INET_Addr
 RtpsUdpTransport::IceEndpoint::stun_server_address() const {
   return transport.config().stun_server_address();
 }
+
+void
+RtpsUdpTransport::start_ice()
+{
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::start_ice\n"));
+  }
+
+  ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
+
+  if (!link_) {
+    if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
+                                    ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::start_ice: ")
+                 ACE_TEXT("failed to register handler for unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 unicast_socket_.get_handle()));
+    }
+#ifdef ACE_HAS_IPV6
+    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), &ice_endpoint_,
+                                    ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::start_ice: ")
+                 ACE_TEXT("failed to register handler for ipv6 unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 ipv6_unicast_socket_.get_handle()));
+    }
+#endif
+  }
+}
+
+void
+RtpsUdpTransport::stop_ice()
+{
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::stop_ice\n"));
+  }
+
+  if (!link_) {
+    if (reactor()->remove_handler(unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::stop_ice: ")
+                 ACE_TEXT("failed to unregister handler for unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 unicast_socket_.get_handle()));
+    }
+#ifdef ACE_HAS_IPV6
+    if (reactor()->remove_handler(ipv6_unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::stop_ice: ")
+                 ACE_TEXT("failed to unregister handler for ipv6 unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 ipv6_unicast_socket_.get_handle()));
+    }
+#endif
+  }
+
+  ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
+}
+
 #endif
 
 } // namespace DCPS

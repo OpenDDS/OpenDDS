@@ -112,6 +112,7 @@ public:
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
 
   ICE::Endpoint* get_ice_endpoint();
+  void use_ice_now(bool flag);
 
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}

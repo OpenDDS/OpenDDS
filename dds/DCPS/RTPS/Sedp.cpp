@@ -4935,7 +4935,8 @@ Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& ls
 #ifdef OPENDDS_SECURITY
 void
 Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
-                                                      const ICE::AgentInfo& a_agent_info) {
+                                                      const ICE::AgentInfo& a_agent_info)
+{
   ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
   LocalPublicationIter pos = sedp.local_publications_.find(a_local_guid);
   if (pos != sedp.local_publications_.end()) {
@@ -4946,13 +4947,36 @@ Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_loca
 }
 
 void
+Sedp::PublicationAgentInfoListener::remove_agent_info(const DCPS::RepoId& a_local_guid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
+  LocalPublicationIter pos = sedp.local_publications_.find(a_local_guid);
+  if (pos != sedp.local_publications_.end()) {
+    pos->second.have_ice_agent_info = false;
+    sedp.write_publication_data(a_local_guid, pos->second);
+  }
+}
+
+void
 Sedp::SubscriptionAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
-                                                       const ICE::AgentInfo& a_agent_info) {
+                                                       const ICE::AgentInfo& a_agent_info)
+{
   ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
   LocalSubscriptionIter pos = sedp.local_subscriptions_.find(a_local_guid);
   if (pos != sedp.local_subscriptions_.end()) {
     pos->second.have_ice_agent_info = true;
     pos->second.ice_agent_info = a_agent_info;
+    sedp.write_subscription_data(a_local_guid, pos->second);
+  }
+}
+
+void
+Sedp::SubscriptionAgentInfoListener::remove_agent_info(const DCPS::RepoId& a_local_guid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
+  LocalSubscriptionIter pos = sedp.local_subscriptions_.find(a_local_guid);
+  if (pos != sedp.local_subscriptions_.end()) {
+    pos->second.have_ice_agent_info = false;
     sedp.write_subscription_data(a_local_guid, pos->second);
   }
 }
@@ -5069,12 +5093,9 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
 }
 
 void
-Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
+Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub)
+{
 #ifdef OPENDDS_SECURITY
-  if (!dpub.have_ice_agent_info_) {
-    return;
-  }
-
   TopicDetails& td = topics_[get_topic_name(dpub)];
   for (DCPS::RepoIdSet::const_iterator it = td.endpoints().begin(),
          end = td.endpoints().end(); it != end; ++it) {
@@ -5097,12 +5118,9 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
 }
 
 void
-Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
+Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub)
+{
 #ifdef OPENDDS_SECURITY
-  if (!dsub.have_ice_agent_info_) {
-    return;
-  }
-
   TopicDetails& td = topics_[get_topic_name(dsub)];
   for (DCPS::RepoIdSet::const_iterator it = td.endpoints().begin(),
          end = td.endpoints().end(); it != end; ++it) {
@@ -5130,10 +5148,57 @@ Sedp::AssociationComplete::execute() {
 }
 
 void
+Sedp::rtps_relay_only(bool f)
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
+  rtps_inst->rtps_relay_only_ = f;
+}
+
+void
+Sedp::use_rtps_relay(bool f)
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
+  rtps_inst->use_rtps_relay_ = f;
+}
+
+void
+Sedp::use_ice_now(bool f)
+{
+  transport_inst_->use_ice_now(f);
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (f) {
+    for(LocalPublicationIter pos = local_publications_.begin(), limit = local_publications_.end(); pos != limit; ++pos) {
+      LocalPublication& pub = pos->second;
+      ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
+      if (endpoint) {
+        pub.have_ice_agent_info = true;
+        pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &publication_agent_info_listener_);
+        start_ice(pos->first, pub);
+      }
+    }
+    for(LocalSubscriptionIter pos = local_subscriptions_.begin(), limit = local_subscriptions_.end(); pos != limit; ++pos) {
+      LocalSubscription& sub = pos->second;
+      ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
+      if (endpoint) {
+        sub.have_ice_agent_info = true;
+        sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &subscription_agent_info_listener_);
+        start_ice(pos->first, sub);
+      }
+    }
+  }
+}
+
+void
 Sedp::rtps_relay_address(const ACE_INET_Addr& address)
 {
   DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
   rtps_inst->rtps_relay_address_ = address;
 }
 
@@ -5141,7 +5206,7 @@ void
 Sedp::stun_server_address(const ACE_INET_Addr& address)
 {
   DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->stun_server_config_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
   rtps_inst->stun_server_address_ = address;
 }
 

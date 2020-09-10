@@ -165,8 +165,10 @@ public:
   u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
 #endif
 
+  void rtps_relay_only_now(bool f);
+  void use_rtps_relay_now(bool f);
+  void use_ice_now(bool f);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
-
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
@@ -215,6 +217,7 @@ private:
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter);
   void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
+  void remove_agent_info(const DCPS::RepoId& local_guid);
 #endif
 
   struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener
