@@ -16,6 +16,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
@@ -114,6 +115,8 @@ public:
 
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
+
+  ReactorTask_rch reactor_task();
 
 protected:
 

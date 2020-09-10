@@ -168,4 +168,11 @@ OpenDDS::DCPS::TransportInst::get_ice_endpoint()
   return temp ? temp->get_ice_endpoint() : 0;
 }
 
+OpenDDS::DCPS::ReactorTask_rch
+OpenDDS::DCPS::TransportInst::reactor_task()
+{
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

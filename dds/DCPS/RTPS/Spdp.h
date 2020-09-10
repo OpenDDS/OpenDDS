@@ -97,8 +97,6 @@ public:
   bool associated() const;
   bool has_discovered_participant(const DCPS::RepoId& guid);
 
-  WaitForAcks& wait_for_acks();
-
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
@@ -156,8 +154,6 @@ public:
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
 
 #endif
-
-  DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
@@ -236,9 +232,8 @@ private:
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
 
     virtual int handle_input(ACE_HANDLE h);
-    virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
-    void open();
+    void open(const DCPS::ReactorTask_rch& reactor_task);
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
@@ -246,13 +241,12 @@ private:
     void send(WriteFlags flags);
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
-    void close();
+    void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
 #ifdef ACE_HAS_IPV6
     bool open_unicast_ipv6_socket(u_short port);
 #endif
-    void acknowledge();
 
     void join_multicast_group(const DCPS::NetworkInterface& nic,
                               bool all_interfaces = false);
@@ -296,8 +290,6 @@ private:
     OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    DCPS::ReactorTask reactor_task_;
-    DCPS::RcHandle<DCPS::JobQueue> job_queue_;
     typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
@@ -393,9 +385,6 @@ private:
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;
-  // wait for acknowledgments from SpdpTransport and Sedp::Task
-  // when BIT is being removed (fini_bit)
-  WaitForAcks wait_for_acks_;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
