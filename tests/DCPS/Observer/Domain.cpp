@@ -13,8 +13,7 @@ using namespace OpenDDS::DCPS;
 const char* Domain::TEST_TOPIC = "TestObserver Topic";
 const char* Domain::TEST_TOPIC_TYPE  = "TestObserver Type";
 
-Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame)
-  : observer_(make_rch<TestObserver>()), appName(app_mame)
+Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appName(app_mame)
 {
   try {
     dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -41,7 +40,7 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame)
 
     // register for all writers and readers in this DomainParticipant
     EntityImpl* entity = dynamic_cast<EntityImpl*>(participant.ptr());
-    entity->set_observer(observer_,
+    entity->set_observer(make_rch<TestObserver>(),
       Observer::e_ENABLED | Observer::e_DELETED | Observer::e_QOS_CHANGED |
       Observer::e_ASSOCIATED | Observer::e_DISASSOCIATED
     );

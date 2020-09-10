@@ -26,19 +26,16 @@ private:
     Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, const Observer::Event e);
     int waitForPublisherDone();
     void change_qos();
-    RcHandle<TestObserver> observer_; // for stats
   private:
     DDS::DataReaderListener_var listener_;
     DDS::DataReader_var reader_;
   };
 
   Domain domain_;
-  RcHandle<TestObserver> observer_; // for stats
   DDS::Subscriber_var sub_;
 };
 
-Subscriber::Subscriber(int argc, ACE_TCHAR* argv[])
-  : domain_(argc, argv, "Subscriber"), observer_(make_rch<TestObserver>())
+Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subscriber")
 {
   sub_ = domain_.participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
     DDS::SubscriberListener::_nil(), DEFAULT_STATUS_MASK);
@@ -48,7 +45,8 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[])
 
   // register Observer::e_SAMPLE_RECEIVED for all readers in this subscriber
   EntityImpl* entity = dynamic_cast<EntityImpl*>(sub_.ptr());
-  entity->set_observer(observer_, Observer::e_SAMPLE_RECEIVED);
+  Observer::Rch o = entity->get_observer(Observer::e_ENABLED);
+  entity->set_observer(o, Observer::e_SAMPLE_RECEIVED);
 }
 
 int Subscriber::run()
@@ -57,13 +55,13 @@ int Subscriber::run()
   Reader reader2("Reader2", sub_, domain_, Observer::e_SAMPLE_TAKEN);
   int r1 = reader1.waitForPublisherDone();
   int r2 = reader2.waitForPublisherDone();
-  bool b = domain_.observer_->r_g1_g2() && observer_->received(16) &&
-           reader1.observer_->read_taken(3, 0) && reader2.observer_->read_taken(0, 4);
+  const TestObserver* o = TestObserver::get(sub_.ptr(), Observer::e_ENABLED);
+  bool b = o && o->r_g1_g2() && o->received() && o->read_taken();
   return r1 + r2 + (b ? 0 : 1);
 }
 
 Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, const Observer::Event e)
-  : observer_(make_rch<TestObserver>()), listener_(new DataReaderListenerImpl(name))
+  : listener_(new DataReaderListenerImpl(name))
 {
   try {
     std::cout << name << " observes " << (e & Observer::e_SAMPLE_READ ? "SAMPLE_READ" : "SAMPLE_TAKEN") << std::endl;
@@ -74,7 +72,8 @@ Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, cons
 
     // register the specified Observer::Event for this reader
     EntityImpl* entity = dynamic_cast<EntityImpl*>(reader_.ptr());
-    entity->set_observer(observer_, e);
+    Observer::Rch o = entity->get_observer(Observer::e_ENABLED);
+    entity->set_observer(o, e);
 
     change_qos();
   } catch (...) { throw; }

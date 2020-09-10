@@ -39,11 +39,24 @@ public:
   virtual void on_sample_read(const DDS::DataReader_ptr r, const Sample& s);
   virtual void on_sample_taken(const DDS::DataReader_ptr r, const Sample& s);
 
+  enum {
+    w_ENABLED = 1, w_DELETED = 0, w_QOS_CHANGED = 1, w_ASSOCIATED = 2, w_DISASSOCIATED = 0,
+    r_ENABLED = 2, r_DELETED = 0, r_QOS_CHANGED = 2, r_ASSOCIATED = 2, r_DISASSOCIATED = 2,
+    n_SENT = 6, n_RECEIVED = 16, n_READ = 3, n_TAKEN = 4
+  };
+
   bool w_g1_g2() const;
   bool r_g1_g2() const;
-  bool sent(const int n) const { return n == sent_; }
-  bool received(const int n) const { return n == received_; }
-  bool read_taken(const int r, const int t) const { return r == read_ && t == taken_; }
+  bool sent() const { return n_SENT == sent_; }
+  bool received() const { return n_RECEIVED == received_; }
+  bool read_taken() const { return n_READ == read_ && n_TAKEN == taken_; }
+
+  template<typename E>
+  static TestObserver* get(E* entity, const Observer::Event e) {
+    EntityImpl* i = dynamic_cast<EntityImpl*>(entity);
+    Observer* o = i ? i->get_observer(e).get() : 0;
+    return o ? dynamic_cast<TestObserver*>(o) : 0;
+  }
 
 private:
   static std::string to_str(DDS::DataWriter_ptr w);
@@ -66,7 +79,6 @@ private:
   int w_associated_, w_disassociated_; // group 2 writer
   int r_associated_, r_disassociated_; // group 2 reader
   int sent_, received_, read_, taken_; // group 3 writer/reader
-  //lock
 };
 
 #endif // OPENDDS_DCPS_TESTOBSERVER_H

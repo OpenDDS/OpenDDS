@@ -27,12 +27,10 @@ private:
   int waitForSubscriber() const;
   void change_writer_qos();
   Domain domain_;
-  RcHandle<TestObserver> observer_; // for stats
   Messenger::MessageDataWriter_var writer_;
 };
 
-Publisher::Publisher(int argc, ACE_TCHAR* argv[])
-  : domain_(argc, argv, "Publisher"), observer_(make_rch<TestObserver>())
+Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publisher")
 {
   DDS::Publisher_var pub = domain_.participant->create_publisher(PUBLISHER_QOS_DEFAULT,
     DDS::PublisherListener::_nil(), DEFAULT_STATUS_MASK);
@@ -51,7 +49,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[])
   }
 
   EntityImpl* entity = dynamic_cast<EntityImpl*>(dw.ptr());
-  entity->set_observer(observer_, Observer::e_SAMPLE_SENT);
+  entity->set_observer(make_rch<TestObserver>(), Observer::e_SAMPLE_SENT);
 }
 
 int Publisher::run()
@@ -61,7 +59,7 @@ int Publisher::run()
   //Message{"from", "subject", @key subject_id, "text", count, ull, source_pid}
   Messenger::Message msg = {"", "Observer", 1, "test", 1, 0, 0};
   DDS::InstanceHandle_t handle = writer_->register_instance(msg);
-  for (msg.count = 1; msg.count <= Domain::N_MSG; ++msg.count) {
+  for (msg.count = 1; msg.count <= TestObserver::n_SENT; ++msg.count) {
     DDS::ReturnCode_t r = writer_->write(msg, handle);
     if (r != ::DDS::RETCODE_OK) {
       std::cerr << "Publisher write returned code " << r << std::endl;
@@ -71,7 +69,9 @@ int Publisher::run()
     }
     ACE_OS::sleep(ACE_Time_Value(0, 300000)); // sleep 300 ms
   }
-  return domain_.observer_->w_g1_g2() && observer_->sent(domain_.N_MSG) ? 0 : 1;
+  const TestObserver* d = TestObserver::get(writer_.ptr(), Observer::e_ENABLED);
+  const TestObserver* p = TestObserver::get(writer_.ptr(), Observer::e_SAMPLE_SENT);
+  return d && d->w_g1_g2() && p && p->sent() ? 0 : 1;
 }
 
 int Publisher::waitForSubscriber() const

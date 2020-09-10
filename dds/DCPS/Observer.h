@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DCPS_OBSERVER_H
 #define OPENDDS_DCPS_OBSERVER_H
 
+#include "DdsDcps_pch.h"
+
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"

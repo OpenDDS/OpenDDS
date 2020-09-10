@@ -62,7 +62,7 @@ std::string TestObserver::to_str(const Sample& s)
 
 std::string TestObserver::to_str(const OpenDDS::DCPS::GUID_t& guid)
 {
-  return OpenDDS::DCPS::to_string(guid);
+  return OpenDDS::DCPS::to_string(guid).c_str();
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
@@ -163,12 +163,12 @@ void TestObserver::on_sample_taken(const DDS::DataReader_ptr r, const Sample& s)
 // ========== ========== ========== ========== ========== ========== ==========
 bool TestObserver::w_g1_g2() const
 {
-  return w_enabled_ == 1 && w_deleted_ == 0 && w_qos_changed_ == 1 &&
-         w_associated_ == 2 && w_disassociated_ == 0;
+  return w_ENABLED == w_enabled_ && w_DELETED == w_deleted_ && w_QOS_CHANGED == w_qos_changed_
+         && w_ASSOCIATED == w_associated_ && w_DISASSOCIATED == w_disassociated_;
 }
 
 bool TestObserver::r_g1_g2() const
 {
-  return r_enabled_ == 2 && r_deleted_ == 0 && r_qos_changed_ == 2 &&
-         r_associated_ == 2 && r_disassociated_ == 2;
+  return r_ENABLED == r_enabled_ && r_DELETED == r_deleted_ && r_QOS_CHANGED == r_qos_changed_
+         && r_ASSOCIATED == r_associated_ && r_DISASSOCIATED == r_disassociated_;
 }
