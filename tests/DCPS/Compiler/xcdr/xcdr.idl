@@ -1,6 +1,6 @@
-//#include <tao/LongSeq.pidl>
-//#include <tao/ShortSeq.pidl>
-//#include <tao/OctetSeq.pidl>
+#include <tao/LongSeq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/OctetSeq.pidl>
 #include <tao/StringSeq.pidl>
 
 #define COMMON_FIELDS \
@@ -325,7 +325,7 @@ default:
 
 // DHEADER is not generated for anonymous sequence of string,
 // so make a name for it here
-//typedef sequence<string> StringSequence;
+typedef sequence<string> StringSeq;
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
@@ -333,15 +333,14 @@ struct MixedMutableStruct {
   @id(1) MutableStruct struct_nested;
   @id(2) sequence<short> sequence_field;
   @id(3) NestedUnion union_nested;
-  @id(4) CORBA::StringSeq sequence_field2;
-  
+  @id(4) StringSeq sequence_field2;
 };
 
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct ModifiedMixedMutableStruct {
   @id(3) NestedUnion union_nested;
-  @id(4) CORBA::StringSeq sequence_field2;
+  @id(4) StringSeq sequence_field2;
   @id(1) MutableStruct struct_nested;
 };
 
