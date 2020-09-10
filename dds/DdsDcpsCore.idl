@@ -272,22 +272,27 @@ module DDS {
       DISALLOW_TYPE_COERCION,
       ALLOW_TYPE_COERCION
     };
-
+    */
+    //constants for TypeConsistencyEnforcementQosPolicy::kind field
+    const short DISALLOW_TYPE_COERCION = 1;
+    const short ALLOW_TYPE_COERCION = 2;
+    /*
     const QosPolicyId_t TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID = 24;
     const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME =
       "TypeConsistencyEnforcement";
 
     // This is for when we support XCDR1.
     // @appendable
+    */
     struct TypeConsistencyEnforcementQosPolicy {
-      TypeConsistencyKind kind;
+      // TypeConsistencyKind kind;
+      short kind;
       boolean ignore_sequence_bounds;
       boolean ignore_string_bounds;
       boolean ignore_member_names;
       boolean prevent_type_widening;
       boolean force_type_validation;
     };
-    */
 
     // This is for when we support XCDR1.
     // @mutable
@@ -365,9 +370,7 @@ module DDS {
       TimeBasedFilterQosPolicy time_based_filter;
       ReaderDataLifecycleQosPolicy reader_data_lifecycle;
       DataRepresentationQosPolicy representation;
-      /* TODO
       TypeConsistencyEnforcementQosPolicy type_consistency;
-      */
     };
 
     struct SubscriberQos {
@@ -471,9 +474,7 @@ module DDS {
       @id(0x002E) TopicDataQosPolicy topic_data;
       @id(0x002D) GroupDataQosPolicy group_data;
       @id(0x0073) DataRepresentationQosPolicy representation;
-      /* TODO
       @id(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
-      */
     };
 
     BUILT_IN_TOPIC_TYPE
