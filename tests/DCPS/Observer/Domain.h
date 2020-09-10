@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TestObserver.h"
 #include <dds/DCPS/Service_Participant.h>
 
 class Domain {
@@ -18,11 +19,12 @@ public:
     }
   }
 
-  DDS::DomainParticipant_var participant;
-  DDS::Topic_var topic;
-
   Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame);
   ~Domain();
+
+  DDS::DomainParticipant_var participant;
+  DDS::Topic_var topic;
+  OpenDDS::DCPS::RcHandle<TestObserver> observer_; // for stats
 
 private:
   void cleanup();

@@ -16,6 +16,14 @@
 #include <iostream>
 #include <sstream>
 
+TestObserver::TestObserver() : Observer()
+  , w_enabled_(0), w_deleted_(0), w_qos_changed_(0)
+  , r_enabled_(0), r_deleted_(0), r_qos_changed_(0)
+  , w_associated_(0) , w_disassociated_(0)
+  , r_associated_(0) , r_disassociated_(0)
+  , sent_(0), received_(0), read_(0), taken_(0)
+{}
+
 std::string TestObserver::to_str(DDS::DataWriter_ptr w)
 {
   std::ostringstream o;
@@ -62,40 +70,40 @@ std::string TestObserver::to_str(const OpenDDS::DCPS::GUID_t& guid)
 
 void TestObserver::on_enabled(DDS::DataWriter_ptr w)
 {
-  ++stats_.w_enabled_;
-  std::cout << "on_enabled " << stats_.w_enabled_ << to_str(w) << std::endl;
+  ++w_enabled_;
+  std::cout << "on_enabled " << w_enabled_ << to_str(w) << std::endl;
 }
 
 void TestObserver::on_enabled(DDS::DataReader_ptr r)
 {
-  ++stats_.r_enabled_;
-  std::cout << "on_enabled " << stats_.r_enabled_ << to_str(r) << std::endl;
+  ++r_enabled_;
+  std::cout << "on_enabled " << r_enabled_ << to_str(r) << std::endl;
 }
 
 void TestObserver::on_deleted(DDS::DataWriter_ptr w)
 {
-  ++stats_.w_deleted_;
-  std::cout << "on_deleted " << stats_.w_deleted_ << to_str(w) << std::endl;
+  ++w_deleted_;
+  std::cout << "on_deleted " << w_deleted_ << to_str(w) << std::endl;
 }
 
 void TestObserver::on_deleted(DDS::DataReader_ptr r)
 {
-  ++stats_.r_deleted_;
-  std::cout << "on_deleted " << stats_.r_deleted_ << to_str(r) << std::endl;
+  ++r_deleted_;
+  std::cout << "on_deleted " << r_deleted_ << to_str(r) << std::endl;
 }
 
 void TestObserver::on_qos_changed(DDS::DataWriter_ptr w)
 {
-  ++stats_.w_qos_changed_;
+  ++w_qos_changed_;
   DDS::DataWriterQos qos;
-  std::cout << "on_qos_changed " << stats_.w_qos_changed_ << to_str(w) << (w->get_qos(qos) == DDS::RETCODE_OK ? qos_str(qos) : "\n");
+  std::cout << "on_qos_changed " << w_qos_changed_ << to_str(w) << (w->get_qos(qos) == DDS::RETCODE_OK ? qos_str(qos) : "\n");
 }
 
 void TestObserver::on_qos_changed(DDS::DataReader_ptr r)
 {
-  ++stats_.r_qos_changed_;
+  ++r_qos_changed_;
   DDS::DataReaderQos qos;
-  std::cout << "on_qos_changed " << stats_.r_qos_changed_ << to_str(r) << (r->get_qos(qos) == DDS::RETCODE_OK ? qos_str(qos) : "\n");
+  std::cout << "on_qos_changed " << r_qos_changed_ << to_str(r) << (r->get_qos(qos) == DDS::RETCODE_OK ? qos_str(qos) : "\n");
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
@@ -103,26 +111,26 @@ void TestObserver::on_qos_changed(DDS::DataReader_ptr r)
 
 void TestObserver::on_associated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId)
 {
-  ++stats_.w_associated_;
-  std::cout << "on_associated " << stats_.w_associated_ << to_str(w) << " with reader " << to_str(readerId) << std::endl;
+  ++w_associated_;
+  std::cout << "on_associated " << w_associated_ << to_str(w) << " with reader " << to_str(readerId) << std::endl;
 }
 
 void TestObserver::on_associated(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId)
 {
-  ++stats_.r_associated_;
-  std::cout << "on_associated " << stats_.r_associated_ << to_str(r) << " with writer " << to_str(writerId) << std::endl;
+  ++r_associated_;
+  std::cout << "on_associated " << r_associated_ << to_str(r) << " with writer " << to_str(writerId) << std::endl;
 }
 
 void TestObserver::on_disassociated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId)
 {
-  ++stats_.w_disassociated_;
-  std::cout << "on_disassociated " << stats_.w_disassociated_ << to_str(w) << " from reader " << to_str(readerId) << std::endl;
+  ++w_disassociated_;
+  std::cout << "on_disassociated " << w_disassociated_ << to_str(w) << " from reader " << to_str(readerId) << std::endl;
 }
 
 void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId)
 {
-  ++stats_.r_disassociated_;
-  std::cout << "on_disassociated " << stats_.r_disassociated_ << to_str(r) << " from writer " << to_str(writerId) << std::endl;
+  ++r_disassociated_;
+  std::cout << "on_disassociated " << r_disassociated_ << to_str(r) << " from writer " << to_str(writerId) << std::endl;
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
@@ -130,24 +138,37 @@ void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::
 
 void TestObserver::on_sample_sent(const DDS::DataWriter_ptr w, const Sample& s)
 {
-  ++stats_.sent_;
-  std::cout << "on_sample_sent " << stats_.sent_ << to_str(w) << to_str(s);
+  ++sent_;
+  std::cout << "on_sample_sent " << sent_ << to_str(w) << to_str(s);
 }
 
 void TestObserver::on_sample_received(const DDS::DataReader_ptr r, const Sample& s)
 {
-  ++stats_.received_;
-  std::cout << "on_sample_received " << stats_.received_ << to_str(r) << to_str(s);
+  ++received_;
+  std::cout << "on_sample_received " << received_ << to_str(r) << to_str(s);
 }
 
 void TestObserver::on_sample_read(const DDS::DataReader_ptr r, const Sample& s)
 {
-  ++stats_.read_;
-  std::cout << "on_sample_read " << stats_.read_ << to_str(r) << to_str(s);
+  ++read_;
+  std::cout << "on_sample_read " << read_ << to_str(r) << to_str(s);
 }
 
 void TestObserver::on_sample_taken(const DDS::DataReader_ptr r, const Sample& s)
 {
-  ++stats_.taken_;
-  std::cout << "on_sample_taken " << stats_.taken_ << to_str(r) << to_str(s);
+  ++taken_;
+  std::cout << "on_sample_taken " << taken_ << to_str(r) << to_str(s);
+}
+
+// ========== ========== ========== ========== ========== ========== ==========
+bool TestObserver::w_g1_g2() const
+{
+  return w_enabled_ == 1 && w_deleted_ == 0 && w_qos_changed_ == 1 &&
+         w_associated_ == 2 && w_disassociated_ == 0;
+}
+
+bool TestObserver::r_g1_g2() const
+{
+  return r_enabled_ == 2 && r_deleted_ == 0 && r_qos_changed_ == 2 &&
+         r_associated_ == 2 && r_disassociated_ == 2;
 }

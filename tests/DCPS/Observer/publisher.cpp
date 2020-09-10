@@ -27,10 +27,12 @@ private:
   int waitForSubscriber() const;
   void change_writer_qos();
   Domain domain_;
+  RcHandle<TestObserver> observer_; // for stats
   Messenger::MessageDataWriter_var writer_;
 };
 
-Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publisher")
+Publisher::Publisher(int argc, ACE_TCHAR* argv[])
+  : domain_(argc, argv, "Publisher"), observer_(make_rch<TestObserver>())
 {
   DDS::Publisher_var pub = domain_.participant->create_publisher(PUBLISHER_QOS_DEFAULT,
     DDS::PublisherListener::_nil(), DEFAULT_STATUS_MASK);
@@ -49,7 +51,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
   }
 
   EntityImpl* entity = dynamic_cast<EntityImpl*>(dw.ptr());
-  entity->set_observer(make_rch<TestObserver>(), Observer::e_SAMPLE_SENT);
+  entity->set_observer(observer_, Observer::e_SAMPLE_SENT);
 }
 
 int Publisher::run()
@@ -69,7 +71,7 @@ int Publisher::run()
     }
     ACE_OS::sleep(ACE_Time_Value(0, 300000)); // sleep 300 ms
   }
-  return 0;
+  return domain_.observer_->w_g1_g2() && observer_->sent(domain_.N_MSG) ? 0 : 1;
 }
 
 int Publisher::waitForSubscriber() const

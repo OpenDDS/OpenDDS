@@ -19,7 +19,7 @@
 class TestObserver : public virtual OpenDDS::DCPS::Observer
 {
 public:
-  TestObserver() : Observer() {}
+  TestObserver();
   virtual ~TestObserver() {}
 
   virtual void on_enabled(DDS::DataWriter_ptr w);
@@ -39,6 +39,12 @@ public:
   virtual void on_sample_read(const DDS::DataReader_ptr r, const Sample& s);
   virtual void on_sample_taken(const DDS::DataReader_ptr r, const Sample& s);
 
+  bool w_g1_g2() const;
+  bool r_g1_g2() const;
+  bool sent(const int n) const { return n == sent_; }
+  bool received(const int n) const { return n == received_; }
+  bool read_taken(const int r, const int t) const { return r == read_ && t == taken_; }
+
 private:
   static std::string to_str(DDS::DataWriter_ptr w);
   static std::string to_str(DDS::DataReader_ptr w);
@@ -55,25 +61,11 @@ private:
     return o.str();
   }
 
-  struct Stats
-  {
-    unsigned int w_enabled_, w_deleted_, w_qos_changed_; // group 1 writer
-    unsigned int r_enabled_, r_deleted_, r_qos_changed_; // group 1 reader
-    unsigned int w_associated_, w_disassociated_; // group 2 writer
-    unsigned int r_associated_, r_disassociated_; // group 2 reader
-    unsigned int sent_, received_, read_, taken_; // group 3 writer/reader
-
-    Stats() :
-      w_enabled_(0), w_deleted_(0), w_qos_changed_(0),
-      r_enabled_(0), r_deleted_(0), r_qos_changed_(0),
-      w_associated_(0) , w_disassociated_(0),
-      r_associated_(0) , r_disassociated_(0),
-      sent_(0), received_(0), read_(0), taken_(0) {}
-
-    bool w_g1_g2() const;
-    bool r_g1_g2() const;
-  };
-  Stats stats_;
+  int w_enabled_, w_deleted_, w_qos_changed_; // group 1 writer
+  int r_enabled_, r_deleted_, r_qos_changed_; // group 1 reader
+  int w_associated_, w_disassociated_; // group 2 writer
+  int r_associated_, r_disassociated_; // group 2 reader
+  int sent_, received_, read_, taken_; // group 3 writer/reader
   //lock
 };
 
