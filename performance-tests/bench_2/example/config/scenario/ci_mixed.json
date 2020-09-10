@@ -1,0 +1,27 @@
+{
+  "name": "CI Showtime Mixed 5",
+  "desc": "This is a small mixed-qos & configuration scenario. Reliable and durable topics are actively used during discovery.",
+  "nodes": [
+    {
+      "workers": [
+        {
+          "config": "ci_mixed_daemon.json",
+          "count": 1
+        },
+        {
+          "config": "ci_mixed_worker.json",
+          "count": 1
+        }
+      ],
+      "count": 5,
+      "exclusive": false
+    }
+  ],
+  "any_node": [
+    {
+      "config": "ci_mixed_master.json",
+      "count": 1
+    }
+  ],
+  "timeout": 60
+}

@@ -58,7 +58,7 @@ BE_GlobalData::BE_GlobalData()
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
 {
-  default_data_representation_.set_all(false);
+  default_data_representation_.set_all(true);
 }
 
 BE_GlobalData::~BE_GlobalData()

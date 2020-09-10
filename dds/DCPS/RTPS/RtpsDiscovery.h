@@ -506,13 +506,20 @@ public:
     const DDS::DomainParticipantQos& qos);
 
 #if defined(OPENDDS_SECURITY)
+#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5)
+#    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
+#  else
+#    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION
+#  endif
+
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     const OpenDDS::DCPS::RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
-    DDS::Security::ParticipantCryptoHandle part_crypto);
+    DDS::Security::ParticipantCryptoHandle part_crypto)
+    OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION;
 #endif
 
   virtual bool supports_liveliness() const { return true; }

@@ -327,6 +327,13 @@ void Service_Participant::pending_timeout(const TimeDuration& value)
 }
 
 ACE_INLINE
+MonotonicTimePoint Service_Participant::new_pending_timeout_deadline() const
+{
+  return pending_timeout_.is_zero() ?
+    MonotonicTimePoint() : MonotonicTimePoint::now() + pending_timeout_;
+}
+
+ACE_INLINE
 int
 Service_Participant::priority_min() const
 {

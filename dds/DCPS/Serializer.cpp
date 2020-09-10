@@ -196,6 +196,20 @@ bool EncapsulationHeader::to_encoding(
   return true;
 }
 
+bool EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
+{
+  if (mb->length() < padding_marker_byte_index + 1) {
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::set_encapsulation_options: ")
+        ACE_TEXT("Insufficient buffer size %d\n"), mb->length()));
+    }
+    return false;
+  }
+
+  mb->rd_ptr()[padding_marker_byte_index] |= ((padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03);
+  return true;
+}
+
 OPENDDS_STRING EncapsulationHeader::to_string() const
 {
   switch (kind_) {
@@ -578,31 +592,29 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
     must_understand = emheader & emheader_must_understand;
 
     // Get Size
-    // TODO(iguessthislldo) LC
     const unsigned short lc = (emheader >> 28) & 0x7;
     if (lc < 4) {
       size = 1 << lc;
     } else {
       ACE_CDR::ULong next_int;
-      if (!(*this >> next_int)) {
+      if (lc == 4 ? !(*this >> next_int) : !peek(next_int)) {
         return false;
       }
       if (lc == 6) {
-        size = 4 * next_int;
+        size = next_int * 4;
       } else if (lc == 7) {
-        size = 8 * next_int;
+        size = next_int * 8;
       } else { // 4 or 5
         size = next_int;
       }
     }
-
     id = emheader & 0xfffffff;
   }
 
   return true;
 }
 
-bool Serializer::write_parameter_id(unsigned id, size_t size)
+bool Serializer::write_parameter_id(const unsigned id, const size_t size, const bool must_understand)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
@@ -643,15 +655,16 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
 
     reset_alignment();
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
-    ACE_CDR::ULong emheader = id;
-    // TODO(iguessthislldo): Conditionally insert must understand flag?
-    id += emheader_must_understand;
-    // TODO(iguessthislldo) LC
+    // Compute Length Code, write EM Header and NEXTINT
+    const ACE_CDR::ULong lc = (size == 1 ? 0 : size == 2 ? 1 : size == 4 ? 2 : size == 8 ? 3 : 4);
+    const ACE_CDR::ULong emheader = (lc << 28) | id | (must_understand ? emheader_must_understand : 0);
     if (!(*this << emheader)) {
       return false;
     }
+    if (lc == 4) {
+      return *this << ACE_CDR::ULong(size);
+    }
   }
-
   return true;
 }
 

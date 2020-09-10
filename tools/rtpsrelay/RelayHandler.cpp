@@ -341,20 +341,26 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     return;
   }
 
-  guid_addr_map_[src_guid].insert(remote);
+  {
+    const auto res = guid_addr_set_map_[src_guid].insert(remote);
+    if (res.second) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message %C %C is at %C\n"), name_.c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote).c_str()));
+    }
+  }
+
   const GuidAddr ga(src_guid, remote);
 
-  // Compute the new expiration time for this SPDP client.
+  // Compute the new expiration time for this GuidAddr.
   const auto expiration = now + config_.lifespan();
-  const auto res = guid_expiration_map_.insert(std::make_pair(ga, expiration));
+  const auto res = guid_addr_expiration_map_.insert(std::make_pair(ga, expiration));
   if (!res.second) {
-    // The SPDP client already exists.  Remove the previous expiration.
+    // The GuidAddr already exists.  Remove the previous expiration.
     const auto previous_expiration = res.first->second;
-    auto r = expiration_guid_map_.equal_range(previous_expiration);
+    auto r = expiration_guid_addr_map_.equal_range(previous_expiration);
     while (r.first != r.second && r.first->second != ga) {
       ++r.first;
     }
-    expiration_guid_map_.erase(r.first);
+    expiration_guid_addr_map_.erase(r.first);
     // Assign the new expiration time.
     res.first->second = expiration;
     // Assert ownership.
@@ -367,16 +373,20 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     write_address(src_guid);
   }
   // Assign the new expiration time.
-  expiration_guid_map_.insert(std::make_pair(expiration, ga));
+  expiration_guid_addr_map_.insert(std::make_pair(expiration, ga));
 
   // Process expirations.
-  for (auto pos = expiration_guid_map_.begin(), limit = expiration_guid_map_.end(); pos != limit && pos->first < now;) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message %C %C expired at %d.%d now=%d.%d\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
-    purge(pos->second);
-    guid_addr_map_.erase(pos->second.guid);
-    guid_expiration_map_.erase(pos->second);
-    unregister_address(pos->second.guid);
-    expiration_guid_map_.erase(pos++);
+  for (auto pos = expiration_guid_addr_map_.begin(), limit = expiration_guid_addr_map_.end(); pos != limit && pos->first < now;) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message %C %C %C expired at %d.%d now=%d.%d\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
+    guid_addr_set_map_[pos->second.guid].erase(pos->second.address);
+    if (guid_addr_set_map_[pos->second.guid].empty()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message %C %C removed\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str()));
+      guid_addr_set_map_.erase(pos->second.guid);
+      unregister_address(pos->second.guid);
+      purge(pos->second.guid);
+    }
+    guid_addr_expiration_map_.erase(pos->second);
+    expiration_guid_addr_map_.erase(pos++);
   }
 
   // Readers send empty messages so we know where they are.
@@ -708,8 +718,8 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
     if (!to.empty()) {
       // Forward to destinations.
       for (const auto& guid : to) {
-        const auto pos = guid_addr_map_.find(guid);
-        if (pos != guid_addr_map_.end()) {
+        const auto pos = guid_addr_set_map_.find(guid);
+        if (pos != guid_addr_set_map_.end()) {
           for (const auto& addr : pos->second) {
             enqueue_message(addr, msg);
           }
@@ -718,14 +728,14 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
       max_fan_out(remote, to.size());
     } else {
       // Forward to all peers except the application participant.
-      for (const auto& p : guid_addr_map_) {
+      for (const auto& p : guid_addr_set_map_) {
         if (p.first != config_.application_participant_guid()) {
           for (const auto& addr : p.second) {
             enqueue_message(addr, msg);
           }
         }
       }
-      max_fan_out(remote, guid_addr_map_.size());
+      max_fan_out(remote, guid_addr_set_map_.size());
     }
 
     return false;
@@ -747,10 +757,10 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   return true;
 }
 
-void SpdpHandler::purge(const GuidAddr& ga)
+void SpdpHandler::purge(const OpenDDS::DCPS::RepoId& guid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
-  const auto pos = spdp_messages_.find(ga.guid);
+  const auto pos = spdp_messages_.find(guid);
   if (pos != spdp_messages_.end()) {
     spdp_messages_.erase(pos);
   }
@@ -827,8 +837,8 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
     if (!to.empty()) {
       // Forward to destinations.
       for (const auto& guid : to) {
-        const auto pos = guid_addr_map_.find(guid);
-        if (pos != guid_addr_map_.end()) {
+        const auto pos = guid_addr_set_map_.find(guid);
+        if (pos != guid_addr_set_map_.end()) {
           for (const auto& addr : pos->second) {
             enqueue_message(addr, msg);
           }
@@ -837,14 +847,14 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
       max_fan_out(remote, to.size());
     } else {
       // Forward to all peers except the application participant.
-      for (const auto& p : guid_addr_map_) {
+      for (const auto& p : guid_addr_set_map_) {
         if (p.first != config_.application_participant_guid()) {
           for (const auto& addr : p.second) {
             enqueue_message(addr, msg);
           }
         }
       }
-      max_fan_out(remote, guid_addr_map_.size());
+      max_fan_out(remote, guid_addr_set_map_.size());
     }
 
     return false;
