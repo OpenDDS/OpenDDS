@@ -593,7 +593,7 @@ private:
   typedef DCPS::RcHandle<SecurityReader> SecurityReader_rch;
 
 #ifdef OPENDDS_SECURITY
-  LivelinessWriter_rch participant_message_secure_reader_;
+  LivelinessReader_rch participant_message_secure_reader_;
   SecurityReader_rch participant_stateless_message_reader_;
   SecurityReader_rch participant_volatile_message_secure_reader_;
   DiscoveryReader_rch dcps_participant_secure_reader_;
