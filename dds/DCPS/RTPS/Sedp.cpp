@@ -328,13 +328,13 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   participant_message_secure_reader_(make_rch<LivelinessReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER),
       ref(*this))),
-  participant_stateless_message_reader_(make_rch<SecurityReader_rch>(
+  participant_stateless_message_reader_(make_rch<SecurityReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER),
       ref(*this))),
-  participant_volatile_message_secure_reader_(make_rch<SecurityReader_rch>(
+  participant_volatile_message_secure_reader_(make_rch<SecurityReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER),
       ref(*this))),
-  dcps_participant_secure_reader_(make_rch<DiscoveryReader_rch>(
+  dcps_participant_secure_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER),
       ref(*this))),
 #endif
