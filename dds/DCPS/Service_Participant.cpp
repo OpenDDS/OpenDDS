@@ -1250,7 +1250,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       ACE_Configuration_Section_Key k;
       cf.open_section(cf.root_section(), RTPS_SECTION_NAME, 1 /*create*/, k);
 
-      int status = this->load_discovery_configuration(cf, RTPS_SECTION_NAME);
+      int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
       if (status != 0) {
         ACE_ERROR((LM_ERROR,

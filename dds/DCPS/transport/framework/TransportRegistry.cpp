@@ -157,7 +157,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             // Create the TransportInst object and load the transport
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
-            const OPENDDS_STRING tid_str = ACE_TEXT_ALWAYS_CHAR(transport_id.c_str());
+            const OPENDDS_STRING tid_str = transport_id.c_str() ? ACE_TEXT_ALWAYS_CHAR(transport_id.c_str()) : "";
             TransportInst_rch inst = create_inst(tid_str, transport_type);
             if (!inst) {
               ACE_ERROR_RETURN((LM_ERROR,
