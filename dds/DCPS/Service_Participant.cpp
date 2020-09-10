@@ -1249,7 +1249,17 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       cf.open();
       ACE_Configuration_Section_Key k;
       cf.open_section(cf.root_section(), RTPS_SECTION_NAME, 1 /*create*/, k);
-      this->load_discovery_configuration(cf, RTPS_SECTION_NAME);
+
+      int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
+
+      if (status != 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_Discovery ")
+                   ACE_TEXT("failed attempt to load default RTPS discovery for domain %d.\n"),
+                   domain));
+
+        return Discovery_rch();
+      }
 
       // Try to find it again
       location = this->discoveryMap_.find(Discovery::DEFAULT_RTPS);
