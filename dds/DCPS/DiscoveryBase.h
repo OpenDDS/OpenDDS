@@ -1241,10 +1241,14 @@ namespace OpenDDS {
       {
         // TLS_TODO: sanity check on locks
         ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
-        MatchingDataIter it;
-        for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
-          if (MonotonicTimePoint::now() - it->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
-            matching_data_buffer_.erase(it->first);
+        MatchingDataIter iter = matching_data_buffer_.begin();
+        MatchingDataIter end_iter = matching_data_buffer_.end();
+
+        for (; iter != end_iter; ) {
+          if (MonotonicTimePoint::now() - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
+            iter = matching_data_buffer_.erase(iter);
+          } else {
+            ++iter;
           }
         }
         // TLS_TODO: any other cleanup?
