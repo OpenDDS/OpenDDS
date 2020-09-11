@@ -5,8 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h"
+
 #include "Observer.h"
-#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

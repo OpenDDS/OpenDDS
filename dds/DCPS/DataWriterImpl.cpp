@@ -597,6 +597,13 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     return;
   }
 
+  Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < readers.length(); ++i) {
+      observer->on_disassociated(this, readers[i]);
+    }
+  }
+
   if (DCPS_debug_level >= 1) {
     GuidConverter writer_converter(publication_id_);
     GuidConverter reader_converter(readers[0]);
@@ -607,13 +614,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                OPENDDS_STRING(writer_converter).c_str(),
                OPENDDS_STRING(reader_converter).c_str(),
                readers.length()));
-  }
-
-  Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
-  if (observer) {
-    for (CORBA::ULong i = 0; i < readers.length(); ++i) {
-      observer->on_disassociated(this, readers[i]);
-    }
   }
 
   // stop pending associations for these reader ids

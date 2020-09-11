@@ -13,6 +13,7 @@
 #endif
 
 #include <dds/DCPS/Observer.h>
+#include <dds/DCPS/EntityImpl.h>
 
 #include <sstream>
 
@@ -53,7 +54,7 @@ public:
 
   template<typename E>
   static TestObserver* get(E* entity, const Observer::Event e) {
-    EntityImpl* i = dynamic_cast<EntityImpl*>(entity);
+    OpenDDS::DCPS::EntityImpl* i = dynamic_cast<OpenDDS::DCPS::EntityImpl*>(entity);
     Observer* o = i ? i->get_observer(e).get() : 0;
     return o ? dynamic_cast<TestObserver*>(o) : 0;
   }

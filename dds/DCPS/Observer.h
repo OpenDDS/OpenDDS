@@ -8,8 +8,6 @@
 #ifndef OPENDDS_DCPS_OBSERVER_H
 #define OPENDDS_DCPS_OBSERVER_H
 
-#include "DdsDcps_pch.h"
-
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
@@ -20,6 +18,7 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -29,8 +28,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-class OpenDDS_Dcps_Export ReceivedDataSample;
 
 class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
