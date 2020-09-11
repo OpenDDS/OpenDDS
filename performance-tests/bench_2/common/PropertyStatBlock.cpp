@@ -44,7 +44,7 @@ void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, co
     }
   }
 
-  os << i1 << uname << " Statitics:" << std::endl;
+  os << i1 << uname << " Statistics:" << std::endl;
   const size_t my_w = sample_count_ ? (median_sample_overflow_ ? 10 : 7) : 5;
   os << i2 << name << std::setw(my_w) << std::setfill(' ') << " count" << " = " << sample_count_ << std::endl;
   if (sample_count_) {
@@ -187,7 +187,7 @@ void PropertyStatBlock::finalize()
   Builder::DoubleSeq ds;
   ds.length(static_cast<CORBA::ULong>(count));
   for (size_t i = 0; i < count; ++i) {
-    size_t pos = (count < median_buffer_.size() ? 0 : ((sample_count_->value.ull_prop() + 1 + i) % median_buffer_.size()));
+    size_t pos = (count < median_buffer_.size() ? i : ((sample_count_->value.ull_prop() + 1 + i) % median_buffer_.size()));
     ds[static_cast<CORBA::ULong>(i)] = median_buffer_[pos];
   }
   buff_prop->value.double_seq_prop(ds);
@@ -196,20 +196,20 @@ void PropertyStatBlock::finalize()
     // calculate median
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
     if (count % 2 == 0) {
-      median_result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;
+      median_result = (median_buffer_[(count / 2) - 1] + median_buffer_[count / 2]) / 2.0;
     } else {
-      median_result = median_buffer_[(count / 2) + 1];
+      median_result = median_buffer_[(count / 2)];
     }
-    // calculate median absolute deviation (median of absolute valute of data deviation from median)
+    // calculate median absolute deviation (median of absolute value of data deviation from median)
     std::vector<double> mad_buffer(median_buffer_);
     for (size_t i = 0; i < count; ++i) {
       mad_buffer[i] = fabs(median_buffer_[i] - median_result);
     }
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
     if (count % 2 == 0) {
-      mad_result = (mad_buffer[count / 2] + mad_buffer[(count / 2) + 1]) / 2.0;
+      mad_result = (mad_buffer[(count / 2) - 1] + mad_buffer[count / 2]) / 2.0;
     } else {
-      mad_result = mad_buffer[(count / 2) + 1];
+      mad_result = mad_buffer[(count / 2)];
     }
   }
   median_->value.double_prop(median_result);
@@ -278,4 +278,3 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
 }
 
 }
-

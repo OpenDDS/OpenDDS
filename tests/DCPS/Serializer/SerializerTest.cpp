@@ -108,6 +108,7 @@ size_t skip(size_t pos, size_t typeSize, size_t maxAlign)
   if (maxAlign == 0) {
     return 0;
   }
+  #undef min
   size_t align = std::min(typeSize, maxAlign);
   return (align - (pos % align)) % align;
 }
@@ -695,6 +696,51 @@ bool runOverrunTest()
   return true;
 }
 
+bool runEncapsulationOptionsTest()
+{
+  std::cerr << "\nRunning encapsulation options tests...\n";
+  const CORBA::Octet arr[4] = {0};
+  OpenDDS::DCPS::EncapsulationHeader encap;
+  const OpenDDS::DCPS::Encoding encoding = OpenDDS::DCPS::Encoding(
+    OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+
+  if (!encap.from_encoding(encoding, OpenDDS::DCPS::APPENDABLE)) {
+    std::cerr << "EncapsulationHeader::from_encoding failed" << std::endl;
+    return false;
+  }
+
+  bool status = true;
+  for (unsigned int i = 1; i <= OpenDDS::DCPS::EncapsulationHeader::padding_marker_alignment; i++) {
+    OpenDDS::DCPS::Message_Block_Ptr mb;
+    ACE_Message_Block* tmp_mb;
+
+    ACE_NEW_RETURN(tmp_mb,
+      ACE_Message_Block(4 + i, ACE_Message_Block::MB_DATA),
+      false);
+    mb.reset(tmp_mb);
+
+    OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
+    if (!(serializer << encap) || !serializer.write_octet_array(arr, i)) {
+      std::cerr << "Serialization failed in runEncapsulationOptionsTest" << std::endl;
+      return false;
+    }
+
+    if (!OpenDDS::DCPS::EncapsulationHeader::set_encapsulation_options(mb)) {
+      std::cerr << "EncapsulationHeader::set_encapsulation_options failed. Size: " << mb->length() << std::endl;
+      return false;
+    }
+
+    unsigned int padding_marker_alignment = mb->rd_ptr()[OpenDDS::DCPS::EncapsulationHeader::padding_marker_byte_index] & 0x03;
+    if (padding_marker_alignment != (OpenDDS::DCPS::EncapsulationHeader::padding_marker_alignment - i)) {
+      std::cerr << "EncapsulationHeader::set_encapsulation_options failed for "
+        << i << " bytes, padding marker alignment: " << padding_marker_alignment << std::endl;
+      status = false;
+    }
+  }
+
+  return status;
+}
+
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
@@ -778,6 +824,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   if (!runAlignmentTest() || !runAlignmentResetTest() || !runAlignmentOverrunTest()) {
+    failed = true;
+  }
+
+  if (!runEncapsulationOptionsTest()) {
     failed = true;
   }
 

@@ -196,6 +196,20 @@ bool EncapsulationHeader::to_encoding(
   return true;
 }
 
+bool EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
+{
+  if (mb->length() < padding_marker_byte_index + 1) {
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::set_encapsulation_options: ")
+        ACE_TEXT("Insufficient buffer size %d\n"), mb->length()));
+    }
+    return false;
+  }
+
+  mb->rd_ptr()[padding_marker_byte_index] |= ((padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03);
+  return true;
+}
+
 OPENDDS_STRING EncapsulationHeader::to_string() const
 {
   switch (kind_) {

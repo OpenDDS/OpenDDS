@@ -124,7 +124,7 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
 
     // Convert to C++ IDL-generated structures
     std::stringstream iss(it->second);
-    Bench::WorkerConfig wc;
+    Bench::WorkerConfig wc{};
     if (!Bench::json_2_idl(iss, wc)) {
       throw std::runtime_error("Can't parse json configs for customization");
     }
@@ -417,7 +417,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
             << std::string(reports[r].log.in()) + "\n===\n";
           std::cerr << ss.str() << std::flush;
         } else {
-          WorkerReport report;
+          WorkerReport report{};
           std::stringstream ss;
           ss << reports[r].details << std::flush;
           if (json_2_idl(ss, report)) {

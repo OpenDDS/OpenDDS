@@ -191,6 +191,7 @@ WorkerDataReaderListener::on_subscription_matched(
   if (expected_match_count_ != 0) {
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
+      expected_match_cv.notify_all();
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
@@ -370,6 +371,18 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 
     datareader_ = nullptr;
   }
+}
+
+bool WorkerDataReaderListener::wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const
+{
+  std::unique_lock<std::mutex> expected_lock(mutex_);
+
+  while (expected_match_count_ != match_count_) {
+    if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
+      return match_count_ == expected_match_count_;
+    }
+  }
+  return true;
 }
 
 }
