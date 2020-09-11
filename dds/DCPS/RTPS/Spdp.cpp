@@ -176,8 +176,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
   if (sedp_endpoint) {
-    RepoId l = guid_;
-    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
     ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
   }
 #endif
@@ -354,8 +353,7 @@ Spdp::~Spdp()
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
   if (sedp_endpoint) {
-    RepoId l = guid_;
-    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
     ICE::Agent::instance()->remove_local_agent_info_listener(sedp_endpoint, l);
   }
 #endif
@@ -1424,8 +1422,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
     DiscoveredParticipantIter pit = participants_.find(pos->second);
     if (pit != participants_.end() &&
         pit->second.stateless_msg_deadline_ <= now) {
-      RepoId reader = pit->first;
-      reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+      const RepoId reader = make_id(pit->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
       pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
@@ -2308,11 +2305,11 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     ICE::AgentInfoMap ai_map;
     ICE::Endpoint* sedp_endpoint = outer_->sedp_.get_ice_endpoint();
     if (sedp_endpoint) {
-      ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+      ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
     }
     ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
     if (spdp_endpoint) {
-      ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+      ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
 
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
@@ -2367,11 +2364,11 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
     ICE::AgentInfoMap ai_map;
     ICE::Endpoint* sedp_endpoint = outer_->sedp_.get_ice_endpoint();
     if (sedp_endpoint) {
-      ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+      ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
     }
     ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
     if (spdp_endpoint) {
-      ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+      ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
 
   if (!ParameterListConverter::to_param_list(ai_map, plist)) {
@@ -2604,9 +2601,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         }
       } else {
         plist.length(1);
-        RepoId guid;
-        std::memcpy(guid.guidPrefix, header.guidPrefix, sizeof(GuidPrefix_t));
-        guid.entityId = ENTITYID_PARTICIPANT;
+        const RepoId guid = make_id(header.guidPrefix, ENTITYID_PARTICIPANT);
         plist[0].guid(guid);
         plist[0]._d(PID_PARTICIPANT_GUID);
       }
@@ -3097,11 +3092,9 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
   const DDS::Security::ParticipantCryptoTokenSeq& pcts = iter->second.crypto_tokens_;
 
   if (pcts.length() != 0) {
-    DCPS::RepoId writer = guid_;
-    writer.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    const DCPS::RepoId writer = make_id(guid_, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
 
-    DCPS::RepoId reader = peer;
-    reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    const DCPS::RepoId reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
@@ -3461,8 +3454,8 @@ void Spdp::process_participant_ice(const ParameterList& plist,
                ACE_TEXT("ICE::AgentInfo\n")));
     return;
   }
-  ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find("SEDP");
-  ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find("SPDP");
+  ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find(SEDP_AGENT_INFO_KEY);
+  ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find(SPDP_AGENT_INFO_KEY);
 
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -3588,6 +3581,8 @@ Spdp::use_rtps_relay_now(bool f)
 void
 Spdp::use_ice_now(bool f)
 {
+  ACE_UNUSED_ARG(f);
+
 #ifdef OPENDDS_SECURITY
   sedp_.use_ice_now(f);
 
@@ -3596,8 +3591,7 @@ Spdp::use_ice_now(bool f)
     ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
 
     if (sedp_endpoint) {
-      RepoId l = guid_;
-      l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+      const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
       ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
     }
     ICE::Agent::instance()->add_endpoint(tport_);
@@ -3608,12 +3602,10 @@ Spdp::use_ice_now(bool f)
     }
 
     for (DiscoveredParticipantConstIter pos = participants_.begin(), limit = participants_.end(); pos != limit; ++pos) {
-      // Start ICE for SPDP.
       if (spdp_endpoint && pos->second.have_spdp_info_) {
         ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, pos->first, pos->second.spdp_info_);
       }
 
-      // Start ICE for SEDP.
       if (sedp_endpoint && pos->second.have_sedp_info_) {
         start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
       }

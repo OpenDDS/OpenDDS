@@ -61,7 +61,6 @@ RtpsUdpTransport::get_ice_endpoint()
 void
 RtpsUdpTransport::use_ice_now(bool after)
 {
-  // Update the config.
   const bool before = config().use_ice();
   config().use_ice(after);
 

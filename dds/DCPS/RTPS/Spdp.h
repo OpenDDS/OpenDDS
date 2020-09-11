@@ -53,6 +53,9 @@ namespace RTPS {
 class RtpsDiscoveryConfig;
 class RtpsDiscovery;
 
+const char SPDP_AGENT_INFO_KEY[] = "SPDP";
+const char SEDP_AGENT_INFO_KEY[] = "SEDP";
+
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp>

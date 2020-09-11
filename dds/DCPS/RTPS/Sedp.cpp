@@ -3334,11 +3334,11 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
   ICE::AgentInfoMap ai_map;
   ICE::Endpoint* sedp_endpoint = get_ice_endpoint();
   if (sedp_endpoint) {
-    ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+    ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
   }
   ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint_if_added();
   if (spdp_endpoint) {
-    ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+    ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
   }
   if (!ParameterListConverter::to_param_list(ai_map, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -5168,30 +5168,34 @@ Sedp::use_ice_now(bool f)
 {
   transport_inst_->use_ice_now(f);
 
+#ifdef OPENDDS_SECURITY
+  if (!f) {
+    return;
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (f) {
-    for(LocalPublicationIter pos = local_publications_.begin(), limit = local_publications_.end(); pos != limit; ++pos) {
-      LocalPublication& pub = pos->second;
-      ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
-      if (endpoint) {
-        pub.have_ice_agent_info = true;
-        pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &publication_agent_info_listener_);
-        start_ice(pos->first, pub);
-      }
-    }
-    for(LocalSubscriptionIter pos = local_subscriptions_.begin(), limit = local_subscriptions_.end(); pos != limit; ++pos) {
-      LocalSubscription& sub = pos->second;
-      ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
-      if (endpoint) {
-        sub.have_ice_agent_info = true;
-        sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &subscription_agent_info_listener_);
-        start_ice(pos->first, sub);
-      }
+  for (LocalPublicationIter pos = local_publications_.begin(), limit = local_publications_.end(); pos != limit; ++pos) {
+    LocalPublication& pub = pos->second;
+    ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
+    if (endpoint) {
+      pub.have_ice_agent_info = true;
+      pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &publication_agent_info_listener_);
+      start_ice(pos->first, pub);
     }
   }
+  for (LocalSubscriptionIter pos = local_subscriptions_.begin(), limit = local_subscriptions_.end(); pos != limit; ++pos) {
+    LocalSubscription& sub = pos->second;
+    ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
+    if (endpoint) {
+      sub.have_ice_agent_info = true;
+      sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &subscription_agent_info_listener_);
+      start_ice(pos->first, sub);
+    }
+  }
+#endif
 }
 
 void
