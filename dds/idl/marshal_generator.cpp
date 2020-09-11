@@ -3211,10 +3211,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+          "  primitive_serialized_size_ulong(encoding, size);\n";
       } else {
         be_global->impl_ <<
-          "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+          "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
       }
 
       be_global->impl_ <<
@@ -3358,10 +3358,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
         if (disc_cls & CL_ENUM) {
           be_global->impl_ <<
-            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+            "  primitive_serialized_size_ulong(encoding, size);\n";
         } else {
           be_global->impl_ <<
-            "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+            "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
         }
 
         be_global->impl_ <<
