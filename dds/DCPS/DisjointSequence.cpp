@@ -328,6 +328,13 @@ DisjointSequence::contains(SequenceNumber value) const
   return iter != sequences_.end() && iter->first <= value;
 }
 
+bool DisjointSequence::contains_any(const SequenceRange& range) const
+{
+  const SequenceRange search(0 /*ignored*/, range.first);
+  const RangeSet::const_iterator iter = sequences_.lower_bound(search);
+  return iter != sequences_.end() && iter->first <= range.second;
+}
+
 void
 DisjointSequence::validate(const SequenceRange& range)
 {

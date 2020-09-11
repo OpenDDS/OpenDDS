@@ -146,12 +146,14 @@ public:
   /// actually be a little larger.
   static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
-  /**
-   * This is a simpler alternative to TransportSendStrategy::send for achieving
-   * fragmentation.
-   *
-   * Return false if the operation failed.
-   */
+  /// Alternative to TransportSendStrategy::send for fragmentation
+  ///
+  /// @param original_element data sample to send, may be larger than max msg size
+  /// @param elements_to_send populated by this method with either original_element
+  ///                         or fragments created from it.  Elements which are not
+  ///                         the original_element need to be cleaned up by the
+  ///                         caller using data_delivered or data_dropped.
+  /// @return operation succeeded
   bool fragmentation_helper(
     TransportQueueElement* original_element, TqeVector& elements_to_send);
 

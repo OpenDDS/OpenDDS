@@ -81,6 +81,19 @@ DisjointSequence::insert(const SequenceRange& range,
   return insert_i(range, &gaps);
 }
 
+ACE_INLINE bool
+DisjointSequence::insert_filtered(const SequenceRange& range, const DisjointSequence& filter)
+{
+  for (SequenceNumber i = range.first; i < range.second; ++i) {
+    if (filter.contains(i)) {
+      if (!insert(i)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

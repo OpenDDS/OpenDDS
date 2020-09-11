@@ -2862,14 +2862,14 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
           //FUTURE: combine multiple resends into one RTPS Message?
           sent_some = true;
           if (it->first > lastSent + 1) {
-            gaps.insert(SequenceRange(lastSent + 1, it->first.previous()));
+            gaps.insert_filtered(SequenceRange(lastSent + 1, it->first.previous()), requests);
           }
           lastSent = it->first;
         }
         if (lastSent < psr[i].second && psr[i].second < dd_last) {
-          gaps.insert(SequenceRange(lastSent + 1, psr[i].second));
+          gaps.insert_filtered(SequenceRange(lastSent + 1, psr[i].second), requests);
           if (it != ri->second.durable_data_.end()) {
-            gaps.insert(SequenceRange(psr[i].second, it->first.previous()));
+            gaps.insert_filtered(SequenceRange(psr[i].second, it->first.previous()), requests);
           }
         }
       }
@@ -3180,7 +3180,7 @@ RtpsUdpDataLink::RtpsWriter::send_nackfrag_replies_i(DisjointSequence& gaps,
 
       const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = ri->second.durable_data_.find(seq);
       if (dd_iter != ri->second.durable_data_.end()) {
-        link->durability_resend(dd_iter->second);
+        link->durability_resend(dd_iter->second, rf->second);
       } else if (send_buff_->contains(seq)) {
         for (AddrSet::const_iterator pos = remote_addrs.begin(), limit = remote_addrs.end();
              pos != limit; ++pos) {
@@ -3359,8 +3359,14 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
   }
 }
 
-void
-RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
+void RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
+{
+  static const RTPS::FragmentNumberSet none = {{0}, 0, RTPS::LongSeq8()};
+  durability_resend(element, none);
+}
+
+void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
+                                        const RTPS::FragmentNumberSet& fragmentSet)
 {
   ACE_DEBUG((LM_DEBUG, "TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
   const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
@@ -3376,10 +3382,40 @@ RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
   if (!send_strategy()->fragmentation_helper(element, to_send)) {
     return;
   }
+
+  DisjointSequence fragments;
+  fragments.insert(fragmentSet.bitmapBase.value, fragmentSet.numBits,
+                   fragmentSet.bitmap.get_buffer());
+  SequenceNumber lastFragment = 0;
+
   const TqeVector::iterator end = to_send.end();
   for (TqeVector::iterator i = to_send.begin(); i != end; ++i) {
-    send_strategy()->send_rtps_control(*const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
+    if (fragments.empty() || include_fragment(**i, fragments, lastFragment)) {
+      send_strategy()->send_rtps_control(*const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
+    }
+
+    //if (*i != element) {
+    //  (*i)->data_delivered();
+    //}
   }
+}
+
+bool RtpsUdpDataLink::include_fragment(const TransportQueueElement& element,
+                                       const DisjointSequence& fragments,
+                                       SequenceNumber& lastFragment)
+{
+  if (!element.is_fragment()) {
+    return true;
+  }
+
+  const RtpsCustomizedElement* const rce = dynamic_cast<const RtpsCustomizedElement*>(&element);
+  if (!rce) {
+    return true;
+  }
+
+  const SequenceRange thisElement(lastFragment + 1, rce->last_fragment());
+  lastFragment = thisElement.second;
+  return fragments.contains_any(thisElement);
 }
 
 void

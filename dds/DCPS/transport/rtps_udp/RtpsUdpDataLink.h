@@ -510,6 +510,11 @@ private:
                                   CORBA::ULong extent);
 
   void durability_resend(TransportQueueElement* element);
+  void durability_resend(TransportQueueElement* element, const RTPS::FragmentNumberSet& fragmentSet);
+
+  static bool include_fragment(const TransportQueueElement& element,
+                               const DisjointSequence& fragments,
+                               SequenceNumber& lastFragment);
 
   template<typename T, typename FN>
   void datawriter_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
