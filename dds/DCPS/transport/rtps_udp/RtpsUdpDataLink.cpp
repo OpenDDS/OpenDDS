@@ -3377,6 +3377,9 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
     return;
   }
 
+  // Sending will decrement loan, and we need to keep it because it's durable.
+  element->increment_loan();
+
   TqeVector to_send;
   if (!send_strategy()->fragmentation_helper(element, to_send)) {
     return;
@@ -3393,9 +3396,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
       send_strategy()->send_rtps_control(*const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
     }
 
-    //if (*i != element) {
-    //  (*i)->data_delivered();
-    //}
+    (*i)->data_delivered();
   }
 }
 

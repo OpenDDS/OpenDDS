@@ -97,6 +97,10 @@ public:
   /// The return value indicates if this element is released.
   bool data_delivered();
 
+  /// Delay releasing the element by one decision (either a data_dropped or
+  /// data_delivered).
+  void increment_loan() { sub_loan_count_++; }
+
   /// Does the sample require an exclusive transport packet?
   virtual bool requires_exclusive_packet() const;
 
