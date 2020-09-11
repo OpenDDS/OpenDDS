@@ -241,6 +241,8 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
+  OPENDDS_ASSERT(addr != ACE_INET_Addr());
+
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
 #ifdef ACE_LACKS_SENDMSG

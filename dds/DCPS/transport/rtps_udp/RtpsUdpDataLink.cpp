@@ -549,6 +549,8 @@ RtpsUdpDataLink::add_locators(const RepoId& remote_id,
                               const ACE_INET_Addr& wide_address,
                               bool requires_inline_qos)
 {
+  OPENDDS_ASSERT(narrow_address != ACE_INET_Addr());
+  OPENDDS_ASSERT(wide_address != ACE_INET_Addr());
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
 

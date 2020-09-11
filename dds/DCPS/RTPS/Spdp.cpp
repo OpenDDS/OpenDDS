@@ -1920,6 +1920,16 @@ Spdp::build_local_pdata(
 
   const GuidPrefix_t& gp = guid_.guidPrefix;
 
+  const DCPS::LocatorSeq unicast_locators = sedp_.unicast_locators();
+  const DCPS::LocatorSeq multicast_locators = sedp_.multicast_locators();
+
+  if (unicast_locators.length() == 0 && multicast_locators.length() == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("Spdp::build_local_pdata: ")
+               ACE_TEXT("no locators\n")));
+  }
+
 #ifdef OPENDDS_SECURITY
   const Security::SPDPdiscoveredParticipantData pdata = {
     kind,
@@ -1956,8 +1966,8 @@ Spdp::build_local_pdata(
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
       0,
-      sedp_.unicast_locators(),
-      sedp_.multicast_locators(),
+      unicast_locators,
+      multicast_locators,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
