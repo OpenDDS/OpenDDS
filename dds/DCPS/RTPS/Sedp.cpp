@@ -3899,6 +3899,8 @@ ACE_UNUSED_ARG(entity_id);
 ACE_UNUSED_ARG(ser);
 ACE_UNUSED_ARG(extensibility);
 
+const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
 #ifdef OPENDDS_SECURITY
   if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
     DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
@@ -4107,7 +4109,7 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(entity_id);
   ACE_UNUSED_ARG(extensibility);
-  
+
   // TLS_TODO: verify request processing
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (DDS::RETCODE_OK != process_tl_request(ser, type_lookup_reply)) {

@@ -647,7 +647,7 @@ private:
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
       const DCPS::Extensibility extensibility);
-    
+ 
     DDS::ReturnCode_t process_tl_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
 
