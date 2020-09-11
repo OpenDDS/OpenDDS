@@ -1138,45 +1138,42 @@ namespace OpenDDS {
           md.time_added_to_map = MonotonicTimePoint::now();
 
           // TLS_TODO: rpc communication needs to be tested when XTypes are ready
-          if (!writer_local) {
-            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
-              XTypes::TypeIdentifierSeq type_ids;
-              type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-              md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
-              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-              if (md_it != matching_data_buffer_.end()) {
-                // TLS_TODO: is this scenario possible?
-                md_it->second = md;
-              } else {
-                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+          if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
+              (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+            if (!writer_local) {
+              if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
+                XTypes::TypeIdentifierSeq type_ids;
+                type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
+                md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
+                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+                if (md_it != matching_data_buffer_.end()) {
+                  // TLS_TODO: is this scenario possible?
+                  md_it->second = md;
+                } else {
+                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+                }
+                send_type_lookup_request(type_ids, writer);
+                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+                // TLS_TODO: sanity check on locks
+                return;
               }
-              send_type_lookup_request(type_ids, writer);
-              type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-              // TLS_TODO: sanity check on locks
-              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
-              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
-              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-              return;
-            }
-          } else if (!reader_local) {
-            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
-              XTypes::TypeIdentifierSeq type_ids;
-              type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-              md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
-              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-              if (md_it != matching_data_buffer_.end()) {
-                // TLS_TODO: is this scenario possible?
-                md_it->second = md;
-              } else {
-                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+            } else if (!reader_local) {
+              if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
+                XTypes::TypeIdentifierSeq type_ids;
+                type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
+                md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
+                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+                if (md_it != matching_data_buffer_.end()) {
+                  // TLS_TODO: is this scenario possible?
+                  md_it->second = md;
+                } else {
+                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+                }
+                send_type_lookup_request(type_ids, reader);
+                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+                // TLS_TODO: sanity check on locks
+                return;
               }
-              send_type_lookup_request(type_ids, reader);
-              type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-              // TLS_TODO: sanity check on locks
-              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
-              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
-              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-              return;
             }
           }
 
@@ -1241,12 +1238,11 @@ namespace OpenDDS {
       {
         // TLS_TODO: sanity check on locks
         ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
-        MatchingDataIter iter = matching_data_buffer_.begin();
         MatchingDataIter end_iter = matching_data_buffer_.end();
 
-        for (; iter != end_iter; ) {
+        for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
           if (MonotonicTimePoint::now() - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
-            iter = matching_data_buffer_.erase(iter);
+            matching_data_buffer_.erase(iter++);
           } else {
             ++iter;
           }
