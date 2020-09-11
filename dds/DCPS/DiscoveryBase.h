@@ -1596,9 +1596,9 @@ namespace OpenDDS {
         : location_ih_(DDS::HANDLE_NIL)
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
+#ifdef OPENDDS_SECURITY
         , have_spdp_info_(false)
         , have_sedp_info_(false)
-#ifdef OPENDDS_SECURITY
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_HANDSHAKE)
@@ -1630,9 +1630,9 @@ namespace OpenDDS {
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
         , seq_reset_count_(0)
+#ifdef OPENDDS_SECURITY
         , have_spdp_info_(false)
         , have_sedp_info_(false)
-#ifdef OPENDDS_SECURITY
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_HANDSHAKE)
@@ -1691,12 +1691,11 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
         ACE_UINT16 seq_reset_count_;
+#ifdef OPENDDS_SECURITY
         bool have_spdp_info_;
         ICE::AgentInfo spdp_info_;
         bool have_sedp_info_;
         ICE::AgentInfo sedp_info_;
-
-#ifdef OPENDDS_SECURITY
         bool have_auth_req_msg_;
         DDS::Security::ParticipantStatelessMessage auth_req_msg_;
         bool have_handshake_msg_;
