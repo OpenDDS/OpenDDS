@@ -290,7 +290,7 @@ namespace OpenDDS {
     bool xcdr1;
     bool xcdr2;
     bool xml;
-    bool unaligned_cdr;
+    //bool unaligned_cdr;
 
     DataRepresentation()
     {
@@ -302,7 +302,7 @@ namespace OpenDDS {
       xcdr1 |= other.xcdr1;
       xcdr2 |= other.xcdr2;
       xml |= other.xml;
-      unaligned_cdr |= other.unaligned_cdr;
+      //unaligned_cdr |= other.unaligned_cdr;
     }
 
     void set_all(bool value)
@@ -310,58 +310,58 @@ namespace OpenDDS {
       xcdr1 = value;
       xcdr2 = value;
       xml = value;
-      unaligned_cdr = value;
+      //unaligned_cdr = value;
     }
 
     bool none() const
     {
-      return !xcdr1 && !xcdr2 && !xml && !unaligned_cdr;
+      return !xcdr1 && !xcdr2 && !xml; //&& !unaligned_cdr;
     }
 
     bool all() const
     {
-      return xcdr1 && xcdr2 && xml && unaligned_cdr;
+      return xcdr1 && xcdr2 && xml; //&& unaligned_cdr;
     }
 
     bool only_xcdr1() const
     {
-      return xcdr1 && !xcdr2 && !xml && !unaligned_cdr;
+      return xcdr1 && !xcdr2 && !xml; //&& !unaligned_cdr;
     }
 
     bool not_only_xcdr1() const
     {
-      return xcdr1 && (xcdr2 || xml || unaligned_cdr);
+      return xcdr1 && (xcdr2 || xml); //|| unaligned_cdr);
     }
 
     bool only_xcdr2() const
     {
-      return !xcdr1 && xcdr2 && !xml && !unaligned_cdr;
+      return !xcdr1 && xcdr2 && !xml; //&& !unaligned_cdr;
     }
 
     bool not_only_xcdr2() const
     {
-      return xcdr2 && (xcdr1 || xml || unaligned_cdr);
+      return xcdr2 && (xcdr1 || xml); //|| unaligned_cdr);
     }
 
     bool only_xml() const
     {
-      return !xcdr1 && !xcdr2 && xml && !unaligned_cdr;
+      return !xcdr1 && !xcdr2 && xml; //&& !unaligned_cdr;
     }
 
     bool not_only_xml() const
     {
-      return xml && (xcdr1 || xcdr2 || unaligned_cdr);
+      return xml && (xcdr1 || xcdr2); //|| unaligned_cdr);
     }
 
-    bool only_unaligned_cdr() const
-    {
-      return !xcdr1 && !xcdr2 && !xml && unaligned_cdr;
-    }
+    //bool only_unaligned_cdr() const
+    //{
+    //  return !xcdr1 && !xcdr2 && !xml && unaligned_cdr;
+    //}
 
-    bool not_only_unaligned_cdr() const
-    {
-      return unaligned_cdr && (xcdr1 || xcdr2 || xml);
-    }
+    //bool not_only_unaligned_cdr() const
+    //{
+    //  return unaligned_cdr && (xcdr1 || xcdr2 || xml);
+    //}
   };
 
   /**

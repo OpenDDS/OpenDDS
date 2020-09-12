@@ -1404,7 +1404,7 @@ namespace {
   }
 
   enum Encoding {
-    encoding_unaligned_cdr,
+    //encoding_unaligned_cdr,
     encoding_xcdr1,
     encoding_xcdr2,
     encoding_count
@@ -2162,9 +2162,9 @@ namespace {
     if (repr.xml) {
       values.push_back("DDS::XML_DATA_REPRESENTATION");
     }
-    if (repr.unaligned_cdr) {
-      values.push_back("UNALIGNED_CDR_DATA_REPRESENTATION");
-    }
+    //if (repr.unaligned_cdr) {
+    //  values.push_back("UNALIGNED_CDR_DATA_REPRESENTATION");
+    //}
 
     std::ostringstream ss;
     ss << indent << name << ".length(" << values.size() << ");\n";
