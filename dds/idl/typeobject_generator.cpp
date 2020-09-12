@@ -242,33 +242,33 @@ print(const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
 {
   be_global->impl_
     << '{'
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[0]) << ')'
+    << static_cast<int>(equivalence_hash[0])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[1]) << ')'
+    << static_cast<int>(equivalence_hash[1])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[2]) << ')'
+    << static_cast<int>(equivalence_hash[2])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[3]) << ')'
+    << static_cast<int>(equivalence_hash[3])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[4]) << ')'
+    << static_cast<int>(equivalence_hash[4])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[5]) << ')'
+    << static_cast<int>(equivalence_hash[5])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[6]) << ')'
+    << static_cast<int>(equivalence_hash[6])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[7]) << ')'
+    << static_cast<int>(equivalence_hash[7])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[8]) << ')'
+    << static_cast<int>(equivalence_hash[8])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[9]) << ')'
+    << static_cast<int>(equivalence_hash[9])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[10]) << ')'
+    << static_cast<int>(equivalence_hash[10])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[11]) << ')'
+    << static_cast<int>(equivalence_hash[11])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[12]) << ')'
+    << static_cast<int>(equivalence_hash[12])
     << ','
-    << "static_cast<unsigned char>(" << static_cast<int>(equivalence_hash[13]) << ')'
+    << static_cast<int>(equivalence_hash[13])
     << '}';
 }
 
@@ -539,13 +539,13 @@ print(const OpenDDS::XTypes::NameHash& name_hash)
 {
   be_global->impl_
     << '{'
-    << "static_cast<char>(" << static_cast<int>(name_hash[0]) << ')'
+    << static_cast<int>(name_hash[0])
     << ','
-    << "static_cast<char>(" << static_cast<int>(name_hash[1]) << ')'
+    << static_cast<int>(name_hash[1])
     << ','
-    << "static_cast<char>(" << static_cast<int>(name_hash[2]) << ')'
+    << static_cast<int>(name_hash[2])
     << ','
-    << "static_cast<char>(" << static_cast<int>(name_hash[3]) << ')'
+    << static_cast<int>(name_hash[3])
     << '}';
 }
 
