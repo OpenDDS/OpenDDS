@@ -540,7 +540,6 @@ namespace XTypes {
     TypeIdentifier(ACE_CDR::Octet kind, const StronglyConnectedComponentId& sc_component_id);
 
     ACE_CDR::Octet kind() const { return kind_; }
-    void kind(ACE_CDR::Octet k);
 
 #define OPENDDS_UNION_ACCESSORS(T, N)                         \
     const T& N() const { return *static_cast<T*>(active_); }  \

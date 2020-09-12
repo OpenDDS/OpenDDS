@@ -3,6 +3,8 @@ project(OpenDDSUtil): dds_taolib {
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
   libout = $(DDS_ROOT)/lib
+  pch_header   = DCPS/DdsDcps_pch.h
+  pch_source   = DCPS/DdsDcps_pch.cpp
 
   Source_Files {
     Hash.h

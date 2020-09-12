@@ -1501,8 +1501,7 @@ typeobject_generator::generate_minimal(AST_Type* type)
 
     std::sort(group_begin, group_end, name_sorter);
 
-    OpenDDS::XTypes::TypeIdentifier ti;
-    ti.kind(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
+    OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
     ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
     std::memset(&ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
     ti.sc_component_id().scc_length = std::distance(group_begin, group_end);

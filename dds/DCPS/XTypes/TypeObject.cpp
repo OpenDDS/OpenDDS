@@ -87,15 +87,6 @@ TypeIdentifier::TypeIdentifier(const TypeIdentifier& other)
   activate(&other);
 }
 
-void TypeIdentifier::kind(ACE_CDR::Octet k)
-{
-  if (kind_ != k) {
-    reset();
-    kind_ = k;
-    activate();
-  }
-}
-
 void TypeIdentifier::reset()
 {
   if (!active_) {
@@ -143,50 +134,58 @@ TypeIdentifier& TypeIdentifier::operator=(const TypeIdentifier& other)
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StringSTypeDefn& sdefn)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   string_sdefn() = sdefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StringLTypeDefn& ldefn)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   string_ldefn() = ldefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainSequenceSElemDefn& sdefn)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   seq_sdefn() = sdefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainSequenceLElemDefn& ldefn)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   seq_ldefn() = ldefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArraySElemDefn& sdefn)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   array_sdefn() = sdefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArrayLElemDefn& ldefn)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   array_ldefn() = ldefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHash& eh)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   std::memcpy(equivalence_hash(), eh, sizeof eh);
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponentId& id)
+  : kind_(k)
 {
-  kind(k);
+  activate();
   sc_component_id() = id;
 }
 
