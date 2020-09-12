@@ -549,8 +549,16 @@ RtpsUdpDataLink::add_locators(const RepoId& remote_id,
                               const ACE_INET_Addr& wide_address,
                               bool requires_inline_qos)
 {
-  OPENDDS_ASSERT(narrow_address != ACE_INET_Addr());
-  OPENDDS_ASSERT(wide_address != ACE_INET_Addr());
+  if (narrow_address == ACE_INET_Addr()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: narrow_address for %C is empty\n"), LogGuid(remote_id).c_str()));
+    return;
+  }
+
+  if (wide_address == ACE_INET_Addr()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: wide_address for %C is empty\n"), LogGuid(remote_id).c_str()));
+    return;
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
 
