@@ -40,7 +40,8 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appNa
 
     // register for all writers and readers in this DomainParticipant
     EntityImpl* entity = dynamic_cast<EntityImpl*>(participant.ptr());
-    entity->set_observer(make_rch<TestObserver>(),
+    entity->set_observer(make_rch<TestObserver>(unwrap_reference(
+      appName == "Publisher" ? TestObserver::c_W_G1_G2 : TestObserver::c_R_ALL)),
       Observer::e_ENABLED | Observer::e_DELETED | Observer::e_QOS_CHANGED |
       Observer::e_ASSOCIATED | Observer::e_DISASSOCIATED
     );

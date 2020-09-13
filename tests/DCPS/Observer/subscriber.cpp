@@ -55,9 +55,7 @@ int Subscriber::run()
   Reader reader2("Reader2", sub_, domain_, Observer::e_SAMPLE_TAKEN);
   int r1 = reader1.waitForPublisherDone();
   int r2 = reader2.waitForPublisherDone();
-  const TestObserver* o = TestObserver::get(sub_.ptr(), Observer::e_ENABLED);
-  bool b = o && o->r_g1_g2() && o->received() && o->read_taken();
-  return r1 + r2 + (b ? 0 : 1);
+  return r1 + r2;
 }
 
 Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, const Observer::Event e)

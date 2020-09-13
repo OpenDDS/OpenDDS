@@ -16,13 +16,33 @@
 #include <iostream>
 #include <sstream>
 
-TestObserver::TestObserver() : Observer()
+TestObserver::TestObserver(Check check) : Observer()
+  , check_(check)
   , w_enabled_(0), w_deleted_(0), w_qos_changed_(0)
   , r_enabled_(0), r_deleted_(0), r_qos_changed_(0)
-  , w_associated_(0) , w_disassociated_(0)
-  , r_associated_(0) , r_disassociated_(0)
+  , w_associated_(0), w_disassociated_(0)
+  , r_associated_(0), r_disassociated_(0)
   , sent_(0), received_(0), read_(0), taken_(0)
 {}
+
+TestObserver::~TestObserver()
+{
+  std::cout << "check_ = " << check_ << '\n';
+  if (check_ == c_SENT) {
+    if (sent_ != n_SENT) {
+      show_observed("sent incorrect");
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: sent = %d.\n"), sent_));
+    }
+  } else if (check_ == c_W_G1_G2) {
+    if (!check_w_g1_g2()) {
+      show_observed("check_w_g1_g2() failed");
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: check_w_g1_g2() failed!\n")));
+    }
+  } else if (!check_r_all()) {
+    show_observed("check_r_all() failed");
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: check_r_all() failed!\n")));
+  }
+}
 
 std::string TestObserver::to_str(DDS::DataWriter_ptr w)
 {
@@ -161,14 +181,25 @@ void TestObserver::on_sample_taken(const DDS::DataReader_ptr r, const Sample& s)
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
-bool TestObserver::w_g1_g2() const
+bool TestObserver::check_w_g1_g2() const
 {
   return w_ENABLED == w_enabled_ && w_DELETED == w_deleted_ && w_QOS_CHANGED == w_qos_changed_
          && w_ASSOCIATED == w_associated_ && w_DISASSOCIATED == w_disassociated_;
 }
 
-bool TestObserver::r_g1_g2() const
+bool TestObserver::check_r_all() const
 {
   return r_ENABLED == r_enabled_ && r_DELETED == r_deleted_ && r_QOS_CHANGED == r_qos_changed_
-         && r_ASSOCIATED == r_associated_ && r_DISASSOCIATED == r_disassociated_;
+         && r_ASSOCIATED == r_associated_ && r_DISASSOCIATED == r_disassociated_
+         && n_RECEIVED == received_ && n_READ == read_ && n_TAKEN == taken_;
+}
+
+void TestObserver::show_observed(const std::string& txt) const
+{
+  std::cout << txt << ":\n"
+    << "  w_enabled_:" << w_enabled_ << " w_deleted_: " << w_deleted_ << " w_qos_changed_:" << w_qos_changed_
+    << "  w_associated_:" << w_associated_ << " w_disassociated_: " << w_disassociated_ << '\n'
+    << "  r_enabled_:" << r_enabled_ << " r_deleted_: " << r_deleted_ << " r_qos_changed_:" << r_qos_changed_
+    << "  r_associated_:" << r_associated_ << " r_disassociated_: " << r_disassociated_ << '\n'
+    << "  sent_:" << sent_ << " received_: " << received_ << " read_:" << read_ << " taken_:" << taken_ << '\n';
 }
