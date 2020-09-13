@@ -38,13 +38,15 @@ public:
   virtual void on_sample_taken(const DDS::DataReader_ptr r, const Sample& s);
 
   enum Check { c_SENT = 1, c_W_G1_G2 = 2, c_R_ALL = 3 };
+
   explicit TestObserver(Check check = c_SENT);
   virtual ~TestObserver();
 
   enum {
-    w_ENABLED = 1, w_DELETED = 1, w_QOS_CHANGED = 1, w_ASSOCIATED = 2, w_DISASSOCIATED = 2,
-    r_ENABLED = 2, r_DELETED = 2, r_QOS_CHANGED = 2, r_ASSOCIATED = 2, r_DISASSOCIATED = 2,
-    n_SENT = 6, n_RECEIVED = (n_SENT + 2) * 2, n_READ = 3, n_TAKEN = n_SENT - n_READ + 1
+    n_WRITER = 1, n_READER = 2, n_MSG = 6,
+    n_ASSOCIATION = n_WRITER * n_READER,
+    n_RECEIVED = (n_MSG + 2) * n_READER,
+    n_READ = 3, n_TAKEN = n_MSG - n_READ + 1
   };
 
 private:

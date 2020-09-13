@@ -29,7 +29,7 @@ TestObserver::~TestObserver()
 {
   std::cout << "check_ = " << check_ << '\n';
   if (check_ == c_SENT) {
-    if (sent_ != n_SENT) {
+    if (sent_ != n_MSG) {
       show_observed("sent incorrect");
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: sent = %d.\n"), sent_));
     }
@@ -183,15 +183,15 @@ void TestObserver::on_sample_taken(const DDS::DataReader_ptr r, const Sample& s)
 // ========== ========== ========== ========== ========== ========== ==========
 bool TestObserver::check_w_g1_g2() const
 {
-  return w_ENABLED == w_enabled_ && w_DELETED == w_deleted_ && w_QOS_CHANGED == w_qos_changed_
-         && w_ASSOCIATED == w_associated_ && w_DISASSOCIATED == w_disassociated_;
+  return w_enabled_ == n_WRITER && w_deleted_ == n_WRITER && w_qos_changed_ == n_WRITER
+         && w_associated_ == n_ASSOCIATION && w_disassociated_ == n_ASSOCIATION;
 }
 
 bool TestObserver::check_r_all() const
 {
-  return r_ENABLED == r_enabled_ && r_DELETED == r_deleted_ && r_QOS_CHANGED == r_qos_changed_
-         && r_ASSOCIATED == r_associated_ && r_DISASSOCIATED == r_disassociated_
-         && n_RECEIVED == received_ && n_READ == read_ && n_TAKEN == taken_;
+  return r_enabled_ == n_READER && r_deleted_ == n_READER && r_qos_changed_ == n_READER
+         && r_associated_ == n_ASSOCIATION && r_disassociated_ == n_ASSOCIATION
+         && received_ == n_RECEIVED && read_ == n_READ && taken_ == n_TAKEN;
 }
 
 void TestObserver::show_observed(const std::string& txt) const

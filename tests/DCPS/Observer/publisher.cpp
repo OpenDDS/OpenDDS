@@ -59,7 +59,7 @@ int Publisher::run()
   //Message{"from", "subject", @key subject_id, "text", count, ull, source_pid}
   Messenger::Message msg = {"", "Observer", 1, "test", 1, 0, 0};
   DDS::InstanceHandle_t handle = writer_->register_instance(msg);
-  for (msg.count = 1; msg.count <= TestObserver::n_SENT; ++msg.count) {
+  for (msg.count = 1; msg.count <= TestObserver::n_MSG; ++msg.count) {
     DDS::ReturnCode_t r = writer_->write(msg, handle);
     if (r != ::DDS::RETCODE_OK) {
       std::cerr << "Publisher write returned code " << r << std::endl;
@@ -77,7 +77,7 @@ int Publisher::waitForSubscriber() const
 {
   std::cout << "Publisher waiting for subscriber..." << std::endl;
   DDS::DataWriter_var writer = DDS::DataWriter::_narrow(writer_);
-  return Utils::wait_match(writer, Domain::N_READER);
+  return Utils::wait_match(writer, TestObserver::n_READER);
 }
 
 void Publisher::change_writer_qos()
