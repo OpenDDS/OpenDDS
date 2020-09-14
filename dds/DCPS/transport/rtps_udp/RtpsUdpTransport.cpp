@@ -556,6 +556,7 @@ namespace {
   ssize_t
   send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr)
   {
+    OPENDDS_ASSERT(addr != ACE_INET_Addr());
 #ifdef ACE_LACKS_SENDMSG
     char buffer[UDP_MAX_MESSAGE_SIZE];
     char *iter = buffer;

@@ -220,7 +220,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
         AddrVector addrs;
         get_interface_addrs(addrs);
         for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-          if (adr_it->get_type() == AF_INET) {
+          if (*adr_it != ACE_INET_Addr() && adr_it->get_type() == AF_INET) {
             idx = locators.length();
             locators.length(idx + 1);
             locators[idx].kind = address_to_kind(*adr_it);
@@ -244,7 +244,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
         AddrVector addrs;
         get_interface_addrs(addrs);
         for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-          if (adr_it->get_type() == AF_INET6) {
+          if (*adr_it != ACE_INET_Addr() && adr_it->get_type() == AF_INET6) {
             idx = locators.length();
             locators.length(idx + 1);
             locators[idx].kind = address_to_kind(*adr_it);
