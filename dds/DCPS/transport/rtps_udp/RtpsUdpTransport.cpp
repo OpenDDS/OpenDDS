@@ -562,7 +562,7 @@ namespace {
     char *iter = buffer;
     for (int i = 0; i < n; ++i) {
       if (size_t(iter - buffer + iov[i].iov_len) > UDP_MAX_MESSAGE_SIZE) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
                    "message too large at index %d size %d\n", i, iov[i].iov_len));
         return -1;
       }
@@ -579,7 +579,7 @@ namespace {
       addr.addr_to_string(addr_buff, 256);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-      ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
                  "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
     }
     return result;
