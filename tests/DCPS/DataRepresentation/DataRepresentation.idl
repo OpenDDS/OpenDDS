@@ -5,7 +5,7 @@ struct DefaultedType {
 
 @topic
 @::OpenDDS::data_representation(XCDR1)
-@::OpenDDS::data_representation(UNALIGNED_CDR)
+//@::OpenDDS::data_representation(UNALIGNED_CDR)
 struct ExplicitDefaultType {
   long value;
 };
