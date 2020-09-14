@@ -4079,6 +4079,12 @@ Sedp::populate_discovered_reader_msg(
     drd.readerProxy.associatedWriters.length(len + 1);
     drd.readerProxy.associatedWriters[len] = *writer;
   }
+  drd.ddsSubscriptionData.type_consistency.kind = DDS::ALLOW_TYPE_COERCION;
+  drd.ddsSubscriptionData.type_consistency.ignore_sequence_bounds = true;
+  drd.ddsSubscriptionData.type_consistency.ignore_string_bounds = true;
+  drd.ddsSubscriptionData.type_consistency.ignore_member_names = false;
+  drd.ddsSubscriptionData.type_consistency.prevent_type_widening = false;
+  drd.ddsSubscriptionData.type_consistency.force_type_validation = false;
 }
 
 void
