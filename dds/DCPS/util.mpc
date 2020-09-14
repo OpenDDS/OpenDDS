@@ -1,4 +1,4 @@
-project(OpenDDSUtil): dds_taolib {
+project(OpenDDSUtil): dds_taolib, install {
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
