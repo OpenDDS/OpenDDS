@@ -8,6 +8,9 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include "Observer.h"
+#include "DataSampleElement.h"
+#include "ReceivedDataElementList.h"
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

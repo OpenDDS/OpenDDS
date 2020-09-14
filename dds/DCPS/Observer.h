@@ -11,14 +11,11 @@
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
-#include "DataSampleElement.h"
-#include "ReceivedDataElementList.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,6 +25,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+class DataSampleElement;
+class ReceivedDataSample;
+class ReceivedDataElement;
 
 class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
@@ -53,7 +54,7 @@ public:
     e_ALL             = 0xffff
   };
 
-  struct Sample
+  struct OpenDDS_Dcps_Export Sample
   {
     DDS::InstanceHandle_t instance_;
     CORBA::ULong instance_state_;
