@@ -2342,8 +2342,6 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
 
     prev_dst = GUID_UNKNOWN;
 
-    size_t submessage_length = 0;
-
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
@@ -4036,6 +4034,11 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
+
+  if (config().rtps_relay_only_) {
+    addresses.insert(config().rtps_relay_address());
+    return;
+  }
 
   ACE_INET_Addr normal_addr;
   ACE_INET_Addr ice_addr;

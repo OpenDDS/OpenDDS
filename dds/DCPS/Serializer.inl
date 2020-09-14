@@ -826,28 +826,30 @@ bool Serializer::align_w(size_t al)
 ACE_INLINE void
 Serializer::align_cont_r()
 {
+  const size_t max_align = encoding().max_align();
   const size_t thisblock =
-    (ptrdiff_t(current_->rd_ptr()) - align_rshift_) % encoding().max_align();
+    max_align ? (ptrdiff_t(current_->rd_ptr()) - align_rshift_) % max_align : 0;
 
-  this->current_ = this->current_->cont();
+  current_ = current_->cont();
 
-  if (this->current_) {
-    this->align_rshift_ =
-      (ptrdiff_t(current_->rd_ptr()) - thisblock) % encoding().max_align();
+  if (current_ && max_align) {
+    align_rshift_ =
+      (ptrdiff_t(current_->rd_ptr()) - thisblock) % max_align;
   }
 }
 
 ACE_INLINE void
 Serializer::align_cont_w()
 {
+  const size_t max_align = encoding().max_align();
   const size_t thisblock =
-    (ptrdiff_t(current_->wr_ptr()) - align_wshift_) % encoding().max_align();
+    max_align ? (ptrdiff_t(current_->wr_ptr()) - align_wshift_) % max_align : 0;
 
-  this->current_ = this->current_->cont();
+  current_ = current_->cont();
 
-  if (this->current_) {
-    this->align_wshift_ =
-      (ptrdiff_t(current_->wr_ptr()) - thisblock) % encoding().max_align();
+  if (current_ && max_align) {
+    align_wshift_ =
+      (ptrdiff_t(current_->wr_ptr()) - thisblock) % max_align;
   }
 }
 

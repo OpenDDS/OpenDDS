@@ -59,6 +59,8 @@ module Bench {
     Builder::ProcessConfig process;
     ActionConfigSeq actions;
     ActionReportSeq action_reports;
+    boolean wait_for_discovery;
+    unsigned long wait_for_discovery_seconds;
   };
 
   struct WorkerReport {

@@ -6,7 +6,6 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-
 #include "DomainParticipantFactoryImpl.h"
 
 #include "DomainParticipantImpl.h"
@@ -15,6 +14,8 @@
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "Util.h"
+
+#include "transport/framework/TransportRegistry.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 
@@ -85,6 +86,27 @@ DomainParticipantFactoryImpl::create_participant(
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
+  // if the specified transport is a transport template then create a new transport
+  // instance for the new participant if per_participant is set (checked before creating instance).
+  ACE_TString transport_config_name;
+  TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
+
+  if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
+    ACE_TString instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
+
+    bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
+
+    if (ret) {
+      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()), dp.in());
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                 ACE_TEXT("could not create new transport instance for participant.\n")));
+      return DDS::DomainParticipant::_nil();
+    }
+  }
+
   participants_[domainId].insert(dp);
   return dp._retn();
 }
@@ -93,8 +115,6 @@ DDS::ReturnCode_t
 DomainParticipantFactoryImpl::delete_participant(
   DDS::DomainParticipant_ptr a_participant)
 {
-
-//xxx rc = 4
   if (CORBA::is_nil(a_participant)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

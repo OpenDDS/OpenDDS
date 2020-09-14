@@ -72,8 +72,59 @@ struct MutableXcdr12Struct {
   COMMON_FIELDS
 };
 
+enum UnionDisc {
+  E_SHORT_FIELD,
+  E_LONG_FIELD,
+  E_OCTET_FIELD,
+  E_LONG_LONG_FIELD
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableXcdr12Union switch (UnionDisc) {
+case E_SHORT_FIELD:
+  short short_field;
+case E_LONG_FIELD:
+  long long_field;
+case E_OCTET_FIELD:
+  octet octet_field;
+case E_LONG_LONG_FIELD:
+  long long long_long_field;
+};
+
 // Appendable Tests ==========================================================
-// TODO(iguessthislldo)
+
+typedef AppendableXcdr2Struct NestedStruct;
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableStruct {
+  NestedStruct nested;
+  COMMON_FIELDS
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldNestedStruct {
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldAppendableStruct {
+  AdditionalFieldNestedStruct nested;
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableStruct2 {
+  string string_field;
+  NestedStruct nested;
+};
 
 // Mutable Tests =============================================================
 // TODO(iguessthislldo): Add more fields
@@ -148,6 +199,7 @@ struct Long3 {
 @mutable
 @OpenDDS::data_representation(XCDR2)
 struct LengthCodeStruct { //LC Size
+  @key
   @id(0) octet o;         // 0    1
   @id(1) short s;         // 1    2
   @id(2) long l;          // 2    4
@@ -155,6 +207,7 @@ struct LengthCodeStruct { //LC Size
 
   @id(4) Bool3 b3;        // 4    3
   @id(5) Octet5 o5;       // 4    5
+  @key
   @id(6) Short3 s3;       // 4    6
   @id(7) Struct7 t7;      // 4    7
   @id(8) Long3 l3;        // 4   12
@@ -163,6 +216,7 @@ struct LengthCodeStruct { //LC Size
   @id(12) string<2> str2; // 4  4+2
   @id(13) string<3> str3; // 4  4+3
   @id(14) string<4> str4; // 3  4+4
+  @key
   @id(15) string<5> str5; // 4  4+5
 };
 
@@ -179,4 +233,20 @@ struct LC567Struct {            //LC Size
   @id(4) string<4> str4;        // 3    4
   @id(5) string<5> str5;        // 5    5
   @id(6) sequence<long> ls;     // 6  4x2 (2 elements)
+  @key
+  @id(7) string<7> str7;        // 5    7
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+union MutableUnion switch (UnionDisc) {
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_LONG_LONG_FIELD:
+  @id(10) long long long_long_field;
 };
