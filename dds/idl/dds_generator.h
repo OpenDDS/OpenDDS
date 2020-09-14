@@ -747,7 +747,7 @@ inline
 std::string insert_cxx11_accessor_parens(
               const std::string& full_var_name_, bool is_union_member) {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  if (!use_cxx11 || is_union_member) return full_var_name_;
+  if (!use_cxx11 || is_union_member || full_var_name_.empty()) return full_var_name_;
 
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
