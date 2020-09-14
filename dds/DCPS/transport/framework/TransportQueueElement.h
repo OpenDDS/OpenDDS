@@ -99,7 +99,7 @@ public:
 
   /// Delay releasing the element by one decision (either a data_dropped or
   /// data_delivered).
-  void increment_loan() { sub_loan_count_++; }
+  void increment_loan() { ++sub_loan_count_; }
 
   /// Does the sample require an exclusive transport packet?
   virtual bool requires_exclusive_packet() const;
