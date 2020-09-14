@@ -86,7 +86,7 @@ typedef ShortSeqBound ArrSeqBound[3];
 
 //anon seq
 //enum
-struct AnonSeqStruct { 
+struct AnonSeqStruct {
   sequence<EnumType> AnonEnumSeqUnbound;
   sequence<EnumType, 2> AnonEnumSeqBound;
   sequence<EnumType, 3> AnonEnumSeqBound2;
@@ -121,7 +121,7 @@ struct AnonSeqStruct {
 
 //anon arr
 //enum
-  struct AnonArrStruct { 
+  struct AnonArrStruct {
   EnumType AnonEnumArr[3];
   //primitives
   short AnonShortArr[3];
@@ -344,7 +344,7 @@ module TryCon {
   @topic
   @mutable
   @OpenDDS::data_representation(XCDR1)
-  struct AnonSeqStructTrim { 
+  struct AnonSeqStructTrim {
     @try_construct(TRIM) sequence<EnumType, 2> AnonEnumSeqBound;
     //primitives
     @try_construct(TRIM) sequence<short, 2> AnonShortSeqBound;
@@ -364,7 +364,7 @@ module TryCon {
   @topic
   @mutable
   @OpenDDS::data_representation(XCDR1)
-  struct AnonSeqStructDefault { 
+  struct AnonSeqStructDefault {
     @try_construct(USE_DEFAULT) sequence< EnumType, 2> AnonEnumSeqBound;
     //primitives
     @try_construct(USE_DEFAULT) sequence<short, 2> AnonShortSeqBound;
