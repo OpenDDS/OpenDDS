@@ -394,7 +394,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
-      cfg.use_rtps_relay_) {
+      cfg.use_rtps_relay()) {
     relay_beacon_.enable(false, cfg.rtps_relay_beacon_period_);
   }
 
@@ -4040,7 +4040,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
-  if (config().rtps_relay_only_) {
+  if (config().rtps_relay_only()) {
     addresses.insert(config().rtps_relay_address());
     return;
   }

@@ -43,9 +43,6 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
   , rtps_relay_beacon_period_(30)
-  , use_rtps_relay_(false)
-  , rtps_relay_only_(false)
-  , use_ice_(false)
   , opendds_discovery_guid_(GUID_UNKNOWN)
   , multicast_group_address_(7401, "239.255.0.2")
   , local_address_(u_short(0), "0.0.0.0")
@@ -53,6 +50,9 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ipv6_multicast_group_address_(7401, "FF03::2")
   , ipv6_local_address_(u_short(0), "::")
 #endif
+  , rtps_relay_only_(false)
+  , use_rtps_relay_(false)
+  , use_ice_(false)
 {}
 
 TransportImpl_rch

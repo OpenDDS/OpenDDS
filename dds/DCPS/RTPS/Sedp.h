@@ -166,8 +166,10 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
+  void rtps_relay_only(bool f);
+  void use_rtps_relay(bool f);
+  void use_ice_now(bool f);
   void rtps_relay_address(const ACE_INET_Addr& address);
-
   void stun_server_address(const ACE_INET_Addr& address);
 
   DCPS::ReactorTask_rch reactor_task() const { return reactor_task_; }
@@ -844,7 +846,7 @@ protected:
     PublicationAgentInfoListener(Sedp& a_sedp) : sedp(a_sedp) {}
     void update_agent_info(const DCPS::RepoId& a_local_guid,
                            const ICE::AgentInfo& a_agent_info);
-
+    void remove_agent_info(const DCPS::RepoId& a_local_guid);
   } publication_agent_info_listener_;
 
   struct SubscriptionAgentInfoListener : public ICE::AgentInfoListener
@@ -853,6 +855,7 @@ protected:
     SubscriptionAgentInfoListener(Sedp& a_sedp) : sedp(a_sedp) {}
     void update_agent_info(const DCPS::RepoId& a_local_guid,
                            const ICE::AgentInfo& a_agent_info);
+    void remove_agent_info(const DCPS::RepoId& a_local_guid);
   } subscription_agent_info_listener_;
 #endif
 

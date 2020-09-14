@@ -34,6 +34,7 @@ public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
   virtual ICE::Endpoint* get_ice_endpoint();
+  virtual void use_ice_now(bool flag);
 
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
@@ -145,6 +146,10 @@ private:
     virtual ACE_INET_Addr stun_server_address() const;
   };
   IceEndpoint ice_endpoint_;
+
+  void start_ice();
+  void stop_ice();
+
 #endif
 };
 

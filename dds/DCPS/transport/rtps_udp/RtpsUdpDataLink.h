@@ -328,7 +328,6 @@ private:
         return;
       }
 
-      ACE_DEBUG((LM_DEBUG, "Calling replay_durable_data on datalink\n"));
       link->replay_durable_data(local_pub_id_, remote_sub_id_);
     }
   };
