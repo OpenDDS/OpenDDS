@@ -1,0 +1,14 @@
+/TryConstruct_C++11_TryConstruct
+TryConstructC.cpp
+TryConstructC.h
+TryConstructC.inl
+TryConstructS.cpp
+TryConstructS.h
+TryConstructTypeSupportC.cpp
+TryConstructTypeSupportC.h
+TryConstructTypeSupportC.inl
+TryConstructTypeSupportImpl.cpp
+TryConstructTypeSupportImpl.h
+TryConstructTypeSupportS.cpp
+TryConstructTypeSupportS.h
+TryConstructTypeSupport.idl
