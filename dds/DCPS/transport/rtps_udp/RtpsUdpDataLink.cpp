@@ -2819,7 +2819,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     const SequenceNumber& dd_last = ri->second.durable_data_.rbegin()->first;
     if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
-                 "check ack %q against last durable %q\n",
+                 "check base %q against last durable %q\n",
                  ack.getValue(), dd_last.getValue()));
     }
     if (ack > dd_last) {
