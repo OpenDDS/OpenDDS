@@ -3573,8 +3573,6 @@ Sedp::LivelinessWriter::~LivelinessWriter()
 {
 }
 
-//-------------------------------------------------------------------------
-
 Sedp::TypeLookupWriter::~TypeLookupWriter()
 {
 }
@@ -3678,9 +3676,8 @@ Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sampl
 
 DDS::ReturnCode_t
 Sedp::TypeLookupRequestReader::process_tl_request(DCPS::Serializer& ser,
-                                               XTypes::TypeLookup_Reply& type_lookup_reply)
+                                                  XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  // TLS_TODO: verify request processing
   XTypes::TypeLookup_Request type_lookup_request;
 
   if (!(ser >> type_lookup_request)) {
@@ -3704,8 +3701,7 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
                                                          XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
-    type_lookup_reply.data.getTypes.result.types,
-    type_lookup_reply.data.getTypes.result.complete_to_minimal);
+    type_lookup_reply.data.getTypes.result.types);
   if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
     type_lookup_reply.data.getTypes.return_code = DDS::RETCODE_OK;
     type_lookup_reply.data.kind = XTypes::TypeLookup_getTypes_HashId;
@@ -3735,8 +3731,6 @@ Sedp::TypeLookupReplyReader::process_tl_reply(DCPS::Serializer& ser)
   }
   return DDS::RETCODE_OK;
 }
-
-//-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
 {
@@ -4110,7 +4104,6 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   ACE_UNUSED_ARG(entity_id);
   ACE_UNUSED_ARG(extensibility);
 
-  // TLS_TODO: verify request processing
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (DDS::RETCODE_OK != process_tl_request(ser, type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
@@ -4118,7 +4111,6 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
     return;
   }
 
-  // TLS_TODO: verify reader
   if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(sample, type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
       ACE_TEXT("failed to send type lookup reply\n")));
@@ -4136,7 +4128,6 @@ Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sam
   ACE_UNUSED_ARG(entity_id);
   ACE_UNUSED_ARG(extensibility);
 
-  // TLS_TODO: verify reply processing
   if (!process_tl_reply(ser)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
       ACE_TEXT("failed to take type lookup reply\n")));

@@ -1267,7 +1267,7 @@ namespace OpenDDS {
       }
 
       void
-        match_continue(const RepoId& writer, const RepoId& reader)
+      match_continue(const RepoId& writer, const RepoId& reader)
       {
         bool call_writer = false, call_reader = false, writer_local = false, reader_local = false;
 

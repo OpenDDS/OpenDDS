@@ -24,29 +24,16 @@ TypeLookupService::~TypeLookupService()
 }
 
 
-void TypeLookupService::collect_types_info_from_cache(const TypeIdentifierSeq& type_ids,
-                                                      TypeIdentifierTypeObjectPairSeq& types,
-                                                      TypeIdentifierPairSeq& complete_to_minimal,
-                                                      TypeIdentifierSeq& not_found)
+void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
+                                         TypeIdentifierTypeObjectPairSeq& types)
 {
   for (CORBA::ULong i = 0; i < type_ids.length(); ++i) {
     TypeObjectMap::iterator it_object = type_object_map_.find(type_ids[i]);
     if (it_object != type_object_map_.end()) {
       TypeIdentifierTypeObjectPair new_to_pair(it_object->first, it_object->second);
       types.append(new_to_pair);
-    } else {
-      not_found.append(type_ids[i]);
     }
   }
-}
-
-
-void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
-                                         TypeIdentifierTypeObjectPairSeq& types,
-                                         TypeIdentifierPairSeq& complete_to_minimal)
-{
-  TypeIdentifierSeq dummy;
-  collect_types_info_from_cache(type_ids, types, complete_to_minimal, dummy);
 }
 
 

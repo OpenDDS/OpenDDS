@@ -30,10 +30,9 @@ public:
   const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
   void add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj);
 
-  // For Type Lookup reply
+  // For Type Lookup Service request / reply
   void get_type_objects(const TypeIdentifierSeq& type_ids,
-    TypeIdentifierTypeObjectPairSeq& types,
-    TypeIdentifierPairSeq& complete_to_minimal);
+    TypeIdentifierTypeObjectPairSeq& types);
   void add_type_objects_to_cache(TypeIdentifierTypeObjectPairSeq& types);
 
   // For adding local endpoint types
@@ -50,11 +49,6 @@ protected:
 
   typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
   TypeIdentifierWithSizeSeqMap type_dependencies_map_;
-
-  void collect_types_info_from_cache(const TypeIdentifierSeq& type_ids,
-    TypeIdentifierTypeObjectPairSeq& types,
-    TypeIdentifierPairSeq& complete_to_minimal,
-    TypeIdentifierSeq& not_found);
 
   TypeObject to_empty_;
 };
