@@ -1465,7 +1465,7 @@ namespace {
       extraction.endArgs();
       be_global->impl_ << "  bool discard_flag = false;\n"
                           "  const Encoding& encoding = strm.encoding();\n"
-		          "  ACE_UNUSED_ARG(encoding);\n";
+                          "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
