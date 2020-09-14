@@ -48,7 +48,7 @@ public:
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);
     publication.remote_data_[0].transport_type = "rtps_udp";
-    message_block_to_sequence (mb_locator, publication.remote_data_[0].data);
+    message_block_to_sequence(mb_locator, publication.remote_data_[0].data);
   }
 
   int run() {

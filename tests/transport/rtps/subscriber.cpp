@@ -288,7 +288,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);
     publication.remote_data_[0].transport_type = "rtps_udp";
-    message_block_to_sequence (mb_locator, publication.remote_data_[0].data);
+    message_block_to_sequence(mb_locator, publication.remote_data_[0].data);
 
     std::cerr << "***Association Data created for Publication for SimpleDataReader to init\n";
     std::cout << "Associating with pub..." << std::endl;
