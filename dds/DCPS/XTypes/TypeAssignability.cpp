@@ -1067,6 +1067,15 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
     return false;
   }
 
+  // T1.bit_bound and T2.bit_bound are in the same equivalence set
+  const BitBound ta_bit_bound = ta.enumerated_type.header.common.bit_bound;
+  const BitBound tb_bit_bound = tb.enumerated_type.header.common.bit_bound;
+  if (((ta_bit_bound >= 1 && ta_bit_bound <= 8) && !(tb_bit_bound >= 1 && tb_bit_bound <= 8)) ||
+      ((ta_bit_bound >= 9 && ta_bit_bound <= 16) && !(tb_bit_bound >= 9 && tb_bit_bound <= 16)) ||
+      ((ta_bit_bound >= 17 && ta_bit_bound <= 32) && !(tb_bit_bound >= 17 && tb_bit_bound <= 32))) {
+    return false;
+  }
+
   const size_t size_a = ta.enumerated_type.literal_seq.members.size();
   const size_t size_b = tb.enumerated_type.literal_seq.members.size();
   std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_name_to_value;
