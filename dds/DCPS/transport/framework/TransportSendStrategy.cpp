@@ -1938,6 +1938,7 @@ TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
 bool TransportSendStrategy::fragmentation_helper(
   TransportQueueElement* original_element, TqeVector& elements_to_send)
 {
+  original_element->increment_loan();
   const size_t space = space_available();
   for (TransportQueueElement* e = original_element; e;) {
     const size_t esize = e->msg()->total_length();

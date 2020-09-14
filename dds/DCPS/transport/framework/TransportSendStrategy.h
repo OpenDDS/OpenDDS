@@ -150,9 +150,9 @@ public:
   ///
   /// @param original_element data sample to send, may be larger than max msg size
   /// @param elements_to_send populated by this method with either original_element
-  ///                         or fragments created from it.  Elements which are not
-  ///                         the original_element need to be cleaned up by the
-  ///                         caller using data_delivered or data_dropped.
+  ///                         or fragments created from it.  Elements need to be
+  ///                         cleaned up by the caller using data_delivered or
+  ///                         data_dropped.
   /// @return operation succeeded
   bool fragmentation_helper(
     TransportQueueElement* original_element, TqeVector& elements_to_send);
