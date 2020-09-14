@@ -140,14 +140,14 @@ struct AnonSeqStruct {
 
 //nested struct for use in struct, union, and sequence
 @mutable
-@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
 struct NestedStruct {
   @try_construct(DISCARD) str64 str64_d;
   @try_construct(USE_DEFAULT) str64 str64_ud;
   @try_construct(TRIM) str64 str64_t;
 };
 @mutable
-@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
 struct NestedStructTrim {
   @try_construct(DISCARD) str20 str20_d;
   @try_construct(USE_DEFAULT) str20 str20_ud;
@@ -239,7 +239,7 @@ struct NestedStruct3 {
 
 module TryCon {
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct StringTest1 {
     str64 str64_d;
     str64 str64_ud;
@@ -247,7 +247,7 @@ module TryCon {
   };
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct StringTest2 {
     @try_construct(DISCARD) str20 str20_d;
     @try_construct(USE_DEFAULT) str20 str20_ud;
@@ -255,19 +255,19 @@ module TryCon {
   };
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct NestedStructTest1{
     NestedStruct2 ns;
   };
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct NestedStructTest2{
     @try_construct(USE_DEFAULT) NestedStruct3 ns;
   };
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct TrimStruct1 {
     str64 str64_t;
     wstr64 wstr64_t;
@@ -294,7 +294,7 @@ module TryCon {
   };
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct TrimStruct2 {
     @try_construct(TRIM) str20 str20_t;
     @try_construct(TRIM) wstr20 wstr20_t;
@@ -323,7 +323,7 @@ module TryCon {
   };
   @topic
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct AnonSeqStruct {
     sequence<EnumType, 3> AnonEnumSeqBound;
     //primitives
@@ -343,7 +343,7 @@ module TryCon {
   };
   @topic
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct AnonSeqStructTrim {
     @try_construct(TRIM) sequence<EnumType, 2> AnonEnumSeqBound;
     //primitives
@@ -363,7 +363,7 @@ module TryCon {
   };
   @topic
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct AnonSeqStructDefault {
     @try_construct(USE_DEFAULT) sequence< EnumType, 2> AnonEnumSeqBound;
     //primitives
@@ -383,7 +383,7 @@ module TryCon {
   };
   @topic
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct AnonArrStruct {
     //string
     str64 AnonStringArr[3];
@@ -397,7 +397,7 @@ module TryCon {
 
   @topic
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct AnonArrStructTrim {
     //string
     str20 AnonStringArr @try_construct(TRIM) [3];
@@ -411,7 +411,7 @@ module TryCon {
 
   @topic
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct AnonArrStructUseDefault {
     //string
     str20 AnonStringArr @try_construct(USE_DEFAULT) [3];
@@ -423,42 +423,42 @@ module TryCon {
     ShortSeqBound AnonArrShortSeqBound @try_construct(USE_DEFAULT) [3];
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructString1 {
     str64 str64_d;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructString2 {
     str20 str20_d;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructWString1 {
     wstr64 wstr64_d;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructWString2 {
     wstr20 wstr20_d;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructStruct1 {
     NestedStruct ns;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructStruct2 {
     NestedStructTrim ns;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructArray1 {
     str64Array sa;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructArray2 {
     str20Array sa;
   };
@@ -467,33 +467,33 @@ module TryCon {
   typedef sequence<str20> ss_20;
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructSequence1 {
     ss_64 ss64;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructSequence2 {
     ss_20 ss20;
   };
 
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructArrayAnon1 {
     str64 saa64[3];
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructArrayAnon2 {
     str20 saa20[3];
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructSequenceAnon1 {
     sequence <str64> ssa64;
   };
   @mutable
-  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
   struct DiscardStructSequenceAnon2 {
     sequence <str20> ssa20;
   };

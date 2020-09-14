@@ -11,7 +11,7 @@
 
 using namespace OpenDDS::XTypes;
 using namespace OpenDDS::DCPS;
-const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
+const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
 
 TEST(TestTryCon, string)
 {
@@ -26,17 +26,17 @@ TEST(TestTryCon, string)
   TryCon::StringTest2 actual;
 
   {
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
     // Serialize and Compare CDR
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer << sent);
     }
 
     // Deserialize and Compare C++ Values
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer >> actual);
     }
     ASSERT_EQ(actual.str20_d(), expected.str20_d());
@@ -45,15 +45,15 @@ TEST(TestTryCon, string)
   }
   {
     sent.str64_d("abcdefghijklmnopqrstuvwxyz");
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer << sent);
     }
 
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_FALSE(serializer >> actual);
     }
   }
@@ -66,15 +66,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructString2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
      {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -85,15 +85,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructWString2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -106,15 +106,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructStruct2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -125,15 +125,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructArray2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -145,15 +145,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructSequence2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -164,15 +164,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructArrayAnon2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -184,15 +184,15 @@ TEST(StructandSeq, DISCARD)
     TryCon::DiscardStructSequenceAnon2 actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_FALSE(serializer >> actual);
       }
     }
@@ -276,15 +276,15 @@ TEST(StructandSeq, USE_DEFAULT)
   TryCon::NestedStructTest2 actual;
 
   {
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer << sent);
     }
 
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer >> actual);
     }
     ASSERT_EQ(actual.ns().str20_d(), expected.ns().str20_d());
@@ -461,15 +461,15 @@ TEST(StructandSeq, TRIM)
   TryCon::TrimStruct2 actual;
 
   {
-    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+    Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer << sent);
     }
 
     {
-      Serializer serializer(data.get(), xcdr1);
+      Serializer serializer(data.get(), xcdr2);
       EXPECT_TRUE(serializer >> actual);
     }
     ASSERT_EQ(actual.str20_t(), expected.str20_t());
@@ -617,15 +617,15 @@ TEST(AnonSequence, Trim)
     TryCon::AnonSeqStructTrim actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer >> actual);
       }
     }
@@ -714,15 +714,15 @@ TEST(AnonSequence, USE_DEFAULT)
     TryCon::AnonSeqStructDefault actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer >> actual);
       }
     }
@@ -781,15 +781,15 @@ TEST(AnonArray, TRIM)
     TryCon::AnonArrStructTrim actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer >> actual);
       }
     }
@@ -847,15 +847,15 @@ TEST(AnonArray, USE_DEFAULT)
     TryCon::AnonArrStructUseDefault actual;
 
     {
-      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr1, sent)));
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer << sent);
       }
 
       {
-        Serializer serializer(data.get(), xcdr1);
+        Serializer serializer(data.get(), xcdr2);
         EXPECT_TRUE(serializer >> actual);
       }
     }
