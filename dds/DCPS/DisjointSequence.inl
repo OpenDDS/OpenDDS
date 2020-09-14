@@ -86,7 +86,7 @@ DisjointSequence::insert_filtered(const SequenceRange& range, const DisjointSequ
 {
   for (SequenceNumber i = range.first; i <= range.second; ++i) {
     if (filter.contains(i) && !insert(i)) {
-        return false;
+      return false;
     }
   }
   return true;
