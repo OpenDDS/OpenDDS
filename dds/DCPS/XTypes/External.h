@@ -49,7 +49,6 @@ public:
   bool operator==(const External& other) const { return ptr_ == other.ptr_; }
   bool operator!=(const External& other) const { return ptr_ != other.ptr_; }
   bool operator<(const External& other) const { return ptr_ < other.ptr_; }
-  bool operator>(const External& other) const { return ptr_ > other.ptr_; }
   operator bool() const { return ptr_; }
   //  bool is_locked() const;
   //  void lock();
