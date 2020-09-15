@@ -274,8 +274,9 @@ module DDS {
     };
     */
     //constants for TypeConsistencyEnforcementQosPolicy::kind field
-    const short DISALLOW_TYPE_COERCION = 1;
-    const short ALLOW_TYPE_COERCION = 2;
+    typedef short TypeConsistencyEnforcementQosPolicyKind_t;
+    const TypeConsistencyEnforcementQosPolicyKind_t DISALLOW_TYPE_COERCION = 1;
+    const TypeConsistencyEnforcementQosPolicyKind_t ALLOW_TYPE_COERCION = 2;
     /*
     const QosPolicyId_t TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID = 24;
     const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME =
@@ -285,8 +286,7 @@ module DDS {
     // @appendable
     */
     struct TypeConsistencyEnforcementQosPolicy {
-      // TypeConsistencyKind kind;
-      short kind;
+      TypeConsistencyEnforcementQosPolicyKind_t kind;
       boolean ignore_sequence_bounds;
       boolean ignore_string_bounds;
       boolean ignore_member_names;
