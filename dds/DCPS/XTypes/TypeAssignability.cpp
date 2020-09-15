@@ -1067,7 +1067,7 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
     return false;
   }
 
-  // T1.bit_bound and T2.bit_bound are in the same equivalence set
+  // T1.bit_bound and T2.bit_bound are in the same equivalence set (DDSXTY14-34)
   const BitBound ta_bit_bound = ta.enumerated_type.header.common.bit_bound;
   const BitBound tb_bit_bound = tb.enumerated_type.header.common.bit_bound;
   if (((ta_bit_bound >= 1 && ta_bit_bound <= 8) && !(tb_bit_bound >= 1 && tb_bit_bound <= 8)) ||
