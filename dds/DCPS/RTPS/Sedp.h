@@ -496,7 +496,7 @@ private:
     DDS::ReturnCode_t send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
-      DCPS::SequenceNumber& rpc_sequence,
+      const DCPS::SequenceNumber& rpc_sequence,
       const DCPS::RepoId& participant_id);
   };
 

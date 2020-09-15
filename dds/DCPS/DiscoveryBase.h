@@ -1144,7 +1144,7 @@ namespace OpenDDS {
               if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
                 XTypes::TypeIdentifierSeq type_ids;
                 type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
+                md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
                 MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
                 if (md_it != matching_data_buffer_.end()) {
                   // TLS_TODO: is this scenario possible?
@@ -1161,7 +1161,7 @@ namespace OpenDDS {
               if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
                 XTypes::TypeIdentifierSeq type_ids;
                 type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = ++(type_lookup_service_->rpc_sequence_number_);
+                md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
                 MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
                 if (md_it != matching_data_buffer_.end()) {
                   // TLS_TODO: is this scenario possible?

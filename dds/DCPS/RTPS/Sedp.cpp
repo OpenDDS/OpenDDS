@@ -3165,7 +3165,7 @@ bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
   return type_lookup_request_writer_->send_type_lookup_request(type_ids,
                                                                remote_reader,
                                                                sequence,
-                                                               type_lookup_service_->rpc_sequence_number_,
+                                                               type_lookup_service_->rpc_sequence_number(),
                                                                participant_id_) == DDS::RETCODE_OK;
 }
 
@@ -3601,7 +3601,7 @@ DDS::ReturnCode_t
 Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                                         const DCPS::RepoId& reader,
                                                         DCPS::SequenceNumber& sequence,
-                                                        DCPS::SequenceNumber& rpc_sequence,
+                                                        const DCPS::SequenceNumber& rpc_sequence,
                                                         const DCPS::RepoId& participant_id)
 {
   XTypes::TypeLookup_Request type_lookup_request;
