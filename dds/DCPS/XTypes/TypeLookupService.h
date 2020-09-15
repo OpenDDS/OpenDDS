@@ -50,7 +50,7 @@ public:
     return rpc_sequence_number_;
   }
 
-protected:
+private:
   // Only minimal Type Objects for now
   typedef std::map<TypeIdentifier, TypeObject> TypeObjectMap;
   TypeObjectMap type_object_map_;
