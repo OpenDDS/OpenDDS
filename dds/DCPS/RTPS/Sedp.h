@@ -546,7 +546,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      const DCPS::Extensibility extensibility) = 0;
+      DCPS::Extensibility extensibility) = 0;
   };
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
@@ -563,7 +563,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      const DCPS::Extensibility extensibility);
+      DCPS::Extensibility extensibility);
   };
 
   typedef DCPS::RcHandle<DiscoveryReader> DiscoveryReader_rch;
@@ -592,7 +592,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      const DCPS::Extensibility extensibility);
+      DCPS::Extensibility extensibility);
   };
 
   typedef DCPS::RcHandle<LivelinessReader> LivelinessReader_rch;
@@ -611,7 +611,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      const DCPS::Extensibility extensibility);
+      DCPS::Extensibility extensibility);
   };
 
   typedef DCPS::RcHandle<SecurityReader> SecurityReader_rch;
@@ -646,7 +646,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      const DCPS::Extensibility extensibility);
+      DCPS::Extensibility extensibility);
 
     DDS::ReturnCode_t process_tl_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
@@ -672,7 +672,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      const DCPS::Extensibility extensibility);
+      DCPS::Extensibility extensibility);
 
     DDS::ReturnCode_t process_tl_reply(DCPS::Serializer& ser);
   };

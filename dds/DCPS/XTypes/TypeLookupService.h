@@ -40,7 +40,7 @@ public:
 
   bool type_object_in_cache(const TypeIdentifier& ti);
 
-  OpenDDS::DCPS::SequenceNumber rpc_sequence_number_;
+  DCPS::SequenceNumber rpc_sequence_number_;
 
 protected:
   // Only minimal Type Objects for now

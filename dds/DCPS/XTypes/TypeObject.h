@@ -786,10 +786,10 @@ namespace XTypes {
 
       switch (kind_) {
       case TI_STRONGLY_CONNECTED_COMPONENT:
-        return (sc_component_id() < other.sc_component_id());
+        return sc_component_id() < other.sc_component_id();
       case EK_COMPLETE:
       case EK_MINIMAL:
-        return (memcmp(equivalence_hash(), other.equivalence_hash(), sizeof equivalence_hash()) < 0);
+        return memcmp(equivalence_hash(), other.equivalence_hash(), sizeof equivalence_hash()) < 0;
       case TI_STRING8_SMALL:
       case TI_STRING16_SMALL:
         return string_sdefn() < other.string_sdefn();

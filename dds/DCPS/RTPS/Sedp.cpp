@@ -3166,7 +3166,7 @@ bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                                                remote_reader,
                                                                sequence,
                                                                type_lookup_service_->rpc_sequence_number_,
-                                                               participant_id_)  == DDS::RETCODE_OK;
+                                                               participant_id_) == DDS::RETCODE_OK;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3645,10 +3645,8 @@ DDS::ReturnCode_t
 Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sample,
                                            XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  DCPS::RepoId reader = sample.header_.publication_id_;
-  reader.entityId = ENTITYID_TL_SVC_REPLY_READER;
+  DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
   DCPS::SequenceNumber sequence = 0;
-
   type_lookup_reply.header.remote_ex = DDS::RPC::REMOTE_EX_OK;
 
   // Determine message length
@@ -3851,7 +3849,7 @@ void
 Sedp::LivelinessReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  const DCPS::Extensibility extensibility)
+  DCPS::Extensibility extensibility)
 {
   ACE_UNUSED_ARG(extensibility);
 
@@ -3886,16 +3884,13 @@ void
 Sedp::SecurityReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  const DCPS::Extensibility extensibility)
+  DCPS::Extensibility extensibility)
 {
-ACE_UNUSED_ARG(sample);
-ACE_UNUSED_ARG(entity_id);
-ACE_UNUSED_ARG(ser);
-ACE_UNUSED_ARG(extensibility);
-
-const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+  ACE_UNUSED_ARG(extensibility);
 
 #ifdef OPENDDS_SECURITY
+  const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
   if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
     DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
     if (!(ser >> *data)) {
@@ -3914,6 +3909,10 @@ const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_i
     }
     sedp_.task_.enqueue_volatile_message_secure(id, move(data));
   }
+#else
+  ACE_UNUSED_ARG(sample);
+  ACE_UNUSED_ARG(entity_id);
+  ACE_UNUSED_ARG(ser);
 #endif
 }
 
@@ -3921,7 +3920,7 @@ void
 Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  const DCPS::Extensibility extensibility)
+  DCPS::Extensibility extensibility)
 {
   const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
 
@@ -4098,7 +4097,7 @@ void
 Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  const DCPS::Extensibility extensibility)
+  DCPS::Extensibility extensibility)
 {
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(entity_id);
@@ -4122,7 +4121,7 @@ void
 Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  const DCPS::Extensibility extensibility)
+  DCPS::Extensibility extensibility)
 {
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(entity_id);
