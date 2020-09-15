@@ -98,7 +98,7 @@ OpenDDS_Dcps_Export
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
 
 OpenDDS_Dcps_Export
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(DDS::DataRepresentationIdSeq qos);
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos);
 
 } // namespace DCPS
 } // namespace OpenDDS
