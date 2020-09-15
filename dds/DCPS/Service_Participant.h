@@ -155,7 +155,7 @@ public:
   const DDS::PublisherQos& initial_PublisherQos() const;
   const DDS::DataReaderQos& initial_DataReaderQos() const;
   const DDS::SubscriberQos& initial_SubscriberQos() const;
-  const DDS::TypeConsistencyEnforcementQosPolicy initial_TypeConsistencyEnforcementQosPolicy() const;
+  const DDS::TypeConsistencyEnforcementQosPolicy& initial_TypeConsistencyEnforcementQosPolicy() const;
 
   /**
    * This accessor is to provide the configurable number of chunks
