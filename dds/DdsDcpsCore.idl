@@ -474,7 +474,6 @@ module DDS {
       @id(0x002E) TopicDataQosPolicy topic_data;
       @id(0x002D) GroupDataQosPolicy group_data;
       @id(0x0073) DataRepresentationQosPolicy representation;
-      @id(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
     };
 
     BUILT_IN_TOPIC_TYPE
