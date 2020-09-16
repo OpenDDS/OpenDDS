@@ -3881,10 +3881,8 @@ void
 Sedp::SecurityReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  DCPS::Extensibility extensibility)
+  DCPS::Extensibility)
 {
-  ACE_UNUSED_ARG(extensibility);
-
 #ifdef OPENDDS_SECURITY
   const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
 
@@ -4091,15 +4089,11 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 }
 
 void
-Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& sample,
-  const DCPS::EntityId_t& entity_id,
+Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample&,
+  const DCPS::EntityId_t&,
   DCPS::Serializer& ser,
-  DCPS::Extensibility extensibility)
+  DCPS::Extensibility)
 {
-  ACE_UNUSED_ARG(sample);
-  ACE_UNUSED_ARG(entity_id);
-  ACE_UNUSED_ARG(extensibility);
-
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (DDS::RETCODE_OK != process_tl_request(ser, type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
@@ -4115,15 +4109,11 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
 }
 
 void
-Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sample,
-  const DCPS::EntityId_t& entity_id,
+Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample&,
+  const DCPS::EntityId_t&,
   DCPS::Serializer& ser,
-  DCPS::Extensibility extensibility)
+  DCPS::Extensibility)
 {
-  ACE_UNUSED_ARG(sample);
-  ACE_UNUSED_ARG(entity_id);
-  ACE_UNUSED_ARG(extensibility);
-
   if (!process_tl_reply(ser)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
       ACE_TEXT("failed to take type lookup reply\n")));
