@@ -15,6 +15,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+enum {
+  cdr_header_size = 4
+};
+
 /**
  * Servant for DataWriter interface of the Traits::MessageType data type.
  *
@@ -129,6 +133,9 @@ public:
   };
 
   DataWriterImpl_T()
+    : marshaled_size_(0)
+    , key_marshaled_size_(0)
+    , marshal_skip_serialize_(false)
   {
   }
 
@@ -415,6 +422,16 @@ public:
     return DDS::RETCODE_OK;
   }
 
+  void set_marshal_skip_serialize(bool value)
+  {
+    marshal_skip_serialize_ = value;
+  }
+
+  bool get_marshal_skip_serialize() const
+  {
+    return marshal_skip_serialize_;
+  }
+
 private:
 
   /**
@@ -433,6 +450,43 @@ private:
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
+    if (marshal_skip_serialize_) {
+      size_t effective_size = 0, padding = 0;
+      if (marshaled_size_) {
+        effective_size = marshaled_size_;
+      } else {
+        // TODO:  Fix this.
+        //TraitsType::gen_find_size(instance_data, effective_size, padding);
+        if (encapsulated) {
+          effective_size += cdr_header_size;
+        }
+      }
+      if (encapsulated) {
+        effective_size += padding;
+      }
+      ACE_NEW_MALLOC_RETURN(tmp_mb,
+        static_cast<ACE_Message_Block*>(
+          mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+        ACE_Message_Block(
+          effective_size,
+          ACE_Message_Block::MB_DATA,
+          0, // cont
+          0, // data
+          data_allocator_.get(), // allocator_strategy
+          get_db_lock(), // data block locking_strategy
+          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+          ACE_Time_Value::zero,
+          ACE_Time_Value::max_time,
+          db_allocator_.get(),
+          mb_allocator_.get()),
+          0);
+      mb.reset(tmp_mb);
+      if (!MarshalTraitsType::to_message_block(*mb, instance_data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+                   ACE_TEXT("attempting to skip serialize but bad from_message_block.\n")));
+      }
+      return mb.release();
+    }
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
       // Don't use the cached allocator for the registered sample message
       // block.
@@ -599,10 +653,13 @@ private:
   }
 
   InstanceMap instance_map_;
+  size_t marshaled_size_;
+  size_t key_marshaled_size_;
   unique_ptr<DataAllocator> data_allocator_;
   unique_ptr<MessageBlockAllocator> mb_allocator_;
   unique_ptr<DataBlockAllocator> db_allocator_;
   EncodingMode encoding_mode_;
+  bool marshal_skip_serialize_;
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.

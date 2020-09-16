@@ -902,29 +902,6 @@ namespace {
     }
   }
 
-  string getAlignment(AST_Type* elem)
-  {
-    if (elem->node_type() == AST_Decl::NT_enum) {
-      return "4";
-    }
-    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
-    case AST_PredefinedType::PT_short:
-    case AST_PredefinedType::PT_ushort:
-      return "2";
-    case AST_PredefinedType::PT_long:
-    case AST_PredefinedType::PT_ulong:
-    case AST_PredefinedType::PT_float:
-      return "4";
-    case AST_PredefinedType::PT_longlong:
-    case AST_PredefinedType::PT_ulonglong:
-    case AST_PredefinedType::PT_double:
-    case AST_PredefinedType::PT_longdouble:
-      return "8";
-    default:
-      return "";
-    }
-  }
-
   void gen_array(UTL_ScopedName* name, AST_Array* arr)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -2177,11 +2154,20 @@ namespace {
   bool generate_marshal_traits(
     AST_Decl* node, const std::string& cxx,
     const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
-    bool is_bounded, bool key_is_bounded)
+    bool is_bounded, bool key_is_bounded, bool octetSeqOnly, std::string field_name)
   {
+    string exp, fn = " { return false; }";
+    if (octetSeqOnly) {
+      const ACE_CString exporter = be_global->export_macro();
+      if (exporter != "") {
+        exp = string(" ") + exporter.c_str();
+      }
+      fn = ";";
+    }
+
     be_global->header_ <<
       "template <>\n"
-      "struct MarshalTraits<" << cxx << "> {\n"
+      "struct" << exp << " MarshalTraits<" << cxx << "> {\n"
       "  static bool gen_is_bounded_size() { return " <<
         (is_bounded ? "true" : "false") << "; }\n"
       "  static bool gen_is_bounded_key_size() { return " <<
@@ -2191,12 +2177,55 @@ namespace {
       "  {\n"
         << fill_datareprseq(repr, "seq", "    ") <<
       "  }\n"
-      "\n"
+      "\n";
+
+    if (octetSeqOnly) {
+      const char* get_len;
+      const char* set_len;
+      const char* get_buffer;
+      const char* buffer_pre = "";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        get_len = "size";
+        set_len = "resize";
+        get_buffer = "[0]";
+        buffer_pre = "&";
+        field_name += "()";
+      } else {
+        get_len = set_len = "length";
+        get_buffer = ".get_buffer()";
+      }
+
+      be_global->impl_ <<
+        "bool MarshalTraits<" << cxx << ">::to_message_block(ACE_Message_Block& mb, "
+        "const " << cxx << "& stru)\n"
+        "{\n"
+        "  if (mb.size(stru." << field_name << "." << get_len << "()) != 0) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  return mb.copy(reinterpret_cast<const char*>(" << buffer_pre << "stru."
+                              << field_name << get_buffer << "), stru." << field_name << "." << get_len
+                              << "()) == 0;\n"
+        "}\n\n"
+        "bool MarshalTraits<" << cxx << ">::from_message_block(" << cxx << "& stru, "
+        "const ACE_Message_Block& mb)\n"
+        "{\n"
+        "  stru." << field_name << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
+        "  std::memcpy(" << buffer_pre << "stru." << field_name << get_buffer
+                              << ", mb.rd_ptr(), mb.length());\n"
+        "  return true;\n"
+        "}\n\n";
+    }
+
+    be_global->header_ <<
+      "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)" << fn << "\n"
+      "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)" << fn << "\n";
+
     /*
      * This is used for the CDR header.
      * This is just for the base type, nested types can have different
      * extensibilities.
      */
+    be_global->header_ <<
       "  static Extensibility extensibility() { return ";
     switch (exten) {
     case extensibilitykind_final:
@@ -2589,6 +2618,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         break;
       }
     }
+    bool octetSeqOnly = false;
+    if (fields.size() == 1) {
+      AST_Type* const type = resolveActualType(fields[0]->field_type());
+      const Classification fld_cls = classify(type);
+      if (fld_cls & CL_SEQUENCE) {
+        AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+        AST_Type* const base = seq->base_type();
+        if (classify(base) & CL_PRIMITIVE) {
+          AST_PredefinedType* const pt = AST_PredefinedType::narrow_from_decl(base);
+          octetSeqOnly = pt->pt() == AST_PredefinedType::PT_octet;
+        }
+      }
+    }
     {
       Function max_serialized_size("max_serialized_size", "bool");
       max_serialized_size.addArg("encoding", "const Encoding&");
@@ -2842,8 +2884,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(
-        node, cxx, repr, exten, is_bounded_struct, bounded_key)) {
+    if (!generate_marshal_traits(node, cxx, repr, exten, is_bounded_struct, bounded_key, octetSeqOnly, fields[0]->local_name()->get_string())) {
       return false;
     }
   }
@@ -3246,7 +3287,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n";
+          "  size_t mutable_running_total = 0;\n"
           "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
       }
 
@@ -3343,5 +3384,5 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   return generate_marshal_traits(
     node, cxx, repr, exten, is_bounded,
-    true /* Only the discriminator, which is always bounded, can be the key */);
+    true /* Only the discriminator, which is always bounded, can be the key */, false, "");
 }

@@ -71,6 +71,7 @@ public:
   virtual ~AgentInfoListener() {}
   virtual void update_agent_info(const DCPS::RepoId& a_local_guid,
                                  const AgentInfo& a_agent_info) = 0;
+  virtual void remove_agent_info(const DCPS::RepoId& a_local_guid) = 0;
 };
 
 class OpenDDS_Rtps_Export Configuration {
