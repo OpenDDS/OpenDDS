@@ -165,13 +165,15 @@ public:
     locators[0].port = remote_addr.get_port_number();
     address_to_bytes(locators[0].address, remote_addr);
 
-    // TODO: Fix this.
-    size_t size_locator = 0, padding_locator = 0;
-    //gen_find_size(locators, size_locator, padding_locator);
-    ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-    // Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-    // ser_loc << locators;
-    // ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
+    const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
+    size_t size_locator = 0;
+    serialized_size(locators_encoding, size_locator, locators);
+    ACE_Message_Block mb_locator(size_locator + 1);
+    Serializer ser_loc(&mb_locator, locators_encoding);
+    if (!(ser_loc << locators) ||
+        !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+      std::cerr << "subscriber serialize locators failed\n";
+    }
 
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);

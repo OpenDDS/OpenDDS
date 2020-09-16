@@ -288,13 +288,16 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     locators[0].port = remote_addr.get_port_number();
     address_to_bytes(locators[0].address, remote_addr);
 
-    // TODO: Fix this.
-    size_t size_locator = 0, padding_locator = 0;
-    //OpenDDS::DCPS::gen_find_size(locators, size_locator, padding_locator);
-    ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-    // Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, OpenDDS::DCPS::Serializer::ALIGN_CDR);
-    // ser_loc << locators;
-    // ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
+    const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
+    size_t size_locator = 0;
+    serialized_size(locators_encoding, size_locator, locators);
+    ACE_Message_Block mb_locator(size_locator + 1);
+    Serializer ser_loc(&mb_locator, locators_encoding);
+    if (!(ser_loc << locators) ||
+        !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+      std::cerr << "subscriber serialize locators failed\n";
+      return 1;
+    }
 
     AssociationData publication;
     publication.remote_id_ = remote;

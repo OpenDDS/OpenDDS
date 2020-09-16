@@ -15,10 +15,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-enum {
-  cdr_header_size = 4
-};
-
 /**
  * Servant for DataWriter interface of the Traits::MessageType data type.
  *
@@ -133,9 +129,7 @@ public:
   };
 
   DataWriterImpl_T()
-    : marshaled_size_(0)
-    , key_marshaled_size_(0)
-    , marshal_skip_serialize_(false)
+    : marshal_skip_serialize_(false)
   {
   }
 
@@ -451,19 +445,7 @@ private:
     ACE_Message_Block* tmp_mb;
 
     if (marshal_skip_serialize_) {
-      size_t effective_size = 0, padding = 0;
-      if (marshaled_size_) {
-        effective_size = marshaled_size_;
-      } else {
-        // TODO:  Fix this.
-        //TraitsType::gen_find_size(instance_data, effective_size, padding);
-        if (encapsulated) {
-          effective_size += cdr_header_size;
-        }
-      }
-      if (encapsulated) {
-        effective_size += padding;
-      }
+      const size_t effective_size = encoding_mode_.buffer_size(instance_data);
       ACE_NEW_MALLOC_RETURN(tmp_mb,
         static_cast<ACE_Message_Block*>(
           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
@@ -487,6 +469,7 @@ private:
       }
       return mb.release();
     }
+
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
       // Don't use the cached allocator for the registered sample message
       // block.
@@ -653,8 +636,6 @@ private:
   }
 
   InstanceMap instance_map_;
-  size_t marshaled_size_;
-  size_t key_marshaled_size_;
   unique_ptr<DataAllocator> data_allocator_;
   unique_ptr<MessageBlockAllocator> mb_allocator_;
   unique_ptr<DataBlockAllocator> db_allocator_;
