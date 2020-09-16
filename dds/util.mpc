@@ -1,4 +1,4 @@
-project(OpenDDSUtil): acelib, install {
+project(OpenDDS_Util): acelib, install {
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
