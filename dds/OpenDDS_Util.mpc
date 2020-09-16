@@ -1,25 +1,23 @@
-project(OpenDDS_Util): acelib, install {
+project: acelib, install {
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
   libout = $(DDS_ROOT)/lib
-  pch_header   = DCPS/DdsDcps_pch.h
-  pch_source   = DCPS/DdsDcps_pch.cpp
 
-  Source_Files {
+  Header_Files {
     DCPS/Hash.h
     DCPS/SafetyProfileStreams.h
     DCPS/Serializer.h
-    DCPS/XTypes
     DCPS/debug.h
+    DCPS/XTypes
   }
 
-  Header_Files {
+  Source_Files {
     DCPS/Hash.cpp
     DCPS/SafetyProfileStreams.cpp
     DCPS/Serializer.cpp
-    DCPS/XTypes
     DCPS/debug.cpp
+    DCPS/XTypes
   }
 
 }

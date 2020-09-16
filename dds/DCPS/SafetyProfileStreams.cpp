@@ -18,7 +18,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 OPENDDS_STRING
-to_dds_string(::CORBA::UShort to_convert)
+to_dds_string(unsigned short to_convert)
 {
   const char* fmt = "%hu";
   const int buff_size = 5 + 1; // note +1 for null terminator
