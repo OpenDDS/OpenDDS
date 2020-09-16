@@ -4089,7 +4089,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 }
 
 void
-Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample&,
+Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t&,
   DCPS::Serializer& ser,
   DCPS::Extensibility)
