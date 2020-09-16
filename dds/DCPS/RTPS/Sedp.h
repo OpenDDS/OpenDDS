@@ -592,7 +592,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      DCPS::Extensibility extensibility);
+      DCPS::Extensibility);
   };
 
   typedef DCPS::RcHandle<LivelinessReader> LivelinessReader_rch;

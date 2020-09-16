@@ -3713,7 +3713,6 @@ DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::process_tl_reply(DCPS::Serializer& ser)
 {
   XTypes::TypeLookup_Reply type_lookup_reply;
-  // TLS_TODO: verify reply processing
   if (!(ser >> type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_tl_reply - ")
               ACE_TEXT("failed to deserialize type lookup reply\n")));
@@ -3849,10 +3848,8 @@ void
 Sedp::LivelinessReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& entity_id,
   DCPS::Serializer& ser,
-  DCPS::Extensibility extensibility)
+  DCPS::Extensibility)
 {
-  ACE_UNUSED_ARG(extensibility);
-
   const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
   const bool full_message = !sample.header_.key_fields_only_;
 

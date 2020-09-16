@@ -1137,7 +1137,6 @@ namespace OpenDDS {
           md.reader = reader;
           md.time_added_to_map = MonotonicTimePoint::now();
 
-          // TLS_TODO: rpc communication needs to be tested when XTypes are ready
           if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
               (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
             if (!writer_local) {
@@ -1147,14 +1146,12 @@ namespace OpenDDS {
                 md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
                 MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
                 if (md_it != matching_data_buffer_.end()) {
-                  // TLS_TODO: is this scenario possible?
                   md_it->second = md;
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
                 send_type_lookup_request(type_ids, writer);
                 type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                // TLS_TODO: sanity check on locks
                 return;
               }
             } else if (!reader_local) {
@@ -1164,14 +1161,12 @@ namespace OpenDDS {
                 md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
                 MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
                 if (md_it != matching_data_buffer_.end()) {
-                  // TLS_TODO: is this scenario possible?
                   md_it->second = md;
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
                 send_type_lookup_request(type_ids, reader);
                 type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                // TLS_TODO: sanity check on locks
                 return;
               }
             }
@@ -1179,7 +1174,6 @@ namespace OpenDDS {
 
           MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
           if (md_it != matching_data_buffer_.end()) {
-            // TLS_TODO: is this scenario possible?
             md_it->second = md;
           } else {
             matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
@@ -1236,7 +1230,6 @@ namespace OpenDDS {
       void
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
       {
-        // TLS_TODO: sanity check on locks
         ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter end_iter = matching_data_buffer_.end();
 
@@ -1247,15 +1240,11 @@ namespace OpenDDS {
             ++iter;
           }
         }
-        // TLS_TODO: any other cleanup?
       }
 
       void
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
-        // TLS_TODO: sanity check on locks
-        // TLS_TODO: match_continue(it->second.writer, it->second.reader)
-        // will unlock '_lock'. Should it be locked here?
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter it;
