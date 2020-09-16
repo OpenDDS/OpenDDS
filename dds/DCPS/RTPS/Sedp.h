@@ -592,7 +592,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      DCPS::Extensibility);
+      DCPS::Extensibility extensibility);
   };
 
   typedef DCPS::RcHandle<LivelinessReader> LivelinessReader_rch;
@@ -611,7 +611,7 @@ private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      DCPS::Extensibility);
+      DCPS::Extensibility extensibility);
   };
 
   typedef DCPS::RcHandle<SecurityReader> SecurityReader_rch;
@@ -643,10 +643,10 @@ private:
     virtual ~TypeLookupRequestReader();
 
   private:
-    virtual void data_received_i(const DCPS::ReceivedDataSample&,
-      const DCPS::EntityId_t&,
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      DCPS::Extensibility);
+      DCPS::Extensibility extensibility);
 
     DDS::ReturnCode_t process_tl_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
@@ -669,10 +669,10 @@ private:
     virtual ~TypeLookupReplyReader();
 
   private:
-    virtual void data_received_i(const DCPS::ReceivedDataSample&,
-      const DCPS::EntityId_t&,
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      DCPS::Extensibility);
+      DCPS::Extensibility extensibility);
 
     DDS::ReturnCode_t process_tl_reply(DCPS::Serializer& ser);
   };

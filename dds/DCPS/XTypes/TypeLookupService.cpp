@@ -24,7 +24,7 @@ TypeLookupService::~TypeLookupService()
 
 
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
-                                         TypeIdentifierTypeObjectPairSeq& types)
+                                         TypeIdentifierTypeObjectPairSeq& types) const
 {
   for (CORBA::ULong i = 0; i < type_ids.length(); ++i) {
     const TypeObjectMap::iterator it_object = type_object_map_.find(type_ids[i]);
@@ -77,7 +77,7 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, cons
 }
 
 
-bool TypeLookupService::type_object_in_cache(const TypeIdentifier& ti)
+bool TypeLookupService::type_object_in_cache(const TypeIdentifier& ti) const
 {
   const TypeObjectMap::iterator it_type_id_with_size_seq = type_object_map_.find(ti);
   return it_type_id_with_size_seq != type_object_map_.end();
