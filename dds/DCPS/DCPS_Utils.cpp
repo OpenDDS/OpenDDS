@@ -408,18 +408,18 @@ DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresent
     ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
     return ids;
   } else {
-    for (CORBA::ULong i = 0; i < qos.length(); ++i) {
+    DDS::DataRepresentationIdSeq ids(qos.length());
+    ids.length(qos.length());
+    CORBA::ULong i = 0;
+    for (CORBA::ULong q = 0; q < qos.length(); ++q) {
       Encoding::Kind kind;
-      if (repr_to_encoding_kind(qos[i], kind) && Encoding::KIND_XCDR1 == kind) {
-        // erase XCDR1
-        const CORBA::ULong e = qos.length() - 1;
-        DDS::DataRepresentationIdSeq ids(e);
-        ids.length(e);
-        for (CORBA::ULong j = 0; j < e; ++j) {
-          ids[j] = qos[j < i ? j : (j + 1)];
-        }
-        return ids;
+      if (repr_to_encoding_kind(qos[q], kind) && Encoding::KIND_XCDR1 != kind) {
+        ids[i++] = qos[q];
       }
+    }
+    if (i < qos.length()) {
+      ids.length(i);
+      return ids;
     }
   }
   return qos;
