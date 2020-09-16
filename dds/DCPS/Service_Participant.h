@@ -637,6 +637,11 @@ private:
   bool is_discovery_template(const OPENDDS_STRING& name);
 
 public:
+  // thread status reporting
+  TimeDuration get_thread_status_interval();
+
+  ThreadStatus* get_thread_statuses();
+
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
   MonitorFactory* monitor_factory_;
@@ -704,7 +709,9 @@ private:
   bool bidir_giop_;
 
   /// Enable Internal Thread Status Monitoring
-  TimeDuration internal_thread_reporting_;
+  TimeDuration thread_status_interval_;
+
+  ThreadStatus thread_status_;
 
   /// Enable Monitor functionality
   bool monitor_enabled_;

@@ -40,6 +40,7 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<InternalThreadBuiltinTopicData> InternalThreadBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<ConnectionRecord> ConnectionRecordDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
@@ -93,7 +94,7 @@ namespace OpenDDS {
                   DataWriterCallbacks* dwr)
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
-      {}
+      { }
 
       int svc()
       {
@@ -1768,6 +1769,16 @@ namespace OpenDDS {
       DDS::DataReader_var d =
         bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
       return dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
+    }
+
+    DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
+    {
+      if (!bit_subscriber_.in())
+        return 0;
+
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+      return dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
 

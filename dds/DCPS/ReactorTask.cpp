@@ -27,6 +27,8 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
+  , thread_status_(0)
+  , timeout_(TimeDuration(0))
   , use_async_send_(useAsyncSend)
   , timer_queue_(0)
 {
@@ -48,8 +50,11 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 }
 
 int
-OpenDDS::DCPS::ReactorTask::open(void*)
+OpenDDS::DCPS::ReactorTask::open(void*, TimeDuration timeout, ThreadStatus* thread_stat)
 {
+  // thread status reporting support
+  timeout_ = timeout;
+  thread_status_ = thread_stat;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
   if (use_async_send_) {
@@ -155,7 +160,30 @@ OpenDDS::DCPS::ReactorTask::svc()
 //MJM: Nevermind.
   try {
     // Tell the reactor to handle events.
-    reactor_->run_reactor_event_loop();
+    if (timeout_ == TimeDuration(0)) {
+     reactor_->run_reactor_event_loop();
+    } else {
+      ACE_thread_t tid = ACE_OS::thr_self();
+      ACE_Time_Value t = timeout_.value();
+      ACE_Time_Value expire = MonotonicTimePoint::now().value() + t;
+
+      while (state_ == STATE_RUNNING) {
+        reactor_->run_reactor_event_loop(t, 0);
+        ACE_Time_Value now = MonotonicTimePoint::now().value();
+        if (now > expire) {
+          expire = now + timeout_.value();
+          if (thread_status_) {
+            if (DCPS_debug_level > 4) {
+              ACE_DEBUG((LM_DEBUG,
+                        "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
+            }
+            thread_status_->lock.acquire_write();
+            thread_status_->map[tid] = now;
+            thread_status_->lock.release();
+          }
+        }
+      }
+    }
   } catch (const std::exception& e) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",

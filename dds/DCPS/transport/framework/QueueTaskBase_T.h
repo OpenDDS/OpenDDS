@@ -12,6 +12,9 @@
 
 #include "EntryExit.h"
 
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/Service_Participant.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -106,6 +109,8 @@ public:
     DBG_ENTRY("QueueTaskBase","svc");
 
     this->thr_id_ = ACE_OS::thr_self();
+    TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
+    ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
@@ -113,8 +118,30 @@ public:
       {
         GuardType guard(this->lock_);
 
-        if (this->queue_.is_empty()) {
-          this->work_available_.wait();
+        if (this->queue_.is_empty() && !shutdown_initiated_) {
+          if (interval > TimeDuration(0)) {
+            ACE_Time_Value t = interval.value();
+            ACE_Time_Value expire = MonotonicTimePoint::now().value() + t;
+
+            do {
+              this->work_available_.wait(&expire); // wait uses abstime
+              ACE_Time_Value now = MonotonicTimePoint::now().value();
+              if (now > expire) {
+                expire = now + interval.value();
+                if (status) {
+                  if (DCPS_debug_level > 4) {
+                    ACE_DEBUG((LM_DEBUG,
+                              "%T (%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                  }
+                  status->lock.acquire_write();
+                  status->map[thr_id_] = now;
+                  status->lock.release();
+                }
+              }
+            } while (this->queue_.is_empty() && !shutdown_initiated_);
+          } else {
+            this->work_available_.wait();
+          }
         }
 
         if (this->shutdown_initiated_)

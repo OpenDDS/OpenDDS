@@ -1879,7 +1879,24 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
+<<<<<<< HEAD
   tport_->open(sedp_.reactor_task());
+=======
+
+  if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
+    // configure thread status
+    DCPS::ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
+
+    thread_status_data_.guid = guid();
+    thread_status_data_.bit = internal_thread_bit();
+    thread_status_data_.status = status;
+
+    tport_->open(&thread_status_handler_, &thread_status_data_);
+  } else {
+    tport_->open();
+  }
+
+>>>>>>> Internal thread BIT implementation
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
@@ -2107,8 +2124,26 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
 }
 
 void
-Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
+Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task, ThreadStatusHandler* handler, ThreadStatusData *data)
 {
+  TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
+
+  if (interval <= TimeDuration(0)) {
+    reactor_task->open(0);
+  } else {
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) Thread status monitoring is active - ")
+                ACE_TEXT("status interval = %u.\n"), interval.value().sec()));
+    }
+
+    reactor_task->open(0, interval, data->status);
+
+    ACE_Time_Value initial = interval.value();
+    ACE_Time_Value interval = initial;
+    reactor_task->get_reactor()->schedule_timer(handler, data, initial, interval);
+  }
+
 #ifdef OPENDDS_SECURITY
   // Add the endpoint before any sending and receiving occurs.
   ICE::Endpoint* endpoint = get_ice_endpoint();
@@ -3118,6 +3153,42 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
     results.insert(idx->first);
   }
 }
+
+int
+Spdp::ThreadStatusHandler::handle_timeout(const ACE_Time_Value &time, const void* thr_status_data)
+{
+  if (DCPS::DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Spdp::ThreadStatusHandler: Updating internal thread status BIT.\n"));
+  }
+
+  ThreadStatusData* tdata = (ThreadStatusData*)thr_status_data;
+
+  if (tdata->status && tdata->bit) {
+    tdata->status->lock.acquire_read();
+    DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
+
+    for (OPENDDS_MAP(ACE_thread_t, ACE_Time_Value)::const_iterator i = tdata->status->map.begin(); i != tdata->status->map.end(); ++i) {
+      const ACE_Time_Value t = i->second;
+      DCPS::InternalThreadBuiltinTopicData data;
+      ACE_OS::memcpy(&(data.guid), &(tdata->guid), 16);
+      data.thread_id = i->first;
+      data.timestamp.sec = t.sec();
+      data.timestamp.nanosec = t.usec() * 1000;
+
+      handle = tdata->bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+    }
+
+    tdata-> status->lock.release();
+  } else {
+    // Not necessarily and error. App could be shutting down.
+    ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
+  }
+
+  return 0;
+}
+
 
 #ifdef OPENDDS_SECURITY
 Spdp::ParticipantCryptoInfoPair

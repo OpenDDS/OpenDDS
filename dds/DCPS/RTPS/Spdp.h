@@ -212,6 +212,25 @@ private:
 
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
+  // thread status reporting
+  class ThreadStatusHandler : public ACE_Event_Handler
+  {
+    public:
+      int handle_timeout(const ACE_Time_Value &time, const void* ptr = 0);
+  };
+
+  ThreadStatusHandler thread_status_handler_;
+
+  struct ThreadStatusData {
+    DCPS::RepoId guid;
+    DCPS::InternalThreadBuiltinTopicDataDataReaderImpl *bit;
+    DCPS::ThreadStatus* status;
+
+    ThreadStatusData() : bit(0) { };
+  };
+
+  ThreadStatusData thread_status_data_;
+
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
@@ -239,7 +258,8 @@ private:
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch& reactor_task);
+    void open(const DCPS::ReactorTask_rch& reactor_task, ThreadStatusHandler* hp = 0, ThreadStatusData* dp = 0);
+
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);

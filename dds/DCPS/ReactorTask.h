@@ -30,14 +30,22 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+// thread status reporting forward
+struct ThreadStatus {
+  ACE_Recursive_Thread_Mutex lock;
+  OPENDDS_MAP(ACE_thread_t, ACE_Time_Value) map;
+};
+
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
 public virtual RcObject {
+
 public:
 
   explicit ReactorTask(bool useAsyncSend);
   virtual ~ReactorTask();
 
-  virtual int open(void*);
+public:
+  virtual int open(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0);
   virtual int svc();
   virtual int close(u_long flags = 0);
 
@@ -94,6 +102,10 @@ private:
   ACE_Proactor* proactor_;
   bool          use_async_send_;
   TimerQueueType* timer_queue_;
+
+  // thread status reporting
+  TimeDuration timeout_;
+  ThreadStatus* thread_status_;
 
   ReactorInterceptor_rch interceptor_;
 };

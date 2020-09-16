@@ -90,6 +90,27 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     }
   }
 
+  // Internal thread status topic
+  type_support =
+    Registered_Data_Types->lookup(participant, BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE);
+
+  if (CORBA::is_nil(type_support)) {
+    OpenDDS::DCPS::InternalThreadBuiltinTopicDataTypeSupport_var ts =
+      new OpenDDS::DCPS::InternalThreadBuiltinTopicDataTypeSupportImpl;
+
+    DDS::ReturnCode_t ret = ts->register_type(participant,
+      BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ")
+        ACE_TEXT("Discovery::create_bit_topics, ")
+        ACE_TEXT("register BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE returned %C.\n"),
+        retcode_to_string(ret)),
+        ret);
+    }
+  }
+
   DDS::Topic_var bit_part_loc_topic =
     participant->create_topic(BUILT_IN_PARTICIPANT_LOCATION_TOPIC,
       BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
