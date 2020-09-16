@@ -104,6 +104,11 @@ Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32
   return candidate;
 }
 
+Configuration* Configuration::instance()
+{
+  return ACE_Singleton<Configuration, ACE_Thread_Mutex>::instance();
+}
+
 Agent* Agent::instance()
 {
   return ACE_Singleton<AgentImpl, ACE_Thread_Mutex>::instance();

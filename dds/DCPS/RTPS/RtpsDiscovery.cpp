@@ -66,9 +66,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
   , max_spdp_sequence_msg_reset_check_(3)
-  , spdp_rtps_relay_beacon_period_(30, 0)
   , spdp_rtps_relay_send_period_(30, 0)
-  , sedp_rtps_relay_beacon_period_(30, 0)
   , use_rtps_relay_(false)
   , rtps_relay_only_(false)
   , use_ice_(false)
@@ -323,16 +321,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
           config->spdp_rtps_relay_address(addr);
         } else if (name == "SpdpRtpsRelayBeaconPeriod") {
-          const OPENDDS_STRING& value = it->second;
-          int period;
-          if (!DCPS::convertToInteger(value, period)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for SpdpRtpsRelayBeaconPeriod in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->spdp_rtps_relay_beacon_period(TimeDuration(period));
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                     ACE_TEXT("Entry SpdpRtpsRelayBeaconPeriod is deprecated and will be ignored.\n")));
         } else if (name == "SpdpRtpsRelaySendPeriod") {
           const OPENDDS_STRING& value = it->second;
           int period;
@@ -355,16 +346,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
           config->sedp_rtps_relay_address(addr);
         } else if (name == "SedpRtpsRelayBeaconPeriod") {
-          const OPENDDS_STRING& value = it->second;
-          int period;
-          if (!DCPS::convertToInteger(value, period)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for SedpRtpsRelayBeaconPeriod in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->sedp_rtps_relay_beacon_period(TimeDuration(period));
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                     ACE_TEXT("Entry SedpRtpsRelayBeaconPeriod is deprecated and will be ignored.\n")));
         } else if (name == "RtpsRelayOnly") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
@@ -417,7 +401,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().T_a(TimeDuration::from_msec(int_value));
+            ICE::Configuration::instance()->T_a(TimeDuration::from_msec(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -430,7 +414,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().connectivity_check_ttl(TimeDuration(int_value));
+            ICE::Configuration::instance()->connectivity_check_ttl(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -443,7 +427,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().checklist_period(TimeDuration(int_value));
+            ICE::Configuration::instance()->checklist_period(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -456,7 +440,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().indication_period(TimeDuration(int_value));
+            ICE::Configuration::instance()->indication_period(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -469,7 +453,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().nominated_ttl(TimeDuration(int_value));
+            ICE::Configuration::instance()->nominated_ttl(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -482,7 +466,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().server_reflexive_address_period(TimeDuration(int_value));
+            ICE::Configuration::instance()->server_reflexive_address_period(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -494,7 +478,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().server_reflexive_indication_count(int_value);
+            ICE::Configuration::instance()->server_reflexive_indication_count(int_value);
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -507,7 +491,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().deferred_triggered_check_ttl(TimeDuration(int_value));
+            ICE::Configuration::instance()->deferred_triggered_check_ttl(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -520,7 +504,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
           if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Agent::instance()->get_configuration().change_password_period(TimeDuration(int_value));
+            ICE::Configuration::instance()->change_password_period(TimeDuration(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

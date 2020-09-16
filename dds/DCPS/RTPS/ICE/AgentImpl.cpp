@@ -41,7 +41,7 @@ void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
                         WeakTaskPtr wtask)
 {
   if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
-    const MonotonicTimePoint release = std::max(last_execute_ + get_configuration().T_a(), a_release_time);
+    const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), a_release_time);
     execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - MonotonicTimePoint::now()));
   }
   tasks_.push(Item(a_release_time, wtask));
@@ -76,7 +76,7 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   check_invariants();
 
   if (!tasks_.empty()) {
-    const MonotonicTimePoint release = std::max(last_execute_ + get_configuration().T_a(), tasks_.top().release_time_);
+    const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), tasks_.top().release_time_);
     execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - now));
   }
 

@@ -62,6 +62,10 @@ ACE_UINT16 Attribute::length() const
   case ICE_CONTROLLED:
   case ICE_CONTROLLING:
     return 8;
+
+  case GUID_PREFIX:
+    return sizeof(DCPS::GuidPrefix_t);
+
   default:
     break;
   }
@@ -152,6 +156,15 @@ Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker)
   Attribute attribute;
   attribute.type = ICE_CONTROLLED;
   attribute.ice_tie_breaker = ice_tie_breaker;
+  return attribute;
+}
+
+OpenDDS_Rtps_Export
+Attribute make_guid_prefix(const DCPS::GuidPrefix_t& guid_prefix)
+{
+  Attribute attribute;
+  attribute.type = GUID_PREFIX;
+  std::memcpy(attribute.guid_prefix, guid_prefix, sizeof(guid_prefix));
   return attribute;
 }
 
@@ -418,6 +431,16 @@ bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
   }
   break;
 
+  case GUID_PREFIX: {
+    DCPS::GuidPrefix_t guid_prefix;
+    if (!(serializer.read_octet_array(guid_prefix, sizeof(guid_prefix)))) {
+      return false;
+    }
+
+    holder.attribute = make_guid_prefix(guid_prefix);
+  }
+  break;
+
   default: {
     if (!serializer.skip(attribute_length)) {
       return false;
@@ -545,6 +568,11 @@ bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder)
   }
   break;
 
+  case GUID_PREFIX: {
+    serializer.write_octet_array(holder.attribute.guid_prefix, sizeof(holder.attribute.guid_prefix));
+  }
+  break;
+
   default:
     // Don't serialize attributes that are not understood.
     return false;
@@ -577,7 +605,7 @@ bool TransactionId::operator!=(const TransactionId& other) const
 
 void Message::generate_transaction_id()
 {
-  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
+  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
 }
 
 void Message::clear_transaction_id()
@@ -701,7 +729,7 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
   block->wr_ptr(block->base() + HEADER_SIZE + length_for_message_integrity() - 24);
 
   // Compute the SHA1.
-  TheSecurityRegistry->fix_empty_default()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
+  TheSecurityRegistry->builtin_config()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
 
   // Write the correct length.
   block->wr_ptr(block->base() + 2);
@@ -820,6 +848,18 @@ bool Message::has_use_candidate() const
 {
   for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
     if (pos->type == STUN::USE_CANDIDATE) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Message::get_guid_prefix(DCPS::GuidPrefix_t& guid_prefix) const
+{
+  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+    if (pos->type == STUN::GUID_PREFIX) {
+      std::memcpy(guid_prefix, pos->guid_prefix, sizeof(guid_prefix));
       return true;
     }
   }

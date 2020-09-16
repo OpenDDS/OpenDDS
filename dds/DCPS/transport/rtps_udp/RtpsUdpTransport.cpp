@@ -12,6 +12,8 @@
 #include "RtpsUdpReceiveStrategy.h"
 
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/DiscoveryBase.h"
 
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
@@ -59,6 +61,30 @@ RtpsUdpTransport::get_ice_endpoint()
 }
 
 void
+RtpsUdpTransport::rtps_relay_only_now(bool flag)
+{
+  if (flag) {
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  } else {
+    if (!config().use_rtps_relay()) {
+      relay_stun_task_->disable();
+    }
+  }
+}
+
+void
+RtpsUdpTransport::use_rtps_relay_now(bool flag)
+{
+  if (flag) {
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  } else {
+    if (!config().rtps_relay_only()) {
+      relay_stun_task_->disable();
+    }
+  }
+}
+
+void
 RtpsUdpTransport::use_ice_now(bool after)
 {
   const bool before = config().use_ice();
@@ -76,6 +102,8 @@ RtpsUdpTransport::use_ice_now(bool after)
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
+  std::memcpy(local_prefix_, local_prefix, sizeof(local_prefix_));
+  relay_stun_task(DCPS::MonotonicTimePoint::now());
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
@@ -139,6 +167,8 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
                                    const TransportClient_rch& client)
 {
+  bit_sub_ = client->get_builtin_subscriber();
+
   if (is_shut_down_) {
     return AcceptConnectResult();
   }
@@ -181,6 +211,8 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
                                   const TransportClient_rch& client)
 {
+  bit_sub_ = client->get_builtin_subscriber();
+
   GuardThreadType guard_links(links_lock_);
 
   if (is_shut_down_) {
@@ -477,6 +509,9 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
 #endif
 
+  relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
+  relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+
   if (config.opendds_discovery_default_listener_) {
     link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
@@ -509,6 +544,8 @@ RtpsUdpTransport::shutdown_i()
     stop_ice();
   }
 #endif
+
+  relay_stun_task_->disable_and_wait();
 }
 
 void
@@ -543,7 +580,7 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
   ACE_INET_Addr remote_address;
 
   bool stop;
-  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), stop);
+  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), &transport, stop);
 
   return 0;
 }
@@ -727,6 +764,66 @@ RtpsUdpTransport::stop_ice()
   }
 
   ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
+}
+
+void
+RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
+{
+  if (!(config().use_rtps_relay() ||
+        config().rtps_relay_only())) {
+    return;
+  }
+
+  const ACE_INET_Addr stun_server_address = config().rtps_relay_address();
+
+  process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
+
+  if (stun_server_address != ACE_INET_Addr()) {
+    ice_endpoint_.send(stun_server_address, relay_srsm_.message());
+  }
+}
+
+void
+RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ConnectionRecord connection_record;
+  std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
+  connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+
+  if (!bit_sub_) {
+    return;
+  }
+
+  DDS::DataReader_var d = bit_sub_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+  if (!d) {
+    return;
+  }
+
+  DCPS::ConnectionRecordDataReaderImpl* dr = dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
+  if (!dr) {
+    return;
+  }
+
+  switch (sc) {
+  case ICE::ServerReflexiveStateMachine::None:
+    break;
+  case ICE::ServerReflexiveStateMachine::Set:
+  case ICE::ServerReflexiveStateMachine::Change:
+    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
+    break;
+  case ICE::ServerReflexiveStateMachine::Unset:
+    {
+      connection_record.address = to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+      const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);
+      dr->set_instance_state(ih, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      break;
+    }
+  }
+#else
+  ACE_UNUSED_ARG(sc);
+#endif
 }
 
 #endif

@@ -169,6 +169,8 @@ public:
     return change_password_period_;
   }
 
+  static Configuration* instance();
+
 private:
   // Mininum time between consecutive sends.
   // RFC 8445 Section 14.2
@@ -194,7 +196,6 @@ private:
 class OpenDDS_Rtps_Export Agent {
 public:
   virtual ~Agent() {}
-  virtual Configuration& get_configuration() = 0;
   virtual void add_endpoint(Endpoint* a_endpoint) = 0;
   virtual void remove_endpoint(Endpoint* a_endpoint) = 0;
   virtual AgentInfo get_local_agent_info(Endpoint* a_endpoint) const = 0;
@@ -224,6 +225,204 @@ public:
 
   static Agent* instance();
 };
+
+class ServerReflexiveStateMachine {
+public:
+  enum StateChange {
+    None,
+    Set,
+    Unset,
+    Change
+  };
+
+  ServerReflexiveStateMachine()
+    : indication_count_(0)
+  {}
+
+  // Return Unset if transitioning from a determined SRA to an undetermined SRA.
+  // Return None otherwise.
+  StateChange send(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix)
+  {
+    if (stun_server_address_ == ACE_INET_Addr() &&
+        address == ACE_INET_Addr()) {
+      // Do nothing.
+      return None;
+    } else if (stun_server_address_ == ACE_INET_Addr() &&
+               address != ACE_INET_Addr()) {
+      start(address, guid_prefix);
+      return None;
+    } else if (stun_server_address_ != ACE_INET_Addr() &&
+               address == ACE_INET_Addr()) {
+      return stop();
+    } else {
+      if (stun_server_address_ != address) {
+        const StateChange retval = stop();
+        start(address, guid_prefix);
+        return retval;
+      } else {
+        return next_send(indication_count_limit, guid_prefix);
+      }
+    }
+  }
+
+  // Return Set if transitioning from an undetermined SRA to a determined SRA.
+  // Return Change if transitioning from a determined SRA to a different SRA.
+  // Return None otherwise.
+  StateChange receive(const STUN::Message& message)
+  {
+    switch (message.class_) {
+    case STUN::SUCCESS_RESPONSE:
+      return success_response(message);
+
+    case STUN::ERROR_RESPONSE:
+      error_response(message);
+      return None;
+
+    case STUN::REQUEST:
+    case STUN::INDICATION:
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unsupported STUN message class %d\n"), message.class_));
+      return None;
+    }
+
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unknown STUN message class %d\n"), message.class_));
+    return None;
+  }
+
+  const STUN::Message& message() const { return message_; }
+  const ACE_INET_Addr& unset_stun_server_address() const { return unset_stun_server_address_; }
+  const ACE_INET_Addr& stun_server_address() const { return stun_server_address_; }
+
+  bool is_response(const STUN::Message& message) const
+  {
+    return message.transaction_id == message_.transaction_id;
+  }
+
+private:
+  void start(const ACE_INET_Addr& address, const DCPS::GuidPrefix_t& guid_prefix)
+  {
+    OPENDDS_ASSERT(address != ACE_INET_Addr());
+    OPENDDS_ASSERT(stun_server_address_ == ACE_INET_Addr());
+
+    // Send a binding request.
+    message_ = STUN::Message();
+    message_.class_ = STUN::REQUEST;
+    message_.method = STUN::BINDING;
+    message_.generate_transaction_id();
+    message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
+    message_.append_attribute(STUN::make_fingerprint());
+
+    stun_server_address_ = address;
+    server_reflexive_address_ = ACE_INET_Addr();
+    indication_count_ = 0;
+  }
+
+  StateChange stop()
+  {
+    OPENDDS_ASSERT(stun_server_address_ != ACE_INET_Addr());
+    const StateChange retval = server_reflexive_address_ != ACE_INET_Addr() ? Unset : None;
+    unset_stun_server_address_ = stun_server_address_;
+    stun_server_address_ = ACE_INET_Addr();
+    server_reflexive_address_ = ACE_INET_Addr();
+    indication_count_ = 0;
+    return retval;
+  }
+
+  StateChange next_send(size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix)
+  {
+    StateChange retval = None;
+
+    if (message_.class_ == STUN::REQUEST &&
+        server_reflexive_address_ != ACE_INET_Addr()) {
+      // Two consecutive sends in a row causes a reset.
+      retval = Unset;
+      server_reflexive_address_ = ACE_INET_Addr();
+      unset_stun_server_address_ = stun_server_address_;
+    }
+
+    if (server_reflexive_address_ == ACE_INET_Addr() || indication_count_ >= indication_count_limit) {
+      // Send a request.
+      message_ = STUN::Message();
+      message_.class_ = STUN::REQUEST;
+      message_.method = STUN::BINDING;
+      message_.generate_transaction_id();
+      message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
+      message_.append_attribute(STUN::make_fingerprint());
+      indication_count_ = 0;
+    } else {
+      // Send an indication.
+      message_ = STUN::Message();
+      message_.class_ = STUN::INDICATION;
+      message_.method = STUN::BINDING;
+      message_.generate_transaction_id();
+      message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
+      message_.append_attribute(STUN::make_fingerprint());
+      ++indication_count_;
+    }
+
+    return retval;
+  }
+
+  StateChange success_response(const STUN::Message& message)
+  {
+    std::vector<STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
+
+    if (!unknown_attributes.empty()) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING Unknown comprehension required attributes\n")));
+      return None;
+    }
+
+    ACE_INET_Addr server_reflexive_address;
+
+    if (!message.get_mapped_address(server_reflexive_address)) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING No (XOR)_MAPPED_ADDRESS attribute\n")));
+      return None;
+    }
+
+    if (server_reflexive_address == ACE_INET_Addr()) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING (XOR)_MAPPED_ADDRESS is not valid\n")));
+      return None;
+    }
+
+    message_.class_ = STUN::INDICATION;
+    if (server_reflexive_address == server_reflexive_address_) {
+      return None;
+    } else {
+      server_reflexive_address_ = server_reflexive_address;
+      return Change;
+    }
+  }
+
+  void error_response(const STUN::Message& message)
+  {
+    if (message.method != STUN::BINDING) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING Unsupported STUN method\n")));
+      return;
+    }
+
+
+    if (!message.has_error_code()) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING No error code\n")));
+      return;
+    }
+
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING STUN error response code=%d reason=%s\n"), message.get_error_code(), message.get_error_reason().c_str()));
+
+    if (message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && message.has_unknown_attributes()) {
+      std::vector<STUN::AttributeType> unknown_attributes = message.get_unknown_attributes();
+
+      for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
+             limit = unknown_attributes.end(); pos != limit; ++pos) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING Unknown STUN attribute %d\n"), *pos));
+      }
+    }
+  }
+
+  STUN::Message message_;
+  ACE_INET_Addr unset_stun_server_address_;
+  ACE_INET_Addr stun_server_address_;
+  ACE_INET_Addr server_reflexive_address_;
+  size_t indication_count_;
+ };
 
 } // namespace ICE
 } // namespace OpenDDS

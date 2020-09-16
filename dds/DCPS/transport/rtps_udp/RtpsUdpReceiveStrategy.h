@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RTPS/ICE/Ice.h"
 #include "dds/DCPS/RcEventHandler.h"
 
 #include "ace/INET_Addr.h"
@@ -32,6 +33,7 @@ namespace ICE {
 
 namespace DCPS {
 
+class RtpsUdpTransport;
 class RtpsUdpDataLink;
 class ReceivedDataSample;
 
@@ -73,6 +75,7 @@ public:
                                       const ACE_SOCK_Dgram& socket,
                                       ACE_INET_Addr& remote_address,
                                       ICE::Endpoint* endpoint,
+                                      RtpsUdpTransport* tport,
                                       bool& stop);
 
 private:

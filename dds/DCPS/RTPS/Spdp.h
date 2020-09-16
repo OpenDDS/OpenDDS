@@ -309,8 +309,10 @@ private:
 #endif
     void send_relay(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_sender_;
-    void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> relay_beacon_;
+    void relay_stun_task(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
+    ICE::ServerReflexiveStateMachine relay_srsm_;
+    void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
   } *tport_;

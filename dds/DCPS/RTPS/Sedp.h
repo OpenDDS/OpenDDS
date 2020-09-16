@@ -431,6 +431,8 @@ private:
 
     void shutting_down() { shutting_down_ = true; }
 
+    DDS::Subscriber_var get_builtin_subscriber() const;
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;

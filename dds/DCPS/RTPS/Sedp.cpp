@@ -381,7 +381,6 @@ Sedp::init(const RepoId& guid,
 #endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());
-  rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();
   rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
   rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
 
@@ -3078,6 +3077,12 @@ Sedp::Endpoint::~Endpoint()
 {
   remove_all_msgs();
   transport_stop();
+}
+
+DDS::Subscriber_var
+Sedp::Endpoint::get_builtin_subscriber() const
+{
+  return sedp_.spdp_.bit_subscriber();
 }
 
 //---------------------------------------------------------------

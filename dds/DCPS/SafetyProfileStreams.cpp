@@ -7,6 +7,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/Definitions.h"
 
 #ifdef OPENDDS_SECURITY
 #  include "dds/DdsSecurityCoreC.h"
@@ -140,6 +141,13 @@ OPENDDS_STRING to_hex_dds_string(
     rv.push_back(nibble_to_hex_char(data[i]));
   }
   return rv;
+}
+
+OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr)
+{
+  ACE_TCHAR buffer[AddrToStringSize];
+  addr.addr_to_string(buffer, AddrToStringSize);
+  return ACE_TEXT_ALWAYS_CHAR(buffer);
 }
 
 const char* retcode_to_string(DDS::ReturnCode_t value)

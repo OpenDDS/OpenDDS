@@ -854,6 +854,10 @@ namespace OpenDDS {
       DataSampleHeader header;
       const int msg = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       header.message_id_ = static_cast<char>(msg);
+      const DDS::Time_t now = SystemTimePoint::now().to_dds_time();
+      header.source_timestamp_sec_ = now.sec;
+      header.source_timestamp_nanosec_ = now.nanosec;
+
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
       store_instance_data(move(data), header, instance, just_registered, filtered);
