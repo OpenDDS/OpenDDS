@@ -403,10 +403,24 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
 
 DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos) {
   if (qos.length() == 0) {
-    DDS::DataRepresentationIdSeq ids = qos;
+    DDS::DataRepresentationIdSeq ids(1);
     ids.length(1);
     ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
     return ids;
+  } else {
+    for (CORBA::ULong i = 0; i < qos.length(); ++i) {
+      Encoding::Kind kind;
+      if (repr_to_encoding_kind(qos[i], kind) && Encoding::KIND_XCDR1 == kind) {
+        // erase XCDR1
+        const CORBA::ULong e = qos.length() - 1;
+        DDS::DataRepresentationIdSeq ids(e);
+        ids.length(e);
+        for (CORBA::ULong j = 0; j < e; ++j) {
+          ids[j] = qos[j < i ? j : (j + 1)];
+        }
+        return ids;
+      }
+    }
   }
   return qos;
 }

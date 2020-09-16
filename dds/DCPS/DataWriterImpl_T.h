@@ -348,11 +348,15 @@ public:
       for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
         Encoding::Kind encoding_kind;
         if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-          if (Encoding::KIND_XCDR1 == encoding_kind ||
-              Encoding::KIND_XCDR2 == encoding_kind) {
+          if (Encoding::KIND_XCDR2 == encoding_kind) {
             encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
             success = true;
             break;
+          } else if (Encoding::KIND_XCDR1 == encoding_kind) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+                       ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                       ACE_TEXT("XCDR1 data representation is not currently supported.\n"),
+                       TraitsType::type_name()));
           } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
             // Supported but incompatible data representation
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")

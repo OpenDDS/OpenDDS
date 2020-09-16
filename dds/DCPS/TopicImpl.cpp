@@ -228,6 +228,9 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
   if (type_allowed_reprs.length() == 0) {
     return true;
   }
+  if (qos_ids.length() == 0) {
+    return false;
+  }
   //Data Writer will only use the 1st QoS declared
   if (is_data_writer) {
     DDS::DataRepresentationId_t id = qos_ids[0];
