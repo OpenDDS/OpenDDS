@@ -2,17 +2,26 @@
 #define RTPSRELAY_PARTICIPANT_LISTENER_H_
 
 #include "ListenerBase.h"
-#include "DomainStatisticsWriter.h"
+#include "DomainStatisticsReporter.h"
+
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace RtpsRelay {
 
 class ParticipantListener : public ListenerBase {
 public:
-  explicit ParticipantListener(DomainStatisticsWriter& stats_writer);
+  explicit ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+                               DomainStatisticsReporter& stats_reporter,
+                               ParticipantEntryDataWriter_ptr participant_writer);
 private:
   void on_data_available(DDS::DataReader_ptr reader) override;
+  void write_sample(const DDS::ParticipantBuiltinTopicData& data,
+                    const DDS::SampleInfo& info);
+  void unregister_instance(const DDS::SampleInfo& info);
 
-  DomainStatisticsWriter& stats_writer_;
+  OpenDDS::DCPS::DomainParticipantImpl* participant_;
+  DomainStatisticsReporter& stats_reporter_;
+  ParticipantEntryDataWriter_ptr writer_;
 };
 
 }

@@ -3,7 +3,7 @@
 
 #include "AssociationTable.h"
 #include "ListenerBase.h"
-#include "DomainStatisticsWriter.h"
+#include "DomainStatisticsReporter.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
 
@@ -13,7 +13,7 @@ class SubscriptionListener : public ListenerBase {
 public:
   SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                        ReaderEntryDataWriter_ptr writer,
-                       DomainStatisticsWriter& stats_writer);
+                       DomainStatisticsReporter& stats_reporter);
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
   void write_sample(const DDS::SubscriptionBuiltinTopicData& data,
@@ -22,7 +22,7 @@ private:
 
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   ReaderEntryDataWriter_ptr writer_;
-  DomainStatisticsWriter& stats_writer_;
+  DomainStatisticsReporter& stats_reporter_;
 };
 
 }

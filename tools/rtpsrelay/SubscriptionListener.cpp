@@ -6,10 +6,10 @@ namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            ReaderEntryDataWriter_ptr writer,
-                                           DomainStatisticsWriter& stats_writer)
+                                           DomainStatisticsReporter& stats_reporter)
   : participant_(participant)
   , writer_(writer)
-  , stats_writer_(stats_writer)
+  , stats_reporter_(stats_reporter)
 {}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
@@ -37,12 +37,12 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       write_sample(data[idx], infos[idx]);
-      stats_writer_.add_local_reader();
+      stats_reporter_.add_local_reader(OpenDDS::DCPS::MonotonicTimePoint::now());
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       unregister_instance(infos[idx]);
-      stats_writer_.remove_local_reader();
+      stats_reporter_.remove_local_reader(OpenDDS::DCPS::MonotonicTimePoint::now());
       break;
     }
   }
