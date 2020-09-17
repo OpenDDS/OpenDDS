@@ -244,7 +244,7 @@ BE_produce()
 
   // Get the root node.
   AST_Decl *d = idl_global->root();
-  AST_Root *root = AST_Root::narrow_from_decl(d);
+  AST_Root *root = dynamic_cast<AST_Root*>(d);
 
   if (root == 0) {
     ACE_ERROR((LM_ERROR,
