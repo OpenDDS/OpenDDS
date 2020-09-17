@@ -336,7 +336,7 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
     return false;
   }
   if (IS_APPENDABLE == a_exten || IS_FINAL == a_exten) {
-    const size_t num_members = std::min(ta.struct_type.member_seq.length(),
+    const size_t num_members = (std::min)(ta.struct_type.member_seq.length(),
                                         tb.struct_type.member_seq.length());
     for (size_t i = 0; i < num_members; ++i) {
       if (ta.struct_type.member_seq[i].common.member_id !=
