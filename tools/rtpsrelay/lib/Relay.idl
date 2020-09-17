@@ -65,16 +65,19 @@ module RtpsRelay {
     unsigned long nanosec;
   };
 
+  @topic
   struct ParticipantStatistics {
-    string address;
+    @key GUID_t guid;
     unsigned long messages_in;
     unsigned long long bytes_in;
     unsigned long messages_out;
     unsigned long long bytes_out;
     unsigned long max_fan_out;
+    unsigned long error_count;
+    Duration_t interval;
+    //string last_activity_timestamp;
+    //last activity timestamp
   };
-
-  typedef sequence<ParticipantStatistics> ParticipantStatisticsSequence;
 
   @topic
   struct HandlerStatistics {
@@ -89,7 +92,8 @@ module RtpsRelay {
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
     unsigned long local_active_participants;
-    ParticipantStatisticsSequence participant_statistics;
+    unsigned long error_count;
+    unsigned long governor_count;
   };
 
   @topic
@@ -101,4 +105,11 @@ module RtpsRelay {
     unsigned long total_writers;
     unsigned long total_readers;
   };
+
+  @topic
+  struct ParticipantEntry {
+    @key GUID_t guid;
+    DDS::UserDataQosPolicy user_data;
+  };
+
 };
