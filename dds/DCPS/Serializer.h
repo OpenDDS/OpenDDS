@@ -48,8 +48,6 @@
 #include "PoolAllocator.h"
 #include "Message_Block_Ptr.h"
 
-#include <tao/String_Alloc.h>
-
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
 
@@ -415,13 +413,19 @@ public:
 
   /// Read a narrow string.
   size_t read_string(ACE_CDR::Char*& dest,
-    ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = CORBA::string_alloc,
-    void str_free(ACE_CDR::Char*) = CORBA::string_free);
+                     ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = 0,
+                     void str_free(ACE_CDR::Char*) = 0);
+
+  void free_string(ACE_CDR::Char* str,
+                   void str_free(ACE_CDR::Char*) = 0);
 
   /// Read a wide string.
   size_t read_string(ACE_CDR::WChar*& dest,
-    ACE_CDR::WChar* str_alloc(ACE_CDR::ULong) = CORBA::wstring_alloc,
-    void str_free(ACE_CDR::WChar*) = CORBA::wstring_free);
+                     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong) = 0,
+                     void str_free(ACE_CDR::WChar*) = 0);
+
+  void free_string(ACE_CDR::WChar* str,
+                   void str_free(ACE_CDR::WChar*) = 0);
 
   /// Skip the logical rd_ptr() over a given number of bytes = n * size.
   /// If alignment is enabled, skips any padding to align to 'size' before

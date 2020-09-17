@@ -11,8 +11,6 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/Serializer.h"
 
-#include <tao/Array_VarOut_T.h>
-
 #include <ace/CDR_Base.h>
 
 #include <algorithm>
@@ -21,6 +19,32 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+  template<typename T, typename T_slice, typename TAG>
+  class Fake_TAO_Array_Forany_T {
+  public:
+    typedef T_slice _slice_type;
+
+    Fake_TAO_Array_Forany_T (_slice_type *p)
+      : ptr_(p)
+    {}
+
+    typedef const _slice_type *   _in_type;
+    typedef       _slice_type * & _out_type;
+
+    _in_type      in (void) const
+    {
+      return (const T_slice *) this->ptr_;
+    }
+
+    _out_type     out (void)
+    {
+      return this->ptr_;
+    }
+
+  private:
+    _slice_type * ptr_;
+  };
 
   OpenDDS_Dcps_Export
   const DCPS::Encoding& get_typeobject_encoding();
@@ -176,7 +200,7 @@ namespace XTypes {
   typedef ACE_CDR::Octet EquivalenceHash[14];
   struct EquivalenceHash_tag {};
   typedef ACE_CDR::Octet EquivalenceHash_slice;
-  typedef TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
+  typedef Fake_TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
 
   // First 4 bytes of MD5 of of a member name converted to bytes
   // using UTF-8 encoding and without a 'nul' terminator.
@@ -184,7 +208,7 @@ namespace XTypes {
   typedef ACE_CDR::Octet NameHash[4];
   struct NameHash_tag {};
   typedef ACE_CDR::Octet NameHash_slice;
-  typedef TAO_Array_Forany_T<NameHash, NameHash_slice, NameHash_tag> NameHash_forany;
+  typedef Fake_TAO_Array_Forany_T<NameHash, NameHash_slice, NameHash_tag> NameHash_forany;
 
   // Long Bound of a collection type
   typedef ACE_CDR::ULong LBound;

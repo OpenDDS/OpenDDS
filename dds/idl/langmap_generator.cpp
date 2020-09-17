@@ -23,6 +23,8 @@ using namespace AstTypeClassification;
 struct GeneratorBase;
 
 namespace {
+  std::string string_ns = "::CORBA";
+
   GeneratorBase* generator_ = 0;
 
   std::map<AST_PredefinedType::PredefinedType, std::string> primtype_;
@@ -291,12 +293,12 @@ struct GeneratorBase
           "  }\n"
           "  void " << field_name << " (const " << primtype << "* x) {\n"
           "    _reset();\n"
-          "    this->_u." << field_name << " = ::CORBA::string_dup(x);\n"
+          "    this->_u." << field_name << " = " << string_ns << "::string_dup(x);\n"
           "    _discriminator = " << first_label.str() << ";\n"
           "  }\n"
           "  void " << field_name << " (const " << helper << "& x) {\n"
           "    _reset();\n" <<
-          "    this->_u." << field_name << " = ::CORBA::string_dup(x.in());\n"
+          "    this->_u." << field_name << " = " << string_ns << "::string_dup(x.in());\n"
           "    _discriminator = " << first_label.str() << ";\n"
           "  }\n"
           "  const " << primtype << "* " << field_name << " () const {\n"
@@ -403,7 +405,7 @@ struct GeneratorBase
         "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << string_ns << "::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
@@ -430,7 +432,7 @@ struct GeneratorBase
         "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << string_ns << "::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
@@ -484,7 +486,7 @@ struct GeneratorBase
       // Do nothing.
     } else if (cls & CL_STRING) {
       ss <<
-        "    ::CORBA::string_free(this->_u." << name << ");\n"
+        "    " << string_ns << "::string_free(this->_u." << name << ");\n"
         "    this->_u." << name << " = 0;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
@@ -1740,14 +1742,17 @@ void langmap_generator::init()
 {
   switch (be_global->language_mapping()) {
   case BE_GlobalData::LANGMAP_FACE_CXX:
+    string_ns = "::FACE";
     generator_ = &FaceGenerator::instance;
     generator_->init();
     break;
   case BE_GlobalData::LANGMAP_SP_CXX:
+    string_ns = "::CORBA";
     generator_ = &SafetyProfileGenerator::instance;
     generator_->init();
     break;
   case BE_GlobalData::LANGMAP_CXX11:
+    string_ns = "::CORBA";
     generator_ = &Cxx11Generator::instance;
     generator_->init();
     break;

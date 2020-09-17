@@ -3,4 +3,6 @@ project: dds_taolib {
   libs += OpenDDS_Util
   includes += $(DDS_ROOT)
   libpaths += $(DDS_ROOT)/lib
+  macros   += NOTAO
+
 }

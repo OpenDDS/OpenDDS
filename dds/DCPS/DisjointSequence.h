@@ -80,8 +80,8 @@ public:
   /// bit_index is 0-based.
   /// Precondition: the array 'bits' has at least ceil(num_bits / 32) entries.
   bool insert(SequenceNumber value,
-              CORBA::ULong num_bits,
-              const CORBA::Long bits[]);
+              ACE_CDR::ULong num_bits,
+              const ACE_CDR::Long bits[]);
 
   /// Inverse of insert(value, num_bits, bits).  Populates array of
   /// bitmap[length] with the bitmap of ranges above the cumulative_ack() value.
@@ -92,9 +92,9 @@ public:
   /// true, the 1's in the bitmap represent the missing_sequence_ranges()
   /// instead of the present_sequence_ranges().
   /// Precondition: the array 'bits' has 'length' entries allocated.
-  bool to_bitmap(CORBA::Long bitmap[],
-                 CORBA::ULong length,
-                 CORBA::ULong& num_bits,
+  bool to_bitmap(ACE_CDR::Long bitmap[],
+                 ACE_CDR::ULong length,
+                 ACE_CDR::ULong& num_bits,
                  bool invert = false) const;
 
   /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
@@ -129,9 +129,9 @@ private:
 
 public:
   /// Set the bits in range [low, high] in the bitmap, updating num_bits.
-  static bool fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
-                                CORBA::Long bitmap[], CORBA::ULong length,
-                                CORBA::ULong& num_bits);
+  static bool fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
+                                ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
+                                ACE_CDR::ULong& num_bits);
 };
 
 

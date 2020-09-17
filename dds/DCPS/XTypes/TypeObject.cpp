@@ -427,12 +427,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   if (seq.length() == 0) {
     return;
   }
-  max_serialized_size(encoding, size, CORBA::ULong(), seq.length());
+  max_serialized_size(encoding, size, ACE_CDR::ULong(), seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
@@ -444,7 +444,7 @@ bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
@@ -468,7 +468,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
@@ -480,7 +480,7 @@ bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
@@ -499,12 +499,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   if (seq.length() == 0) {
     return;
   }
-  max_serialized_size(encoding, size, CORBA::Long(), seq.length());
+  max_serialized_size(encoding, size, ACE_CDR::Long(), seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
@@ -516,7 +516,7 @@ bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
@@ -990,18 +990,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSizeSeq& seq)
 {
   DCPS::serialized_size_ulong(encoding, size);
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSizeSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm << seq[i])) {
       return false;
     }
@@ -1011,12 +1011,12 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSizeSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSizeSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
   seq.length(length);
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
       return false;
     }
@@ -1815,7 +1815,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   }
   switch (kind) {
   case XTypes::TK_BOOLEAN: {
-    CORBA::Boolean tmp;
+    ACE_CDR::Boolean tmp;
     if (strm >> ACE_InputCDR::to_boolean(tmp)) {
       uni.boolean_value = tmp;
       uni.kind = kind;
@@ -1824,7 +1824,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_BYTE: {
-    CORBA::Octet tmp;
+    ACE_CDR::Octet tmp;
     if (strm >> ACE_InputCDR::to_octet(tmp)) {
       uni.byte_value = tmp;
       uni.kind = kind;
@@ -1833,7 +1833,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_INT16: {
-    CORBA::Short tmp;
+    ACE_CDR::Short tmp;
     if (strm >> tmp) {
       uni.int16_value = tmp;
       uni.kind = kind;
@@ -1842,7 +1842,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_UINT16: {
-    CORBA::UShort tmp;
+    ACE_CDR::UShort tmp;
     if (strm >> tmp) {
       uni.uint_16_value = tmp;
       uni.kind = kind;
@@ -1851,7 +1851,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_INT32: {
-    CORBA::Long tmp;
+    ACE_CDR::Long tmp;
     if (strm >> tmp) {
       uni.int32_value = tmp;
       uni.kind = kind;
@@ -1860,7 +1860,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_UINT32: {
-    CORBA::ULong tmp;
+    ACE_CDR::ULong tmp;
     if (strm >> tmp) {
       uni.uint32_value = tmp;
       uni.kind = kind;
@@ -1869,7 +1869,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_INT64: {
-    CORBA::LongLong tmp;
+    ACE_CDR::LongLong tmp;
     if (strm >> tmp) {
       uni.int64_value = tmp;
       uni.kind = kind;
@@ -1878,7 +1878,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_UINT64: {
-    CORBA::ULongLong tmp;
+    ACE_CDR::ULongLong tmp;
     if (strm >> tmp) {
       uni.uint64_value = tmp;
       uni.kind = kind;
@@ -1887,7 +1887,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_FLOAT32: {
-    CORBA::Float tmp;
+    ACE_CDR::Float tmp;
     if (strm >> tmp) {
       uni.float32_value = tmp;
       uni.kind = kind;
@@ -1896,7 +1896,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_FLOAT64: {
-    CORBA::Double tmp;
+    ACE_CDR::Double tmp;
     if (strm >> tmp) {
       uni.float64_value = tmp;
       uni.kind = kind;
@@ -1905,7 +1905,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_FLOAT128: {
-    CORBA::LongDouble tmp;
+    ACE_CDR::LongDouble tmp;
     if (strm >> tmp) {
       uni.float128_value = tmp;
       uni.kind = kind;
@@ -1914,7 +1914,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_CHAR8: {
-    CORBA::Char tmp;
+    ACE_CDR::Char tmp;
     if (strm >> ACE_InputCDR::to_char(tmp)) {
       uni.char_value = tmp;
       uni.kind = kind;
@@ -1923,7 +1923,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_CHAR16: {
-    CORBA::WChar tmp;
+    ACE_CDR::WChar tmp;
     if (strm >> ACE_InputCDR::to_wchar(tmp)) {
       uni.wchar_value = tmp;
       uni.kind = kind;
@@ -1932,7 +1932,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_ENUM: {
-    CORBA::Long tmp;
+    ACE_CDR::Long tmp;
     if (strm >> tmp) {
       uni.enumerated_value = tmp;
       uni.kind = kind;
@@ -2908,7 +2908,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 {
   // TODO: needs correct implementation
   DCPS::serialized_size_ulong(encoding, size);
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }
 }
@@ -2916,11 +2916,11 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& seq)
 {
   // TODO: needs correct implementation
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm << seq[i])) {
       return false;
     }
@@ -2931,12 +2931,12 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& seq)
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& seq)
 {
   // TODO: needs correct implementation
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
   seq.length(length);
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
       return false;
     }

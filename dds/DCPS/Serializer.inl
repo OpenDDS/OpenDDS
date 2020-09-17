@@ -1340,7 +1340,7 @@ operator>>(Serializer& s, OPENDDS_STRING& x)
   char* buf = 0;
   const size_t length = s.read_string(buf);
   x.assign(buf, length);
-  CORBA::string_free(buf);
+  s.free_string(buf);
   return s.good_bit();
 }
 
@@ -1357,7 +1357,7 @@ operator>>(Serializer& s, OPENDDS_WSTRING& x)
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
   x.assign(buf, length);
-  CORBA::wstring_free(buf);
+  s.free_string(buf);
   return s.good_bit();
 }
 
