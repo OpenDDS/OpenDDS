@@ -36,7 +36,7 @@ namespace {
     if (cls & (CL_ARRAY | CL_SEQUENCE)) return "Array";
     if (cls & CL_PRIMITIVE) {
       AST_Type* actual = resolveActualType(type);
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(actual);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(actual);
       if (pt) *pt = p->pt();
       switch (p->pt()) {
       case AST_PredefinedType::PT_char:
@@ -158,7 +158,7 @@ namespace {
 
     } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
       AST_Type* real_type = resolveActualType(type);
-      AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
+      AST_Sequence* seq = dynamic_cast<AST_Sequence*>(real_type);
       AST_Type* elem = seq->base_type();
       strm <<
         "  {\n"
@@ -319,7 +319,7 @@ namespace {
 
     } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
       AST_Type* real_type = resolveActualType(type);
-      AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
+      AST_Sequence* seq = dynamic_cast<AST_Sequence*>(real_type);
       AST_Type* elem = seq->base_type();
       if (prop_index) {
         strm <<
@@ -480,7 +480,7 @@ bool rapidjson_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   switch (type->node_type()) {
   case AST_Decl::NT_sequence: {
     NamespaceGuard ng;
-    AST_Sequence* seq = AST_Sequence::narrow_from_decl(type);
+    AST_Sequence* seq = dynamic_cast<AST_Sequence*>(type);
     const std::string cxx = scoped(name);
     AST_Type* elem = seq->base_type();
     {
@@ -524,7 +524,7 @@ bool rapidjson_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   }
   case AST_Decl::NT_array: {
     NamespaceGuard ng;
-    AST_Array* array = AST_Array::narrow_from_decl(type);
+    AST_Array* array = dynamic_cast<AST_Array*>(type);
     const std::string cxx = scoped(name);
     AST_Type* elem = array->base_type();
     {

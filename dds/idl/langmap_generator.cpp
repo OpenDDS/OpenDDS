@@ -43,14 +43,14 @@ namespace {
   }
 
   std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
-    AST_Array* const arr = AST_Array::narrow_from_decl(type);
+    AST_Array* const arr = dynamic_cast<AST_Array*>(type);
     std::string ret;
     for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
       elems *= arr->dims()[dim]->ev()->u.ulval;
       if (dim) ret += "[0]";
     }
     AST_Type* base = resolveActualType(arr->base_type());
-    if (AST_Array::narrow_from_decl(base)) {
+    if (dynamic_cast<AST_Array*>(base)) {
       ret += "[0]" + array_dims(base, elems);
     }
     return ret;
@@ -86,13 +86,13 @@ struct GeneratorBase
 
   std::string map_type(AST_Type* type)
   {
-    if (AST_Typedef::narrow_from_decl(type)) {
+    if (dynamic_cast<AST_Typedef*>(type)) {
       return scoped(type->name());
     }
     const Classification cls = classify(type);
     if (cls & CL_PRIMITIVE) {
       AST_Type* actual = resolveActualType(type);
-      return primtype_[AST_PredefinedType::narrow_from_decl(actual)->pt()];
+      return primtype_[dynamic_cast<AST_PredefinedType*>(actual)->pt()];
     }
     if (cls & CL_STRING) {
       const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
@@ -218,7 +218,7 @@ struct GeneratorBase
         break;
       case AST_Expression::EV_enum:
         {
-          AST_Enum* e = AST_Enum::narrow_from_decl(the_union->disc_type());
+          AST_Enum* e = dynamic_cast<AST_Enum*>(the_union->disc_type());
           if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
             first_label << scoped(e->name()) << "::"
               << e->value_to_name(dv.u.enum_val)->last_component()->get_string();
@@ -1016,7 +1016,7 @@ struct FaceGenerator : GeneratorBase
         if (cls & CL_ARRAY) {
           std::string indent("  ");
           NestedForLoops nfl("int", "i",
-            AST_Array::narrow_from_decl(field_type), indent, true);
+            dynamic_cast<AST_Array*>(field_type), indent, true);
           be_global->impl_ <<
             indent << "if (" << field_name << nfl.index_ << " != rhs."
             << field_name << nfl.index_ << ") {\n" <<
@@ -1247,7 +1247,7 @@ struct SafetyProfileGenerator : GeneratorBase
         if (cls & CL_ARRAY) {
           std::string indent("  ");
           NestedForLoops nfl("int", "i",
-            AST_Array::narrow_from_decl(field_type), indent, true);
+            dynamic_cast<AST_Array*>(field_type), indent, true);
           be_global->impl_ <<
             indent << "if (" << field_name << nfl.index_ << " != rhs."
             << field_name << nfl.index_ << ") {\n" <<
@@ -1440,7 +1440,7 @@ struct Cxx11Generator : GeneratorBase
         "  " << lang_field_type << ' ' << af.name_ << "() const " << ret <<
         "  " << lang_field_type << "& " << af.name_ << "() " << ret;
       if (af.cls_ & CL_ENUM) {
-        AST_Enum* enu = AST_Enum::narrow_from_decl(af.act_);
+        AST_Enum* enu = dynamic_cast<AST_Enum*>(af.act_);
         for (UTL_ScopeActiveIterator it(enu, UTL_Scope::IK_decls); !it.is_done(); it.next()) {
           if (it.item()->node_type() == AST_Decl::NT_enum_val) {
             initializer = '{' + generator_->map_type(af.type_)
@@ -1528,7 +1528,7 @@ struct Cxx11Generator : GeneratorBase
     const char* nm = branch->local_name()->get_string();
 
     AST_UnionLabel* label = branch->label(0);
-    AST_Union* union_ = AST_Union::narrow_from_scope(branch->defined_in());
+    AST_Union* union_ = dynamic_cast<AST_Union*>(branch->defined_in());
     AST_Type* dtype = resolveActualType(union_->disc_type());
     const std::string disc_type = generator_->map_type(dtype);
 
@@ -1845,14 +1845,14 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:
-      generator_->gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+      generator_->gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
       break;
     case AST_Decl::NT_array:
-      generator_->gen_array(name, arr = AST_Array::narrow_from_decl(base));
+      generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
       break;
     case AST_Decl::NT_fixed:
 # ifdef ACE_HAS_CDR_FIXED
-      gen_fixed(name, AST_Fixed::narrow_from_decl(base));
+      gen_fixed(name, dynamic_cast<AST_Fixed*>(base));
       break;
 # else
       std::cerr << "ERROR: fixed data type (for " << nm << ") is not supported"

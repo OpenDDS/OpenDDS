@@ -140,7 +140,7 @@ namespace {
     }
     if (cls & CL_PRIMITIVE) {
       AST_Type* t = resolveActualType(type);
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(t);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(t);
       switch (p->pt()) {
       case AST_PredefinedType::PT_long:
         size = 4;
@@ -330,7 +330,7 @@ namespace {
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_ARRAY) {
       AST_Type* unTD = resolveActualType(field->field_type());
-      AST_Array* arr = AST_Array::narrow_from_decl(unTD);
+      AST_Array* arr = dynamic_cast<AST_Array*>(unTD);
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
         "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" << af.name_ << ";\n"
@@ -643,9 +643,9 @@ bool
 metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   AST_Type* type, const char*)
 {
-  AST_Array* arr = AST_Array::narrow_from_decl(type);
+  AST_Array* arr = dynamic_cast<AST_Array*>(type);
   AST_Sequence* seq = 0;
-  if (!arr && !(seq = AST_Sequence::narrow_from_decl(type))) {
+  if (!arr && !(seq = dynamic_cast<AST_Sequence*>(type))) {
     return true;
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
