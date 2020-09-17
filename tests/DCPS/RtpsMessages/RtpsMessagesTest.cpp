@@ -40,17 +40,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<TestMsg> {
-  static bool bounded(const Encoding&)
+  static SerializedSizeBound serialized_size_bound(const Encoding&)
   {
-    return false;
+    return SerializedSizeBound();
   }
 
-  static bool key_only_bounded(const Encoding&)
-  {
-    return true;
-  }
-
-  static size_t key_only_max_serialized_size(const Encoding&)
+  static SerializedSizeBound key_only_serialized_size_bound(const Encoding&)
   {
     return 4;
   }
@@ -78,17 +73,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<BigKey> {
-  static bool bounded(const Encoding&)
+  static SerializedSizeBound serialized_size_bound(const Encoding&)
   {
-    return true;
+    return SerializedSizeBound();
   }
 
-  static bool key_only_bounded(const Encoding&)
-  {
-    return true;
-  }
-
-  static size_t key_only_max_serialized_size(const Encoding&)
+  static SerializedSizeBound key_only_serialized_size_bound(const Encoding&)
   {
     return 24;
   }

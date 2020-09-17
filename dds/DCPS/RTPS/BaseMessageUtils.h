@@ -44,9 +44,10 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   std::memset(hash.value, 0, hash_limit);
 
   const Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
+  const OpenDDS::DCPS::SerializedSizeBound bound =
+    Traits::key_only_serialized_size_bound(encoding);
 
-  if (Traits::key_only_bounded(encoding) &&
-      Traits::key_only_max_serialized_size(encoding) <= hash_limit) {
+  if (bound && bound.get() <= hash_limit) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
     ACE_Message_Block mb(hash_limit);

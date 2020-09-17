@@ -21,26 +21,15 @@ const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
 template<typename Type>
 bool assert_impl(
-  const char* type_name, bool expected_bounded, size_t expected_size)
+  const char* type_name, SerializedSizeBound expected_bound)
 {
-  typedef MarshalTraits<Type> Traits;
-
-  const bool actual_bounded = Traits::bounded(encoding);
-  if (actual_bounded != expected_bounded) {
+  const SerializedSizeBound actual_bound = MarshalTraits<Type>::serialized_size_bound(encoding);
+  if (actual_bound != expected_bound) {
     ACE_ERROR((LM_ERROR, "KeyTest/IsBounded: ERROR: %C: "
-      "expected to%C be bounded, but it is%C\n",
-      type_name, expected_bounded ? "" : " not", actual_bounded ? "" : "n't"));
+      "expected to bound to be %C, but it is %C\n",
+      type_name, expected_bound.to_string().c_str(), actual_bound.to_string().c_str()));
     return true;
   }
-
-  const size_t actual_size = Traits::max_serialized_size(encoding);
-  if (actual_size != expected_size) {
-    ACE_ERROR((LM_ERROR, "KeyTest/IsBounded: ERROR: %C: "
-      "expected max size to be %B, but it is %B\n",
-      type_name, expected_size, actual_size));
-    return true;
-  }
-
   return false;
 }
 
@@ -48,14 +37,14 @@ template<typename Type>
 bool assert_bounded(
   const char* type_name, size_t expected_size)
 {
-  return assert_impl<Type>(type_name, true, expected_size);
+  return assert_impl<Type>(type_name, SerializedSizeBound(expected_size));
 }
 
 template<typename Type>
 bool assert_unbounded(
   const char* type_name)
 {
-  return assert_impl<Type>(type_name, false, 0);
+  return assert_impl<Type>(type_name, SerializedSizeBound());
 }
 
 int ACE_TMAIN(int, ACE_TCHAR*[])

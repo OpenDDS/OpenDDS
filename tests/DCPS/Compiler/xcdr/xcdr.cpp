@@ -249,6 +249,16 @@ bool operator==(const DataView& a, const DataView& b)
     << result.str();
 }
 
+::testing::AssertionResult assert_SerializedSizeBound(
+  const char* a_expr, const char* b_expr,
+  const SerializedSizeBound& a, const SerializedSizeBound& b)
+{
+  return a == b ? ::testing::AssertionSuccess() :
+    (::testing::AssertionFailure()
+      << a_expr << " (" << a.to_string() << ") isn't the same as "
+      << b_expr << " (" << b.to_string() << ").\n");
+}
+
 template<typename T>
 void deserialize_compare(
   const Encoding& encoding, const DataView& data, const T& expected)
@@ -297,47 +307,19 @@ void serializer_test(const Encoding& encoding, const DataView& expected_cdr)
   amalgam_serializer_test<Type, Type>(encoding, expected_cdr);
 }
 
-struct Bound {
-  bool bounded;
-  size_t max_size;
-
-  // Intentionally Left Implicit
-  Bound(bool bounded)
-  : bounded(bounded)
-  , max_size(0)
-  {
-  }
-
-  // Intentionally Left Implicit
-  Bound(size_t max_size)
-  : bounded(true)
-  , max_size(max_size)
-  {
-  }
-
-  operator bool() const
-  {
-    return bounded;
-  }
-};
-
 template<typename Type>
 void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
-  Bound bound = false)
+  SerializedSizeBound bound = SerializedSizeBound())
 {
-  EXPECT_EQ(MarshalTraits<Type>::bounded(encoding), bound);
-  if (bound) {
-    EXPECT_EQ(MarshalTraits<Type>::max_serialized_size(encoding), bound.max_size);
-  }
+  EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
+    MarshalTraits<Type>::serialized_size_bound(encoding), bound);
   /*
    * TODO(iguessthislldo): Assuming key only size is bounded to 0 if the type
    * as normal is bounded for now. Maybe add keys to types? If so also check
    * key only serialization.
    */
-  EXPECT_TRUE(MarshalTraits<Type>::key_only_bounded(encoding));
-  if (bound) {
-    EXPECT_EQ(MarshalTraits<Type>::key_only_max_serialized_size(encoding), size_t(0));
-  }
+  EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
+    MarshalTraits<Type>::key_only_serialized_size_bound(encoding), 0);
 
   Type value;
   set_values(value);

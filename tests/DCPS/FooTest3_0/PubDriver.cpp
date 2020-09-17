@@ -938,7 +938,7 @@ PubDriver::allocator_test ()
   foo2.handle_value = handle;
   foo2.writer_id = 0;
 
-  const bool bounded = MarshalTraits< ::Xyz::Foo>::bounded(encoding);
+  const SerializedSizeBound bound = MarshalTraits< ::Xyz::Foo>::serialized_size_bound(encoding);
 
   // Allocate serialized foo data from pre-allocated pool
   for (size_t i = 1; i <= n_chunks; i ++) {
@@ -948,7 +948,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (bounded) {
+    if (bound) {
       TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(i));
@@ -965,7 +965,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (bounded) {
+    if (bound) {
       TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(n_chunks));

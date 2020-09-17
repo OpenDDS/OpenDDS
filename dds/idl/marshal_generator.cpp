@@ -909,29 +909,6 @@ namespace {
     }
   }
 
-  string getAlignment(AST_Type* elem)
-  {
-    if (elem->node_type() == AST_Decl::NT_enum) {
-      return "4";
-    }
-    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
-    case AST_PredefinedType::PT_short:
-    case AST_PredefinedType::PT_ushort:
-      return "2";
-    case AST_PredefinedType::PT_long:
-    case AST_PredefinedType::PT_ulong:
-    case AST_PredefinedType::PT_float:
-      return "4";
-    case AST_PredefinedType::PT_longlong:
-    case AST_PredefinedType::PT_ulonglong:
-    case AST_PredefinedType::PT_double:
-    case AST_PredefinedType::PT_longdouble:
-      return "8";
-    default:
-      return "";
-    }
-  }
-
   void gen_array(UTL_ScopedName* name, AST_Array* arr)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -2250,30 +2227,15 @@ namespace {
     const std::string name = scoped(node->name());
 
     be_global->header_ <<
-      "  static bool " << function_prefix << "bounded(const Encoding& encoding)\n"
+      "  static SerializedSizeBound " << function_prefix <<
+        "serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      const bool bounded = is_bounded_topic_struct(type_node, encoding, key_only, keys, info);
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-        "      return " << (bounded ? "true" : "false") << ";\n";
-    }
-    be_global->header_ <<
-      "    default:\n"
-      "      OPENDDS_ASSERT(false);\n"
-      "      return false;\n"
-      "    }\n"
-      "  }\n"
-      "\n";
-
-    be_global->header_ <<
-      "  static size_t " << function_prefix << "max_serialized_size(const Encoding& encoding)\n"
-      "  {\n"
-      "    switch (encoding.kind()) {\n";
-    for (unsigned e = 0; e < encoding_count; ++e) {
-      const Encoding encoding = static_cast<Encoding>(e);
+        "      return SerializedSizeBound(";
       if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
         size_t size = 0;
         if (key_only) {
@@ -2286,15 +2248,14 @@ namespace {
             idl_max_serialized_size(encoding, size, (*i)->field_type());
           }
         }
-        be_global->header_ <<
-          "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-          "      return " << size << ";\n";
+        be_global->header_ << size;
       }
+      be_global->header_ << ");\n";
     }
     be_global->header_ <<
       "    default:\n"
       "      OPENDDS_ASSERT(false);\n"
-      "      return 0;\n"
+      "      return SerializedSizeBound();\n"
       "    }\n"
       "  }\n"
       "\n";
@@ -2313,72 +2274,48 @@ namespace {
   bool generate_marshal_traits_union(AST_Union* node, bool has_key)
   {
     be_global->header_ <<
-      "  static bool bounded(const Encoding& encoding)\n"
+      "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      const bool bounded = is_bounded_type(node, encoding);
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-        "      return " << (bounded ? "true" : "false") << ";\n";
-    }
-    be_global->header_ <<
-      "    default:\n"
-      "      OPENDDS_ASSERT(false);\n"
-      "      return false;\n"
-      "    }\n"
-      "  }\n"
-      "\n";
-
-    be_global->header_ <<
-      "  static size_t max_serialized_size(const Encoding& encoding)\n"
-      "  {\n"
-      "    switch (encoding.kind()) {\n";
-    for (unsigned e = 0; e < encoding_count; ++e) {
-      const Encoding encoding = static_cast<Encoding>(e);
+        "      return SerializedSizeBound(";
       if (is_bounded_type(node, encoding)) {
         size_t size = 0;
         idl_max_serialized_size(encoding, size, node);
-        be_global->header_ <<
-          "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-          "      return " << size << ";\n";
+        be_global->header_ << size;
       }
+      be_global->header_ << ");\n";
     }
     be_global->header_ <<
       "    default:\n"
       "      OPENDDS_ASSERT(false);\n"
-      "      return 0;\n"
+      "      return SerializedSizeBound();\n"
       "    }\n"
       "  }\n"
       "\n";
 
     be_global->header_ <<
-      "  static bool key_only_bounded(const Encoding& /*encoding*/)\n"
-      "  {\n"
-      // Union can only have discriminator as key, and the discriminator is always bounded.
-      "    return true;\n"
-      "  }\n"
-      "\n";
-
-    be_global->header_ <<
-      "  static size_t key_only_max_serialized_size(const Encoding& encoding)\n"
+      "  static SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
       size_t size = 0;
+      // Union can only have discriminator as key, and the discriminator is always bounded.
       if (has_key) {
         idl_max_serialized_size(encoding, size, node->disc_type());
       }
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-        "      return " << size << ";\n";
+        "      return SerializedSizeBound(" << size << ");\n";
     }
     be_global->header_ <<
       "    default:\n"
       "      OPENDDS_ASSERT(false);\n"
-      "      return 0;\n"
+      "      return SerializedSizeBound();\n"
       "    }\n"
       "  }\n"
       "\n";
@@ -3317,7 +3254,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n";
+          "  size_t mutable_running_total = 0;\n"
           "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
       }
 

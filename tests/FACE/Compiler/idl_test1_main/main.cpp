@@ -1,15 +1,16 @@
 #include "../idl_test1_lib/FooDefTypeSupportImpl.h"
 
-#include "dds/Version.h"
+#include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/Version.h>
 
-#include "ace/ACE.h"
-#include "ace/Log_Msg.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
+#include <ace/ACE.h>
+#include <ace/Log_Msg.h>
 
 #include <map>
 #include <cstring>
 
 using OpenDDS::DCPS::Encoding;
+using OpenDDS::DCPS::SerializedSizeBound;
 
 const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
 const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
@@ -300,20 +301,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "NOTE: _dcps_has_key(foo) returned false\n"));
   }
 
-  const bool expected_bounded = false;
-  const size_t expected_size = 97;
+  const SerializedSizeBound expected_bound;
+  const size_t expected_size = 90;
 
-  const bool actual_bounded =
-    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::bounded(encoding_unaligned_native);
+  const SerializedSizeBound actual_bound =
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::serialized_size_bound(encoding_unaligned_native);
   const size_t actual_size = serialized_size(encoding_unaligned_native, my_foo);
 
-  ACE_DEBUG((LM_DEBUG, "bounded(my_foo) => %d\n", int(actual_bounded)));
-  ACE_DEBUG((LM_DEBUG, "serialized_size(my_foo) => %B\n", actual_size));
+  ACE_DEBUG((LM_DEBUG, "serialized_size_bound => %C\n", actual_bound.to_string().c_str()));
+  ACE_DEBUG((LM_DEBUG, "serialized_size => %B\n", actual_size));
 
-  if (actual_bounded != expected_bounded) {
+  if (actual_bound != expected_bound) {
     ACE_ERROR((LM_ERROR,
-      "gen_is_bounded_size(my_foo) failed: expected %d got %d\n",
-      int(expected_bounded), int(actual_bounded)));
+      "serialized_size_bound failed: expected %C got %C\n",
+      expected_bound.to_string().c_str(), actual_bound.to_string().c_str()));
     failed = true;
   }
 
