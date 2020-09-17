@@ -6,6 +6,9 @@
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
+
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -150,13 +153,33 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 class DDS_TEST {
 public:
   DDS_TEST(int argc, ACE_TCHAR* argv[]) : config(argc, argv, true) {
+
+    using OpenDDS::RTPS::address_to_kind;
+    using OpenDDS::RTPS::address_to_bytes;
+    using OpenDDS::RTPS::message_block_to_sequence;
+
+    ACE_INET_Addr remote_addr("127.0.0.1:12345");
+    LocatorSeq locators;
+    locators.length(1);
+    locators[0].kind = address_to_kind(remote_addr);
+    locators[0].port = remote_addr.get_port_number();
+    address_to_bytes(locators[0].address, remote_addr);
+
+    const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
+    size_t size_locator = 0;
+    serialized_size(locators_encoding, size_locator, locators);
+    ACE_Message_Block mb_locator(size_locator + 1);
+    Serializer ser_loc(&mb_locator, locators_encoding);
+    if (!(ser_loc << locators) ||
+        !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+      std::cerr << "subscriber serialize locators failed\n";
+    }
+
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);
     publication.remote_data_[0].transport_type = "rtps_udp";
     publication.remote_data_[0].data.length(5);
-    for (CORBA::ULong i = 0; i < 5; ++i) {
-      publication.remote_data_[0].data[i] = 0;
-    }
+    message_block_to_sequence(mb_locator, publication.remote_data_[0].data);
   }
 
   int run() {

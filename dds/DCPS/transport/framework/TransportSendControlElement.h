@@ -25,8 +25,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportSendListener;
-
 class TransportSendControlElement;
+class DataSampleElement;
 
 typedef Cached_Allocator_With_Overflow<TransportSendControlElement, ACE_SYNCH_NULL_MUTEX>
 TransportSendControlElementAllocator;

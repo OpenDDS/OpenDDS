@@ -704,6 +704,51 @@ RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
   get_part(domain_id, part_id)->signal_liveliness(kind);
 }
 
+void
+RtpsDiscovery::rtps_relay_only_now(bool f)
+{
+  config_->rtps_relay_only(f);
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->rtps_relay_only_now(f);
+    }
+  }
+}
+
+void
+RtpsDiscovery::use_rtps_relay_now(bool f)
+{
+  config_->use_rtps_relay(f);
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->use_rtps_relay_now(f);
+    }
+  }
+}
+
+void
+RtpsDiscovery::use_ice_now(bool after)
+{
+  const bool before = config_->use_ice();
+  config_->use_ice(after);
+
+  if (before != after) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+         dom_pos != dom_limit; ++dom_pos) {
+      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+        part_pos->second->use_ice_now(after);
+      }
+    }
+  }
+}
+
 #ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,

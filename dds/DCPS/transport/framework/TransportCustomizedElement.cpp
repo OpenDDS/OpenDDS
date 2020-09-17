@@ -40,28 +40,6 @@ TransportCustomizedElement::release_element(bool dropped_by_transport)
   }
 }
 
-RepoId
-TransportCustomizedElement::publication_id() const
-{
-  DBG_ENTRY_LVL("TransportCustomizedElement", "publication_id", 6);
-  return publication_id_;
-}
-
-RepoId
-TransportCustomizedElement::subscription_id() const
-{
-  DBG_ENTRY_LVL("TransportCustomizedElement", "subscription_id", 6);
-  const TransportSendElement* ose = original_send_element();
-  return ose ? ose->subscription_id() : GUID_UNKNOWN;
-}
-
-void
-TransportCustomizedElement::set_publication_id(const RepoId& id)
-{
-  DBG_ENTRY_LVL("TransportCustomizedElement", "set_msg", 6);
-  publication_id_ = id;
-}
-
 const ACE_Message_Block*
 TransportCustomizedElement::msg() const
 {
