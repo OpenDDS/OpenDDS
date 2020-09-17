@@ -48,7 +48,7 @@ string idl_mapping_jni::taoType(AST_Type *decl)
 {
   switch (decl->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(decl);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(decl);
 
     switch (p->pt()) {
     case AST_PredefinedType::PT_boolean:
@@ -106,7 +106,7 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
   AST_Decl::NodeType effectiveType = decl->node_type();
 
   if (effectiveType == AST_Decl::NT_typedef) {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(decl);
     effectiveType = td->primitive_base_type()->node_type();
   }
 
@@ -178,7 +178,7 @@ string idl_mapping_jni::type(AST_Type *decl)
 {
   switch (decl->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(decl);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(decl);
 
     switch (p->pt()) {
     case AST_PredefinedType::PT_boolean:
@@ -210,11 +210,11 @@ string idl_mapping_jni::type(AST_Type *decl)
   case AST_Decl::NT_struct:
     return "jobject";
   case AST_Decl::NT_typedef: {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(decl);
     return type(td->primitive_base_type());
   }
   case AST_Decl::NT_sequence: {
-    AST_Sequence *seq = AST_Sequence::narrow_from_decl(decl);
+    AST_Sequence *seq = dynamic_cast<AST_Sequence*>(decl);
     string base = type(seq->base_type());
 
     if (base.find("Array") == string::npos)
@@ -223,7 +223,7 @@ string idl_mapping_jni::type(AST_Type *decl)
     else return "jobjectArray";
   }
   case AST_Decl::NT_array: {
-    AST_Array *arr = AST_Array::narrow_from_decl(decl);
+    AST_Array *arr = dynamic_cast<AST_Array*>(decl);
     string base = type(arr->base_type());
 
     if (base.find("Array") == string::npos)
@@ -266,7 +266,7 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
 {
   switch (decl->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(decl);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(decl);
 
     switch (p->pt()) {
     case AST_PredefinedType::PT_boolean:
@@ -304,15 +304,15 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
   case AST_Decl::NT_interface_fwd:
     return "L" + scoped_helper(decl->name(), "/") + ";";
   case AST_Decl::NT_typedef: {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(decl);
     return jvmSignature(td->primitive_base_type());
   }
   case AST_Decl::NT_sequence: {
-    AST_Sequence *seq = AST_Sequence::narrow_from_decl(decl);
+    AST_Sequence *seq = dynamic_cast<AST_Sequence*>(decl);
     return "[" + jvmSignature(seq->base_type());
   }
   case AST_Decl::NT_array: {
-    AST_Array *arr = AST_Array::narrow_from_decl(decl);
+    AST_Array *arr = dynamic_cast<AST_Array*>(decl);
     return "[" + jvmSignature(arr->base_type());
   }
   case AST_Decl::NT_native: {
@@ -335,7 +335,7 @@ string idl_mapping_jni::jniFnName(AST_Type *decl)
 {
   switch (decl->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(decl);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(decl);
 
     switch (p->pt()) {
     case AST_PredefinedType::PT_boolean:
@@ -367,7 +367,7 @@ string idl_mapping_jni::jniFnName(AST_Type *decl)
   case AST_Decl::NT_struct:
     return "Object";
   case AST_Decl::NT_typedef: {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(decl);
     return jniFnName(td->primitive_base_type());
   }
   default:
@@ -409,12 +409,12 @@ struct commonSetup {
 bool isPrimitive(AST_Type *element)
 {
   if (element->node_type() == AST_Decl::NT_typedef) {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(element);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(element);
     element = td->primitive_base_type();
   }
 
   if (element->node_type() == AST_Decl::NT_pre_defined) {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(element);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(element);
     return (p->pt() != AST_PredefinedType::PT_any)
            && (p->pt() != AST_PredefinedType::PT_object);
 
@@ -424,7 +424,7 @@ bool isPrimitive(AST_Type *element)
 bool isArray(AST_Type *t)
 {
   if (t->node_type() == AST_Decl::NT_typedef) {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(t);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(t);
     t = td->primitive_base_type();
   }
 
@@ -434,7 +434,7 @@ bool isArray(AST_Type *t)
 bool isObjref(AST_Type *t)
 {
   if (t->node_type() == AST_Decl::NT_typedef) {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(t);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(t);
     t = td->primitive_base_type();
   }
 
@@ -445,7 +445,7 @@ bool isObjref(AST_Type *t)
 bool isSSU(AST_Type *t)  //sequence, struct, union
 {
   if (t->node_type() == AST_Decl::NT_typedef) {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(t);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(t);
     t = td->primitive_base_type();
   }
 
@@ -593,13 +593,13 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
 
   switch (base->node_type()) {
   case AST_Decl::NT_sequence: {
-    AST_Sequence *seq = AST_Sequence::narrow_from_decl(base);
+    AST_Sequence *seq = dynamic_cast<AST_Sequence*>(base);
     element = seq->base_type();
     sequence = true;
     break;
   }
   case AST_Decl::NT_array: {
-    AST_Array *arr = AST_Array::narrow_from_decl(base);
+    AST_Array *arr = dynamic_cast<AST_Array*>(base);
     element = arr->base_type();
 
     if (arr->n_dims() != 1) {
@@ -1315,7 +1315,7 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     AST_Decl *item = it.item();
 
     if (item->node_type() == AST_Decl::NT_argument) {
-      AST_Argument *arg = AST_Argument::narrow_from_decl(item);
+      AST_Argument *arg = dynamic_cast<AST_Argument*>(item);
       const char *argname = arg->local_name()->get_string();
       bool in = arg->direction() == AST_Argument::dir_IN;
       args += ", " + (in ? idl_mapping_jni::type(arg->field_type())
@@ -1540,7 +1540,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
       AST_Decl *item = it.item();
 
       if (item->node_type() == AST_Decl::NT_attr) {
-        AST_Attribute *attr = AST_Attribute::narrow_from_decl(item);
+        AST_Attribute *attr = dynamic_cast<AST_Attribute*>(item);
 
         write_native_attribute_r(name, javaStub.c_str(), attr, false);
 
@@ -1550,7 +1550,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
         }
 
       } else if (item->node_type() == AST_Decl::NT_op) {
-        AST_Operation *op = AST_Operation::narrow_from_decl(item);
+        AST_Operation *op = dynamic_cast<AST_Operation*>(item);
         write_native_operation(name, javaStub.c_str(), op, false);
       }
     }
@@ -1742,7 +1742,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       }
 
       if (branches[i]->field_type()->node_type() == AST_Decl::NT_typedef) {
-        AST_Typedef *td = AST_Typedef::narrow_from_decl(branches[i]->field_type());
+        AST_Typedef *td = dynamic_cast<AST_Typedef*>(branches[i]->field_type());
         if (td->primitive_base_type()->node_type() == AST_Decl::NT_string) {
           br_tao = "CORBA::String_var";
         }
@@ -1769,7 +1769,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       }
 
       if (branches[i]->field_type()->node_type() == AST_Decl::NT_typedef) {
-        AST_Typedef *td = AST_Typedef::narrow_from_decl(branches[i]->field_type());
+        AST_Typedef *td = dynamic_cast<AST_Typedef*>(branches[i]->field_type());
         if (td->primitive_base_type()->node_type() == AST_Decl::NT_string) {
           br_tao = "CORBA::String_var";
         }
