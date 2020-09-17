@@ -1,4 +1,4 @@
-project: dds_taolib {
+project: acelib, dds_macros {
   after += OpenDDS_Util
   libs += OpenDDS_Util
   includes += $(DDS_ROOT)
