@@ -208,29 +208,36 @@ namespace OpenDDS {
       typedef DCPS::TopicDetails TopicDetails;
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
-        : lock_(lock)
+        : max_type_lookup_service_reply_period_(0)
+        , lock_(lock)
         , participant_id_(participant_id)
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
-        , reactor_task_(false)
-        , max_type_lookup_service_reply_period_(0)
 #ifdef OPENDDS_SECURITY
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
-      {
-        reactor_task_.open(0);
-        type_lookup_reply_deadline_processor_ = DCPS::make_rch<EndpointManagerSporadic>(reactor_task_.interceptor(), ref(*this), &EndpointManager::remove_expired_endpoints);
-      }
+      { }
 
       virtual ~EndpointManager()
       {
+        type_lookup_fini();
+      }
+
+      void type_lookup_init(ReactorInterceptor_rch reactor_interceptor)
+      {
+        if (!type_lookup_reply_deadline_processor_) {
+          type_lookup_reply_deadline_processor_ = DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this), &EndpointManager::remove_expired_endpoints);
+        }
+      }
+
+      void type_lookup_fini()
+      {
         if (type_lookup_reply_deadline_processor_) {
           type_lookup_reply_deadline_processor_->cancel_and_wait();
+          type_lookup_reply_deadline_processor_.reset();
         }
-
-        reactor_task_.stop();
       }
 
       void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
@@ -954,7 +961,6 @@ namespace OpenDDS {
       typedef std::map<MatchingPair, MatchingData> MatchingDataMap;
       typedef typename MatchingDataMap::iterator MatchingDataIter;
       MatchingDataMap matching_data_buffer_;
-      ReactorTask reactor_task_;
       typedef PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
@@ -1831,6 +1837,8 @@ namespace OpenDDS {
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
+        , have_spdp_info_(false)
+        , have_sedp_info_(false)
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_HANDSHAKE)
@@ -1863,6 +1871,8 @@ namespace OpenDDS {
         , last_seq_(seq)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
+        , have_spdp_info_(false)
+        , have_sedp_info_(false)
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_HANDSHAKE)
@@ -1921,8 +1931,11 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
         ACE_UINT16 seq_reset_count_;
-
 #ifdef OPENDDS_SECURITY
+        bool have_spdp_info_;
+        ICE::AgentInfo spdp_info_;
+        bool have_sedp_info_;
+        ICE::AgentInfo sedp_info_;
         bool have_auth_req_msg_;
         DDS::Security::ParticipantStatelessMessage auth_req_msg_;
         bool have_handshake_msg_;

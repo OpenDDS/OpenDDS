@@ -36,8 +36,8 @@ namespace OpenDDS {
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
-    typedef typename TraitsType::MessageSequenceType MessageSequenceType;
     typedef MarshalTraits<MessageType> MarshalTraitsType;
+    typedef typename TraitsType::MessageSequenceType MessageSequenceType;
 
     typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
                               typename TraitsType::LessThanType) InstanceMap;
@@ -77,6 +77,7 @@ namespace OpenDDS {
 
     DataReaderImpl_T (void)
     : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this)))
+    , marshal_skip_serialize_(false)
     {
     }
 
@@ -986,6 +987,16 @@ namespace OpenDDS {
     DataReaderImpl::qos_change(qos);
   }
 
+  void set_marshal_skip_serialize(bool value)
+  {
+    marshal_skip_serialize_ = value;
+  }
+
+  bool get_marshal_skip_serialize() const
+  {
+    return marshal_skip_serialize_;
+  }
+
 protected:
 
   virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -994,7 +1005,19 @@ protected:
                              bool& filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
+    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
+
+    if (marshal_skip_serialize_) {
+      if (!MarshalTraitsType::from_message_block(*data, *sample.sample_)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+                   ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
+        return;
+      }
+      store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
+      return;
+    }
     const bool encapsulated = sample.header_.cdr_encapsulation_;
+
     OpenDDS::DCPS::Serializer ser(
       sample.sample_.get(),
       encapsulated ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
@@ -1036,8 +1059,6 @@ protected:
       ser.encoding(encoding);
     }
 
-    unique_ptr<MessageTypeWithAllocator> data(
-      new (*data_allocator()) MessageTypeWithAllocator);
     const bool key_only_marshaling =
       marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     if (key_only_marshaling) {
@@ -2285,6 +2306,9 @@ unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->da
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap instance_map_;
+
+bool marshal_skip_serialize_;
+
 };
 
 template <typename MessageType>

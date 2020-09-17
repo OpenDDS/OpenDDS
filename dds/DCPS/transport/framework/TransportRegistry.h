@@ -126,7 +126,7 @@ public:
 
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
-  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, ACE_TString& instance_config_name);
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
