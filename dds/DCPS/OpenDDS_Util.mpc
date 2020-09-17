@@ -3,7 +3,9 @@ project: acelib, install {
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
   libout = $(DDS_ROOT)/lib
-  macros      += NOTAO
+  pch_header =
+  pch_source =
+  macros += NOTAO
 
   Header_Files {
     Hash.h
