@@ -865,8 +865,7 @@ TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
 TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Union* node)
 {
   TryConstructAnnotation* try_construct_annotation =
-    dynamic_cast<TryConstructAnnotation*>(
-                                          builtin_annotations_["::@try_construct"]);
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
   return try_construct_annotation->union_value(node);
 }
 
@@ -894,7 +893,6 @@ ACE_CDR::ULong BE_GlobalData::get_id(AST_Field* field, AutoidKind auto_id, ACE_C
     // @hashid
     return OpenDDS::XTypes::hash_member_name_to_id(hash_id);
   } else if (auto_id == autoidkind_hash) {
-    // auto_id == autoidkind_hash
     return OpenDDS::XTypes::hash_member_name_to_id(field->local_name()->get_string());
   } else {
     // auto_id == autoidkind_sequential
