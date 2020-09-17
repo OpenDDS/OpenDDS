@@ -872,6 +872,318 @@ TEST(AnonArray, USE_DEFAULT)
   }
 }
 
+TEST(Union, DISCARD)
+{
+  {
+    TryCon::BaseUnion sent;
+    sent._d(0);
+    sent.str_d("abcdefghijklmnopqrstuvwxyz");
+    TryCon::DiscardUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(3);
+    sent.wstr_d(L"abcdefghijklmnopqrstuvwxyz");
+    TryCon::DiscardUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(6);
+    str64Array temp_arr;
+    temp_arr[0] = "abcdefghijklmnopqrstuvwxyz";
+    sent.stra_d(temp_arr);
+    TryCon::DiscardUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(9);
+    StringSeqBound2 temp_seq;
+    temp_seq.length(3);
+    for (ACE_INT16 i = 0; i < 3; i++) {
+      temp_seq[i] = "abcdefghijklmnopqrstuvwxyz";
+    }
+    sent.strs_d(temp_seq);
+    TryCon::DiscardUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+}
+
+TEST(Union, USE_DEFAULT)
+{
+  {
+    TryCon::BaseUnion sent;
+    sent._d(1);
+    sent.str_ud("abcdefghijklmnopqrstuvwxyz");
+    TryCon::DefaultUnion expected;
+    expected._d(1);
+    expected.str_ud("");
+    TryCon::DefaultUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+        ASSERT_EQ(expected.str_ud(), actual.str_ud());
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(4);
+    sent.wstr_ud(L"abcdefghijklmnopqrstuvwxyz");
+    TryCon::DefaultUnion expected;
+    expected._d(4);
+    expected.wstr_ud(L"");
+    TryCon::DefaultUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_EQ(expected.wstr_ud(), actual.wstr_ud());
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(7);
+    str64Array temp_arr;
+    for (ACE_INT16 i = 0; i < 10; i++) {
+      temp_arr[i] = "abcdefghijklmnopqrstuvwxyz";
+    }
+    sent.stra_ud(temp_arr);
+    TryCon::DefaultUnion expected;
+    expected._d(7);
+    str64Array temp_arr2;
+    for (ACE_INT16 i = 0; i < 3; i++) {
+      temp_arr2[i] = "";
+    }
+    expected.stra_ud(temp_arr2);
+    TryCon::DefaultUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_STREQ(expected.stra_ud()[0].in(), actual.stra_ud()[0].in());
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(10);
+    StringSeqBound2 temp_seq;
+    temp_seq.length(3);
+    for (ACE_INT16 i = 0; i < 3; i++) {
+      temp_seq[i] = "abcdefghijklmnopqrstuvwxyz";
+    }
+    sent.strs_ud(temp_seq);
+    TryCon::DefaultUnion expected;
+    expected._d(10);
+    StringSeqBound temp_seq2;
+    temp_seq2.length(0);
+    expected.strs_ud(temp_seq2);
+    TryCon::DefaultUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_EQ(expected.strs_ud().length(), actual.strs_ud().length());
+    }
+  }
+}
+
+TEST(Union, TRIM)
+{
+  {
+    TryCon::BaseUnion sent;
+    sent._d(2);
+    sent.str_t("abcdefghijklmnopqrstuvwxyz");
+    TryCon::TrimUnion expected;
+    expected._d(2);
+    expected.str_t("abcdefghijklmnopqrst");
+    TryCon::TrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+        ASSERT_STREQ(expected.str_t(), actual.str_t());
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(5);
+    sent.wstr_t(L"abcdefghijklmnopqrstuvwxyz");
+    TryCon::TrimUnion expected;
+    expected._d(5);
+    expected.wstr_t(L"abcdefghijklmnopqrst");
+    TryCon::TrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_STREQ(expected.wstr_t(), actual.wstr_t());
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(8);
+    str64Array temp_arr;
+    for (ACE_INT16 i = 0; i < 10; i++) {
+      temp_arr[i] = "abcdefghijklmnopqrstuvwxyz";
+    }
+    sent.stra_t(temp_arr);
+    TryCon::TrimUnion expected;
+    expected._d(8);
+    str64Array temp_arr2;
+    for (ACE_INT16 i = 0; i < 3; i++) {
+      temp_arr2[i] = "abcdefghijklmnopqrst";
+    }
+    expected.stra_t(temp_arr2);
+    TryCon::TrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_STREQ(expected.stra_t()[0].in(), actual.stra_t()[0].in());
+    }
+  }
+  {
+    TryCon::BaseUnion sent;
+    sent._d(11);
+    StringSeqBound2 temp_seq;
+    temp_seq.length(3);
+    for (ACE_INT16 i = 0; i < 3; i++) {
+      temp_seq[i] = "abcdefghijklmnopqrstuvwxyz";
+    }
+    sent.strs_t(temp_seq);
+    TryCon::TrimUnion expected;
+    expected._d(11);
+    StringSeqBound temp_seq2;
+    temp_seq2.length(2);
+    for (ACE_INT16 i = 0; i < 2; i++) {
+      temp_seq2[i] = "abcdefghijklmnopqrstuvwxyz";
+    }
+    expected.strs_t(temp_seq2);
+    TryCon::TrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_EQ(expected.strs_t().length(), actual.strs_t().length());
+    }
+  }
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);

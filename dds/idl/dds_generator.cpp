@@ -10,6 +10,7 @@
 #include "utl_identifier.h"
 
 using namespace std;
+using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
@@ -240,3 +241,102 @@ NestedForLoops::~NestedForLoops()
     be_global->impl_ << indent_ << "}\n";
   }
 }
+
+string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bool is_union)
+{
+  string val;
+  AST_Type* actual_type = resolveActualType(type);
+  Classification fld_cls = classify(actual_type);
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  if ((fld_cls & CL_STRUCTURE) || (fld_cls & CL_UNION)) {
+    if (is_union) {
+    val = string("set_default(") + name + "());\n";
+    } else {
+    val = string("set_default(") + name + ");\n";
+    }
+  } else if (fld_cls & CL_ARRAY) {
+    AST_Array* arr = dynamic_cast<AST_Array*>(actual_type);
+    string temp = name;
+    if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
+      temp.erase(temp.size() - 2);
+    }
+    temp += "_temp";
+    replace( temp.begin(), temp.end(), '.', '_');
+    replace( temp.begin(), temp.end(), '[', '_');
+    replace( temp.begin(), temp.end(), ']', '_');
+    if (use_cxx11) {
+      string n = scoped(type->name());
+      if (is_anonymous) {
+        n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
+        n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+      }
+      string v = n;
+      size_t index = 0;
+      while (true) {
+        index = v.find("::", index);
+        if (index == string::npos) break;
+        v.replace(index, 2, "_");
+        index += 1;
+      }
+      string pre;
+      if (is_union) {
+        pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(tmp)";
+      } else {
+        pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(" + name + ")";
+      }
+      val += string("      set_default(") + pre + ");\n";
+    } else {
+      string n = scoped(type->name());
+      if (is_anonymous) {
+        n = n.substr(0, n.rfind("::") + 2) + "_" + type->local_name()->get_string();
+        n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+      }
+      if (is_union) {
+        val = n + "_forany " + temp + "(const_cast<"
+          + n + "_slice*>(tmp));\n";
+      } else {
+        val = n + "_forany " + temp + "(const_cast<"
+          + n + "_slice*>(" + name + "));\n";
+      }
+      val += string("      set_default(") + temp + ");\n";
+      if (is_union) {
+        val += name + "(tmp);\n";
+      }
+    }
+  } else if (fld_cls & CL_ENUM) {
+    // For now, simply return the first value of the enumeration.
+    // Must be changed, if support for @default_literal is desired.
+    AST_Enum* enu = dynamic_cast<AST_Enum*>(actual_type);
+    UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
+    AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
+    string enum_val = item->name()->get_string_copy();
+    if (use_cxx11) {
+      enum_val = scoped(type->name()) + "::" + item->local_name()->get_string();
+    }
+    val = name + " = " + enum_val + ";\n";
+  } else if (fld_cls & CL_SEQUENCE) {
+    string seq_resize_func = (use_cxx11) ? "resize" : "length";
+    if (is_union) {
+      val = "tmp." + seq_resize_func + "(0);\n";
+      val += name + "(tmp);\n";
+    } else {
+      val = name + "." + seq_resize_func + "(0);\n";
+    }
+  } else if (fld_cls & CL_STRING) {
+    string def_val = (fld_cls & CL_WIDE) ? "L\"\"" : "\"\"";
+    if (is_union) {
+      val = name + "(" + def_val + ");\n";
+    } else if (use_cxx11) {
+      val = name + " = " + def_val + ";\n";
+    } else {
+      val = name + " = " + def_val + ";\n";
+    }
+  } else if ((fld_cls & CL_PRIMITIVE) || (fld_cls & CL_FIXED)) {
+    val = name + " = 0;\n";
+  } else {
+    // TODO: Remove
+    abort();
+  }
+  return val;
+}
+

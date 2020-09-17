@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+  struct S{long l;};
+
 //bounded string definitions for trim
 typedef string<20> str20;
 typedef wstring<20> wstr20;
@@ -235,7 +237,6 @@ struct NestedStruct3 {
   @try_construct(USE_DEFAULT) str20 str20_ud;
   @try_construct(TRIM) str20 str20_t;
 };
-
 
 module TryCon {
   @mutable
@@ -496,5 +497,55 @@ module TryCon {
   @OpenDDS::data_representation(XCDR2)
   struct DiscardStructSequenceAnon2 {
     sequence <str20> ssa20;
+  };
+
+
+  @topic
+  @extensibility(MUTABLE)
+  @OpenDDS::data_representation(XCDR2)
+  union BaseUnion switch (short) {
+    case 0:@try_construct(DISCARD) str64 str_d;
+    case 1:@try_construct(USE_DEFAULT) str64 str_ud;
+    case 2:@try_construct(TRIM) str64 str_t;
+    case 3:@try_construct(DISCARD) wstr64 wstr_d;
+    case 4:@try_construct(USE_DEFAULT) wstr64 wstr_ud;
+    case 5:@try_construct(TRIM) wstr64 wstr_t;
+    case 6:@try_construct(DISCARD) str64Array stra_d;
+    case 7:@try_construct(USE_DEFAULT) str64Array stra_ud;
+    case 8:@try_construct(TRIM) str64Array stra_t;
+    case 9:@try_construct(DISCARD) StringSeqBound2 strs_d;
+    case 10:@try_construct(USE_DEFAULT) StringSeqBound2 strs_ud;
+    case 11:@try_construct(TRIM) StringSeqBound2 strs_t;
+    default:@try_construct(TRIM) str64 def;
+  };
+  @topic
+  @extensibility(MUTABLE)
+  @OpenDDS::data_representation(XCDR2)
+  union DiscardUnion switch (short) {
+    case 0:@try_construct(DISCARD) str20 str_d;
+    case 3:@try_construct(DISCARD) wstr20 wstr_d;
+    case 6:@try_construct(DISCARD) str20Array stra_d;
+    case 9:@try_construct(DISCARD) StringSeqBound strs_d;
+    default:@try_construct(TRIM) str20 def;
+  };
+  @topic
+  @extensibility(MUTABLE)
+  @OpenDDS::data_representation(XCDR2)
+  union TrimUnion switch (short) {
+    case 2:@try_construct(TRIM) str20 str_t;
+    case 5:@try_construct(TRIM) wstr20 wstr_t;
+    case 8:@try_construct(TRIM) str20ArrayTrim stra_t;
+    case 11:@try_construct(TRIM) StringSeqBound strs_t;
+    default:@try_construct(TRIM) str20 def;
+  };
+  @topic
+  @extensibility(MUTABLE)
+  @OpenDDS::data_representation(XCDR2)
+  union DefaultUnion switch (short) {
+    case 1:@try_construct(USE_DEFAULT) str20 str_ud;
+    case 4:@try_construct(USE_DEFAULT) wstr20 wstr_ud;
+    case 7:@try_construct(USE_DEFAULT) str20Array stra_ud;
+    case 10:@try_construct(USE_DEFAULT) StringSeqBound strs_ud;
+    default:@try_construct(TRIM) str20 def;
   };
 };
