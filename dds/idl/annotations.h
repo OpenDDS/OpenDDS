@@ -113,8 +113,7 @@ public:
   /**
    * If node has the annotation, this sets value to the annotation value and
    * returns true.
-   * If node does not have the annotation, this sets value to absent_value()
-   * and returns false.
+   * If node does not have the annotation, it sets it to a default value and returns false.
    */
   virtual bool node_value_exists(AST_Decl* node, T& value) const
   {
@@ -126,10 +125,8 @@ public:
   }
 
 protected:
-  /**
-   * Get value from an annotation application. Returns absent_value if appl is
-   * null. Must be specialized.
-   */
+  /* NOTE: Derived classes should either override value_from_appl or default_value. */
+
   virtual T value_from_appl(AST_Annotation_Appl*,
                             const T* default_value) const
   {
