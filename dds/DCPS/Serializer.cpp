@@ -668,11 +668,13 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
   return true;
 }
 
-Serializer::ConstructionStatus Serializer::get_construction_status() const{
+Serializer::ConstructionStatus Serializer::get_construction_status() const
+{
   return construction_status_;
 }
 
-void Serializer::set_construction_status(Serializer::ConstructionStatus cs) {
+void Serializer::set_construction_status(Serializer::ConstructionStatus cs)
+{
   construction_status_ = cs;
 }
 
