@@ -82,6 +82,10 @@ namespace {
   bool isSecuritySubmessage(const string& cxx);
   bool genSecuritySubmessage(const string& cxx);
 
+  string streamCommon(const string& name, AST_Type* type,
+                      const string& prefix, string& intro,
+                      const string& stru = "", bool printing = false);
+
   const special_sequence special_sequences[] = {
     {
       isRtpsSpecialSequence,
@@ -122,6 +126,8 @@ namespace {
       genRtpsSpecialUnion,
     },
   };
+
+  
 
 } /* namespace */
 
@@ -376,24 +382,6 @@ namespace {
     return true;
   }
 
-  std::string bounded_arg(AST_Type* type)
-  {
-    std::ostringstream arg;
-    const Classification cls = classify(type);
-    if (cls & CL_STRING) {
-      AST_String* const str = AST_String::narrow_from_decl(type);
-      arg << str->max_size()->ev()->u.ulval;
-    } else if (cls & CL_SEQUENCE) {
-      AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
-      arg << seq->max_size()->ev()->u.ulval;
-    }
-    return arg.str();
-  }
-
-  // Helper function to conditionally generate dheader-related code which is passed as the
-  // "code" argument.
-  // code contains the lines of code to generate
-  // is_ser_func specifies whether this is a serialization operation
   void generate_dheader_code(const std::vector<std::string>& code, bool dheader_required, bool is_ser_func = true)
   {
     //DHeader appears on aggregated types that are mutable or appendable in XCDR2
@@ -411,6 +399,55 @@ namespace {
     }
   }
 
+  void skip_to_end_sequence(string start, string end, string tempvar, bool use_cxx11, Classification cls, AST_Sequence* seq) {
+    std::string seq_resize_func = (use_cxx11) ? "resize" : "length";
+    be_global->impl_ << "    if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+                        "      strm.skip(end_of_seq - strm.pos_rd());\n"
+                        "    } else {\n" // in xcdr2 we can just skip with the dheader info
+                        "      " << tempvar << " tempvar;\n"
+                        "      tempvar." << seq_resize_func << "(1);\n"
+                        "      for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n"; //read stuff we havent read yet
+    if (!use_cxx11 && (cls & CL_ARRAY)) {
+      const string typedefname = scoped(seq->base_type()->name());
+      be_global->impl_ << "        " << typedefname << "_var tmp = " << typedefname << "_alloc();\n"
+                          "        " << typedefname << "_forany fa = tmp.inout();\n"
+                       << "          strm >> fa; \n";
+    } else if (cls & CL_STRING) {
+      if (cls & CL_BOUNDED) {
+        AST_Type* elem = resolveActualType(seq->base_type());
+        const string args = string("tempvar[0]") + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
+        be_global->impl_ << "        strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ";\n";
+      }
+      else {
+        const string getbuffer =
+          (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
+          ? ".get_buffer()" : "";
+        be_global->impl_ << "        strm >> tempvar" + getbuffer + "[0];\n";
+      }
+    } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE))) {
+      const string typedefname = scoped(seq->base_type()->name());
+      const string elem_underscores = dds_generator::scoped_helper(seq->base_type()->name(), "_");
+      be_global->impl_ <<
+      "        strm >> IDL::DistinctType<" << typedefname << ", "  <<
+                      elem_underscores << "_tag>(tempvar[0]);\n";
+    } else {
+      be_global->impl_ << "      strm >> tempvar[0];\n";
+    }
+    be_global->impl_ << "      }\n"
+                        "    }\n";
+  }
+
+  void skip_to_end_array() {
+    be_global->impl_ << "      if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+                        "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+                        "        strm.skip(end_of_seq - strm.pos_rd());\n"
+                        "        return false;\n"
+                        "      } else {\n" // in xcdr2 we can just skip with the dheader info
+                        "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                        "        discard_flag=true;\n"
+                        "      }\n";
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -425,6 +462,24 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(seq->base_type());
+    AST_Annotation_Appl* ann_appl = seq->base_type_annotations().find("::@try_construct");
+    TryConstructFailAction try_construct = tryconstructfailaction_discard;
+    if (ann_appl) {
+      switch (get_u32_annotation_member_value(ann_appl, "value"))
+      {
+      case 0:
+        try_construct = tryconstructfailaction_discard;
+        break;
+      case 1:
+        try_construct = tryconstructfailaction_use_default;
+        break;
+      case 2:
+        try_construct = tryconstructfailaction_trim;
+        break;
+      default:
+        try_construct = tryconstructfailaction_discard;
+      }
+    }
     Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()) {
@@ -553,7 +608,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -611,35 +666,69 @@ namespace {
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
-
+      if (!primitive) {
+        be_global->impl_ << "  const char* end_of_seq = strm.pos_rd() + total_size;\n";
+      }
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
+      AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
+      string bound;
       if (!seq->unbounded()) {
-        be_global->impl_ <<
-          "  if (length > " << (use_cxx11 ? bounded_arg(seq) : "seq.maximum()") << ") {\n"
-          "    return false;\n"
-          "  }\n";
+        bound = (use_cxx11 ? bounded_arg(seq) : "seq.maximum()");
       }
-      be_global->impl_ <<
-        (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
+      //create a variable called newlength which tells us how long we need to copy to
+      //for an unbounded sequence this is just our length
+      //for a bounded sequence this is our maximum
+      //we save the old length so we know how far we need to read until
+      be_global->impl_ << "  CORBA::ULong new_length = length;\n";
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
-        if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
+        // if we are a bounded primitive, we read to our max then return false
+        if (!seq->unbounded()) {
           be_global->impl_ <<
-            "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+            "  if (length > " << bound << ") {\n"
+            "    new_length = " << bound << ";\n"
+            "  }\n";
+          be_global->impl_ <<
+            (use_cxx11 ? "  wrap.val_->resize(" : "  seq.length(") << "new_length);\n";
+          if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
+            be_global->impl_ <<
+            "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n"
             "    bool b;\n" <<
             streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
             "    seq[i] = b;\n"
-            "  }\n"
-            "  return true;\n";
+            "  }\n";
+          } else {
+            be_global->impl_ <<
+              "  strm.read_" << getSerializerName(elem) << "_array(" << get_buffer << ", new_length);\n";
+          }
+          be_global->impl_ <<
+            "  if (new_length != length) {\n"
+            "    size_t skip_length = 0;\n"
+            "    " << getMaxSizeExprPrimitive(elem, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
+            "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+            "    strm.skip(skip_length);\n"
+            "    return false;\n"
+            "  }\n";
         } else {
           be_global->impl_ <<
-            "  if (length == 0) {\n"
-            "    return true;\n"
-            "  }\n"
-            "  return strm.read_" << getSerializerName(elem)
-            << "_array(" << get_buffer << ", length);\n";
+            (use_cxx11 ? "  wrap.val_->resize(new_length);\n" : "  seq.length(new_length);\n");
+          if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
+            be_global->impl_ <<
+              "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+              "    bool b;\n" <<
+              streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
+              "    seq[i] = b;\n"
+              "  }\n"
+              "  return true;\n";
+          } else {
+            be_global->impl_ <<
+              "  if (length == 0) {\n"
+              "    return true;\n"
+              "  }\n"
+              "  return strm.read_" << getSerializerName(elem)
+              << "_array(" << get_buffer << ", length);\n";
+          }
         }
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
@@ -648,39 +737,102 @@ namespace {
         be_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
+        if (!seq->unbounded()) {
+          be_global->impl_ <<
+            "  if (length > " << (use_cxx11 ? bounded_arg(seq) : "seq.maximum()") << ") {\n"
+            "    new_length = " << bound << ";\n"
+            "  }\n";
+        }
+        //change the size of seq length to prepare
         be_global->impl_ <<
-          "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
+          (use_cxx11 ? "  wrap.val_->resize(new_length);\n" : "  seq.length(new_length);\n");
+        //read the entire length of the writer's sequence
+        be_global->impl_ <<
+          "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
+
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           const string typedefname = scoped(seq->base_type()->name());
           be_global->impl_ <<
-            "    " << typedefname << "_var tmp = " << typedefname
+            "      " << typedefname << "_var tmp = " << typedefname
             << "_alloc();\n"
-            "    " << typedefname << "_forany fa = tmp.inout();\n"
-            << streamAndCheck(">> fa", 4) <<
-            "    " << typedefname << "_copy(seq[i], tmp.in());\n";
+            "      " << typedefname << "_forany fa = tmp.inout();\n"
+            << "    if (!(strm >> fa)) {\n";
         } else if (elem_cls & CL_STRING) {
           if (elem_cls & CL_BOUNDED) {
-            const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ")
-              + bounded_arg(elem);
-            be_global->impl_ <<
-              streamAndCheck(">> " + getWrapper(args, elem, WD_INPUT), 4);
-          } else { // unbounded string
+            const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
+            be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
+          }
+          else {
             const string getbuffer =
               (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
               ? ".get_buffer()" : "";
-            be_global->impl_ << streamAndCheck(">> seq" + getbuffer + "[i]", 4);
+            be_global->impl_ << "if (!(strm >> seq" + getbuffer + "[i])) {\n";
           }
         } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            streamAndCheck(">> IDL::DistinctType<" + cxx_elem + ", " +
-                           elem_underscores + "_tag>(seq[i])", 4);
-        } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
-          be_global->impl_ << streamAndCheck(">> seq[i]", 4);
+          "    if (!(strm >> IDL::DistinctType<" << cxx_elem << ", "  <<
+                           elem_underscores << "_tag>(seq[i])" << ")) {\n";
+        } else {
+          be_global->impl_ << "   if (!(strm >> seq[i])) {\n";
         }
-        be_global->impl_ <<
-          "  }\n"
-          "  return true;\n";
+        std::string seq_resize_func = (use_cxx11) ? "resize" : "length";
+
+        if (try_construct == tryconstructfailaction_use_default) {
+          be_global->impl_ << "     " << type_to_default(elem, "seq[i]") <<
+                              "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+        } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
+                   ((elem_cls & CL_STRING) || (elem_cls & CL_SEQUENCE))) {
+          if (elem_cls & CL_STRING){
+            string check_not_empty = (use_cxx11) ? "!seq[i].empty()" : "seq[i].in()";
+            string get_length = (use_cxx11) ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
+            string inout = (use_cxx11) ? "" : ".inout()";
+            if (use_cxx11 ){
+            be_global->impl_ <<
+              "      if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "        seq[i]" << inout <<inout << ".resize(" << bounded_arg(elem) <<  ");\n"
+              "      }";
+            } else {
+            be_global->impl_ <<
+              "      if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "        seq[i]" << inout << "[" << bounded_arg(elem) << "] = 0;\n"
+              "      }";
+            }
+            be_global->impl_ <<
+              "  else {\n"
+              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
+            be_global->impl_ <<   "        return false;\n"
+                                  "      }\n";
+          } else if (elem_cls & CL_SEQUENCE) {
+            be_global->impl_ << "      if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
+            skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
+            be_global->impl_ << "        return false;\n"
+                                "      }\n"
+                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          }
+        } else {
+          //discard/default
+          be_global->impl_ << "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          be_global->impl_ << "      ";
+          skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
+          be_global->impl_ << "      return false;\n";
+        }
+        be_global->impl_ << "    }\n";
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+          be_global->impl_ << "    " << scoped(seq->base_type()->name()) << "_copy(seq[i], tmp.in());\n";
+        }
+        be_global->impl_ << "  }\n";
       }
+      if (!primitive) {
+        be_global->impl_ << "  if (new_length != length) {\n";
+        skip_to_end_sequence("new_length", "length", scoped(tdname), use_cxx11, elem_cls, seq);
+        be_global->impl_ << "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+          "    return false;\n"
+          "  }\n";
+      }
+      be_global->impl_ << "  return true;\n";
     }
   }
 
@@ -700,23 +852,28 @@ namespace {
     }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool primitive = sf.as_cls_ & CL_PRIMITIVE;
     const string check_empty = use_cxx11 ? "seq.empty()" : "seq.length() == 0";
     const string get_length = use_cxx11 ? "static_cast<uint32_t>(seq.size())" : "seq.length()";
-    const string get_buffer = use_cxx11 ? "seq.data()" : "seq.get_buffer()";
-    string const_cxx = cxx, unwrap, const_unwrap;
+    const string get_buffer = use_cxx11 ? "wrap.val_->data()" : "seq.get_buffer()";
+    string const_cxx = cxx;
     if (use_cxx11) {
       be_global->header_ << "struct " << sf.underscored_ << "_tag {};\n\n";
       const_cxx = "IDL::DistinctType<const " + cxx + ", " + sf.underscored_ + "_tag>";
     } else {
       const_cxx = "const " + cxx + '&';
     }
-
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_);
       serialized_size.endArgs();
+
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, !primitive, false);
+
       be_global->impl_ << sf.const_unwrap_ <<
         "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
@@ -759,8 +916,7 @@ namespace {
             "    serialized_size(encoding, size, tmp);\n";
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            "    serialized_size(encoding, size, IDL::DistinctType<const "
-            << sf.scoped_elem_ << ", " << sf.elem_ref_ + "(seq[i]));\n";
+            "    serialized_size(encoding, size, " << sf.elem_const_ref_ + "(seq[i]));\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
             "    serialized_size(encoding, size, seq[i]);\n";
@@ -774,6 +930,15 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg(sf.arg_.c_str(), sf.const_ref_);
       insertion.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+
       be_global->impl_ << sf.const_unwrap_ <<
         "  const CORBA::ULong length = " << get_length << ";\n";
       if (!sf.seq_->unbounded()) {
@@ -834,33 +999,93 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(sf.arg_.c_str(), sf.ref_);
       extraction.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+
+      const string cxx_elem = scoped(sf.seq_->base_type()->name()),
+        elem_underscores = dds_generator::scoped_helper(sf.seq_->base_type()->name(), "_");
+      AST_Annotation_Appl* ann_appl = sf.seq_->base_type_annotations().find("::@try_construct");
+      TryConstructFailAction try_construct = tryconstructfailaction_discard;
+      if (ann_appl) {
+        switch (get_u32_annotation_member_value(ann_appl, "value"))
+        {
+        case 0:
+          try_construct = tryconstructfailaction_discard;
+          break;
+        case 1:
+          try_construct = tryconstructfailaction_use_default;
+          break;
+        case 2:
+          try_construct = tryconstructfailaction_trim;
+          break;
+        default:
+          try_construct = tryconstructfailaction_discard;
+        }
+      }
+
+      if (!primitive) {
+        be_global->impl_ << "  const char* end_of_seq = strm.pos_rd() + total_size;\n";
+      }
       be_global->impl_ << sf.unwrap_ <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
+      AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
+      string bound;
       if (!sf.seq_->unbounded()) {
-        be_global->impl_ <<
-          "  if (length > " << (use_cxx11 ? bounded_arg(sf.seq_) : "seq.maximum()") << ") {\n"
-          "    return false;\n"
-          "  }\n";
+        bound = (use_cxx11 ? bounded_arg(sf.seq_) : "seq.maximum()");
       }
-      be_global->impl_ <<
-        (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
+      be_global->impl_ << "  CORBA::ULong new_length = length;\n";
       if (sf.as_cls_ & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(sf.as_act_);
-        if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
+        if (!sf.seq_->unbounded()) {
           be_global->impl_ <<
-            "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
-            "    bool b;\n" << streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
+            "  if (length > " << bound << ") {\n"
+            "    new_length = " << bound << ";\n"
+            "  }\n";
+          be_global->impl_ <<
+            (use_cxx11 ? "  wrap.val_->resize(" : "  seq.length(") << "new_length);\n";
+          if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
+            be_global->impl_ <<
+            "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n"
+            "    bool b;\n" <<
+            streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
             "    seq[i] = b;\n"
-            "  }\n"
-            "  return true;\n";
+            "  }\n";
+          } else {
+            be_global->impl_ <<
+              "  strm.read_" << getSerializerName(sf.as_act_) << "_array(" << get_buffer << ", new_length);\n";
+          }
+          be_global->impl_ <<
+            "  if (new_length != length) {\n"
+            "    size_t skip_length = 0;\n"
+            "    " << getMaxSizeExprPrimitive(sf.as_act_, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
+            "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+            "    strm.skip(skip_length);\n"
+            "    return false;\n"
+            "  }\n";
         } else {
           be_global->impl_ <<
-            "  if (length == 0) {\n"
-            "    return true;\n"
-            "  }\n"
-            "  return strm.read_" << getSerializerName(sf.as_act_)
-            << "_array(" << get_buffer << ", length);\n";
+            (use_cxx11 ? "  wrap.val_->resize(new_length);\n" : "  seq.length(new_length);\n");
+          if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
+            be_global->impl_ <<
+              "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+              "    bool b;\n" <<
+              streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
+              "    seq[i] = b;\n"
+              "  }\n"
+              "  return true;\n";
+          } else {
+            be_global->impl_ <<
+              "  if (length == 0) {\n"
+              "    return true;\n"
+              "  }\n"
+              "  return strm.read_" << getSerializerName(sf.as_act_)
+              << "_array(" << get_buffer << ", length);\n";
+          }
         }
       } else if (sf.as_cls_ & CL_INTERFACE) {
         be_global->impl_ <<
@@ -869,36 +1094,100 @@ namespace {
         be_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        be_global->impl_ <<
-          "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
-        if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
+        if (!sf.seq_->unbounded()) {
           be_global->impl_ <<
-            "    " << sf.scoped_elem_ << "_var tmp = " << sf.scoped_elem_ << "_alloc();\n"
-            "    " << sf.scoped_elem_ << "_forany fa = tmp.inout();\n"
-            << streamAndCheck(">> fa", 4) <<
-            "    " << sf.scoped_elem_ << "_copy(seq[i], tmp.in());\n";
+            "  if (length > " << (use_cxx11 ? bounded_arg(sf.seq_) : "seq.maximum()") << ") {\n"
+            "    new_length = " << bound << ";\n"
+            "  }\n";
+        }
+        //change the size of seq length to prepare
+        be_global->impl_ <<
+          (use_cxx11 ? "  wrap.val_->resize(new_length);\n" : "  seq.length(new_length);\n");
+        //read the entire length of the writer's sequence
+        be_global->impl_ <<
+          "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
+        if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
+          const string typedefname = scoped(sf.seq_->base_type()->name());
+          be_global->impl_ <<
+            "      " << typedefname << "_var tmp = " << typedefname
+            << "_alloc();\n"
+            "      " << typedefname << "_forany fa = tmp.inout();\n"
+            << "    if (!(strm >> fa)) {\n";
         } else if (sf.as_cls_ & CL_STRING) {
           if (sf.as_cls_ & CL_BOUNDED) {
-            const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ")
-              + bounded_arg(sf.as_act_);
-            be_global->impl_ <<
-              streamAndCheck(">> " + getWrapper(args, sf.as_act_, WD_INPUT), 4);
-          } else { // unbounded string
+            const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(sf.as_act_);
+            be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, sf.as_act_, WD_INPUT) << ")) {\n";
+          }
+          else {
             const string getbuffer =
               (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
               ? ".get_buffer()" : "";
-            be_global->impl_ << streamAndCheck(">> seq" + getbuffer + "[i]", 4);
+            be_global->impl_ << "    if (!(strm >> seq" + getbuffer + "[i])) {\n";
           }
         } else if (use_cxx11 && (sf.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            streamAndCheck(">> " + sf.elem_ref_ + "(seq[i])", 4);
-        } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
-          be_global->impl_ << streamAndCheck(">> seq[i]", 4);
+          "    if (!(strm >> " << sf.elem_ref_ << "(seq[i])" << ")) {\n";
+        } else {
+          be_global->impl_ << "   if (!(strm >> seq[i])) {\n";
         }
-        be_global->impl_ <<
-          "  }\n"
-          "  return true;\n";
+
+        if (try_construct == tryconstructfailaction_use_default) {
+          be_global->impl_ << "     " << type_to_default(sf.as_base_, "seq[i]") <<
+                              "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+        } else if ((try_construct == tryconstructfailaction_trim) && (sf.as_cls_ & CL_BOUNDED) &&
+                   ((sf.as_cls_ & CL_STRING) || (sf.as_cls_ & CL_SEQUENCE))) {
+          if (sf.as_cls_ & CL_STRING){
+            string check_not_empty = (use_cxx11) ? "!seq[i].empty()" : "seq[i].in()";
+            string get_length = (use_cxx11) ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
+            string inout = (use_cxx11) ? "" : ".inout()";
+            if (use_cxx11 ){
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
+              "          seq[i]" << inout << ".resize(" << bounded_arg(sf.as_act_) <<  ");\n"
+              "        }";
+            } else {
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
+              "          seq[i]" << inout << "[" << bounded_arg(sf.as_act_) << "] = 0;\n"
+              "        }";
+            }
+            be_global->impl_ <<" else {\n"
+            "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
+            be_global->impl_ << "        return false;\n"
+                                "      }\n";
+          } else if (sf.as_cls_ & CL_SEQUENCE) {
+            be_global->impl_ << "      if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
+            skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
+            be_global->impl_ << "        return false;\n"
+                                "      }\n"
+                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          }
+        } else {
+          //discard/default
+          be_global->impl_ << "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          be_global->impl_ << "      ";
+          skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
+          be_global->impl_ << "      return false;\n";
+        }
+        be_global->impl_ << "    }\n";
+        if (!use_cxx11 && (sf.as_cls_ & CL_ARRAY)) {
+          be_global->impl_ << "    " << scoped(sf.seq_->base_type()->name()) << "_copy(seq[i], tmp.in());\n";
+        }
+        be_global->impl_ << "  }\n";
       }
+      if (!primitive) {
+        be_global->impl_ <<
+          "  if (new_length != length) {\n";
+        skip_to_end_sequence("new_length", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
+        be_global->impl_ <<
+          "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+          "    return false;\n"
+          "  }\n";
+      }
+      be_global->impl_ << "  return true;\n";
     }
   }
 
@@ -923,6 +1212,24 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(arr->base_type());
+    AST_Annotation_Appl* ann_appl = arr->base_type_annotations().find("::@try_construct");
+    TryConstructFailAction try_construct = tryconstructfailaction_discard;
+    if (ann_appl) {
+      switch (get_u32_annotation_member_value(ann_appl, "value"))
+      {
+      case 0:
+        try_construct = tryconstructfailaction_discard;
+        break;
+      case 1:
+        try_construct = tryconstructfailaction_use_default;
+        break;
+      case 2:
+        try_construct = tryconstructfailaction_trim;
+        break;
+      default:
+        try_construct = tryconstructfailaction_discard;
+      }
+    }
     Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()
@@ -933,6 +1240,19 @@ namespace {
     size_t n_elems = 1;
     for (size_t i = 0; i < arr->n_dims(); ++i) {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
+    }
+    {
+      Function set_default("set_default", "void");
+      set_default.addArg("stru", cxx);
+      set_default.endArgs();
+      string indent = "  ";
+      string var_name = "stru";
+      if (use_cxx11) {
+        be_global->impl_ << "  " << scoped(arr->name()) + "& arr = stru;\n";
+        var_name = "arr";
+      }
+      NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+      be_global->impl_ << "    " << type_to_default(elem, var_name + nfl.index_);
     }
     {
       Function serialized_size("serialized_size", "void");
@@ -1047,15 +1367,17 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(use_cxx11 ? "wrap" : "arr", cxx);
       extraction.endArgs();
-
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n"
-        "  ACE_UNUSED_ARG(encoding);\n";
+      be_global->impl_ << "  bool discard_flag = false;\n"
+                          "  const Encoding& encoding = strm.encoding();\n"
+                          "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
+      if (!primitive) {
+        be_global->impl_ << "  const char* end_of_seq = strm.pos_rd() + total_size;\n";
+      }
 
       be_global->impl_ << unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
@@ -1067,46 +1389,106 @@ namespace {
           "  return strm.read_" << getSerializerName(elem)
           << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        {
-          string indent = "  ";
-          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-            const string typedefname = scoped(arr->base_type()->name());
-            be_global->impl_ <<
-              indent << typedefname << "_var tmp = " << typedefname
-              << "_alloc();\n" <<
-              indent << typedefname << "_forany fa = tmp.inout();\n"
-              << streamAndCheck(">> fa", indent.size()) <<
-              indent << typedefname << "_copy(arr" << nfl.index_ <<
-              ", tmp.in());\n";
-          } else {
-            string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
-            string pre;
-            if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = "IDL::DistinctType<" + cxx_elem + ", " +
-                dds_generator::scoped_helper(arr->base_type()->name(), "_") + "_tag>(";
-              suffix += ')';
-            }
-            be_global->impl_ <<
-              streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
-          }
+        string indent = "  ";
+        string suffix = "";
+        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+          const string typedefname = scoped(arr->base_type()->name());
+          be_global->impl_ <<
+            indent << typedefname << "_var tmp = " << typedefname
+            << "_alloc();\n" <<
+            indent << typedefname << "_forany fa = tmp.inout();\n"
+            << indent <<  "    if (!(strm >> fa)) {\n";
+        } else {
+          string intro;
+          be_global->impl_ << "    if (!"
+            << streamCommon("", arr->base_type(), string(">> ") + "arr" + nfl.index_, intro)
+            << ") {\n";
         }
-        be_global->impl_ << "  return true;\n";
+
+        if (try_construct == tryconstructfailaction_use_default) {
+          if (elem_cls & CL_ARRAY) {
+            be_global->impl_ << "      " << type_to_default(elem, "arr" + nfl.index_) <<
+                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          } else {
+            be_global->impl_ << "      " << type_to_default(elem, "arr" + nfl.index_ + suffix) <<
+                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          }
+        } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
+                   ((elem_cls & CL_STRING) || (elem_cls & CL_SEQUENCE))) {
+          if (elem_cls & CL_STRING) {
+            string check_not_empty = (use_cxx11) ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
+            string get_length = (use_cxx11) ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
+            string inout = (use_cxx11) ? "" : ".inout()";
+            if (use_cxx11 ){
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "          arr" << nfl.index_ << inout << ".resize(" << bounded_arg(elem) <<  ");\n"
+              "        }";
+            } else {
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "          arr" << nfl.index_ << inout << "[" << bounded_arg(elem) << "] = 0;\n"
+              "        }";
+            }
+            be_global->impl_ << " else {\n";
+            skip_to_end_array();
+            be_global->impl_ << "      }\n";
+          } else if (elem_cls & CL_SEQUENCE) {
+            be_global->impl_ << "      if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
+            skip_to_end_array();
+            be_global->impl_ << "      } else {\n"
+                                "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                                "      }\n";
+          }
+        } else {
+          //discard/default
+          skip_to_end_array();
+        }
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+          const string typedefname = scoped(arr->base_type()->name());
+          be_global->impl_ << indent << "} else {\n" <<
+            indent << "  " << typedefname << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
+        }
+        be_global->impl_ << "    }\n";
       }
+      be_global->impl_ << "  if (discard_flag) {\n"
+                          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+                          "    return false;\n"
+                          "  }\n"
+                          "  return true;\n";
     }
   }
 
   void gen_anonymous_array(const FieldInfo& af)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
+    const bool primitive = af.as_cls_ & CL_PRIMITIVE;
     if (!af.as_act_->in_main_file() && af.as_act_->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(af.as_act_->file_name().c_str());
     }
     if (use_cxx11) {
       be_global->header_ << "struct " << af.underscored_ << "_tag {};\n\n";
     }
-
+    {
+      Function set_default("set_default", "void");
+      set_default.addArg("stru", af.ref_);
+      set_default.endArgs();
+      AST_Type* elem = resolveActualType(af.arr_->base_type());
+      string indent = "  ";
+      string var_name = "stru";
+      if (use_cxx11) {
+        std::string n = scoped(af.arr_->name());
+        n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + af.arr_->local_name()->get_string();
+        be_global->impl_ << "  " << n + "& arr = stru;\n";
+        var_name = "arr";
+      }
+      NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
+      be_global->impl_ << "    " << type_to_default(elem, var_name + nfl.index_);
+    }
     {
 
       Function serialized_size("serialized_size", "void");
@@ -1114,6 +1496,11 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg(af.arg_.c_str(), af.const_ref_);
       serialized_size.endArgs();
+
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, !primitive, false);
+
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
@@ -1167,6 +1554,15 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg(af.arg_.c_str(), af.const_ref_);
       insertion.endArgs();
+
+      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");");
+      code.push_back("if (!strm.write_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+
       be_global->impl_ << af.const_unwrap_;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (af.as_cls_ & CL_PRIMITIVE) {
@@ -1206,6 +1602,38 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg(af.arg_.c_str(), af.ref_);
       extraction.endArgs();
+
+
+      AST_Annotation_Appl* ann_appl = af.arr_->base_type_annotations().find("::@try_construct");
+      TryConstructFailAction try_construct = tryconstructfailaction_discard;
+      if (ann_appl) {
+        switch (get_u32_annotation_member_value(ann_appl, "value"))
+        {
+        case 0:
+          try_construct = tryconstructfailaction_discard;
+          break;
+        case 1:
+          try_construct = tryconstructfailaction_use_default;
+          break;
+        case 2:
+          try_construct = tryconstructfailaction_trim;
+          break;
+        default:
+          try_construct = tryconstructfailaction_discard;
+        }
+      }
+
+      be_global->impl_ << "  bool discard_flag = false;\n"
+                       << "  const Encoding& encoding = strm.encoding();\n";
+      std::vector<string> code;
+      code.push_back("if (!strm.read_delimiter(total_size)) {");
+      code.push_back("  return false;");
+      code.push_back("}");
+      generate_dheader_code(code, !primitive);
+      if (!primitive) {
+        be_global->impl_ << "  const char* end_of_seq = strm.pos_rd() + total_size;\n";
+      }
+
       be_global->impl_ << af.unwrap_;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
       if (af.as_cls_ & CL_PRIMITIVE) {
@@ -1216,40 +1644,88 @@ namespace {
           "  return strm.read_" << getSerializerName(af.as_act_)
           << "_array(arr" << accessor << suffix << ", " << af.n_elems_ << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        {
-          string indent = "  ";
-          NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
-          if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
-            be_global->impl_ <<
-              indent << af.scoped_elem_ << "_var tmp = " << af.scoped_elem_ << "_alloc();\n" <<
-              indent << af.scoped_elem_ << "_forany fa = tmp.inout();\n" <<
-              streamAndCheck(">> fa", indent.size()) <<
-              indent << af.scoped_elem_ << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
-          } else {
-            string suffix = (af.as_cls_ & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
-            string pre;
-            if (use_cxx11 && (af.as_cls_ & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = "IDL::DistinctType<" + af.scoped_elem_ + ", " +
-                dds_generator::scoped_helper(af.as_base_->name(), "_") + "_tag>(";
-              suffix += ')';
-            }
-            be_global->impl_ <<
-              streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
-          }
+        string indent = "  ";
+        string suffix = "";
+        NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
+        if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
+          const string typedefname = scoped(af.arr_->base_type()->name());
+          be_global->impl_ <<
+            indent << typedefname << "_var tmp = " << typedefname
+            << "_alloc();\n" <<
+            indent << typedefname << "_forany fa = tmp.inout();\n"
+            << indent <<  "if (!(strm >> fa)) {\n";
+        } else {
+          string intro;
+          be_global->impl_ << "    if (!"
+            << streamCommon("", af.as_base_, string(">> ") + "arr" + nfl.index_, intro)
+            << ") {\n";
         }
-        be_global->impl_ << "  return true;\n";
+
+        if (try_construct == tryconstructfailaction_use_default) {
+          if (af.as_cls_ & CL_ARRAY) {
+            be_global->impl_ << "      " << type_to_default(af.as_base_, "arr" + nfl.index_) <<
+                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          } else {
+            be_global->impl_ << "      " << type_to_default(af.as_base_, "arr" + nfl.index_ + suffix) <<
+                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          }
+        } else if ((try_construct == tryconstructfailaction_trim) && (af.as_cls_ & CL_BOUNDED) &&
+                   ((af.as_cls_ & CL_STRING) || (af.as_cls_ & CL_SEQUENCE))) {
+          if (af.as_cls_ & CL_STRING){
+            string check_not_empty = (use_cxx11) ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
+            string get_length = (use_cxx11) ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
+            string inout = (use_cxx11) ? "" : ".inout()";
+
+            if (use_cxx11 ){
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
+              "        arr" << nfl.index_ << inout << ".resize(" << bounded_arg(af.as_act_) <<  ");\n"
+              "        }";
+            } else {
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
+              "        arr" << nfl.index_ << inout << "[" << bounded_arg(af.as_act_) << "] = 0;\n"
+              "        }";
+            }
+            be_global->impl_ << " else {\n";
+            skip_to_end_array();
+            be_global->impl_ << "      }\n";
+          } else if (af.as_cls_ & CL_SEQUENCE) {
+            be_global->impl_ << "      if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
+            skip_to_end_array();
+            be_global->impl_ << "      } else {\n"
+                                "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                                "      }\n";
+          }
+        } else {
+          //discard/default
+          skip_to_end_array();
+        }
+        if (!use_cxx11 && (af.as_cls_ & CL_ARRAY)) {
+          const string typedefname = scoped(af.arr_->base_type()->name());
+          be_global->impl_ << indent << "} else {\n" <<
+            indent << "  " << typedefname << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
+        }
+        be_global->impl_ << "    }\n";
       }
+    be_global->impl_ << "  if (discard_flag) {\n"
+                          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+                          "    return false;\n"
+                          "  }\n"
+                          "  return true;\n";
     }
   }
 
   string getArrayForany(const char* prefix, const char* fname,
-                        const string& cxx_fld)
+                        const string& cxx_fld, const string& temp_var_suffix = "")
   {
     string local = fname;
     if (local.size() > 2 && local.substr(local.size() - 2, 2) == "()") {
       local.erase(local.size() - 2);
     }
-    return cxx_fld + "_forany " + prefix + '_' + local + "(const_cast<"
+    return cxx_fld + "_forany " + prefix + '_' + local + temp_var_suffix + "(const_cast<"
       + cxx_fld + "_slice*>(" + prefix + "." + fname + "));";
   }
 
@@ -1617,7 +2093,7 @@ namespace {
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
         return indent +
@@ -1675,7 +2151,7 @@ namespace {
   // common to both fields (in structs) and branches (in unions)
   string streamCommon(const string& name, AST_Type* type,
                       const string& prefix, string& intro,
-                      const string& stru = "", bool printing = false)
+                      const string& stru, bool printing)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
@@ -1685,9 +2161,11 @@ namespace {
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
-    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member),
-          shift = prefix.substr(0, 2),
-          expr = qual.substr(3);
+    string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
+    // if there is a stray '.' on the end, strip it off
+    if (qual[qual.length() - 1] == '.') qual.pop_back();
+    const string shift = prefix.substr(0, 2),
+                 expr = qual.substr(3);
 
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
@@ -1716,10 +2194,12 @@ namespace {
         if (accessor) {
           local.erase(local.size() - 2);
         }
-        intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname) + '\n';
+        //TODO: Was this redundant call fixed
+        intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname, "_sc") + '\n';
+        local += "_sc";
         fieldref += '_';
       } else {
-        fieldref += '.';
+        if (local != "") fieldref += '.';
       }
 
       if (fld_cls & CL_STRING) {
@@ -1758,7 +2238,8 @@ namespace {
         if (accessor) {
           local.erase(local.size() - 2);
         }
-        intro += "  " + getArrayForany(stru.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
+        intro += "  " + getArrayForany(stru.c_str(), af.name_.c_str(), af.scoped_type_, "_sc") + '\n';
+        local += "_sc";
       }
       expr += "(strm " + fieldref + local + ')';
     }
@@ -2266,6 +2747,21 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
   const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
+  const bool may_be_delimited = not_final && repr.xcdr2;
+  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  {
+    Function set_default("set_default", "void");
+    set_default.addArg("stru", cxx + "&");
+    set_default.endArgs();
+    for (size_t i = 0; i < fields.size(); ++i) {
+      string field_name = string("stru.") + fields[i]->local_name()->get_string();
+      if (use_cxx11) {
+        field_name += "()";
+      }
+      be_global->impl_ << "  " << type_to_default(fields[i]->field_type(), field_name, fields[i]->field_type()->anonymous());
+    }
+  }
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -2356,6 +2852,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     // Write the fields
     string intro = rtpsCustom.preamble_;
     if (may_be_parameter_list) {
+      string expr;
       be_global->impl_ <<
         "  size_t size = 0;\n";
       std::ostringstream fields_encode;
@@ -2364,18 +2861,27 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         const string field_name = fields[i]->local_name()->get_string();
         bool is_key = false;
         be_global->check_key(fields[i], is_key);
-        fields_encode <<
-          "\n" <<
-            findSizeCommon(field_name, fields[i]->field_type(), "stru", intro) <<
-          "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
+        fields_encode << "\n";
+        expr = "";
+        if (!findSizeAnonymous(fields[i], "stru", intro, expr)) {
+          expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
+        }
+        fields_encode << expr << "\n";
+        expr = "";
+        fields_encode << "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
+
           "    return false;\n"
           "  }\n"
           "  size = 0;\n"
-          "  if (!" <<
-            streamCommon(field_name, fields[i]->field_type(),
-              "<< stru", intro, cxx) << ") {\n"
-          "    return false;\n"
-          "  }\n";
+          "  if (!";
+        if (!streamAnonymous(fields[i], "<<", intro, expr)) {
+          expr += streamCommon(field_name, fields[i]->field_type(),
+              "<< stru", intro, cxx);
+        }
+        fields_encode << expr << "\n"
+                      ") {\n"
+                      "    return false;\n"
+                      "  }\n";
       }
       fields_encode <<
         "\n"
@@ -2411,7 +2917,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.addArg("stru", cxx + "&");
     extraction.endArgs();
     string intro;
-
+    string expr;
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
@@ -2464,19 +2970,69 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "      return true;\n"
           "    }\n";
       }
-
+      be_global->impl_ << "    const char* end_of_field = strm.pos_rd() + field_size;\n";
       std::ostringstream cases;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
-        const string field_name = fields[i]->local_name()->get_string();
+        string field_name = string("stru.") + fields[i]->local_name()->get_string();
         cases <<
           "    case " << id << ": {\n"
-          "      if (!" << streamCommon(field_name, fields[i]->field_type(),
-            ">> stru", intro, cxx) << ") {\n"
-          "        return false;\n"
-          "      }\n"
-          "      break;\n"
-          "    }\n";
+          "      if (!";
+        expr = "";
+        if (!streamAnonymous(fields[i], ">>", intro, expr)) {
+          expr += streamCommon(fields[i]->local_name()->get_string(), fields[i]->field_type(),
+            ">> stru", intro, cxx);
+        }
+        cases << expr << "\n"
+              ") {\n";
+        AST_Type* field_type = resolveActualType(fields[i]->field_type());
+        Classification fld_cls = classify(field_type);
+
+        if (use_cxx11) {
+          field_name += "()";
+        }
+        if (be_global->try_construct(fields[i]) == tryconstructfailaction_use_default) {
+          cases << "        " << type_to_default(field_type, field_name, fields[i]->field_type()->anonymous()) <<
+                   "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos_rd());\n";
+        } else if ((be_global->try_construct(fields[i]) == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
+                   ((fld_cls & CL_STRING) || (fld_cls & CL_SEQUENCE))) {
+          if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
+            string check_not_empty = (use_cxx11) ? "!" + field_name + ".empty()" : field_name + ".in()";
+            string get_length = (use_cxx11) ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
+            string inout = (use_cxx11) ? "" : ".inout()";
+            if (use_cxx11 ){cases <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(field_type) << " < " << get_length << ")) {\n"
+              "          " << field_name << inout << ".resize(" << bounded_arg(field_type) <<  ");\n"
+              "        }";
+            } else {
+            cases <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(field_type) << " < " << get_length << ")) {\n"
+              "          " << field_name << inout << "[" << bounded_arg(field_type) << "] = 0;\n"
+              "        }";
+            }
+            cases << " else {\n"
+              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "          return false;\n"
+              "        }\n";
+          } else if (fld_cls & CL_SEQUENCE) {
+            cases << "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+                      "          return false;\n"
+                      "        }\n"
+                      "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                      "        strm.skip(end_of_field - strm.pos_rd());\n";
+          }
+        } else {
+          //discard/default
+          cases << "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos_rd());\n";
+          cases << "        return false;\n  ";
+        }
+        cases << "      }\n"
+                 "      break;\n"
+                 "    }\n";
       }
       be_global->impl_ << intro <<
         "    switch (member_id) {\n"
@@ -3057,6 +3613,55 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->data_representations(node);
 
   const bool not_final = exten != extensibilitykind_final;
+
+  {
+    Function set_default("set_default", "void");
+    set_default.addArg("stru", cxx + "&");
+    set_default.endArgs();
+    be_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";
+    be_global->impl_ << type_to_default(discriminator, "  temp");
+    be_global->impl_ << "  stru._d(temp);\n";
+    AST_Type* disc_type = resolveActualType(discriminator);
+    Classification disc_cls = classify(disc_type);
+    ACE_CDR::ULong default_enum_val = 0;
+    if (disc_cls & CL_ENUM) {
+      AST_Enum* enu = dynamic_cast<AST_Enum*>(disc_type);
+      UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
+      AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
+      default_enum_val = item->constant_value()->ev()->u.eval;
+    }
+    bool found = false;
+    for (std::vector<AST_UnionBranch*>::const_iterator itr = branches.begin(); itr < branches.end() && !found; itr++) {
+      AST_UnionBranch* branch = *itr;
+      for (int i = 0; i < branch->label_list_length(); i++) {
+        AST_UnionLabel* ul = branch->label(i);
+        if (ul->label_kind() != AST_UnionLabel::UL_default) {
+          AST_Expression::AST_ExprValue* ev = branch->label(i)->label_val()->ev();
+          if ((ev->et == AST_Expression::EV_enum && ev->u.eval == default_enum_val) ||
+              (ev->et == AST_Expression::EV_short && ev->u.sval == 0) ||
+              (ev->et == AST_Expression::EV_ushort && ev->u.usval == 0) ||
+              (ev->et == AST_Expression::EV_long && ev->u.lval == 0) ||
+              (ev->et == AST_Expression::EV_ulong && ev->u.ulval == 0) ||
+              (ev->et == AST_Expression::EV_longlong && ev->u.llval == 0) ||
+              (ev->et == AST_Expression::EV_ulonglong && ev->u.ullval == 0) ||
+              (ev->et == AST_Expression::EV_float && ev->u.fval == 0) ||
+              (ev->et == AST_Expression::EV_double && ev->u.dval == 0) ||
+              (ev->et == AST_Expression::EV_longdouble && ev->u.sval == 0) ||
+              (ev->et == AST_Expression::EV_char && ev->u.cval == 0) ||
+              (ev->et == AST_Expression::EV_wchar && ev->u.wcval == 0) ||
+              (ev->et == AST_Expression::EV_octet && ev->u.oval == 0) ||
+              (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
+          {
+            be_global->impl_ << "  " << scoped(branch->field_type()->name()) << " btemp;\n";
+            be_global->impl_ << type_to_default(branch->field_type(), "  btemp");
+            be_global->impl_ << "  stru." << branch->local_name()->get_string() << "(btemp);\n";
+            found = true;
+            break;
+          }
+        }
+      }
+    }
+  }
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {

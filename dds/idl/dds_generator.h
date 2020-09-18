@@ -505,6 +505,23 @@ std::ostream& operator<<(std::ostream& o,
   }
 }
 
+inline std::string bounded_arg(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  std::ostringstream arg;
+  const Classification cls = classify(type);
+  if (cls & CL_STRING) {
+    AST_String* const str = AST_String::narrow_from_decl(type);
+    arg << str->max_size()->ev()->u.ulval;
+  } else if (cls & CL_SEQUENCE) {
+    AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+    arg << seq->max_size()->ev()->u.ulval;
+  }
+  return arg.str();
+}
+
+std::string type_to_default(AST_Type* type, const std::string& name, bool is_anonymous = false, bool is_union = false);
+
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
                           size_t& n_labels, bool& has_default)
@@ -574,17 +591,64 @@ void generateCaseBody(
     }
     std::string rhs;
     if (br_cls & CL_STRING) {
-      if (use_cxx11) {
-        brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
-          + "string";
-        rhs = "tmp";
+    //       std::string tmp;
+    // if (strm >> Serializer::ToBoundedString(tmp, 20)) {
+    //   uni.u_b(tmp.c_str());
+
+
+      // if (use_cxx11) {
+      //   if (br_cls & CL_BOUNDED) {
+      //     const std::string nmspace =
+      //       lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "std::";
+      //     brType = nmspace + ((br_cls & CL_WIDE) ? "w" : "")
+      //       + "string";
+      //     std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
+      //     rhs = "Serializer::ToBoundedString<" + char_type + ">(tmp, " + bounded_arg(br) + ")";
+      //   } else {
+      //     brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
+      //       + "string";
+      //     rhs = "tmp";
+      //   }
+      // } else {
+      //   if (br_cls & CL_BOUNDED) {
+      //     const std::string nmspace =
+      //       lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "std::";
+      //     brType = nmspace + ((br_cls & CL_WIDE) ? "w" : "")
+      //       + "string";
+      //     std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
+      //     rhs = "Serializer::ToBoundedString<" + char_type + ">(tmp, " + bounded_arg(br) + ")";
+      //   } else {
+      //     const std::string nmspace =
+      //       lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
+      //     brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
+      //       + "String_var";
+      //     rhs = "tmp.out()";
+      //   }
+      // }
+
+      if (br_cls & CL_BOUNDED) {
+        const std::string nmspace = lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "std::";
+        brType = nmspace + ((br_cls & CL_WIDE) ? (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "WString_var" : "wstring" ) : (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "String_var" : "string" ));
+        std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
+        if ((lmap == BE_GlobalData::LANGMAP_FACE_CXX) && (br_cls & CL_WIDE)) {
+          rhs = "ACE_InputCDR::to_wstring(tmp.out(), " + bounded_arg(br) + ")";
+        } else if (lmap == BE_GlobalData::LANGMAP_FACE_CXX) {
+          rhs = "ACE_InputCDR::to_string(tmp.out(), " + bounded_arg(br) + ")";
+        } else { rhs = "Serializer::ToBoundedString<" + char_type + ">(tmp, " + bounded_arg(br) + ")";}
       } else {
-        const std::string nmspace =
-          lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
-        brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
-          + "String_var";
-        rhs = "tmp.out()";
+        if (use_cxx11) {
+          brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
+            + "string";
+          rhs = "tmp";
+        } else {
+          const std::string nmspace = lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
+          brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
+            + "String_var";
+          rhs = "tmp.out()";
+        }
       }
+
+      
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
       rhs = "IDL::DistinctType<" + brType + ", " +
         dds_generator::scoped_helper(branch->field_type()->name(), "_")
@@ -597,23 +661,95 @@ void generateCaseBody(
     }
     be_global->impl_ <<
       "    " << brType << " tmp;\n" << forany <<
-      "    if (strm >> " << rhs << ") {\n"
-      "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
-      "      uni._d(disc);\n"
-      "      return true;\n"
-      "    }\n"
-      "    return false;\n";
+      "    if (strm >> " << rhs << ") {\n";
+    if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED) && (lmap != BE_GlobalData::LANGMAP_FACE_CXX)) {
+      be_global->impl_ << "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp.c_str());\n");
+    } else {
+      be_global->impl_ << "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n");
+    }
+    be_global->impl_ << "      uni._d(disc);\n"
+                        "      return true;\n"
+                        "    }\n";
+
+
+
+
+
+      if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
+          be_global->impl_ << "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
+                   "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                   "        return true;\n";
+          // if (!(br_cls & CL_STRING)) be_global->impl_ << "        strm.skip(end_of_field - strm.pos_rd());\n";
+        } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
+                   ((br_cls & CL_STRING) || (br_cls & CL_SEQUENCE))) {
+          if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
+            std::string check_not_empty = "!tmp.empty()";
+            std::string get_length = (use_cxx11) ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
+            std::string inout = (use_cxx11) ? "" : ".inout()";
+            // if (use_cxx11 ){
+            //   be_global->impl_ <<
+            //   "        if (strm.good_bit() && " << check_not_empty << " && ("
+            //            << bounded_arg(br) << " < " << get_length << ")) {\n"
+            //   "          uni." << name << inout << ".resize(" << bounded_arg(br) <<  ");\n"
+            //   "        }";
+            // } else {
+            be_global->impl_ <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(br) << " < " << get_length << ")) {\n";
+              //"          uni." << name << inout << "[" << bounded_arg(br) << "] = 0;\n"
+            if (br_cls & CL_WIDE) {
+              be_global->impl_ << "          std::wstring s = tmp;\n";
+            }else {
+              be_global->impl_ << "          std::string s = tmp;\n";
+            }
+            be_global->impl_ <<
+              "          s.resize(" << bounded_arg(br) << ");\n"
+              "          uni." << name << "(s.c_str());\n"
+              "          return true;\n"
+              "        }";
+            //}
+            be_global->impl_ << " else {\n"
+              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "          return false;\n"
+              "        }\n";
+          } else if (br_cls & CL_SEQUENCE) {
+            be_global->impl_ << "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+                      "          return false;\n"
+                      "        }\n"
+                      "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+                      "        uni._d(disc);\n"
+                      "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                      "        return true;\n";
+                      // "        strm.skip(end_of_field - strm.pos_rd());\n";
+          }
+        } else {
+          //discard/default
+          be_global->impl_ << "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          // if (!(br_cls & CL_STRING)) be_global->impl_ << "        strm.skip(end_of_field - strm.pos_rd());\n";
+          be_global->impl_ << "        return false;\n  ";
+        }
+
+
+
+
+
+
+
+
+
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
-    std::string intro;
     if (commonFn2) {
+      std::string intro;
       const unsigned id = be_global->get_id(type, branch, default_id);
-      be_global->impl_ <<
-        commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false) <<
+      std::string expr = commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false);
+      be_global->impl_ << intro <<
+        expr <<
         "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
         "      return false;\n"
         "    }\n";
     }
+    std::string intro;
     std::string expr = commonFn(
       name + (parens ? "()" : ""), branch->field_type(),
       std::string(namePrefix) + "uni", intro, uni, printing);
@@ -744,7 +880,7 @@ inline
 std::string insert_cxx11_accessor_parens(
               const std::string& full_var_name_, bool is_union_member) {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  if (!use_cxx11 || is_union_member) return full_var_name_;
+  if (!use_cxx11 || is_union_member || full_var_name_.empty()) return full_var_name_;
 
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
