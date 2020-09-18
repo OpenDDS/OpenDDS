@@ -593,8 +593,8 @@ void generateCaseBody(
     if (br_cls & CL_STRING) {
       if (br_cls & CL_BOUNDED) {
         const std::string nmspace = lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "std::";
-        brType = nmspace + ((br_cls & CL_WIDE) ? 
-          (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "WString_var" : "wstring" ) 
+        brType = nmspace + ((br_cls & CL_WIDE) ?
+          (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "WString_var" : "wstring" )
           : (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "String_var" : "string" ));
         std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
         if ((lmap == BE_GlobalData::LANGMAP_FACE_CXX) && (br_cls & CL_WIDE)) {
@@ -613,7 +613,7 @@ void generateCaseBody(
             + "String_var";
           rhs = "tmp.out()";
         }
-      }     
+      }
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
       rhs = "IDL::DistinctType<" + brType + ", " +
         dds_generator::scoped_helper(branch->field_type()->name(), "_")

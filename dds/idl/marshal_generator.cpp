@@ -408,7 +408,7 @@ namespace {
       "      for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n";
     if (!use_cxx11 && (cls & CL_ARRAY)) {
       const string typedefname = scoped(seq->base_type()->name());
-      be_global->impl_ << 
+      be_global->impl_ <<
         "        " << typedefname << "_var tmp = " << typedefname << "_alloc();\n"
         "        " << typedefname << "_forany fa = tmp.inout();\n"
         "          strm >> fa; \n";
@@ -1122,7 +1122,7 @@ namespace {
         }
 
         if (try_construct == tryconstructfailaction_use_default) {
-          be_global->impl_ << 
+          be_global->impl_ <<
             "     " << type_to_default(sf.as_base_, "seq[i]") <<
             "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (sf.as_cls_ & CL_BOUNDED) &&
@@ -1154,7 +1154,7 @@ namespace {
           } else if (sf.as_cls_ & CL_SEQUENCE) {
             be_global->impl_ << "      if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
             skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
-            be_global->impl_ << 
+            be_global->impl_ <<
               "        return false;\n"
               "      }\n"
               "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
