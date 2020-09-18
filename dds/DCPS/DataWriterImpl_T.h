@@ -80,7 +80,7 @@ public:
 
     SerializedSizeBound buffer_size_bound() const
     {
-      return bound_ ? SerializedSizeBound() : SerializedSizeBound(header_size_ + bound_.get());
+      return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
     }
 
     /// Size of a buffer needed to store a specific sample
