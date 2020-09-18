@@ -20,7 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const TqePair null_tqe_pair(0, 0);
+const TqePair null_tqe_pair;
 
 TransportQueueElement::~TransportQueueElement()
 {
