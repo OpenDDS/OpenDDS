@@ -6,7 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TransportSendStrategy.h"
+
 #include "RemoveAllVisitor.h"
 #include "TransportInst.h"
 #include "ThreadSynchStrategy.h"
@@ -19,12 +21,13 @@
 #include "PacketRemoveVisitor.h"
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
-#include "ace/Reverse_Lock_T.h"
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <ace/Reverse_Lock_T.h>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
@@ -1003,7 +1006,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         : /* not fragmenting */ element_length;
 
       if ((exclusive && (this->elems_.size() != 0))
-          || (this->space_available() < space_needed)) {
+          || (current_space_available() < space_needed)) {
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Element won't fit in current packet or requires exclusive"
@@ -1063,10 +1066,15 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
         this->header_.last_fragment_ = false;
         if (max_message_size) { // fragmentation enabled
-          const size_t avail = this->space_available();
+          const size_t avail = current_space_available();
           if (element_length > avail) {
             VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
-            ElementPair ep = element->fragment(avail);
+            const TqePair ep = element->fragment(avail);
+            if (ep == null_tqe_pair) {
+              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::send: "
+                "Element Fragmentation Failed\n"));
+              return;
+            }
             element = ep.first;
             element_length = element->msg()->total_length();
             next_fragment = ep.second;
@@ -1528,7 +1536,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
     // Flag used to determine if the element requires a packet all to itself.
     const bool exclusive_packet = element->requires_exclusive_packet();
 
-    const size_t avail = this->space_available();
+    const size_t avail = current_space_available();
 
     bool frag = false;
     if (element_length > avail) {
@@ -1536,7 +1544,12 @@ TransportSendStrategy::get_packet_elems_from_queue()
       if (this->max_message_size()) { // fragmentation enabled
         this->header_.first_fragment_ = !element->is_fragment();
         VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting from queue\n"), 0);
-        ElementPair ep = element->fragment(avail);
+        const TqePair ep = element->fragment(avail);
+        if (ep == null_tqe_pair) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::get_packet_elems_from_queue: "
+            "Element Fragmentation Failed\n"));
+          return;
+        }
         element = ep.first;
         element_length = element->msg()->total_length();
         this->queue_.replace_head(ep.second);
@@ -1885,14 +1898,19 @@ void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
   element->data_delivered();
 }
 
-size_t TransportSendStrategy::space_available() const
+size_t TransportSendStrategy::space_available(size_t already_used) const
 {
-  const size_t used = this->max_header_size_ + this->header_.length_,
-    max_msg = this->max_message_size();
+  const size_t used = max_header_size_ + already_used;
+  const size_t max_msg = max_message_size();
   if (max_msg) {
-    return std::min(this->max_size_ - used, max_msg - used);
+    return std::min(static_cast<size_t>(max_size_), max_msg) - used;
   }
-  return this->max_size_ - used;
+  return max_size_ - used;
+}
+
+size_t TransportSendStrategy::current_space_available() const
+{
+  return space_available(header_.length_);
 }
 
 int
@@ -1917,8 +1935,33 @@ TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
   return num_blocks;
 }
 
-// close namespaces
+bool TransportSendStrategy::fragmentation_helper(
+  TransportQueueElement* original_element, TqeVector& elements_to_send)
+{
+  original_element->increment_loan();
+  const size_t space = space_available();
+  for (TransportQueueElement* e = original_element; e;) {
+    const size_t esize = e->msg()->total_length();
+    if (esize > space) {
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TransportSendStrategy::fragmentation_helper: "
+          "message size %B > space %B: Fragmenting\n", esize, space), 0);
+      const TqePair pair = e->fragment(space);
+      if (pair == null_tqe_pair) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::fragmentation_helper: "
+          "Element Fragmentation Failed\n"));
+        return false;
+      }
+      elements_to_send.push_back(pair.first);
+      e = pair.second;
+    } else {
+      elements_to_send.push_back(e);
+      e = 0;
+    }
+  }
+  return true;
 }
-}
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

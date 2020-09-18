@@ -271,7 +271,7 @@ namespace XTypes {
   const TypeFlag TypeFlagMinimalMask = 0x0007; // Selects  M, A, F
 
   // Forward declaration
-  struct TypeIdentifier;
+  class TypeIdentifier;
 
   // 1 Byte
   struct StringSTypeDefn {

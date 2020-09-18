@@ -2326,11 +2326,20 @@ namespace {
   bool generate_marshal_traits(
     AST_Decl* node, const std::string& cxx,
     const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
-    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0,
+    std::string octetSeqOnly = "")
   {
+    std::string export_string;
+    if (octetSeqOnly.size()) {
+      const ACE_CString exporter = be_global->export_macro();
+      if (exporter != "") {
+        export_string = string(" ") + exporter.c_str();
+      }
+    }
+
     be_global->header_ <<
       "template <>\n"
-      "struct MarshalTraits<" << cxx << "> {\n"
+      "struct" << export_string << " MarshalTraits<" << cxx << "> {\n"
       "  static void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)\n"
       "  {\n"
         << fill_datareprseq(repr, "seq", "    ") <<
@@ -2350,6 +2359,51 @@ namespace {
     } else {
       return false;
     }
+
+    const char* msg_block_fn_decl_end = " { return false; }";
+    if (octetSeqOnly.size()) {
+      const char* get_len;
+      const char* set_len;
+      const char* get_buffer;
+      const char* buffer_pre = "";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        get_len = "size";
+        set_len = "resize";
+        get_buffer = "[0]";
+        buffer_pre = "&";
+        octetSeqOnly += "()";
+      } else {
+        get_len = set_len = "length";
+        get_buffer = ".get_buffer()";
+      }
+
+      be_global->impl_ <<
+        "bool MarshalTraits<" << cxx << ">::to_message_block(ACE_Message_Block& mb, "
+        "const " << cxx << "& stru)\n"
+        "{\n"
+        "  if (mb.size(stru." << octetSeqOnly << "." << get_len << "()) != 0) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  return mb.copy(reinterpret_cast<const char*>(" << buffer_pre << "stru."
+          << octetSeqOnly << get_buffer << "), stru." << octetSeqOnly << "." << get_len
+          << "()) == 0;\n"
+        "}\n\n"
+        "bool MarshalTraits<" << cxx << ">::from_message_block(" << cxx << "& stru, "
+        "const ACE_Message_Block& mb)\n"
+        "{\n"
+        "  stru." << octetSeqOnly << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
+        "  std::memcpy(" << buffer_pre << "stru." << octetSeqOnly << get_buffer
+          << ", mb.rd_ptr(), mb.length());\n"
+        "  return true;\n"
+        "}\n\n";
+
+      msg_block_fn_decl_end = ";";
+    }
+    be_global->header_ <<
+      "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)"
+        << msg_block_fn_decl_end << "\n"
+      "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)"
+        << msg_block_fn_decl_end << "\n";
 
     /*
      * This is used for the CDR header.
@@ -2742,6 +2796,22 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   // Only generate these methods if this is a topic type
   if (info || is_topic_type) {
+    std::string octetSeqOnly;
+    if (fields.size() == 1) {
+      AST_Type* const type = resolveActualType(fields[0]->field_type());
+      const Classification fld_cls = classify(type);
+      if (fld_cls & CL_SEQUENCE) {
+        AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
+        AST_Type* const base = seq->base_type();
+        if (classify(base) & CL_PRIMITIVE) {
+          AST_PredefinedType* const pt = dynamic_cast<AST_PredefinedType*>(base);
+          if (pt->pt() == AST_PredefinedType::PT_octet) {
+            octetSeqOnly = fields[0]->local_name()->get_string();
+          }
+        }
+      }
+    }
+
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -2906,7 +2976,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(node, cxx, repr, exten, keys, info)) {
+    if (!generate_marshal_traits(node, cxx, repr, exten, keys, info, octetSeqOnly)) {
       return false;
     }
   }

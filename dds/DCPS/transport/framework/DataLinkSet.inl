@@ -52,8 +52,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 
       DataSampleHeader::add_cfentries(guids, mb.get());
 
-      TransportCustomizedElement* tce =
-        new TransportCustomizedElement(send_element, false);
+      TransportCustomizedElement* tce = new TransportCustomizedElement(send_element);
       tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
 
       itr->second->send(tce);

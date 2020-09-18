@@ -312,22 +312,6 @@ DisjointSequence::missing_sequence_ranges() const
   return missing;
 }
 
-OPENDDS_VECTOR(SequenceRange)
-DisjointSequence::present_sequence_ranges() const
-{
-  OPENDDS_VECTOR(SequenceRange) present;
-  std::copy(sequences_.begin(), sequences_.end(), std::back_inserter(present));
-  return present;
-}
-
-bool
-DisjointSequence::contains(SequenceNumber value) const
-{
-  RangeSet::const_iterator iter =
-    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
-  return iter != sequences_.end() && iter->first <= value;
-}
-
 void
 DisjointSequence::validate(const SequenceRange& range)
 {

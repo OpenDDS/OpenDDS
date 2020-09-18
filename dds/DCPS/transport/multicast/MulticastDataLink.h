@@ -46,7 +46,7 @@ public:
                     const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
                     MulticastInst& config,
-                    ReactorTask* reactor_task,
+                    const ReactorTask_rch& reactor_task,
                     bool is_active);
   virtual ~MulticastDataLink();
 
@@ -62,7 +62,7 @@ public:
 
   MulticastInst& config();
 
-  ReactorTask* reactor_task();
+  ReactorTask_rch reactor_task();
   ACE_Reactor* get_reactor();
   ACE_Proactor* get_proactor();
 
@@ -85,7 +85,7 @@ private:
 
   MulticastPeer local_peer_;
 
-  ReactorTask* reactor_task_;
+  ReactorTask_rch reactor_task_;
 
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;

@@ -268,7 +268,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   subscription.remote_reliable_ = false;
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "rtps_udp";
-  message_block_to_sequence (mb_locator, subscription.remote_data_[0].data);
+  message_block_to_sequence(mb_locator, subscription.remote_data_[0].data);
 
   if (!sdw.init(subscription)) {
     std::cerr << "publisher TransportClient::associate() failed\n";

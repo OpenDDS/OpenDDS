@@ -188,6 +188,12 @@ TransportClient::populate_connection_info()
       }
     }
   }
+
+  if (conn_info_.length() == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportClient::populate_connection_info: ")
+               ACE_TEXT("No connection info\n")));
+  }
 }
 
 bool

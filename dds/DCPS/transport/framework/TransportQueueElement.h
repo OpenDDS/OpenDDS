@@ -25,10 +25,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleElement;
-
 class TransportQueueElement;
-typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;
+typedef std::pair<TransportQueueElement*, TransportQueueElement*> TqePair;
+extern OpenDDS_Dcps_Export const TqePair null_tqe_pair;
+typedef OPENDDS_VECTOR(TransportQueueElement*) TqeVector;
 
 /**
  * @class TransportQueueElement
@@ -97,6 +97,10 @@ public:
   /// The return value indicates if this element is released.
   bool data_delivered();
 
+  /// Delay releasing the element by one decision (either a data_dropped or
+  /// data_delivered).
+  void increment_loan() { ++sub_loan_count_; }
+
   /// Does the sample require an exclusive transport packet?
   virtual bool requires_exclusive_packet() const;
 
@@ -141,7 +145,9 @@ public:
   /// the newly-created elements will need to invoke non-const methods on it).
   /// Each element in the pair will contain its own serialized modified
   /// DataSampleHeader.
-  virtual ElementPair fragment(size_t size);
+  ///
+  /// If the fragmentation fails, a copy of null_tqe_pair is returned.
+  virtual TqePair fragment(size_t size);
 
   /// Is this QueueElement the result of fragmentation?
   virtual bool is_fragment() const { return false; }

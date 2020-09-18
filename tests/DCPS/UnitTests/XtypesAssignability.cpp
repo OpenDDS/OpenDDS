@@ -290,6 +290,9 @@ protected:
   {
     enum_a_.enum_flags = IS_APPENDABLE;
     enum_b_.enum_flags = enum_a_.enum_flags;
+    enum_a_.header.common.bit_bound = 10;
+    enum_b_.header.common.bit_bound = 13;
+
     MinimalEnumeratedLiteral l1_a, l2_a;
     l1_a.common.value = 3;
     l1_a.common.flags = IS_DEFAULT;
@@ -338,6 +341,21 @@ TEST_F(EnumTypeTest, Assignable)
 TEST_F(EnumTypeTest, NotAssignable)
 {
   TypeAssignability test;
+
+  // Different bit_bounds
+  enum_a_.header.common.bit_bound = 3;
+  enum_b_.header.common.bit_bound = 23;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
+                               TypeObject(MinimalTypeObject(enum_b_))));
+  enum_a_.header.common.bit_bound = 11;
+  enum_b_.header.common.bit_bound = 7;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
+                               TypeObject(MinimalTypeObject(enum_b_))));
+  enum_a_.header.common.bit_bound = 20;
+  enum_a_.header.common.bit_bound = 15;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
+                               TypeObject(MinimalTypeObject(enum_b_))));
+
   // Do not have identical literal sets
   enum_a_.enum_flags = IS_FINAL;
   enum_b_.enum_flags = enum_a_.enum_flags;
