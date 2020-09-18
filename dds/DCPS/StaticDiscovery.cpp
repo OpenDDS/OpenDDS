@@ -393,7 +393,6 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
     DDS::OctetSeq type_info;
-    type_info.length(0);
     const WriterAssociation wa = {
       writer.trans_info, writerid, writer.publisher_qos, writer.qos, type_info
     };
