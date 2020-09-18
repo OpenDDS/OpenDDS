@@ -59,7 +59,7 @@ public:
 
   size_t get() const
   {
-    assert(bounded_);
+    OPENDDS_ASSERT(bounded_);
     return bound_;
   }
 
