@@ -9,25 +9,23 @@
 #define dds_generator_H
 
 #include "be_extern.h"
+#include "../DCPS/RestoreOutputStreamState.h"
 
-#include "utl_scoped_name.h"
-#include "utl_identifier.h"
-#include "utl_string.h"
+#include <utl_scoped_name.h>
+#include <utl_identifier.h>
+#include <utl_string.h>
+#include <ast.h>
+#include <ast_component_fwd.h>
+#include <ast_eventtype_fwd.h>
+#include <ast_structure_fwd.h>
+#include <ast_union_fwd.h>
+#include <ast_valuetype_fwd.h>
 
-#include "ast.h"
-#include "ast_component_fwd.h"
-#include "ast_eventtype_fwd.h"
-#include "ast_structure_fwd.h"
-#include "ast_union_fwd.h"
-#include "ast_valuetype_fwd.h"
-
-#include "ace/CDR_Base.h"
+#include <ace/CDR_Base.h>
 
 #include <string>
 #include <vector>
 #include <cstring>
-
-#include "../DCPS/RestoreOutputStreamState.h"
 
 class dds_generator {
 public:
@@ -877,10 +875,12 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
 }
 
 inline
-std::string insert_cxx11_accessor_parens(
-              const std::string& full_var_name_, bool is_union_member) {
+std::string insert_cxx11_accessor_parens(const std::string& full_var_name_, bool is_union_member)
+{
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  if (!use_cxx11 || is_union_member || full_var_name_.empty()) return full_var_name_;
+  if (!use_cxx11 || is_union_member || full_var_name_.empty()) {
+    return full_var_name_;
+  }
 
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
@@ -920,7 +920,8 @@ public:
       check();
     }
 
-    bool valid() const {
+    bool valid() const
+    {
       return node_ && pos_ < node_->nfields();
     }
 
