@@ -287,11 +287,11 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2))
   , participant_volatile_message_secure_writer_(make_rch<SecurityWriter>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this)))
+#endif
   , type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
       make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER), ref(*this)))
   , type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
       make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this)))
-#endif
   , publications_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER), ref(*this)))
 #ifdef OPENDDS_SECURITY
@@ -3843,8 +3843,9 @@ Sedp::SecurityReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
 
   if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
-    DCPS::RcHandle<MsgParticipantMessageData> msg = make_rch<MsgParticipantMessageData>(rchandle_from(&sedp_), id);
-    ParticipantMessageData& data = msg->data();
+    DCPS::RcHandle<MsgParticipantStatelessData> msg = make_rch<MsgParticipantStatelessData>(rchandle_from(&sedp_), id);
+    DDS::Security::ParticipantStatelessMessage& data = msg->data();
+    ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
     if (!(ser >> data)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::SecurityReader::data_received_i - ")
                  ACE_TEXT("failed to deserialize data\n")));
