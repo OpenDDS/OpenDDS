@@ -314,7 +314,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     // Find a common data representation
     bool found = false;
     DDS::DataRepresentationIdSeq readerIds =
-      get_effective_data_rep_qos(readerQos->representation.value);
+      get_effective_data_rep_qos(readerQos->representation.value, true);
     DDS::DataRepresentationIdSeq writerIds =
       get_effective_data_rep_qos(writerQos->representation.value);
     const CORBA::ULong reader_count = readerIds.length();
@@ -401,26 +401,13 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos) {
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader) {
   if (qos.length() == 0) {
-    DDS::DataRepresentationIdSeq ids(1);
-    ids.length(1);
+    DDS::DataRepresentationIdSeq ids(reader ? 2 : 1);
+    ids.length(reader ? 2 : 1);
     ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    if (reader) { ids[1] = DDS::XCDR_DATA_REPRESENTATION; }
     return ids;
-  } else {
-    DDS::DataRepresentationIdSeq ids(qos.length());
-    ids.length(qos.length());
-    CORBA::ULong i = 0;
-    for (CORBA::ULong q = 0; q < qos.length(); ++q) {
-      Encoding::Kind kind;
-      if (repr_to_encoding_kind(qos[q], kind) && Encoding::KIND_XCDR1 != kind) {
-        ids[i++] = qos[q];
-      }
-    }
-    if (i < qos.length()) {
-      ids.length(i);
-      return ids;
-    }
   }
   return qos;
 }
