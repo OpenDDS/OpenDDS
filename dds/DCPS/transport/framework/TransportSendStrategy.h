@@ -146,6 +146,17 @@ public:
   /// actually be a little larger.
   static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
+  /// Alternative to TransportSendStrategy::send for fragmentation
+  ///
+  /// @param original_element data sample to send, may be larger than max msg size
+  /// @param elements_to_send populated by this method with either original_element
+  ///                         or fragments created from it.  Elements need to be
+  ///                         cleaned up by the caller using data_delivered or
+  ///                         data_dropped.
+  /// @return operation succeeded
+  bool fragmentation_helper(
+    TransportQueueElement* original_element, TqeVector& elements_to_send);
+
 protected:
 
   TransportSendStrategy(std::size_t id,
@@ -259,11 +270,17 @@ private:
   /// the entire packet was not sent.
   int adjust_packet_after_send(ssize_t num_bytes_sent);
 
+  /**
+   * How much space is available in packet with a given used space before we
+   * reach one of the limits: max_message_size() [transport's inherent
+   * limitation] or max_size_ [user's configured limit]
+   */
+  size_t space_available(size_t already_used = 0) const;
 
-  /// How much space is available in the current packet before we reach one
-  /// of the limits: max_message_size() [transport's inherent limitation]
-  /// or max_size_ [user's configured limit]
-  size_t space_available() const;
+  /**
+   * Like above, but use the current packet.
+   */
+  size_t current_space_available() const;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

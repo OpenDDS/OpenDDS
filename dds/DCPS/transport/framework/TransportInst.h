@@ -16,6 +16,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
@@ -111,9 +112,12 @@ public:
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
 
   ICE::Endpoint* get_ice_endpoint();
+  void use_ice_now(bool flag);
 
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
+
+  ReactorTask_rch reactor_task();
 
 protected:
 

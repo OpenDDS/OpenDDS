@@ -587,6 +587,15 @@ public:
   u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
 
+  bool rtps_relay_only() const { return config_->rtps_relay_only(); }
+  void rtps_relay_only_now(bool f);
+
+  bool use_rtps_relay() const { return config_->use_rtps_relay(); }
+  void use_rtps_relay_now(bool f);
+
+  bool use_ice() const { return config_->use_ice(); }
+  void use_ice_now(bool f);
+
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
 #ifdef OPENDDS_SECURITY

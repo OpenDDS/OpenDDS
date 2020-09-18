@@ -20,6 +20,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+const TqePair null_tqe_pair(0, 0);
+
 TransportQueueElement::~TransportQueueElement()
 {
   DBG_ENTRY_LVL("TransportQueueElement", "~TransportQueueElement", 6);
@@ -39,22 +41,21 @@ TransportQueueElement::is_control(RepoId /*pub_id*/) const
   return false;
 }
 
-ElementPair
-TransportQueueElement::fragment(size_t size)
+TqePair TransportQueueElement::fragment(size_t size)
 {
   Message_Block_Ptr head;
   Message_Block_Ptr tail;
   DataSampleHeader::split(*msg(), size, head, tail);
 
-  TransportCustomizedElement* frag = new TransportCustomizedElement(0, true);
-  frag->set_publication_id(publication_id());
+  TransportCustomizedElement* frag = new TransportCustomizedElement(0);
+  frag->set_fragment(this);
   frag->set_msg(move(head));
 
-  TransportCustomizedElement* rest =
-    new TransportCustomizedElement(this, true);
+  TransportCustomizedElement* rest = new TransportCustomizedElement(this);
+  frag->set_fragment(this);
   rest->set_msg(move(tail));
 
-  return ElementPair(frag, rest);
+  return TqePair(frag, rest);
 }
 
 ACE_Message_Block*

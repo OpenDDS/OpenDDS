@@ -241,6 +241,8 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
+  OPENDDS_ASSERT(addr != ACE_INET_Addr());
+
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
 #ifdef ACE_LACKS_SENDMSG
@@ -268,6 +270,12 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
                  "destination %s failed send: %m\n", addr_buff));
+      if (errno == EMSGSIZE) {
+        for (int i = 0; i < n; ++i) {
+          ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i: "
+              "iovec[%d].iov_len = %B\n", i, size_t(iov[i].iov_len)));
+        }
+      }
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;
