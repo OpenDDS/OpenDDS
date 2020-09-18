@@ -1,13 +1,23 @@
 #include <tao/LongSeq.pidl>
 #include <tao/ShortSeq.pidl>
 #include <tao/OctetSeq.pidl>
+#include <tao/StringSeq.pidl>
 
-// TODO(iguessthislldo): Add more fields
 #define COMMON_FIELDS \
   short short_field; \
   long long_field; \
   octet octet_field; \
-  long long long_long_field; \
+  long long long_long_field;
+
+#define COMMON_BRANCHES \
+  case E_SHORT_FIELD: \
+    short short_field; \
+  case E_LONG_FIELD: \
+    long long_field; \
+  case E_OCTET_FIELD: \
+    octet octet_field; \
+  case E_LONG_LONG_FIELD: \
+    long long long_long_field;
 
 // Generic XCDR1 Tests =======================================================
 
@@ -76,21 +86,45 @@ enum UnionDisc {
   E_SHORT_FIELD,
   E_LONG_FIELD,
   E_OCTET_FIELD,
-  E_LONG_LONG_FIELD
+  E_LONG_LONG_FIELD,
+  E_ADDITIONAL_FIELD
 };
 
 @mutable
 @OpenDDS::data_representation(XCDR1)
 @OpenDDS::data_representation(XCDR2)
 union MutableXcdr12Union switch (UnionDisc) {
-case E_SHORT_FIELD:
-  short short_field;
-case E_LONG_FIELD:
-  long long_field;
-case E_OCTET_FIELD:
-  octet octet_field;
-case E_LONG_LONG_FIELD:
-  long long long_long_field;
+  COMMON_BRANCHES
+};
+
+@final
+struct NoDataRepFinalStruct {
+  COMMON_FIELDS
+};
+
+@appendable
+struct NoDataRepAppendableStruct {
+  COMMON_FIELDS
+};
+
+@mutable
+struct NoDataRepMutableStruct {
+  COMMON_FIELDS
+};
+
+@final
+union NoDataRepFinalUnion switch(UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@appendable
+union NoDataRepAppendableUnion switch(UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@mutable
+union NoDataRepMutableUnion switch(UnionDisc) {
+  COMMON_BRANCHES
 };
 
 // Appendable Tests ==========================================================
@@ -126,8 +160,22 @@ struct AppendableStruct2 {
   NestedStruct nested;
 };
 
+@appendable
+@OpenDDS::data_representation(XCDR2)
+union AppendableUnion switch (UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+union ModifiedAppendableUnion switch (UnionDisc) {
+  COMMON_BRANCHES
+case E_ADDITIONAL_FIELD:
+  long additional_field;
+};
+
+
 // Mutable Tests =============================================================
-// TODO(iguessthislldo): Add more fields
 
 @mutable
 @OpenDDS::data_representation(XCDR1)
@@ -249,4 +297,78 @@ case E_OCTET_FIELD:
   @id(8) octet octet_field;
 case E_LONG_LONG_FIELD:
   @id(10) long long long_long_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+union ModifiedMutableUnion switch (UnionDisc) {
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
+};
+
+typedef sequence<long> LongSeq;
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+union NestedUnion switch(short) {
+case 1:
+  @id(1) short short_field;
+case 2:
+  @id(2) LongSeq sequence_field;
+default:
+  @id(3) string string_field;
+};
+
+// DHEADER is not generated for anonymous sequence of string,
+// so make a name for it here
+typedef sequence<string> StringSeq;
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct MixedMutableStruct {
+  @id(1) MutableStruct struct_nested;
+  @id(2) sequence<short> sequence_field;
+  @id(3) NestedUnion union_nested;
+  @id(4) StringSeq sequence_field2;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct ModifiedMixedMutableStruct {
+  @id(3) NestedUnion union_nested;
+  @id(4) StringSeq sequence_field2;
+  @id(1) MutableStruct struct_nested;
+};
+
+// Mixed Extensibility Tests =================================================
+
+@final
+@OpenDDS::data_representation(XCDR2)
+struct NestingFinalStruct {
+  string string_field;
+  AppendableXcdr2Struct appendable_nested;
+  sequence<short> sequence_field;
+  MutableXcdr2Struct mutable_nested;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct NestingAppendableStruct {
+  string string_field;
+  MutableXcdr2Struct mutable_nested;
+  sequence<long> sequence_field;
+  FinalXcdr2Struct final_nested;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct NestingMutableStruct {
+  string string_field;
+  AppendableXcdr2Struct appendable_nested;
+  sequence<octet> sequence_field;
+  FinalXcdr2Struct final_nested;
 };
