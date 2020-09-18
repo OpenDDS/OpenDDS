@@ -2422,7 +2422,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     generate_dheader_code(code, not_final);
     if (not_final) {
       be_global->impl_ <<
-        "  const size_t start_pos = strm.pos();\n";
+        "  const size_t start_pos = strm.pos();\n"
+        "  ACE_UNUSED_ARG(start_pos);\n";
     }
 
     if (may_be_parameter_list) {
