@@ -70,7 +70,7 @@ namespace {
     for (; !it.is_done(); it.next()) {
       AST_Decl* item = it.item();
       if (item->node_type() == nt) {
-        v.push_back(T::narrow_from_decl(item));
+        v.push_back(dynamic_cast<T*>(item));
       }
     }
   }
