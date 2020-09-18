@@ -1180,7 +1180,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
     }
 
@@ -1192,7 +1192,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
       Parameter param = get(param_list, PID_TOPIC_NAME);
@@ -1207,7 +1207,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1235,7 +1235,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_TYPE_NAME));
       Parameter param = get(param_list, PID_TYPE_NAME);
@@ -1249,7 +1249,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1279,7 +1279,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info , map));
       TEST_ASSERT(is_present(param_list, PID_DURABILITY));
       Parameter param = get(param_list, PID_DURABILITY);
@@ -1295,7 +1295,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1332,7 +1332,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_DURABILITY_SERVICE));
       Parameter param = get(param_list, PID_DURABILITY_SERVICE);
@@ -1358,7 +1358,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1416,7 +1416,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_DEADLINE));
       Parameter param = get(param_list, PID_DEADLINE);
@@ -1434,7 +1434,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1473,7 +1473,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
       Parameter param = get(param_list, PID_LATENCY_BUDGET);
@@ -1491,7 +1491,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1527,7 +1527,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_LIVELINESS));
       Parameter param = get(param_list, PID_LIVELINESS);
@@ -1546,7 +1546,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1591,7 +1591,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
@@ -1612,7 +1612,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1658,7 +1658,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_LIFESPAN));
       Parameter param = get(param_list, PID_LIFESPAN);
@@ -1677,7 +1677,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1719,7 +1719,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_USER_DATA));
       Parameter param = get(param_list, PID_USER_DATA);
@@ -1742,7 +1742,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1783,7 +1783,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_OWNERSHIP));
       Parameter param = get(param_list, PID_OWNERSHIP);
@@ -1802,7 +1802,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1838,7 +1838,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
   #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
@@ -1860,7 +1860,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1897,7 +1897,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_DESTINATION_ORDER));
       Parameter param = get(param_list, PID_DESTINATION_ORDER);
@@ -1917,7 +1917,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -1955,7 +1955,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_PRESENTATION));
       Parameter param = get(param_list, PID_PRESENTATION);
@@ -1978,7 +1978,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2028,7 +2028,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_PARTITION));
       Parameter param = get(param_list, PID_PARTITION);
@@ -2051,7 +2051,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2097,7 +2097,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_DATA));
       Parameter param = get(param_list, PID_TOPIC_DATA);
@@ -2123,7 +2123,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2167,7 +2167,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_GROUP_DATA));
       Parameter param = get(param_list, PID_GROUP_DATA);
@@ -2193,7 +2193,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2235,7 +2235,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
     }
@@ -2246,7 +2246,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2278,7 +2278,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_MULTICAST_LOCATOR));
@@ -2306,7 +2306,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2336,7 +2336,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_UNICAST_LOCATOR));
@@ -2364,7 +2364,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(from_param_list(param_list, writer_data_out, type_info));
@@ -2379,7 +2379,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
     }
 
@@ -2391,7 +2391,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
       Parameter param = get(param_list, PID_TOPIC_NAME);
@@ -2406,7 +2406,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2422,7 +2422,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_TYPE_NAME));
       Parameter param = get(param_list, PID_TYPE_NAME);
@@ -2436,7 +2436,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2454,7 +2454,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_DURABILITY));
       Parameter param = get(param_list, PID_DURABILITY);
@@ -2470,7 +2470,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2488,7 +2488,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_DEADLINE));
       Parameter param = get(param_list, PID_DEADLINE);
@@ -2505,7 +2505,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2524,7 +2524,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
       Parameter param = get(param_list, PID_LATENCY_BUDGET);
@@ -2541,7 +2541,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2558,7 +2558,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_LIVELINESS));
       Parameter param = get(param_list, PID_LIVELINESS);
@@ -2576,7 +2576,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2598,7 +2598,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
@@ -2618,7 +2618,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2643,7 +2643,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_USER_DATA));
       Parameter param = get(param_list, PID_USER_DATA);
@@ -2665,7 +2665,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2684,7 +2684,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_OWNERSHIP));
       Parameter param = get(param_list, PID_OWNERSHIP);
@@ -2702,7 +2702,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2722,7 +2722,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_DESTINATION_ORDER));
       Parameter param = get(param_list, PID_DESTINATION_ORDER);
@@ -2741,7 +2741,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2762,7 +2762,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_PRESENTATION));
       Parameter param = get(param_list, PID_PRESENTATION);
@@ -2784,7 +2784,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2811,7 +2811,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_PARTITION));
       Parameter param = get(param_list, PID_PARTITION);
@@ -2833,7 +2833,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2857,7 +2857,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_DATA));
       Parameter param = get(param_list, PID_TOPIC_DATA);
@@ -2882,7 +2882,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2905,7 +2905,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_GROUP_DATA));
       Parameter param = get(param_list, PID_GROUP_DATA);
@@ -2930,7 +2930,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2951,7 +2951,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
     }
@@ -2962,7 +2962,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -2993,7 +2993,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_MULTICAST_LOCATOR));
@@ -3020,7 +3020,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -3048,7 +3048,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
       Parameter param0 = get(param_list, PID_MULTICAST_LOCATOR, 0);
@@ -3079,7 +3079,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -3106,7 +3106,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
       // Default check
@@ -3135,7 +3135,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       DiscoveredReaderData reader_data_out;
       TEST_ASSERT(from_param_list(param_list, reader_data_out, type_info));
@@ -3313,7 +3313,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(writer_data, param_list, type_info, map));
       TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
       TEST_ASSERT(!is_present(param_list, PID_DURABILITY_SERVICE));
@@ -3342,7 +3342,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       type_info.minimal.dependent_typeid_count = 0;
       type_info.complete.dependent_typeid_count = 0;
-      bool map;
+      bool map = false;
       TEST_ASSERT(to_param_list(reader_data, param_list, type_info, map));
       TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
       TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
