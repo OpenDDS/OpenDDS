@@ -58,6 +58,7 @@ TEST(TestTryCon, string)
     }
   }
 }
+
 TEST(StructandSeq, DISCARD)
 {
   {
@@ -326,6 +327,7 @@ TEST(StructandSeq, USE_DEFAULT)
     EXPECT_EQ(actual.ns().us_ud(), expected.ns().us_ud());
   }
 }
+
 TEST(StructandSeq, TRIM)
 {
   TryCon::TrimStruct1 sent;

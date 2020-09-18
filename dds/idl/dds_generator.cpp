@@ -250,20 +250,19 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   if ((fld_cls & CL_STRUCTURE) || (fld_cls & CL_UNION)) {
     if (is_union) {
-    val = string("set_default(") + name + "());\n";
+    val = "set_default(" + name + "());\n";
     } else {
-    val = string("set_default(") + name + ");\n";
+    val = "set_default(" + name + ");\n";
     }
   } else if (fld_cls & CL_ARRAY) {
-    AST_Array* arr = dynamic_cast<AST_Array*>(actual_type);
     string temp = name;
     if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
       temp.erase(temp.size() - 2);
     }
     temp += "_temp";
-    replace( temp.begin(), temp.end(), '.', '_');
-    replace( temp.begin(), temp.end(), '[', '_');
-    replace( temp.begin(), temp.end(), ']', '_');
+    replace(temp.begin(), temp.end(), '.', '_');
+    replace(temp.begin(), temp.end(), '[', '_');
+    replace(temp.begin(), temp.end(), ']', '_');
     if (use_cxx11) {
       string n = scoped(type->name());
       if (is_anonymous) {
@@ -284,7 +283,7 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
       } else {
         pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(" + name + ")";
       }
-      val += string("      set_default(") + pre + ");\n";
+      val += "      set_default(" + pre + ");\n";
     } else {
       string n = scoped(type->name());
       if (is_anonymous) {
@@ -298,7 +297,7 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
         val = n + "_forany " + temp + "(const_cast<"
           + n + "_slice*>(" + name + "));\n";
       }
-      val += string("      set_default(") + temp + ");\n";
+      val += "      set_default(" + temp + ");\n";
       if (is_union) {
         val += name + "(tmp);\n";
       }
@@ -326,8 +325,6 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
     string def_val = (fld_cls & CL_WIDE) ? "L\"\"" : "\"\"";
     if (is_union) {
       val = name + "(" + def_val + ");\n";
-    } else if (use_cxx11) {
-      val = name + " = " + def_val + ";\n";
     } else {
       val = name + " = " + def_val + ";\n";
     }

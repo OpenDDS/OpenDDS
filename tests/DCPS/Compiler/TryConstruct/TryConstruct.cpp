@@ -58,6 +58,7 @@ TEST(TestTryCon, string)
     }
   }
 }
+
 TEST(StructandSeq, DISCARD)
 {
   {
