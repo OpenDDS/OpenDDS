@@ -54,13 +54,10 @@ public:
     EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
     : valid_(true)
     , encoding_(kind, swap_the_bytes)
-    , header_size_(0)
+    , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
+    , bound_(MarshalTraitsType::serialized_size_bound(encoding_))
+    , key_only_bound_(MarshalTraitsType::key_only_serialized_size_bound(encoding_))
     {
-      if (encoding_.is_encapsulated()) {
-        header_size_ = EncapsulationHeader::serialized_size;
-      }
-      bound_ = MarshalTraitsType::serialized_size_bound(encoding_);
-      key_only_bound_ = MarshalTraitsType::key_only_serialized_size_bound(encoding_);
     }
 
     bool valid() const

@@ -620,7 +620,8 @@ TEST(BasicTests, MutableXcdr12UnionLE)
 
 TEST(BasicTests, NoDataRepFinalStruct)
 {
-  baseline_checks<NoDataRepFinalStruct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
+  baseline_checks<NoDataRepFinalStruct>(xcdr2,
+    FinalXcdr2StructExpectedBE::expected, final_xcdr2_struct_max_size);
 }
 
 TEST(BasicTests, NoDataRepAppendableStruct)
