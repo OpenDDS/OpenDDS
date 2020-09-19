@@ -2161,7 +2161,11 @@ namespace {
           local.erase(local.size() - 2);
         }
         //TODO: Was this redundant call fixed
-        intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname, "_sc") + '\n';
+        // TODO(iguessthislldo): Replace with something better
+        const std::string line = "  " + getArrayForany(pre.c_str(), name.c_str(), tdname, "_sc") + '\n';
+        if (intro.find(line) == std::string::npos) {
+          intro += line;
+        }
         local += "_sc";
         fieldref += '_';
       } else if (!local.empty()) {
@@ -2204,7 +2208,11 @@ namespace {
         if (accessor) {
           local.erase(local.size() - 2);
         }
-        intro += "  " + getArrayForany(stru.c_str(), af.name_.c_str(), af.scoped_type_, "_sc") + '\n';
+        // TODO(iguessthislldo): Replace with something better
+        const std::string line = "  " + getArrayForany(stru.c_str(), af.name_.c_str(), af.scoped_type_, "_sc") + '\n';
+        if (intro.find(line) == std::string::npos) {
+          intro += line;
+        }
         local += "_sc";
       }
       expr += "(strm " + fieldref + local + ')';
