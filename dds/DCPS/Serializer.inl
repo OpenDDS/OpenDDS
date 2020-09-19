@@ -177,7 +177,7 @@ ACE_INLINE
 bool serialized_size(const Encoding& /*encoding*/, size_t& size,
   const EncapsulationHeader& /*value*/)
 {
-  size += 4;
+  size += EncapsulationHeader::serialized_size;
   return true;
 }
 
