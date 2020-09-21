@@ -87,7 +87,7 @@ struct OpenDDS_Rtps_Export Attribute {
     ACE_UINT32 fingerprint; // FINGERPRINT
     ACE_UINT32 priority; // PRIORITY
     ACE_UINT64 ice_tie_breaker; // ICE_CONTROLLED, ICE_CONTROLLING
-    unsigned char guid_prefix[12]; // GUID_PREFIX
+    unsigned char guid_prefix[sizeof(DCPS::GuidPrefix_t)]; // GUID_PREFIX
   };
   struct {
     ACE_UINT16 code;
@@ -140,7 +140,7 @@ OpenDDS_Rtps_Export
 Attribute make_guid_prefix(const DCPS::GuidPrefix_t& guid_prefix);
 
 struct OpenDDS_Rtps_Export TransactionId {
-  ACE_UINT8 data[sizeof(DCPS::GuidPrefix_t)];
+  ACE_UINT8 data[12];
   TransactionId()
   {
     std::memset(data, 0, sizeof data);
