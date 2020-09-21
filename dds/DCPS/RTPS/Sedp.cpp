@@ -4451,7 +4451,7 @@ Sedp::write_subscription_data_unsecure(
     DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
     tceqp.ignore_member_names = true;
     Parameter param;
-    param.type_consistency(tceqp); //JJA convert type_consistency to param
+    param.type_consistency(tceqp);
     OpenDDS::RTPS::add_param(plist, param);
 
 #ifdef OPENDDS_SECURITY
