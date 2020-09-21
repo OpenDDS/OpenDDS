@@ -25,21 +25,23 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 template<typename Type>
 class RegisteredType {
 public:
-  typedef typename OpenDDS::DCPS::DDSTraits<Type> TypeTraits;
-  typedef typename TypeTraits::TypeSupportType TypeSupport;
-  typedef typename TypeSupport::_var_type TypeSupportVar;
-  typedef typename TypeTraits::TypeSupportTypeImpl TypeSupportImpl;
-  static const char* type_name(){ return TypeTraits::type_name(); }
-  RegisteredType() : type_support_var_(0) {}
-  bool register_type(DDS::DomainParticipant* participant) {
-    type_support_var_ = new TypeSupportImpl;
-    DDS::ReturnCode_t rc = type_support_var_->register_type(participant, "");
-    if (DDS::RETCODE_OK == rc) { return true; }
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: RegisteredType<%C>::register_type failed: %C\n"),
-      TypeTraits::type_name(), retcode_to_string(rc)));
-    return false;
+  static const char* name(){ return Traits::type_name(); }
+  RegisteredType(DDS::DomainParticipant* p) : type_support_(new TypeSupportImpl), participant_(p) {
+    DDS::ReturnCode_t rc = type_support_->register_type(participant_, "");
+    if (DDS::RETCODE_OK != rc) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: RegisteredType<%C> failed: %C\n"), name(), retcode_to_string(rc)));
+      throw 1;
+    }
   }
-  TypeSupportVar type_support_var_;
+  ~RegisteredType() {
+    type_support_->unregister_type(participant_, name());
+  }
+private:
+  typedef typename OpenDDS::DCPS::DDSTraits<Type> Traits;
+  typedef typename Traits::TypeSupportType::_var_type TypeSupportVar;
+  typedef typename Traits::TypeSupportTypeImpl TypeSupportImpl;
+  TypeSupportVar type_support_;
+  DDS::DomainParticipant* participant_;
 };
 
 class Test {
@@ -51,7 +53,7 @@ public:
 private:
   typedef std::vector<DDS::DataRepresentationId_t> Dri;
   void cleanup();
-  void set_topic(const char* type_name, const Dri& dri);
+  void create_topic(const char* type_name, const Dri& dri);
   DDS::DataWriter* create_writer(const Dri& dri = Dri());
   DDS::DataReader* create_reader(const Dri& dri = Dri());
   void test_case(const Dri& writer_dr, const Dri& reader_dr,
@@ -123,11 +125,8 @@ void Test::cleanup()
 
 int Test::run()
 {
-  RegisteredType<DefaultType> default_type;
-  if (!default_type.register_type(participant_.in())) {
-    return 1;
-  }
-  set_topic(default_type.type_name(), default_dr_);
+  RegisteredType<DefaultType> default_type(participant_.in());
+  create_topic(default_type.name(), default_dr_);
   test();
   test_case(xcdr1_, xcdr1_);
   test_case(xcdr1_, default_reader_dr_);
@@ -135,37 +134,28 @@ int Test::run()
   test_case(xcdr2_, default_reader_dr_);
   test_case(default_writer_dr_, xcdr2_);
 
-  set_topic(default_type.type_name(), xcdr2_);
+  create_topic(default_type.name(), xcdr2_);
   test();
 
-  set_topic(default_type.type_name(), xml_);
+  create_topic(default_type.name(), xml_);
   test();
 
-  RegisteredType<WriterDefaultType> writer_default_type;
-  if (!writer_default_type.register_type(participant_.in())) {
-    return 1;
-  }
-  set_topic(writer_default_type.type_name(), default_dr_);
+  RegisteredType<WriterDefaultType> writer_default_type(participant_.in());
+  create_topic(writer_default_type.name(), default_dr_);
   test();
 
-  set_topic(writer_default_type.type_name(), xcdr2_);
+  create_topic(writer_default_type.name(), xcdr2_);
   test();
 
-  RegisteredType<Xcdr1Type> xcdr1_type;
-  if (!xcdr1_type.register_type(participant_.in())) {
-    return 1;
-  }
-  set_topic(xcdr1_type.type_name(), default_dr_);
+  RegisteredType<Xcdr1Type> xcdr1_type(participant_.in());
+  create_topic(xcdr1_type.name(), default_dr_);
   test(false, true);
 
-  set_topic(xcdr1_type.type_name(), xcdr2_);
+  create_topic(xcdr1_type.name(), xcdr2_);
   test(false, true);
 
-  RegisteredType<XmlType> xml_type;
-  if (!xml_type.register_type(participant_.in())) {
-    return 1;
-  }
-  set_topic(xml_type.type_name(), default_dr_);
+  RegisteredType<XmlType> xml_type(participant_.in());
+  create_topic(xml_type.name(), default_dr_);
   test_default(false, false);
   test_case(default_dr_, default_dr_, true, false);
   test_case(default_writer_dr_, default_dr_, true, false);
@@ -177,7 +167,7 @@ int Test::run()
   test_case(default_dr_, xml_, false, false);
   test_case(xml_, xml_, true, false);
 
-  set_topic(xcdr1_type.type_name(), xml_);
+  create_topic(xcdr1_type.name(), xml_);
   test(false, false);
   test_case(xml_, xml_, true, false, false);
 
@@ -199,7 +189,7 @@ void Test::test(bool expect_writer, bool expect_reader) {
   test_case(default_dr_, xml_, false, expect_writer, false);
 }
 
-void Test::set_topic(const char* type_name, const Dri& dri){
+void Test::create_topic(const char* type_name, const Dri& dri){
   topic_name_ = std::string(type_name) + " Topic";
   if (dri.size()) { topic_name_ += " " + to_string(dri); }
   DDS::TopicQos qos;
@@ -430,8 +420,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
   try {
     Test test(argc, argv);
     ret = test.run();
-  } catch (const CORBA::Exception& e) {
-    e._tao_print_exception("Caught in main()");
-  }
+  } catch (...) { ret = 1; }
   return ret;
 }
