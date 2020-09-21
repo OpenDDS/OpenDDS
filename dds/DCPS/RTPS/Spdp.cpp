@@ -2136,15 +2136,16 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 #ifdef OPENDDS_SECURITY
   handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
   handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
-#endif
 
   relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
   relay_stun_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
+
   if (outer_->config_->use_rtps_relay() ||
       outer_->config_->rtps_relay_only()) {
     relay_sender_->enable(false, outer_->config_->spdp_rtps_relay_send_period());
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   }
+#endif
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer_->config_->use_ncm() && ncm) {
@@ -2245,13 +2246,13 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (handshake_resend_processor_) {
     handshake_resend_processor_->cancel_and_wait();
   }
-#endif
   if (relay_sender_) {
     relay_sender_->disable_and_wait();
   }
   if (relay_stun_task_) {
     relay_stun_task_->disable_and_wait();
   }
+#endif
   if (local_sender_) {
     local_sender_->disable_and_wait();
   }
@@ -3370,7 +3371,6 @@ Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
   }
   return DDS::HANDLE_NIL;
 }
-#endif
 
 void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
 {
@@ -3432,6 +3432,7 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
 
   write(SEND_TO_RELAY);
 }
+#endif
 
 void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
@@ -3565,17 +3566,25 @@ const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) co
 void
 Spdp::rtps_relay_only_now(bool f)
 {
-  sedp_.rtps_relay_only(f);
+  ACE_UNUSED_ARG(f);
+
+#ifdef OPENDDS_SECURITY
+  sedp_.rtps_relay_only_now(f);
+
+  if (f) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    DCPS::ReactorTask_rch reactor_task = sedp_.reactor_task();
+
+    tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
+    tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (f) {
     const DCPS::ParticipantLocation mask =
       DCPS::LOCATION_LOCAL |
       DCPS::LOCATION_LOCAL6 |
       DCPS::LOCATION_ICE |
       DCPS::LOCATION_ICE6;
-
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     DCPS::RepoIdSet participant_ids;
     get_discovered_participant_ids(participant_ids);
@@ -3588,11 +3597,7 @@ Spdp::rtps_relay_only_now(bool f)
         process_location_updates_i(iter);
       }
     }
-
-    DCPS::ReactorTask_rch reactor_task = sedp_.reactor_task();
-
-    tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
-    tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+#endif
   } else {
     if (!config_->use_rtps_relay()) {
       if (tport_->relay_sender_) {
@@ -3609,20 +3614,23 @@ Spdp::rtps_relay_only_now(bool f)
 void
 Spdp::use_rtps_relay_now(bool f)
 {
-  sedp_.use_rtps_relay(f);
+  ACE_UNUSED_ARG(f);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#ifdef OPENDDS_SECURITY
+  sedp_.use_rtps_relay_now(f);
+
   if (!f) {
-    const DCPS::ParticipantLocation mask =
-      DCPS::LOCATION_RELAY |
-      DCPS::LOCATION_RELAY6;
-
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     DCPS::ReactorTask_rch reactor_task = sedp_.reactor_task();
 
     tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
     tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    const DCPS::ParticipantLocation mask =
+      DCPS::LOCATION_RELAY |
+      DCPS::LOCATION_RELAY6;
 
     DCPS::RepoIdSet participant_ids;
     get_discovered_participant_ids(participant_ids);
@@ -3635,6 +3643,7 @@ Spdp::use_rtps_relay_now(bool f)
         process_location_updates_i(iter);
       }
     }
+#endif
   } else {
     if (!config_->rtps_relay_only()) {
       if (tport_->relay_sender_) {

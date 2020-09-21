@@ -677,29 +677,35 @@ RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
 }
 
 void
-RtpsDiscovery::rtps_relay_only_now(bool f)
+RtpsDiscovery::rtps_relay_only_now(bool after)
 {
-  config_->rtps_relay_only(f);
+  const bool before = config_->rtps_relay_only();
+  config_->rtps_relay_only(after);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-       dom_pos != dom_limit; ++dom_pos) {
-    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->rtps_relay_only_now(f);
+  if (before != after) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+         dom_pos != dom_limit; ++dom_pos) {
+      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+        part_pos->second->rtps_relay_only_now(after);
+      }
     }
   }
 }
 
 void
-RtpsDiscovery::use_rtps_relay_now(bool f)
+RtpsDiscovery::use_rtps_relay_now(bool after)
 {
-  config_->use_rtps_relay(f);
+  const bool before = config_->use_rtps_relay();
+  config_->use_rtps_relay(after);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-       dom_pos != dom_limit; ++dom_pos) {
-    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->use_rtps_relay_now(f);
+  if (before != after) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+         dom_pos != dom_limit; ++dom_pos) {
+      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+        part_pos->second->use_rtps_relay_now(after);
+      }
     }
   }
 }

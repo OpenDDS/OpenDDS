@@ -166,8 +166,8 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
-  void rtps_relay_only(bool f);
-  void use_rtps_relay(bool f);
+  void rtps_relay_only_now(bool f);
+  void use_rtps_relay_now(bool f);
   void use_ice_now(bool f);
   void rtps_relay_address(const ACE_INET_Addr& address);
   void stun_server_address(const ACE_INET_Addr& address);

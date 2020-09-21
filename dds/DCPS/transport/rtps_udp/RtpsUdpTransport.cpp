@@ -63,6 +63,9 @@ RtpsUdpTransport::get_ice_endpoint()
 void
 RtpsUdpTransport::rtps_relay_only_now(bool flag)
 {
+  ACE_UNUSED_ARG(flag);
+
+#ifdef OPENDDS_SECURITY
   if (flag) {
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   } else {
@@ -70,11 +73,15 @@ RtpsUdpTransport::rtps_relay_only_now(bool flag)
       relay_stun_task_->disable();
     }
   }
+#endif
 }
 
 void
 RtpsUdpTransport::use_rtps_relay_now(bool flag)
 {
+  ACE_UNUSED_ARG(flag);
+
+#ifdef OPENDDS_SECURITY
   if (flag) {
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   } else {
@@ -82,15 +89,18 @@ RtpsUdpTransport::use_rtps_relay_now(bool flag)
       relay_stun_task_->disable();
     }
   }
+#endif
 }
 
 void
 RtpsUdpTransport::use_ice_now(bool after)
 {
+  ACE_UNUSED_ARG(after);
+
+#ifdef OPENDDS_SECURITY
   const bool before = config().use_ice();
   config().use_ice(after);
 
-#ifdef OPENDDS_SECURITY
   if (before && !after) {
     stop_ice();
   } else if (!before && after) {
@@ -103,7 +113,9 @@ RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(local_prefix_));
+#ifdef OPENDDS_SECURITY
   relay_stun_task(DCPS::MonotonicTimePoint::now());
+#endif
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
@@ -507,10 +519,10 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   if (config.use_ice()) {
     start_ice();
   }
-#endif
 
   relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
   relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+#endif
 
   if (config.opendds_discovery_default_listener_) {
     link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
@@ -543,9 +555,9 @@ RtpsUdpTransport::shutdown_i()
   if(config().use_ice()) {
     stop_ice();
   }
-#endif
 
   relay_stun_task_->disable_and_wait();
+#endif
 }
 
 void

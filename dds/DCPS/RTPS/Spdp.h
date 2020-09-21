@@ -306,13 +306,13 @@ private:
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
     void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_resend_processor_;
-#endif
     void send_relay(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_sender_;
     void relay_stun_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+#endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
   } *tport_;

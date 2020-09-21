@@ -58,6 +58,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              RtpsUdpTransport* tport,
                                              bool& stop)
 {
+  ACE_UNUSED_ARG(tport);
+
   ACE_INET_Addr local_address;
   const ssize_t ret = socket.recv(iov, n, remote_address, 0
 #if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)

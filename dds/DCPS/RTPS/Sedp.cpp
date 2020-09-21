@@ -5153,19 +5153,15 @@ Sedp::AssociationComplete::execute() {
 }
 
 void
-Sedp::rtps_relay_only(bool f)
+Sedp::rtps_relay_only_now(bool f)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->rtps_relay_only_ = f;
+  transport_inst_->rtps_relay_only_now(f);
 }
 
 void
-Sedp::use_rtps_relay(bool f)
+Sedp::use_rtps_relay_now(bool f)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->use_rtps_relay_ = f;
+  transport_inst_->use_rtps_relay_now(f);
 }
 
 void
