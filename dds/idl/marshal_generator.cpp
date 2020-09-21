@@ -824,7 +824,7 @@ namespace {
           }
         } else {
           //discard/default
-          be_global->impl_ << 
+          be_global->impl_ <<
           "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "      ";
           skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
