@@ -1253,12 +1253,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.type_consistency))
-  {
-    Parameter param;
-    param.type_consistency(reader_data.ddsSubscriptionData.type_consistency);
-    add_param(param_list, param);
-  }
+
 
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();

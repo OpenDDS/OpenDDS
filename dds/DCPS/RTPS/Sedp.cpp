@@ -4079,12 +4079,6 @@ Sedp::populate_discovered_reader_msg(
     drd.readerProxy.associatedWriters.length(len + 1);
     drd.readerProxy.associatedWriters[len] = *writer;
   }
-  drd.ddsSubscriptionData.type_consistency.kind = DDS::ALLOW_TYPE_COERCION;
-  drd.ddsSubscriptionData.type_consistency.ignore_sequence_bounds = true;
-  drd.ddsSubscriptionData.type_consistency.ignore_string_bounds = true;
-  drd.ddsSubscriptionData.type_consistency.ignore_member_names = false;
-  drd.ddsSubscriptionData.type_consistency.prevent_type_widening = false;
-  drd.ddsSubscriptionData.type_consistency.force_type_validation = false;
 }
 
 void
@@ -4452,6 +4446,14 @@ Sedp::write_subscription_data_unsecure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
+
+    //add TypeConsistencyEnforcementQosPolicy to param list
+    DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
+    tceqp.ignore_member_names = true;
+    Parameter param;
+    param.type_consistency(tceqp); //JJA convert type_consistency to param
+    OpenDDS::RTPS::add_param(plist, param);
+
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
