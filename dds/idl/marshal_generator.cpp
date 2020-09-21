@@ -166,7 +166,7 @@ namespace {
     if (type->node_type() != AST_Decl::NT_pre_defined) {
       return "";
     }
-    AST_PredefinedType* pt = AST_PredefinedType::narrow_from_decl(type);
+    AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(type);
     const string first_args = encoding_expr + ", " + size_expr;
     switch (pt->pt()) {
     case AST_PredefinedType::PT_octet:
@@ -185,7 +185,7 @@ namespace {
 
   string getSerializerName(AST_Type* type)
   {
-    switch (AST_PredefinedType::narrow_from_decl(type)->pt()) {
+    switch (dynamic_cast<AST_PredefinedType*>(type)->pt()) {
     case AST_PredefinedType::PT_long:
       return "long";
     case AST_PredefinedType::PT_ulong:
@@ -247,7 +247,7 @@ namespace {
     // At this point the stream must be 4-byte aligned (from the sequence
     // length), but it might need to be 8-byte aligned for primitives > 4.
     // (If XCDR version is < 2)
-    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    switch (dynamic_cast<AST_PredefinedType*>(elem)->pt()) {
     case AST_PredefinedType::PT_longlong:
     case AST_PredefinedType::PT_ulonglong:
     case AST_PredefinedType::PT_double:
@@ -383,10 +383,10 @@ namespace {
     std::ostringstream arg;
     const Classification cls = classify(type);
     if (cls & CL_STRING) {
-      AST_String* const str = AST_String::narrow_from_decl(type);
+      AST_String* const str = dynamic_cast<AST_String*>(type);
       arg << str->max_size()->ev()->u.ulval;
     } else if (cls & CL_SEQUENCE) {
-      AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+      AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
       arg << seq->max_size()->ev()->u.ulval;
     }
     return arg.str();
@@ -555,7 +555,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -626,7 +626,7 @@ namespace {
       be_global->impl_ <<
         (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -790,7 +790,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (sf.as_cls_ & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(sf.as_act_);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -848,7 +848,7 @@ namespace {
       be_global->impl_ <<
         (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
       if (sf.as_cls_ & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(sf.as_act_);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -901,29 +901,6 @@ namespace {
           "  }\n"
           "  return true;\n";
       }
-    }
-  }
-
-  string getAlignment(AST_Type* elem)
-  {
-    if (elem->node_type() == AST_Decl::NT_enum) {
-      return "4";
-    }
-    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
-    case AST_PredefinedType::PT_short:
-    case AST_PredefinedType::PT_ushort:
-      return "2";
-    case AST_PredefinedType::PT_long:
-    case AST_PredefinedType::PT_ulong:
-    case AST_PredefinedType::PT_float:
-      return "4";
-    case AST_PredefinedType::PT_longlong:
-    case AST_PredefinedType::PT_ulonglong:
-    case AST_PredefinedType::PT_double:
-    case AST_PredefinedType::PT_longdouble:
-      return "8";
-    default:
-      return "";
     }
   }
 
@@ -1486,7 +1463,7 @@ namespace {
     const ExtensibilityKind exten = be_global->extensibility(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       switch (p->pt()) {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_boolean:
@@ -1604,10 +1581,10 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
-    gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+    gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
     break;
   case AST_Decl::NT_array:
-    gen_array(name, AST_Array::narrow_from_decl(base));
+    gen_array(name, dynamic_cast<AST_Array*>(base));
     break;
   default:
     return true;
@@ -1642,7 +1619,7 @@ namespace {
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
         return indent +
@@ -2179,11 +2156,20 @@ namespace {
   bool generate_marshal_traits(
     AST_Decl* node, const std::string& cxx,
     const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
-    bool is_bounded, bool key_is_bounded)
+    bool is_bounded, bool key_is_bounded, bool octetSeqOnly, std::string field_name)
   {
+    string exp, fn = " { return false; }";
+    if (octetSeqOnly) {
+      const ACE_CString exporter = be_global->export_macro();
+      if (exporter != "") {
+        exp = string(" ") + exporter.c_str();
+      }
+      fn = ";";
+    }
+
     be_global->header_ <<
       "template <>\n"
-      "struct MarshalTraits<" << cxx << "> {\n"
+      "struct" << exp << " MarshalTraits<" << cxx << "> {\n"
       "  static bool gen_is_bounded_size() { return " <<
         (is_bounded ? "true" : "false") << "; }\n"
       "  static bool gen_is_bounded_key_size() { return " <<
@@ -2193,12 +2179,55 @@ namespace {
       "  {\n"
         << fill_datareprseq(repr, "seq", "    ") <<
       "  }\n"
-      "\n"
+      "\n";
+
+    if (octetSeqOnly) {
+      const char* get_len;
+      const char* set_len;
+      const char* get_buffer;
+      const char* buffer_pre = "";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        get_len = "size";
+        set_len = "resize";
+        get_buffer = "[0]";
+        buffer_pre = "&";
+        field_name += "()";
+      } else {
+        get_len = set_len = "length";
+        get_buffer = ".get_buffer()";
+      }
+
+      be_global->impl_ <<
+        "bool MarshalTraits<" << cxx << ">::to_message_block(ACE_Message_Block& mb, "
+        "const " << cxx << "& stru)\n"
+        "{\n"
+        "  if (mb.size(stru." << field_name << "." << get_len << "()) != 0) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  return mb.copy(reinterpret_cast<const char*>(" << buffer_pre << "stru."
+                              << field_name << get_buffer << "), stru." << field_name << "." << get_len
+                              << "()) == 0;\n"
+        "}\n\n"
+        "bool MarshalTraits<" << cxx << ">::from_message_block(" << cxx << "& stru, "
+        "const ACE_Message_Block& mb)\n"
+        "{\n"
+        "  stru." << field_name << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
+        "  std::memcpy(" << buffer_pre << "stru." << field_name << get_buffer
+                              << ", mb.rd_ptr(), mb.length());\n"
+        "  return true;\n"
+        "}\n\n";
+    }
+
+    be_global->header_ <<
+      "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)" << fn << "\n"
+      "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)" << fn << "\n";
+
     /*
      * This is used for the CDR header.
      * This is just for the base type, nested types can have different
      * extensibilities.
      */
+    be_global->header_ <<
       "  static Extensibility extensibility() { return ";
     switch (exten) {
     case extensibilitykind_final:
@@ -2397,7 +2426,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     generate_dheader_code(code, not_final);
     if (not_final) {
       be_global->impl_ <<
-        "  size_t start_pos = strm.pos();\n";
+        "  const size_t start_pos = strm.pos();\n"
+        "  ACE_UNUSED_ARG(start_pos);\n";
     }
 
     if (may_be_parameter_list) {
@@ -2593,6 +2623,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!is_bounded_type(fields[i]->field_type())) {
         is_bounded_struct = false;
         break;
+      }
+    }
+    bool octetSeqOnly = false;
+    if (fields.size() == 1) {
+      AST_Type* const type = resolveActualType(fields[0]->field_type());
+      const Classification fld_cls = classify(type);
+      if (fld_cls & CL_SEQUENCE) {
+        AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
+        AST_Type* const base = seq->base_type();
+        if (classify(base) & CL_PRIMITIVE) {
+          AST_PredefinedType* const pt = dynamic_cast<AST_PredefinedType*>(base);
+          octetSeqOnly = pt->pt() == AST_PredefinedType::PT_octet;
+        }
       }
     }
     {
@@ -2848,8 +2891,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(
-        node, cxx, repr, exten, is_bounded_struct, bounded_key)) {
+    if (!generate_marshal_traits(node, cxx, repr, exten, is_bounded_struct, bounded_key, octetSeqOnly, fields[0]->local_name()->get_string())) {
       return false;
     }
   }
@@ -3348,5 +3390,5 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   return generate_marshal_traits(
     node, cxx, repr, exten, is_bounded,
-    true /* Only the discriminator, which is always bounded, can be the key */);
+    true /* Only the discriminator, which is always bounded, can be the key */, false, "");
 }

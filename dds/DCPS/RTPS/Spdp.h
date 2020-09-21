@@ -53,6 +53,9 @@ namespace RTPS {
 class RtpsDiscoveryConfig;
 class RtpsDiscovery;
 
+const char SPDP_AGENT_INFO_KEY[] = "SPDP";
+const char SEDP_AGENT_INFO_KEY[] = "SEDP";
+
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp>
@@ -96,8 +99,6 @@ public:
 
   bool associated() const;
   bool has_discovered_participant(const DCPS::RepoId& guid);
-
-  WaitForAcks& wait_for_acks();
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
@@ -157,8 +158,6 @@ public:
 
 #endif
 
-  DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }
-
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
   u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
@@ -169,8 +168,10 @@ public:
   u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
 #endif
 
+  void rtps_relay_only_now(bool f);
+  void use_rtps_relay_now(bool f);
+  void use_ice_now(bool f);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
-
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
@@ -219,6 +220,7 @@ private:
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter);
   void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
+  void remove_agent_info(const DCPS::RepoId& local_guid);
 #endif
 
   struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener
@@ -236,9 +238,8 @@ private:
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
 
     virtual int handle_input(ACE_HANDLE h);
-    virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
-    void open();
+    void open(const DCPS::ReactorTask_rch& reactor_task);
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
@@ -246,13 +247,12 @@ private:
     void send(WriteFlags flags);
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
-    void close();
+    void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
 #ifdef ACE_HAS_IPV6
     bool open_unicast_ipv6_socket(u_short port);
 #endif
-    void acknowledge();
 
     void join_multicast_group(const DCPS::NetworkInterface& nic,
                               bool all_interfaces = false);
@@ -296,8 +296,6 @@ private:
     OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    DCPS::ReactorTask reactor_task_;
-    DCPS::RcHandle<DCPS::JobQueue> job_queue_;
     typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
@@ -393,9 +391,6 @@ private:
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;
-  // wait for acknowledgments from SpdpTransport and Sedp::Task
-  // when BIT is being removed (fini_bit)
-  WaitForAcks wait_for_acks_;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;

@@ -1,16 +1,27 @@
 #include "DelayedDurableTypeSupportImpl.h"
 
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/WaitSet.h"
-
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 #ifdef ACE_AS_STATIC_LIBS
-# include "dds/DCPS/RTPS/RtpsDiscovery.h"
-# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+
+#include <set>
 
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
+
+const unsigned large_sample_seq_size =
+ static_cast<unsigned>(
+    OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE);
+
+int scale(int value, bool large_samples)
+{
+  return value * (large_samples ? 1 : 10);
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -24,9 +35,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Topic_var topic = dp->create_topic("MyTopic", type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
-  const bool verbose = argc > 2 && ACE_TString(argv[2]) == ACE_TEXT("-verbose");
+  bool verbose = false;
+  bool writer = false;
+  bool reader = false;
+  bool large_samples = false;
+  for (int i = 1; i < argc; ++i) {
+    ACE_TString arg(argv[i]);
+    if (arg == ACE_TEXT("--verbose")) {
+      verbose = true;
+    } else if (arg == ACE_TEXT("--writer")) {
+      writer = true;
+    } else if (arg == ACE_TEXT("--reader")) {
+      reader = true;
+    } else if (arg == ACE_TEXT("--large-samples")) {
+      large_samples = true;
+    } else {
+      ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
+      return 1;
+    }
+  }
 
-  if (argc > 1 && ACE_TString(argv[1]) == ACE_TEXT("-writer")) {
+  bool failed = false;
+
+  if (writer) {
     Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
     DataWriterQos dw_qos;
@@ -35,23 +66,38 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
                                                DEFAULT_STATUS_MASK);
     PropertyDataWriter_var pdw = PropertyDataWriter::_narrow(dw);
-    for (int i = 1; i <= 1000; ++i) {
-      Property p = {i, i};
+
+    Property p;
+    if (large_samples) {
+      p.extra.length(large_sample_seq_size);
+      for (unsigned i = 0; i < large_sample_seq_size; ++i) {
+        p.extra[i] = i % 256;
+      }
+    } else {
+      p.extra.length(0);
+    }
+
+    for (int i = 1; i <= scale(100, large_samples); ++i) {
+      p.key = i;
+      p.value = i;
       pdw->write(p, HANDLE_NIL);
     }
 
     for (int c = 1; c < 75; ++c) {
-      for (int i = 1; i <= 1000; i += 50) {
-        Property p = {i, i + c};
+      for (int i = 1; i <= scale(100, large_samples); i += scale(5, large_samples)) {
+        p.key = i;
+        p.value = i + c;
         pdw->write(p, HANDLE_NIL);
       }
       ACE_OS::sleep(ACE_Time_Value(0, 500 * 1000)); // 1/2 sec
       if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "Count: %d\n", c));
+        ACE_DEBUG((LM_DEBUG, "writer: Count: %d\n", c));
       }
     }
 
-  } else if (argc > 1 && ACE_TString(argv[1]) == ACE_TEXT("-reader")) {
+  } else if (reader) {
+    ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
+
     Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                DEFAULT_STATUS_MASK);
     DataReaderQos dr_qos;
@@ -66,46 +112,65 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                        ALIVE_INSTANCE_STATE);
     WaitSet_var ws = new WaitSet;
     ws->attach_condition(dr_rc);
-    int counter = 0;
-    ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
-    bool done = false;
-    while (!done) {
+    unsigned counter = 0;
+    const unsigned minimum_sample_count = large_samples ? 95 : 981;
+    std::set<int> instances;
+    while (true) {
       ConditionSeq active;
-      Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
-      ReturnCode_t ret = ws->wait(active, infinite);
-      if (ret != RETCODE_OK) {
-        return 1;
+      const Duration_t max_wait = {10, 0};
+      ReturnCode_t ret = ws->wait(active, max_wait);
+      if (ret == RETCODE_TIMEOUT) {
+        if (verbose) {
+          ACE_DEBUG((LM_DEBUG, "reader: Timedout\n"));
+        }
+        break;
+      } else if (ret != RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
+        failed = true;
+        break;
       }
-      while (!done) {
-        ::PropertySeq data;
-        SampleInfoSeq info;
-        ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
-        if (ret == RETCODE_NO_DATA) {
-          break;
-        }
-        if (ret != RETCODE_OK) {
-          return 1;
-        }
+      ::PropertySeq data;
+      SampleInfoSeq info;
+      while ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
         for (unsigned int i = 0; i < data.length(); ++i) {
           ++counter;
+          instances.insert(data[i].key);
           if (verbose) {
-            ACE_DEBUG((LM_DEBUG, "Counter: %d Instance: %d\n", counter, data[i].key));
+            ACE_DEBUG((LM_DEBUG, "reader: Counter: %u Instance: %d\n", counter, data[i].key));
           }
 
-          if (counter == 981) {
-            ACE_DEBUG((LM_DEBUG, "Counter 981 at %T\n"));
-            done = true;
+          if (counter == minimum_sample_count) {
+            ACE_DEBUG((LM_DEBUG, "reader: Counter reached %u at %T\n", minimum_sample_count));
           }
         }
+      }
+      if (ret != RETCODE_NO_DATA && ret != RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
+        failed = true;
+        break;
+      }
+    }
+    if (counter < minimum_sample_count) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader failed to get %d samples, got only %d\n",
+        minimum_sample_count, counter));
+      failed = true;
+    }
+    for (int i = 1; i <= scale(100, large_samples); ++i) {
+      if (instances.count(i) == 0) {
+        ACE_ERROR((LM_ERROR, "ERROR: Reader Missing Instance %d\n", i));
+        failed = true;
       }
     }
     ws->detach_condition(dr_rc);
     dr->delete_readcondition(dr_rc);
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
+    return 1;
   }
 
   topic = 0;
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
-  return 0;
+  return failed ? 1 : 0;
 }
