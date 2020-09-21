@@ -4452,7 +4452,9 @@ Sedp::write_subscription_data_unsecure(
     tceqp.ignore_member_names = true;
     Parameter param;
     param.type_consistency(tceqp);
-    OpenDDS::RTPS::add_param(plist, param);
+    const CORBA::ULong length = plist.length();
+    plist.length(length + 1);
+    plist[length] = param;
 
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
