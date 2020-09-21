@@ -2625,13 +2625,13 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
   // Assume STUN
 
-# ifndef ACE_RECVPKTINFO
+#ifndef ACE_RECVPKTINFO
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() ")
              ACE_TEXT("potential STUN message received but this version of the ACE ")
              ACE_TEXT("library doesn't support the local_address extension in ")
              ACE_TEXT("ACE_SOCK_Dgram::recv\n")));
   ACE_NOTSUP_RETURN(0);
-# else
+#else
 
 #ifdef OPENDDS_SECURITY
   DCPS::Serializer serializer(&buff_, DCPS::Serializer::SWAP_BE);
@@ -2648,7 +2648,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     }
   }
 #endif
-# endif
+#endif
 
   return 0;
 }
@@ -3402,14 +3402,14 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   }
 
   switch (sc) {
-  case ICE::ServerReflexiveStateMachine::None:
+  case ICE::ServerReflexiveStateMachine::SRSM_None:
     break;
-  case ICE::ServerReflexiveStateMachine::Set:
-  case ICE::ServerReflexiveStateMachine::Change:
+  case ICE::ServerReflexiveStateMachine::SRSM_Set:
+  case ICE::ServerReflexiveStateMachine::SRSM_Change:
     connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
     dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
     break;
-  case ICE::ServerReflexiveStateMachine::Unset:
+  case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     {
       connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
       const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);

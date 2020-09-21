@@ -140,7 +140,7 @@ OpenDDS_Rtps_Export
 Attribute make_guid_prefix(const DCPS::GuidPrefix_t& guid_prefix);
 
 struct OpenDDS_Rtps_Export TransactionId {
-  ACE_UINT8 data[12];
+  ACE_UINT8 data[sizeof(DCPS::GuidPrefix_t)];
   TransactionId()
   {
     std::memset(data, 0, sizeof data);

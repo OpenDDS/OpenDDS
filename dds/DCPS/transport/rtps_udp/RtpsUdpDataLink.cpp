@@ -3975,10 +3975,10 @@ RtpsUdpDataLink::HeldDataDeliveryHandler::remove_reference()
   return link_->remove_reference();
 }
 
-RtpsUdpTransport*
+RtpsUdpTransport&
 RtpsUdpDataLink::transport()
 {
-  return static_cast<RtpsUdpTransport*>(&impl_);
+  return static_cast<RtpsUdpTransport&>(impl());
 }
 
 RtpsUdpSendStrategy*

@@ -592,7 +592,7 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
   ACE_INET_Addr remote_address;
 
   bool stop;
-  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), &transport, stop);
+  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), transport, stop);
 
   return 0;
 }
@@ -818,14 +818,14 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
   }
 
   switch (sc) {
-  case ICE::ServerReflexiveStateMachine::None:
+  case ICE::ServerReflexiveStateMachine::SRSM_None:
     break;
-  case ICE::ServerReflexiveStateMachine::Set:
-  case ICE::ServerReflexiveStateMachine::Change:
+  case ICE::ServerReflexiveStateMachine::SRSM_Set:
+  case ICE::ServerReflexiveStateMachine::SRSM_Change:
     connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
     dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
     break;
-  case ICE::ServerReflexiveStateMachine::Unset:
+  case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     {
       connection_record.address = to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
       const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);

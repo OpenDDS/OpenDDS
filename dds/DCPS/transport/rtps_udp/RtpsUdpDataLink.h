@@ -189,7 +189,7 @@ public:
   static bool separate_message(EntityId_t entity);
 #endif
 
-  RtpsUdpTransport* transport();
+  RtpsUdpTransport& transport();
 
 private:
   void join_multicast_group(const DCPS::NetworkInterface& nic,

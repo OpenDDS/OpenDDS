@@ -229,10 +229,10 @@ public:
 class ServerReflexiveStateMachine {
 public:
   enum StateChange {
-    None,
-    Set,
-    Unset,
-    Change
+    SRSM_None,
+    SRSM_Set,
+    SRSM_Unset,
+    SRSM_Change
   };
 
   ServerReflexiveStateMachine()
@@ -246,11 +246,10 @@ public:
     if (stun_server_address_ == ACE_INET_Addr() &&
         address == ACE_INET_Addr()) {
       // Do nothing.
-      return None;
+      return SRSM_None;
     } else if (stun_server_address_ == ACE_INET_Addr() &&
                address != ACE_INET_Addr()) {
-      start(address, guid_prefix);
-      return None;
+      return start(address, guid_prefix);
     } else if (stun_server_address_ != ACE_INET_Addr() &&
                address == ACE_INET_Addr()) {
       return stop();
@@ -275,17 +274,16 @@ public:
       return success_response(message);
 
     case STUN::ERROR_RESPONSE:
-      error_response(message);
-      return None;
+      return error_response(message);
 
     case STUN::REQUEST:
     case STUN::INDICATION:
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unsupported STUN message class %d\n"), message.class_));
-      return None;
+      return SRSM_None;
     }
 
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unknown STUN message class %d\n"), message.class_));
-    return None;
+    return SRSM_None;
   }
 
   const STUN::Message& message() const { return message_; }
@@ -298,7 +296,7 @@ public:
   }
 
 private:
-  void start(const ACE_INET_Addr& address, const DCPS::GuidPrefix_t& guid_prefix)
+  StateChange start(const ACE_INET_Addr& address, const DCPS::GuidPrefix_t& guid_prefix)
   {
     OPENDDS_ASSERT(address != ACE_INET_Addr());
     OPENDDS_ASSERT(stun_server_address_ == ACE_INET_Addr());
@@ -314,12 +312,14 @@ private:
     stun_server_address_ = address;
     server_reflexive_address_ = ACE_INET_Addr();
     indication_count_ = 0;
+
+    return SRSM_None;
   }
 
   StateChange stop()
   {
     OPENDDS_ASSERT(stun_server_address_ != ACE_INET_Addr());
-    const StateChange retval = server_reflexive_address_ != ACE_INET_Addr() ? Unset : None;
+    const StateChange retval = server_reflexive_address_ != ACE_INET_Addr() ? SRSM_Unset : SRSM_None;
     unset_stun_server_address_ = stun_server_address_;
     stun_server_address_ = ACE_INET_Addr();
     server_reflexive_address_ = ACE_INET_Addr();
@@ -329,12 +329,12 @@ private:
 
   StateChange next_send(size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix)
   {
-    StateChange retval = None;
+    StateChange retval = SRSM_None;
 
     if (message_.class_ == STUN::REQUEST &&
         server_reflexive_address_ != ACE_INET_Addr()) {
       // Two consecutive sends in a row causes a reset.
-      retval = Unset;
+      retval = SRSM_Unset;
       server_reflexive_address_ = ACE_INET_Addr();
       unset_stun_server_address_ = stun_server_address_;
     }
@@ -368,41 +368,41 @@ private:
 
     if (!unknown_attributes.empty()) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING Unknown comprehension required attributes\n")));
-      return None;
+      return SRSM_None;
     }
 
     ACE_INET_Addr server_reflexive_address;
 
     if (!message.get_mapped_address(server_reflexive_address)) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING No (XOR)_MAPPED_ADDRESS attribute\n")));
-      return None;
+      return SRSM_None;
     }
 
     if (server_reflexive_address == ACE_INET_Addr()) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING (XOR)_MAPPED_ADDRESS is not valid\n")));
-      return None;
+      return SRSM_None;
     }
 
     message_.class_ = STUN::INDICATION;
     if (server_reflexive_address == server_reflexive_address_) {
-      return None;
+      return SRSM_None;
     } else {
       server_reflexive_address_ = server_reflexive_address;
-      return Change;
+      return SRSM_Change;
     }
   }
 
-  void error_response(const STUN::Message& message)
+  StateChange error_response(const STUN::Message& message)
   {
     if (message.method != STUN::BINDING) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING Unsupported STUN method\n")));
-      return;
+      return SRSM_None;
     }
 
 
     if (!message.has_error_code()) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING No error code\n")));
-      return;
+      return SRSM_None;
     }
 
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING STUN error response code=%d reason=%s\n"), message.get_error_code(), message.get_error_reason().c_str()));
@@ -415,6 +415,8 @@ private:
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING Unknown STUN attribute %d\n"), *pos));
       }
     }
+
+    return SRSM_None;
   }
 
   STUN::Message message_;

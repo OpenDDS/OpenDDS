@@ -55,7 +55,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
                                              ICE::Endpoint* endpoint,
-                                             RtpsUdpTransport* tport,
+                                             RtpsUdpTransport& tport,
                                              bool& stop)
 {
   ACE_UNUSED_ARG(tport);
@@ -106,8 +106,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
-    if (tport->relay_srsm().is_response(message)) {
-      tport->process_relay_sra(tport->relay_srsm().receive(message));
+    if (tport.relay_srsm().is_response(message)) {
+      tport.process_relay_sra(tport.relay_srsm().receive(message));
     } else if (endpoint) {
       ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
     }

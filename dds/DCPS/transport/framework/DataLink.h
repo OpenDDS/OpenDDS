@@ -410,11 +410,9 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, LocalAssociationInfo, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
- protected:
   /// A reference to the TransportImpl that created this DataLink.
   TransportImpl& impl_;
 
- private:
   /// The id for this DataLink
   ACE_UINT64 id_;
 
