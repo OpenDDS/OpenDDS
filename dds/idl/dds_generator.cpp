@@ -312,7 +312,11 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
     if (use_cxx11) {
       enum_val = scoped(type->name()) + "::" + item->local_name()->get_string();
     }
-    val = name + " = " + enum_val + ";\n";
+    if (is_union) {
+      val = name + "(" + enum_val + ");\n";
+    } else {
+      val = name + " = " + enum_val + ";\n";
+    }
   } else if (fld_cls & CL_SEQUENCE) {
     string seq_resize_func = (use_cxx11) ? "resize" : "length";
     if (is_union) {
@@ -329,7 +333,12 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
       val = name + " = " + def_val + ";\n";
     }
   } else if ((fld_cls & CL_PRIMITIVE) || (fld_cls & CL_FIXED)) {
-    val = name + " = 0;\n";
+    AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(actual_type);
+    if (pt && (pt->pt() == AST_PredefinedType::PT_longdouble)) {
+      val = name + " = ACE_CDR_LONG_DOUBLE_INITIALIZER;\n";
+    } else {
+      val = name + " = 0;\n";
+    }
   } else {
     // TODO: Remove
     abort();

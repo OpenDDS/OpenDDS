@@ -445,7 +445,7 @@ namespace {
       "        return false;\n"
       "      } else {\n"
       "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-      "        discard_flag=true;\n"
+      "        discard_flag = true;\n"
       "      }\n";
   }
 
@@ -675,7 +675,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, !primitive);
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
@@ -741,9 +741,11 @@ namespace {
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
+        return;
       } else if (elem_cls == CL_UNKNOWN) {
         be_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
+        return;
       } else { // Enum, String, Struct, Array, Sequence, Union
         if (!seq->unbounded()) {
           be_global->impl_ <<
@@ -808,7 +810,8 @@ namespace {
             }
             be_global->impl_ <<
               "  else {\n"
-              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "        ";
             skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
             be_global->impl_ <<   "        return false;\n"
               "      }\n";
@@ -821,8 +824,9 @@ namespace {
           }
         } else {
           //discard/default
-          be_global->impl_ << "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          be_global->impl_ << "      ";
+          be_global->impl_ << 
+          "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "      ";
           skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
           be_global->impl_ << "      return false;\n";
         }
@@ -904,9 +908,9 @@ namespace {
         if (sf.as_cls_ & CL_STRING) {
           be_global->impl_ <<
             "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
-            const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
-              ? " * OpenDDS::DCPS::char16_cdr_size;\n"
-              : " + 1;\n";
+          const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
+            ? " * OpenDDS::DCPS::char16_cdr_size;\n"
+            : " + 1;\n";
           if (use_cxx11) {
             be_global->impl_ <<
               "    size += seq[i].size()" << strlen_suffix;
@@ -1020,7 +1024,7 @@ namespace {
       TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
 
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
       be_global->impl_ << sf.unwrap_ <<
         "  CORBA::ULong length;\n"
@@ -1146,7 +1150,8 @@ namespace {
             }
             be_global->impl_ <<
               "      else {\n"
-              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "        ";
             skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
             be_global->impl_ <<
               "        return false;\n"
@@ -1162,7 +1167,7 @@ namespace {
         } else {
           //discard/default
           be_global->impl_ <<
-            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
             "      ";
           skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
           be_global->impl_ << "      return false;\n";
@@ -1378,7 +1383,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, !primitive);
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << unwrap;
@@ -1617,7 +1622,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, !primitive);
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << af.unwrap_;
@@ -1698,12 +1703,12 @@ namespace {
         }
         be_global->impl_ << "    }\n";
       }
-    be_global->impl_ <<
-      "  if (discard_flag) {\n"
-      "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-      "    return false;\n"
-      "  }\n"
-      "  return true;\n";
+      be_global->impl_ <<
+        "  if (discard_flag) {\n"
+        "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "    return false;\n"
+        "  }\n"
+        "  return true;\n";
     }
   }
 
@@ -2908,7 +2913,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "      return true;\n"
           "    }\n";
       }
-      be_global->impl_ << "    size_t end_of_field = strm.pos() + field_size;\n";
+      be_global->impl_ << "    const size_t end_of_field = strm.pos() + field_size;\n";
       std::ostringstream cases;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
@@ -3585,7 +3590,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
           {
             be_global->impl_ << "  " << scoped(branch->field_type()->name()) << " btemp;\n";
-            be_global->impl_ << type_to_default(branch->field_type(), "  btemp");
+            be_global->impl_ << type_to_default(branch->field_type(), "btemp");
             be_global->impl_ << "  stru." << branch->local_name()->get_string() << "(btemp);\n";
             found = true;
             break;

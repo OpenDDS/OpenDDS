@@ -676,8 +676,9 @@ void generateCaseBody(
           }
         } else {
           //discard/default
-          be_global->impl_ << "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          be_global->impl_ << "        return false;\n  ";
+          be_global->impl_ <<
+            "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+            "        return false;\n  ";
         }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
