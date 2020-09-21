@@ -197,7 +197,7 @@ private:
 
   class MsgBase : public DCPS::JobQueue::Job {
   public:
-    MsgBase(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgBase(const DCPS::WeakRcHandle<Sedp>& sedp,
             DCPS::MessageId id)
       : sedp_(sedp)
       , id_(id)
@@ -210,9 +210,9 @@ private:
 
   class MsgParticipantData : public MsgBase {
   public:
-    MsgParticipantData(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantData(const DCPS::WeakRcHandle<Sedp>& sedp,
                        DCPS::MessageId id,
-                       const ParticipantData_t data)
+                       const ParticipantData_t& data)
       : MsgBase(sedp, id)
       , data_(data)
     {}
@@ -225,7 +225,7 @@ private:
 
   class MsgDiscoveredPublication : public MsgBase {
   public:
-    MsgDiscoveredPublication(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredPublication(const DCPS::WeakRcHandle<Sedp>& sedp,
                              DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -239,7 +239,7 @@ private:
 
   class MsgDiscoveredSubscription : public MsgBase {
   public:
-    MsgDiscoveredSubscription(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredSubscription(const DCPS::WeakRcHandle<Sedp>& sedp,
                               DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -253,7 +253,7 @@ private:
 
   class MsgParticipantMessageData : public MsgBase {
   public:
-    MsgParticipantMessageData(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantMessageData(const DCPS::WeakRcHandle<Sedp>& sedp,
                               DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -268,7 +268,7 @@ private:
 #ifndef DDS_HAS_MINIMUM_BIT
   class MsgRemoveFromPubBit : public MsgBase {
   public:
-    MsgRemoveFromPubBit(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgRemoveFromPubBit(const DCPS::WeakRcHandle<Sedp>& sedp,
                         DCPS::MessageId id,
                         DDS::InstanceHandle_t ih)
       : MsgBase(sedp, id)
@@ -283,7 +283,7 @@ private:
 
   class MsgRemoveFromSubBit : public MsgBase {
   public:
-    MsgRemoveFromSubBit(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgRemoveFromSubBit(const DCPS::WeakRcHandle<Sedp>& sedp,
                         DCPS::MessageId id,
                         DDS::InstanceHandle_t ih)
       : MsgBase(sedp, id)
@@ -300,7 +300,7 @@ private:
 #ifdef OPENDDS_SECURITY
   class MsgParticipantStatelessData : public MsgBase {
   public:
-    MsgParticipantStatelessData(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantStatelessData(const DCPS::WeakRcHandle<Sedp>& sedp,
                                 DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -314,7 +314,7 @@ private:
 
   class MsgParticipantVolatileSecure : public MsgBase {
   public:
-    MsgParticipantVolatileSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantVolatileSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                  DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -328,7 +328,7 @@ private:
 
   class MsgParticipantMessageDataSecure : public MsgBase {
   public:
-    MsgParticipantMessageDataSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantMessageDataSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                     DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -342,7 +342,7 @@ private:
 
   class MsgDiscoveredPublicationSecure : public MsgBase {
   public:
-    MsgDiscoveredPublicationSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredPublicationSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                    DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -356,7 +356,7 @@ private:
 
   class MsgDiscoveredSubscriptionSecure : public MsgBase {
   public:
-    MsgDiscoveredSubscriptionSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredSubscriptionSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                     DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -370,7 +370,7 @@ private:
 
   class MsgParticipantDataSecure : public MsgBase {
   public:
-    MsgParticipantDataSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantDataSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                              DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}

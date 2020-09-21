@@ -286,11 +286,11 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2))
   , participant_volatile_message_secure_writer_(make_rch<SedpWriter>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this)))
+#endif
   , type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
       make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER), ref(*this)))
   , type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
       make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this)))
-#endif
   , publications_reader_(make_rch<Reader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER), ref(*this)))
 #ifdef OPENDDS_SECURITY

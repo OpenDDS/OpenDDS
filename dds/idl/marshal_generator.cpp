@@ -171,7 +171,7 @@ namespace {
     if (type->node_type() != AST_Decl::NT_pre_defined) {
       return "";
     }
-    AST_PredefinedType* pt = AST_PredefinedType::narrow_from_decl(type);
+    AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(type);
     const string first_args = encoding_expr + ", " + size_expr;
     switch (pt->pt()) {
     case AST_PredefinedType::PT_octet:
@@ -190,7 +190,7 @@ namespace {
 
   string getSerializerName(AST_Type* type)
   {
-    switch (AST_PredefinedType::narrow_from_decl(type)->pt()) {
+    switch (dynamic_cast<AST_PredefinedType*>(type)->pt()) {
     case AST_PredefinedType::PT_long:
       return "long";
     case AST_PredefinedType::PT_ulong:
@@ -252,7 +252,7 @@ namespace {
     // At this point the stream must be 4-byte aligned (from the sequence
     // length), but it might need to be 8-byte aligned for primitives > 4.
     // (If XCDR version is < 2)
-    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    switch (dynamic_cast<AST_PredefinedType*>(elem)->pt()) {
     case AST_PredefinedType::PT_longlong:
     case AST_PredefinedType::PT_ulonglong:
     case AST_PredefinedType::PT_double:
@@ -388,10 +388,10 @@ namespace {
     std::ostringstream arg;
     const Classification cls = classify(type);
     if (cls & CL_STRING) {
-      AST_String* const str = AST_String::narrow_from_decl(type);
+      AST_String* const str = dynamic_cast<AST_String*>(type);
       arg << str->max_size()->ev()->u.ulval;
     } else if (cls & CL_SEQUENCE) {
-      AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+      AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
       arg << seq->max_size()->ev()->u.ulval;
     }
     return arg.str();
@@ -560,7 +560,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -631,7 +631,7 @@ namespace {
       be_global->impl_ <<
         (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
       if (elem_cls & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(elem);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -795,7 +795,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (sf.as_cls_ & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(sf.as_act_);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -853,7 +853,7 @@ namespace {
       be_global->impl_ <<
         (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
       if (sf.as_cls_ & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(sf.as_act_);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -1496,7 +1496,7 @@ namespace {
     const ExtensibilityKind exten = be_global->extensibility(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       switch (p->pt()) {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_boolean:
@@ -1614,10 +1614,10 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
-    gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+    gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
     break;
   case AST_Decl::NT_array:
-    gen_array(name, AST_Array::narrow_from_decl(base));
+    gen_array(name, dynamic_cast<AST_Array*>(base));
     break;
   default:
     return true;
@@ -1652,7 +1652,7 @@ namespace {
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
         return indent +
@@ -2607,7 +2607,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     generate_dheader_code(code, not_final);
     if (not_final) {
       be_global->impl_ <<
-        "  const size_t start_pos = strm.pos();\n";
+        "  const size_t start_pos = strm.pos();\n"
+        "  ACE_UNUSED_ARG(start_pos);\n";
     }
 
     if (may_be_parameter_list) {
