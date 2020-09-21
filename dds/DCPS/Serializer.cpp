@@ -42,7 +42,7 @@ void string_free(ACE_CDR::Char* ptr)
 
 ACE_CDR::WChar* wstring_alloc(ACE_CDR::ULong size)
 {
-  return static_cast<ACE_CDR::WChar*>(std::malloc(size));
+  return static_cast<ACE_CDR::WChar*>(std::malloc(sizeof(ACE_CDR::WChar) * size));
 }
 
 void wstring_free(ACE_CDR::WChar* ptr)
@@ -317,22 +317,6 @@ OPENDDS_STRING Encoding::to_string() const
   }
   return rv;
 }
-
-MessageBlockHelper::MessageBlockHelper(const DCPS::OctetSeq& seq)
-: db_(seq.length(), ACE_Message_Block::MB_DATA,
-      reinterpret_cast<const char*>(seq.get_buffer()),
-      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-{
-  mb_.wr_ptr(mb_.space());
-}
-
-MessageBlockHelper::MessageBlockHelper(DCPS::OctetSeq& seq)
-: db_(seq.length(), ACE_Message_Block::MB_DATA,
-      reinterpret_cast<const char*>(seq.get_buffer()),
-      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-{}
 
 const char Serializer::ALIGN_PAD[] = {0};
 

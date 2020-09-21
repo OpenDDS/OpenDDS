@@ -618,10 +618,8 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_);
     //turn into a octet seq to pass through generated files
-    DCPS::OctetSeq seq;
-    XTypes::serialize_type_info(type_info, seq);
     DDS::OctetSeq serializedTypeInfo;
-    copy(serializedTypeInfo, seq);
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
       dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
@@ -719,10 +717,8 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
     //turn into a octet seq to pass through generated files
-    DCPS::OctetSeq seq;
-    XTypes::serialize_type_info(type_info, seq);
     DDS::OctetSeq serializedTypeInfo;
-    copy(serializedTypeInfo, seq);
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,

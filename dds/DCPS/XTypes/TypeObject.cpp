@@ -210,27 +210,6 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
   return ti;
 }
 
-void serialize_type_info(const TypeInformation& type_info, DCPS::OctetSeq& seq)
-{
-  seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
-  DCPS::MessageBlockHelper helper(seq);
-  DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
-  if (!(serializer << type_info)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
-              ACE_TEXT("serialization of type information failed.\n")));
-  }
-}
-
-void deserialize_type_info(TypeInformation& type_info, const DCPS::OctetSeq& seq)
-{
-  DCPS::MessageBlockHelper helper(seq);
-  DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
-  if (!(serializer >> type_info)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
-              ACE_TEXT("deserialization of type information failed.\n")));
-  }
-}
-
 // TODO: Test with color.
 ACE_CDR::ULong hash_member_name_to_id(const std::string& name)
 {

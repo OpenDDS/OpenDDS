@@ -66,18 +66,6 @@ const char* retcode_to_string(DDS::ReturnCode_t value)
   }
 }
 
-void copy(DCPS::OctetSeq& to, const DDS::OctetSeq& from)
-{
-  to.length(from.length());
-  std::memcpy(to.get_buffer(), from.get_buffer(), from.length());
-}
-
-void copy(DDS::OctetSeq& to, const DCPS::OctetSeq& from)
-{
-  to.length(from.length());
-  std::memcpy(to.get_buffer(), from.get_buffer(), from.length());
-}
-
 bool
 is_wildcard(const char *str)
 {

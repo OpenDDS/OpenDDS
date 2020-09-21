@@ -28,14 +28,6 @@ namespace DCPS {
 OpenDDS_Dcps_Export const char* retcode_to_string(DDS::ReturnCode_t value);
 
 OpenDDS_Dcps_Export
-void
-copy(DCPS::OctetSeq& to, const DDS::OctetSeq& from);
-
-OpenDDS_Dcps_Export
-void
-copy(DDS::OctetSeq& to, const DCPS::OctetSeq& from);
-
-OpenDDS_Dcps_Export
 bool
 is_wildcard(const char *str);
 

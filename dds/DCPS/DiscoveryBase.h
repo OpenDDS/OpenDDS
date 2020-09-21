@@ -1163,10 +1163,8 @@ namespace OpenDDS {
           wa.writerQos = *dwQos;
           XTypes::serialize_type_info(writer_type_info, wa.serializedTypeInfo);
 #else
-          DCPS::OctetSeq seq1;
-          XTypes::serialize_type_info(*reader_type_info, seq1);
           DDS::OctetSeq octet_seq_type_info_reader;
-          copy(octet_seq_type_info_reader, seq1);
+          XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
 
           const ReaderAssociation ra =
             {add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
@@ -1177,10 +1175,8 @@ namespace OpenDDS {
 #endif
              cfProp->expressionParameters, octet_seq_type_info_reader};
 
-          DCPS::OctetSeq seq2;
-          XTypes::serialize_type_info(*writer_type_info, seq2);
           DDS::OctetSeq octet_seq_type_info_writer;
-          copy(octet_seq_type_info_writer, seq2);
+          XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
           const WriterAssociation wa =
             {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos, octet_seq_type_info_writer};
 #endif

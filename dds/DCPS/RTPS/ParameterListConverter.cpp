@@ -37,18 +37,14 @@ namespace {
   }
 
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info) {
-    DCPS::OctetSeq seq;
-    copy(seq, param.type_information());
-    XTypes::deserialize_type_info(type_info, seq);
+    XTypes::deserialize_type_info(type_info, param.type_information());
   }
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
     Parameter param;
-    DCPS::OctetSeq seq1;
-    XTypes::serialize_type_info(type_info, seq1);
-    DDS::OctetSeq seq2;
-    copy(seq2, seq1);
-    param.type_information(seq2);
+    DDS::OctetSeq seq;
+    XTypes::serialize_type_info(type_info, seq);
+    param.type_information(seq);
     add_param(param_list, param);
   }
 
