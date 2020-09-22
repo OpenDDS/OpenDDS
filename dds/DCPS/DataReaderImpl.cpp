@@ -321,7 +321,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   guard.release();
 
   if (associate(data, active)) {
-    Observer::Rch observer = get_observer(Observer::e_ASSOCIATED);
+    const Observer::Rch observer = get_observer(Observer::e_ASSOCIATED);
     if (observer) {
       observer->on_associated(this, data.remote_id_);
     }
@@ -467,7 +467,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     return;
   }
 
-  Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
+  const Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
   if (observer) {
     for (CORBA::ULong i = 0; i < writers.length(); ++i) {
       observer->on_disassociated(this, writers[i]);
@@ -900,7 +900,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
     qos_change(qos);
     qos_ = qos;
 
-    Observer::Rch observer = get_observer(Observer::e_QOS_CHANGED);
+    const Observer::Rch observer = get_observer(Observer::e_QOS_CHANGED);
     if (observer) {
       observer->on_qos_changed(this);
     }
@@ -1306,7 +1306,7 @@ DataReaderImpl::enable()
   }
 
   if (return_value == DDS::RETCODE_OK) {
-    Observer::Rch observer = get_observer(Observer::e_ENABLED);
+    const Observer::Rch observer = get_observer(Observer::e_ENABLED);
     if (observer) {
       observer->on_enabled(this);
     }
@@ -1660,7 +1660,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     break;
   }
 
-  Observer::Rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+  const Observer::Rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
   if (observer) {
     Observer::Sample s(sample, instance ? instance->instance_handle_ : DDS::HANDLE_NIL);
     observer->on_sample_received(this, s);
@@ -2422,7 +2422,7 @@ DataReaderImpl::statistics_enabled(
 void
 DataReaderImpl::prepare_to_delete()
 {
-  Observer::Rch observer = get_observer(Observer::e_DELETED);
+  const Observer::Rch observer = get_observer(Observer::e_DELETED);
   if (observer) {
     observer->on_deleted(this);
   }

@@ -34,9 +34,6 @@ class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
 {
 public:
-  typedef Observer* Ptr;
-  typedef TAO_Objref_Var_T<Observer> Var;
-  typedef TAO_Objref_Out_T<Observer> Out;
   typedef RcHandle<Observer> Rch;
 
   typedef unsigned long Event;
