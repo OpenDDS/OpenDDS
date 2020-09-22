@@ -7,6 +7,8 @@
 namespace OpenDDS {
 namespace Test {
 
+#ifndef DDS_HAS_MINIMUM_BIT
+
 class Listener : public DDS::DataReaderListener {
   void on_requested_deadline_missed (::DDS::DataReader_ptr,
                                      const ::DDS::RequestedDeadlineMissedStatus&)
@@ -71,9 +73,13 @@ class Listener : public DDS::DataReaderListener {
                        const ::DDS::SampleLostStatus&)
   {}
 };
+#endif
 
 void install_connection_record_logger(DDS::DomainParticipant_var participant)
 {
+  ACE_UNUSED_ARG(participant);
+
+#ifndef DDS_HAS_MINIMUM_BIT
   DDS::Subscriber_var bit_sub = participant->get_builtin_subscriber();
   DDS::DataReader_var d = bit_sub->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
   if (!d) {
@@ -82,6 +88,7 @@ void install_connection_record_logger(DDS::DomainParticipant_var participant)
 
   DDS::DataReaderListener_var listener(new Listener());
   d->set_listener(listener, DCPS::DEFAULT_STATUS_MASK);
+#endif
 }
 
 } // Test

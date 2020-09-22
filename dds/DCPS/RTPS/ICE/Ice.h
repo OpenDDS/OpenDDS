@@ -226,7 +226,7 @@ public:
   static Agent* instance();
 };
 
-class ServerReflexiveStateMachine {
+class OpenDDS_Rtps_Export ServerReflexiveStateMachine {
 public:
   enum StateChange {
     SRSM_None,
