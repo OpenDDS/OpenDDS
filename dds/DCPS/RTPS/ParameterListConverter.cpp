@@ -293,7 +293,7 @@ namespace {
     }
 
     if ((field_mask & (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) == (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) {
-      // TLS_TODO: add EXTENDED_BUILTIN_ENDPOINTS logic here
+      // TLS_TODO: add EXTENDED_BUILTIN_ENDPOINTS logic here???
       if ((field_mask & IDENTITY_STATUS_TOKEN_FIELD) == IDENTITY_STATUS_TOKEN_FIELD) {
         return OpenDDS::Security::DPDK_SECURE;
       } else {
@@ -495,6 +495,11 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
 
+  Parameter aebe_param;
+  aebe_param.extended_builtin_endpoints(
+    proxy.availableExtendedBuiltinEndpoints);
+  add_param(param_list, abe_param);
+
   // Interoperability note:
   // For interoperability with other DDS implemenations, we'll encode the
   // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
@@ -549,6 +554,7 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
+  proxy.availableExtendedBuiltinEndpoints = 0;
   proxy.expectsInlineQos = false;
 
   CORBA::ULong length = param_list.length();
@@ -588,6 +594,11 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
+      //TLS_TODO: where secure parameters should be added to the proxy???
+      //case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+      //  proxy.availableExtendedBuiltinEndpoints =
+      //    param.extended_builtin_endpoints();
+      //  break;
       case PID_METATRAFFIC_UNICAST_LOCATOR:
         append_locator(
             proxy.metatrafficUnicastLocatorList,

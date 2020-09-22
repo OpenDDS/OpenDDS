@@ -168,6 +168,12 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
+    available_extended_builtin_endpoints_ |=
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+
     if (enable_writers) {
       available_builtin_endpoints_ |=
         DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
@@ -206,6 +212,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
+  , available_extended_builtin_endpoints_(0)
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
 #ifdef OPENDDS_SECURITY
   , security_config_()
@@ -245,6 +252,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
+  , available_extended_builtin_endpoints_(0)
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
@@ -906,7 +914,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   }
   if (participant_sec_attr_.is_discovery_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-    pbtds.base.extended_builtin_endpoints = 
+    pbtds.base.extended_builtin_endpoints =
       DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
       DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
   }
@@ -1979,6 +1987,7 @@ Spdp::build_local_pdata(
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
+      available_extended_builtin_endpoints_,
       0,
       unicast_locators,
       multicast_locators,
@@ -3170,6 +3179,7 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 #endif
 
 #ifdef OPENDDS_SECURITY
+// TLS_TODO: Add type lookup service endpoints?
 void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
   RepoId l = guid_;
 
@@ -3269,6 +3279,7 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
   }
 }
 
+// TLS_TODO: Add type lookup service endpoints?
 void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail) {
   RepoId l = guid_;
 

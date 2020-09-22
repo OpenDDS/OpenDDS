@@ -333,6 +333,7 @@ bool run_test()
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       availableBuiltinEndpoints,
+      0, /*TLS_TODO: implement availableExtendedBuiltinEndpoints ??? */
       0,
       nonEmptyList /* sedp_multicast */,
       nonEmptyList /* sedp_unicast */,

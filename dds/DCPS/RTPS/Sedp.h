@@ -106,7 +106,8 @@ public:
   void rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
-  void disassociate_security_builtins(BuiltinEndpointSet_t local_avail, BuiltinEndpointSet_t avail,
+  void disassociate_security_builtins(BuiltinEndpointSet_t local_avail, ExtendedBuiltinEndpointSet_t extended_local_avail, 
+                                      BuiltinEndpointSet_t avail, ExtendedBuiltinEndpointSet_t extended_avail,
                                       const DCPS::RepoId& part);
   void remove_remote_crypto_handle(const DCPS::RepoId& participant, const EntityId_t& entity);
 
@@ -618,7 +619,7 @@ private:
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
 
 #ifdef OPENDDS_SECURITY
-  TypeLookupRequestWriter_rch type_lookup_request_secure_writer;
+  TypeLookupRequestWriter_rch type_lookup_request_secure_writer_;
 
   TypeLookupReplyWriter_rch type_lookup_reply_secure_writer_;
 #endif
@@ -749,9 +750,6 @@ private:
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
 
-
-  TypeLookupRequestReader_rch type_lookup_request_reader_;
-
   class TypeLookupReplyReader : public Reader {
   public:
     TypeLookupReplyReader(const DCPS::RepoId& sub_id, Sedp& sedp)
@@ -771,7 +769,15 @@ private:
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
 
+  TypeLookupRequestReader_rch type_lookup_request_reader_;
+
   TypeLookupReplyReader_rch type_lookup_reply_reader_;
+
+#ifdef OPENDDS_SECURITY
+  TypeLookupRequestReader_rch type_lookup_request_secure_reader_;
+
+  TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
+#endif
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;
