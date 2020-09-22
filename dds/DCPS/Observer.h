@@ -60,59 +60,39 @@ public:
     CORBA::ULong instance_state_;
     DDS::Time_t timestamp_;
     SequenceNumber seq_n_;
-    const void* const data_;
-    static CORBA::ULong to_instance_state(const char message_id);
-    Sample(const DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t);
-    Sample(const ReceivedDataSample& s, const DDS::InstanceHandle_t i = 0);
-    Sample(const ReceivedDataElement& s, const DDS::InstanceHandle_t i = 0, const CORBA::ULong instance_state = 0);
-    Sample(const DDS::InstanceHandle_t i, const CORBA::ULong instance_state,
-      const DDS::Time_t& t, const SequenceNumber& sn, const void* const data);
+    const void* data_;
+    static CORBA::ULong to_instance_state(char message_id);
+    Sample(DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t);
+    explicit Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i = 0);
+    explicit Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i = 0, CORBA::ULong instance_state = 0);
+    Sample(DDS::InstanceHandle_t i, CORBA::ULong instance_state,
+      const DDS::Time_t& t, const SequenceNumber& sn, const void* data);
   };
 
-  // 1) Reader/Writer enabled, QoS changed, deleted
-  //    - Unique Id for the writer/reader, includes domain, topic, data type, QoS
-  virtual void on_enabled(DDS::DataWriter_ptr) {}
-  virtual void on_enabled(DDS::DataReader_ptr) {}
+  // Group 1: Reader/Writer enabled, deleted, QoS changed
+  virtual void on_enabled(DDS::DataWriter_ptr);
+  virtual void on_enabled(DDS::DataReader_ptr);
+  virtual void on_deleted(DDS::DataWriter_ptr);
+  virtual void on_deleted(DDS::DataReader_ptr);
+  virtual void on_qos_changed(DDS::DataWriter_ptr);
+  virtual void on_qos_changed(DDS::DataReader_ptr);
 
-  virtual void on_deleted(DDS::DataWriter_ptr) {}
-  virtual void on_deleted(DDS::DataReader_ptr) {}
+  // Group 2: Peer associated, disassociated
+  virtual void on_associated(DDS::DataWriter_ptr, const GUID_t& /* readerId */);
+  virtual void on_associated(DDS::DataReader_ptr, const GUID_t& /* writerId */);
+  virtual void on_disassociated(DDS::DataWriter_ptr, const GUID_t& /* readerId */);
+  virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */);
 
-  virtual void on_qos_changed(DDS::DataWriter_ptr) {}
-  virtual void on_qos_changed(DDS::DataReader_ptr) {}
+  // Group 3: Sample sent, received, read, taken
+  virtual void on_sample_sent(const DDS::DataWriter_ptr, const Sample&);
+  virtual void on_sample_received(const DDS::DataReader_ptr, const Sample&);
+  virtual void on_sample_read(const DDS::DataReader_ptr, const Sample&);
+  virtual void on_sample_taken(const DDS::DataReader_ptr, const Sample&);
 
-  // 2) Peer associated, QoS changed, association removed
-  //    - Includes peer's unique Id, QoS
-  virtual void on_associated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
-  virtual void on_associated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
-
-  virtual void on_disassociated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
-  virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
-
-  // 3) DataWriter sample sent
-  //    - Writer Id, seq#, timestamp, instance handle, instance state, data payload
-  //      - Data payloads will be in binary encoded (CDR) format
-  //      - A utility function will be provided to convert CDR to JSON string
-  virtual void on_sample_sent(const DDS::DataWriter_ptr, const Sample&) {}
-
-  // 4) Sample received by DataReader
-  //    - ReaderId, Same data fields as "sample sent" above
-  virtual void on_sample_received(const DDS::DataReader_ptr, const Sample&) {}
-
-  // 5) Sample received by application (read/take from DataReader)
-  //    - ReaderId, Same data fields as "sample sent" above, read/take context
-  virtual void on_sample_read(const DDS::DataReader_ptr, const Sample&) {}
-  virtual void on_sample_taken(const DDS::DataReader_ptr, const Sample&) {}
-
-  virtual ~Observer() {}
+  virtual ~Observer();
 protected:
   Observer() {}
 };
-
-// comply with specification
-typedef Observer::Ptr Observer_ptr;
-typedef Observer::Var Observer_var;
-typedef Observer::Out Observer_out;
-typedef Observer::Rch Observer_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

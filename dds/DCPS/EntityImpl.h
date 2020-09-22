@@ -60,9 +60,9 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const { return RcHandle<EntityImpl>(); }
 
-  void set_observer(Observer::Rch observer, const Observer::Event e);
+  void set_observer(Observer::Rch observer, Observer::Event e);
 
-  Observer::Rch get_observer(const Observer::Event e);
+  Observer::Rch get_observer(Observer::Event e);
 
 protected:
   DDS::ReturnCode_t set_enabled();

@@ -1172,7 +1172,7 @@ private:
     results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
     if (observer) {
       typename InstanceMap::iterator i = instance_map_.begin();
-      const DDS::InstanceHandle_t handle = (i != instance_map_.end()) ? i->second : 0;
+      const DDS::InstanceHandle_t handle = (i != instance_map_.end()) ? i->second : DDS::HANDLE_NIL;
       Observer::Sample s(*(item.rde_), handle, instance_states);
       observer->on_sample_read(this, s);
     }

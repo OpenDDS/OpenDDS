@@ -1662,7 +1662,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   Observer::Rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
   if (observer) {
-    Observer::Sample s(sample, instance ? instance->instance_handle_ : 0);
+    Observer::Sample s(sample, instance ? instance->instance_handle_ : DDS::HANDLE_NIL);
     observer->on_sample_received(this, s);
   }
 }
