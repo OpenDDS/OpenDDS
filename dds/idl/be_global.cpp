@@ -693,7 +693,7 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
   return root_default_nested_;
 }
 
-bool BE_GlobalData::check_key(AST_Field* node, bool& value)
+bool BE_GlobalData::check_key(AST_Decl* node, bool& value) const
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
   value = key->absent_value;
@@ -812,11 +812,8 @@ bool BE_GlobalData::is_must_understand(AST_Decl* node) const
 
 bool BE_GlobalData::is_key(AST_Decl* node) const
 {
-  KeyAnnotation* key_annotation =
-    dynamic_cast<KeyAnnotation*>(
-      builtin_annotations_["::@key"]);
-  bool value = key_annotation->absent_value;
-  key_annotation->node_value_exists(node, value);
+  bool value;
+  check_key(node, value);
   return value;
 }
 

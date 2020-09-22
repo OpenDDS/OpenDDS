@@ -18,6 +18,19 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
+
+namespace XTypes {
+  struct TypeInformation;
+};
+
+namespace DCPS {
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
+
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
+};
+
 namespace XTypes {
 
   template<typename T, typename T_slice, typename TAG>
@@ -1858,12 +1871,6 @@ bool operator>>(Serializer& ser, XTypes::TypeObject& type_object);
 OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeInformation& type_info);
-
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
-
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
 
 OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,

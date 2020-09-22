@@ -181,7 +181,7 @@ public:
    * If node has the key annotation, this sets value to the key annotation
    * value and returns true, else this sets value to false and returns false.
    */
-  bool check_key(AST_Field* node, bool& value);
+  bool check_key(AST_Decl* node, bool& value) const;
 
   /**
    * Check if the discriminator in a union has been declared a key.

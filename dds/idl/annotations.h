@@ -80,16 +80,13 @@ AST_Expression::AST_ExprValue* get_annotation_member_ev(AST_Annotation_Appl* app
                                                         const char* member_name);
 
 bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
-                                      const char* member_name,
-                                      const bool* default_value);
+                                      const char* member_name);
 
 ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
-                                           const char* member_name,
-                                           const ACE_UINT32* default_value);
+                                           const char* member_name);
 
 std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
-                                            const char* member_name,
-                                            const std::string* default_value);
+                                            const char* member_name);
 
 /**
  * Annotation that logically provide a value when absent.
@@ -112,52 +109,42 @@ class AnnotationWithValue : public Annotation {
 public:
   /**
    * If node has the annotation, this sets value to the annotation value and
-   * returns true.
-   * If node does not have the annotation, it sets it to a default value and returns false.
+   * returns true.  Returns false otherwise.
    */
   virtual bool node_value_exists(AST_Decl* node, T& value) const
   {
     AST_Annotation_Appl* appl = find_on(node);
     if (!appl) { return false; }
 
-    value = value_from_appl(appl, default_value());
+    value = value_from_appl(appl);
     return true;
   }
 
 protected:
-  /* NOTE: Derived classes should either override value_from_appl or default_value. */
-
-  virtual T value_from_appl(AST_Annotation_Appl*,
-                            const T* default_value) const
+  /* NOTE: Derived classes should either override value_from_appl.  A
+     default implementation is provided so template functions can be
+     defined. */
+  virtual T value_from_appl(AST_Annotation_Appl*) const
   {
-    return *default_value;
-  }
-
-  virtual const T* default_value() const
-  {
-    return 0;
+    return T();
   }
 };
 
 template<>
-bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl,
-                                                const bool* default_value) const;
+bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const;
 
 template<>
-unsigned AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl,
-                                                          const ACE_UINT32* default_value) const;
+unsigned AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const;
 
 template<>
-std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl,
-                                                              const std::string* default_value) const;
+std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl) const;
 
 template <typename T>
 class AnnotationWithEnumValue : public AnnotationWithValue<T> {
 protected:
-  T value_from_appl(AST_Annotation_Appl* appl,
-                    const T* default_value) const
+  T value_from_appl(AST_Annotation_Appl* appl) const
   {
-    return static_cast<T>(get_u32_annotation_member_value(appl, "value", reinterpret_cast<const ACE_UINT32*>(default_value)));
+    return static_cast<T>(get_u32_annotation_member_value(appl, "value"));
   }
 };
 
@@ -173,13 +160,6 @@ public:
   std::string name() const;
 
   bool union_value(AST_Union* node) const;
-
-private:
-  virtual const bool* default_value() const
-  {
-    static bool v = true;
-    return &v;
-  }
 };
 
 // @topic ====================================================================
@@ -202,7 +182,7 @@ public:
   std::string name() const;
 
 private:
-  TopicValue value_from_appl(AST_Annotation_Appl* appl, const TopicValue* default_value) const;
+  TopicValue value_from_appl(AST_Annotation_Appl* appl) const;
 };
 
 // @nested ===================================================================
@@ -211,13 +191,6 @@ class NestedAnnotation : public AnnotationWithValue<bool> {
 public:
   std::string definition() const;
   std::string name() const;
-
-private:
-  virtual const bool* default_value() const
-  {
-    static bool v = true;
-    return &v;
-  }
 };
 
 // @default_nested ===========================================================
@@ -226,13 +199,6 @@ class DefaultNestedAnnotation : public AnnotationWithValue<bool> {
 public:
   std::string definition() const;
   std::string name() const;
-
-private:
-  virtual const bool* default_value() const
-  {
-    static bool v = true;
-    return &v;
-  }
 };
 
 // @id =======================================================================
@@ -258,13 +224,6 @@ public:
 
   std::string definition() const;
   std::string name() const;
-
-private:
-  virtual const AutoidKind* default_value() const
-  {
-    static AutoidKind v = autoidkind_hash;
-    return &v;
-  }
 };
 
 // @hashid ===================================================================
@@ -273,13 +232,6 @@ class HashidAnnotation : public AnnotationWithValue<std::string> {
 public:
   std::string definition() const;
   std::string name() const;
-
-private:
-  virtual const std::string* default_value() const
-  {
-    static std::string v = "";
-    return &v;
-  }
 };
 
 // @optional ===================================================================
@@ -292,12 +244,6 @@ public:
 
   std::string definition() const;
   std::string name() const;
-
-  virtual const bool* default_value() const
-  {
-    static bool v = true;
-    return &v;
-  }
 };
 
 // @must_understand ============================================================
@@ -310,12 +256,6 @@ public:
 
   std::string definition() const;
   std::string name() const;
-
-  virtual const bool* default_value() const
-  {
-    static bool v = true;
-    return &v;
-  }
 };
 
 // @external ===================================================================
@@ -328,12 +268,6 @@ public:
 
   std::string definition() const;
   std::string name() const;
-
-  virtual const bool* default_value() const
-  {
-    static bool v = true;
-    return &v;
-  }
 };
 
 // @extensibility ============================================================
@@ -392,13 +326,6 @@ public:
   std::string name() const;
 
   TryConstructFailAction union_value(AST_Union* node) const;
-
-private:
-  virtual const TryConstructFailAction* default_value() const
-  {
-    static TryConstructFailAction v = tryconstructfailaction_use_default;
-    return &v;
-  }
 };
 
 // OpenDDS Specific Annotations
@@ -499,7 +426,7 @@ namespace OpenDDS {
     bool node_value_exists(AST_Decl* node, DataRepresentation& value) const;
 
   protected:
-    DataRepresentation value_from_appl(AST_Annotation_Appl* appl, const DataRepresentation* default_value) const;
+    DataRepresentation value_from_appl(AST_Annotation_Appl* appl) const;
   };
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
