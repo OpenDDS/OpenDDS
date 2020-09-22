@@ -68,7 +68,7 @@ typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
 typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
 
-class Sedp : public DCPS::EndpointManager<ParticipantData_t>, public DCPS::RcObject {
+class Sedp : public DCPS::EndpointManager<ParticipantData_t> {
 public:
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
@@ -161,6 +161,9 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
+  bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+                                const DCPS::RepoId& reader);
+
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
@@ -197,7 +200,7 @@ private:
 
   class MsgBase : public DCPS::JobQueue::Job {
   public:
-    MsgBase(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgBase(const DCPS::WeakRcHandle<Sedp>& sedp,
             DCPS::MessageId id)
       : sedp_(sedp)
       , id_(id)
@@ -210,9 +213,9 @@ private:
 
   class MsgParticipantData : public MsgBase {
   public:
-    MsgParticipantData(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantData(const DCPS::WeakRcHandle<Sedp>& sedp,
                        DCPS::MessageId id,
-                       const ParticipantData_t data)
+                       const ParticipantData_t& data)
       : MsgBase(sedp, id)
       , data_(data)
     {}
@@ -225,7 +228,7 @@ private:
 
   class MsgDiscoveredPublication : public MsgBase {
   public:
-    MsgDiscoveredPublication(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredPublication(const DCPS::WeakRcHandle<Sedp>& sedp,
                              DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -239,7 +242,7 @@ private:
 
   class MsgDiscoveredSubscription : public MsgBase {
   public:
-    MsgDiscoveredSubscription(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredSubscription(const DCPS::WeakRcHandle<Sedp>& sedp,
                               DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -253,7 +256,7 @@ private:
 
   class MsgParticipantMessageData : public MsgBase {
   public:
-    MsgParticipantMessageData(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantMessageData(const DCPS::WeakRcHandle<Sedp>& sedp,
                               DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -268,7 +271,7 @@ private:
 #ifndef DDS_HAS_MINIMUM_BIT
   class MsgRemoveFromPubBit : public MsgBase {
   public:
-    MsgRemoveFromPubBit(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgRemoveFromPubBit(const DCPS::WeakRcHandle<Sedp>& sedp,
                         DCPS::MessageId id,
                         DDS::InstanceHandle_t ih)
       : MsgBase(sedp, id)
@@ -283,7 +286,7 @@ private:
 
   class MsgRemoveFromSubBit : public MsgBase {
   public:
-    MsgRemoveFromSubBit(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgRemoveFromSubBit(const DCPS::WeakRcHandle<Sedp>& sedp,
                         DCPS::MessageId id,
                         DDS::InstanceHandle_t ih)
       : MsgBase(sedp, id)
@@ -300,7 +303,7 @@ private:
 #ifdef OPENDDS_SECURITY
   class MsgParticipantStatelessData : public MsgBase {
   public:
-    MsgParticipantStatelessData(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantStatelessData(const DCPS::WeakRcHandle<Sedp>& sedp,
                                 DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -314,7 +317,7 @@ private:
 
   class MsgParticipantVolatileSecure : public MsgBase {
   public:
-    MsgParticipantVolatileSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantVolatileSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                  DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -328,7 +331,7 @@ private:
 
   class MsgParticipantMessageDataSecure : public MsgBase {
   public:
-    MsgParticipantMessageDataSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantMessageDataSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                     DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -342,7 +345,7 @@ private:
 
   class MsgDiscoveredPublicationSecure : public MsgBase {
   public:
-    MsgDiscoveredPublicationSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredPublicationSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                    DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -356,7 +359,7 @@ private:
 
   class MsgDiscoveredSubscriptionSecure : public MsgBase {
   public:
-    MsgDiscoveredSubscriptionSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgDiscoveredSubscriptionSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                                     DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -370,7 +373,7 @@ private:
 
   class MsgParticipantDataSecure : public MsgBase {
   public:
-    MsgParticipantDataSecure(DCPS::WeakRcHandle<Sedp> sedp,
+    MsgParticipantDataSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
                              DCPS::MessageId id)
       : MsgBase(sedp, id)
     {}
@@ -472,6 +475,12 @@ private:
       return seq_;
     }
 
+    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+
+    void end_historic_samples(const DCPS::RepoId& reader);
+
   protected:
     void send_sample(const ACE_Message_Block& data,
                      size_t size,
@@ -486,25 +495,22 @@ private:
                            bool historic_sample = false,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
+    void write_control_msg(DCPS::Message_Block_Ptr payload,
+      size_t size,
+      DCPS::MessageId id,
+      DCPS::SequenceNumber seq = DCPS::SequenceNumber());
+
   private:
     DCPS::SequenceNumber seq_;
   };
 
-  class SedpWriter : public Writer {
+  class SecurityWriter : public Writer {
   public:
-    SedpWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+    SecurityWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
       : Writer(pub_id, sedp, seq_init)
     {}
 
-    virtual ~SedpWriter();
-
-    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
-                                           const DCPS::RepoId& reader,
-                                           DCPS::SequenceNumber& sequence);
-
-    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
-                                                const DCPS::RepoId& reader,
-                                                DCPS::SequenceNumber& sequence);
+    virtual ~SecurityWriter();
 
 #ifdef OPENDDS_SECURITY
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
@@ -514,45 +520,66 @@ private:
     DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
+#endif
+  };
 
+  typedef DCPS::RcHandle<SecurityWriter> SecurityWriter_rch;
+
+
+  class LivelinessWriter : public Writer {
+  public:
+    LivelinessWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : Writer(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~LivelinessWriter();
+
+    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
+      const DCPS::RepoId& reader,
+      DCPS::SequenceNumber& sequence);
+  };
+
+  typedef DCPS::RcHandle<LivelinessWriter> LivelinessWriter_rch;
+
+
+  class DiscoveryWriter : public Writer {
+  public:
+    DiscoveryWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
+      : Writer(pub_id, sedp, seq_init)
+    {}
+
+    virtual ~DiscoveryWriter();
+
+#ifdef OPENDDS_SECURITY
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
 #endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
-
-    void end_historic_samples(const DCPS::RepoId& reader);
-
-  private:
-    void write_control_msg(DCPS::Message_Block_Ptr payload,
-      size_t size,
-      DCPS::MessageId id,
-      DCPS::SequenceNumber seq = DCPS::SequenceNumber());
-
   };
 
-  typedef DCPS::RcHandle<SedpWriter> SedpWriter_rch;
+  typedef DCPS::RcHandle<DiscoveryWriter> DiscoveryWriter_rch;
 
-  SedpWriter_rch publications_writer_;
+  DiscoveryWriter_rch publications_writer_;
 
 #ifdef OPENDDS_SECURITY
-  SedpWriter_rch publications_secure_writer_;
+  DiscoveryWriter_rch publications_secure_writer_;
 #endif
 
-  SedpWriter_rch subscriptions_writer_;
+  DiscoveryWriter_rch subscriptions_writer_;
 
 #ifdef OPENDDS_SECURITY
-  SedpWriter_rch subscriptions_secure_writer_;
+  DiscoveryWriter_rch subscriptions_secure_writer_;
 #endif
 
-  SedpWriter_rch participant_message_writer_;
+  LivelinessWriter_rch participant_message_writer_;
 
 #ifdef OPENDDS_SECURITY
-  SedpWriter_rch participant_message_secure_writer_;
-  SedpWriter_rch participant_stateless_message_writer_;
-  SedpWriter_rch dcps_participant_secure_writer_;
+  LivelinessWriter_rch participant_message_secure_writer_;
+  SecurityWriter_rch participant_stateless_message_writer_;
+  DiscoveryWriter_rch dcps_participant_secure_writer_;
 
-  SedpWriter_rch participant_volatile_message_secure_writer_;
+  SecurityWriter_rch participant_volatile_message_secure_writer_;
 #endif
 
   class TypeLookupWriter : public Writer {
@@ -577,7 +604,7 @@ private:
     DDS::ReturnCode_t send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
-      DCPS::SequenceNumber& rpc_sequence,
+      const DCPS::SequenceNumber& rpc_sequence,
       const DCPS::RepoId& participant_id);
   };
 
@@ -593,10 +620,8 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
-      const DCPS::RepoId& reader,
-      DCPS::SequenceNumber& sequence,
-      DDS::RPC::RemoteExceptionCode_t exception_code);
+    DDS::ReturnCode_t send_tl_reply(const DCPS::ReceivedDataSample& sample,
+      XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
@@ -624,29 +649,86 @@ private:
     void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
+
+  private:
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
+      DCPS::Serializer& ser,
+      DCPS::Extensibility extensibility) = 0;
   };
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
 
-  Reader_rch publications_reader_;
+  class DiscoveryReader : public Reader {
+  public:
+    DiscoveryReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~DiscoveryReader();
+
+  private:
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
+      DCPS::Serializer& ser,
+      DCPS::Extensibility extensibility);
+  };
+
+  typedef DCPS::RcHandle<DiscoveryReader> DiscoveryReader_rch;
+
+  DiscoveryReader_rch publications_reader_;
 
 #ifdef OPENDDS_SECURITY
-  Reader_rch publications_secure_reader_;
+  DiscoveryReader_rch publications_secure_reader_;
 #endif
 
-  Reader_rch subscriptions_reader_;
+  DiscoveryReader_rch subscriptions_reader_;
 
 #ifdef OPENDDS_SECURITY
-  Reader_rch subscriptions_secure_reader_;
+  DiscoveryReader_rch subscriptions_secure_reader_;
 #endif
 
-  Reader_rch participant_message_reader_;
+  class LivelinessReader : public Reader {
+  public:
+    LivelinessReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~LivelinessReader();
+
+  private:
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
+      DCPS::Serializer& ser,
+      DCPS::Extensibility extensibility);
+  };
+
+  typedef DCPS::RcHandle<LivelinessReader> LivelinessReader_rch;
+
+  LivelinessReader_rch participant_message_reader_;
+
+  class SecurityReader : public Reader {
+  public:
+    SecurityReader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Reader(sub_id, sedp)
+    {}
+
+    virtual ~SecurityReader();
+
+  private:
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
+      DCPS::Serializer& ser,
+      DCPS::Extensibility extensibility);
+  };
+
+  typedef DCPS::RcHandle<SecurityReader> SecurityReader_rch;
 
 #ifdef OPENDDS_SECURITY
-  Reader_rch participant_message_secure_reader_;
-  Reader_rch participant_stateless_message_reader_;
-  Reader_rch participant_volatile_message_secure_reader_;
-  Reader_rch dcps_participant_secure_reader_;
+  LivelinessReader_rch participant_message_secure_reader_;
+  SecurityReader_rch participant_stateless_message_reader_;
+  SecurityReader_rch participant_volatile_message_secure_reader_;
+  DiscoveryReader_rch dcps_participant_secure_reader_;
 #endif
 
   class TypeLookupReader : public Reader {
@@ -658,20 +740,27 @@ private:
     virtual ~TypeLookupReader();
   };
 
-  typedef DCPS::RcHandle<TypeLookupReader> TypeLookupReader_rch;
 
 
-  class TypeLookupRequestReader : public TypeLookupReader {
+  class TypeLookupRequestReader : public Reader {
   public:
     TypeLookupRequestReader(const DCPS::RepoId& sub_id, Sedp& sedp)
-      : TypeLookupReader(sub_id, sedp)
+      : Reader(sub_id, sedp)
     {}
 
     virtual ~TypeLookupRequestReader();
 
-    DDS::ReturnCode_t take_tl_request(const DCPS::ReceivedDataSample& sample,
+  private:
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      XTypes::TypeLookup_Request& type_lookup_request);
+      DCPS::Extensibility extensibility);
+
+    DDS::ReturnCode_t process_tl_request(DCPS::Serializer& ser,
+      XTypes::TypeLookup_Reply& type_lookup_reply);
+
+    DDS::ReturnCode_t process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
+      XTypes::TypeLookup_Reply& type_lookup_reply);
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
@@ -679,17 +768,21 @@ private:
 
   TypeLookupRequestReader_rch type_lookup_request_reader_;
 
-  class TypeLookupReplyReader : public TypeLookupReader {
+  class TypeLookupReplyReader : public Reader {
   public:
     TypeLookupReplyReader(const DCPS::RepoId& sub_id, Sedp& sedp)
-      : TypeLookupReader(sub_id, sedp)
+      : Reader(sub_id, sedp)
     {}
 
     virtual ~TypeLookupReplyReader();
 
-    DDS::ReturnCode_t take_tl_reply(const DCPS::ReceivedDataSample& sample,
+  private:
+    virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
+      const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
-      XTypes::TypeLookup_Reply& type_lookup_reply);
+      DCPS::Extensibility extensibility);
+
+    DDS::ReturnCode_t process_tl_reply(DCPS::Serializer& ser);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;

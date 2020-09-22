@@ -127,10 +127,17 @@ namespace {
     },
   };
 
+  enum Encoding {
+    encoding_unaligned_cdr,
+    encoding_xcdr1,
+    encoding_xcdr2,
+    encoding_count
+  };
+
 } /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
-  const std::vector<AST_EnumVal*>&, const char*)
+  const std::vector<AST_EnumVal*>& vals, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
@@ -151,6 +158,10 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n"
+      "    if (temp >= " << vals.size() << ") {\n"
+      "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+      "      return false;\n"
+      "    }\n"
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"
       "  }\n"
@@ -161,33 +172,33 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
-  string getMaxSizeExprPrimitive(AST_Type* type,
+  string getSizeExprPrimitive(AST_Type* type,
     const string& count_expr = "count", const string& size_expr = "size",
     const string& encoding_expr = "encoding")
   {
     if (type->node_type() != AST_Decl::NT_pre_defined) {
       return "";
     }
-    AST_PredefinedType* pt = AST_PredefinedType::narrow_from_decl(type);
+    AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(type);
     const string first_args = encoding_expr + ", " + size_expr;
     switch (pt->pt()) {
     case AST_PredefinedType::PT_octet:
-      return "max_serialized_size_octet(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_octet(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_char:
-      return "max_serialized_size_char(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_char(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_wchar:
-      return "max_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_boolean:
-      return "max_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
+      return "primitive_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
     default:
-      return "max_serialized_size(" + first_args + ", " +
+      return "primitive_serialized_size(" + first_args + ", " +
         scoped(type->name()) + "(), " + count_expr + ")";
     }
   }
 
   string getSerializerName(AST_Type* type)
   {
-    switch (AST_PredefinedType::narrow_from_decl(type)->pt()) {
+    switch (dynamic_cast<AST_PredefinedType*>(type)->pt()) {
     case AST_PredefinedType::PT_long:
       return "long";
     case AST_PredefinedType::PT_ulong:
@@ -249,7 +260,7 @@ namespace {
     // At this point the stream must be 4-byte aligned (from the sequence
     // length), but it might need to be 8-byte aligned for primitives > 4.
     // (If XCDR version is < 2)
-    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    switch (dynamic_cast<AST_PredefinedType*>(elem)->pt()) {
     case AST_PredefinedType::PT_longlong:
     case AST_PredefinedType::PT_ulonglong:
     case AST_PredefinedType::PT_double:
@@ -332,7 +343,7 @@ namespace {
       serialized_size.addArg("seq", "const " + cxx + "&");
       serialized_size.endArgs();
       be_global->impl_ <<
-        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    serialized_size(encoding, size, seq[i]);\n"
         "  }\n";
@@ -445,7 +456,7 @@ namespace {
       "        return false;\n"
       "      } else {\n"
       "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-      "        discard_flag=true;\n"
+      "        discard_flag = true;\n"
       "      }\n";
   }
 
@@ -534,16 +545,16 @@ namespace {
       generate_dheader_code(code, !primitive, false);
 
       be_global->impl_ << const_unwrap <<
-        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(elem) <<
-          "  " + getMaxSizeExprPrimitive(elem, get_length) << ";\n";
+          "  " + getSizeExprPrimitive(elem, get_length) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -555,7 +566,7 @@ namespace {
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+            "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
           const string strlen_suffix = (elem_cls & CL_WIDE)
             ? " * OpenDDS::DCPS::char16_cdr_size;\n"
             : " + 1;\n";
@@ -675,7 +686,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, !primitive);
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
       be_global->impl_ << unwrap <<
         "  CORBA::ULong length;\n"
@@ -741,9 +752,11 @@ namespace {
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
+        return;
       } else if (elem_cls == CL_UNKNOWN) {
         be_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
+        return;
       } else { // Enum, String, Struct, Array, Sequence, Union
         if (!seq->unbounded()) {
           be_global->impl_ <<
@@ -808,7 +821,8 @@ namespace {
             }
             be_global->impl_ <<
               "  else {\n"
-              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "        ";
             skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
             be_global->impl_ <<   "        return false;\n"
               "      }\n";
@@ -821,8 +835,9 @@ namespace {
           }
         } else {
           //discard/default
-          be_global->impl_ << "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          be_global->impl_ << "      ";
+          be_global->impl_ <<
+          "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "      ";
           skip_to_end_sequence("i", "length", scoped(tdname), use_cxx11, elem_cls, seq);
           be_global->impl_ << "      return false;\n";
         }
@@ -882,16 +897,16 @@ namespace {
       generate_dheader_code(code, !primitive, false);
 
       be_global->impl_ << sf.const_unwrap_ <<
-        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (sf.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (sf.as_cls_ & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(sf.as_act_) <<
-          "  " + getMaxSizeExprPrimitive(sf.as_act_, get_length) << ";\n";
+          "  " + getSizeExprPrimitive(sf.as_act_, get_length) << ";\n";
       } else if (sf.as_cls_ & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -903,10 +918,10 @@ namespace {
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (sf.as_cls_ & CL_STRING) {
           be_global->impl_ <<
-            "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
-            const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
-              ? " * OpenDDS::DCPS::char16_cdr_size;\n"
-              : " + 1;\n";
+            "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
+          const string strlen_suffix = (sf.as_cls_ & CL_WIDE)
+            ? " * OpenDDS::DCPS::char16_cdr_size;\n"
+            : " + 1;\n";
           if (use_cxx11) {
             be_global->impl_ <<
               "    size += seq[i].size()" << strlen_suffix;
@@ -960,7 +975,7 @@ namespace {
         "    return true;\n"
         "  }\n";
       if (sf.as_cls_ & CL_PRIMITIVE) {
-        AST_PredefinedType* predef = AST_PredefinedType::narrow_from_decl(sf.as_act_);
+        AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
           be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
@@ -1020,7 +1035,7 @@ namespace {
       TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
 
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
       be_global->impl_ << sf.unwrap_ <<
         "  CORBA::ULong length;\n"
@@ -1146,7 +1161,8 @@ namespace {
             }
             be_global->impl_ <<
               "      else {\n"
-              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+              "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "        ";
             skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
             be_global->impl_ <<
               "        return false;\n"
@@ -1162,7 +1178,7 @@ namespace {
         } else {
           //discard/default
           be_global->impl_ <<
-            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
             "      ";
           skip_to_end_sequence("i", "length", sf.scoped_type_, use_cxx11, sf.as_cls_, sf.seq_);
           be_global->impl_ << "      return false;\n";
@@ -1246,23 +1262,23 @@ namespace {
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
         if (n_elems > 1) {
           be_global->impl_ <<
-            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
+            "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, "
               << n_elems - 1 << ");\n";
         }
       } else if (elem_cls & CL_PRIMITIVE) {
         std::ostringstream n_elems_ss;
         n_elems_ss << n_elems;
         be_global->impl_ <<
-          "  " << getMaxSizeExprPrimitive(elem, n_elems_ss.str()) << ";\n";
+          "  " << getSizeExprPrimitive(elem, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            indent << "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" <<
+            indent << "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
@@ -1355,7 +1371,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, !primitive);
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << unwrap;
@@ -1484,23 +1500,23 @@ namespace {
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
         if (af.n_elems_ > 1) {
           be_global->impl_ <<
-            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
+            "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size, "
               << (af.n_elems_ - 1) << ");\n";
         }
       } else if (af.as_cls_ & CL_PRIMITIVE) {
         std::ostringstream n_elems_ss;
         n_elems_ss << af.n_elems_;
         be_global->impl_ <<
-          "  " << getMaxSizeExprPrimitive(af.as_act_, n_elems_ss.str()) << ";\n";
+          "  " << getSizeExprPrimitive(af.as_act_, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
         if (af.as_cls_ & CL_STRING) {
           be_global->impl_ <<
-            indent << "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" <<
+            indent << "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
@@ -1594,7 +1610,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, !primitive);
       if (!primitive) {
-        be_global->impl_ << "  size_t end_of_seq = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << af.unwrap_;
@@ -1675,12 +1691,12 @@ namespace {
         }
         be_global->impl_ << "    }\n";
       }
-    be_global->impl_ <<
-      "  if (discard_flag) {\n"
-      "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-      "    return false;\n"
-      "  }\n"
-      "  return true;\n";
+      be_global->impl_ <<
+        "  if (discard_flag) {\n"
+        "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "    return false;\n"
+        "  }\n"
+        "  return true;\n";
     }
   }
 
@@ -1776,7 +1792,7 @@ namespace {
     throw string("Field not found.");
   }
 
-  bool is_bounded_type(AST_Type* type)
+  bool is_bounded_type(AST_Type* type, Encoding encoding)
   {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
@@ -1790,31 +1806,49 @@ namespace {
     if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
-      const Fields fields(dynamic_cast<AST_Structure*>(type));
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (!is_bounded_type((*i)->field_type())) {
-          bounded = false;
-          break;
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+        /**
+         * This is a workaround for not properly implementing
+         * max_serialized_size for XCDR.
+         */
+        bounded = false;
+      } else {
+        const Fields fields(dynamic_cast<AST_Structure*>(type));
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          if (!is_bounded_type((*i)->field_type(), encoding)) {
+            bounded = false;
+            break;
+          }
         }
       }
     } else if (fld_cls & CL_SEQUENCE) {
       if (fld_cls & CL_BOUNDED) {
         AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
-        if (!is_bounded_type(seq_node->base_type())) bounded = false;
+        if (!is_bounded_type(seq_node->base_type(), encoding)) bounded = false;
       } else {
         bounded = false;
       }
     } else if (fld_cls & CL_ARRAY) {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
-      if (!is_bounded_type(array_node->base_type())) bounded = false;
+      if (!is_bounded_type(array_node->base_type(), encoding)) bounded = false;
     } else if (fld_cls & CL_UNION) {
-      const Fields fields(dynamic_cast<AST_Union*>(type));
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (!is_bounded_type((*i)->field_type())) {
-          bounded = false;
-          break;
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+        /**
+         * This is a workaround for not properly implementing
+         * max_serialized_size for XCDR.
+         */
+        bounded = false;
+      } else {
+        const Fields fields(dynamic_cast<AST_Union*>(type));
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          if (!is_bounded_type((*i)->field_type(), encoding)) {
+            bounded = false;
+            break;
+          }
         }
       }
     }
@@ -1822,18 +1856,12 @@ namespace {
     return bounded;
   }
 
-  enum Encoding {
-    encoding_unaligned_cdr,
-    encoding_xcdr1,
-    encoding_xcdr2,
-    encoding_count
-  };
-
   /**
    * Convert a compiler Encoding value to the string name of the corresponding
    * OpenDDS::DCPS::Encoding::XcdrVersion.
    */
-  string encoding_to_xcdr_version(Encoding encoding) {
+  std::string encoding_to_xcdr_version(Encoding encoding)
+  {
     switch (encoding) {
     case encoding_xcdr1:
       return "Encoding::XCDR_VERSION_1";
@@ -1841,6 +1869,22 @@ namespace {
       return "Encoding::XCDR_VERSION_2";
     default:
       return "Encoding::XCDR_VERSION_NONE";
+    }
+  }
+
+  /**
+   * Convert a compiler Encoding value to the string name of the corresponding
+   * OpenDDS::DCPS::Encoding::Kind.
+   */
+  std::string encoding_to_encoding_kind(Encoding encoding)
+  {
+    switch (encoding) {
+    case encoding_xcdr1:
+      return "Encoding::KIND_XCDR1";
+    case encoding_xcdr2:
+      return "Encoding::KIND_XCDR2";
+    default:
+      return "Encoding::KIND_UNALIGNED_CDR";
     }
   }
 
@@ -1903,7 +1947,7 @@ namespace {
     const ExtensibilityKind exten = be_global->extensibility(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       switch (p->pt()) {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_boolean:
@@ -2021,10 +2065,10 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
-    gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+    gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
     break;
   case AST_Decl::NT_array:
-    gen_array(name, AST_Array::narrow_from_decl(base));
+    gen_array(name, dynamic_cast<AST_Array*>(base));
     break;
   default:
     return true;
@@ -2049,12 +2093,12 @@ namespace {
     const string indent = (is_union_member) ? "    " : "  ";
 
     if (fld_cls & CL_ENUM) {
-      return indent + "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+      return indent + "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
     } else if (fld_cls & CL_STRING) {
       const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
         : ("ACE_OS::strlen(" + qual + suffix + ")");
-      return indent + "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" +
+      return indent + "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" +
         indent + "size += " + get_size
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
@@ -2063,9 +2107,9 @@ namespace {
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
         return indent +
-          "max_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
+          "primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
       }
-      return indent + "max_serialized_size(encoding, size, " +
+      return indent + "primitive_serialized_size(encoding, size, " +
         getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
@@ -2235,7 +2279,7 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  if (stru.propagate) {\n"
-        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
         "    serialized_size(encoding, size, stru.value);\n"
         "  }\n";
@@ -2278,9 +2322,9 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  if (stru.propagate) {\n"
-        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
-        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
+        "    OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.value.in()) + 1;\n"
         "  }\n";
     }
@@ -2365,7 +2409,7 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  serialized_size(encoding, size, stru.smHeader);\n"
-        "  max_serialized_size_octet(encoding, size, stru.content.length());\n";
+        "  primitive_serialized_size_octet(encoding, size, stru.content.length());\n";
     }
     {
       Function insertion("operator<<", "bool");
@@ -2606,35 +2650,182 @@ namespace {
     return ss.str();
   }
 
+  bool is_bounded_topic_struct(AST_Type* type, Encoding encoding, bool key_only,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+  {
+    bool bounded = true;
+    if (key_only) {
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        AST_Structure* const struct_type = dynamic_cast<AST_Structure*>(type);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = find_type(struct_type, key_name);
+          if (!is_bounded_type(field_type, encoding)) {
+            bounded = false;
+            break;
+          }
+        }
+      } else {
+        const TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          if (!is_bounded_type(i.get_ast_type(), encoding)) {
+            bounded = false;
+            break;
+          }
+        }
+      }
+    } else {
+      bounded = is_bounded_type(type, encoding);
+    }
+    return bounded;
+  }
+
+  bool generate_marshal_traits_struct_bounds_functions(AST_Structure* node,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info, bool key_only)
+  {
+    const char* function_prefix = key_only ? "key_only_" : "";
+    AST_Type* const type_node = dynamic_cast<AST_Type*>(node);
+    const Fields fields(node);
+    const Fields::Iterator fields_end = fields.end();
+    const std::string name = scoped(node->name());
+
+    be_global->header_ <<
+      "  static SerializedSizeBound " << function_prefix <<
+        "serialized_size_bound(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      be_global->header_ <<
+        "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+        "      return SerializedSizeBound(";
+      if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
+        size_t size = 0;
+        if (key_only) {
+          if (!iterate_over_keys(encoding_unaligned_cdr, node, name, info, keys,
+                idl_max_serialized_size_iteration, &size, 0, 0)) {
+            return false;
+          }
+        } else {
+          for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+            idl_max_serialized_size(encoding, size, (*i)->field_type());
+          }
+        }
+        be_global->header_ << size;
+      }
+      be_global->header_ << ");\n";
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return SerializedSizeBound();\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    return true;
+  }
+
+  bool generate_marshal_traits_struct(AST_Structure* node,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+  {
+    return
+      generate_marshal_traits_struct_bounds_functions(node, keys, info, false) && // All Fields
+      generate_marshal_traits_struct_bounds_functions(node, keys, info, true); // Key Fields
+  }
+
+  bool generate_marshal_traits_union(AST_Union* node, bool has_key)
+  {
+    be_global->header_ <<
+      "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      be_global->header_ <<
+        "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+        "      return SerializedSizeBound(";
+      if (is_bounded_type(node, encoding)) {
+        size_t size = 0;
+        idl_max_serialized_size(encoding, size, node);
+        be_global->header_ << size;
+      }
+      be_global->header_ << ");\n";
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return SerializedSizeBound();\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    be_global->header_ <<
+      "  static SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding)\n"
+      "  {\n"
+      "    switch (encoding.kind()) {\n";
+    for (unsigned e = 0; e < encoding_count; ++e) {
+      const Encoding encoding = static_cast<Encoding>(e);
+      size_t size = 0;
+      // Union can only have discriminator as key, and the discriminator is always bounded.
+      if (has_key) {
+        idl_max_serialized_size(encoding, size, node->disc_type());
+      }
+      be_global->header_ <<
+        "    case " << encoding_to_encoding_kind(encoding) << ":\n"
+        "      return SerializedSizeBound(" << size << ");\n";
+    }
+    be_global->header_ <<
+      "    default:\n"
+      "      OPENDDS_ASSERT(false);\n"
+      "      return SerializedSizeBound();\n"
+      "    }\n"
+      "  }\n"
+      "\n";
+
+    return true;
+  }
+
   bool generate_marshal_traits(
     AST_Decl* node, const std::string& cxx,
     const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
-    bool is_bounded, bool key_is_bounded, bool octetSeqOnly, std::string field_name)
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0,
+    std::string octetSeqOnly = "")
   {
-    string exp, fn = " { return false; }";
-    if (octetSeqOnly) {
+    std::string export_string;
+    if (octetSeqOnly.size()) {
       const ACE_CString exporter = be_global->export_macro();
       if (exporter != "") {
-        exp = string(" ") + exporter.c_str();
+        export_string = string(" ") + exporter.c_str();
       }
-      fn = ";";
     }
 
     be_global->header_ <<
       "template <>\n"
-      "struct" << exp << " MarshalTraits<" << cxx << "> {\n"
-      "  static bool gen_is_bounded_size() { return " <<
-        (is_bounded ? "true" : "false") << "; }\n"
-      "  static bool gen_is_bounded_key_size() { return " <<
-        (key_is_bounded ? "true" : "false") << "; }\n"
-      "\n"
+      "struct" << export_string << " MarshalTraits<" << cxx << "> {\n"
       "  static void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)\n"
       "  {\n"
         << fill_datareprseq(repr, "seq", "    ") <<
       "  }\n"
       "\n";
 
-    if (octetSeqOnly) {
+    if (node->node_type() == AST_Decl::NT_struct) {
+      if (!generate_marshal_traits_struct(
+            dynamic_cast<AST_Structure*>(node), keys, info)) {
+        return false;
+      }
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      if (!generate_marshal_traits_union(
+            dynamic_cast<AST_Union*>(node), keys.count())) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    const char* msg_block_fn_decl_end = " { return false; }";
+    if (octetSeqOnly.size()) {
       const char* get_len;
       const char* set_len;
       const char* get_buffer;
@@ -2644,7 +2835,7 @@ namespace {
         set_len = "resize";
         get_buffer = "[0]";
         buffer_pre = "&";
-        field_name += "()";
+        octetSeqOnly += "()";
       } else {
         get_len = set_len = "length";
         get_buffer = ".get_buffer()";
@@ -2654,26 +2845,29 @@ namespace {
         "bool MarshalTraits<" << cxx << ">::to_message_block(ACE_Message_Block& mb, "
         "const " << cxx << "& stru)\n"
         "{\n"
-        "  if (mb.size(stru." << field_name << "." << get_len << "()) != 0) {\n"
+        "  if (mb.size(stru." << octetSeqOnly << "." << get_len << "()) != 0) {\n"
         "    return false;\n"
         "  }\n"
         "  return mb.copy(reinterpret_cast<const char*>(" << buffer_pre << "stru."
-                              << field_name << get_buffer << "), stru." << field_name << "." << get_len
-                              << "()) == 0;\n"
+          << octetSeqOnly << get_buffer << "), stru." << octetSeqOnly << "." << get_len
+          << "()) == 0;\n"
         "}\n\n"
         "bool MarshalTraits<" << cxx << ">::from_message_block(" << cxx << "& stru, "
         "const ACE_Message_Block& mb)\n"
         "{\n"
-        "  stru." << field_name << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
-        "  std::memcpy(" << buffer_pre << "stru." << field_name << get_buffer
-                              << ", mb.rd_ptr(), mb.length());\n"
+        "  stru." << octetSeqOnly << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
+        "  std::memcpy(" << buffer_pre << "stru." << octetSeqOnly << get_buffer
+          << ", mb.rd_ptr(), mb.length());\n"
         "  return true;\n"
         "}\n\n";
-    }
 
+      msg_block_fn_decl_end = ";";
+    }
     be_global->header_ <<
-      "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)" << fn << "\n"
-      "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)" << fn << "\n";
+      "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)"
+        << msg_block_fn_decl_end << "\n"
+      "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)"
+        << msg_block_fn_decl_end << "\n";
 
     /*
      * This is used for the CDR header.
@@ -3171,113 +3365,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   // Only generate these methods if this is a topic type
   if (info || is_topic_type) {
-    bool is_bounded_struct = true;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      if (!is_bounded_type(fields[i]->field_type())) {
-        is_bounded_struct = false;
-        break;
-      }
-    }
-    bool octetSeqOnly = false;
+    std::string octetSeqOnly;
     if (fields.size() == 1) {
       AST_Type* const type = resolveActualType(fields[0]->field_type());
       const Classification fld_cls = classify(type);
       if (fld_cls & CL_SEQUENCE) {
-        AST_Sequence* const seq = AST_Sequence::narrow_from_decl(type);
+        AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
         AST_Type* const base = seq->base_type();
         if (classify(base) & CL_PRIMITIVE) {
-          AST_PredefinedType* const pt = AST_PredefinedType::narrow_from_decl(base);
-          octetSeqOnly = pt->pt() == AST_PredefinedType::PT_octet;
-        }
-      }
-    }
-    {
-      Function max_serialized_size("max_serialized_size", "bool");
-      max_serialized_size.addArg("encoding", "const Encoding&");
-      max_serialized_size.addArg("size", "size_t&");
-      max_serialized_size.addArg("stru", "const " + cxx + "&");
-      max_serialized_size.endArgs();
-      if (is_bounded_struct) {
-        be_global->impl_ <<
-          "  switch (encoding.xcdr_version()) {\n";
-        for (unsigned e = 0; e < encoding_count; ++e) {
-          const Encoding encoding = static_cast<Encoding>(e);
-          size_t size = 0;
-          for (size_t i = 0; i < fields.size(); ++i) {
-            idl_max_serialized_size(encoding, size, fields[i]->field_type());
+          AST_PredefinedType* const pt = dynamic_cast<AST_PredefinedType*>(base);
+          if (pt->pt() == AST_PredefinedType::PT_octet) {
+            octetSeqOnly = fields[0]->local_name()->get_string();
           }
-          be_global->impl_ <<
-            "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-            "    size += " << size << ";\n"
-            "    break;\n";
         }
-        be_global->impl_ <<
-          "  }\n"
-          "  return true;\n";
-      } else { // unbounded
-        be_global->impl_
-          << "  return false;\n";
-      }
-    }
-
-    // Generate key-related marshaling code
-    // TODO(iguessthislldo) merge with generate_struct_serialization
-    bool bounded_key = true;
-    if (info) {
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(node, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
-        if (!is_bounded_type(field_type)) {
-          bounded_key = false;
-          break;
-        }
-      }
-    } else {
-      const TopicKeys::Iterator finished = keys.end();
-      for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-        if (!is_bounded_type(i.get_ast_type())) {
-          bounded_key = false;
-          break;
-        }
-      }
-    }
-
-    {
-      Function max_serialized_size("max_serialized_size", "bool");
-      max_serialized_size.addArg("encoding", "const Encoding&");
-      max_serialized_size.addArg("size", "size_t&");
-      max_serialized_size.addArg("stru", "KeyOnly<const " + cxx + ">");
-      max_serialized_size.endArgs();
-
-      if (bounded_key) { // Only generate a size if the key is bounded
-        be_global->impl_ <<
-          "  switch (encoding.xcdr_version()) {\n";
-        for (unsigned e = 0; e < encoding_count; ++e) {
-          const Encoding encoding = static_cast<Encoding>(e);
-          size_t size = 0;
-          if (!iterate_over_keys(encoding, node, cxx, info, keys,
-              idl_max_serialized_size_iteration, &size, 0, 0)) {
-            return false;
-          }
-          be_global->impl_ <<
-            "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-            "    size += " << size << ";\n"
-            "    break;\n";
-        }
-        be_global->impl_ <<
-          "  }\n"
-          "  return true;\n";
-      } else { // unbounded
-        be_global->impl_ <<
-          "  return false;\n";
       }
     }
 
@@ -3285,7 +3385,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
-      serialized_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      serialized_size.addArg("stru", "const KeyOnly<const " + cxx + ">");
       serialized_size.endArgs();
 
       be_global->impl_ <<
@@ -3445,7 +3545,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(node, cxx, repr, exten, is_bounded_struct, bounded_key, octetSeqOnly, fields[0]->local_name()->get_string())) {
+    if (!generate_marshal_traits(node, cxx, repr, exten, keys, info, octetSeqOnly)) {
       return false;
     }
   }
@@ -3662,7 +3762,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
           {
             be_global->impl_ << "  " << scoped(branch->field_type()->name()) << " btemp;\n";
-            be_global->impl_ << type_to_default(branch->field_type(), "  btemp");
+            be_global->impl_ << type_to_default(branch->field_type(), "btemp");
             be_global->impl_ << "  stru." << branch->local_name()->get_string() << "(btemp);\n";
             found = true;
             break;
@@ -3698,10 +3798,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (disc_cls & CL_ENUM) {
       be_global->impl_ <<
-        "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+        "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
     } else {
       be_global->impl_ <<
-        "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+        "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
 
     if (exten == extensibilitykind_mutable) {
@@ -3740,10 +3840,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+          "  primitive_serialized_size_ulong(encoding, size);\n";
       } else {
         be_global->impl_ <<
-          "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+          "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
       }
 
       be_global->impl_ <<
@@ -3832,66 +3932,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   const string key_only_wrap_out = getWrapper("uni.t._d()", discriminator, WD_OUTPUT);
 
-  const bool is_bounded = is_bounded_type(node);
-  {
-    Function max_serialized_size("max_serialized_size", "bool");
-    max_serialized_size.addArg("encoding", "const Encoding&");
-    max_serialized_size.addArg("size", "size_t&");
-    max_serialized_size.addArg("uni", "const " + cxx + "&");
-    max_serialized_size.endArgs();
-
-    if (is_bounded) {
-      be_global->impl_ <<
-        "  switch (encoding.xcdr_version()) {\n";
-      for (unsigned e = 0; e < encoding_count; ++e) {
-        const Encoding encoding = static_cast<Encoding>(e);
-        size_t size = 0;
-        idl_max_serialized_size(encoding, size, node);
-        be_global->impl_ <<
-          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-          "    size += " << size << ";\n"
-          "    break;\n";
-      }
-      be_global->impl_ <<
-        "  }\n"
-        "  return true;\n";
-    } else { // unbounded
-      be_global->impl_
-        << "  return false;\n";
-    }
-  }
-
-  {
-    Function max_serialized_size("max_serialized_size", "size_t");
-    max_serialized_size.addArg("encoding", "const Encoding&");
-    max_serialized_size.addArg("size", "size_t&");
-    max_serialized_size.addArg("uni", "KeyOnly<const " + cxx + ">");
-    max_serialized_size.endArgs();
-
-    if (has_key) {
-      be_global->impl_ <<
-        "  switch (encoding.xcdr_version()) {\n";
-      for (unsigned e = 0; e < encoding_count; ++e) {
-        const Encoding encoding = static_cast<Encoding>(e);
-        size_t size = 0;
-        idl_max_serialized_size(encoding, size, node->disc_type());
-        be_global->impl_ <<
-          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-          "    size += " << size << ";\n"
-          "    break;\n";
-      }
-      be_global->impl_ <<
-        "  }\n";
-    }
-    be_global->impl_
-      << "  return true; // Union key is always bounded.\n";
-  }
-
   {
     Function serialized_size("serialized_size", "void");
     serialized_size.addArg("encoding", "const Encoding&");
     serialized_size.addArg("size", "size_t&");
-    serialized_size.addArg("uni", "KeyOnly<const " + cxx + ">");
+    serialized_size.addArg("uni", "const KeyOnly<const " + cxx + ">");
     serialized_size.endArgs();
 
     if (has_key) {
@@ -3907,10 +3952,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
       } else {
         be_global->impl_ <<
-          "  max_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
+          "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
       }
 
       if (exten == extensibilitykind_mutable) {
@@ -3942,10 +3987,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
         if (disc_cls & CL_ENUM) {
           be_global->impl_ <<
-            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
+            "  primitive_serialized_size_ulong(encoding, size);\n";
         } else {
           be_global->impl_ <<
-            "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
+            "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
         }
 
         be_global->impl_ <<
@@ -3996,7 +4041,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ << "  return true;\n";
   }
 
-  return generate_marshal_traits(
-    node, cxx, repr, exten, is_bounded,
-    true /* Only the discriminator, which is always bounded, can be the key */, false, "");
+  TopicKeys keys(node);
+  return generate_marshal_traits(node, cxx, repr, exten, keys);
 }

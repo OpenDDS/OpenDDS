@@ -28,6 +28,7 @@ typedef str20 str20Array[10];
 typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
 //enum for use in struct, union, and sequence
 enum EnumType {VALUE1, VALUE2};
+enum EnumType2 {B1, B2, B3};
 
 //nested union for use in struct, union, and sequence
 // union NestedUnion switch (EnumType) {
@@ -516,6 +517,8 @@ module TryCon {
     case 9:@try_construct(DISCARD) StringSeqBound2 strs_d;
     case 10:@try_construct(USE_DEFAULT) StringSeqBound2 strs_ud;
     case 11:@try_construct(TRIM) StringSeqBound2 strs_t;
+    case 12:@try_construct(DISCARD) EnumType2 e_d;
+    case 13:@try_construct(USE_DEFAULT) EnumType2 e_ud;
     default:@try_construct(TRIM) str64 def;
   };
   @topic
@@ -526,6 +529,7 @@ module TryCon {
     case 3:@try_construct(DISCARD) wstr20 wstr_d;
     case 6:@try_construct(DISCARD) str20Array stra_d;
     case 9:@try_construct(DISCARD) StringSeqBound strs_d;
+    case 12:@try_construct(DISCARD) EnumType e_d;
     default:@try_construct(TRIM) str20 def;
   };
   @topic
@@ -546,6 +550,7 @@ module TryCon {
     case 4:@try_construct(USE_DEFAULT) wstr20 wstr_ud;
     case 7:@try_construct(USE_DEFAULT) str20Array stra_ud;
     case 10:@try_construct(USE_DEFAULT) StringSeqBound strs_ud;
+    case 13:@try_construct(USE_DEFAULT) EnumType e_ud;
     default:@try_construct(TRIM) str20 def;
   };
 };

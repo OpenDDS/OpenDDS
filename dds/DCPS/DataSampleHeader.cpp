@@ -170,9 +170,7 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
     if (!mb_peek(seqLen, mb, expected, encoding)) {
       return true;
     }
-    size_t guidsize = 0;
-    serialized_size(encoding, guidsize, GUID_t());
-    expected += int32_cdr_size + guidsize * seqLen;
+    expected += int32_cdr_size + guid_cdr_size * seqLen;
   }
 
   return len < expected;
@@ -407,9 +405,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     hdr.message_length_ = 0; // no room for payload data
     *head << hdr;
     const size_t avail = size - head->length() - 4 /* sequence length */;
-    size_t guid_size = 0;
-    max_serialized_size(encoding, guid_size, GUID_t());
-    const CORBA::ULong n_entries = static_cast<CORBA::ULong>(avail / guid_size);
+    const CORBA::ULong n_entries = static_cast<CORBA::ULong>(avail / guid_cdr_size);
     GUIDSeq entries(n_entries);
     entries.length(n_entries);
     // remove from the end of hdr's entries (order doesn't matter)

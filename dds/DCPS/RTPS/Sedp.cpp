@@ -40,6 +40,7 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/XTypes/TypeLookupService.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
@@ -263,56 +264,56 @@ const Encoding sedp_encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   : DCPS::EndpointManager<ParticipantData_t>(participant_id, lock)
   , spdp_(owner)
-  , publications_writer_(make_rch<SedpWriter>(
+  , publications_writer_(make_rch<DiscoveryWriter>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), ref(*this)))
 #ifdef OPENDDS_SECURITY
-  , publications_secure_writer_(make_rch<SedpWriter>(
+  , publications_secure_writer_(make_rch<DiscoveryWriter>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), ref(*this)))
 #endif
-  , subscriptions_writer_(make_rch<SedpWriter>(
+  , subscriptions_writer_(make_rch<DiscoveryWriter>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), ref(*this)))
 #ifdef OPENDDS_SECURITY
-  , subscriptions_secure_writer_(make_rch<SedpWriter>(
+  , subscriptions_secure_writer_(make_rch<DiscoveryWriter>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), ref(*this)))
 #endif
-  , participant_message_writer_(make_rch<SedpWriter>(
+  , participant_message_writer_(make_rch<LivelinessWriter>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), ref(*this)))
 #ifdef OPENDDS_SECURITY
-  , participant_message_secure_writer_(make_rch<SedpWriter>(
+  , participant_message_secure_writer_(make_rch<LivelinessWriter>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), ref(*this)))
-  , participant_stateless_message_writer_(make_rch<SedpWriter>(
+  , participant_stateless_message_writer_(make_rch<SecurityWriter>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), ref(*this)))
-  , dcps_participant_secure_writer_(make_rch<SedpWriter>(
+  , dcps_participant_secure_writer_(make_rch<DiscoveryWriter>(
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2))
-  , participant_volatile_message_secure_writer_(make_rch<SedpWriter>(
+  , participant_volatile_message_secure_writer_(make_rch<SecurityWriter>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this)))
 #endif
   , type_lookup_request_writer_(make_rch<TypeLookupRequestWriter>(
       make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER), ref(*this)))
   , type_lookup_reply_writer_(make_rch<TypeLookupReplyWriter>(
       make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this)))
-  , publications_reader_(make_rch<Reader>(
+  , publications_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER), ref(*this)))
 #ifdef OPENDDS_SECURITY
-  , publications_secure_reader_(make_rch<Reader>(
+  , publications_secure_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER), ref(*this)))
 #endif
-  , subscriptions_reader_(make_rch<Reader>(
+  , subscriptions_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER), ref(*this)))
 #ifdef OPENDDS_SECURITY
-  , subscriptions_secure_reader_(make_rch<Reader>(
+  , subscriptions_secure_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER), ref(*this)))
 #endif
-  , participant_message_reader_(make_rch<Reader>(
+  , participant_message_reader_(make_rch<LivelinessReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER), ref(*this)))
 #ifdef OPENDDS_SECURITY
-  , participant_message_secure_reader_(make_rch<Reader>(
+  , participant_message_secure_reader_(make_rch<LivelinessReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER), ref(*this)))
-  , participant_stateless_message_reader_(make_rch<Reader>(
+  , participant_stateless_message_reader_(make_rch<SecurityReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER), ref(*this)))
-  , participant_volatile_message_secure_reader_(make_rch<Reader>(
+  , participant_volatile_message_secure_reader_(make_rch<SecurityReader>(
       make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER), ref(*this)))
-  , dcps_participant_secure_reader_(make_rch<Reader>(
+  , dcps_participant_secure_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER), ref(*this)))
 #endif
   , type_lookup_request_reader_(make_rch<TypeLookupRequestReader>(
@@ -392,6 +393,7 @@ Sedp::init(const RepoId& guid,
   reactor_task_ = transport_inst_->reactor_task();
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
+  type_lookup_init(reactor_task_->interceptor());
 
   // Configure and enable each reader/writer
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
@@ -466,6 +468,8 @@ Sedp::init(const RepoId& guid,
     type_lookup_reply_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+
+  max_type_lookup_service_reply_period_ = disco.config()->max_type_lookup_service_reply_period();
 
   return DDS::RETCODE_OK;
 }
@@ -717,6 +721,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
 Sedp::~Sedp()
 {
+  type_lookup_fini();
   job_queue_.reset();
   reactor_task_.reset();
   DCPS::RtpsUdpInst_rch rtps_inst =
@@ -3109,6 +3114,20 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
   }
 }
 
+
+bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+                                    const DCPS::RepoId& reader)
+{
+  const DCPS::RepoId remote_reader = make_id(reader, ENTITYID_TL_SVC_REPLY_READER);
+  DCPS::SequenceNumber sequence = 0;
+
+  return type_lookup_request_writer_->send_type_lookup_request(type_ids,
+                                                               remote_reader,
+                                                               sequence,
+                                                               type_lookup_service_->rpc_sequence_number(),
+                                                               participant_id_) == DDS::RETCODE_OK;
+}
+
 #ifdef OPENDDS_SECURITY
 void
 Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
@@ -3235,15 +3254,15 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
 }
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
-                                       const RepoId& reader,
-                                       DCPS::SequenceNumber& sequence)
+Sedp::Writer::write_parameter_list(const ParameterList& plist,
+                                   const RepoId& reader,
+                                   DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, plist);
 
   // Build and send RTPS message
@@ -3264,15 +3283,15 @@ Sedp::SedpWriter::write_parameter_list(const ParameterList& plist,
 }
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
-                                            const RepoId& reader,
-                                            DCPS::SequenceNumber& sequence)
+Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& pmd,
+                                                  const RepoId& reader,
+                                                  DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, pmd);
 
   // Build and send RTPS message
@@ -3294,14 +3313,14 @@ Sedp::SedpWriter::write_participant_message(const ParticipantMessageData& pmd,
 
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                          const RepoId& reader,
-                                          DCPS::SequenceNumber& sequence)
+Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+                                              const RepoId& reader,
+                                              DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
@@ -3322,16 +3341,16 @@ Sedp::SedpWriter::write_stateless_message(const DDS::Security::ParticipantStatel
 }
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                                const RepoId& reader,
-                                                DCPS::SequenceNumber& sequence)
+Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                                    const RepoId& reader,
+                                                    DCPS::SequenceNumber& sequence)
 {
   OPENDDS_ASSERT(sedp_.associated_volatile_readers_.count(reader) != 0);
 
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
@@ -3352,8 +3371,8 @@ Sedp::SedpWriter::write_volatile_message_secure(const DDS::Security::Participant
 }
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                const RepoId& reader, DCPS::SequenceNumber& sequence)
+Sedp::DiscoveryWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
+                                                     const RepoId& reader, DCPS::SequenceNumber& sequence)
 {
   ParameterList plist;
 
@@ -3388,7 +3407,7 @@ Sedp::SedpWriter::write_dcps_participant_secure(const Security::SPDPdiscoveredPa
 #endif
 
 DDS::ReturnCode_t
-Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
+Sedp::DiscoveryWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 {
   // Build param list for message
   Parameter param;
@@ -3400,7 +3419,7 @@ Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, plist);
 
   DCPS::Message_Block_Ptr payload(
@@ -3432,7 +3451,7 @@ Sedp::SedpWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 }
 
 void
-Sedp::SedpWriter::end_historic_samples(const RepoId& reader)
+Sedp::Writer::end_historic_samples(const RepoId& reader)
 {
   DCPS::Message_Block_Ptr mb(
     new ACE_Message_Block(
@@ -3454,10 +3473,10 @@ Sedp::SedpWriter::end_historic_samples(const RepoId& reader)
 }
 
 void
-Sedp::SedpWriter::write_control_msg(DCPS::Message_Block_Ptr payload,
-                                    size_t size,
-                                    DCPS::MessageId id,
-                                    DCPS::SequenceNumber seq)
+Sedp::Writer::write_control_msg(DCPS::Message_Block_Ptr payload,
+                                size_t size,
+                                DCPS::MessageId id,
+                                DCPS::SequenceNumber seq)
 {
   DCPS::DataSampleHeader header;
   Writer::set_header_fields(header, size, GUID_UNKNOWN, seq, false, id);
@@ -3498,11 +3517,17 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
 //-------------------------------------------------------------------------
 
-Sedp::SedpWriter::~SedpWriter()
+Sedp::SecurityWriter::~SecurityWriter()
 {
 }
 
-//-------------------------------------------------------------------------
+Sedp::DiscoveryWriter::~DiscoveryWriter()
+{
+}
+
+Sedp::LivelinessWriter::~LivelinessWriter()
+{
+}
 
 Sedp::TypeLookupWriter::~TypeLookupWriter()
 {
@@ -3532,7 +3557,7 @@ DDS::ReturnCode_t
 Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                                         const DCPS::RepoId& reader,
                                                         DCPS::SequenceNumber& sequence,
-                                                        DCPS::SequenceNumber& rpc_sequence,
+                                                        const DCPS::SequenceNumber& rpc_sequence,
                                                         const DCPS::RepoId& participant_id)
 {
   XTypes::TypeLookup_Request type_lookup_request;
@@ -3551,7 +3576,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, type_lookup_request);
 
   // Build and send type lookup message
@@ -3573,16 +3598,16 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
-                                                    const RepoId& reader,
-                                                    DCPS::SequenceNumber& sequence,
-                                                    DDS::RPC::RemoteExceptionCode_t exception_code)
+Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sample,
+                                           XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  type_lookup_reply.header.remote_ex = exception_code;
+  DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
+  DCPS::SequenceNumber sequence = 0;
+  type_lookup_reply.header.remote_ex = DDS::RPC::REMOTE_EX_OK;
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, type_lookup_reply);
 
   // Build and send type lookup message
@@ -3593,7 +3618,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
   DCPS::EncapsulationHeader encap;
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
-      serializer << encap && serializer << type_lookup_reply) {
+    serializer << encap && serializer << type_lookup_reply) {
     send_sample(payload, size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3604,34 +3629,75 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& ty
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupRequestReader::take_tl_request(const DCPS::ReceivedDataSample& sample,
-                                               DCPS::Serializer& ser,
-                                               XTypes::TypeLookup_Request& type_lookup_request)
+Sedp::TypeLookupRequestReader::process_tl_request(DCPS::Serializer& ser,
+                                                  XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  ACE_UNUSED_ARG(sample);
-  ACE_UNUSED_ARG(ser);
-  ACE_UNUSED_ARG(type_lookup_request);
-  // TODO: uncomment; anything else to do here?
-  // ser >> type_lookup_request;
-  return DDS::RETCODE_OK;
+  XTypes::TypeLookup_Request type_lookup_request;
+
+  if (!(ser >> type_lookup_request)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_tl_request - ")
+              ACE_TEXT("failed to deserialize type lookup request\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
+  switch (type_lookup_request.data.kind) {
+  case XTypes::TypeLookup_getTypes_HashId:
+    return process_get_types_request(type_lookup_request, type_lookup_reply);
+  case XTypes::TypeLookup_getDependencies_HashId:
+    return DDS::RETCODE_UNSUPPORTED;
+  default:
+    return DDS::RETCODE_UNSUPPORTED;
+  }
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupReplyReader::take_tl_reply(const DCPS::ReceivedDataSample& sample,
-                                           DCPS::Serializer& ser,
-                                           XTypes::TypeLookup_Reply& type_lookup_reply)
+Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
+                                                         XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  ACE_UNUSED_ARG(sample);
-  ACE_UNUSED_ARG(ser);
-  ACE_UNUSED_ARG(type_lookup_reply);
-  // TODO: uncomment; anything else to do here?
-  // ser >> type_lookup_reply;
+  sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
+    type_lookup_reply.data.getTypes.result.types);
+  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
+    type_lookup_reply.data.getTypes.return_code = DDS::RETCODE_OK;
+    type_lookup_reply.data.kind = XTypes::TypeLookup_getTypes_HashId;
+    type_lookup_reply.header.related_request_id = type_lookup_request.header.request_id;
+    return DDS::RETCODE_OK;
+  }
+  return DDS::RETCODE_NO_DATA;
+}
+
+DDS::ReturnCode_t
+Sedp::TypeLookupReplyReader::process_tl_reply(DCPS::Serializer& ser)
+{
+  XTypes::TypeLookup_Reply type_lookup_reply;
+  if (!(ser >> type_lookup_reply)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_tl_reply - ")
+              ACE_TEXT("failed to deserialize type lookup reply\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
+    sedp_.type_lookup_service_->add_type_objects_to_cache(type_lookup_reply.data.getTypes.result.types);
+    DCPS::SequenceNumber rpc_sequence;
+    rpc_sequence.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
+      type_lookup_reply.header.related_request_id.sequence_number.low);
+    sedp_.match_continue(rpc_sequence);
+  }
   return DDS::RETCODE_OK;
 }
 
-//-------------------------------------------------------------------------
-
 Sedp::Reader::~Reader()
+{
+}
+
+Sedp::DiscoveryReader::~DiscoveryReader()
+{
+}
+
+Sedp::LivelinessReader::~LivelinessReader()
+{
+}
+
+Sedp::SecurityReader::~SecurityReader()
 {
 }
 
@@ -3690,6 +3756,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER ||
       entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER ||
 #endif
+      entity_id == ENTITYID_TL_SVC_REQ_WRITER ||
+      entity_id == ENTITYID_TL_SVC_REPLY_WRITER ||
       false;
     const bool is_final =
       (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) ||
@@ -3723,253 +3791,296 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     }
     ser.encoding(encoding);
 
-    if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
-      ParameterList data;
-      if (!decode_parameter_list(sample, ser, extensibility, data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-
-      DCPS::RcHandle<MsgDiscoveredPublication> msg = make_rch<MsgDiscoveredPublication>(rchandle_from(&sedp_), id);
-      DiscoveredPublication& wdata = msg->data();
-      if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, wdata.type_info_)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to DiscoveredWriterData\n")));
-        return;
-      }
-#ifdef OPENDDS_SECURITY
-      wdata.have_ice_agent_info_ = false;
-      ICE::AgentInfoMap ai_map;
-      if (!ParameterListConverter::from_param_list(data, ai_map)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to ICE Agent info\n")));
-        return;
-      }
-      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
-      if (pos != ai_map.end()) {
-        wdata.have_ice_agent_info_ = true;
-        wdata.ice_agent_info_ = pos->second;
-      }
-#endif
-      sedp_.job_queue_->enqueue(msg);
-
-
-#ifdef OPENDDS_SECURITY
-    } else if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
-      ParameterList data;
-      if (!decode_parameter_list(sample, ser, extensibility, data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-
-      DCPS::RcHandle<MsgDiscoveredPublicationSecure> msg = make_rch<MsgDiscoveredPublicationSecure>(rchandle_from(&sedp_), id);
-      DiscoveredPublication_SecurityWrapper& wdata_secure = msg->data();
-
-      if (!ParameterListConverter::from_param_list(data, wdata_secure, wdata_secure.type_info)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to DiscoveredPublication_SecurityWrapper\n")));
-        return;
-      }
-
-      wdata_secure.have_ice_agent_info = false;
-      ICE::AgentInfoMap ai_map;
-      if (!ParameterListConverter::from_param_list(data, ai_map)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to ICE Agent info\n")));
-        return;
-      }
-      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
-      if (pos != ai_map.end()) {
-        wdata_secure.have_ice_agent_info = true;
-        wdata_secure.ice_agent_info = pos->second;
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-#endif
-
-    } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
-      ParameterList data;
-      if (!decode_parameter_list(sample, ser, extensibility, data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-
-      DCPS::RcHandle<MsgDiscoveredSubscription> msg = make_rch<MsgDiscoveredSubscription>(rchandle_from(&sedp_), id);
-      DiscoveredSubscription& rdata = msg->data();
-      if (!ParameterListConverter::from_param_list(data, rdata.reader_data_, rdata.type_info_)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to DiscoveredReaderData\n")));
-        return;
-      }
-#ifdef OPENDDS_SECURITY
-      rdata.have_ice_agent_info_ = false;
-      ICE::AgentInfoMap ai_map;
-      if (!ParameterListConverter::from_param_list(data, ai_map)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to ICE Agent info\n")));
-        return;
-      }
-      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
-      if (pos != ai_map.end()) {
-        rdata.have_ice_agent_info_ = true;
-        rdata.ice_agent_info_ = pos->second;
-      }
-#endif
-      if (rdata.reader_data_.readerProxy.expectsInlineQos) {
-        set_inline_qos(rdata.reader_data_.readerProxy.allLocators);
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-
-#ifdef OPENDDS_SECURITY
-    } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
-      ParameterList data;
-      if (!decode_parameter_list(sample, ser, extensibility, data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-
-      DCPS::RcHandle<MsgDiscoveredSubscriptionSecure> msg = make_rch<MsgDiscoveredSubscriptionSecure>(rchandle_from(&sedp_), id);
-      DiscoveredSubscription_SecurityWrapper& rdata = msg->data();
-
-      if (!ParameterListConverter::from_param_list(data, rdata, rdata.type_info)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to DiscoveredSubscription_SecurityWrapper\n")));
-        return;
-      }
-
-      rdata.have_ice_agent_info = false;
-      ICE::AgentInfoMap ai_map;
-      if (!ParameterListConverter::from_param_list(data, ai_map)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to ICE Agent info\n")));
-        return;
-      }
-      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
-      if (pos != ai_map.end()) {
-        rdata.have_ice_agent_info = true;
-        rdata.ice_agent_info = pos->second;
-      }
-
-      if ((rdata.data).readerProxy.expectsInlineQos) {
-        set_inline_qos((rdata.data).readerProxy.allLocators);
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-#endif
-
-    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) {
-      DCPS::RcHandle<MsgParticipantMessageData> msg = make_rch<MsgParticipantMessageData>(rchandle_from(&sedp_), id);
-      ParticipantMessageData& data = msg->data();
-      if (!(ser >> data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-#ifdef OPENDDS_SECURITY
-    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER && full_message) {
-
-      DCPS::RcHandle<MsgParticipantMessageDataSecure> msg = make_rch<MsgParticipantMessageDataSecure>(rchandle_from(&sedp_), id);
-      ParticipantMessageData& data = msg->data();
-
-      if (!(ser >> data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-
-    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
-
-      DCPS::RcHandle<MsgParticipantStatelessData> msg = make_rch<MsgParticipantStatelessData>(rchandle_from(&sedp_), id);
-      DDS::Security::ParticipantStatelessMessage& data = msg->data();
-      if (!(ser >> data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
-
-      DCPS::RcHandle<MsgParticipantVolatileSecure> msg = make_rch<MsgParticipantVolatileSecure>(rchandle_from(&sedp_), id);
-      DDS::Security::ParticipantVolatileMessageSecure& data = msg->data();
-      if (!(ser >> data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-      sedp_.job_queue_->enqueue(msg);
-
-    } else if (entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
-
-      ParameterList data;
-      if (!decode_parameter_list(sample, ser, extensibility, data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to deserialize data\n")));
-        return;
-      }
-
-      DCPS::RcHandle<MsgParticipantDataSecure> msg = make_rch<MsgParticipantDataSecure>(rchandle_from(&sedp_), id);
-      Security::SPDPdiscoveredParticipantData& pdata = msg->data();
-
-      if (!ParameterListConverter::from_param_list(data, pdata)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                   ACE_TEXT("failed to convert from ParameterList ")
-                   ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
-        return;
-      }
-      const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
-      sedp_.spdp_.process_participant_ice(data, pdata, guid);
-      sedp_.job_queue_->enqueue(msg);
-#endif
-
-    } else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
-      // TODO: process request and send reply
-      XTypes::TypeLookup_Request type_lookup_request;
-      if (!sedp_.type_lookup_request_reader_->take_tl_request(sample, ser, type_lookup_request)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-          ACE_TEXT("failed to take type lookup request\n")));
-        return;
-      }
-    } else if (entity_id == ENTITYID_TL_SVC_REPLY_WRITER) {
-      // TODO: process reply
-      XTypes::TypeLookup_Reply type_lookup_reply;
-      if (!sedp_.type_lookup_reply_reader_->take_tl_reply(sample, ser, type_lookup_reply)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-          ACE_TEXT("failed to take type lookup reply\n")));
-        return;
-      }
-    }
+    data_received_i(sample, entity_id, ser, extensibility);
     break;
   }
 
   default:
     break;
+  }
+}
+
+void
+Sedp::LivelinessReader::data_received_i(const DCPS::ReceivedDataSample& sample,
+  const DCPS::EntityId_t& entity_id,
+  DCPS::Serializer& ser,
+  DCPS::Extensibility)
+{
+  const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+  const bool full_message = !sample.header_.key_fields_only_;
+
+  if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) {
+    DCPS::RcHandle<MsgParticipantMessageData> msg = make_rch<MsgParticipantMessageData>(rchandle_from(&sedp_), id);
+    ParticipantMessageData& data = msg->data();
+    if (!(ser >> data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::LivelinessReader::data_received_i - ")
+                 ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+    sedp_.job_queue_->enqueue(msg);
+
+#ifdef OPENDDS_SECURITY
+  } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER && full_message) {
+    DCPS::RcHandle<MsgParticipantMessageData> msg = make_rch<MsgParticipantMessageData>(rchandle_from(&sedp_), id);
+    ParticipantMessageData& data = msg->data();
+    if (!(ser >> data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::LivelinessReader::data_received_i - ")
+                 ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+    sedp_.job_queue_->enqueue(msg);
+#endif
+  }
+}
+
+void
+Sedp::SecurityReader::data_received_i(const DCPS::ReceivedDataSample& sample,
+  const DCPS::EntityId_t& entity_id,
+  DCPS::Serializer& ser,
+  DCPS::Extensibility)
+{
+#ifdef OPENDDS_SECURITY
+  const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
+  if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
+    DCPS::RcHandle<MsgParticipantStatelessData> msg = make_rch<MsgParticipantStatelessData>(rchandle_from(&sedp_), id);
+    DDS::Security::ParticipantStatelessMessage& data = msg->data();
+    ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
+    if (!(ser >> data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::SecurityReader::data_received_i - ")
+                 ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+    sedp_.job_queue_->enqueue(msg);
+  } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
+    DCPS::RcHandle<MsgParticipantVolatileSecure> msg = make_rch<MsgParticipantVolatileSecure>(rchandle_from(&sedp_), id);
+    DDS::Security::ParticipantVolatileMessageSecure& data = msg->data();
+    if (!(ser >> data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::SecurityReader::data_received_i - ")
+                 ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+    sedp_.job_queue_->enqueue(msg);
+  }
+#else
+  ACE_UNUSED_ARG(sample);
+  ACE_UNUSED_ARG(entity_id);
+  ACE_UNUSED_ARG(ser);
+#endif
+}
+
+void
+Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
+  const DCPS::EntityId_t& entity_id,
+  DCPS::Serializer& ser,
+  DCPS::Extensibility extensibility)
+{
+  const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
+  if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
+    ParameterList data;
+    if (!decode_parameter_list(sample, ser, extensibility, data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+
+    DCPS::RcHandle<MsgDiscoveredPublication> msg = make_rch<MsgDiscoveredPublication>(rchandle_from(&sedp_), id);
+    DiscoveredPublication& wdata = msg->data();
+    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, wdata.type_info_)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+                 ACE_TEXT("failed to convert from ParameterList ")
+                 ACE_TEXT("to DiscoveredWriterData\n")));
+      return;
+    }
+#ifdef OPENDDS_SECURITY
+    wdata.have_ice_agent_info_ = false;
+    ICE::AgentInfoMap ai_map;
+    if (!ParameterListConverter::from_param_list(data, ai_map)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to convert from ParameterList ")
+        ACE_TEXT("to ICE Agent info\n")));
+      return;
+}
+    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    if (pos != ai_map.end()) {
+      wdata.have_ice_agent_info_ = true;
+      wdata.ice_agent_info_ = pos->second;
+    }
+#endif
+    sedp_.job_queue_->enqueue(msg);
+
+#ifdef OPENDDS_SECURITY
+  } else if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    ParameterList data;
+    if (!decode_parameter_list(sample, ser, extensibility, data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+
+    DCPS::RcHandle<MsgDiscoveredPublicationSecure> msg = make_rch<MsgDiscoveredPublicationSecure>(rchandle_from(&sedp_), id);
+    DiscoveredPublication_SecurityWrapper& wdata_secure = msg->data();
+
+    if (!ParameterListConverter::from_param_list(data, wdata_secure, wdata_secure.type_info)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+                 ACE_TEXT("failed to convert from ParameterList ")
+                 ACE_TEXT("to DiscoveredPublication_SecurityWrapper\n")));
+      return;
+    }
+
+    wdata_secure.have_ice_agent_info = false;
+    ICE::AgentInfoMap ai_map;
+    if (!ParameterListConverter::from_param_list(data, ai_map)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to convert from ParameterList ")
+        ACE_TEXT("to ICE Agent info\n")));
+      return;
+    }
+    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    if (pos != ai_map.end()) {
+      wdata_secure.have_ice_agent_info = true;
+      wdata_secure.ice_agent_info = pos->second;
+    }
+    sedp_.job_queue_->enqueue(msg);
+#endif
+  } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
+    ParameterList data;
+    if (!decode_parameter_list(sample, ser, extensibility, data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+
+    DCPS::RcHandle<MsgDiscoveredSubscription> msg = make_rch<MsgDiscoveredSubscription>(rchandle_from(&sedp_), id);
+    DiscoveredSubscription& rdata = msg->data();
+    if (!ParameterListConverter::from_param_list(data, rdata.reader_data_, rdata.type_info_)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
+                 ACE_TEXT("failed to convert from ParameterList ")
+                 ACE_TEXT("to DiscoveredReaderData\n")));
+      return;
+    }
+#ifdef OPENDDS_SECURITY
+    rdata.have_ice_agent_info_ = false;
+    ICE::AgentInfoMap ai_map;
+    if (!ParameterListConverter::from_param_list(data, ai_map)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to convert from ParameterList ")
+        ACE_TEXT("to ICE Agent info\n")));
+      return;
+    }
+    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    if (pos != ai_map.end()) {
+      rdata.have_ice_agent_info_ = true;
+      rdata.ice_agent_info_ = pos->second;
+    }
+#endif
+    if (rdata.reader_data_.readerProxy.expectsInlineQos) {
+      set_inline_qos(rdata.reader_data_.readerProxy.allLocators);
+    }
+    sedp_.job_queue_->enqueue(msg);
+
+#ifdef OPENDDS_SECURITY
+  } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    ParameterList data;
+    if (!decode_parameter_list(sample, ser, extensibility, data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+
+    DCPS::RcHandle<MsgDiscoveredSubscriptionSecure> msg = make_rch<MsgDiscoveredSubscriptionSecure>(rchandle_from(&sedp_), id);
+    DiscoveredSubscription_SecurityWrapper& rdata_secure = msg->data();
+
+    if (!ParameterListConverter::from_param_list(data, rdata_secure, rdata_secure.type_info)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
+                 ACE_TEXT("failed to convert from ParameterList ")
+                 ACE_TEXT("to DiscoveredSubscription_SecurityWrapper\n")));
+      return;
+    }
+
+    rdata_secure.have_ice_agent_info = false;
+    ICE::AgentInfoMap ai_map;
+    if (!ParameterListConverter::from_param_list(data, ai_map)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to convert from ParameterList ")
+        ACE_TEXT("to ICE Agent info\n")));
+      return;
+    }
+    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    if (pos != ai_map.end()) {
+      rdata_secure.have_ice_agent_info = true;
+      rdata_secure.ice_agent_info = pos->second;
+    }
+
+    if ((rdata_secure.data).readerProxy.expectsInlineQos) {
+      set_inline_qos((rdata_secure.data).readerProxy.allLocators);
+    }
+    sedp_.job_queue_->enqueue(msg);
+  } else if (entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+
+    ParameterList data;
+    if (!decode_parameter_list(sample, ser, extensibility, data)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
+        ACE_TEXT("failed to deserialize data\n")));
+      return;
+    }
+
+    DCPS::RcHandle<MsgParticipantDataSecure> msg = make_rch<MsgParticipantDataSecure>(rchandle_from(&sedp_), id);
+    Security::SPDPdiscoveredParticipantData& pdata = msg->data();
+
+    if (!ParameterListConverter::from_param_list(data, pdata)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
+                 ACE_TEXT("failed to convert from ParameterList ")
+                 ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
+      return;
+    }
+    const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+    sedp_.spdp_.process_participant_ice(data, pdata, guid);
+    sedp_.job_queue_->enqueue(msg);
+  #endif
+  }
+}
+
+void
+Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& sample,
+  const DCPS::EntityId_t&,
+  DCPS::Serializer& ser,
+  DCPS::Extensibility)
+{
+  XTypes::TypeLookup_Reply type_lookup_reply;
+  if (DDS::RETCODE_OK != process_tl_request(ser, type_lookup_reply)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
+      ACE_TEXT("failed to take type lookup request\n")));
+    return;
+  }
+
+  if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(sample, type_lookup_reply)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
+      ACE_TEXT("failed to send type lookup reply\n")));
+    return;
+  }
+}
+
+void
+Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample&,
+  const DCPS::EntityId_t&,
+  DCPS::Serializer& ser,
+  DCPS::Extensibility)
+{
+  if (!process_tl_reply(ser)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
+      ACE_TEXT("failed to take type lookup reply\n")));
+    return;
   }
 }
 
@@ -4582,7 +4693,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
     } else if (locs.length()) {
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
-      DCPS::max_serialized_size_boolean(encoding, size);
+      DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
@@ -4594,7 +4705,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       rTls->length(1);
       (*rTls)[0] = tl;
     } else {
@@ -4624,7 +4735,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
     } else if (locs.length()) {
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
-      DCPS::max_serialized_size_boolean(encoding, size);
+      DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
@@ -4633,7 +4744,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       wTls->length(1);
       (*wTls)[0] = tl;
     } else {
