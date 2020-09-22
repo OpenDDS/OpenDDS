@@ -724,7 +724,7 @@ namespace {
           be_global->impl_ <<
             "  if (new_length != length) {\n"
             "    size_t skip_length = 0;\n"
-            "    " << getMaxSizeExprPrimitive(elem, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
+            "    " << getSizeExprPrimitive(elem, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
             "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
             "    strm.skip(skip_length);\n"
             "    return false;\n"
@@ -1068,7 +1068,7 @@ namespace {
           be_global->impl_ <<
             "  if (new_length != length) {\n"
             "    size_t skip_length = 0;\n"
-            "    " << getMaxSizeExprPrimitive(sf.as_act_, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
+            "    " << getSizeExprPrimitive(sf.as_act_, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
             "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
             "    strm.skip(skip_length);\n"
             "    return false;\n"
@@ -2788,11 +2788,35 @@ namespace {
   }
 
   bool generate_marshal_traits(
-    AST_Decl* node, const std::string& cxx,
-    const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
-    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0,
-    std::string octetSeqOnly = "")
+    AST_Decl* node, const std::string& cxx, ExtensibilityKind exten,
+    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
+    AST_Structure* const struct_node =
+      node->node_type() == AST_Decl::NT_struct ? dynamic_cast<AST_Structure*>(node) : 0;
+    AST_Union* const union_node =
+      node->node_type() == AST_Decl::NT_union ? dynamic_cast<AST_Union*>(node) : 0;
+    if (!struct_node && !union_node) {
+      idl_global->err()->misc_error("Can't generate MarshalTraits for this node", node);
+      return false;
+    }
+
+    std::string octetSeqOnly;
+    if (struct_node && struct_node->nfields() == 1) {
+      AST_Field* field = *Fields(struct_node).begin();
+      AST_Type* const type = resolveActualType(field->field_type());
+      const Classification fld_cls = classify(type);
+      if (fld_cls & CL_SEQUENCE) {
+        AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
+        AST_Type* const base = seq->base_type();
+        if (classify(base) & CL_PRIMITIVE) {
+          AST_PredefinedType* const pt = dynamic_cast<AST_PredefinedType*>(base);
+          if (pt->pt() == AST_PredefinedType::PT_octet) {
+            octetSeqOnly = field->local_name()->get_string();
+          }
+        }
+      }
+    }
+
     std::string export_string;
     if (octetSeqOnly.size()) {
       const ACE_CString exporter = be_global->export_macro();
@@ -2806,22 +2830,18 @@ namespace {
       "struct" << export_string << " MarshalTraits<" << cxx << "> {\n"
       "  static void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)\n"
       "  {\n"
-        << fill_datareprseq(repr, "seq", "    ") <<
+        << fill_datareprseq(be_global->data_representations(node), "seq", "    ") <<
       "  }\n"
       "\n";
 
-    if (node->node_type() == AST_Decl::NT_struct) {
-      if (!generate_marshal_traits_struct(
-            dynamic_cast<AST_Structure*>(node), keys, info)) {
+    if (struct_node) {
+      if (!generate_marshal_traits_struct(struct_node , keys, info)) {
         return false;
       }
-    } else if (node->node_type() == AST_Decl::NT_union) {
-      if (!generate_marshal_traits_union(
-            dynamic_cast<AST_Union*>(node), keys.count())) {
+    } else if (union_node) {
+      if (!generate_marshal_traits_union(union_node, keys.count())) {
         return false;
       }
-    } else {
-      return false;
     }
 
     const char* msg_block_fn_decl_end = " { return false; }";
@@ -3204,13 +3224,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const string cxx = scoped(name); // name as a C++ class
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
-  /*
-   * TODO(iguessthislldo): Move this into generate_marshal_traits once
-   * https://github.com/objectcomputing/OpenDDS/pull/1846 is merged
-   */
-  const OpenDDS::DataRepresentation repr =
-    be_global->data_representations(node);
-
   const ExtensibilityKind exten = be_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;
   const bool is_mutable = exten == extensibilitykind_mutable;
@@ -3365,22 +3378,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   // Only generate these methods if this is a topic type
   if (info || is_topic_type) {
-    std::string octetSeqOnly;
-    if (fields.size() == 1) {
-      AST_Type* const type = resolveActualType(fields[0]->field_type());
-      const Classification fld_cls = classify(type);
-      if (fld_cls & CL_SEQUENCE) {
-        AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
-        AST_Type* const base = seq->base_type();
-        if (classify(base) & CL_PRIMITIVE) {
-          AST_PredefinedType* const pt = dynamic_cast<AST_PredefinedType*>(base);
-          if (pt->pt() == AST_PredefinedType::PT_octet) {
-            octetSeqOnly = fields[0]->local_name()->get_string();
-          }
-        }
-      }
-    }
-
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -3545,7 +3542,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(node, cxx, repr, exten, keys, info, octetSeqOnly)) {
+    if (!generate_marshal_traits(node, cxx, exten, keys, info)) {
       return false;
     }
   }
@@ -3714,13 +3711,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   Classification disc_cls = classify(discriminator);
 
   const ExtensibilityKind exten = be_global->extensibility(node);
-  /*
-   * TODO(iguessthislldo): Move this into generate_marshal_traits once
-   * https://github.com/objectcomputing/OpenDDS/pull/1846 is merged
-   */
-  const OpenDDS::DataRepresentation repr =
-    be_global->data_representations(node);
-
   const bool not_final = exten != extensibilitykind_final;
 
   {
@@ -4042,5 +4032,5 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   }
 
   TopicKeys keys(node);
-  return generate_marshal_traits(node, cxx, repr, exten, keys);
+  return generate_marshal_traits(node, cxx, exten, keys);
 }
