@@ -1852,6 +1852,7 @@ namespace OpenDDS {
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
+        , extended_builtin_endpoints_(0)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1886,6 +1887,7 @@ namespace OpenDDS {
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
+        , extended_builtin_endpoints_(0)
 #endif
         {
           RepoId guid;
@@ -1965,6 +1967,7 @@ namespace OpenDDS {
         DDS::Security::PermissionsHandle permissions_handle_;
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
         DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
+        DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints_;
 #endif
       };
 

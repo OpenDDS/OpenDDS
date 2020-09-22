@@ -261,7 +261,8 @@ namespace {
       PERM_TOKEN_FIELD = 0x02,
       PROPERTY_LIST_FIELD = 0x04,
       PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
-      IDENTITY_STATUS_TOKEN_FIELD = 0x10
+      IDENTITY_STATUS_TOKEN_FIELD = 0x10,
+      EXTENDED_BUILTIN_ENDPOINTS = 0x20
     };
 
     unsigned char field_mask = 0x00;
@@ -285,10 +286,14 @@ namespace {
         case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
           field_mask |= IDENTITY_STATUS_TOKEN_FIELD;
           break;
+        case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+          field_mask |= EXTENDED_BUILTIN_ENDPOINTS;
+          break;
       }
     }
 
     if ((field_mask & (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) == (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) {
+      // TLS_TODO: add EXTENDED_BUILTIN_ENDPOINTS logic here
       if ((field_mask & IDENTITY_STATUS_TOKEN_FIELD) == IDENTITY_STATUS_TOKEN_FIELD) {
         return OpenDDS::Security::DPDK_SECURE;
       } else {
@@ -364,6 +369,10 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   param_psi.participant_security_info(pbtd.security_info);
   add_param(param_list, param_psi);
 
+  Parameter param_ebe;
+  param_ebe.extended_builtin_endpoints(pbtd.extended_builtin_endpoints);
+  add_param(param_list, param_ebe);
+
   return true;
 }
 
@@ -391,6 +400,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
         pbtd.security_info = param.participant_security_info();
+        break;
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        pbtd.extended_builtin_endpoints = param.extended_builtin_endpoints();
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {

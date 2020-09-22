@@ -582,21 +582,10 @@ private:
   SecurityWriter_rch participant_volatile_message_secure_writer_;
 #endif
 
-  class TypeLookupWriter : public Writer {
-  public:
-    TypeLookupWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
-      : Writer(pub_id, sedp, seq_init)
-    {}
-
-    virtual ~TypeLookupWriter();
-  };
-
-  typedef DCPS::RcHandle<TypeLookupWriter> TypeLookupWriter_rch;
-
-  class TypeLookupRequestWriter : public TypeLookupWriter {
+  class TypeLookupRequestWriter : public Writer {
   public:
     TypeLookupRequestWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
-      : TypeLookupWriter(pub_id, sedp, seq_init)
+      : Writer(pub_id, sedp, seq_init)
     {}
 
     virtual ~TypeLookupRequestWriter();
@@ -612,10 +601,10 @@ private:
 
   TypeLookupRequestWriter_rch type_lookup_request_writer_;
 
-  class TypeLookupReplyWriter : public TypeLookupWriter {
+  class TypeLookupReplyWriter : public Writer {
   public:
     TypeLookupReplyWriter(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1)
-      : TypeLookupWriter(pub_id, sedp, seq_init)
+      : Writer(pub_id, sedp, seq_init)
     {}
 
     virtual ~TypeLookupReplyWriter();
@@ -627,6 +616,12 @@ private:
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
 
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
+
+#ifdef OPENDDS_SECURITY
+  TypeLookupRequestWriter_rch type_lookup_request_secure_writer;
+
+  TypeLookupReplyWriter_rch type_lookup_reply_secure_writer_;
+#endif
 
   class Reader
     : public DCPS::TransportReceiveListener
@@ -730,17 +725,6 @@ private:
   SecurityReader_rch participant_volatile_message_secure_reader_;
   DiscoveryReader_rch dcps_participant_secure_reader_;
 #endif
-
-  class TypeLookupReader : public Reader {
-  public:
-    TypeLookupReader(const DCPS::RepoId& sub_id, Sedp& sedp)
-      : Reader(sub_id, sedp)
-    {}
-
-    virtual ~TypeLookupReader();
-  };
-
-
 
   class TypeLookupRequestReader : public Reader {
   public:

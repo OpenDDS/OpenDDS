@@ -465,6 +465,9 @@ module OpenDDS {
 
       case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
         DDS::Security::IdentityStatusToken identity_status_token;
+
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
 #endif
 
       case PID_OPENDDS_ICE_GENERAL:

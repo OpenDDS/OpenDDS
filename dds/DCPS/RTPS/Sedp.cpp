@@ -3529,19 +3529,11 @@ Sedp::LivelinessWriter::~LivelinessWriter()
 {
 }
 
-Sedp::TypeLookupWriter::~TypeLookupWriter()
-{
-}
-
 Sedp::TypeLookupRequestWriter::~TypeLookupRequestWriter()
 {
 }
 
 Sedp::TypeLookupReplyWriter::~TypeLookupReplyWriter()
-{
-}
-
-Sedp::TypeLookupReader::~TypeLookupReader()
 {
 }
 
