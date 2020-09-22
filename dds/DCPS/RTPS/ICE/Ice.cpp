@@ -162,7 +162,7 @@ ServerReflexiveStateMachine::receive(const STUN::Message& message)
 
 ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::start(const ACE_INET_Addr& address,
-                                     const DCPS::GuidPrefix_t& guid_prefix)
+                                   const DCPS::GuidPrefix_t& guid_prefix)
 {
   OPENDDS_ASSERT(address != ACE_INET_Addr());
   OPENDDS_ASSERT(stun_server_address_ == ACE_INET_Addr());
@@ -237,19 +237,25 @@ ServerReflexiveStateMachine::success_response(const STUN::Message& message)
   std::vector<STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
 
   if (!unknown_attributes.empty()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING Unknown comprehension required attributes\n")));
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: "
+                        "WARNING Unknown comprehension required attributes\n")));
     return SRSM_None;
   }
 
   ACE_INET_Addr server_reflexive_address;
 
   if (!message.get_mapped_address(server_reflexive_address)) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING No (XOR)_MAPPED_ADDRESS attribute\n")));
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: "
+                        "WARNING No (XOR)_MAPPED_ADDRESS attribute\n")));
     return SRSM_None;
   }
 
   if (server_reflexive_address == ACE_INET_Addr()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: WARNING (XOR)_MAPPED_ADDRESS is not valid\n")));
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::success_response: "
+                        "WARNING (XOR)_MAPPED_ADDRESS is not valid\n")));
     return SRSM_None;
   }
 
@@ -266,24 +272,34 @@ ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::error_response(const STUN::Message& message)
 {
   if (message.method != STUN::BINDING) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING Unsupported STUN method\n")));
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: "
+                        "WARNING Unsupported STUN method\n")));
     return SRSM_None;
   }
 
 
   if (!message.has_error_code()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING No error code\n")));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: "
+                                    "WARNING No error code\n")));
     return SRSM_None;
   }
 
-  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING STUN error response code=%d reason=%s\n"), message.get_error_code(), message.get_error_reason().c_str()));
+  ACE_ERROR((LM_WARNING,
+             ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: "
+                      "WARNING STUN error response code=%d reason=%C\n"),
+             message.get_error_code(),
+             message.get_error_reason().c_str()));
 
   if (message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && message.has_unknown_attributes()) {
     std::vector<STUN::AttributeType> unknown_attributes = message.get_unknown_attributes();
 
     for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
            limit = unknown_attributes.end(); pos != limit; ++pos) {
-      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: WARNING Unknown STUN attribute %d\n"), *pos));
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: "
+                          "WARNING Unknown STUN attribute %d\n"),
+                 *pos));
     }
   }
 
