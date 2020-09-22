@@ -5,14 +5,8 @@ struct DefaultType {
 
 @topic
 @::OpenDDS::data_representation(XCDR2)
-struct WriterDefaultType {
-  long value;
-};
-
-@topic
-@::OpenDDS::data_representation(XCDR2)
 @::OpenDDS::data_representation(XCDR1)
-struct ReaderDefaultType {
+struct Xcdr2Xcdr1Type {
   long value;
 };
 

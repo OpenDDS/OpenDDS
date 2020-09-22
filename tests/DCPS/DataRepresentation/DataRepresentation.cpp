@@ -32,8 +32,10 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: RegisteredType<%C> failed: %C\n"), name(), retcode_to_string(rc)));
       throw 1;
     }
+    ACE_DEBUG((LM_INFO, ACE_TEXT("INFO: register_type[%C]\n"), name()));
   }
   ~RegisteredType() {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("INFO: unregister_type[%C]\n"), name()));
     type_support_->unregister_type(participant_, name());
   }
 private:
@@ -51,15 +53,22 @@ public:
   int run();
 
 private:
-  typedef std::vector<DDS::DataRepresentationId_t> Dri;
   void cleanup();
+  typedef std::vector<DDS::DataRepresentationId_t> Dri;
   void create_topic(const char* type_name, const Dri& dri);
   DDS::DataWriter* create_writer(const Dri& dri = Dri());
   DDS::DataReader* create_reader(const Dri& dri = Dri());
+
   void test_case(const Dri& writer_dr, const Dri& reader_dr,
-                 bool expect_match = true, bool expect_writer = true, bool expect_reader = true);
+                 bool expect_writer = true, bool expect_reader = true, bool expect_match = true);
   void test_default(bool expect_writer = true, bool expect_reader = true);
   void test(bool expect_writer = true, bool expect_reader = true);
+  void test_Registered_DefaultType();
+  void test_Registered_Xcdr2Xcdr1Type();
+  void test_Registered_Xcdr1Type();
+  void test_Registered_Xcdr2Type();
+  void test_Registered_XmlType();
+
   static void dr_to_qos(const Dri& dri, DDS::DataRepresentationQosPolicy& qos);
   static std::string to_string(const Dri& dri);
   static bool check_policies(const char* what, bool expect_match, const DDS::QosPolicyCountSeq& q);
@@ -77,11 +86,9 @@ private:
   unsigned cases_passed_;
   unsigned cases_total_;
   const Dri default_dr_;
-  Dri default_writer_dr_;
-  Dri default_reader_dr_;
+  Dri xcdr2xcdr1_;
   Dri xcdr1_;
   Dri xcdr2_;
-  Dri unaligned_;
   Dri xml_;
 };
 
@@ -100,14 +107,22 @@ Test::Test(int argc, ACE_TCHAR** argv) : cases_passed_(0), cases_total_(0)
     if (!(subscriber_ = participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK))) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: create_subscriber failed!\n"))); throw 1;
     }
-    default_writer_dr_.push_back(DDS::XCDR2_DATA_REPRESENTATION);
-    default_reader_dr_.push_back(DDS::XCDR2_DATA_REPRESENTATION);
-    default_reader_dr_.push_back(DDS::XCDR_DATA_REPRESENTATION);
+    xcdr2xcdr1_.push_back(DDS::XCDR2_DATA_REPRESENTATION);
+    xcdr2xcdr1_.push_back(DDS::XCDR_DATA_REPRESENTATION);
     xcdr1_.push_back(DDS::XCDR_DATA_REPRESENTATION);
     xcdr2_.push_back(DDS::XCDR2_DATA_REPRESENTATION);
-    unaligned_.push_back(OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION); //?? unused
     xml_.push_back(DDS::XML_DATA_REPRESENTATION);
   } catch (...) { cleanup(); throw; }
+}
+
+int Test::run()
+{
+  test_Registered_DefaultType();
+  test_Registered_Xcdr2Xcdr1Type();
+  test_Registered_Xcdr1Type();
+  test_Registered_Xcdr2Type();
+  test_Registered_XmlType();
+  return any_failed();
 }
 
 void Test::cleanup()
@@ -123,83 +138,20 @@ void Test::cleanup()
   TheServiceParticipant->shutdown();
 }
 
-int Test::run()
+void Test::create_topic(const char* type_name, const Dri& dri)
 {
-  RegisteredType<DefaultType> default_type(participant_.in());
-  create_topic(default_type.name(), default_dr_);
-  test();
-  test_case(xcdr1_, xcdr1_);
-  test_case(xcdr1_, default_reader_dr_);
-  test_case(default_writer_dr_, xcdr1_, false);
-  test_case(xcdr2_, default_reader_dr_);
-  test_case(default_writer_dr_, xcdr2_);
-
-  create_topic(default_type.name(), xcdr2_);
-  test();
-
-  create_topic(default_type.name(), xml_);
-  test();
-
-  RegisteredType<WriterDefaultType> writer_default_type(participant_.in());
-  create_topic(writer_default_type.name(), default_dr_);
-  test();
-
-  create_topic(writer_default_type.name(), xcdr2_);
-  test();
-
-  RegisteredType<Xcdr1Type> xcdr1_type(participant_.in());
-  create_topic(xcdr1_type.name(), default_dr_);
-  test(false, true);
-
-  create_topic(xcdr1_type.name(), xcdr2_);
-  test(false, true);
-
-  RegisteredType<XmlType> xml_type(participant_.in());
-  create_topic(xml_type.name(), default_dr_);
-  test_default(false, false);
-  test_case(default_dr_, default_dr_, true, false);
-  test_case(default_writer_dr_, default_dr_, true, false);
-  test_case(default_dr_, default_reader_dr_, true, false);
-
-  test_case(xcdr2_, default_dr_, false, false);
-  test_case(default_dr_, xcdr2_, false, false);
-  test_case(xml_, default_dr_, false, false, false);
-  test_case(default_dr_, xml_, false, false);
-  test_case(xml_, xml_, true, false);
-
-  create_topic(xcdr1_type.name(), xml_);
-  test(false, false);
-  test_case(xml_, xml_, true, false, false);
-
-  return any_failed();
-}
-
-void Test::test_default(bool expect_writer, bool expect_reader) {
-  test_case(default_dr_, default_dr_, true, expect_writer, expect_reader);
-  test_case(default_dr_, default_reader_dr_, true, expect_writer, expect_reader);
-  test_case(default_writer_dr_, default_dr_, true, expect_writer, expect_reader);
-  test_case(default_writer_dr_, default_reader_dr_, true, expect_writer, expect_reader);
-}
-
-void Test::test(bool expect_writer, bool expect_reader) {
-  test_default(expect_writer, expect_reader);
-  test_case(xcdr2_, default_dr_, true, expect_writer);
-  test_case(default_dr_, xcdr2_, true, expect_writer, expect_reader);
-  test_case(xml_, default_dr_, false, false);
-  test_case(default_dr_, xml_, false, expect_writer, false);
-}
-
-void Test::create_topic(const char* type_name, const Dri& dri){
   topic_name_ = std::string(type_name) + " Topic";
   if (dri.size()) { topic_name_ += " " + to_string(dri); }
   DDS::TopicQos qos;
   if (participant_->get_default_topic_qos(qos) == DDS::RETCODE_OK) {
     dr_to_qos(dri, qos.representation);
     topic_ = participant_->create_topic(topic_name_.c_str(), type_name, qos, 0, DEFAULT_STATUS_MASK);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("INFO: create_topic[%C]\n"), topic_name_.c_str()));
   } else { ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: get_default_topic_qos failed!\n"))); }
 }
 
-DDS::DataWriter* Test::create_writer(const Dri& dri) {
+DDS::DataWriter* Test::create_writer(const Dri& dri)
+{
   DDS::DataWriterQos qos;
   if (publisher_->get_default_datawriter_qos(qos) == DDS::RETCODE_OK) {
     dr_to_qos(dri, qos.representation);
@@ -209,7 +161,8 @@ DDS::DataWriter* Test::create_writer(const Dri& dri) {
   return 0;
 }
 
-DDS::DataReader* Test::create_reader(const Dri& dri) {
+DDS::DataReader* Test::create_reader(const Dri& dri)
+{
   DDS::DataReaderQos qos;
   if (subscriber_->get_default_datareader_qos(qos) == DDS::RETCODE_OK) {
     dr_to_qos(dri, qos.representation);
@@ -220,7 +173,7 @@ DDS::DataReader* Test::create_reader(const Dri& dri) {
 }
 
 void Test::test_case(const Dri& writer_dr, const Dri& reader_dr,
-  bool expect_match, bool expect_writer, bool expect_reader)
+  bool expect_writer, bool expect_reader, bool expect_match)
 {
   if (!topic_) { add_result(false); return; }
   // Create Writer and Reader
@@ -260,6 +213,91 @@ void Test::test_case(const Dri& writer_dr, const Dri& reader_dr,
     passed = false;
   }
   add_result(passed);
+}
+
+void Test::test_default(bool expect_writer, bool expect_reader)
+{
+  test_case(default_dr_, default_dr_, expect_writer, expect_reader);
+  test_case(default_dr_, xcdr2xcdr1_, expect_writer, expect_reader);
+  test_case(xcdr2xcdr1_, default_dr_, expect_writer, expect_reader);
+  test_case(xcdr2xcdr1_, xcdr2xcdr1_, expect_writer, expect_reader);
+}
+
+void Test::test(bool expect_writer, bool expect_reader)
+{
+  test_default(expect_writer, expect_reader);
+  test_case(xcdr2_, default_dr_, expect_writer);
+  test_case(default_dr_, xcdr2_, expect_writer, expect_reader);
+  test_case(xml_, default_dr_, false, true, false);
+  test_case(default_dr_, xml_, expect_writer, false, false);
+}
+
+void Test::test_Registered_DefaultType()
+{
+  RegisteredType<DefaultType> default_type(participant_.in());
+  create_topic(default_type.name(), default_dr_);
+  test();
+  test_case(xcdr1_, xcdr1_);
+  test_case(xcdr1_, xcdr2xcdr1_);
+  test_case(xcdr2xcdr1_, xcdr1_);
+  test_case(xcdr2_, xcdr2xcdr1_);
+  test_case(xcdr2xcdr1_, xcdr2_);
+
+  create_topic(default_type.name(), xcdr2_);
+  test();
+
+  create_topic(default_type.name(), xml_);
+  test();
+}
+
+void Test::test_Registered_Xcdr2Xcdr1Type()
+{
+  RegisteredType<Xcdr2Xcdr1Type> xcdr2xcdr1_type(participant_.in());
+  create_topic(xcdr2xcdr1_type.name(), default_dr_);
+  test();
+
+  create_topic(xcdr2xcdr1_type.name(), xcdr2_);
+  test();
+}
+
+void Test::test_Registered_Xcdr1Type()
+{
+  RegisteredType<Xcdr1Type> xcdr1_type(participant_.in());
+  create_topic(xcdr1_type.name(), default_dr_);
+  test(false, true);
+
+  create_topic(xcdr1_type.name(), xcdr2_);
+  test(false, true);
+
+  create_topic(xcdr1_type.name(), xml_);
+  test(false, false);
+  test_case(xml_, xml_, false, false);
+}
+
+void Test::test_Registered_Xcdr2Type()
+{
+  RegisteredType<Xcdr2Type> xcdr2_type(participant_.in());
+  create_topic(xcdr2_type.name(), default_dr_);
+  test();
+
+  create_topic(xcdr2_type.name(), xcdr2_);
+  test();
+}
+
+void Test::test_Registered_XmlType()
+{
+  RegisteredType<XmlType> xml_type(participant_.in());
+  create_topic(xml_type.name(), default_dr_);
+  test_default(false, false);
+  test_case(default_dr_, default_dr_, false);
+  test_case(xcdr2xcdr1_, default_dr_, false);
+  test_case(default_dr_, xcdr2xcdr1_, false);
+
+  test_case(xcdr2_, default_dr_, false, true, false);
+  test_case(default_dr_, xcdr2_, false, true, false);
+  test_case(xml_, default_dr_, false, false, false);
+  test_case(default_dr_, xml_, false, true, false);
+  test_case(xml_, xml_, false);
 }
 
 void Test::dr_to_qos(const Dri& dri, DDS::DataRepresentationQosPolicy& qos)
@@ -410,7 +448,7 @@ void Test::add_result(bool passed){
 int Test::any_failed() const {
   if (cases_passed_ != cases_total_) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: %u out of %u cases failed\n"), cases_total_ - cases_passed_, cases_total_));
-  } else ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: %u out of %u cases passed\n"), cases_passed_, cases_total_));
+  } else ACE_DEBUG((LM_INFO, ACE_TEXT("INFO: %u out of %u cases passed\n"), cases_passed_, cases_total_));
   return cases_total_ - cases_passed_;
 }
 
