@@ -724,7 +724,7 @@ namespace {
           be_global->impl_ <<
             "  if (new_length != length) {\n"
             "    size_t skip_length = 0;\n"
-            "    " << getMaxSizeExprPrimitive(elem, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
+            "    " << getSizeExprPrimitive(elem, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
             "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
             "    strm.skip(skip_length);\n"
             "    return false;\n"
@@ -1068,7 +1068,7 @@ namespace {
           be_global->impl_ <<
             "  if (new_length != length) {\n"
             "    size_t skip_length = 0;\n"
-            "    " << getMaxSizeExprPrimitive(sf.as_act_, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
+            "    " << getSizeExprPrimitive(sf.as_act_, "(length - new_length)", "skip_length", "strm.encoding()") << ";\n"
             "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
             "    strm.skip(skip_length);\n"
             "    return false;\n"
