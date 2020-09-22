@@ -4447,7 +4447,6 @@ Sedp::write_subscription_data_unsecure(
       result = DDS::RETCODE_ERROR;
     }
 
-    //add TypeConsistencyEnforcementQosPolicy to param list
     DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
     tceqp.ignore_member_names = true;
     Parameter param;
