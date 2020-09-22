@@ -41,47 +41,23 @@ public:
 
   /**
    * Used to hold the encoding and get the buffer sizes needed to store the
-   * results of the encoding. This is used to isolate the RTPS CDR encapsulated
-   * mode from the classical OpenDDS mode.
-   *
-   * TODO(iguessthislldo): Remove this class if multiple DataWriter encoding
-   * modes aren't necessary?
+   * results of the encoding.
    */
   class EncodingMode {
   public:
     EncodingMode()
     : valid_(false)
-    , bounded_(false)
-    , buffer_size_(0)
-    , key_only_bounded_(false)
-    , key_only_buffer_size_(0)
     , header_size_(0)
     {
     }
 
     EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
-    : encoding_(kind, swap_the_bytes)
-    , valid_(true)
-    , bounded_(MarshalTraitsType::gen_is_bounded_size())
-    , buffer_size_(0)
-    , key_only_bounded_(MarshalTraitsType::gen_is_bounded_key_size())
-    , key_only_buffer_size_(0)
-    , header_size_(0)
+    : valid_(true)
+    , encoding_(kind, swap_the_bytes)
+    , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
+    , bound_(MarshalTraitsType::serialized_size_bound(encoding_))
+    , key_only_bound_(MarshalTraitsType::key_only_serialized_size_bound(encoding_))
     {
-      if (encoding_.is_encapsulated()) {
-        header_size_ = EncapsulationHeader::serialized_size;
-      }
-      MessageType x;
-      if (bounded_) {
-        TraitsType::max_serialized_size(encoding_, buffer_size_, x);
-        buffer_size_ += header_size_;
-      }
-      if (key_only_bounded_) {
-        const KeyOnlyType key_only_x(x);
-        TraitsType::max_serialized_size(
-          encoding_, key_only_buffer_size_, key_only_x);
-        key_only_buffer_size_ += header_size_;
-      }
     }
 
     bool valid() const
@@ -94,41 +70,38 @@ public:
       return encoding_;
     }
 
-    /// Size of a buffer needed to store a sample if it's bounded
-    size_t buffer_size() const
+    bool bound() const
     {
-      return buffer_size_;
+      return bound_;
+    }
+
+    SerializedSizeBound buffer_size_bound() const
+    {
+      return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
     }
 
     /// Size of a buffer needed to store a specific sample
     size_t buffer_size(const MessageType& x) const
     {
-      if (bounded_) {
-        return buffer_size_;
-      }
-      return header_size_ + serialized_size(encoding_, x);
+      return header_size_ + (bound_ ? bound_.get() : serialized_size(encoding_, x));
     }
 
     /// Size of a buffer needed to store a specific key only sample
     size_t buffer_size(const KeyOnlyType& x) const
     {
-      if (key_only_bounded_) {
-        return key_only_buffer_size_;
-      }
-      return header_size_ + serialized_size(encoding_, x);
+      return header_size_ + (key_only_bound_ ? key_only_bound_.get() : serialized_size(encoding_, x));
     }
 
   private:
-    Encoding encoding_;
     bool valid_;
-    bool bounded_;
-    size_t buffer_size_;
-    bool key_only_bounded_;
-    size_t key_only_buffer_size_;
+    Encoding encoding_;
     size_t header_size_;
+    SerializedSizeBound bound_;
+    SerializedSizeBound key_only_bound_;
   };
 
   DataWriterImpl_T()
+    : marshal_skip_serialize_(false)
   {
   }
 
@@ -343,7 +316,6 @@ public:
   {
     const DDS::DataRepresentationIdSeq repIds =
       get_effective_data_rep_qos(qos_.representation.value);
-    bool success = false;
     if (cdr_encapsulation()) {
       for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
         Encoding::Kind encoding_kind;
@@ -351,7 +323,6 @@ public:
           if (Encoding::KIND_XCDR1 == encoding_kind ||
               Encoding::KIND_XCDR2 == encoding_kind) {
             encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-            success = true;
             break;
           } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
             // Supported but incompatible data representation
@@ -372,9 +343,8 @@ public:
     } else {
       // Pick unaligned CDR as it is the implicit representation for non-encapsulated
       encoding_mode_ = EncodingMode(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
-      success = true;
     }
-    if (!success) {
+    if (!encoding_mode_.valid()) {
       if (::OpenDDS::DCPS::DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
@@ -392,8 +362,9 @@ public:
     }
 
     // Set up allocator with reserved space for data if it is bounded
-    if (MarshalTraitsType::gen_is_bounded_size()) {
-      const size_t chunk_size = encoding_mode_.buffer_size();
+    const SerializedSizeBound buffer_size_bound = encoding_mode_.buffer_size_bound();
+    if (buffer_size_bound) {
+      const size_t chunk_size = buffer_size_bound.get();
       data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
       if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
@@ -415,6 +386,16 @@ public:
     return DDS::RETCODE_OK;
   }
 
+  void set_marshal_skip_serialize(bool value)
+  {
+    marshal_skip_serialize_ = value;
+  }
+
+  bool get_marshal_skip_serialize() const
+  {
+    return marshal_skip_serialize_;
+  }
+
 private:
 
   /**
@@ -432,6 +413,32 @@ private:
     const Encoding& encoding = encoding_mode_.encoding();
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
+
+    if (marshal_skip_serialize_) {
+      const size_t effective_size = encoding_mode_.buffer_size(instance_data);
+      ACE_NEW_MALLOC_RETURN(tmp_mb,
+        static_cast<ACE_Message_Block*>(
+          mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+        ACE_Message_Block(
+          effective_size,
+          ACE_Message_Block::MB_DATA,
+          0, // cont
+          0, // data
+          data_allocator_.get(), // allocator_strategy
+          get_db_lock(), // data block locking_strategy
+          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+          ACE_Time_Value::zero,
+          ACE_Time_Value::max_time,
+          db_allocator_.get(),
+          mb_allocator_.get()),
+          0);
+      mb.reset(tmp_mb);
+      if (!MarshalTraitsType::to_message_block(*mb, instance_data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+                   ACE_TEXT("attempting to skip serialize but bad from_message_block.\n")));
+      }
+      return mb.release();
+    }
 
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
       // Don't use the cached allocator for the registered sample message
@@ -603,6 +610,7 @@ private:
   unique_ptr<MessageBlockAllocator> mb_allocator_;
   unique_ptr<DataBlockAllocator> db_allocator_;
   EncodingMode encoding_mode_;
+  bool marshal_skip_serialize_;
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.

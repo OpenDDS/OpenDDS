@@ -8,15 +8,15 @@
 #ifndef OPENDDS_DCPS_SEQUENCENUMBER_H
 #define OPENDDS_DCPS_SEQUENCENUMBER_H
 
-#include "ace/Global_Macros.h"
+#include "Serializer.h"
 
-#include <utility>
+#include <ace/Global_Macros.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/Serializer.h"
+#include <utility>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -197,10 +197,11 @@ inline
 void serialized_size(const Encoding& encoding, size_t& size,
   const SequenceNumber& /*sn*/)
 {
-  max_serialized_size_ulong(encoding, size, 2);
+  primitive_serialized_size_ulong(encoding, size, 2);
 }
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;
+extern OpenDDS_Dcps_Export const SequenceRange unknown_sequence_range;
 
 } // namespace OpenDDS
 } // namespace DCPS

@@ -168,4 +168,20 @@ OpenDDS::DCPS::TransportInst::get_ice_endpoint()
   return temp ? temp->get_ice_endpoint() : 0;
 }
 
+void
+OpenDDS::DCPS::TransportInst::use_ice_now(bool flag)
+{
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  if (temp) {
+    temp->use_ice_now(flag);
+  }
+}
+
+OpenDDS::DCPS::ReactorTask_rch
+OpenDDS::DCPS::TransportInst::reactor_task()
+{
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

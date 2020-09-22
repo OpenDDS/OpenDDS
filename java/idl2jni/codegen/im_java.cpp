@@ -211,7 +211,7 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
 
   switch (t->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(t);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(t);
 
     switch (p->pt()) {
     case AST_PredefinedType::PT_boolean:
@@ -238,7 +238,7 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     builtin = true;
     break;
   case AST_Decl::NT_typedef: {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(t);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(t);
     AST_Type *base = td->base_type();
 
     if (base->node_type() == AST_Decl::NT_array
@@ -265,7 +265,7 @@ std::string idl_mapping_java::type(AST_Type *decl)
 {
   switch (decl->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType *p = AST_PredefinedType::narrow_from_decl(decl);
+    AST_PredefinedType *p = dynamic_cast<AST_PredefinedType*>(decl);
 
     switch (p->pt()) {
     case AST_PredefinedType::PT_boolean:
@@ -304,15 +304,15 @@ std::string idl_mapping_java::type(AST_Type *decl)
   case AST_Decl::NT_struct_fwd:
     return scoped(decl->name());
   case AST_Decl::NT_typedef: {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(decl);
     return type(td->primitive_base_type());
   }
   case AST_Decl::NT_sequence: {
-    AST_Sequence *seq = AST_Sequence::narrow_from_decl(decl);
+    AST_Sequence *seq = dynamic_cast<AST_Sequence*>(decl);
     return type(seq->base_type()) + "[]";
   }
   case AST_Decl::NT_array: {
-    AST_Array *arr = AST_Array::narrow_from_decl(decl);
+    AST_Array *arr = dynamic_cast<AST_Array*>(decl);
     return type(arr->base_type()) + "[]";
   }
   default:
@@ -408,7 +408,7 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
 bool isEnum(AST_Type *t)
 {
   if (t->node_type() == AST_Decl::NT_typedef) {
-    AST_Typedef *td = AST_Typedef::narrow_from_decl(t);
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(t);
     t = td->primitive_base_type();
   }
 
@@ -607,7 +607,7 @@ string op_signature(AST_Operation *op)
     AST_Decl *item = it.item();
 
     if (item->node_type() == AST_Decl::NT_argument) {
-      AST_Argument *arg = AST_Argument::narrow_from_decl(item);
+      AST_Argument *arg = dynamic_cast<AST_Argument*>(item);
       signature += param_type(arg->field_type(), arg->direction())
                    + " " + arg->local_name()->get_string() + ", ";
     }
@@ -691,7 +691,7 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
       AST_Decl *item = it.item();
 
       if (item->node_type() == AST_Decl::NT_attr) {
-        AST_Attribute *attr = AST_Attribute::narrow_from_decl(item);
+        AST_Attribute *attr = dynamic_cast<AST_Attribute*>(item);
 
         string signature = attr_signature_r(attr);
         body_stub +=
@@ -704,7 +704,7 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
         }
 
       } else if (item->node_type() == AST_Decl::NT_op) {
-        AST_Operation *op = AST_Operation::narrow_from_decl(item);
+        AST_Operation *op = dynamic_cast<AST_Operation*>(item);
         body_stub +=
           "  public native " + op_signature(op) + ";\n\n";
       }

@@ -108,11 +108,7 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
 
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
-inline
-void max_serialized_size(const Encoding& /*encoding*/, size_t& size, const GUID_t&)
-{
-  size += 16;
-}
+const size_t guid_cdr_size = 16;
 
 #ifndef OPENDDS_SAFETY_PROFILE
 inline bool

@@ -447,6 +447,17 @@ public:
     sedp_max_message_size_ = value;
   }
 
+  DCPS::TimeDuration max_type_lookup_service_reply_period() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return max_type_lookup_service_reply_period_;
+  }
+  void max_type_lookup_service_reply_period(const DCPS::TimeDuration& x)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    max_type_lookup_service_reply_period_ = x;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -479,6 +490,7 @@ private:
   bool use_ice_;
   bool use_ncm_;
   size_t sedp_max_message_size_;
+  DCPS::TimeDuration max_type_lookup_service_reply_period_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -586,6 +598,15 @@ public:
 
   u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
+
+  bool rtps_relay_only() const { return config_->rtps_relay_only(); }
+  void rtps_relay_only_now(bool f);
+
+  bool use_rtps_relay() const { return config_->use_rtps_relay(); }
+  void use_rtps_relay_now(bool f);
+
+  bool use_ice() const { return config_->use_ice(); }
+  void use_ice_now(bool f);
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

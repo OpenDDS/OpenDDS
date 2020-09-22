@@ -817,6 +817,10 @@ void EndpointManager::purge()
   for (UsernameToChecklistType::const_iterator pos = checklists.begin(), limit = checklists.end(); pos != limit; ++pos) {
     pos->second->remove_guids();
   }
+
+  for (AgentInfoListenersType::const_iterator pos = agent_info_listeners_.begin(), limit = agent_info_listeners_.end(); pos != limit; ++pos) {
+    pos->second->remove_agent_info(pos->first);
+  }
 }
 
 #endif /* OPENDDS_SECURITY */

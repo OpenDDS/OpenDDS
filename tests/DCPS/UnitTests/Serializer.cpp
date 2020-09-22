@@ -60,40 +60,40 @@ TEST(serializer_test, Encoding__Encoding_XCDR2_No_Swap)
 TEST(serializer_test, Encoding__Encoding_XCDR1_max_align)
 {
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
-  EXPECT_EQ(8, enc.max_align());
+  EXPECT_EQ(size_t(8), enc.max_align());
 }
 
 TEST(serializer_test, Encoding__Encoding_UNALIGNED_CDR_max_align)
 {
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_BIG);
-  EXPECT_EQ(0, enc.max_align());
+  EXPECT_EQ(size_t(0), enc.max_align());
 }
 
 TEST(serializer_test, Encoding__Encoding_XCDR2_max_align)
 {
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
-  EXPECT_EQ(4, enc.max_align());
+  EXPECT_EQ(size_t(4), enc.max_align());
 }
 
 TEST(serializer_test, align_value_no_offset)
 {
   size_t value = 8;
   align(value, 4);
-  EXPECT_EQ(8, value);
+  EXPECT_EQ(size_t(8), value);
 }
 
 TEST(serializer_test, align_value_add_offset)
 {
   size_t value = 9;
   align(value, 4);
-  EXPECT_EQ(12, value);
+  EXPECT_EQ(size_t(12), value);
 }
 
 TEST(serializer_test, align_value_smaller_than_by)
 {
   size_t value = 4;
   align(value, 9);
-  EXPECT_EQ(9, value);
+  EXPECT_EQ(size_t(9), value);
 }
 
 TEST(serializer_test, Encoding__is_encapsulated_this_XCDR1)

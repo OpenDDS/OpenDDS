@@ -224,7 +224,7 @@ NestedForLoops::NestedForLoops(const char* type, const char* prefix,
     AST_Type* const base =
       AstTypeClassification::resolveActualType(arr->base_type());
     if (base->node_type() == AST_Decl::NT_array) {
-      arr = AST_Array::narrow_from_decl(base);
+      arr = dynamic_cast<AST_Array*>(base);
       n_ += arr->n_dims();
       j = i;
     } else {

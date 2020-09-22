@@ -69,7 +69,6 @@ EncapsulationHeader::EncapsulationHeader()
 {
 }
 
-// TODO(iguessthidlldo) Support End Padding Described By XTypes 7.6.3.1.2
 bool EncapsulationHeader::from_encoding(
   const Encoding& encoding, Extensibility extensibility)
 {
@@ -110,7 +109,6 @@ bool EncapsulationHeader::from_encoding(
   return true;
 }
 
-// TODO(iguessthidlldo) Support End Padding Described By XTypes 7.6.3.1.2
 bool EncapsulationHeader::to_encoding(
   Encoding& encoding, Extensibility expected_extensibility)
 {

@@ -3,10 +3,11 @@
 #include "gtest/gtest.h"
 
 using namespace OpenDDS::XTypes;
+using namespace OpenDDS::DCPS;
 
 TEST(PrimitiveTypesTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TK_BOOLEAN);
   tib.kind(tia.kind());
@@ -93,7 +94,7 @@ TEST(PrimitiveTypesTest, Assignable)
 
 TEST(PrimitiveTypesTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TK_BOOLEAN);
   tib.kind(TK_BYTE);
@@ -180,7 +181,7 @@ TEST(PrimitiveTypesTest, NotAssignable)
 
 TEST(StringTypesTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TI_STRING8_SMALL);
   tib.kind(TI_STRING8_SMALL);
@@ -272,7 +273,7 @@ void string_expect_false(const TypeAssignability& test, const TypeIdentifier& ti
 
 TEST(StringTypesTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   TypeIdentifier tia, tib;
   tia.kind(TI_STRING8_SMALL);
   string_expect_false(test, tia, tib);
@@ -290,6 +291,9 @@ protected:
   {
     enum_a_.enum_flags = IS_APPENDABLE;
     enum_b_.enum_flags = enum_a_.enum_flags;
+    enum_a_.header.common.bit_bound = 10;
+    enum_b_.header.common.bit_bound = 13;
+
     MinimalEnumeratedLiteral l1_a, l2_a;
     l1_a.common.value = 3;
     l1_a.common.flags = IS_DEFAULT;
@@ -323,7 +327,7 @@ protected:
 
 TEST_F(EnumTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
                               TypeObject(MinimalTypeObject(enum_b_))));
 
@@ -337,7 +341,22 @@ TEST_F(EnumTypeTest, Assignable)
 
 TEST_F(EnumTypeTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
+
+  // Different bit_bounds
+  enum_a_.header.common.bit_bound = 3;
+  enum_b_.header.common.bit_bound = 23;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
+                               TypeObject(MinimalTypeObject(enum_b_))));
+  enum_a_.header.common.bit_bound = 11;
+  enum_b_.header.common.bit_bound = 7;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
+                               TypeObject(MinimalTypeObject(enum_b_))));
+  enum_a_.header.common.bit_bound = 20;
+  enum_a_.header.common.bit_bound = 15;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
+                               TypeObject(MinimalTypeObject(enum_b_))));
+
   // Do not have identical literal sets
   enum_a_.enum_flags = IS_FINAL;
   enum_b_.enum_flags = enum_a_.enum_flags;
@@ -447,7 +466,7 @@ TEST_F(EnumTypeTest, NotAssignable)
 
 TEST(BitmaskTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalBitmaskType bitmask_a, bitmask_b;
   bitmask_a.header.common.bit_bound = 16;
   bitmask_b.header.common.bit_bound = bitmask_a.header.common.bit_bound;
@@ -479,7 +498,7 @@ TEST(BitmaskTypeTest, Assignable)
 
 TEST(BitmaskTypeTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalBitmaskType bitmask_a;
   bitmask_a.header.common.bit_bound = 32;
   MinimalTypeObject tobj_a(bitmask_a);
@@ -579,9 +598,19 @@ TEST(BitmaskTypeTest, NotAssignable)
   EXPECT_FALSE(test.assignable(TypeObject(tobj_a), tib));
 }
 
+static void get_equivalence_hash(EquivalenceHash& out)
+{
+  static unsigned int hash = 0;
+  unsigned int tmp = ++hash;
+  for (int i = 13; i >= 0; --i) {
+    out[i] = tmp % 256;
+    tmp /= 256;
+  }
+}
+
 TEST(SequenceTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalSequenceType seq_a, seq_b;
   seq_a.header.common.bound = 10;
   seq_b.header.common.bound = 20;
@@ -685,42 +714,42 @@ TEST(SequenceTypeTest, Assignable)
   seq_a.element.common.type = TypeIdentifier(TK_UINT8);
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 8;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT16);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 16;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 32;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 64;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 }
 
 TEST(SequenceTypeTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalSequenceType seq_a, seq_b;
   seq_a.header.common.bound = 10;
   seq_b.header.common.bound = 20;
@@ -815,42 +844,42 @@ TEST(SequenceTypeTest, NotAssignable)
   seq_a.element.common.type = TypeIdentifier(TK_UINT8);
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT16);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 17;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 34;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   seq_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 13;
-  TypeLookup::insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(seq_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 }
 
 TEST(ArrayTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalArrayType arr_a, arr_b;
   arr_a.header.common.bound_seq.append(10).append(20).append(30);
   arr_b.header.common.bound_seq.append(10).append(20).append(30);
@@ -954,42 +983,42 @@ TEST(ArrayTypeTest, Assignable)
   arr_a.element.common.type = TypeIdentifier(TK_UINT8);
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 8;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT16);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 16;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 32;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 64;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                               TypeObject(MinimalTypeObject(arr_b))));
 }
 
 TEST(ArrayTypeTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalArrayType arr_a, arr_b;
   arr_a.header.common.bound_seq.append(10).append(20).append(30);
   arr_b.header.common.bound_seq.append(10).append(20).append(30);
@@ -1084,42 +1113,42 @@ TEST(ArrayTypeTest, NotAssignable)
   arr_a.element.common.type = TypeIdentifier(TK_UINT8);
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT16);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 17;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 34;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 
   arr_a.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   arr_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 13;
-  TypeLookup::insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(arr_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(arr_a)),
                                TypeObject(MinimalTypeObject(arr_b))));
 }
 
 TEST(MapTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalMapType map_a, map_b;
   map_a.header.common.bound = 50;
   map_b.header.common.bound = 100;
@@ -1272,48 +1301,48 @@ TEST(MapTypeTest, Assignable)
   map_b.key.common.type = TypeIdentifier(TK_INT32);
   map_a.element.common.type = TypeIdentifier(TK_UINT8);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 7;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
   map_a.key.common.type = TypeIdentifier(TK_INT16);
   map_b.key.common.type = TypeIdentifier(TK_INT16);
   map_a.element.common.type = TypeIdentifier(TK_UINT16);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 15;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
   map_a.key.common.type = TypeIdentifier(TK_INT64);
   map_b.key.common.type = TypeIdentifier(TK_INT64);
   map_a.element.common.type = TypeIdentifier(TK_UINT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 31;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 
   map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(60));
   map_b.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(80));
   map_a.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 63;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                               TypeObject(MinimalTypeObject(map_b))));
 }
 
 TEST(MapTypeTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalMapType map_a, map_b;
   map_a.header.common.bound = 50;
   map_b.header.common.bound = 100;
@@ -1464,48 +1493,48 @@ TEST(MapTypeTest, NotAssignable)
   map_b.key.common.type = TypeIdentifier(TK_INT32);
   map_a.element.common.type = TypeIdentifier(TK_UINT8);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
   map_a.key.common.type = TypeIdentifier(TK_INT16);
   map_b.key.common.type = TypeIdentifier(TK_INT16);
   map_a.element.common.type = TypeIdentifier(TK_UINT16);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 17;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
   map_a.key.common.type = TypeIdentifier(TK_INT64);
   map_b.key.common.type = TypeIdentifier(TK_INT64);
   map_a.element.common.type = TypeIdentifier(TK_UINT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 33;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 
   map_a.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(60));
   map_b.key.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(80));
   map_a.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   map_b.element.common.type = TypeIdentifier::make(EK_MINIMAL, hash);
   bitmask_b.header.common.bit_bound = 15;
-  TypeLookup::insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(map_b.element.common.type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
                                TypeObject(MinimalTypeObject(map_b))));
 }
 
 void expect_true_non_alias_to_alias()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -1604,9 +1633,9 @@ void expect_true_non_alias_to_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(enum_a))));
 
   // Bitmask
@@ -1625,34 +1654,34 @@ void expect_true_non_alias_to_alias()
   flag.common.position = 3;
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(bitmask_a))));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT8)));
 
   bitmask_a.header.common.bit_bound = 14;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT16)));
 
   bitmask_a.header.common.bit_bound = 31;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT32)));
 
   bitmask_a.header.common.bit_bound = 60;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT64)));
 }
 
 void expect_true_alias_to_non_alias()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -1751,9 +1780,9 @@ void expect_true_alias_to_non_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(enum_a)), TypeObject(MinimalTypeObject(ali_a))));
 
   // Bitmask
@@ -1772,34 +1801,34 @@ void expect_true_alias_to_non_alias()
   flag.common.position = 3;
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(bitmask_a)), TypeObject(MinimalTypeObject(ali_a))));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT8), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 14;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT16), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 31;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT32), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 60;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeIdentifier(TK_UINT64), TypeObject(MinimalTypeObject(ali_a))));
 }
 
 void expect_true_alias_to_alias()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a, ali_b;
 
   // Primitive types
@@ -1867,9 +1896,9 @@ void expect_true_alias_to_alias()
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier(TK_UINT32);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(seq_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(seq_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Array
@@ -1881,9 +1910,9 @@ void expect_true_alias_to_alias()
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier(TK_FLOAT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(arr_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(arr_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Map
@@ -1904,9 +1933,9 @@ void expect_true_alias_to_alias()
   map_b.header.common.bound = 500;
   map_b.key.common.type = TypeIdentifier(TK_UINT32);
   map_b.element.common.type = TypeIdentifier(TK_INT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(map_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(map_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Enumeration
@@ -1922,17 +1951,17 @@ void expect_true_alias_to_alias()
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()),
                                               MinimalMemberDetail("LITERAL5")));
   MinimalEnumeratedType enum_b(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(5))),
                                literal_seq);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(enum_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(enum_b));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Bitmask
@@ -1951,34 +1980,34 @@ void expect_true_alias_to_alias()
   flag.common.position = 3;
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT8);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 14;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT16);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 31;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT32);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 60;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT64);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 }
@@ -1992,7 +2021,7 @@ TEST(AliasTypeTest, Assignable)
 
 void expect_false_non_alias_to_alias()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -2090,9 +2119,9 @@ void expect_false_non_alias_to_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag(IS_DEFAULT)),
                                                 MinimalMemberDetail("LITERAL3")));
@@ -2117,36 +2146,36 @@ void expect_false_non_alias_to_alias()
   flag.common.position = 3;
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 10;
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(bitmask_b))));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT32)));
 
   bitmask_a.header.common.bit_bound = 14;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT8)));
 
   bitmask_a.header.common.bit_bound = 31;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT16)));
 
   bitmask_a.header.common.bit_bound = 60;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeIdentifier(TK_UINT32)));
 }
 
 void expect_false_alias_to_non_alias()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a;
 
   // Primitive types
@@ -2245,9 +2274,9 @@ void expect_false_alias_to_non_alias()
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(6, EnumeratedLiteralFlag()),
                                                 MinimalMemberDetail("LITERAL1")));
@@ -2272,36 +2301,36 @@ void expect_false_alias_to_non_alias()
   flag.common.position = 3;
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 9;
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(bitmask_b)), TypeObject(MinimalTypeObject(ali_a))));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT16), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 14;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT32), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 31;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT64), TypeObject(MinimalTypeObject(ali_a))));
 
   bitmask_a.header.common.bit_bound = 60;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   EXPECT_FALSE(test.assignable(TypeIdentifier(TK_UINT16), TypeObject(MinimalTypeObject(ali_a))));
 }
 
 void expect_false_alias_to_alias()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalAliasType ali_a, ali_b;
 
   // Primitive types
@@ -2369,9 +2398,9 @@ void expect_false_alias_to_alias()
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier(TK_FLOAT64);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(seq_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(seq_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Array
@@ -2383,9 +2412,9 @@ void expect_false_alias_to_alias()
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier(TK_INT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(arr_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(arr_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Map
@@ -2406,9 +2435,9 @@ void expect_false_alias_to_alias()
   map_b.header.common.bound = 500;
   map_b.key.common.type = TypeIdentifier(TK_UINT32);
   map_b.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(map_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(map_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Enumeration
@@ -2424,18 +2453,18 @@ void expect_false_alias_to_alias()
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()),
                                                 MinimalMemberDetail("LITERAL2")));
   MinimalEnumeratedType enum_b(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(1))),
                                literal_seq_b);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(enum_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(enum_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Bitmask
@@ -2454,36 +2483,36 @@ void expect_false_alias_to_alias()
   flag.common.position = 3;
   flag.detail = MinimalMemberDetail("BIT4");
   bitmask_a.flag_seq.append(flag);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   MinimalBitmaskType bitmask_b;
   bitmask_b.header.common.bit_bound = 11;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_b.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_b.body.common.related_type, MinimalTypeObject(bitmask_b));
+  test.insert_entry(ali_b.body.common.related_type, MinimalTypeObject(bitmask_b));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT16);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 14;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT32);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 31;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT16);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   bitmask_a.header.common.bit_bound = 60;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
-  TypeLookup::insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  test.insert_entry(ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
   ali_b.body.common.related_type = TypeIdentifier(TK_UINT32);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 }
@@ -2497,7 +2526,7 @@ TEST(AliasTypeTest, NotAssignable)
 
 TEST(StructTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
   a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
@@ -2539,14 +2568,14 @@ TEST(StructTypeTest, Assignable)
                               TypeObject(MinimalTypeObject(inner_b))));
 
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma2(CommonStructMember(2, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m2"));
-  TypeLookup::insert_entry(ma2.common.member_type_id, MinimalTypeObject(inner_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma2.common.member_type_id, MinimalTypeObject(inner_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb2(CommonStructMember(2, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m2"));
-  TypeLookup::insert_entry(mb2.common.member_type_id, MinimalTypeObject(inner_b));
+  test.insert_entry(mb2.common.member_type_id, MinimalTypeObject(inner_b));
   a.member_seq.append(ma2);
   b.member_seq.append(mb2);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2587,14 +2616,14 @@ TEST(StructTypeTest, Assignable)
                                                 MinimalMemberDetail("LITERAL3")));
   MinimalEnumeratedType enum_a(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_a);
   MinimalEnumeratedType enum_b(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_b);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma4(CommonStructMember(4, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m4"));
-  TypeLookup::insert_entry(ma4.common.member_type_id, MinimalTypeObject(enum_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma4.common.member_type_id, MinimalTypeObject(enum_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb4(CommonStructMember(4, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m4"));
-  TypeLookup::insert_entry(mb4.common.member_type_id, MinimalTypeObject(enum_b));
+  test.insert_entry(mb4.common.member_type_id, MinimalTypeObject(enum_b));
   a.member_seq.append(ma4);
   b.member_seq.append(mb4);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2605,14 +2634,14 @@ TEST(StructTypeTest, Assignable)
   seq_a.element.common.type = TypeIdentifier(TK_FLOAT64);
   seq_b.header.common.bound = 60;
   seq_b.element.common.type = TypeIdentifier(TK_FLOAT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma5(CommonStructMember(5, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
-  TypeLookup::insert_entry(ma5.common.member_type_id, MinimalTypeObject(seq_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma5.common.member_type_id, MinimalTypeObject(seq_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb5(CommonStructMember(5, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
-  TypeLookup::insert_entry(mb5.common.member_type_id, MinimalTypeObject(seq_b));
+  test.insert_entry(mb5.common.member_type_id, MinimalTypeObject(seq_b));
   a.member_seq.append(ma5);
   b.member_seq.append(mb5);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2621,10 +2650,10 @@ TEST(StructTypeTest, Assignable)
   MinimalSequenceType seq_a2;
   seq_a2.header.common.bound = 120;
   seq_a2.element.common.type = TypeIdentifier(TK_UINT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma6(CommonStructMember(6, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m6"));
-  TypeLookup::insert_entry(ma6.common.member_type_id, MinimalTypeObject(seq_a2));
+  test.insert_entry(ma6.common.member_type_id, MinimalTypeObject(seq_a2));
   MinimalStructMember mb6(CommonStructMember(6, IS_KEY,
                                              TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT64),
                                                                                static_cast<SBound>(70))),
@@ -2641,14 +2670,14 @@ TEST(StructTypeTest, Assignable)
   map_b.header.common.bound = 150;
   map_b.key.common.type = TypeIdentifier(TK_UINT64);
   map_b.element.common.type = TypeIdentifier(TK_FLOAT128);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma7(CommonStructMember(7, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
-  TypeLookup::insert_entry(ma7.common.member_type_id, MinimalTypeObject(map_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma7.common.member_type_id, MinimalTypeObject(map_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb7(CommonStructMember(7, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
-  TypeLookup::insert_entry(mb7.common.member_type_id, MinimalTypeObject(map_b));
+  test.insert_entry(mb7.common.member_type_id, MinimalTypeObject(map_b));
   a.member_seq.append(ma7);
   b.member_seq.append(mb7);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2658,10 +2687,10 @@ TEST(StructTypeTest, Assignable)
   map_a2.header.common.bound = 200;
   map_a2.key.common.type = TypeIdentifier(TK_INT32);
   map_a2.element.common.type = TypeIdentifier(TK_FLOAT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m8"));
-  TypeLookup::insert_entry(ma8.common.member_type_id, MinimalTypeObject(map_a2));
+  test.insert_entry(ma8.common.member_type_id, MinimalTypeObject(map_a2));
   PlainMapLTypeDefn plain_map(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()), 160,
                               TypeIdentifier(TK_FLOAT32), CollectionElementFlag(),
                               TypeIdentifier(TK_INT32));
@@ -2694,14 +2723,14 @@ TEST(StructTypeTest, Assignable)
                                                                TypeIdentifier::makeString(false, StringLTypeDefn(150)),
                                                                UnionCaseLabelSeq().append(3).append(4)),
                                              MinimalMemberDetail("inner2")));
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
-  TypeLookup::insert_entry(ma9.common.member_type_id, MinimalTypeObject(uni_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma9.common.member_type_id, MinimalTypeObject(uni_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb9(CommonStructMember(9, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
-  TypeLookup::insert_entry(mb9.common.member_type_id, MinimalTypeObject(uni_b));
+  test.insert_entry(mb9.common.member_type_id, MinimalTypeObject(uni_b));
   a.member_seq.append(ma9);
   b.member_seq.append(mb9);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2709,7 +2738,7 @@ TEST(StructTypeTest, Assignable)
 
 void expect_false_different_extensibilities()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Different extensibility kinds
@@ -2720,7 +2749,7 @@ void expect_false_different_extensibilities()
 
 void expect_false_different_ids()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Some members with the same name but different ID
@@ -2737,7 +2766,7 @@ void expect_false_different_ids()
 
 void expect_false_different_names()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Some members with the same name but different ID
@@ -2754,7 +2783,7 @@ void expect_false_different_names()
 
 void expect_false_no_matched_member()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // There no members with the same ID
@@ -2775,7 +2804,7 @@ void expect_false_no_matched_member()
 
 void expect_false_key_erased()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // KeyErased of members are not assignable
@@ -2795,14 +2824,14 @@ void expect_false_key_erased()
                                                                                               StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(ma1.common.member_type_id, MinimalTypeObject(inner_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma1.common.member_type_id, MinimalTypeObject(inner_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb1(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(mb1.common.member_type_id, MinimalTypeObject(inner_b));
+  test.insert_entry(mb1.common.member_type_id, MinimalTypeObject(inner_b));
   a.member_seq.append(ma1);
   b.member_seq.append(mb1);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2829,14 +2858,14 @@ void expect_false_key_erased()
                                                                TypeIdentifier::makeString(false, StringLTypeDefn(150)),
                                                                UnionCaseLabelSeq().append(3).append(4)),
                                              MinimalMemberDetail("inner2")));
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
-  TypeLookup::insert_entry(ma9.common.member_type_id, MinimalTypeObject(uni_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma9.common.member_type_id, MinimalTypeObject(uni_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb9(CommonStructMember(9, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m9"));
-  TypeLookup::insert_entry(mb9.common.member_type_id, MinimalTypeObject(uni_b));
+  test.insert_entry(mb9.common.member_type_id, MinimalTypeObject(uni_b));
   a2.member_seq.append(ma9);
   b2.member_seq.append(mb9);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a2)), TypeObject(MinimalTypeObject(b2))));
@@ -2844,7 +2873,7 @@ void expect_false_key_erased()
 
 void expect_false_not_optional_must_understand()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_MUTABLE;
@@ -2866,7 +2895,7 @@ void expect_false_not_optional_must_understand()
 
 void expect_false_keys_must_in_both()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_MUTABLE;
@@ -2886,7 +2915,7 @@ void expect_false_keys_must_in_both()
 
 void expect_false_string_keys()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(),
@@ -2902,7 +2931,7 @@ void expect_false_string_keys()
 
 void expect_false_enum_keys()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   MinimalEnumeratedLiteralSeq literal_seq_a, literal_seq_b;
@@ -2921,14 +2950,14 @@ void expect_false_enum_keys()
   MinimalEnumeratedType enum_a(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_a);
   MinimalEnumeratedType enum_b(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_b);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(ma1.common.member_type_id, MinimalTypeObject(enum_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma1.common.member_type_id, MinimalTypeObject(enum_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb1(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(mb1.common.member_type_id, MinimalTypeObject(enum_b));
+  test.insert_entry(mb1.common.member_type_id, MinimalTypeObject(enum_b));
   a.member_seq.append(ma1);
   b.member_seq.append(mb1);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2936,7 +2965,7 @@ void expect_false_enum_keys()
 
 void expect_false_sequence_keys()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Sequence key members
@@ -2946,14 +2975,14 @@ void expect_false_sequence_keys()
   seq_b.header.common.bound = 600;
   seq_b.element.common.type = TypeIdentifier(TK_UINT64);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma5(CommonStructMember(5, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
-  TypeLookup::insert_entry(ma5.common.member_type_id, MinimalTypeObject(seq_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma5.common.member_type_id, MinimalTypeObject(seq_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb5(CommonStructMember(5, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m5"));
-  TypeLookup::insert_entry(mb5.common.member_type_id, MinimalTypeObject(seq_b));
+  test.insert_entry(mb5.common.member_type_id, MinimalTypeObject(seq_b));
   a.member_seq.append(ma5);
   b.member_seq.append(mb5);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -2963,10 +2992,10 @@ void expect_false_sequence_keys()
   MinimalSequenceType seq_a2;
   seq_a2.header.common.bound = 320;
   seq_a2.element.common.type = TypeIdentifier(TK_FLOAT64);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma6(CommonStructMember(6, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m6"));
-  TypeLookup::insert_entry(ma6.common.member_type_id, MinimalTypeObject(seq_a));
+  test.insert_entry(ma6.common.member_type_id, MinimalTypeObject(seq_a));
   MinimalStructMember mb6(CommonStructMember(6, IS_KEY,
                                              TypeIdentifier::makePlainSequence(TypeIdentifier(TK_UINT32),
                                                                                static_cast<LBound>(200))),
@@ -2978,7 +3007,7 @@ void expect_false_sequence_keys()
 
 void expect_false_map_keys()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   // Map key members
@@ -2990,14 +3019,14 @@ void expect_false_map_keys()
   map_b.key.common.type = TypeIdentifier(TK_UINT64);
   map_b.element.common.type = TypeIdentifier(TK_FLOAT128);
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma7(CommonStructMember(7, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
-  TypeLookup::insert_entry(ma7.common.member_type_id, MinimalTypeObject(map_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma7.common.member_type_id, MinimalTypeObject(map_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb7(CommonStructMember(7, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m7"));
-  TypeLookup::insert_entry(mb7.common.member_type_id, MinimalTypeObject(map_b));
+  test.insert_entry(mb7.common.member_type_id, MinimalTypeObject(map_b));
   a.member_seq.append(ma7);
   b.member_seq.append(mb7);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -3008,10 +3037,10 @@ void expect_false_map_keys()
   map_a2.header.common.bound = 200;
   map_a2.key.common.type = TypeIdentifier(TK_INT32);
   map_a2.element.common.type = TypeIdentifier(TK_FLOAT32);
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m8"));
-  TypeLookup::insert_entry(ma8.common.member_type_id, MinimalTypeObject(map_a2));
+  test.insert_entry(ma8.common.member_type_id, MinimalTypeObject(map_a2));
   PlainMapLTypeDefn plain_map(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()), 300,
                               TypeIdentifier(TK_FLOAT32), CollectionElementFlag(),
                               TypeIdentifier(TK_INT32));
@@ -3024,7 +3053,7 @@ void expect_false_map_keys()
 
 void expect_false_key_holder()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   MinimalStructType inner_a, inner_b;
@@ -3043,14 +3072,14 @@ void expect_false_key_holder()
                                                                                               StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EquivalenceHash hash;
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(ma1.common.member_type_id, MinimalTypeObject(inner_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma1.common.member_type_id, MinimalTypeObject(inner_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb1(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(mb1.common.member_type_id, MinimalTypeObject(inner_b));
+  test.insert_entry(mb1.common.member_type_id, MinimalTypeObject(inner_b));
   a.member_seq.append(ma1);
   b.member_seq.append(mb1);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
@@ -3077,14 +3106,14 @@ void expect_false_key_holder()
                                                                TypeIdentifier::makeString(false, StringLTypeDefn(150)),
                                                                UnionCaseLabelSeq().append(30).append(40)),
                                              MinimalMemberDetail("inner2")));
-  TypeLookup::get_equivalence_hash(hash);
+  get_equivalence_hash(hash);
   MinimalStructMember ma2(CommonStructMember(1, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(ma2.common.member_type_id, MinimalTypeObject(uni_a));
-  TypeLookup::get_equivalence_hash(hash);
+  test.insert_entry(ma2.common.member_type_id, MinimalTypeObject(uni_a));
+  get_equivalence_hash(hash);
   MinimalStructMember mb2(CommonStructMember(1, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m1"));
-  TypeLookup::insert_entry(mb2.common.member_type_id, MinimalTypeObject(uni_b));
+  test.insert_entry(mb2.common.member_type_id, MinimalTypeObject(uni_b));
   a2.member_seq.append(ma2);
   b2.member_seq.append(mb2);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a2)), TypeObject(MinimalTypeObject(b2))));
@@ -3092,7 +3121,7 @@ void expect_false_key_holder()
 
 void expect_false_appendable()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_APPENDABLE;
@@ -3110,7 +3139,7 @@ void expect_false_appendable()
 
 void expect_false_final()
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
 
   a.struct_flags = IS_FINAL;
@@ -3148,7 +3177,7 @@ TEST(StructTypeTest, NotAssignable)
 
 TEST(UnionTypeTest, Assignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
 
   // Extensibility
@@ -3255,7 +3284,7 @@ TEST(UnionTypeTest, Assignable)
 
 TEST(UnionTypeTest, NotAssignable)
 {
-  TypeAssignability test;
+  TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
 
   // Different extensibility kinds
