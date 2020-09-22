@@ -1,4 +1,4 @@
-project(*TryConstruct): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
+project(Compiler_*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
   exename = *
   Source_Files {
       TryConstruct.cpp

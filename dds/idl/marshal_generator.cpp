@@ -130,7 +130,7 @@ namespace {
 } /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
-  const std::vector<AST_EnumVal*>&, const char*)
+  const std::vector<AST_EnumVal*>& vals, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
@@ -151,6 +151,10 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n"
+      "    if (temp >= " << vals.size() << ") {\n"
+      "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+      "      return false;\n"
+      "    }\n"
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"
       "  }\n"

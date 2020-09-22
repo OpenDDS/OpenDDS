@@ -28,7 +28,6 @@ typedef str20 str20Array[10];
 typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
 //enum for use in struct, union, and sequence
 enum EnumType {VALUE1, VALUE2};
-//enum for use in struct, union, and sequence
 enum EnumType2 {B1, B2, B3};
 
 //nested union for use in struct, union, and sequence
