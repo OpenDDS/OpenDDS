@@ -273,7 +273,6 @@ module DDS {
       ALLOW_TYPE_COERCION
     };
     */
-    //constants for TypeConsistencyEnforcementQosPolicy::kind field
     typedef short TypeConsistencyEnforcementQosPolicyKind_t;
     const TypeConsistencyEnforcementQosPolicyKind_t DISALLOW_TYPE_COERCION = 1;
     const TypeConsistencyEnforcementQosPolicyKind_t ALLOW_TYPE_COERCION = 2;
