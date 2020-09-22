@@ -32,7 +32,7 @@ namespace {
 
 ACE_CDR::Char* string_alloc(ACE_CDR::ULong size)
 {
-  return static_cast<ACE_CDR::Char*>(std::malloc(size));
+  return static_cast<ACE_CDR::Char*>(std::malloc(size + 1));
 }
 
 void string_free(ACE_CDR::Char* ptr)
@@ -42,7 +42,7 @@ void string_free(ACE_CDR::Char* ptr)
 
 ACE_CDR::WChar* wstring_alloc(ACE_CDR::ULong size)
 {
-  return static_cast<ACE_CDR::WChar*>(std::malloc(sizeof(ACE_CDR::WChar) * size));
+  return static_cast<ACE_CDR::WChar*>(std::malloc(sizeof(ACE_CDR::WChar) * (size + 1)));
 }
 
 void wstring_free(ACE_CDR::WChar* ptr)

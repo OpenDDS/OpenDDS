@@ -313,9 +313,13 @@ size_t serialized_size(const Encoding& encoding, const T& value)
 }
 
 /**
- * This helper class can be used to construct ace message blocks from OctetSeqs
- * and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
- * The OctetSeq must have its length set before constructing this object.
+ * This helper class can be used to construct ace message blocks from
+ * byte buffers like DDS::OctetSeq and DCPS::OctetSeq and be used with
+ * the Serializer to serialize/deserialize directly into the byte
+ * buffer.  The sequence must have its length set before constructing
+ * this object.  T should provide a length() method which is the size
+ * of the buffer and get_buffer() which returns a pointer to the
+ * underlying byte sequence.
  */
 template <typename T>
 class MessageBlockHelper {

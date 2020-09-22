@@ -210,10 +210,8 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
   return ti;
 }
 
-// TODO: Test with color.
 ACE_CDR::ULong hash_member_name_to_id(const std::string& name)
 {
-  // TODO: Check algorithm.
   ACE_CDR::ULong name_hash;
 
   unsigned char result[16];
@@ -223,7 +221,6 @@ ACE_CDR::ULong hash_member_name_to_id(const std::string& name)
   return name_hash & 0x0FFFFFFF;
 }
 
-// TODO: Test with color.
 void hash_member_name(NameHash& name_hash, const std::string& name)
 {
   unsigned char result[16];
