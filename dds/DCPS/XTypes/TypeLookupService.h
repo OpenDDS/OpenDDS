@@ -33,12 +33,18 @@ public:
   // For Type Lookup Service request / reply
   void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types) const;
-  void add_type_objects_to_cache(TypeIdentifierTypeObjectPairSeq& types);
+  void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
+
+  bool get_depend_type_identifiers(const TypeIdentifier& type_id,
+    TypeIdentifierWithSizeSeq& dependencies) const;
+  void add_depend_type_identifiers(const TypeIdentifier& type_id,
+    const TypeIdentifierWithSizeSeq& dependencies);
 
   // For adding local endpoint types
   void add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport);
 
   bool type_object_in_cache(const TypeIdentifier& ti) const;
+  bool type_dependencies_in_cache(const TypeIdentifier& ti) const;
 
   const DCPS::SequenceNumber& next_rpc_sequence_number()
   {

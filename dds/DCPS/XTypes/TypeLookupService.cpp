@@ -17,11 +17,9 @@ TypeLookupService::TypeLookupService() : rpc_sequence_number_(0)
   to_empty_.complete.kind = TK_NONE;
 }
 
-
 TypeLookupService::~TypeLookupService()
 {
 }
-
 
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
                                          TypeIdentifierTypeObjectPairSeq& types) const
@@ -34,7 +32,6 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
   }
 }
 
-
 const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type_id) const
 {
   const TypeObjectMap::const_iterator it_object = type_object_map_.find(type_id);
@@ -44,8 +41,18 @@ const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type
   return to_empty_;
 }
 
+bool TypeLookupService::get_depend_type_identifiers(const TypeIdentifier& type_id,
+  TypeIdentifierWithSizeSeq& dependencies) const
+{
+  const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_id);
+  if (it != type_dependencies_map_.end()) {
+    dependencies = it->second;
+    return true;
+  }
+  return false;
+}
 
-void TypeLookupService::add_type_objects_to_cache(TypeIdentifierTypeObjectPairSeq& types)
+void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)
 {
   for (ACE_UINT32 i = 0; i < types.length(); ++i) {
     const TypeObjectMap::iterator it_type_id_with_size_seq = type_object_map_.find(types[i].type_identifier);
@@ -54,7 +61,6 @@ void TypeLookupService::add_type_objects_to_cache(TypeIdentifierTypeObjectPairSe
     }
   }
 }
-
 
 void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport)
 {
@@ -67,20 +73,29 @@ void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& t
   }
 }
 
-
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj)
 {
-  TypeObjectMap::const_iterator it_type_id_with_size_seq = type_object_map_.find(ti);
-  if (it_type_id_with_size_seq == type_object_map_.end()) {
+  if (type_object_map_.find(ti) == type_object_map_.end()) {
     type_object_map_.insert(std::make_pair(ti, tobj));
   }
 }
 
+void TypeLookupService::add_depend_type_identifiers(const TypeIdentifier& type_id,
+  const TypeIdentifierWithSizeSeq& dependencies)
+{
+  if (type_dependencies_map_.find(type_id) == type_dependencies_map_.end()) {
+    type_dependencies_map_.insert(std::make_pair(type_id, dependencies));
+  }
+}
 
 bool TypeLookupService::type_object_in_cache(const TypeIdentifier& ti) const
 {
-  TypeObjectMap::const_iterator it_type_id_with_size_seq = type_object_map_.find(ti);
-  return it_type_id_with_size_seq != type_object_map_.end();
+  return type_object_map_.find(ti) != type_object_map_.end();
+}
+
+bool TypeLookupService::type_dependencies_in_cache(const TypeIdentifier& ti) const
+{
+  return type_dependencies_map_.find(ti) != type_dependencies_map_.end();
 }
 
 } // namespace XTypes
