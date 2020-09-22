@@ -977,6 +977,25 @@ TEST(Union, DISCARD)
       }
     }
   }
+  {
+    TryCon::BaseDiscrimUnion sent;
+    sent._d(B3);
+    sent.s3(5);
+    TryCon::DiscardDiscrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
 }
 
 TEST(Union, USE_DEFAULT)
@@ -1109,6 +1128,30 @@ TEST(Union, USE_DEFAULT)
         EXPECT_TRUE(serializer >> actual);
       }
       ASSERT_EQ(expected.e_ud(), actual.e_ud());
+    }
+  }
+  {
+    TryCon::BaseDiscrimUnion sent;
+    sent._d(B3);
+    sent.s3(5);
+    TryCon::DefaultDiscrimUnion expected;
+    expected._d(VALUE1);
+    expected.s1(0);
+    TryCon::DefaultDiscrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_EQ(expected.s1(), actual.s1());
+      ASSERT_EQ(expected._d(), actual._d());
     }
   }
 }

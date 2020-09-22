@@ -3133,6 +3133,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    }\n";
       }
       be_global->impl_ << "    const size_t end_of_field = strm.pos() + field_size;\n";
+
+      //be_global->impl_ << "    set_default(stru);\n";
       std::ostringstream cases;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
@@ -3691,11 +3693,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   {
     Function set_default("set_default", "void");
-    set_default.addArg("stru", cxx + "&");
+    set_default.addArg("uni", cxx + "&");
     set_default.endArgs();
     be_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";
     be_global->impl_ << type_to_default(discriminator, "  temp");
-    be_global->impl_ << "  stru._d(temp);\n";
+    be_global->impl_ << "  uni._d(temp);\n";
     AST_Type* disc_type = resolveActualType(discriminator);
     Classification disc_cls = classify(disc_type);
     ACE_CDR::ULong default_enum_val = 0;
@@ -3729,7 +3731,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           {
             be_global->impl_ << "  " << scoped(branch->field_type()->name()) << " btemp;\n";
             be_global->impl_ << type_to_default(branch->field_type(), "btemp");
-            be_global->impl_ << "  stru." << branch->local_name()->get_string() << "(btemp);\n";
+            be_global->impl_ << "  uni." << branch->local_name()->get_string() << "(btemp);\n";
             found = true;
             break;
           }
@@ -3854,10 +3856,30 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
         "  }\n";
-
+      AST_Annotation_Appl* ann_appl = node->disc_annotations().find("::@try_construct");
+      TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
       be_global->impl_ <<
-        "  " << scoped(discriminator->name()) << " disc;\n" <<
-        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+        "  " << scoped(discriminator->name()) << " disc;\n" 
+        "  if (!(strm >> disc)) {\n";
+      if (try_construct == tryconstructfailaction_use_default) {
+        be_global->impl_ <<
+          "    set_default(uni);\n"
+          "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    strm.skip(field_size);\n"
+          "    strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "    return true;\n";
+      } else {
+        be_global->impl_ <<
+          "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    strm.skip(field_size);\n"
+          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "    return false;\n";
+      }
+      be_global->impl_ << "  }\n";
 
       be_global->impl_ <<
         "  member_id = 0;\n"
