@@ -2,11 +2,12 @@
 #define CONNECTION_RECORD_LOGGER_H
 
 #include "dds/DdsDcpsDomainC.h"
+#include "common_export.h"
 
 namespace OpenDDS {
 namespace Test {
 
-void install_connection_record_logger(DDS::DomainParticipant_var participant);
+void Common_Export install_connection_record_logger(DDS::DomainParticipant_var participant);
 
 } // Test
 } // OpenDDS
