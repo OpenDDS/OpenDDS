@@ -1221,8 +1221,10 @@ DataReaderImpl::enable()
         " Cached_Allocator_With_Overflow %x with %d chunks\n",
         rd_allocator_.get(), n_chunks_));
 
-  if ((qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC) &&
-      (qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC)) {
+  if ((qos_.liveliness.lease_duration.sec !=
+      DDS::DURATION_INFINITE_SEC) &&
+      (qos_.liveliness.lease_duration.nanosec !=
+          DDS::DURATION_INFINITE_NSEC)) {
     liveliness_lease_duration_ = TimeDuration(qos_.liveliness.lease_duration);
   }
 
