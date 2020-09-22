@@ -12,7 +12,8 @@ project: acelib, dds_macros, install {
     SafetyProfileStreams.h
     Serializer.h
     debug.h
-    XTypes
+    XTypes/External.h
+    XTypes/TypeObject.h
   }
 
   Source_Files {
@@ -20,7 +21,7 @@ project: acelib, dds_macros, install {
     SafetyProfileStreams.cpp
     Serializer.cpp
     debug.cpp
-    XTypes
+    XTypes/TypeObject.cpp
   }
 
 }

@@ -1289,6 +1289,9 @@ DataReaderImpl::enable()
     XTypes::TypeInformation type_info;
     typesupport->to_type_info(type_info);
 
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->add_type_objects_to_cache(*typesupport);
+
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
