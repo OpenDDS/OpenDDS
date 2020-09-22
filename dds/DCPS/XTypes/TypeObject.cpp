@@ -279,7 +279,7 @@ namespace DCPS {
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& uni)
 {
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind()));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind()));
   switch (uni.kind()) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
@@ -399,11 +399,11 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   if (seq.length() == 0) {
     return;
   }
-  max_serialized_size(encoding, size, ACE_CDR::ULong(), seq.length());
+  primitive_serialized_size(encoding, size, ACE_CDR::ULong(), seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq)
@@ -435,11 +435,11 @@ bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::SBoundSeq& seq)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   if (seq.length() == 0) {
     return;
   }
-  max_serialized_size_octet(encoding, size, seq.length());
+  primitive_serialized_size_octet(encoding, size, seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq)
@@ -471,11 +471,11 @@ bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::UnionCaseLabelSeq& seq)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   if (seq.length() == 0) {
     return;
   }
-  max_serialized_size(encoding, size, ACE_CDR::Long(), seq.length());
+  primitive_serialized_size(encoding, size, ACE_CDR::Long(), seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq)
@@ -507,7 +507,7 @@ bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::NameHash_forany&)
 {
-  max_serialized_size_octet(encoding, size, 4);
+  primitive_serialized_size_octet(encoding, size, 4);
 }
 
 bool operator<<(Serializer& strm, const XTypes::NameHash_forany& arr)
@@ -524,7 +524,7 @@ bool operator>>(Serializer& strm, XTypes::NameHash_forany& arr)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::EquivalenceHash_forany&)
 {
-  max_serialized_size_octet(encoding, size, 14);
+  primitive_serialized_size_octet(encoding, size, 14);
 }
 
 bool operator<<(Serializer& strm, const XTypes::EquivalenceHash_forany& arr)
@@ -543,7 +543,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 {
   serialized_size(encoding, size, stru.ann_builtin);
   serialized_size(encoding, size, stru.ann_custom);
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   size += stru.type_name.size() + 1;
 }
 
@@ -593,7 +593,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalStructHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteStructType& stru)
 {
-  max_serialized_size(encoding, size, stru.struct_flags);
+  primitive_serialized_size(encoding, size, stru.struct_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.member_seq);
 }
@@ -609,7 +609,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteStructType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalStructType& stru)
 {
-  max_serialized_size(encoding, size, stru.struct_flags);
+  primitive_serialized_size(encoding, size, stru.struct_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.member_seq);
 }
@@ -625,7 +625,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalStructType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteUnionType& stru)
 {
-  max_serialized_size(encoding, size, stru.union_flags);
+  primitive_serialized_size(encoding, size, stru.union_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.discriminator);
   serialized_size(encoding, size, stru.member_seq);
@@ -643,7 +643,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteUnionType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalUnionType& stru)
 {
-  max_serialized_size(encoding, size, stru.union_flags);
+  primitive_serialized_size(encoding, size, stru.union_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.discriminator);
   serialized_size(encoding, size, stru.member_seq);
@@ -661,7 +661,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalUnionType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteAnnotationType& stru)
 {
-  max_serialized_size(encoding, size, stru.annotation_flag);
+  primitive_serialized_size(encoding, size, stru.annotation_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.member_seq);
 }
@@ -677,7 +677,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalAnnotationType& stru)
 {
-  max_serialized_size(encoding, size, stru.annotation_flag);
+  primitive_serialized_size(encoding, size, stru.annotation_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.member_seq);
 }
@@ -693,7 +693,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalAnnotationType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteAliasType& stru)
 {
-  max_serialized_size(encoding, size, stru.alias_flags);
+  primitive_serialized_size(encoding, size, stru.alias_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.body);
 }
@@ -709,7 +709,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAliasType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalAliasType& stru)
 {
-  max_serialized_size(encoding, size, stru.alias_flags);
+  primitive_serialized_size(encoding, size, stru.alias_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.body);
 }
@@ -725,7 +725,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalAliasType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteSequenceType& stru)
 {
-  max_serialized_size(encoding, size, stru.collection_flag);
+  primitive_serialized_size(encoding, size, stru.collection_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.element);
 }
@@ -741,7 +741,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteSequenceType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalSequenceType& stru)
 {
-  max_serialized_size(encoding, size, stru.collection_flag);
+  primitive_serialized_size(encoding, size, stru.collection_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.element);
 }
@@ -757,7 +757,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalSequenceType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteArrayType& stru)
 {
-  max_serialized_size(encoding, size, stru.collection_flag);
+  primitive_serialized_size(encoding, size, stru.collection_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.element);
 }
@@ -773,7 +773,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteArrayType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalArrayType& stru)
 {
-  max_serialized_size(encoding, size, stru.collection_flag);
+  primitive_serialized_size(encoding, size, stru.collection_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.element);
 }
@@ -789,7 +789,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalArrayType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteMapType& stru)
 {
-  max_serialized_size(encoding, size, stru.collection_flag);
+  primitive_serialized_size(encoding, size, stru.collection_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.key);
   serialized_size(encoding, size, stru.element);
@@ -807,7 +807,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteMapType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalMapType& stru)
 {
-  max_serialized_size(encoding, size, stru.collection_flag);
+  primitive_serialized_size(encoding, size, stru.collection_flag);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.key);
   serialized_size(encoding, size, stru.element);
@@ -850,7 +850,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalEnumeratedHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteEnumeratedType& stru)
 {
-  max_serialized_size(encoding, size, stru.enum_flags);
+  primitive_serialized_size(encoding, size, stru.enum_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.literal_seq);
 }
@@ -866,7 +866,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteEnumeratedType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalEnumeratedType& stru)
 {
-  max_serialized_size(encoding, size, stru.enum_flags);
+  primitive_serialized_size(encoding, size, stru.enum_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.literal_seq);
 }
@@ -882,7 +882,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalEnumeratedType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteBitmaskType& stru)
 {
-  max_serialized_size(encoding, size, stru.bitmask_flags);
+  primitive_serialized_size(encoding, size, stru.bitmask_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.flag_seq);
 }
@@ -898,7 +898,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitmaskType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalBitmaskType& stru)
 {
-  max_serialized_size(encoding, size, stru.bitmask_flags);
+  primitive_serialized_size(encoding, size, stru.bitmask_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.flag_seq);
 }
@@ -914,7 +914,7 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitmaskType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteBitsetType& stru)
 {
-  max_serialized_size(encoding, size, stru.bitset_flags);
+  primitive_serialized_size(encoding, size, stru.bitset_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.field_seq);
 }
@@ -930,7 +930,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitsetType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalBitsetType& stru)
 {
-  max_serialized_size(encoding, size, stru.bitset_flags);
+  primitive_serialized_size(encoding, size, stru.bitset_flags);
   serialized_size(encoding, size, stru.header);
   serialized_size(encoding, size, stru.field_seq);
 }
@@ -946,7 +946,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSize& stru)
 {
   serialized_size(encoding, size, stru.type_id);
-  max_serialized_size(encoding, size, stru.typeobject_serialized_size);
+  primitive_serialized_size(encoding, size, stru.typeobject_serialized_size);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
@@ -965,7 +965,7 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSizeSeq& seq)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }
@@ -1005,7 +1005,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru)
 {
   serialized_size(encoding, size, stru.typeid_with_size);
-  max_serialized_size(encoding, size, stru.dependent_typeid_count);
+  primitive_serialized_size(encoding, size, stru.dependent_typeid_count);
   serialized_size(encoding, size, stru.dependent_typeids);
 }
 
@@ -1104,7 +1104,7 @@ bool operator>>(Serializer& strm, XTypes::CompleteAliasHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteAnnotationHeader& stru)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   size += ACE_OS::strlen(stru.annotation_name.c_str()) + 1;
 }
 
@@ -1123,7 +1123,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteAnnotationParameter& stru)
 {
   serialized_size(encoding, size, stru.common);
-  serialized_size_ulong(encoding, size);
+  primitive_serialized_size_ulong(encoding, size);
   size += ACE_OS::strlen(stru.name.c_str()) + 1;
   serialized_size(encoding, size, stru.default_value);
 }
@@ -1642,72 +1642,72 @@ bool operator>>(Serializer& strm, XTypes::MinimalUnionMember& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AnnotationParameterValue& uni)
 {
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
   switch (uni.kind) {
   case XTypes::TK_BOOLEAN: {
-    max_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(uni.boolean_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(uni.boolean_value));
     break;
   }
   case XTypes::TK_BYTE: {
-    max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.byte_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.byte_value));
     break;
   }
   case XTypes::TK_INT16: {
-    max_serialized_size(encoding, size, uni.int16_value);
+    primitive_serialized_size(encoding, size, uni.int16_value);
     break;
   }
   case XTypes::TK_UINT16: {
-    max_serialized_size(encoding, size, uni.uint_16_value);
+    primitive_serialized_size(encoding, size, uni.uint_16_value);
     break;
   }
   case XTypes::TK_INT32: {
-    max_serialized_size(encoding, size, uni.int32_value);
+    primitive_serialized_size(encoding, size, uni.int32_value);
     break;
   }
   case XTypes::TK_UINT32: {
-    max_serialized_size(encoding, size, uni.uint32_value);
+    primitive_serialized_size(encoding, size, uni.uint32_value);
     break;
   }
   case XTypes::TK_INT64: {
-    max_serialized_size(encoding, size, uni.int64_value);
+    primitive_serialized_size(encoding, size, uni.int64_value);
     break;
   }
   case XTypes::TK_UINT64: {
-    max_serialized_size(encoding, size, uni.uint64_value);
+    primitive_serialized_size(encoding, size, uni.uint64_value);
     break;
   }
   case XTypes::TK_FLOAT32: {
-    max_serialized_size(encoding, size, uni.float32_value);
+    primitive_serialized_size(encoding, size, uni.float32_value);
     break;
   }
   case XTypes::TK_FLOAT64: {
-    max_serialized_size(encoding, size, uni.float64_value);
+    primitive_serialized_size(encoding, size, uni.float64_value);
     break;
   }
   case XTypes::TK_FLOAT128: {
-    max_serialized_size(encoding, size, ACE_CDR::LongDouble());
+    primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());
     break;
   }
   case XTypes::TK_CHAR8: {
-    max_serialized_size(encoding, size, ACE_OutputCDR::from_char(uni.char_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_char(uni.char_value));
     break;
   }
   case XTypes::TK_CHAR16: {
-    max_serialized_size(encoding, size, ACE_OutputCDR::from_wchar(uni.wchar_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_wchar(uni.wchar_value));
     break;
   }
   case XTypes::TK_ENUM: {
-    max_serialized_size(encoding, size, uni.enumerated_value);
+    primitive_serialized_size(encoding, size, uni.enumerated_value);
     break;
   }
   case XTypes::TK_STRING8: {
-    DCPS::serialized_size_ulong(encoding, size);
+    DCPS::primitive_serialized_size_ulong(encoding, size);
     size += ACE_OS::strlen(uni.string8_value.c_str()) + 1;
     break;
   }
   case XTypes::TK_STRING16: {
 #ifdef DDS_HAS_WCHAR
-    DCPS::serialized_size_ulong(encoding, size);
+    DCPS::primitive_serialized_size_ulong(encoding, size);
     size += ACE_OS::strlen(uni.string16_value.c_str()) * DCPS::char16_cdr_size;
 #endif
     break;
@@ -1977,7 +1977,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 {
   size += DCPS::boolean_cdr_size;
   if (stru.unit.present) {
-    DCPS::serialized_size_ulong(encoding, size);
+    DCPS::primitive_serialized_size_ulong(encoding, size);
     size += ACE_OS::strlen(stru.unit.value.c_str()) + 1;
   }
 
@@ -1986,7 +1986,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
   size += DCPS::boolean_cdr_size;
   if (stru.hash_id.present) {
-    DCPS::serialized_size_ulong(encoding, size);
+    DCPS::primitive_serialized_size_ulong(encoding, size);
     size += ACE_OS::strlen(stru.hash_id.value.c_str()) + 1;
   }
 }
@@ -2010,11 +2010,11 @@ bool operator>>(Serializer& strm, XTypes::AppliedBuiltinMemberAnnotations& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedVerbatimAnnotation& stru)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   size += ACE_OS::strlen(stru.placement.c_str()) + 1;
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   size += ACE_OS::strlen(stru.language.c_str()) + 1;
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   size += ACE_OS::strlen(stru.text.c_str()) + 1;
 }
 
@@ -2036,7 +2036,7 @@ bool operator>>(Serializer& strm, XTypes::AppliedVerbatimAnnotation& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonAliasBody& stru)
 {
-  max_serialized_size(encoding, size, stru.related_flags);
+  primitive_serialized_size(encoding, size, stru.related_flags);
   serialized_size(encoding, size, stru.related_type);
 }
 
@@ -2056,7 +2056,7 @@ bool operator>>(Serializer& strm, XTypes::CommonAliasBody& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonAnnotationParameter& stru)
 {
-  max_serialized_size(encoding, size, stru.member_flags);
+  primitive_serialized_size(encoding, size, stru.member_flags);
   serialized_size(encoding, size, stru.member_type_id);
 }
 
@@ -2093,10 +2093,10 @@ bool operator>>(Serializer& strm, XTypes::CommonArrayHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonBitfield& stru)
 {
-  max_serialized_size(encoding, size, stru.position);
-  max_serialized_size(encoding, size, stru.flags);
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bitcount));
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.holder_type));
+  primitive_serialized_size(encoding, size, stru.position);
+  primitive_serialized_size(encoding, size, stru.flags);
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bitcount));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.holder_type));
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonBitfield& stru)
@@ -2119,8 +2119,8 @@ bool operator>>(Serializer& strm, XTypes::CommonBitfield& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonBitflag& stru)
 {
-  max_serialized_size(encoding, size, stru.position);
-  max_serialized_size(encoding, size, stru.flags);
+  primitive_serialized_size(encoding, size, stru.position);
+  primitive_serialized_size(encoding, size, stru.flags);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonBitflag& stru)
@@ -2139,7 +2139,7 @@ bool operator>>(Serializer& strm, XTypes::CommonBitflag& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonCollectionElement& stru)
 {
-  max_serialized_size(encoding, size, stru.element_flags);
+  primitive_serialized_size(encoding, size, stru.element_flags);
   serialized_size(encoding, size, stru.type);
 }
 
@@ -2159,7 +2159,7 @@ bool operator>>(Serializer& strm, XTypes::CommonCollectionElement& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonCollectionHeader& stru)
 {
-  max_serialized_size(encoding, size, stru.bound);
+  primitive_serialized_size(encoding, size, stru.bound);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonCollectionHeader& stru)
@@ -2176,7 +2176,7 @@ bool operator>>(Serializer& strm, XTypes::CommonCollectionHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonDiscriminatorMember& stru)
 {
-  max_serialized_size(encoding, size, stru.member_flags);
+  primitive_serialized_size(encoding, size, stru.member_flags);
   serialized_size(encoding, size, stru.type_id);
 }
 
@@ -2196,7 +2196,7 @@ bool operator>>(Serializer& strm, XTypes::CommonDiscriminatorMember& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonEnumeratedHeader& stru)
 {
-  max_serialized_size(encoding, size, stru.bit_bound);
+  primitive_serialized_size(encoding, size, stru.bit_bound);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonEnumeratedHeader& stru)
@@ -2213,8 +2213,8 @@ bool operator>>(Serializer& strm, XTypes::CommonEnumeratedHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonEnumeratedLiteral& stru)
 {
-  max_serialized_size(encoding, size, stru.value);
-  max_serialized_size(encoding, size, stru.flags);
+  primitive_serialized_size(encoding, size, stru.value);
+  primitive_serialized_size(encoding, size, stru.flags);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonEnumeratedLiteral& stru)
@@ -2233,8 +2233,8 @@ bool operator>>(Serializer& strm, XTypes::CommonEnumeratedLiteral& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonStructMember& stru)
 {
-  max_serialized_size(encoding, size, stru.member_id);
-  max_serialized_size(encoding, size, stru.member_flags);
+  primitive_serialized_size(encoding, size, stru.member_id);
+  primitive_serialized_size(encoding, size, stru.member_flags);
   serialized_size(encoding, size, stru.member_type_id);
 }
 
@@ -2256,8 +2256,8 @@ bool operator>>(Serializer& strm, XTypes::CommonStructMember& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonUnionMember& stru)
 {
-  max_serialized_size(encoding, size, stru.member_id);
-  max_serialized_size(encoding, size, stru.member_flags);
+  primitive_serialized_size(encoding, size, stru.member_id);
+  primitive_serialized_size(encoding, size, stru.member_flags);
   serialized_size(encoding, size, stru.type_id);
   serialized_size(encoding, size, stru.label_seq);
 }
@@ -2302,7 +2302,7 @@ bool operator>>(Serializer& strm, XTypes::CompleteElementDetail& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteMemberDetail& stru)
 {
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   size += ACE_OS::strlen(stru.name.c_str()) + 1;
   serialized_size(encoding, size, stru.ann_builtin);
   serialized_size(encoding, size, stru.ann_custom);
@@ -2393,9 +2393,9 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainMapLTypeDefn& stru)
 {
   serialized_size(encoding, size, stru.header);
-  max_serialized_size(encoding, size, stru.bound);
+  primitive_serialized_size(encoding, size, stru.bound);
   serialized_size(encoding, size, *stru.element_identifier);
-  max_serialized_size(encoding, size, stru.key_flags);
+  primitive_serialized_size(encoding, size, stru.key_flags);
   serialized_size(encoding, size, *stru.key_identifier);
 }
 
@@ -2422,9 +2422,9 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainMapSTypeDefn& stru)
 {
   serialized_size(encoding, size, stru.header);
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bound));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bound));
   serialized_size(encoding, size, *stru.element_identifier);
-  max_serialized_size(encoding, size, stru.key_flags);
+  primitive_serialized_size(encoding, size, stru.key_flags);
   serialized_size(encoding, size, *stru.key_identifier);
 }
 
@@ -2451,7 +2451,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainSequenceLElemDefn& stru)
 {
   serialized_size(encoding, size, stru.header);
-  max_serialized_size(encoding, size, stru.bound);
+  primitive_serialized_size(encoding, size, stru.bound);
   serialized_size(encoding, size, *stru.element_identifier);
 }
 
@@ -2474,7 +2474,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainSequenceSElemDefn& stru)
 {
   serialized_size(encoding, size, stru.header);
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bound));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bound));
   serialized_size(encoding, size, *stru.element_identifier);
 }
 
@@ -2496,7 +2496,7 @@ bool operator>>(Serializer& strm, XTypes::PlainSequenceSElemDefn& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::StringLTypeDefn& stru)
 {
-  max_serialized_size(encoding, size, stru.bound);
+  primitive_serialized_size(encoding, size, stru.bound);
 }
 
 bool operator<<(Serializer& strm, const XTypes::StringLTypeDefn& stru)
@@ -2513,7 +2513,7 @@ bool operator>>(Serializer& strm, XTypes::StringLTypeDefn& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::StringSTypeDefn& stru)
 {
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bound));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.bound));
 }
 
 bool operator<<(Serializer& strm, const XTypes::StringSTypeDefn& stru)
@@ -2531,8 +2531,8 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::StronglyConnectedComponentId& stru)
 {
   serialized_size(encoding, size, stru.sc_component_id);
-  max_serialized_size(encoding, size, stru.scc_length);
-  max_serialized_size(encoding, size, stru.scc_index);
+  primitive_serialized_size(encoding, size, stru.scc_length);
+  primitive_serialized_size(encoding, size, stru.scc_index);
 }
 
 bool operator<<(Serializer& strm, const XTypes::StronglyConnectedComponentId& stru)
@@ -2553,8 +2553,8 @@ bool operator>>(Serializer& strm, XTypes::StronglyConnectedComponentId& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainCollectionHeader& stru)
 {
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.equiv_kind));
-  max_serialized_size(encoding, size, stru.element_flags);
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(stru.equiv_kind));
+  primitive_serialized_size(encoding, size, stru.element_flags);
 }
 
 bool operator<<(Serializer& strm, const XTypes::PlainCollectionHeader& stru)
@@ -2573,7 +2573,7 @@ bool operator>>(Serializer& strm, XTypes::PlainCollectionHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeObjectHashId& uni)
 {
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
   switch (uni.kind) {
   case XTypes::EK_MINIMAL:
   case XTypes::EK_COMPLETE: {
@@ -2623,7 +2623,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteTypeObject& type_object)
 {
   using namespace XTypes;
-  max_serialized_size_octet(encoding, size); // discriminator
+  primitive_serialized_size_octet(encoding, size); // discriminator
 
   switch (type_object.kind) {
   case TK_ALIAS:
@@ -2694,7 +2694,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalTypeObject& type_object)
 {
   using namespace XTypes;
-  max_serialized_size_octet(encoding, size); // discriminator
+  primitive_serialized_size_octet(encoding, size); // discriminator
 
   switch (type_object.kind) {
   case TK_ALIAS:
@@ -2759,8 +2759,8 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeObject& type_object)
 {
   using namespace XTypes;
-  max_serialized_size_ulong(encoding, size); // DHEADER
-  max_serialized_size_octet(encoding, size); // discriminator
+  primitive_serialized_size_ulong(encoding, size); // DHEADER
+  primitive_serialized_size_octet(encoding, size); // discriminator
 
   switch (type_object.kind) {
   case EK_COMPLETE:
@@ -2779,7 +2779,7 @@ bool operator<<(Serializer& ser, const XTypes::TypeObject& type_object)
   // maximum alignment in PLAIN_CDR2 is 4
   size_t object_size = serialized_size(ser.encoding(), type_object);
   size_t dheader_size = 0;
-  max_serialized_size_ulong(ser.encoding(), dheader_size);
+  primitive_serialized_size_ulong(ser.encoding(), dheader_size);
   if (!ser.write_delimiter(object_size - dheader_size)) {
     return false;
   }
@@ -2883,7 +2883,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPairSeq& seq)
 {
   // TODO: needs correct implementation
-  DCPS::serialized_size_ulong(encoding, size);
+  DCPS::primitive_serialized_size_ulong(encoding, size);
   for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }

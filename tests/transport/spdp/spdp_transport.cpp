@@ -129,7 +129,7 @@ struct TestParticipant: ACE_Event_Handler {
     size_t size = 0;
     serialized_size(encoding, size, hdr_);
     serialized_size(encoding, size, ds);
-    serialized_size_ulong(encoding, size);
+    primitive_serialized_size_ulong(encoding, size);
     serialized_size(encoding, size, plist);
 
     ACE_Message_Block mb(size);
