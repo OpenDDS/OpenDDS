@@ -21,15 +21,15 @@ namespace OpenDDS {
 
 namespace XTypes {
   struct TypeInformation;
-};
+}
 
 namespace DCPS {
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
+  OpenDDS_Dcps_Export
+  bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
 
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
-};
+  OpenDDS_Dcps_Export
+  bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
+}
 
 namespace XTypes {
 
