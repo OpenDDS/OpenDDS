@@ -2174,9 +2174,6 @@ namespace {
     if (repr.xml) {
       values.push_back("DDS::XML_DATA_REPRESENTATION");
     }
-    if (repr.unaligned_cdr) {
-      values.push_back("UNALIGNED_CDR_DATA_REPRESENTATION");
-    }
 
     std::ostringstream ss;
     ss << indent << name << ".length(" << values.size() << ");\n";
