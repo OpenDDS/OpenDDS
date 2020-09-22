@@ -175,7 +175,7 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
-  if (result < 0) {
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -203,7 +203,7 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
-  if (result < 0) {
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
