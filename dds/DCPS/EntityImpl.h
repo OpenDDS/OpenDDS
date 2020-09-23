@@ -60,9 +60,9 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const { return RcHandle<EntityImpl>(); }
 
-  void set_observer(Observer::Rch observer, Observer::Event e);
+  void set_observer(Observer_rch observer, Observer::Event e);
 
-  Observer::Rch get_observer(Observer::Event e);
+  Observer_rch get_observer(Observer::Event e);
 
 protected:
   DDS::ReturnCode_t set_enabled();
@@ -88,7 +88,7 @@ private:
 
   TransportConfig_rch transport_config_;
 
-  Observer::Rch observer_;
+  Observer_rch observer_;
   Observer::Event events_;
 
   mutable ACE_Thread_Mutex lock_;

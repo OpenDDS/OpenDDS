@@ -82,10 +82,10 @@ EntityImpl::get_deleted()
   return this->entity_deleted_.value();
 }
 
-Observer::Rch EntityImpl::get_observer(Observer::Event e)
+Observer_rch EntityImpl::get_observer(Observer::Event e)
 {
   return (observer_ && (events_ & e)) ? observer_ :
-         parent() ? parent()->get_observer(e) : Observer::Rch();
+         parent() ? parent()->get_observer(e) : Observer_rch();
 }
 
 void
@@ -116,7 +116,7 @@ EntityImpl::transport_config() const
   return transport_config_;
 }
 
-void EntityImpl::set_observer(Observer::Rch observer, Observer::Event e)
+void EntityImpl::set_observer(Observer_rch observer, Observer::Event e)
 {
   observer_ = observer;
   events_ = e;

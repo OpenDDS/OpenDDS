@@ -17,7 +17,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-CORBA::ULong Observer::Sample::to_instance_state(char message_id)
+DDS::InstanceStateKind Observer::Sample::to_instance_state(char message_id)
 {
   switch (message_id) {
   case UNREGISTER_INSTANCE:
@@ -46,7 +46,7 @@ Observer::Sample::Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i)
   , data_(s.sample_.get())
 {}
 
-Observer::Sample::Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i, CORBA::ULong instance_state)
+Observer::Sample::Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i, DDS::InstanceStateKind instance_state)
   : instance_(i)
   , instance_state_(to_instance_state(instance_state))
   , timestamp_(s.source_timestamp_)
@@ -56,7 +56,7 @@ Observer::Sample::Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i, 
 
 Observer::Sample::Sample(
   DDS::InstanceHandle_t i,
-  CORBA::ULong instance_state,
+  DDS::InstanceStateKind instance_state,
   const DDS::Time_t& t,
   const SequenceNumber& sn,
   const void* data)
@@ -66,23 +66,6 @@ Observer::Sample::Sample(
   , seq_n_(sn)
   , data_(data)
 {}
-
-void Observer::on_enabled(DDS::DataWriter_ptr) {}
-void Observer::on_enabled(DDS::DataReader_ptr) {}
-void Observer::on_deleted(DDS::DataWriter_ptr) {}
-void Observer::on_deleted(DDS::DataReader_ptr) {}
-void Observer::on_qos_changed(DDS::DataWriter_ptr) {}
-void Observer::on_qos_changed(DDS::DataReader_ptr) {}
-
-void Observer::on_associated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
-void Observer::on_associated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
-void Observer::on_disassociated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
-void Observer::on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
-
-void Observer::on_sample_sent(const DDS::DataWriter_ptr, const Sample&) {}
-void Observer::on_sample_received(const DDS::DataReader_ptr, const Sample&) {}
-void Observer::on_sample_read(const DDS::DataReader_ptr, const Sample&) {}
-void Observer::on_sample_taken(const DDS::DataReader_ptr, const Sample&) {}
 
 Observer::~Observer() {}
 

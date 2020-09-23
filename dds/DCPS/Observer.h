@@ -34,8 +34,6 @@ class OpenDDS_Dcps_Export Observer
   : public virtual RcObject
 {
 public:
-  typedef RcHandle<Observer> Rch;
-
   typedef unsigned long Event;
   enum {
     e_ENABLED         = 0x0001 << 0,
@@ -54,42 +52,44 @@ public:
   struct OpenDDS_Dcps_Export Sample
   {
     DDS::InstanceHandle_t instance_;
-    CORBA::ULong instance_state_;
+    DDS::InstanceStateKind instance_state_;
     DDS::Time_t timestamp_;
     SequenceNumber seq_n_;
     const void* data_;
-    static CORBA::ULong to_instance_state(char message_id);
+    static DDS::InstanceStateKind to_instance_state(char message_id);
     Sample(DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t);
     explicit Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i = 0);
-    explicit Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i = 0, CORBA::ULong instance_state = 0);
-    Sample(DDS::InstanceHandle_t i, CORBA::ULong instance_state,
+    explicit Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i = 0, DDS::InstanceStateKind instance_state = 0);
+    Sample(DDS::InstanceHandle_t i, DDS::InstanceStateKind instance_state,
       const DDS::Time_t& t, const SequenceNumber& sn, const void* data);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed
-  virtual void on_enabled(DDS::DataWriter_ptr);
-  virtual void on_enabled(DDS::DataReader_ptr);
-  virtual void on_deleted(DDS::DataWriter_ptr);
-  virtual void on_deleted(DDS::DataReader_ptr);
-  virtual void on_qos_changed(DDS::DataWriter_ptr);
-  virtual void on_qos_changed(DDS::DataReader_ptr);
+  virtual void on_enabled(DDS::DataWriter_ptr) {}
+  virtual void on_enabled(DDS::DataReader_ptr) {}
+  virtual void on_deleted(DDS::DataWriter_ptr) {}
+  virtual void on_deleted(DDS::DataReader_ptr) {}
+  virtual void on_qos_changed(DDS::DataWriter_ptr) {}
+  virtual void on_qos_changed(DDS::DataReader_ptr) {}
 
   // Group 2: Peer associated, disassociated
-  virtual void on_associated(DDS::DataWriter_ptr, const GUID_t& /* readerId */);
-  virtual void on_associated(DDS::DataReader_ptr, const GUID_t& /* writerId */);
-  virtual void on_disassociated(DDS::DataWriter_ptr, const GUID_t& /* readerId */);
-  virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */);
+  virtual void on_associated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
+  virtual void on_associated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
+  virtual void on_disassociated(DDS::DataWriter_ptr, const GUID_t& /* readerId */) {}
+  virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
 
   // Group 3: Sample sent, received, read, taken
-  virtual void on_sample_sent(const DDS::DataWriter_ptr, const Sample&);
-  virtual void on_sample_received(const DDS::DataReader_ptr, const Sample&);
-  virtual void on_sample_read(const DDS::DataReader_ptr, const Sample&);
-  virtual void on_sample_taken(const DDS::DataReader_ptr, const Sample&);
+  virtual void on_sample_sent(const DDS::DataWriter_ptr, const Sample&) {}
+  virtual void on_sample_received(const DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_read(const DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_taken(const DDS::DataReader_ptr, const Sample&) {}
 
   virtual ~Observer();
 protected:
   Observer() {}
 };
+
+typedef RcHandle<Observer> Observer_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

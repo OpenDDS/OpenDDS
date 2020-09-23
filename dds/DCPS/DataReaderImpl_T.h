@@ -228,7 +228,7 @@ namespace OpenDDS {
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
-    const Observer::Rch observer = get_observer(Observer::e_SAMPLE_READ);
+    const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
 
     const typename InstanceMap::iterator the_end = instance_map_.end();
     for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
@@ -285,7 +285,7 @@ namespace OpenDDS {
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
-    const Observer::Rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
+    const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
 
     const typename InstanceMap::iterator the_end = instance_map_.end();
     for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
@@ -1137,7 +1137,7 @@ private:
 #endif
                                            DDS_OPERATION_READ);
 
-  const Observer::Rch observer = get_observer(Observer::e_SAMPLE_READ);
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (!group_coherent_ordered) {
@@ -1228,7 +1228,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
 #endif
                                            DDS_OPERATION_TAKE);
 
-  const Observer::Rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (!group_coherent_ordered) {
@@ -1304,7 +1304,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
 
   const InstanceState_rch state_obj = inst->instance_state_;
   if (state_obj->match(view_states, instance_states)) {
-    const Observer::Rch observer = get_observer(Observer::e_SAMPLE_READ);
+    const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
       if ((item->sample_state_ & sample_states)
@@ -1375,7 +1375,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
                                            DDS_OPERATION_TAKE);
 
   if (inst->instance_state_->match(view_states, instance_states)) {
-    const Observer::Rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
+    const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
       if ((item->sample_state_ & sample_states)

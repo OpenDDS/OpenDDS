@@ -234,7 +234,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     (reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
   if (associate(data, active)) {
-    const Observer::Rch observer = get_observer(Observer::e_ASSOCIATED);
+    const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
     if (observer) {
       observer->on_associated(this, data.remote_id_);
     }
@@ -597,7 +597,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     return;
   }
 
-  const Observer::Rch observer = get_observer(Observer::e_DISASSOCIATED);
+  const Observer_rch observer = get_observer(Observer::e_DISASSOCIATED);
   if (observer) {
     for (CORBA::ULong i = 0; i < readers.length(); ++i) {
       observer->on_disassociated(this, readers[i]);
@@ -1020,7 +1020,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 
     qos_ = qos;
 
-    const Observer::Rch observer = get_observer(Observer::e_QOS_CHANGED);
+    const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
     if (observer) {
       observer->on_qos_changed(this);
     }
@@ -1575,7 +1575,7 @@ DataWriterImpl::enable()
 #endif
 
   if (writer_enabled_result == DDS::RETCODE_OK) {
-    const Observer::Rch observer = get_observer(Observer::e_ENABLED);
+    const Observer_rch observer = get_observer(Observer::e_ENABLED);
     if (observer) {
       observer->on_enabled(this);
     }
@@ -1926,7 +1926,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->send(list, transaction_id);
   }
 
-  const Observer::Rch observer = get_observer(Observer::e_SAMPLE_SENT);
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
   if (observer) {
     Observer::Sample s(handle, *element, source_timestamp);
     observer->on_sample_sent(this, s);
@@ -2553,7 +2553,7 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 void
 DataWriterImpl::prepare_to_delete()
 {
-  const Observer::Rch observer = get_observer(Observer::e_DELETED);
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
   if (observer) {
     observer->on_deleted(this);
   }
