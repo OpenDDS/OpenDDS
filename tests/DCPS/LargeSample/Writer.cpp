@@ -51,7 +51,7 @@ void Writer::write(bool reliable, int num_messages, unsigned data_field_length_o
       }
 
       Messenger::Message message;
-      message.writer_id = datawriter_i + 1;
+      message.writer_id = static_cast<int>(datawriter_i + 1);
       message.from = "Comic Book Guy";
       message.process_id = my_pid_;
       message.participant_id = 0;

@@ -81,6 +81,8 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
 {
   pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
   sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
+
+  type_lookup_init(TheServiceParticipant->interceptor());
 }
 
 void StaticEndpointManager::init_bit()
@@ -392,16 +394,10 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     const RepoId& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
-#ifdef __SUNPRO_CC
-    WriterAssociation wa;
-    wa.writerTransInfo = writer.trans_info;
-    wa.writerId = writerid;
-    wa.pubQos = writer.publisher_qos;
-    wa.writerQos = writer.qos;
-#else
-    const WriterAssociation wa =
-      {writer.trans_info, writerid, writer.publisher_qos, writer.qos};
-#endif
+    DDS::OctetSeq type_info;
+    const WriterAssociation wa = {
+      writer.trans_info, writerid, writer.publisher_qos, writer.qos, type_info
+    };
     sub.subscription_->add_association(readerid, wa, false);
   }
 

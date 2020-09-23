@@ -158,6 +158,7 @@ public:
   };
 
   virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual void use_ice_now(bool /*flag*/) {}
 
 protected:
   TransportImpl(TransportInst& config);

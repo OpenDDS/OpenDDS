@@ -296,11 +296,9 @@ public:
   #endif
     initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy;
 
-    initial_DataWriterQos_.representation.value.length(2);
+    initial_DataWriterQos_.representation.value.length(1);
     initial_DataWriterQos_.representation.value[0] =
       DDS::XCDR_DATA_REPRESENTATION;
-    initial_DataWriterQos_.representation.value[1] =
-      OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
   }
 
   WriteDataContainer* delayed_deliver_container_;

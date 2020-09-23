@@ -92,12 +92,12 @@ DomainParticipantFactoryImpl::create_participant(
   TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
 
   if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
-    ACE_TString instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(dp->get_unique_id().c_str());
+    OPENDDS_STRING instance_config_name = dp->get_unique_id();
 
     bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
 
     if (ret) {
-      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()), dp.in());
+      TheTransportRegistry->bind_config(instance_config_name, dp.in());
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")

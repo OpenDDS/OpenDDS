@@ -31,6 +31,23 @@ void print_hex(void* d)
   printf("\n");
 }
 
+template<typename Type>
+void key_hash_test(const Type& value, SerializedSizeBound expected_bound = SerializedSizeBound())
+{
+  const SerializedSizeBound actual_bound =
+    MarshalTraits<Type>::key_only_serialized_size_bound(encoding);
+  std::cout << "  bound = " << actual_bound.to_string() << std::endl;
+  if (actual_bound != expected_bound) {
+    ACE_ERROR((LM_ERROR, "ERROR: expected bound to be %C, but it is %C\n",
+       expected_bound.to_string().c_str(), actual_bound.to_string().c_str()));
+    TEST_CHECK(false);
+  }
+
+  OpenDDS::RTPS::KeyHash_t hash;
+  OpenDDS::RTPS::marshal_key_hash(value, hash);
+  print_hex(hash.value);
+}
+
 void run_test(const Encoding& encoding)
 {
   {
@@ -304,213 +321,92 @@ void run_test(const Encoding& encoding)
   // The following tests exercise the KeyHash related functionality using
   // a variety of different key types
   {
-    Messenger1::Message message;  // No Key, length = 0, bounded = true
     std::cout << "Messenger1::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger1::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger1::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 0);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    Messenger1::Message message; // No Key, length = 0, bounded = true
+    key_hash_test(message, 0);
   }
 
   {
-    Messenger2::Message message;  // long Key, length = 4, bounded = true
-    message.subject_id = 0x01020304;
     std::cout << "Messenger2::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger2::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger2::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 4);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
-  }
-
-  {
-    Messenger3::Message message;  // two long Keys, length = 8, bounded = true
+    Messenger2::Message message; // long Key, length = 4, bounded = true
     message.subject_id = 0x01020304;
-    message.count      = 0x05060708;
+    key_hash_test(message, 4);
+  }
+
+  {
     std::cout << "Messenger3::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger3::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger3::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 8);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    Messenger3::Message message; // two long Keys, length = 8, bounded = true
+    message.subject_id = 0x01020304;
+    message.count = 0x05060708;
+    key_hash_test(message, 8);
   }
 
   {
-    Messenger4::Message message;  // Keys of many types, length = 0, bounded = false
     std::cout << "Messenger4::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger4::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger4::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(!is_bounded);
-    TEST_CHECK(length == 0);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    Messenger4::Message message;  // Keys of many types, length = 0, bounded = false
+    key_hash_test(message);
   }
 
   {
-    Messenger5::Message message;  // Wide string Key, length = 0, bounded = false
     std::cout << "Messenger5::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger5::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger5::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(!is_bounded);
-    TEST_CHECK(length == 0);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    Messenger5::Message message;  // Wide string Key, length = 0, bounded = false
+    key_hash_test(message);
   }
 
   {
+    std::cout << "Messenger6::Message" << std::endl;
     Messenger6::Message message;  // long Key, length = 4, bounded = true
     message.payload.header.subject_id = 0x01020304;
-
-    std::cout << "Messenger6::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger6::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger6::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 4);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message, 4);
   }
 
   {
+    std::cout << "Messenger7::Message" << std::endl;
     Messenger7::Message message;  // Long Key, length = 4, bounded = true
     message.responses[0] = 0x01020304;
-    std::cout << "Messenger7::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger7::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger7::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 4);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message, 4);
   }
 
   {
+    std::cout << "Messenger8::Message" << std::endl;
     Messenger8::Message message;  // Long Key, length = 4, bounded = true
     message.header.responses[0] = 0x01020304;
-    std::cout << "Messenger8::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger8::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger8::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 4);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message, 4);
   }
 
   {
+    std::cout << "Messenger9::Message" << std::endl;
     Messenger9::Message message;  // Long Key, length = 4, bounded = true
     message.headers[1].subject_id = 0x01020304;
-    std::cout << "Messenger9::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger9::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger9::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 4);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message, 4);
   }
 
   {
+    std::cout << "Messenger10::Message" << std::endl;
     Messenger10::Message message;  // String and long Keys, length = 0, bounded = false
     message.count = 0x01020304;
-    std::cout << "Messenger10::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger10::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger10::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(!is_bounded);
-    TEST_CHECK(length == 0);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message);
   }
 
   {
+    std::cout << "Messenger11::Message" << std::endl;
     Messenger11::Message message;  // Four long Keys, length = 16, bounded = true
     message.long_1 = 0x01020304;
     message.long_2 = 0x05060708;
     message.long_3 = 0x090a0b0c;
     message.long_4 = 0x0d0e0f10;
-    std::cout << "Messenger11::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger11::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger11::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 16);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message, 16);
   }
 
   {
+    std::cout << "Messenger12::Message" << std::endl;
     Messenger12::Message message;  // Five long Keys, length = 20, bounded = true
     message.long_1 = 0x01020304;
     message.long_2 = 0x05060708;
     message.long_3 = 0x090a0b0c;
     message.long_4 = 0x0d0e0f10;
     message.long_5 = 0x11121314;
-    std::cout << "Messenger12::Message" << std::endl;
-    const size_t length = max_serialized_size(
-      encoding, KeyOnly<const Messenger12::Message>(message));
-    bool is_bounded = MarshalTraits<Messenger12::Message>::gen_is_bounded_key_size();
-    std::cout << "  is bounded = " << is_bounded << std::endl;
-    std::cout << "  length = " << length << std::endl;
-    TEST_CHECK(is_bounded);
-    TEST_CHECK(length == 20);
-
-    OpenDDS::RTPS::KeyHash_t hash;
-    OpenDDS::RTPS::marshal_key_hash(message, hash);
-    print_hex(hash.value);
+    key_hash_test(message, 20);
   }
 }
 
