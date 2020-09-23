@@ -333,7 +333,6 @@ bool run_test()
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       availableBuiltinEndpoints,
-      0, /*TLS_TODO: implement availableExtendedBuiltinEndpoints ??? */
       0,
       nonEmptyList /* sedp_multicast */,
       nonEmptyList /* sedp_unicast */,
@@ -341,7 +340,8 @@ bool run_test()
       nonEmptyList /*defaultUnicastLocatorList*/,
       { 0 /*manualLivelinessCount*/ },
       qos.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
+      0 /*TLS_TODO: init availableExtendedBuiltinEndpoints in ParticipantProxy_t??? */
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),

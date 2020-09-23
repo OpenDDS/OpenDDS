@@ -495,12 +495,6 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
 
-  // TLS_TODO: needed for proxy? extended_builtin_endpoints is out of scope in non-secure builds
-  //Parameter aebe_param;
-  //aebe_param.extended_builtin_endpoints(
-  //  proxy.availableExtendedBuiltinEndpoints);
-  //add_param(param_list, abe_param);
-
   // Interoperability note:
   // For interoperability with other DDS implemenations, we'll encode the
   // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
@@ -509,6 +503,14 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   be_param.builtin_endpoints(
     proxy.availableBuiltinEndpoints);
   add_param(param_list, be_param);
+
+  // TLS_TODO: verify it's the right place to handle extended builtin endpoints
+#ifdef OPENDDS_SECURITY
+  Parameter aebe_param;
+  aebe_param.extended_builtin_endpoints(
+    proxy.availableExtendedBuiltinEndpoints);
+  add_param(param_list, abe_param);
+#endif
 
   // Each locator
   add_param_locator_seq(
@@ -555,7 +557,9 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
+#ifdef OPENDDS_SECURITY
   proxy.availableExtendedBuiltinEndpoints = 0;
+#endif
   proxy.expectsInlineQos = false;
 
   CORBA::ULong length = param_list.length();
@@ -595,11 +599,13 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
-      //TLS_TODO: where secure parameters should be added to the proxy???
-      //case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
-      //  proxy.availableExtendedBuiltinEndpoints =
-      //    param.extended_builtin_endpoints();
-      //  break;
+      //TLS_TODO: where secure parameters should be added to the proxy?
+#ifdef OPENDDS_SECURITY
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        proxy.availableExtendedBuiltinEndpoints =
+          param.extended_builtin_endpoints();
+        break;
+#endif
       case PID_METATRAFFIC_UNICAST_LOCATOR:
         append_locator(
             proxy.metatrafficUnicastLocatorList,

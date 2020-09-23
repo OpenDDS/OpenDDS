@@ -221,8 +221,6 @@ module OpenDDS {
     const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER =
       1 << 15;
 
-    typedef unsigned long ExtendedBuiltinEndpointSet_t;
-
     typedef unsigned long BuiltinEndpointQos_t;
     const BuiltinEndpointQos_t BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER =
       1 << 0;
@@ -584,7 +582,6 @@ module OpenDDS {
       VendorId_t vendorId;
       boolean expectsInlineQos;
       BuiltinEndpointSet_t availableBuiltinEndpoints;
-      ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
       BuiltinEndpointQos_t builtinEndpointQos;
       DCPS::LocatorSeq metatrafficUnicastLocatorList;
       DCPS::LocatorSeq metatrafficMulticastLocatorList;
@@ -593,6 +590,9 @@ module OpenDDS {
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
+#ifdef OPENDDS_SECURITY
+      DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
+#endif
     };
 
     // top-level data type for SPDP

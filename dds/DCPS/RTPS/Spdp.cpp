@@ -893,7 +893,7 @@ namespace {
 DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 {
   DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-    {
+  {
       {
         DDS::BuiltinTopicKey_t() /*ignored*/,
         qos_.user_data
@@ -914,6 +914,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   }
   if (participant_sec_attr_.is_discovery_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    // TLS_TODO: only when is_discovery_protected?
     pbtds.base.extended_builtin_endpoints =
       DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
       DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
@@ -1967,7 +1968,8 @@ Spdp::build_local_pdata(
         {
           security_attributes_to_bitmask(participant_sec_attr_),
           participant_sec_attr_.plugin_participant_attributes
-        }
+        },
+        available_extended_builtin_endpoints_
       },
       identity_status_token_
     },
@@ -1987,7 +1989,6 @@ Spdp::build_local_pdata(
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
-      available_extended_builtin_endpoints_,
       0,
       unicast_locators,
       multicast_locators,
@@ -1995,7 +1996,8 @@ Spdp::build_local_pdata(
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
       qos_.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
+      available_extended_builtin_endpoints_
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),

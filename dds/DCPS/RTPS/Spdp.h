@@ -175,7 +175,7 @@ public:
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
-  ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const { return available_extended_builtin_endpoints_; }
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const { return available_extended_builtin_endpoints_; }
 
   ICE::Endpoint* get_ice_endpoint_if_added();
 
@@ -391,10 +391,10 @@ private:
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
-  ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
   DCPS::RcHandle<Sedp>  sedp_;
 
 #ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 

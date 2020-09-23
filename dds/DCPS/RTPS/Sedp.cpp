@@ -1542,9 +1542,9 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     //FUTURE: if/when topic propagation is supported, add it here
 
 #ifdef OPENDDS_SECURITY
-    const ExtendedBuiltinEndpointSet_t extended_avail =
+    const DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail =
       pdata.participantProxy.availableExtendedBuiltinEndpoints;
-    ExtendedBuiltinEndpointSet_t extended_local_avail = spdp_.available_extended_builtin_endpoints();
+    const DDS::Security::ExtendedBuiltinEndpointSet_t extended_local_avail = spdp_.available_extended_builtin_endpoints();
 
     if (spdp_.security_builtins_associated(part)) {
       disassociate_security_builtins(local_avail, extended_local_avail, avail, extended_avail, part);
@@ -1617,8 +1617,8 @@ Sedp::disassociate(const ParticipantData_t& pdata)
 }
 
 #ifdef OPENDDS_SECURITY
-void Sedp::disassociate_security_builtins(BuiltinEndpointSet_t local_avail, ExtendedBuiltinEndpointSet_t,
-                                          BuiltinEndpointSet_t avail, ExtendedBuiltinEndpointSet_t extended_avail,
+void Sedp::disassociate_security_builtins(BuiltinEndpointSet_t local_avail, DDS::Security::ExtendedBuiltinEndpointSet_t,
+                                          BuiltinEndpointSet_t avail, DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                                           const RepoId& part)
 {
   using namespace DDS::Security;
@@ -1808,7 +1808,7 @@ Sedp::update_locators(const ParticipantData_t& pdata)
     transport_inst_->update_locators(remote_id, remote_data);
   }
 
-  const ExtendedBuiltinEndpointSet_t& extended_avail =
+  const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail =
     pdata.participantProxy.availableExtendedBuiltinEndpoints;
 
   if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
