@@ -212,7 +212,9 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
+#ifdef OPENDDS_SECURITY
   , available_extended_builtin_endpoints_(0)
+#endif
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
 #ifdef OPENDDS_SECURITY
   , security_config_()
@@ -1981,23 +1983,25 @@ Spdp::build_local_pdata(
     },
 #endif
     { // ParticipantProxy_t
-      domain_,
-      "",
-      PROTOCOLVERSION,
-      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
-      VENDORID_OPENDDS,
-      false /*expectsIQoS*/,
-      available_builtin_endpoints_,
-      0,
-      unicast_locators,
-      multicast_locators,
-      nonEmptyList /*defaultMulticastLocatorList*/,
-      nonEmptyList /*defaultUnicastLocatorList*/,
-      {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
-      qos_.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
-      available_extended_builtin_endpoints_
+      domain_
+      , ""
+      , PROTOCOLVERSION
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , VENDORID_OPENDDS
+      , false /*expectsIQoS*/
+      , available_builtin_endpoints_
+      , 0
+      , unicast_locators
+      , multicast_locators
+      , nonEmptyList /*defaultMulticastLocatorList*/
+      , nonEmptyList /*defaultUnicastLocatorList*/
+      , {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
+      , qos_.property
+      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+#ifdef OPENDDS_SECURITY
+      , available_extended_builtin_endpoints_
+#endif
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
