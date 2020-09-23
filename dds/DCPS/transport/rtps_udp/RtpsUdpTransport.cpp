@@ -522,7 +522,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 
   relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
 
-  if (config.use_rtps_relay() || cofig.rtps_relay_only()) {
+  if (config.use_rtps_relay() || config.rtps_relay_only()) {
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   }
 #endif
