@@ -893,7 +893,7 @@ namespace {
 DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 {
   DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-  {
+    {
       {
         DDS::BuiltinTopicKey_t() /*ignored*/,
         qos_.user_data

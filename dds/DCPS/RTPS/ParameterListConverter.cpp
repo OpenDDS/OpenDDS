@@ -293,7 +293,6 @@ namespace {
     }
 
     if ((field_mask & (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) == (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) {
-      // TLS_TODO: add EXTENDED_BUILTIN_ENDPOINTS logic here???
       if ((field_mask & IDENTITY_STATUS_TOKEN_FIELD) == IDENTITY_STATUS_TOKEN_FIELD) {
         return OpenDDS::Security::DPDK_SECURE;
       } else {
@@ -506,8 +505,8 @@ bool to_param_list(const ParticipantProxy_t& proxy,
 
   // TLS_TODO: verify it's the right place to handle extended builtin endpoints
 #ifdef OPENDDS_SECURITY
-  Parameter aebe_param;
-  aebe_param.extended_builtin_endpoints(
+  Parameter ebe_param;
+  ebe_param.extended_builtin_endpoints(
     proxy.availableExtendedBuiltinEndpoints);
   add_param(param_list, abe_param);
 #endif

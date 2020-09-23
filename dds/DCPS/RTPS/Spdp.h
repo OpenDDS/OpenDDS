@@ -175,7 +175,9 @@ public:
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
+#ifdef OPENDDS_SECURITY
   DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const { return available_extended_builtin_endpoints_; }
+#endif
 
   ICE::Endpoint* get_ice_endpoint_if_added();
 
