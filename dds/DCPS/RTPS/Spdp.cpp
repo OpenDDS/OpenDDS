@@ -916,7 +916,6 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   }
   if (participant_sec_attr_.is_discovery_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-    // TLS_TODO: only when is_discovery_protected?
     pbtds.base.extended_builtin_endpoints =
       DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
       DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;

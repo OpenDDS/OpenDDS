@@ -325,23 +325,25 @@ bool run_test()
       qos.user_data
     },
     {
-      domain,
-      "",
-      PROTOCOLVERSION,
-      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
-      VENDORID_OPENDDS,
-      false /*expectsIQoS*/,
-      availableBuiltinEndpoints,
-      0,
-      nonEmptyList /* sedp_multicast */,
-      nonEmptyList /* sedp_unicast */,
-      nonEmptyList /*defaultMulticastLocatorList*/,
-      nonEmptyList /*defaultUnicastLocatorList*/,
-      { 0 /*manualLivelinessCount*/ },
-      qos.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
-      0 /*TLS_TODO: init availableExtendedBuiltinEndpoints in ParticipantProxy_t??? */
+      domain
+      , ""
+      , PROTOCOLVERSION
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , VENDORID_OPENDDS
+      , false /*expectsIQoS*/
+      , availableBuiltinEndpoints
+      , 0
+      , nonEmptyList /* sedp_multicast */
+      , nonEmptyList /* sedp_unicast */
+      , nonEmptyList /*defaultMulticastLocatorList*/
+      , nonEmptyList /*defaultUnicastLocatorList*/
+      , { 0 /*manualLivelinessCount*/ }
+      , qos.property
+      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+#ifdef OPENDDS_SECURITY
+      , 0 /*TLS_TODO: init availableExtendedBuiltinEndpoints in ParticipantProxy_t??? */
+#endif
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
