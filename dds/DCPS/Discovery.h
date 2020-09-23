@@ -13,6 +13,7 @@
 #include "RcHandle_T.h"
 #include "unique_ptr.h"
 #include "XTypes/TypeObject.h"
+#include "XTypes/TypeLookupService.h"
 
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
@@ -258,6 +259,10 @@ public:
     const RepoId& participantId,
     const RepoId& localId,
     const RepoId& remoteId) = 0;
+
+  virtual void set_type_lookup_service(DDS::DomainId_t,
+    const RepoId&,
+    XTypes::TypeLookupService_rch) {}
 
   virtual bool supports_liveliness() const { return false; }
 

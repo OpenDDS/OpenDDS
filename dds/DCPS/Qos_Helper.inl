@@ -1083,7 +1083,6 @@ bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
     case DDS::XCDR_DATA_REPRESENTATION:
     case DDS::XML_DATA_REPRESENTATION:
     case DDS::XCDR2_DATA_REPRESENTATION:
-    case UNALIGNED_CDR_DATA_REPRESENTATION:
       break;
 
     default:

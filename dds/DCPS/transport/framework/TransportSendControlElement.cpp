@@ -6,9 +6,12 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "EntryExit.h"
+
+#include <dds/DCPS/DataSampleElement.h>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendControlElement.inl"

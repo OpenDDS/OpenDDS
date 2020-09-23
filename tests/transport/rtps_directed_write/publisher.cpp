@@ -153,7 +153,7 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
   serialized_size(encoding, size, hdr);
   serialized_size(encoding, size, it);
   serialized_size(encoding, size, ds);
-  serialized_size_ulong(encoding, size, size);
+  primitive_serialized_size_ulong(encoding, size, size);
   serialized_size(encoding, size, msg);
 
   ACE_Message_Block mb(size);

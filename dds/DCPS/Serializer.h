@@ -11,16 +11,6 @@
  * The serialization interface for a C++ type called Type consists of the
  * following overloads:
  *
- *   bool max_serialized_size(
- *       const Encoding& encoding, size_t& size, const Type&);
- *     Get the maximum possible byte size of Type in serialized form of the
- *     encoding. Aligns size first if appropriate for the encoding. Returns
- *     true if the type has a bounded maximum size, else false.
- *
- *     TODO(iguessthislldo): Make this a template? I don't see how this would
- *     ever actually need a Type value. There are places like the
- *     DataWriterImpl where we create an instance just to use this function.
- *
  *   void serialized_size(
  *       const Encoding& encoding, size_t& size, const Type& value);
  *     Get the byte size of the representation of value.
@@ -282,18 +272,6 @@ bool operator>>(Serializer& s, EncapsulationHeader& value);
 
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& s, const EncapsulationHeader& value);
-
-/**
- * Convenience function for the max_serialized_size of a single value with no
- * alignment needed.
- */
-template <typename T>
-size_t max_serialized_size(const Encoding& encoding, const T& value)
-{
-  size_t size = 0;
-  max_serialized_size(encoding, size, value);
-  return size;
-}
 
 /**
  * Convenience function for the serialized_size of a single value with no
@@ -771,79 +749,75 @@ namespace IDL {
 
 // predefined type methods
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Short& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::UShort& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Long& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::ULong& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::LongLong& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::ULongLong& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Float& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Double& value,
   size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::LongDouble& value,
   size_t count = 1);
 
 // predefined type method disambiguators.
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_OutputCDR::from_boolean value, size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_OutputCDR::from_char value, size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_OutputCDR::from_wchar value, size_t count = 1);
 OpenDDS_Dcps_Export
-bool max_serialized_size(
+bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_OutputCDR::from_octet value, size_t count = 1);
 
 /// predefined type method explicit disambiguators.
 OpenDDS_Dcps_Export
-void max_serialized_size_boolean(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_boolean(const Encoding& encoding, size_t& size,
   size_t count = 1);
 OpenDDS_Dcps_Export
-void max_serialized_size_char(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_char(const Encoding& encoding, size_t& size,
   size_t count = 1);
 OpenDDS_Dcps_Export
-void max_serialized_size_wchar(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_wchar(const Encoding& encoding, size_t& size,
   size_t count = 1);
 OpenDDS_Dcps_Export
-void max_serialized_size_octet(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_octet(const Encoding& encoding, size_t& size,
   size_t count = 1);
 OpenDDS_Dcps_Export
-void max_serialized_size_ulong(const Encoding& encoding, size_t& size,
-  size_t count = 1);
-
-OpenDDS_Dcps_Export
-void serialized_size_ulong(const Encoding& encoding, size_t& size,
+void primitive_serialized_size_ulong(const Encoding& encoding, size_t& size,
   size_t count = 1);
 
 /// Add delimiter to the size of a serialized size if the encoding has them.

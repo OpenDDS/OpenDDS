@@ -157,7 +157,8 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             // Create the TransportInst object and load the transport
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
-            TransportInst_rch inst = create_inst(ACE_TEXT_ALWAYS_CHAR(transport_id.c_str()), transport_type);
+            const OPENDDS_STRING tid_str = transport_id.c_str() ? ACE_TEXT_ALWAYS_CHAR(transport_id.c_str()) : "";
+            TransportInst_rch inst = create_inst(tid_str, transport_type);
             if (!inst) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -641,7 +642,7 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 }
 
 bool
-TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, ACE_TString& instance_config_name)
+TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name)
 {
   // check per_participant
   TransportTemplate templ;
@@ -657,14 +658,11 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 
   TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()));
 
-  OPENDDS_STRING tmp = ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str());
-  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + tmp;
-
-  tmp = "transport_config_" + tmp;
-  instance_config_name = ACE_TEXT_CHAR_TO_TCHAR(tmp.c_str());
+  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + instance_config_name;
+  instance_config_name = "transport_config_" + instance_config_name;
 
   OpenDDS::DCPS::TransportConfig_rch config =
-    TheTransportRegistry->create_config(ACE_TEXT_ALWAYS_CHAR(instance_config_name.c_str()));
+    TheTransportRegistry->create_config(instance_config_name);
   OpenDDS::DCPS::TransportInst_rch inst =
     TheTransportRegistry->create_inst(inst_name, "rtps_udp");
 

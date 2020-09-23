@@ -81,6 +81,8 @@ namespace XTypes {
       return members[i];
     }
 
+    bool operator<(const Sequence& other) const { return members < other.members; }
+
     T* get_buffer() { return &members[0]; }
     const T* get_buffer() const { return &members[0]; }
   };
@@ -213,6 +215,11 @@ namespace XTypes {
     {
       std::memcpy(hash, a_hash, sizeof hash);
     }
+
+    bool operator<(const TypeObjectHashId& other) const
+    {
+      return (kind < other.kind) && (hash < other.hash);
+    }
   };
 
   // Flags that apply to struct/union/collection/enum/bitmask/bitset
@@ -271,7 +278,7 @@ namespace XTypes {
   const TypeFlag TypeFlagMinimalMask = 0x0007; // Selects  M, A, F
 
   // Forward declaration
-  struct TypeIdentifier;
+  class TypeIdentifier;
 
   // 1 Byte
   struct StringSTypeDefn {
@@ -282,6 +289,11 @@ namespace XTypes {
     explicit StringSTypeDefn(const SBound a_bound)
       : bound(a_bound)
     {}
+
+    bool operator<(const StringSTypeDefn& other) const
+    {
+      return bound < other.bound;
+    }
   };
 
   // 4 Bytes
@@ -293,6 +305,11 @@ namespace XTypes {
     explicit StringLTypeDefn(const LBound a_bound)
       : bound(a_bound)
     {}
+
+    bool operator<(const StringLTypeDefn& other) const
+    {
+      return bound < other.bound;
+    }
   };
 
   struct PlainCollectionHeader {
@@ -306,6 +323,15 @@ namespace XTypes {
       : equiv_kind(a_equiv_kind)
       , element_flags(a_element_flags)
     {}
+
+    bool operator<(const PlainCollectionHeader& other) const
+    {
+      if (equiv_kind < other.equiv_kind) return true;
+      if (other.equiv_kind < equiv_kind) return false;
+      if (element_flags < other.element_flags) return true;
+      if (other.element_flags < element_flags) return false;
+      return false;
+    }
   };
 
   struct PlainSequenceSElemDefn {
@@ -322,6 +348,18 @@ namespace XTypes {
       , bound(a_bound)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainSequenceSElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (other.header < header) return false;
+      if (bound < other.bound) return true;
+      if (other.bound < bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (other.element_identifier < element_identifier) return false;
+      return false;
+    }
+
   };
 
   struct PlainSequenceLElemDefn {
@@ -338,6 +376,17 @@ namespace XTypes {
       , bound(a_bound)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainSequenceLElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (other.header < header) return false;
+      if (bound < other.bound) return true;
+      if (other.bound < bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (other.element_identifier < element_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainArraySElemDefn {
@@ -354,6 +403,17 @@ namespace XTypes {
       , array_bound_seq(a_array_bound_seq)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainArraySElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (other.header < header) return false;
+      if (array_bound_seq < other.array_bound_seq) return true;
+      if (other.array_bound_seq < array_bound_seq) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (other.element_identifier < element_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainArrayLElemDefn {
@@ -370,6 +430,17 @@ namespace XTypes {
       , array_bound_seq(a_array_bound_seq)
       , element_identifier(a_element_identifier)
     {}
+
+    bool operator<(const PlainArrayLElemDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (other.header < header) return false;
+      if (array_bound_seq < other.array_bound_seq) return true;
+      if (other.array_bound_seq < array_bound_seq) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (other.element_identifier < element_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainMapSTypeDefn {
@@ -392,6 +463,21 @@ namespace XTypes {
       , key_flags(a_key_flags)
       , key_identifier(a_key_identifier)
     {}
+
+    bool operator<(const PlainMapSTypeDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (other.header < header) return false;
+      if (bound < other.bound) return true;
+      if (other.bound < bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (other.element_identifier < element_identifier) return false;
+      if (key_flags < other.key_flags) return true;
+      if (other.key_flags < key_flags) return false;
+      if (key_identifier < other.key_identifier) return true;
+      if (other.key_identifier < key_identifier) return false;
+      return false;
+    }
   };
 
   struct PlainMapLTypeDefn {
@@ -414,6 +500,21 @@ namespace XTypes {
       , key_flags(a_key_flags)
       , key_identifier(a_key_identifier)
     {}
+
+    bool operator<(const PlainMapLTypeDefn& other) const
+    {
+      if (header < other.header) return true;
+      if (other.header < header) return false;
+      if (bound < other.bound) return true;
+      if (other.bound < bound) return false;
+      if (element_identifier < other.element_identifier) return true;
+      if (other.element_identifier < element_identifier) return false;
+      if (key_flags < other.key_flags) return true;
+      if (other.key_flags < key_flags) return false;
+      if (key_identifier < other.key_identifier) return true;
+      if (other.key_identifier < key_identifier) return false;
+      return false;
+    }
   };
 
   // Used for Types that have cyclic dependencies with other types
@@ -431,6 +532,13 @@ namespace XTypes {
       , scc_length(a_scc_length)
       , scc_index(a_scc_index)
     {}
+
+    bool operator<(const StronglyConnectedComponentId& other) const
+    {
+      return (sc_component_id < other.sc_component_id)
+        && (scc_length < other.scc_length)
+        && (scc_index < other.scc_index);
+    }
   };
 
   // Future extensibility
@@ -657,6 +765,42 @@ namespace XTypes {
       TypeIdentifier ti(k);
       ti.extended_defn() = extended_defn;
       return ti;
+    }
+
+    bool operator<(const TypeIdentifier& other) const
+    {
+      if (kind_ != other.kind_) {
+        return kind_ < other.kind_;
+      }
+
+      switch (kind_) {
+      case TI_STRONGLY_CONNECTED_COMPONENT:
+        return sc_component_id() < other.sc_component_id();
+      case EK_COMPLETE:
+      case EK_MINIMAL:
+        return memcmp(equivalence_hash(), other.equivalence_hash(), sizeof equivalence_hash()) < 0;
+      case TI_STRING8_SMALL:
+      case TI_STRING16_SMALL:
+        return string_sdefn() < other.string_sdefn();
+      case TI_STRING8_LARGE:
+      case TI_STRING16_LARGE:
+        return string_ldefn() < other.string_ldefn();
+      case TI_PLAIN_SEQUENCE_SMALL:
+        return seq_sdefn() < other.seq_sdefn();
+      case TI_PLAIN_SEQUENCE_LARGE:
+        return seq_ldefn() < other.seq_ldefn();
+      case TI_PLAIN_ARRAY_SMALL:
+        return array_sdefn() < other.array_sdefn();
+      case TI_PLAIN_ARRAY_LARGE:
+        return array_ldefn() < other.array_ldefn();
+      case TI_PLAIN_MAP_SMALL:
+        return map_sdefn() < other.map_sdefn();
+      case TI_PLAIN_MAP_LARGE:
+        return map_ldefn() < other.map_ldefn();
+
+      default:
+        return false;
+      }
     }
 
   private:
@@ -1594,6 +1738,13 @@ namespace XTypes {
   struct TypeIdentifierPair {
     TypeIdentifier type_identifier1;
     TypeIdentifier type_identifier2;
+
+    TypeIdentifierPair() {}
+
+    TypeIdentifierPair(const TypeIdentifier& t1, const TypeIdentifier& t2)
+      : type_identifier1(t1)
+      , type_identifier2(t2)
+    {}
   };
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
@@ -1722,7 +1873,7 @@ template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
                      const XTypes::Sequence<T>& seq)
 {
-  serialized_size_ulong(encoding, size);
+  primitive_serialized_size_ulong(encoding, size);
   for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }

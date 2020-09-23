@@ -13,20 +13,10 @@ namespace DCPS {
 ACE_INLINE
 RtpsCustomizedElement::RtpsCustomizedElement(TransportQueueElement* orig,
                                              Message_Block_Ptr msg)
-  : TransportCustomizedElement(orig, false)
-  , seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  : TransportCustomizedElement(orig)
 {
   set_requires_exclusive();
   set_msg(move(msg));
-}
-
-
-ACE_INLINE
-SequenceNumber
-RtpsCustomizedElement::sequence() const
-{
-  return (seq_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) ?
-    TransportCustomizedElement::sequence() : seq_;
 }
 
 ACE_INLINE

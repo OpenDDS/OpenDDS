@@ -117,6 +117,7 @@ DomainParticipantImpl::DomainParticipantImpl(
 {
   (void) this->set_listener(a_listener, mask);
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
+  type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
 }
 
 DomainParticipantImpl::~DomainParticipantImpl()
@@ -1753,6 +1754,8 @@ DomainParticipantImpl::enable()
 
   dp_id_ = value.id;
   federated_ = value.federated;
+
+  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
 
   if (monitor_) {
     monitor_->report();
