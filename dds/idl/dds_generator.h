@@ -592,10 +592,11 @@ void generateCaseBody(
     std::string rhs;
     if (br_cls & CL_STRING) {
       if (br_cls & CL_BOUNDED) {
-        const std::string nmspace = lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "std::";
-        brType = nmspace + ((br_cls & CL_WIDE) ?
-          (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "WString_var" : "wstring" )
-          : (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "String_var" : "string" ));
+        if (lmap == BE_GlobalData::LANGMAP_FACE_CXX) {
+          brType = std::string("FACE::") + ((br_cls & CL_WIDE) ? "WString_var" : "String_var");
+        } else {
+          brType = ((br_cls & CL_WIDE) ? "OPENDDS_WSTRING" : "OPENDDS_STRING");
+        }
         std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
         if ((lmap == BE_GlobalData::LANGMAP_FACE_CXX) && (br_cls & CL_WIDE)) {
           rhs = "ACE_InputCDR::to_wstring(tmp.out(), " + bounded_arg(br) + ")";

@@ -335,7 +335,7 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
   } else if ((fld_cls & CL_PRIMITIVE) || (fld_cls & CL_FIXED)) {
     AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(actual_type);
     if (pt && (pt->pt() == AST_PredefinedType::PT_longdouble)) {
-      val = name + " = ACE_CDR_LONG_DOUBLE_INITIALIZER;\n";
+      val = "ACE_CDR_LONG_DOUBLE_ASSIGNMENT(" + name + ", 0.0L);\n";
     } else {
       val = name + " = 0;\n";
     }
