@@ -5,7 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
 
 
 //bounded string definitions for trim
@@ -42,10 +45,10 @@ typedef sequence<EnumType> EnumSeqUnbound;
 typedef sequence<EnumType, 2> EnumSeqBound;
 typedef sequence<EnumType, 3> EnumSeqBound2;
 //primitives
-typedef sequence<short> ShortSeqUnbound;
+typedef CORBA::ShortSeq ShortSeqUnbound;
 typedef sequence<short, 2> ShortSeqBound;
 typedef sequence<short, 3> ShortSeqBound2;
-typedef sequence<unsigned short> UnsignedShortSeqUnbound;
+typedef CORBA::UShortSeq UnsignedShortSeqUnbound;
 typedef sequence<unsigned short, 2> UnsignedShortSeqBound;
 typedef sequence<unsigned short, 3> UnsignedShortSeqBound2;
 //string
