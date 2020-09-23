@@ -495,10 +495,11 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
 
-  Parameter aebe_param;
-  aebe_param.extended_builtin_endpoints(
-    proxy.availableExtendedBuiltinEndpoints);
-  add_param(param_list, abe_param);
+  // TLS_TODO: needed for proxy? extended_builtin_endpoints is out of scope in non-secure builds
+  //Parameter aebe_param;
+  //aebe_param.extended_builtin_endpoints(
+  //  proxy.availableExtendedBuiltinEndpoints);
+  //add_param(param_list, abe_param);
 
   // Interoperability note:
   // For interoperability with other DDS implemenations, we'll encode the
