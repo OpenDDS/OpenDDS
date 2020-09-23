@@ -521,7 +521,10 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
 
   relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
-  relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+
+  if (config.use_rtps_relay() || cofig.rtps_relay_only()) {
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  }
 #endif
 
   if (config.opendds_discovery_default_listener_) {
@@ -545,12 +548,6 @@ void RtpsUdpTransport::client_stop(const RepoId& localId)
 void
 RtpsUdpTransport::shutdown_i()
 {
-  GuardThreadType guard_links(links_lock_);
-  if (link_) {
-    link_->transport_shutdown();
-  }
-  link_.reset();
-
 #ifdef OPENDDS_SECURITY
   if(config().use_ice()) {
     stop_ice();
@@ -558,6 +555,12 @@ RtpsUdpTransport::shutdown_i()
 
   relay_stun_task_->disable_and_wait();
 #endif
+
+  GuardThreadType guard_links(links_lock_);
+  if (link_) {
+    link_->transport_shutdown();
+  }
+  link_.reset();
 }
 
 void

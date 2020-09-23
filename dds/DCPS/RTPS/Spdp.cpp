@@ -3424,13 +3424,9 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
 
 void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  if ((outer_->config_->use_rtps_relay() ||
-       outer_->config_->rtps_relay_only()) &&
-      outer_->config_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
-    return;
+  if ((outer_->config_->use_rtps_relay() || outer_->config_->rtps_relay_only()) && outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+    write(SEND_TO_RELAY);
   }
-
-  write(SEND_TO_RELAY);
 }
 #endif
 
