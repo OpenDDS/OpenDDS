@@ -322,7 +322,6 @@ std::string Test::to_string(const Dri& dri)
       if      (*i == DDS::XCDR_DATA_REPRESENTATION) { ss << "XCDR1"; }
       else if (*i == DDS::XCDR2_DATA_REPRESENTATION) { ss << "XCDR2"; }
       else if (*i == DDS::XML_DATA_REPRESENTATION) { ss << "XML"; }
-      else if (*i == OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION) { ss << "UNALIGNED CDR"; }
       else { ss << "Unknown Value " << *i; }
     }
     return ss.str();
