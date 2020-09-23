@@ -79,10 +79,10 @@ public:
   virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
 
   // Group 3: Sample sent, received, read, taken
-  virtual void on_sample_sent(const DDS::DataWriter_ptr, const Sample&) {}
-  virtual void on_sample_received(const DDS::DataReader_ptr, const Sample&) {}
-  virtual void on_sample_read(const DDS::DataReader_ptr, const Sample&) {}
-  virtual void on_sample_taken(const DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_sent(DDS::DataWriter_ptr, const Sample&) {}
+  virtual void on_sample_received(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_read(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&) {}
 
   virtual ~Observer();
 protected:

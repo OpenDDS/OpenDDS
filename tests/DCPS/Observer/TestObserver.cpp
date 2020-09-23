@@ -156,25 +156,25 @@ void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::
 // ========== ========== ========== ========== ========== ========== ==========
 // 3. Sample: sent, received, read, taken
 
-void TestObserver::on_sample_sent(const DDS::DataWriter_ptr w, const Sample& s)
+void TestObserver::on_sample_sent(DDS::DataWriter_ptr w, const Sample& s)
 {
   ++sent_;
   std::cout << "on_sample_sent " << sent_ << to_str(w) << to_str(s);
 }
 
-void TestObserver::on_sample_received(const DDS::DataReader_ptr r, const Sample& s)
+void TestObserver::on_sample_received(DDS::DataReader_ptr r, const Sample& s)
 {
   ++received_;
   std::cout << "on_sample_received " << received_ << to_str(r) << to_str(s);
 }
 
-void TestObserver::on_sample_read(const DDS::DataReader_ptr r, const Sample& s)
+void TestObserver::on_sample_read(DDS::DataReader_ptr r, const Sample& s)
 {
   ++read_;
   std::cout << "on_sample_read " << read_ << to_str(r) << to_str(s);
 }
 
-void TestObserver::on_sample_taken(const DDS::DataReader_ptr r, const Sample& s)
+void TestObserver::on_sample_taken(DDS::DataReader_ptr r, const Sample& s)
 {
   ++taken_;
   std::cout << "on_sample_taken " << taken_ << to_str(r) << to_str(s);
