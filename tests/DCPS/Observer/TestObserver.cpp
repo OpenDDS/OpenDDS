@@ -127,7 +127,7 @@ void TestObserver::on_qos_changed(DDS::DataReader_ptr r)
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
-// 2. Association: associated, disassociated, associated_qos_changed
+// 2. Association: associated, disassociated
 
 void TestObserver::on_associated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId)
 {

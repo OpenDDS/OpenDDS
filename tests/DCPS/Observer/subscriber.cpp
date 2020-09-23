@@ -45,7 +45,7 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subsc
 
   // register Observer::e_SAMPLE_RECEIVED for all readers in this subscriber
   EntityImpl* entity = dynamic_cast<EntityImpl*>(sub_.ptr());
-  Observer::Rch o = entity->get_observer(Observer::e_ENABLED);
+  Observer_rch o = entity->get_observer(Observer::e_ENABLED);
   entity->set_observer(o, Observer::e_SAMPLE_RECEIVED);
 }
 
@@ -70,7 +70,7 @@ Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, cons
 
     // register the specified Observer::Event for this reader
     EntityImpl* entity = dynamic_cast<EntityImpl*>(reader_.ptr());
-    Observer::Rch o = entity->get_observer(Observer::e_ENABLED);
+    Observer_rch o = entity->get_observer(Observer::e_ENABLED);
     entity->set_observer(o, e);
 
     change_qos();
