@@ -4,6 +4,8 @@
 #include "dds/DCPS/DiscoveryBase.h"
 #include "dds/DCPS/GuidConverter.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Test {
 
@@ -93,3 +95,5 @@ void install_connection_record_logger(DDS::DomainParticipant_var participant)
 
 } // Test
 } // OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
