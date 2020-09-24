@@ -191,7 +191,7 @@ bool TestObserver::check_r_all() const
 {
   return r_enabled_ == n_READER && r_deleted_ == n_READER && r_qos_changed_ == n_READER
          && r_associated_ == n_ASSOCIATION && r_disassociated_ == n_ASSOCIATION
-         && received_ == n_RECEIVED && read_ == n_READ && taken_ == n_TAKEN;
+         && received_ >= n_RECEIVED && read_ == n_READ && taken_ >= n_TAKEN;
 }
 
 void TestObserver::show_observed(const std::string& txt) const

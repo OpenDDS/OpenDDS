@@ -45,8 +45,8 @@ public:
   enum {
     n_WRITER = 1, n_READER = 2, n_MSG = 6,
     n_ASSOCIATION = n_WRITER * n_READER,
-    n_RECEIVED = (n_MSG + 2) * n_READER,
-    n_READ = 3, n_TAKEN = n_MSG - n_READ + 1
+    n_RECEIVED = n_MSG * n_READER,
+    n_READ = 3, n_TAKEN = n_MSG - n_READ
   };
 
 private:

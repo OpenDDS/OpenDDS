@@ -19,7 +19,7 @@ $test->process('subscriber', 'subscriber', " -DCPSConfigFile rtps_disc.ini");
 $test->start_process('subscriber');
 $test->start_process('publisher');
 
-my $result = $test->finish(30);
+my $result = $test->finish(60);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";
 }
