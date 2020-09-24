@@ -197,9 +197,9 @@ bool TestObserver::check_r_all() const
 void TestObserver::show_observed(const std::string& txt) const
 {
   std::cout << txt << ":\n"
-    << "  w_enabled_:" << w_enabled_ << " w_deleted_: " << w_deleted_ << " w_qos_changed_:" << w_qos_changed_
-    << "  w_associated_:" << w_associated_ << " w_disassociated_: " << w_disassociated_ << '\n'
-    << "  r_enabled_:" << r_enabled_ << " r_deleted_: " << r_deleted_ << " r_qos_changed_:" << r_qos_changed_
-    << "  r_associated_:" << r_associated_ << " r_disassociated_: " << r_disassociated_ << '\n'
-    << "  sent_:" << sent_ << " received_: " << received_ << " read_:" << read_ << " taken_:" << taken_ << '\n';
+    << "  w_enabled_:" << w_enabled_ << " w_deleted_:" << w_deleted_ << " w_qos_changed_:" << w_qos_changed_
+    << "  w_associated_:" << w_associated_ << " w_disassociated_:" << w_disassociated_ << '\n'
+    << "  r_enabled_:" << r_enabled_ << " r_deleted_:" << r_deleted_ << " r_qos_changed_:" << r_qos_changed_
+    << "  r_associated_:" << r_associated_ << " r_disassociated_:" << r_disassociated_ << '\n'
+    << "  sent_:" << sent_ << " received_:" << received_ << " read_:" << read_ << " taken_:" << taken_ << '\n';
 }
