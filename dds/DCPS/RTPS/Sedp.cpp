@@ -4448,7 +4448,6 @@ Sedp::write_subscription_data_unsecure(
     }
 
     DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
-    tceqp.ignore_member_names = true;
     Parameter param;
     param.type_consistency(tceqp);
     const CORBA::ULong length = plist.length();

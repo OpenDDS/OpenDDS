@@ -1253,8 +1253,6 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-
-
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
   // Serialize from allLocators, rather than the unicastLocatorList
