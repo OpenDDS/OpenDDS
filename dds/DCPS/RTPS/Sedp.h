@@ -163,7 +163,7 @@ public:
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
   bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
-                                const DCPS::RepoId& reader);
+                                const DCPS::RepoId& reader, bool is_discovery_protected);
 
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
@@ -611,7 +611,7 @@ private:
     virtual ~TypeLookupReplyWriter();
 
     DDS::ReturnCode_t send_tl_reply(const DCPS::ReceivedDataSample& sample,
-      XTypes::TypeLookup_Reply& type_lookup_reply);
+      XTypes::TypeLookup_Reply& type_lookup_reply, const DCPS::RepoId& reader);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;

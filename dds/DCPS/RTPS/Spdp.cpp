@@ -355,7 +355,8 @@ Spdp::~Spdp()
 #ifdef OPENDDS_SECURITY
         ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                   part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
         ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
@@ -701,7 +702,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
       ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
-        stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                 iter->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
       ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
@@ -1404,7 +1406,8 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints);
+          stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                   pit->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
         ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
@@ -1819,7 +1822,8 @@ Spdp::remove_expired_participants()
 #ifdef OPENDDS_SECURITY
         ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                   part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
         ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
@@ -3184,8 +3188,9 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 #endif
 
 #ifdef OPENDDS_SECURITY
-// TLS_TODO: Add type lookup service endpoints?
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
+void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail,
+                     const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail, const ICE::AgentInfo& agent_info)
+{
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -3217,6 +3222,26 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
 
@@ -3280,12 +3305,32 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
 }
 
-// TLS_TODO: Add type lookup service endpoints?
-void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail) {
+void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail,
+                    const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail) {
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -3317,6 +3362,26 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
 
@@ -3380,6 +3445,26 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
 }
@@ -3515,9 +3600,9 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     if (sedp_pos != ai_map.end()) {
-      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, sedp_pos->second);
+      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, pdata.participantProxy.availableExtendedBuiltinEndpoints, sedp_pos->second);
     } else {
-      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
+      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, pdata.participantProxy.availableExtendedBuiltinEndpoints);
     }
   }
   ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
@@ -3642,7 +3727,8 @@ Spdp::use_ice_now(bool f)
       }
 
       if (sedp_endpoint && pos->second.have_sedp_info_) {
-        start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
+        start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                  pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
       }
     }
   } else {

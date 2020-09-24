@@ -598,7 +598,7 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
-      //TLS_TODO: where secure parameters should be added to the proxy?
+      //TLS_TODO: verify it's the right place where secure parameters should be added to the proxy
 #ifdef OPENDDS_SECURITY
       case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
         proxy.availableExtendedBuiltinEndpoints =

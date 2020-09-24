@@ -417,8 +417,8 @@ private:
   TimeQueue handshake_deadlines_;
   TimeQueue handshake_resends_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
+  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail, const ICE::AgentInfo& agent_info);
+  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);
   void purge_handshake_resends(DiscoveredParticipantIter iter);
