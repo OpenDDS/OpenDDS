@@ -3859,7 +3859,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       AST_Annotation_Appl* ann_appl = node->disc_annotations().find("::@try_construct");
       TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
       be_global->impl_ <<
-        "  " << scoped(discriminator->name()) << " disc;\n" 
+        "  " << scoped(discriminator->name()) << " disc;\n"
         "  if (!(strm >> disc)) {\n";
       if (try_construct == tryconstructfailaction_use_default) {
         be_global->impl_ <<

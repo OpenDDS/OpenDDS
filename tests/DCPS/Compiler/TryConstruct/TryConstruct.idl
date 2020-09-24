@@ -577,5 +577,5 @@ module TryCon {
     case VALUE1: short s1;
     case VALUE2: short s2;
   };
-  
+
 };
