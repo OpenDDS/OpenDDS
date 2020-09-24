@@ -111,8 +111,6 @@ public:
   ACE_INET_Addr stun_server_address() const;
   ///}
 
-  TimeDuration rtps_relay_beacon_period_;
-
   void update_locators(const RepoId& remote_id,
                        const TransportLocatorSeq& locators);
 

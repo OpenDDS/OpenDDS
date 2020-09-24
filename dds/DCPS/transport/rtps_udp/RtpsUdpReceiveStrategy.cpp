@@ -55,8 +55,11 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
                                              ICE::Endpoint* endpoint,
+                                             RtpsUdpTransport& tport,
                                              bool& stop)
 {
+  ACE_UNUSED_ARG(tport);
+
   ACE_INET_Addr local_address;
   const ssize_t ret = socket.recv(iov, n, remote_address, 0
 #if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
@@ -68,43 +71,49 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return ret;
   }
 
+  if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
+    return ret;
+  }
+
 #ifdef OPENDDS_SECURITY
-  if (endpoint && n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) != 0) {
+  // Assume STUN
 # ifndef ACE_RECVPKTINFO
-    ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
-               "received but this version of the ACE library doesn't support the local_address "
-               "extension in ACE_SOCK_Dgram::recv\n"));
-    ACE_UNUSED_ARG(stop);
-    ACE_NOTSUP_RETURN(-1);
+  ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
+             "received but this version of the ACE library doesn't support the local_address "
+             "extension in ACE_SOCK_Dgram::recv\n"));
+  ACE_UNUSED_ARG(stop);
+  ACE_NOTSUP_RETURN(-1);
 # else
 
-    // Assume STUN
-    stop = true;
-    size_t bytes = ret;
-    size_t block_size = std::min(bytes, static_cast<size_t>(iov[0].iov_len));
-    ACE_Message_Block* head = new ACE_Message_Block(static_cast<const char*>(iov[0].iov_base), block_size);
-    head->length(block_size);
+  stop = true;
+  size_t bytes = ret;
+  size_t block_size = std::min(bytes, static_cast<size_t>(iov[0].iov_len));
+  ACE_Message_Block* head = new ACE_Message_Block(static_cast<const char*>(iov[0].iov_base), block_size);
+  head->length(block_size);
+  bytes -= block_size;
+
+  ACE_Message_Block* tail = head;
+  for (int i = 1; i < n && bytes != 0; ++i) {
+    block_size = std::min(bytes, static_cast<size_t>(iov[i].iov_len));
+    ACE_Message_Block* mb = new ACE_Message_Block(static_cast<const char*>(iov[i].iov_base), block_size);
+    mb->length(block_size);
+    tail->cont(mb);
+    tail = mb;
     bytes -= block_size;
+  }
 
-    ACE_Message_Block* tail = head;
-    for (int i = 1; i < n && bytes != 0; ++i) {
-      block_size = std::min(bytes, static_cast<size_t>(iov[i].iov_len));
-      ACE_Message_Block* mb = new ACE_Message_Block(static_cast<const char*>(iov[i].iov_base), block_size);
-      mb->length(block_size);
-      tail->cont(mb);
-      tail = mb;
-      bytes -= block_size;
-    }
-
-    DCPS::Serializer serializer(head, DCPS::Serializer::SWAP_BE);
-    STUN::Message message;
-    message.block = head;
-    if (serializer >> message) {
+  DCPS::Serializer serializer(head, DCPS::Serializer::SWAP_BE);
+  STUN::Message message;
+  message.block = head;
+  if (serializer >> message) {
+    if (tport.relay_srsm().is_response(message)) {
+      tport.process_relay_sra(tport.relay_srsm().receive(message));
+    } else if (endpoint) {
       ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
     }
-    head->release();
-# endif
   }
+  head->release();
+# endif
 #else
   ACE_UNUSED_ARG(endpoint);
   ACE_UNUSED_ARG(stop);
@@ -169,7 +178,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   }
   const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
 #else
-  const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address, link_->get_ice_endpoint(), stop);
+  const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address, link_->get_ice_endpoint(), link_->transport(), stop);
 #endif
   remote_address_ = remote_address;
 

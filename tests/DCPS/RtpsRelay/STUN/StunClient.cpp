@@ -291,7 +291,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ACE_INET_Addr local(0, ipv6 ? "::" : "0.0.0.0", ipv6 ? AF_INET6 : AF_INET);
   ACE_SOCK_Dgram socket(local, ipv6 ? AF_INET6 : AF_INET);
 
-  ACE_INET_Addr remote(3478, ipv6 ? "::1" : "127.0.0.1");
+  ACE_INET_Addr remote(4444, ipv6 ? "::1" : "127.0.0.1");
 
   if (!test_success(status, socket, remote)) {
     std::cerr << "ERROR: test_success failed" << std::endl;

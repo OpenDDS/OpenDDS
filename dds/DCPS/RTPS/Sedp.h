@@ -166,8 +166,8 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
-  void rtps_relay_only(bool f);
-  void use_rtps_relay(bool f);
+  void rtps_relay_only_now(bool f);
+  void use_rtps_relay_now(bool f);
   void use_ice_now(bool f);
   void rtps_relay_address(const ACE_INET_Addr& address);
   void stun_server_address(const ACE_INET_Addr& address);
@@ -430,6 +430,8 @@ private:
 #endif
 
     void shutting_down() { shutting_down_ = true; }
+
+    DDS::Subscriber_var get_builtin_subscriber() const;
 
   protected:
     DCPS::RepoId repo_id_;

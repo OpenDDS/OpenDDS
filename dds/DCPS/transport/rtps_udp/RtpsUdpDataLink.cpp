@@ -108,7 +108,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , heartbeat_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeat_reply_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeat_replies)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
-  , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
   , quick_heartbeat_delay_(config.heartbeat_period_ * config.quick_reply_ratio_)
@@ -391,11 +390,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
-  }
-
-  if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
-      cfg.use_rtps_relay()) {
-    relay_beacon_.enable(false, cfg.rtps_relay_beacon_period_);
   }
 
   NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
@@ -938,7 +932,6 @@ RtpsUdpDataLink::stop_i()
   heartbeat_reply_.disable_and_wait();
   heartbeat_.disable_and_wait();
   heartbeatchecker_.disable_and_wait();
-  relay_beacon_.disable_and_wait();
   unicast_socket_.close();
   multicast_socket_.close();
 #ifdef ACE_HAS_IPV6
@@ -3699,20 +3692,6 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
 }
 
 void
-RtpsUdpDataLink::send_relay_beacon(const DCPS::MonotonicTimePoint& /*now*/)
-{
-  const ACE_INET_Addr rra = config().rtps_relay_address();
-  if (rra == ACE_INET_Addr()) {
-    return;
-  }
-
-  // Create a message with a few bytes of data for the beacon
-  ACE_Message_Block mb(reinterpret_cast<const char*>(OpenDDS::RTPS::BEACON_MESSAGE), OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
-  mb.wr_ptr(OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
-  send_strategy()->send_rtps_control(mb, rra);
-}
-
-void
 RtpsUdpDataLink::send_heartbeats_manual_i(const TransportSendControlElement* tsce, MetaSubmessageVec& meta_submessages)
 {
   using namespace OpenDDS::RTPS;
@@ -4055,6 +4034,12 @@ ACE_Event_Handler::Reference_Count
 RtpsUdpDataLink::HeldDataDeliveryHandler::remove_reference()
 {
   return link_->remove_reference();
+}
+
+RtpsUdpTransport&
+RtpsUdpDataLink::transport()
+{
+  return static_cast<RtpsUdpTransport&>(impl());
 }
 
 RtpsUdpSendStrategy*
