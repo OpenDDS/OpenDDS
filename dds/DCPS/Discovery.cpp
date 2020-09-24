@@ -260,6 +260,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
   bit_pub_topic->enable();
 
   bit_part_loc_topic->enable();
+  bit_connection_record_topic->enable();
 
 #else
   ACE_UNUSED_ARG(participant);
