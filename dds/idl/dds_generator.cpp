@@ -327,6 +327,7 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
     }
   } else if (fld_cls & CL_STRING) {
     string def_val = (fld_cls & CL_WIDE) ? "L\"\"" : "\"\"";
+    if (!use_cxx11 && (fld_cls & CL_WIDE)) def_val = "TAO::WString_Manager::s_traits::default_initializer()";
     if (is_union) {
       val = name + "(" + def_val + ");\n";
     } else {
