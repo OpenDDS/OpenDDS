@@ -816,7 +816,8 @@ namespace OpenDDS {
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
       virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq&,
-                                            const DCPS::RepoId&)
+                                            const DCPS::RepoId&,
+                                            const CORBA::ULong)
       { return true; }
 
       void match_endpoints(RepoId repoId, const TopicDetails& td,
@@ -1156,7 +1157,7 @@ namespace OpenDDS {
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
-                send_type_lookup_request(type_ids, writer);
+                send_type_lookup_request(type_ids, writer, XTypes::TypeLookup_getTypes_HashId);
                 type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
                 return;
               }
@@ -1171,7 +1172,7 @@ namespace OpenDDS {
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
-                send_type_lookup_request(type_ids, reader);
+                send_type_lookup_request(type_ids, reader, XTypes::TypeLookup_getTypes_HashId);
                 type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
                 return;
               }

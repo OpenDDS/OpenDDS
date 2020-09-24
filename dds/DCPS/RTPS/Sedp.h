@@ -162,7 +162,8 @@ public:
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
   bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
-                                const DCPS::RepoId& reader);
+                                const DCPS::RepoId& reader,
+                                const CORBA::ULong tl_kind);
 
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
@@ -605,7 +606,8 @@ private:
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,
-      const DCPS::RepoId& participant_id);
+      const DCPS::RepoId& participant_id,
+      const CORBA::ULong tl_kind);
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestWriter> TypeLookupRequestWriter_rch;
@@ -740,8 +742,6 @@ private:
     virtual ~TypeLookupReader();
   };
 
-
-
   class TypeLookupRequestReader : public Reader {
   public:
     TypeLookupRequestReader(const DCPS::RepoId& sub_id, Sedp& sedp)
@@ -765,7 +765,6 @@ private:
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
 
-
   TypeLookupRequestReader_rch type_lookup_request_reader_;
 
   class TypeLookupReplyReader : public Reader {
@@ -776,13 +775,18 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
+    const OctetSeq32& continuation_point() const { return continuation_point_; }
+
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    DDS::ReturnCode_t process_tl_reply(DCPS::Serializer& ser);
+    DDS::ReturnCode_t process_type_lookup_reply(DCPS::Serializer& ser);
+
+    // Store continuation point of getTypeDependencies reply
+    OctetSeq32 continuation_point_;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
