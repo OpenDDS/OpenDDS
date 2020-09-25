@@ -2055,12 +2055,37 @@ Spdp::SpdpTransport::open()
   reactor_task_.open(0);
 
   ACE_Reactor* reactor = reactor_task_.get_reactor();
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
   }
 
   if (reactor->register_handler(multicast_socket_.get_handle(),
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    unicast_ipv6_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register multicast input handler");
   }
