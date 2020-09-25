@@ -30,12 +30,15 @@ BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
     TheSecurityRegistry->register_plugin(PLUGIN_NAME, plugin);
   }
 
+  SecurityConfig_rch default_config =
+    TheSecurityRegistry->create_config(SecurityRegistry::DEFAULT_CONFIG_NAME,
+                                       plugin);
+
   if (TheSecurityRegistry->has_no_configs()) {
-    SecurityConfig_rch default_config =
-      TheSecurityRegistry->create_config(SecurityRegistry::DEFAULT_CONFIG_NAME,
-                                         plugin);
     TheSecurityRegistry->default_config(default_config);
   }
+
+  TheSecurityRegistry->builtin_config(default_config);
 
   return 0;
 }

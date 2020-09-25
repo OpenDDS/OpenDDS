@@ -691,6 +691,17 @@ private:
 #endif
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
+
+  DDS::Subscriber_var get_builtin_subscriber() const
+  {
+    RcHandle<DomainParticipantImpl> participant_servant = participant_servant_.lock();
+    if (participant_servant) {
+      return participant_servant->get_builtin_subscriber();
+    }
+
+    return DDS::Subscriber_var();
+  }
+
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
 
   Priority get_priority_value(const AssociationData& data) const {

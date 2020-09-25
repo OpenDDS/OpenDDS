@@ -603,6 +603,15 @@ module OpenDDS {
             DDS::Time_t relay6_timestamp;
     };
 
+    const string RTPS_RELAY_STUN_PROTOCOL = "RtspRelay:STUN";
+
+    BUILT_IN_TOPIC_TYPE
+    struct ConnectionRecord {
+            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            BUILT_IN_TOPIC_KEY string address;
+            BUILT_IN_TOPIC_KEY string protocol;
+    };
+
   };// End of module DCPS
 }; // End of module OpenDDS
 

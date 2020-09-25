@@ -236,9 +236,14 @@ protected:
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  void record_activity(const ACE_INET_Addr& remote_address,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       const OpenDDS::DCPS::RepoId& src_guid);
   void send(const ACE_INET_Addr& from,
             const GuidSet& to,
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
+  void send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message);
+
   void populate_address_map(AddressMap& address_map, const GuidSet& to);
 
   virtual uint32_t local_active_participants() const override { return guid_addr_set_map_.size(); }
@@ -258,7 +263,6 @@ private:
                      const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                      OpenDDS::DCPS::RepoId& src_guid,
                      GuidSet& to,
-                     bool& is_pad_only,
                      bool check_submessages);
   ACE_INET_Addr read_address(const OpenDDS::DCPS::RepoId& guid) const;
   void write_address(const OpenDDS::DCPS::RepoId& guid);
@@ -369,24 +373,6 @@ public:
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto);
 };
-
-#ifdef OPENDDS_SECURITY
-
-class StunHandler : public RelayHandler {
-public:
-  explicit StunHandler(const RelayHandlerConfig& config,
-                       const std::string& name,
-                       ACE_Reactor* reactor,
-                       Governor& governor);
-
-private:
-  void process_message(const ACE_INET_Addr& remote,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
-  void send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message);
-
-};
-#endif /* OPENDDS_SECURITY */
 
 }
 

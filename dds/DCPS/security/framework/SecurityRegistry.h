@@ -41,6 +41,7 @@ public:
   static void close();
 
   static const char* DEFAULT_CONFIG_NAME;
+  static const char* BUILTIN_CONFIG_NAME;
 
   /// This will shutdown all Security plugin objects.
   ///
@@ -72,6 +73,9 @@ public:
   SecurityConfig_rch default_config() const;
   void default_config(const SecurityConfig_rch& cfg);
 
+  SecurityConfig_rch builtin_config() const;
+  void builtin_config(const SecurityConfig_rch& cfg);
+
   void bind_config(const OPENDDS_STRING& name,
                    DDS::DomainParticipant_ptr domain_participant);
   void bind_config(const SecurityConfig_rch& config,
@@ -84,8 +88,6 @@ public:
   /// the configuration file, and creates SecurityConfigEntry
   /// objects and adds them to the registry.
   int load_security_configuration(ACE_Configuration_Heap& cf);
-
-  SecurityConfig_rch fix_empty_default();
 
 private:
   friend class ACE_Singleton<SecurityRegistry, ACE_Recursive_Thread_Mutex>;
@@ -149,6 +151,7 @@ private:
   InstMap registered_plugins_;
   LibDirectiveMap lib_directive_map_;
   mutable SecurityConfig_rch default_config_;
+  mutable SecurityConfig_rch builtin_config_;
 
   mutable LockType lock_;
   mutable LockType default_load_lock_;
