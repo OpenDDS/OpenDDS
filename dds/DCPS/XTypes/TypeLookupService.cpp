@@ -41,7 +41,7 @@ const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type
   return to_empty_;
 }
 
-bool TypeLookupService::get_depend_type_identifiers(const TypeIdentifier& type_id,
+bool TypeLookupService::get_type_dependencies(const TypeIdentifier& type_id,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
   const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_id);
@@ -50,6 +50,13 @@ bool TypeLookupService::get_depend_type_identifiers(const TypeIdentifier& type_i
     return true;
   }
   return false;
+}
+
+bool TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
+  TypeIdentifierWithSizeSeq& dependencies) const
+{
+  // TODO(sonndinh): implement this
+  return true;
 }
 
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)

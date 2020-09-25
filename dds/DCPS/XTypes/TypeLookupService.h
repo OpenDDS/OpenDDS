@@ -30,12 +30,15 @@ public:
   const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
   void add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj);
 
-  // For Type Lookup Service request / reply
+  // For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types) const;
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
-  bool get_depend_type_identifiers(const TypeIdentifier& type_id,
+  // For TypeLookup_getTypeDependencies
+  bool get_type_dependencies(const TypeIdentifier& type_id,
+    TypeIdentifierWithSizeSeq& dependencies) const;
+  bool get_type_dependencies(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
   void add_depend_type_identifiers(const TypeIdentifier& type_id,
     const TypeIdentifierWithSizeSeq& dependencies);
@@ -61,6 +64,7 @@ private:
   typedef std::map<TypeIdentifier, TypeObject> TypeObjectMap;
   TypeObjectMap type_object_map_;
 
+  // For dependencies of local types
   typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
   TypeIdentifierWithSizeSeqMap type_dependencies_map_;
 

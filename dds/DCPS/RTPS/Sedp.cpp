@@ -3557,11 +3557,11 @@ Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
 
 DDS::ReturnCode_t
 Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
-                                                        const DCPS::RepoId& reader,
-                                                        DCPS::SequenceNumber& sequence,
-                                                        const DCPS::SequenceNumber& rpc_sequence,
-                                                        const DCPS::RepoId& participant_id,
-                                                        const CORBA:ULong tl_kind)
+  const DCPS::RepoId& reader,
+  DCPS::SequenceNumber& sequence,
+  const DCPS::SequenceNumber& rpc_sequence,
+  const DCPS::RepoId& participant_id,
+  const CORBA:ULong tl_kind)
 {
   if (tl_kind != XTypes::TypeLookup_getTypes_HashId &&
       tl_kind != XTypes::TypeLookup_getDependencies_HashId) {
@@ -3609,8 +3609,8 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sample,
-                                           XTypes::TypeLookup_Reply& type_lookup_reply)
+Sedp::TypeLookupReplyWriter::send_type_lookup_reply(const DCPS::ReceivedDataSample& sample,
+  XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
   DCPS::SequenceNumber sequence = 0;
@@ -3640,14 +3640,14 @@ Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sampl
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupRequestReader::process_tl_request(DCPS::Serializer& ser,
-                                                  XTypes::TypeLookup_Reply& type_lookup_reply)
+Sedp::TypeLookupRequestReader::process_type_lookup_request(DCPS::Serializer& ser,
+  XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   XTypes::TypeLookup_Request type_lookup_request;
 
   if (!(ser >> type_lookup_request)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_tl_request - ")
-              ACE_TEXT("failed to deserialize type lookup request\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_type_lookup_request - ")
+               ACE_TEXT("failed to deserialize type lookup request\n")));
     return DDS::RETCODE_ERROR;
   }
 
@@ -3655,7 +3655,7 @@ Sedp::TypeLookupRequestReader::process_tl_request(DCPS::Serializer& ser,
   case XTypes::TypeLookup_getTypes_HashId:
     return process_get_types_request(type_lookup_request, type_lookup_reply);
   case XTypes::TypeLookup_getDependencies_HashId:
-    return DDS::RETCODE_UNSUPPORTED;
+    return process_get_dependencies_request(type_lookup_request, type_lookup_reply);
   default:
     return DDS::RETCODE_UNSUPPORTED;
   }
@@ -3663,7 +3663,7 @@ Sedp::TypeLookupRequestReader::process_tl_request(DCPS::Serializer& ser,
 
 DDS::ReturnCode_t
 Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
-                                                         XTypes::TypeLookup_Reply& type_lookup_reply)
+  XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
     type_lookup_reply.data.getTypes.result.types);
@@ -3677,12 +3677,29 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
 }
 
 DDS::ReturnCode_t
+Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
+  XTypes::TypeLookup_Reply& reply)
+{
+  // TODO(sonndinh): we're sending a complete set of dependencies. How to
+  // set continuation_point in this case?
+  sedp_.type_lookup_service_->get_type_dependencies(request.data.getTypeDependencies.type_ids,
+    reply.data.getTypeDependencies.result.dependent_typeids);
+  if (reply.data.getTypeDependencies.result.dependent_typeids.length() > 0) {
+    reply.data.kind = XTypes::TypeLookup_getTypeDependencies_HashId;
+    reply.data.getTypeDependencies.return_code = DDS::RETCODE_OK;
+    reply.header.related_request_id = request.header.request_id;
+    return DDS:RETCODE_OK;
+  }
+  return DDS::RETCODE_NO_DATA;
+}
+
+DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::process_type_lookup_reply(DCPS::Serializer& ser)
 {
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (!(ser >> type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-              ACE_TEXT("failed to deserialize TypeLookup_Reply\n")));
+               ACE_TEXT("failed to deserialize type lookup reply\n")));
     return DDS::RETCODE_ERROR;
   }
 
@@ -3693,14 +3710,24 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(DCPS::Serializer& ser)
       continue_match = true;
     }
   } else { // XTypes::TypeLookup_getDependencies_HashId
-    continuation_point_ = type_lookup_reply.data.getTypeDependencies.result.continuation_point;
-    if (type_lookup_reply.data.getTypeDependencies.result.dependent_typeids.length() > 0) {
-      // TODO(sonndinh): Store dependencies to TypeLookupService's cache.
-      // Q: Suppose getTypeDependencies_In contains multiple TypeIdentifiers, how to
-      // separate a set of dependencies for each input TypeIdentifier in the reply?
-      // Proposed solution: when we send a request, always send request for 1 TypeIdentifier.
-      // This way when we receive the reply, we know exactly which TypeIdentifier the
-      // dependencies in the reply belong to.
+    const XTypes::TypeLookup_getTypeDependencies_Out& data = type_lookup_reply.data.getTypeDependencies.result;
+    continuation_point_ = data.continuation_point;
+    if (data.length() > 0) {
+      XTypes::TypeIdentifierSeq req_type_ids;
+      for (size_t i = 0; i < data.length(); ++i) {
+        const TypeIdentifier& ti = data.dependent_typeids.type_id;
+        if (!sedp_.type_lookup_service_->type_object_in_cache(ti)) {
+          req_type_ids.append(ti);
+        }
+      }
+      // TODO(sonndinh): figure out the second argument
+      DCPS::RepoId repo_id;
+      if (DDS::RETCODE_OK != sedp_.send_type_lookup_request(req_type_ids, repo_id, XTypes::TypeLookup_getTypes_HashId)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+                   ACE_TEXT("failed to send type lookup request\n")));
+      }
+
+      // TODO(sonndinh): Do we continue with match_continue()?
       continue_match = true;
     }
   }
@@ -4087,13 +4114,13 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   DCPS::Extensibility)
 {
   XTypes::TypeLookup_Reply type_lookup_reply;
-  if (DDS::RETCODE_OK != process_tl_request(ser, type_lookup_reply)) {
+  if (DDS::RETCODE_OK != process_type_lookup_request(ser, type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
       ACE_TEXT("failed to take type lookup request\n")));
     return;
   }
 
-  if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(sample, type_lookup_reply)) {
+  if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_type_lookup_reply(sample, type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
       ACE_TEXT("failed to send type lookup reply\n")));
     return;

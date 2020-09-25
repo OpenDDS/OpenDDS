@@ -18,6 +18,7 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "SporadicTask.h"
+#include "RTPS/TypeLookup.h"
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
