@@ -11,17 +11,3 @@ project(InternalThreadStatusPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transp
     InternalThreadStatusListenerImpl.cpp
   }
 }
-
-project(InternalThreadStatusSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
-
-  exename   = subscriber
-  requires += built_in_topics
-
-  Idl_Files {
-  }
-
-  Source_Files {
-    subscriber.cpp
-    InternalThreadStatusListenerImpl.cpp
-  }
-}

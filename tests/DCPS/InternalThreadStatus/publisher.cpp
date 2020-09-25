@@ -29,39 +29,9 @@
 #include "MessengerTypeSupportImpl.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include "ParticipantLocationListenerImpl.h"
+#include "InternalThreadStatusListenerImpl.h"
 
 #include <iostream>
-
-bool no_ice = false;
-bool ipv6 = false;
-
-int parse_args (int argc, ACE_TCHAR *argv[])
-{
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n6"));
-  int c;
-
-  while ((c = get_opts ()) != -1)
-    switch (c)
-      {
-      case 'n':
-        no_ice = true;
-        break;
-      case '6':
-        ipv6 = true;
-        break;
-      case '?':
-      default:
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "usage:  %s "
-                           "-n do not check for ICE connections"
-                           "\n",
-                           argv [0]),
-                          -1);
-      }
-  // Indicates successful parsing of the command line
-  return 0;
-}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -73,12 +43,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-    if( parse_args(argc, argv) != 0)
-      return 1;
-
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
-
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant = dpf->create_participant(42,
@@ -161,31 +127,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
-    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
     if (0 == pub_loc_dr) {
-      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
+      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
                 << " DataReader." << std::endl;
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Publisher");
+    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl();
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
       pub_loc_dr->set_listener(listener,
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (retcode != DDS::RETCODE_OK) {
-      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
+      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC << " failed." << std::endl;
       ACE_OS::exit(EXIT_FAILURE);
     }
 
     // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
     ACE_OS::sleep(10);
-
-    // check that all locations received
-    if (!listener->check(no_ice, ipv6)) {
-      status = EXIT_FAILURE;
-    }
 
     // Clean-up!
     std::cerr << "publisher deleting contained entities" << std::endl;
