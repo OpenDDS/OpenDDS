@@ -6,12 +6,12 @@
  */
 
 #include "ParameterListConverter.h"
-
 #include "BaseMessageUtils.h"
 #ifdef OPENDDS_SECURITY
 #  include "SecurityHelpers.h"
 #endif
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -235,11 +235,6 @@ namespace {
   bool not_default(const OpenDDSParticipantFlags_t& flags)
   {
     return flags.bits != PFLAGS_EMPTY;
-  }
-
-  bool not_default(const DDS::DataRepresentationQosPolicy& qos)
-  {
-    return qos.value.length();
   }
 
   void normalize(DDS::Duration_t& dur)
@@ -747,6 +742,15 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
+{
+  DDS::DataRepresentationQosPolicy dr_qos;
+  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
+  Parameter param;
+  param.representation(dr_qos);
+  add_param(param_list, param);
+}
+
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    const XTypes::TypeInformation& type_info,
@@ -885,12 +889,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.representation))
-  {
-    Parameter param;
-    param.representation(writer_data.ddsPublicationData.representation);
-    add_param(param_list, param);
-  }
+  add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value);
 
   {
     Parameter param;
@@ -970,8 +969,8 @@ bool from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
-  writer_data.ddsPublicationData.representation =
-    TheServiceParticipant->initial_DataRepresentationQosPolicy();
+  writer_data.ddsPublicationData.representation.value.length(1);
+  writer_data.ddsPublicationData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1051,7 +1050,9 @@ bool from_param_list(const ParameterList& param_list,
         writer_data.ddsPublicationData.group_data = param.group_data();
         break;
       case PID_DATA_REPRESENTATION:
-        writer_data.ddsPublicationData.representation = param.representation();
+        if (param.representation().value.length() != 0) {
+          writer_data.ddsPublicationData.representation = param.representation();
+        }
         break;
       case PID_ENDPOINT_GUID:
         writer_data.writerProxy.remoteWriterGuid = param.guid();
@@ -1234,12 +1235,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.representation))
-  {
-    Parameter param;
-    param.representation(reader_data.ddsSubscriptionData.representation);
-    add_param(param_list, param);
-  }
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
 
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
@@ -1319,8 +1315,8 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterClassName = "";
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
-  reader_data.ddsSubscriptionData.representation =
-    TheServiceParticipant->initial_DataRepresentationQosPolicy();
+  reader_data.ddsSubscriptionData.representation.value.length(1);
+  reader_data.ddsSubscriptionData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1391,7 +1387,9 @@ bool from_param_list(const ParameterList& param_list,
         reader_data.ddsSubscriptionData.group_data = param.group_data();
         break;
       case PID_DATA_REPRESENTATION:
-        reader_data.ddsSubscriptionData.representation = param.representation();
+        if (param.representation().value.length() != 0) {
+          reader_data.ddsSubscriptionData.representation = param.representation();
+        }
         break;
       case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();
