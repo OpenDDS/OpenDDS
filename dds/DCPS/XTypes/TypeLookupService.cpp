@@ -52,11 +52,25 @@ bool TypeLookupService::get_type_dependencies(const TypeIdentifier& type_id,
   return false;
 }
 
-bool TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
+void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
-  // TODO(sonndinh): implement this
-  return true;
+  std::set<TypeIdentifier> tmp;
+  for (size_t i = 0; i < type_ids.length(); ++i) {
+    const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_ids[i]);
+    if (it != type_dependencies_map_.end()) {
+      for (size_t j = 0; j < it->second.length(); ++j) {
+        tmp.insert(it->second[j].type_id);
+      }
+    }
+  }
+
+  dependencies.length(tmp.size());
+  std::set<TypeIdentifier>::const_iterator iter = tmp.begin();
+  size_t i = 0;
+  for (; iter != tmp.end(); ++i, ++iter) {
+    dependencies[i] = *iter;
+  }
 }
 
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)

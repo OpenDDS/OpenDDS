@@ -38,7 +38,7 @@ public:
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
     TypeIdentifierWithSizeSeq& dependencies) const;
-  bool get_type_dependencies(const TypeIdentifierSeq& type_ids,
+  void get_type_dependencies(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
   void add_depend_type_identifiers(const TypeIdentifier& type_id,
     const TypeIdentifierWithSizeSeq& dependencies);

@@ -3561,7 +3561,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
   DCPS::SequenceNumber& sequence,
   const DCPS::SequenceNumber& rpc_sequence,
   const DCPS::RepoId& participant_id,
-  const CORBA:ULong tl_kind)
+  const CORBA::ULong tl_kind)
 {
   if (tl_kind != XTypes::TypeLookup_getTypes_HashId &&
       tl_kind != XTypes::TypeLookup_getDependencies_HashId) {
@@ -3685,10 +3685,10 @@ Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::Ty
   sedp_.type_lookup_service_->get_type_dependencies(request.data.getTypeDependencies.type_ids,
     reply.data.getTypeDependencies.result.dependent_typeids);
   if (reply.data.getTypeDependencies.result.dependent_typeids.length() > 0) {
-    reply.data.kind = XTypes::TypeLookup_getTypeDependencies_HashId;
+    reply.data.kind = XTypes::TypeLookup_getDependencies_HashId;
     reply.data.getTypeDependencies.return_code = DDS::RETCODE_OK;
     reply.header.related_request_id = request.header.request_id;
-    return DDS:RETCODE_OK;
+    return DDS::RETCODE_OK;
   }
   return DDS::RETCODE_NO_DATA;
 }
@@ -3712,10 +3712,10 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(DCPS::Serializer& ser)
   } else { // XTypes::TypeLookup_getDependencies_HashId
     const XTypes::TypeLookup_getTypeDependencies_Out& data = type_lookup_reply.data.getTypeDependencies.result;
     continuation_point_ = data.continuation_point;
-    if (data.length() > 0) {
+    if (data.dependent_typeids.length() > 0) {
       XTypes::TypeIdentifierSeq req_type_ids;
-      for (size_t i = 0; i < data.length(); ++i) {
-        const TypeIdentifier& ti = data.dependent_typeids.type_id;
+      for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
+        const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
         if (!sedp_.type_lookup_service_->type_object_in_cache(ti)) {
           req_type_ids.append(ti);
         }

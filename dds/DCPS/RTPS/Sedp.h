@@ -778,7 +778,7 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
-    const OctetSeq32& continuation_point() const { return continuation_point_; }
+    const XTypes::OctetSeq32& continuation_point() const { return continuation_point_; }
 
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
@@ -789,7 +789,7 @@ private:
     DDS::ReturnCode_t process_type_lookup_reply(DCPS::Serializer& ser);
 
     // Store continuation point of getTypeDependencies reply
-    OctetSeq32 continuation_point_;
+    XTypes::OctetSeq32 continuation_point_;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
