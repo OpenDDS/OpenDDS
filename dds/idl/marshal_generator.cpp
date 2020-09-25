@@ -2555,14 +2555,14 @@ namespace {
     AST_Structure* node,
     const std::string& struct_name,
     IDL_GlobalData::DCPS_Data_Type_Info* info,
-    TopicKeys& keys,
+    TopicKeys* keys,
     KeyIterationFn fn,
     size_t* size,
     string* expr, Intro* intro)
   {
-    if (!info) {
-      const TopicKeys::Iterator finished = keys.end();
-      for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+    if (keys) {
+      const TopicKeys::Iterator finished = keys->end();
+      for (TopicKeys::Iterator i = keys->begin(); i != finished; ++i) {
         string key_access = i.path();
         AST_Type* straight_ast_type = i.get_ast_type();
         AST_Type* ast_type;
@@ -2579,7 +2579,10 @@ namespace {
         }
         fn(indent, encoding, key_access, ast_type, size, expr, intro);
       }
-    } else {
+      return true;
+    }
+
+    if (info) {
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
@@ -2594,6 +2597,7 @@ namespace {
         fn(indent, encoding, key_name, field_type, size, expr, intro);
       }
     }
+
     return true;
   }
 
@@ -2692,7 +2696,7 @@ namespace {
       if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
         size_t size = 0;
         if (key_only) {
-          if (!iterate_over_keys("", encoding_unaligned_cdr, node, name, info, keys,
+          if (!iterate_over_keys("", encoding_unaligned_cdr, node, name, info, &keys,
                 idl_max_serialized_size_iteration, &size, 0, 0)) {
             return false;
           }
@@ -3401,7 +3405,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     return false;
   }
 
-  if (info) {
+  if (info && !is_topic_type) {
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -3416,7 +3420,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         string expr;
         Intro intro;
         const Encoding encoding = static_cast<Encoding>(e);
-        if (!iterate_over_keys(indent, encoding, node, cxx, info, keys,
+        if (!iterate_over_keys(indent, encoding, node, cxx, info, 0,
               serialized_size_iteration, 0, &expr, &intro)) {
           return false;
         }
@@ -3444,54 +3448,23 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       Intro intro;
       const char* indent = "  ";
 
-      if (info) {
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          AST_Type* field_type = 0;
-          try {
-            field_type = find_type(node, key_name);
-          } catch (const string& error) {
-            std::cerr << "ERROR: Invalid key specification for " << cxx
-                      << " (" << key_name << "). " << error << std::endl;
-            return false;
-          }
-          if (first) {
-            first = false;
-          } else {
-            expr += "\n    && ";
-          }
-          expr += streamCommon(indent, key_name, field_type, "<< stru.value", intro);
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(node, key_name);
+        } catch (const string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
         }
-      } else {
-        // TODO(iguessthisllo): Remove
-        const TopicKeys::Iterator finished = keys.end();
-        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-          std::string key_access = i.path();
-          if (first) {
-            first = false;
-          } else {
-            expr += "\n    && ";
-          }
-          AST_Type* straight_ast_type = i.get_ast_type();
-          AST_Type* ast_type;
-          if (i.root_type() == TopicKeys::UnionType) {
-            key_access.append("._d()");
-            AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
-            if (!union_type) {
-              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
-              return false;
-            }
-            ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
-          } else {
-            ast_type = straight_ast_type;
-          }
-          if (!ast_type) {
-            std::cerr << "ERROR: Invalid key iterator for: " << cxx;
-            return false;
-          }
-          expr += streamCommon(indent, key_access, ast_type, "<< stru.value", intro);
+        if (first) {
+          first = false;
+        } else {
+          expr += "\n    && ";
         }
+        expr += streamCommon(indent, key_name, field_type, "<< stru.value", intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3509,61 +3482,23 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       std::string expr;
       const std::string indent = "  ";
 
-      if (info) {
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          AST_Type* field_type = 0;
-          try {
-            field_type = find_type(node, key_name);
-          } catch (const string& error) {
-            std::cerr << "ERROR: Invalid key specification for " << cxx
-                      << " (" << key_name << "). " << error << std::endl;
-            return false;
-          }
-          if (first) {
-            first = false;
-          } else {
-            expr += "\n    && ";
-          }
-          expr += streamCommon(indent, key_name, field_type, ">> stru.value", intro);
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(node, key_name);
+        } catch (const string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
         }
-      } else {
-        // TODO(iguessthisllo): Remove
-        const TopicKeys::Iterator finished = keys.end();
-        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-          const std::string key_name = i.path();
-          AST_Type* ast_type = i.get_ast_type();
-          if (i.root_type() == TopicKeys::UnionType) {
-            AST_Union* union_type = dynamic_cast<AST_Union*>(ast_type);
-            if (!union_type) {
-              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
-              return false;
-            }
-            AST_Type* disc_type = dynamic_cast<AST_Type*>(union_type->disc_type());
-            if (!disc_type) {
-              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
-              return false;
-            }
-            be_global->impl_ <<
-              "  {\n"
-              "    " << scoped(disc_type->name()) << " tmp;\n" <<
-              "    if (strm >> " << getWrapper("tmp", disc_type, WD_INPUT) << ") {\n"
-              "      stru.value." << key_name << "._d(tmp);\n"
-              "    } else {\n"
-              "      return false;\n"
-              "    }\n"
-              "  }\n"
-              ;
-          } else {
-            if (first) {
-              first = false;
-            } else {
-              expr += "\n    && ";
-            }
-            expr += streamCommon(indent, key_name, ast_type, ">> stru.value", intro);
-          }
+        if (first) {
+          first = false;
+        } else {
+          expr += "\n    && ";
         }
+        expr += streamCommon(indent, key_name, field_type, ">> stru.value", intro);
       }
 
       intro.join(be_global->impl_, indent);
