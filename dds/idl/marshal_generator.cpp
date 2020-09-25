@@ -7,6 +7,7 @@
 
 #include "marshal_generator.h"
 
+#include "dds_generator.h"
 #include "field_info.h"
 #include "topic_keys.h"
 
@@ -82,10 +83,6 @@ namespace {
   bool isSecuritySubmessage(const string& cxx);
   bool genSecuritySubmessage(const string& cxx);
 
-  string streamCommon(const string& name, AST_Type* type,
-                      const string& prefix, string& intro,
-                      const string& stru = "", bool printing = false);
-
   const special_sequence special_sequences[] = {
     {
       isRtpsSpecialSequence,
@@ -134,6 +131,9 @@ namespace {
     encoding_count
   };
 
+  string streamCommon(const std::string& indent, const string& name, AST_Type* type,
+                      const string& prefix, Intro& intro,
+                      const string& stru = "", bool printing = false);
 } /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
@@ -1395,10 +1395,10 @@ namespace {
             indent << typedefname << "_forany fa = tmp.inout();\n" <<
             indent <<  "    if (!(strm >> fa)) {\n";
         } else {
-          string intro;
+          Intro intro;
           be_global->impl_ <<
             "    if (!" <<
-              streamCommon("", arr->base_type(), string(">> ") + "arr" + nfl.index_, intro) <<
+              streamCommon("", "", arr->base_type(), string(">> ") + "arr" + nfl.index_, intro) <<
               ") {\n";
         }
         if (try_construct == tryconstructfailaction_use_default) {
@@ -1634,9 +1634,9 @@ namespace {
             indent << typedefname << "_forany fa = tmp.inout();\n"
             << indent <<  "if (!(strm >> fa)) {\n";
         } else {
-          string intro;
+          Intro intro;
           be_global->impl_ << "    if (!"
-            << streamCommon("", af.as_base_, string(">> ") + "arr" + nfl.index_, intro)
+            << streamCommon("", "", af.as_base_, string(">> ") + "arr" + nfl.index_, intro)
             << ") {\n";
         }
         if (try_construct == tryconstructfailaction_use_default) {
@@ -1700,15 +1700,25 @@ namespace {
     }
   }
 
-  string getArrayForany(const char* prefix, const char* fname,
-                        const string& cxx_fld, const string& temp_var_suffix = "")
+  std::string valid_var_name(std::string prefix)
   {
-    string local = fname;
+    size_t i;
+    while ((i = prefix.find(".")) != std::string::npos) {
+      prefix[i] = '_';
+    }
+    return prefix;
+  }
+
+  std::string getArrayForany(Intro& intro, const char* prefix, const char* fname, const std::string& cxx_fld)
+  {
+    std::string local = fname;
     if (local.size() > 2 && local.substr(local.size() - 2, 2) == "()") {
       local.erase(local.size() - 2);
     }
-    return cxx_fld + "_forany " + prefix + '_' + local + temp_var_suffix + "(const_cast<"
-      + cxx_fld + "_slice*>(" + prefix + "." + fname + "));";
+    const std::string name = valid_var_name(prefix) + '_' + local;
+    intro.insert(cxx_fld + "_forany " + name + "(const_cast<"
+      + cxx_fld + "_slice*>(" + prefix + "." + fname + "));");
+    return name;
   }
 
   // This function looks through the fields of a struct for the key
@@ -2078,8 +2088,8 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 
 namespace {
   // common to both fields (in structs) and branches (in unions)
-  string findSizeCommon(const string& name, AST_Type* type,
-                        const string& prefix, string& intro,
+  string findSizeCommon(const std::string& indent, const string& name, AST_Type* type,
+                        const string& prefix, Intro& intro,
                         const string& = "", bool = false) // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -2090,7 +2100,6 @@ namespace {
     Classification fld_cls = classify(type);
 
     const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
-    const string indent = (is_union_member) ? "    " : "  ";
 
     if (fld_cls & CL_ENUM) {
       return indent + "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
@@ -2117,11 +2126,8 @@ namespace {
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
       string tdname = scoped(typedeff->name());
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
-        intro += "  " + getArrayForany(prefix.c_str(), name.c_str(), tdname) + '\n';
-        fieldref += '_';
-        if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
-          local.erase(local.size() - 2);
-        }
+        fieldref = getArrayForany(intro, prefix.c_str(), name.c_str(), tdname);
+        local = "";
       } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) {
         fieldref = "IDL::DistinctType<const " + tdname + ", " +
           dds_generator::scoped_helper(typedeff->name(), "_") + "_tag>("
@@ -2135,7 +2141,8 @@ namespace {
     }
   }
 
-  bool findSizeAnonymous(AST_Field* field, const string& prefix, string& intro, string& expr)
+  bool findSizeAnonymous(
+    const std::string& indent, AST_Field* field, const string& prefix, Intro& intro, string& expr)
   {
     FieldInfo af(*field);
     if (!af.anonymous()) {
@@ -2146,21 +2153,18 @@ namespace {
       fieldref = af.const_ref_ + "(" + fieldref + '.';
       local += ')';
     } else if (af.cls_ & CL_ARRAY) {
-      intro += "  " + getArrayForany(prefix.c_str(), af.name_.c_str(), af.scoped_type_) + '\n';
-      fieldref += '_';
-      if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
-        local.erase(local.size() - 2);
-      }
+      fieldref = getArrayForany(intro, prefix.c_str(), af.name_.c_str(), af.scoped_type_);
+      local = "";
     } else {
       fieldref += '.';
     }
-    expr += "  serialized_size(encoding, size, " + fieldref + local + ");\n";
+    expr += indent + "serialized_size(encoding, size, " + fieldref + local + ");\n";
     return true;
   }
 
   // common to both fields (in structs) and branches (in unions)
-  string streamCommon(const string& name, AST_Type* type,
-                      const string& prefix, string& intro,
+  string streamCommon(const std::string& /*indent*/, const string& name, AST_Type* type,
+                      const string& prefix, Intro& intro,
                       const string& stru, bool printing)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -2201,17 +2205,8 @@ namespace {
         if (shift == ">>" || shift == "<<") {
           pre.erase(0, 3);
         }
-        if (accessor) {
-          local.erase(local.size() - 2);
-        }
-        //TODO: Was this redundant call fixed
-        // TODO(iguessthislldo): Replace with something better
-        const std::string line = "  " + getArrayForany(pre.c_str(), name.c_str(), tdname, "_sc") + '\n';
-        if (intro.find(line) == std::string::npos) {
-          intro += line;
-        }
-        local += "_sc";
-        fieldref += '_';
+        fieldref = shift + " " + getArrayForany(intro, pre.c_str(), name.c_str(), tdname);
+        local = "";
       } else if (!local.empty()) {
         fieldref += '.';
       }
@@ -2234,32 +2229,24 @@ namespace {
     }
   }
 
-  bool streamAnonymous(AST_Field* field, const string& shift, string& intro, string& expr)
+  bool streamAnonymous(
+    AST_Field* field, const string& shift, const std::string& cpp_type, Intro& intro, string& expr)
   {
     FieldInfo af(*field);
     if (!af.anonymous()) {
       return false;
     }
-    const string stru = "stru";
     string local = insert_cxx11_accessor_parens(af.name_, false);
-    const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
     if (af.cxx11()) {
       expr += "(strm " + shift + " " + ((shift == "<<") ? af.const_ref_ : af.ref_)
-        + "(" + stru + "." + local + "))";
+        + "(" + cpp_type + "." + local + "))";
     } else {
-      const string fieldref = shift + ' ' + stru + ((af.cls_ & CL_ARRAY) ? '_' : '.');
+      string fieldref = cpp_type + ((af.cls_ & CL_ARRAY) ? '_' : '.');
       if (af.cls_ & CL_ARRAY) {
-        if (accessor) {
-          local.erase(local.size() - 2);
-        }
-        // TODO(iguessthislldo): Replace with something better
-        const std::string line = "  " + getArrayForany(stru.c_str(), af.name_.c_str(), af.scoped_type_, "_sc") + '\n';
-        if (intro.find(line) == std::string::npos) {
-          intro += line;
-        }
-        local += "_sc";
+        fieldref = getArrayForany(intro, cpp_type.c_str(), af.name_.c_str(), af.scoped_type_);
+        local = "";
       }
-      expr += "(strm " + fieldref + local + ')';
+      expr += "(strm " + shift + " " + fieldref + local + ')';
     }
     return true;
   }
@@ -2524,8 +2511,7 @@ namespace {
         cst_["multicastLocator"] = "stru.smHeader.flags & 2";
 
       } else if (cxx == "OpenDDS::RTPS::SubmessageHeader") {
-        preamble_ =
-          "  strm.swap_bytes(ACE_CDR_BYTE_ORDER != (stru.flags & 1));\n";
+        intro_.insert("strm.swap_bytes(ACE_CDR_BYTE_ORDER != (stru.flags & 1));");
       }
     }
 
@@ -2551,17 +2537,20 @@ namespace {
     }
 
     std::map<string, string> cst_;
-    string iQosOffset_, preamble_;
+    string iQosOffset_;
+    Intro intro_;
   };
 
   typedef void (*KeyIterationFn)(
+    const std::string& indent,
     Encoding encoding,
     const string& key_name, AST_Type* ast_type,
     size_t* size,
-    string* expr, string* intro);
+    string* expr, Intro* intro);
 
   bool
   iterate_over_keys(
+    const std::string& indent,
     Encoding encoding,
     AST_Structure* node,
     const std::string& struct_name,
@@ -2569,7 +2558,7 @@ namespace {
     TopicKeys& keys,
     KeyIterationFn fn,
     size_t* size,
-    string* expr, string* intro)
+    string* expr, Intro* intro)
   {
     if (!info) {
       const TopicKeys::Iterator finished = keys.end();
@@ -2588,7 +2577,7 @@ namespace {
         } else {
           ast_type = straight_ast_type;
         }
-        fn(encoding, key_access, ast_type, size, expr, intro);
+        fn(indent, encoding, key_access, ast_type, size, expr, intro);
       }
     } else {
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
@@ -2602,7 +2591,7 @@ namespace {
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        fn(encoding, key_name, field_type, size, expr, intro);
+        fn(indent, encoding, key_name, field_type, size, expr, intro);
       }
     }
     return true;
@@ -2610,17 +2599,17 @@ namespace {
 
   // Args must match KeyIterationFn.
   void idl_max_serialized_size_iteration(
-    Encoding encoding, const string&, AST_Type* ast_type,
-    size_t* size, string*, string*)
+    const std::string&, Encoding encoding, const string&, AST_Type* ast_type,
+    size_t* size, string*, Intro*)
   {
     idl_max_serialized_size(encoding, *size, ast_type);
   }
 
   void serialized_size_iteration(
-    Encoding, const string& key_name, AST_Type* ast_type,
-    size_t*, string* expr, string* intro)
+    const std::string& indent, Encoding, const string& key_name, AST_Type* ast_type,
+    size_t*, string* expr, Intro* intro)
   {
-    *expr += findSizeCommon(key_name, ast_type, "stru.t", *intro);
+    *expr += findSizeCommon(indent, key_name, ast_type, "stru.value", *intro);
   }
 
   std::string fill_datareprseq(
@@ -2703,7 +2692,7 @@ namespace {
       if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
         size_t size = 0;
         if (key_only) {
-          if (!iterate_over_keys(encoding_unaligned_cdr, node, name, info, keys,
+          if (!iterate_over_keys("", encoding_unaligned_cdr, node, name, info, keys,
                 idl_max_serialized_size_iteration, &size, 0, 0)) {
             return false;
           }
@@ -2802,7 +2791,7 @@ namespace {
 
     std::string octetSeqOnly;
     if (struct_node && struct_node->nfields() == 1) {
-      AST_Field* field = *Fields(struct_node).begin();
+      AST_Field* const field = get_struct_field(struct_node, 0);
       AST_Type* const type = resolveActualType(field->field_type());
       const Classification fld_cls = classify(type);
       if (fld_cls & CL_SEQUENCE) {
@@ -2917,10 +2906,31 @@ namespace {
     return true;
   }
 
-  bool generate_struct_serialization(
-    AST_Structure* node, const std::vector<AST_Field*>& fields, RtpsFieldCustomizer& rtpsCustom)
+  bool generate_struct_serialization(AST_Structure* node, FieldType field_type)
   {
-    const string cxx = scoped(node->name());
+    const std::string actual_cpp_name = scoped(node->name());
+    std::string cpp_name = actual_cpp_name;
+    std::string const_cpp_name;
+    std::string value_access;
+    switch (field_type) {
+    case FieldType_All:
+      const_cpp_name = "const " + actual_cpp_name + "&";
+      break;
+    case FieldType_NestedKeyOnly:
+      cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
+      const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
+      value_access = ".value";
+      break;
+    case FieldType_KeyOnly:
+      cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
+      const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
+      value_access = ".value";
+      break;
+    }
+    const Fields fields(node, field_type);
+    const Fields::Iterator fields_end = fields.end();
+    RtpsFieldCustomizer rtpsCustom(cpp_name);
+
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
     const ExtensibilityKind exten = be_global->extensibility(node);
@@ -2929,94 +2939,152 @@ namespace {
     const bool is_appendable = exten == extensibilitykind_appendable;
 
     {
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", const_cpp_name);
+      serialized_size.endArgs();
+
+      if (is_mutable) {
+        /*
+         * For parameter lists this is used to hold the total size while
+         * size is hijacked for field sizes because of alignment resets.
+         */
+        be_global->impl_ <<
+          "  size_t mutable_running_total = 0;\n";
+      }
+
+      std::vector<string> code;
+      code.push_back("serialized_size_delimiter(encoding, size);");
+      generate_dheader_code(code, not_final, false);
+
+      std::string expr;
+      Intro intro;
+      const std::string indent = "  ";
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        AST_Field* const field = *i;
+        AST_Type* field_type = resolveActualType(field->field_type());
+        if (!field_type->in_main_file() && field_type->node_type() != AST_Decl::NT_pre_defined) {
+          be_global->add_referenced(field_type->file_name().c_str());
+        }
+        const string field_name = field->local_name()->get_string(),
+          cond = rtpsCustom.getConditional(field_name);
+        if (!cond.empty()) {
+          expr += "  if (" + cond + ") {\n  ";
+        }
+        if (is_mutable) {
+          expr +=
+            "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+        }
+        if (!findSizeAnonymous(indent, field, "stru" + value_access, intro, expr)) {
+          expr += findSizeCommon(indent, field_name, field->field_type(), "stru" + value_access, intro);
+        }
+        if (!cond.empty()) {
+          expr += "  }\n";
+        }
+      }
+      intro.join(be_global->impl_, indent);
+      be_global->impl_ << expr;
+
+      if (is_mutable) {
+        be_global->impl_ <<
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+      }
+    }
+
+    {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
-      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.addArg("stru", const_cpp_name);
       insertion.endArgs();
 
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
-      code.push_back("serialized_size(strm.encoding(), total_size, stru);");
+      code.push_back("serialized_size(strm.encoding(), total_size, stru" + value_access + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, not_final);
 
       // Write the fields
-      string intro = rtpsCustom.preamble_;
+      std::ostringstream mutable_fields;
+      Intro intro = rtpsCustom.intro_;
+      const std::string indent = "  ";
       if (is_mutable) {
         string expr;
-        be_global->impl_ <<
+        const std::string mutable_indent = indent + "  ";
+        mutable_fields <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
           "    size_t size = 0;\n";
-        std::ostringstream fields_encode;
-        for (size_t i = 0; i < fields.size(); ++i) {
-          const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
-          const string field_name = fields[i]->local_name()->get_string();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          AST_Field* const field = *i;
+          const unsigned id = be_global->get_id(node, field, i.pos());
+          const string field_name = field->local_name()->get_string();
           bool is_key = false;
-          be_global->check_key(fields[i], is_key);
-          fields_encode << "\n";
+          be_global->check_key(field, is_key);
+
+          mutable_fields << "\n";
           expr = "";
-          if (!findSizeAnonymous(fields[i], "stru", intro, expr)) {
-            expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
+          if (!findSizeAnonymous(mutable_indent, field, "stru" + value_access, intro, expr)) {
+            expr += findSizeCommon(mutable_indent, field_name, field->field_type(), "stru" + value_access, intro);
           }
-          fields_encode << expr << "\n";
+          mutable_fields << expr << "\n";
           expr = "";
-          fields_encode <<
+          mutable_fields <<
             "    if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
             "      return false;\n"
             "    }\n"
             "    size = 0;\n"
             "    if (!";
-          if (!streamAnonymous(fields[i], "<<", intro, expr)) {
-            expr += streamCommon(field_name, fields[i]->field_type(),
-                "<< stru", intro, cxx);
+          if (!streamAnonymous(field, "<<", "stru" + value_access, intro, expr)) {
+            expr += streamCommon(mutable_indent, field_name, field->field_type(), "<< stru" + value_access, intro, cpp_name);
           }
-          fields_encode << expr << "\n"
-            ") {\n"
+          mutable_fields << expr << ") {\n"
             "    return false;\n"
             "  }\n";
         }
-        fields_encode <<
-          "\n"
+        mutable_fields << "\n"
           "    if (!strm.write_list_end_parameter_id()) {\n"
           "      return false;\n"
-          "    }\n";
-        be_global->impl_ <<
-          intro <<
-          fields_encode.str() << "\n"
+          "    }\n"
           "    return true;\n"
           "  }\n";
       }
 
       string expr;
-      for (size_t i = 0; i < fields.size(); ++i) {
-        if (i) expr += "\n    && ";
-        const string field_name = fields[i]->local_name()->get_string(),
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        AST_Field* const field = *i;
+        if (i.pos()) expr += "\n    && ";
+        const string field_name = field->local_name()->get_string(),
           cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
           expr += "(!(" + cond + ") || ";
         }
-        if (!streamAnonymous(fields[i], "<<", intro, expr)) {
-          expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
+        if (!streamAnonymous(field, "<<", "stru" + value_access, intro, expr)) {
+          expr += streamCommon(
+            indent, field_name, field->field_type(), "<< stru" + value_access, intro, cpp_name);
         }
         if (!cond.empty()) {
           expr += ")";
         }
       }
-      be_global->impl_ << intro << "  return " << expr << ";\n";
+
+      intro.join(be_global->impl_, indent);
+      be_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
     }
 
     // TODO(iguessthislldo) Pull this out for metaclass_generator
     {
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
-      extraction.addArg("stru", cxx + "&");
+      extraction.addArg("stru", cpp_name + "&");
       extraction.endArgs();
-      string intro;
+      Intro intro;
       string expr;
+      const std::string indent = "  ";
+
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n"
@@ -3064,28 +3132,29 @@ namespace {
           "\n";
 
         std::ostringstream cases;
-        for (size_t i = 0; i < fields.size(); ++i) {
-          const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
-          string field_name = string("stru.") + fields[i]->local_name()->get_string();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          AST_Field* const field = *i;
+          const unsigned id = be_global->get_id(node, field, i.pos());
+          string field_name = string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
             "      case " << id << ": {\n"
             "        if (!";
           expr = "";
-          if (!streamAnonymous(fields[i], ">>", intro, expr)) {
-            expr += streamCommon(fields[i]->local_name()->get_string(), fields[i]->field_type(),
-              ">> stru", intro, cxx);
+          if (!streamAnonymous(field, ">>",  "stru" + value_access, intro, expr)) {
+            expr += streamCommon(indent, field->local_name()->get_string(), field->field_type(),
+              ">> stru" + value_access, intro, cpp_name);
           }
           cases << expr << ") {\n";
-          AST_Type* field_type = resolveActualType(fields[i]->field_type());
+          AST_Type* field_type = resolveActualType(field->field_type());
           Classification fld_cls = classify(field_type);
 
           if (use_cxx11) {
             field_name += "()";
           }
-          const TryConstructFailAction try_construct = be_global->try_construct(fields[i]);
+          const TryConstructFailAction try_construct = be_global->try_construct(field);
           if (try_construct == tryconstructfailaction_use_default) {
             cases <<
-              "          " << type_to_default(field_type, field_name, fields[i]->field_type()->anonymous()) <<
+              "          " << type_to_default(field_type, field_name, field->field_type()->anonymous()) <<
               "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
             if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
           } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
@@ -3133,14 +3202,15 @@ namespace {
             "        break;\n"
             "      }\n";
         }
-        be_global->impl_ << intro <<
+        intro.join(be_global->impl_, indent);
+        be_global->impl_ <<
           "      switch (member_id) {\n"
           << cases.str() <<
           "      default:\n"
           "        if (must_understand) {\n"
           "          if (DCPS_debug_level >= 8) {\n"
           "            ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
-                         << cxx.c_str() << "\\n\"), member_id));\n" <<
+                         << cpp_name << "\\n\"), member_id));\n" <<
           "          }\n"
           "          return false;\n"
           "        }\n"
@@ -3154,8 +3224,9 @@ namespace {
       }
 
       expr = "";
-      for (size_t i = 0; i < fields.size(); ++i) {
-        if (i && exten != extensibilitykind_appendable) {
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        AST_Field* const field = *i;
+        if (i.pos() && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
         }
         // TODO (sonndinh): Integrate with try-construct for when the stream
@@ -3167,7 +3238,7 @@ namespace {
             "    return true;\n"
             "  }\n";
         }
-        const string field_name = fields[i]->local_name()->get_string();
+        const string field_name = field->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
           string prefix = rtpsCustom.preFieldRead(field_name);
@@ -3186,8 +3257,9 @@ namespace {
         } else if (is_appendable) {
           expr += "  if (!";
         }
-        if (!streamAnonymous(fields[i], ">>", intro, expr)) {
-          expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
+        if (!streamAnonymous(field, ">>",  "stru" + value_access, intro, expr)) {
+          expr += streamCommon(
+            indent, field_name, field->field_type(), ">> stru" + value_access, intro, cpp_name);
         }
         if (is_appendable) {
           expr += ") {\n"
@@ -3197,6 +3269,7 @@ namespace {
           expr += ")";
         }
       }
+      intro.join(be_global->impl_, indent);
       if (is_appendable) {
         expr +=
           "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
@@ -3204,9 +3277,9 @@ namespace {
           "    strm.skip(end_of_struct - strm.pos());\n"
           "  }\n"
           "  return true;\n";
-        be_global->impl_ << intro << expr;
+        be_global->impl_ << expr;
       } else {
-        be_global->impl_ << intro << "  return " << expr << ";\n";
+        be_global->impl_ << "  return " << expr << ";\n";
       }
     }
     return true;
@@ -3223,10 +3296,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   be_global->add_include("dds/DCPS/Serializer.h");
   const string cxx = scoped(name); // name as a C++ class
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
-  const ExtensibilityKind exten = be_global->extensibility(node);
-  const bool not_final = exten != extensibilitykind_final;
-  const bool is_mutable = exten == extensibilitykind_mutable;
 
   {
     Function set_default("set_default", "void");
@@ -3259,61 +3328,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
   }
 
-  RtpsFieldCustomizer rtpsCustom(cxx);
-
-  // TODO(iguessthislldo) Move this into generate_struct_serialization
-  {
-    Function serialized_size("serialized_size", "void");
-    serialized_size.addArg("encoding", "const Encoding&");
-    serialized_size.addArg("size", "size_t&");
-    serialized_size.addArg("stru", "const " + cxx + "&");
-    serialized_size.endArgs();
-
-    if (is_mutable) {
-      /*
-       * For parameter lists this is used to hold the total size while
-       * size is hijacked for field sizes because of alignment resets.
-       */
-      be_global->impl_ <<
-        "  size_t mutable_running_total = 0;\n";
-    }
-
-    std::vector<string> code;
-    code.push_back("serialized_size_delimiter(encoding, size);");
-    generate_dheader_code(code, not_final, false);
-
-    string expr, intro;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      AST_Type* field_type = resolveActualType(fields[i]->field_type());
-      if (!field_type->in_main_file()
-          && field_type->node_type() != AST_Decl::NT_pre_defined) {
-        be_global->add_referenced(field_type->file_name().c_str());
-      }
-      const string field_name = fields[i]->local_name()->get_string(),
-        cond = rtpsCustom.getConditional(field_name);
-      if (!cond.empty()) {
-        expr += "  if (" + cond + ") {\n  ";
-      }
-      if (is_mutable) {
-        expr +=
-          "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
-      }
-      if (!findSizeAnonymous(fields[i], "stru", intro, expr)) {
-        expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
-      }
-      if (!cond.empty()) {
-        expr += "  }\n";
-      }
-    }
-    be_global->impl_ << intro << expr;
-
-    if (is_mutable) {
-      be_global->impl_ <<
-        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
-    }
-  }
-
-  if (!generate_struct_serialization(node, fields, rtpsCustom)) {
+  if (!generate_struct_serialization(node, FieldType_All) ||
+      !generate_struct_serialization(node, FieldType_NestedKeyOnly)) {
     return false;
   }
 
@@ -3326,8 +3342,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     shift.addArg("stru", "const " + cxx + "&");
     shift.endArgs();
     shift.extra_newline_ = false;
-    string intro;
-    string expr = "  strm.push_indent();\n";
+    Intro intro;
+    const std::string indent = "  ";
+    std::string expr = indent + "strm.push_indent();\n";
     for (size_t i = 0; i < fields.size(); ++i) {
       const string field_name = fields[i]->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(fields[i]->field_type());
@@ -3352,9 +3369,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr +=
           "  strm.os() << '\"';\n";
       }
-      expr +=
-        "  " + streamCommon(
-          field_name, fields[i]->field_type(), "<< stru", intro, cxx, true);
+      expr += indent + streamCommon(
+        indent, field_name, fields[i]->field_type(), "<< stru", intro, cxx, true);
       if (is_string_type) {
         expr += " << '\"'";
       }
@@ -3363,8 +3379,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
       expr += ";\n";
     }
-    be_global->impl_ << intro << expr <<
-      "\n"
+    intro.join(be_global->impl_, indent);
+    be_global->impl_ << expr << "\n"
       "  return strm.os();\n";
   }
 
@@ -3374,10 +3390,18 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   if (is_topic_type) {
     keys = TopicKeys(node);
     info = 0; // Annotations Override DCPS_DATA_TYPE
+
+    if (!generate_struct_serialization(node, FieldType_KeyOnly)) {
+      return false;
+    }
   }
 
-  // Only generate these methods if this is a topic type
-  if (info || is_topic_type) {
+  if ((info || is_topic_type) &&
+      !generate_marshal_traits(node, cxx, be_global->extensibility(node), keys, info)) {
+    return false;
+  }
+
+  if (info) {
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -3387,17 +3411,21 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       be_global->impl_ <<
         "  switch (encoding.xcdr_version()) {\n";
+      const char* indent = "    ";
       for (unsigned e = 0; e < encoding_count; ++e) {
-        string expr, intro;
+        string expr;
+        Intro intro;
         const Encoding encoding = static_cast<Encoding>(e);
-        if (!iterate_over_keys(encoding, node, cxx, info, keys,
-            serialized_size_iteration, 0, &expr, &intro)) {
+        if (!iterate_over_keys(indent, encoding, node, cxx, info, keys,
+              serialized_size_iteration, 0, &expr, &intro)) {
           return false;
         }
         be_global->impl_ <<
           "  case " << encoding_to_xcdr_version(encoding) << ":\n"
-          "    {\n"
-          << intro << expr <<
+          "    {\n";
+        intro.join(be_global->impl_, indent);
+        be_global->impl_
+          << expr <<
           "    break;\n"
           "    }\n";
       }
@@ -3412,7 +3440,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       insertion.endArgs();
 
       bool first = true;
-      string expr, intro;
+      std::string expr;
+      Intro intro;
+      const char* indent = "  ";
 
       if (info) {
         IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
@@ -3431,9 +3461,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           } else {
             expr += "\n    && ";
           }
-          expr += streamCommon(key_name, field_type, "<< stru.t", intro);
+          expr += streamCommon(indent, key_name, field_type, "<< stru.value", intro);
         }
       } else {
+        // TODO(iguessthisllo): Remove
         const TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_access = i.path();
@@ -3459,15 +3490,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             std::cerr << "ERROR: Invalid key iterator for: " << cxx;
             return false;
           }
-          expr += streamCommon(key_access, ast_type, "<< stru.t", intro);
+          expr += streamCommon(indent, key_access, ast_type, "<< stru.value", intro);
         }
       }
 
-      if (first) {
-        be_global->impl_ << intro << "  return true;\n";
-      } else {
-        be_global->impl_ << intro << "  return " << expr << ";\n";
-      }
+      intro.join(be_global->impl_, indent);
+      be_global->impl_ << "  return " << (first ? "true" : expr) << ";\n";
     }
 
     {
@@ -3477,7 +3505,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       extraction.endArgs();
 
       bool first = true;
-      string expr, intro;
+      Intro intro;
+      std::string expr;
+      const std::string indent = "  ";
 
       if (info) {
         IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
@@ -3496,9 +3526,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           } else {
             expr += "\n    && ";
           }
-          expr += streamCommon(key_name, field_type, ">> stru.t", intro);
+          expr += streamCommon(indent, key_name, field_type, ">> stru.value", intro);
         }
       } else {
+        // TODO(iguessthisllo): Remove
         const TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           const std::string key_name = i.path();
@@ -3518,7 +3549,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
               "  {\n"
               "    " << scoped(disc_type->name()) << " tmp;\n" <<
               "    if (strm >> " << getWrapper("tmp", disc_type, WD_INPUT) << ") {\n"
-              "      stru.t." << key_name << "._d(tmp);\n"
+              "      stru.value." << key_name << "._d(tmp);\n"
               "    } else {\n"
               "      return false;\n"
               "    }\n"
@@ -3530,20 +3561,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             } else {
               expr += "\n    && ";
             }
-            expr += streamCommon(key_name, ast_type, ">> stru.t", intro);
+            expr += streamCommon(indent, key_name, ast_type, ">> stru.value", intro);
           }
         }
       }
 
-      if (first) {
-        be_global->impl_ << intro << "  return true;\n";
-      } else {
-        be_global->impl_ << intro << "  return " << expr << ";\n";
-      }
-    }
-
-    if (!generate_marshal_traits(node, cxx, exten, keys, info)) {
-      return false;
+      intro.join(be_global->impl_, indent);
+      be_global->impl_ << "  return " << (first ? "true" : expr) << ";\n";
     }
   }
 
@@ -3920,7 +3944,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     return true;
   }
 
-  const string key_only_wrap_out = getWrapper("uni.t._d()", discriminator, WD_OUTPUT);
+  const string key_only_wrap_out = getWrapper("uni.value._d()", discriminator, WD_OUTPUT);
 
   {
     Function serialized_size("serialized_size", "void");
@@ -4025,7 +4049,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_
         << "  " << scoped(discriminator->name()) << " disc;\n"
         << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
-        << "  uni.t._d(disc);\n";
+        << "  uni.value._d(disc);\n";
     }
 
     be_global->impl_ << "  return true;\n";

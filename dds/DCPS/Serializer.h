@@ -742,9 +742,24 @@ private:
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];
 };
 
-template<typename T> struct KeyOnly {
-  explicit KeyOnly(T& mess) : t(mess) { }
-  T& t;
+template<typename Type>
+struct KeyOnly {
+  explicit KeyOnly(Type& value)
+  : value(value)
+  {
+  }
+
+  Type& value;
+};
+
+template<typename Type>
+struct NestedKeyOnly {
+  explicit NestedKeyOnly(Type& value)
+  : value(value)
+  {
+  }
+
+  Type& value;
 };
 
 namespace IDL {

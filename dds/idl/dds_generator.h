@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <set>
 
 class dds_generator {
 public:
@@ -563,9 +564,33 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   }
 }
 
+struct Intro {
+  typedef std::set<std::string> Lines;
+  Lines lines;
+
+  void join(std::ostream& os, const std::string& indent)
+  {
+    for (Lines::iterator i = lines.begin(); i != lines.end(); ++i)
+    {
+      os << indent << *i << '\n';
+    }
+  }
+
+  void insert(const std::string& line)
+  {
+    lines.insert(line);
+  }
+
+  void insert(const Intro& other)
+  {
+    lines.insert(other.lines.begin(), other.lines.end());
+  }
+};
+
 typedef std::string (*CommonFn)(
+  const std::string& indent,
   const std::string& name, AST_Type* type,
-  const std::string& prefix, std::string& intro,
+  const std::string& prefix, Intro& intro,
   const std::string&, bool printing);
 
 inline
@@ -680,29 +705,29 @@ void generateCaseBody(
         }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
+    const std::string indent = "    ";
+    Intro intro;
+    std::ostringstream contents;
     if (commonFn2) {
-      std::string intro;
       const unsigned id = be_global->get_id(type, branch, default_id);
-      std::string expr = commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false);
-      be_global->impl_ << intro <<
-        expr <<
-        "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
-        "      return false;\n"
-        "    }\n";
+      contents
+        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false)
+        << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
+        << indent << "  return false;\n"
+        << indent << "}\n";
     }
-    std::string intro;
-    std::string expr = commonFn(
+    const std::string expr = commonFn(indent,
       name + (parens ? "()" : ""), branch->field_type(),
       std::string(namePrefix) + "uni", intro, uni, printing);
-    be_global->impl_ <<
-      (intro.empty() ? "" : "  ") << intro;
     if (*statementPrefix) {
-      be_global->impl_ <<
-        "    " << statementPrefix << " " << expr << ";\n" <<
+      contents <<
+        indent << statementPrefix << " " << expr << ";\n" <<
         (statementPrefix == std::string("return") ? "" : breakString);
     } else {
-      be_global->impl_ << expr << breakString;
+      contents << expr << breakString;
     }
+    intro.join(be_global->impl_, indent);
+    be_global->impl_ << contents.str();
   }
 }
 
@@ -844,6 +869,22 @@ std::string insert_cxx11_accessor_parens(const std::string& full_var_name_, bool
     ? full_var_name : full_var_name + "()";
 }
 
+enum FieldType {
+  FieldType_All,
+  FieldType_NestedKeyOnly,
+  FieldType_KeyOnly
+};
+
+inline AST_Field* get_struct_field(AST_Structure* struct_node, size_t index)
+{
+  if (!struct_node || index >= struct_node->nfields()) {
+    return 0;
+  }
+  AST_Field** field_ptrptr;
+  struct_node->field(field_ptrptr, index);
+  return field_ptrptr ? *field_ptrptr : 0;
+}
+
 /**
  * Wrapper for Iterating Over Structure Fields
  */
@@ -856,11 +897,23 @@ public:
     typedef AST_Field*& reference;
     typedef std::input_iterator_tag iterator_category;
 
-    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0)
+    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0, FieldType type = FieldType_All)
     : node_(node)
     , pos_(pos)
+    , just_keys_(type == FieldType_KeyOnly) // FieldType_NestedKeyOnly case is checked below
     {
       check();
+
+      // Check for implied keys rule for non-topic type cases
+      if (node && type_ == FieldType_NestedKeyOnly) {
+        for (size_t i = 0; i < node_->nfields(); ++i) {
+          bool marked_as_key = false;
+          be_global->check_key(get_struct_field(node_, pos_), marked_as_key);
+          if (marked_as_key) {
+            just_keys_ = true;
+          }
+        }
+      }
     }
 
     bool valid() const
@@ -868,12 +921,14 @@ public:
       return node_ && pos_ < node_->nfields();
     }
 
-    void check()
+    bool check()
     {
       if (!valid()) {
         node_ = 0;
         pos_ = 0;
+        return false;
       }
+      return true;
     }
 
     unsigned pos() const
@@ -883,9 +938,17 @@ public:
 
     Iterator& operator++() // Prefix
     {
-      if (node_) {
+      while (true) {
         ++pos_;
-        check();
+        if (check() && just_keys_) {
+          bool marked_as_key = false;
+          be_global->check_key(**this, marked_as_key);
+          if (marked_as_key) {
+            break;
+          }
+        } else {
+          break;
+        }
       }
       return *this;
     }
@@ -899,14 +962,7 @@ public:
 
     AST_Field* operator*() const
     {
-      if (node_) {
-        AST_Field** field_ptrptr;
-        node_->field(field_ptrptr, pos_);
-        if (field_ptrptr) {
-          return *field_ptrptr;
-        }
-      }
-      return 0;
+      return get_struct_field(node_, pos_);
     }
 
     bool operator==(const Iterator& other) const
@@ -922,10 +978,13 @@ public:
   private:
     AST_Structure* node_;
     unsigned pos_;
+    FieldType type_;
+    bool just_keys_;
   };
 
-  explicit Fields(AST_Structure* node = 0)
+  explicit Fields(AST_Structure* node = 0, FieldType type = FieldType_All)
   : node_(node)
+  , type_(type)
   {
   }
 
@@ -936,7 +995,7 @@ public:
 
   Iterator begin() const
   {
-    return Iterator(node_);
+    return Iterator(node_, 0, type_);
   }
 
   Iterator end() const
@@ -952,6 +1011,7 @@ public:
 
 private:
   AST_Structure* node_;
+  FieldType type_;
 };
 
 #endif
