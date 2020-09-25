@@ -71,7 +71,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return ret;
   }
 
-  if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
+  if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
     return ret;
   }
 
@@ -763,16 +763,6 @@ RtpsUdpReceiveStrategy::start_i()
                       ACE_TEXT("NULL reactor reference!\n")),
                      -1);
   }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  BOOL recv_udp_connreset = FALSE;
-  link_->unicast_socket().control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-#endif
 
   if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
                                 ACE_Event_Handler::READ_MASK) != 0) {
