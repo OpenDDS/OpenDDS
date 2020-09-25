@@ -28,12 +28,12 @@ struct TestMsg {
 void serialized_size(
   const Encoding& encoding, size_t& size, const KeyOnly<const TestMsg>& stru)
 {
-  primitive_serialized_size(encoding, size, stru.t.key);
+  primitive_serialized_size(encoding, size, stru.value.key);
 }
 
 bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)
 {
-  return strm << stru.t.key;
+  return strm << stru.value.key;
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -66,7 +66,7 @@ void serialized_size(
 
 bool operator<<(Serializer& strm, KeyOnly<const BigKey> stru)
 {
-  return strm.write_octet_array(stru.t.key, 24);
+  return strm.write_octet_array(stru.value.key, 24);
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
