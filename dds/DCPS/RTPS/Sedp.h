@@ -786,7 +786,11 @@ private:
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    DDS::ReturnCode_t process_type_lookup_reply(DCPS::Serializer& ser);
+    DDS::ReturnCode_t process_type_lookup_reply(const DCPS::ReceivedDataSample&,
+                                                DCPS::Serializer& ser);
+    DDS::ReturnCode_t process_get_types_reply(const XTypes::TypeLookup_Reply&);
+    DDS::ReturnCode_t process_get_dependencies_reply(const DCPS::ReceivedDataSample&,
+                                                     const XTypes::TypeLookup_Reply&);
 
     // Store continuation point of getTypeDependencies reply
     XTypes::OctetSeq32 continuation_point_;

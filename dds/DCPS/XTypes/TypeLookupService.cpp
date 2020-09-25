@@ -69,7 +69,15 @@ void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
   std::set<TypeIdentifier>::const_iterator iter = tmp.begin();
   size_t i = 0;
   for (; iter != tmp.end(); ++i, ++iter) {
-    dependencies[i] = *iter;
+    // TODO(sonndinh): do we include TypeIdentifiers that don't have TypeObjects?
+    // Currently, we include only the ones that have TypeObjects.
+    const TypeObjectMap::const_iterator tobj_it = type_object_map_.find(*iter);
+    if (tobj_it != type_object_map_.end()) {
+      dependencies[i].type_id = *iter;
+      size_t size = 0;
+      DCPS::serialized_size(get_typeobject_encoding(), size, tobj_it->second);
+      dependencies[i].typeobject_serialized_size = size;
+    }
   }
 }
 
