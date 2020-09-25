@@ -94,17 +94,45 @@ namespace OpenDDS {
                   DataWriterCallbacks* dwr)
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
-      { }
+        , interval(TimeDuration(0)), status(0), tid(0), has_timeout(false)
+      {
+        interval = TheServiceParticipant->get_thread_status_interval();
+        status = TheServiceParticipant->get_thread_statuses();
+        tid = ACE_OS::thr_self();
+        has_timeout = interval > TimeDuration(0);
+      }
 
       int svc()
       {
+        ACE_Time_Value expire = ACE_Time_Value(0);
+
+        if (has_timeout) {
+          expire = MonotonicTimePoint::now().value() + interval.value();
+        }
+
         drr_->add_association(reader_, wa_, active_);
         {
           ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);
           reader_done_ = true;
           cnd_.signal();
           while (!writer_done_) {
-            cnd_.wait();
+            do {
+              cnd_.wait(&expire);
+
+              ACE_Time_Value now = MonotonicTimePoint::now().value();
+              if (has_timeout && now > expire) {
+                expire = now + interval.value();
+                if (status) {
+                  if (DCPS_debug_level > 4) {
+                    ACE_DEBUG((LM_DEBUG,
+                              "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+                  }
+                  status->lock.acquire_write();
+                  status->map[tid] = now;
+                  status->lock.release();
+                }
+              }
+            } while (!writer_done_ && has_timeout);
           }
         }
         dwr_->association_complete(reader_);
@@ -118,7 +146,28 @@ namespace OpenDDS {
           writer_done_ = true;
           cnd_.signal();
         }
-        wait();
+
+        ACE_Time_Value expire = ACE_Time_Value(0);
+
+        if (has_timeout) {
+          expire = MonotonicTimePoint::now().value() + interval.value();
+        }
+
+        wait(); // ACE_Task_Base::wait does not accept a timeout
+
+        ACE_Time_Value now = MonotonicTimePoint::now().value();
+        if (has_timeout && now > expire) {
+          expire = now + interval.value();
+          if (status) {
+            if (DCPS_debug_level > 4) {
+              ACE_DEBUG((LM_DEBUG,
+                        "%T (%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
+            }
+            status->lock.acquire_write();
+            status->map[tid] = EXIT_SUCCESS;
+            status->lock.release();
+          }
+        }
       }
 
       DataReaderCallbacks* const drr_;
@@ -129,6 +178,12 @@ namespace OpenDDS {
       bool reader_done_, writer_done_;
       ACE_Thread_Mutex mtx_;
       ACE_Condition_Thread_Mutex cnd_;
+
+      // thread reporting
+      TimeDuration interval;
+      ThreadStatus* status;
+      ACE_thread_t tid;
+      bool has_timeout;
     };
 
     template <typename DiscoveredParticipantData_>
@@ -1858,6 +1913,10 @@ namespace OpenDDS {
         DDS::TopicDescription_var bit_connection_record_topic =
           participant->lookup_topicdescription(BUILT_IN_CONNECTION_RECORD_TOPIC);
         create_bit_dr(bit_connection_record_topic, BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE,
+
+        DDS::TopicDescription_var bit_internal_thread_topic =
+          participant->lookup_topicdescription(BUILT_IN_INTERNAL_THREAD_TOPIC);
+        create_bit_dr(bit_internal_thread_topic, BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE,
                       sub, dr_qos);
 
         const DDS::ReturnCode_t ret = bit_subscriber->enable();

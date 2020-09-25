@@ -90,6 +90,22 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     }
   }
 
+  DDS::Topic_var bit_part_loc_topic =
+    participant->create_topic(BUILT_IN_PARTICIPANT_LOCATION_TOPIC,
+      BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+      TOPIC_QOS_DEFAULT,
+      DDS::TopicListener::_nil(),
+      DEFAULT_STATUS_MASK);
+
+  if (CORBA::is_nil(bit_part_loc_topic)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ")
+      ACE_TEXT("Discovery::create_bit_topics, ")
+      ACE_TEXT("Nil %C Topic\n"),
+      BUILT_IN_PARTICIPANT_LOCATION_TOPIC),
+      DDS::RETCODE_ERROR);
+  }
+
   // Internal thread status topic
   type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE);
@@ -111,19 +127,19 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     }
   }
 
-  DDS::Topic_var bit_part_loc_topic =
-    participant->create_topic(BUILT_IN_PARTICIPANT_LOCATION_TOPIC,
-      BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+  DDS::Topic_var bit_internal_thread_topic =
+    participant->create_topic(BUILT_IN_INTERNAL_THREAD_TOPIC,
+      BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE,
       TOPIC_QOS_DEFAULT,
       DDS::TopicListener::_nil(),
       DEFAULT_STATUS_MASK);
 
-  if (CORBA::is_nil(bit_part_loc_topic)) {
+  if (CORBA::is_nil(bit_internal_thread_topic)) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ")
       ACE_TEXT("Discovery::create_bit_topics, ")
       ACE_TEXT("Nil %C Topic\n"),
-      BUILT_IN_PARTICIPANT_LOCATION_TOPIC),
+      BUILT_IN_INTERNAL_THREAD_TOPIC),
       DDS::RETCODE_ERROR);
   }
 
@@ -282,6 +298,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 
   bit_part_loc_topic->enable();
   bit_connection_record_topic->enable();
+  bit_internal_thread_topic->enable();
 
 #else
   ACE_UNUSED_ARG(participant);
