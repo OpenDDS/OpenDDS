@@ -901,7 +901,7 @@ const char* OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
   case LOST_STATE:
     return "LOST_STATE";
   case RECONNECTED_STATE:
-    return "RECONENCTED_STATE";
+    return "RECONNECTED_STATE";
   case ACTIVE_RECONNECTING_STATE:
     return "ACTIVE_RECONNECTING_STATE";
   case ACTIVE_WAITING_STATE:
