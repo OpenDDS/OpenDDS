@@ -298,6 +298,9 @@ module OpenDDS {
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
+    // Type Consistency Enforcement QoS Policy 7.6.3.4 XTypes Spec
+    const ParameterId_t PID_XYTPES_TYPE_CONSISTENCY = 0x0074;
+
     // TypeInformation for XTypes 7.6.3.2.2 XTypes Spec
     const ParameterId_t PID_XTYPES_TYPE_INFORMATION = 0x0075;
 
@@ -487,6 +490,9 @@ module OpenDDS {
 
       case PID_DATA_REPRESENTATION:
         DDS::DataRepresentationQosPolicy representation;
+
+      case PID_XYTPES_TYPE_CONSISTENCY:
+        DDS::TypeConsistencyEnforcementQosPolicy type_consistency;
 
       default:
         DDS::OctetSeq unknown_data;

@@ -244,6 +244,13 @@ Service_Participant::initial_SubscriberQos() const
 }
 
 ACE_INLINE
+const DDS::TypeConsistencyEnforcementQosPolicy&
+Service_Participant::initial_TypeConsistencyEnforcementQosPolicy() const
+{
+  return initial_TypeConsistencyEnforcementQosPolicy_;
+}
+
+ACE_INLINE
 int&
 Service_Participant::federation_recovery_duration()
 {

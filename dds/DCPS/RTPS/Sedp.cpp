@@ -4530,6 +4530,14 @@ Sedp::write_subscription_data_unsecure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
+
+    DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
+    Parameter param;
+    param.type_consistency(tceqp);
+    const CORBA::ULong length = plist.length();
+    plist.length(length + 1);
+    plist[length] = param;
+
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
