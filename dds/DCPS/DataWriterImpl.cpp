@@ -244,7 +244,12 @@ DataWriterImpl::add_association(const RepoId& yourId,
   data.remote_durable_ =
     (reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-  if (!associate(data, active)) {
+  if (associate(data, active)) {
+    const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
+    if (observer) {
+      observer->on_associated(this, data.remote_id_);
+    }
+  } else {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
@@ -601,6 +606,13 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
 {
   if (readers.length() == 0) {
     return;
+  }
+
+  const Observer_rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < readers.length(); ++i) {
+      observer->on_disassociated(this, readers[i]);
+    }
   }
 
   if (DCPS_debug_level >= 1) {
@@ -975,7 +987,6 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1019,6 +1030,11 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
     }
 
     qos_ = qos;
+
+    const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
+    if (observer) {
+      observer->on_qos_changed(this);
+    }
 
     return DDS::RETCODE_OK;
 
@@ -1569,6 +1585,13 @@ DataWriterImpl::enable()
 
 #endif
 
+  if (writer_enabled_result == DDS::RETCODE_OK) {
+    const Observer_rch observer = get_observer(Observer::e_ENABLED);
+    if (observer) {
+      observer->on_enabled(this);
+    }
+  }
+
   return writer_enabled_result;
 }
 
@@ -1911,8 +1934,13 @@ DataWriterImpl::write(Message_Block_Ptr data,
 
   } else {
     guard.release();
-
     this->send(list, transaction_id);
+  }
+
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
+  if (observer) {
+    Observer::Sample s(handle, *element, source_timestamp);
+    observer->on_sample_sent(this, s);
   }
 
   return DDS::RETCODE_OK;
@@ -2536,6 +2564,11 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 void
 DataWriterImpl::prepare_to_delete()
 {
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
+
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();
