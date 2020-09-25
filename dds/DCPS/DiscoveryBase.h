@@ -1156,7 +1156,11 @@ namespace OpenDDS {
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
-                send_type_lookup_request(type_ids, writer, lpi->second.security_attribs_.base.is_discovery_protected);
+                bool is_discovery_protected = false;
+#ifdef OPENDDS_SECURITY
+                is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
+#endif
+                send_type_lookup_request(type_ids, writer, is_discovery_protected);
                 type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
                 return;
               }
@@ -1171,7 +1175,11 @@ namespace OpenDDS {
                 } else {
                   matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
                 }
-                send_type_lookup_request(type_ids, reader, lsi->second.security_attribs_.base.is_discovery_protected);
+                bool is_discovery_protected = false;
+#ifdef OPENDDS_SECURITY
+                is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+#endif
+                send_type_lookup_request(type_ids, reader, is_discovery_protected);
                 type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
                 return;
               }
