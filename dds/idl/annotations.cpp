@@ -1,9 +1,10 @@
 #include "annotations.h"
 
 #include "be_extern.h"
+#include "be_util.h"
 
-#include <ast_annotation_decl.h>
 #include <ast_annotation_appl.h>
+#include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
 #include <ast_union.h>
 #include <utl_string.h>
@@ -43,9 +44,7 @@ Annotation* Annotations::operator[](const std::string& annotation) const
 {
   const MapType::const_iterator i = map_.find(annotation);
   if (i == map_.end()) {
-    idl_global->err()->misc_error(
-      (std::string("No such annotation: ") + annotation).c_str());
-    BE_abort();
+    be_util::misc_error_and_abort(std::string("No such annotation: ") + annotation);
   }
   return i->second;
 }
@@ -92,16 +91,18 @@ AST_Expression::AST_ExprValue* get_annotation_member_ev(
 {
   AST_Annotation_Member* member =
     dynamic_cast<AST_Annotation_Member*>((*appl)[member_name]);
-  if (!member) {
-    return 0;
+  if (member) {
+    AST_Expression* e = member->value();
+    if (e) {
+      return e->ev();
+    }
   }
 
-  AST_Expression* e = member->value();
-  if (!e) {
-    return 0;
-  }
-
-  return e->ev();
+  be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
+                                member_name + "\" of annotation \"" +
+                                appl->local_name()->get_string() + "\"",
+                                appl);
+  return 0;
 }
 
 bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
@@ -109,12 +110,10 @@ bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
 {
   AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
   if (!ev) {
-    idl_global->err()->misc_error(
-      (std::string("Found null pointer while getting value of member \"") +
-        member_name + "\" of annotation \"" +
-        appl->local_name()->get_string() + "\"").c_str(),
-      appl);
-    BE_abort();
+    be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
+                                  member_name + "\" of annotation \"" +
+                                  appl->local_name()->get_string() + "\"",
+                                  appl);
   }
   return ev->u.bval;
 }
@@ -124,12 +123,10 @@ ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
 {
   AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
   if (!ev) {
-    idl_global->err()->misc_error(
-      (std::string("Found null pointer while getting value of member \"") +
-        member_name + "\" of annotation \"" +
-        appl->local_name()->get_string() + "\"").c_str(),
-      appl);
-    BE_abort();
+    be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
+                                  member_name + "\" of annotation \"" +
+                                  appl->local_name()->get_string() + "\"",
+                                  appl);
   }
   return ev->u.ulval;
 }
@@ -139,21 +136,17 @@ std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
 {
   AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
   if (!ev) {
-    idl_global->err()->misc_error(
-      (std::string("Found null pointer while getting value of member \"") +
-        member_name + "\" of annotation \"" +
-        appl->local_name()->get_string() + "\"").c_str(),
-      appl);
-    BE_abort();
+    be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
+                                  member_name + "\" of annotation \"" +
+                                  appl->local_name()->get_string() + "\"",
+                                  appl);
   }
   UTL_String* idlstr = ev->u.strval;
   if (!idlstr) {
-    idl_global->err()->misc_error(
-      (std::string("Found null pointer while getting string value of member \"") +
-        member_name + "\" of annotation \"" +
-        appl->local_name()->get_string() + "\"").c_str(),
-      appl);
-    BE_abort();
+    be_util::misc_error_and_abort(std::string("Found null pointer while getting string value of member \"") +
+                                  member_name + "\" of annotation \"" +
+                                  appl->local_name()->get_string() + "\"",
+                                  appl);
   }
   return idlstr->get_string();
 }

@@ -6,13 +6,14 @@
  */
 
 #include "typeobject_generator.h"
-#include "be_extern.h"
 
+#include "be_extern.h"
+#include "be_util.h"
+#include "dds_visitor.h"
+#include "topic_keys.h"
 #include "utl_identifier.h"
 
-#include "topic_keys.h"
-#include "dds_visitor.h"
-#include "dds/DCPS/Hash.h"
+#include <dds/DCPS/Hash.h>
 
 using std::string;
 using namespace AstTypeClassification;
@@ -63,184 +64,222 @@ to_long(const AST_Expression::AST_ExprValue& ev)
     return ev.u.lval;
   case AST_Expression::EV_ulong:
     return ev.u.ulval;
-  case AST_Expression::EV_longlong:
-    return ev.u.llval;
-  case AST_Expression::EV_ulonglong:
-    return ev.u.ullval;
   case AST_Expression::EV_wchar:
     return ev.u.wcval;
   case AST_Expression::EV_char:
     return ev.u.cval;
   case AST_Expression::EV_bool:
     return ev.u.bval;
-  case AST_Expression::EV_float:
-    return ev.u.fval;
-  case AST_Expression::EV_double:
-    return ev.u.dval;
+  case AST_Expression::EV_enum:
+    return ev.u.eval;
   default:
+    be_util::misc_error_and_abort("Illegal conversion to long");
     return 0;
   }
 }
 
-void
-print(const OpenDDS::XTypes::TypeIdentifier& ti);
+template <typename T, typename P>
+struct Printer {
+  Printer(const T& a_value)
+    : value(a_value)
+  {}
 
-void
-print_sbound(const OpenDDS::XTypes::SBound& bound)
+  void print_on(std::ostream& out) const
+  {
+    out << static_cast<P>(value);
+  }
+
+  const T value;
+};
+
+template <typename T, typename P>
+std::ostream&
+operator<<(std::ostream& out, const Printer<T, P>& printer)
 {
-  be_global->impl_ << static_cast<unsigned int>(bound);
+  printer.print_on(out);
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::SBoundSeq& seq)
+struct SBoundPrinter : public Printer<OpenDDS::XTypes::SBound, unsigned int> {
+  SBoundPrinter(const OpenDDS::XTypes::SBound a_value) : Printer(a_value) {}
+};
+
+struct LBoundPrinter : public Printer<OpenDDS::XTypes::LBound, unsigned int> {
+  LBoundPrinter(const OpenDDS::XTypes::LBound a_value) : Printer(a_value) {}
+};
+
+struct EquivalenceKindPrinter : public Printer<OpenDDS::XTypes::EquivalenceKind, unsigned int> {
+  EquivalenceKindPrinter(const OpenDDS::XTypes::EquivalenceKind a_value) : Printer(a_value) {}
+};
+
+struct CollectionElementFlagsPrinter : public Printer<OpenDDS::XTypes::CollectionElementFlag, unsigned int> {
+  CollectionElementFlagsPrinter(const OpenDDS::XTypes::CollectionElementFlag a_value) : Printer(a_value) {}
+};
+
+struct AliasTypeFlagsPrinter : public Printer<OpenDDS::XTypes::AliasTypeFlag, unsigned int> {
+  AliasTypeFlagsPrinter(const OpenDDS::XTypes::AliasTypeFlag a_value) : Printer(a_value) {}
+};
+
+struct StructTypeFlagsPrinter : public Printer<OpenDDS::XTypes::StructTypeFlag, unsigned int> {
+  StructTypeFlagsPrinter(const OpenDDS::XTypes::StructTypeFlag a_value) : Printer(a_value) {}
+};
+
+struct EnumTypeFlagsPrinter : public Printer<OpenDDS::XTypes::EnumTypeFlag, unsigned int> {
+  EnumTypeFlagsPrinter(const OpenDDS::XTypes::EnumTypeFlag a_value) : Printer(a_value) {}
+};
+
+struct UnionTypeFlagsPrinter : public Printer<OpenDDS::XTypes::UnionTypeFlag, unsigned int> {
+  UnionTypeFlagsPrinter(const OpenDDS::XTypes::UnionTypeFlag a_value) : Printer(a_value) {}
+};
+
+struct AliasMemberFlagsPrinter : public Printer<OpenDDS::XTypes::AliasMemberFlag, unsigned int> {
+  AliasMemberFlagsPrinter(const OpenDDS::XTypes::AliasMemberFlag a_value) : Printer(a_value) {}
+};
+
+struct StructMemberFlagsPrinter : public Printer<OpenDDS::XTypes::StructMemberFlag, unsigned int> {
+  StructMemberFlagsPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : Printer(a_value) {}
+};
+
+struct UnionMemberFlagsPrinter : public Printer<OpenDDS::XTypes::UnionMemberFlag, unsigned int> {
+  UnionMemberFlagsPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : Printer(a_value) {}
+};
+
+struct EnumeratedLiteralFlagsPrinter : public Printer<OpenDDS::XTypes::EnumeratedLiteralFlag, unsigned int> {
+  EnumeratedLiteralFlagsPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : Printer(a_value) {}
+};
+
+struct UnionDiscriminatorFlagsPrinter : public Printer<OpenDDS::XTypes::UnionDiscriminatorFlag, unsigned int> {
+  UnionDiscriminatorFlagsPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : Printer(a_value) {}
+};
+
+struct MemberIdPrinter : public Printer<OpenDDS::XTypes::UnionDiscriminatorFlag, unsigned int> {
+  MemberIdPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : Printer(a_value) {}
+};
+
+struct BitBoundPrinter : public Printer<OpenDDS::XTypes::UnionDiscriminatorFlag, unsigned int> {
+  BitBoundPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : Printer(a_value) {}
+};
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti);
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::SBoundSeq& seq)
 {
-  be_global->impl_ << "XTypes::SBoundSeq()";
+  out << "XTypes::SBoundSeq()";
   for (OpenDDS::XTypes::SBoundSeq::const_iterator pos = seq.begin(), limit = seq.end(); pos != limit; ++pos) {
-    be_global->impl_ << ".append(";
-    print_sbound(*pos);
-    be_global->impl_ << ")";
+    out << ".append(" << SBoundPrinter(*pos) << ")";
   }
+  return out;
 }
 
-void
-print_lbound(const OpenDDS::XTypes::LBound& bound)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::LBoundSeq& seq)
 {
-  be_global->impl_ << bound;
-}
-
-void
-print(const OpenDDS::XTypes::LBoundSeq& seq)
-{
-  be_global->impl_ << "XTypes::LBoundSeq()";
+  out << "XTypes::LBoundSeq()";
   for (OpenDDS::XTypes::LBoundSeq::const_iterator pos = seq.begin(), limit = seq.end(); pos != limit; ++pos) {
-    be_global->impl_ << ".append(";
-    print_lbound(*pos);
-    be_global->impl_ << ")";
+    out << ".append(" << LBoundPrinter(*pos) << ")";
   }
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::StringSTypeDefn& string_sdefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::StringSTypeDefn& string_sdefn)
 {
-  be_global->impl_ << "XTypes::StringSTypeDefn(";
-  print_sbound(string_sdefn.bound);
-  be_global->impl_ << ")";
+  return out << "XTypes::StringSTypeDefn(" << SBoundPrinter(string_sdefn.bound) << ")";
 }
 
-void
-print(const OpenDDS::XTypes::StringLTypeDefn& string_ldefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::StringLTypeDefn& string_ldefn)
 {
-  be_global->impl_ << "XTypes::StringSTypeDefn(";
-  print_lbound(string_ldefn.bound);
-  be_global->impl_ << ")";
+  return out << "XTypes::StringSTypeDefn(" << LBoundPrinter(string_ldefn.bound) << ")";
 }
 
-void
-print_equivalence_kind(const OpenDDS::XTypes::EquivalenceKind& kind)
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainCollectionHeader& header)
 {
-  be_global->impl_ << static_cast<unsigned int>(kind);
+  return out
+    << "XTypes::PlainCollectionHeader("
+    << EquivalenceKindPrinter(header.equiv_kind) << ","
+    << CollectionElementFlagsPrinter(header.element_flags)
+    << ")";
 }
 
-void
-print_collection_element_flags(const OpenDDS::XTypes::CollectionElementFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainSequenceSElemDefn& seq_sdefn)
 {
-  be_global->impl_ << flags;
+  return out
+    << "XTypes::PlainSequenceSElemDefn("
+    << seq_sdefn.header << ","
+    << SBoundPrinter(seq_sdefn.bound) << ","
+    << *seq_sdefn.element_identifier
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::PlainCollectionHeader& header)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainSequenceLElemDefn& seq_ldefn)
 {
-  be_global->impl_ << "XTypes::PlainCollectionHeader(";
-  print_equivalence_kind(header.equiv_kind);
-  be_global->impl_ << ",";
-  print_collection_element_flags(header.element_flags);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::PlainSequenceLElemDefn("
+    << seq_ldefn.header << ","
+    << SBoundPrinter(seq_ldefn.bound) << ","
+    << *seq_ldefn.element_identifier
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::PlainSequenceSElemDefn& seq_sdefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainArraySElemDefn& array_sdefn)
 {
-  be_global->impl_ << "XTypes::PlainSequenceSElemDefn(";
-  print(seq_sdefn.header);
-  be_global->impl_ << ",";
-  print_sbound(seq_sdefn.bound);
-  be_global->impl_ << ",";
-  print(*seq_sdefn.element_identifier);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::PlainArraySElemDefn("
+    << array_sdefn.header << ","
+    << array_sdefn.array_bound_seq << ","
+    << *array_sdefn.element_identifier
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::PlainSequenceLElemDefn& seq_ldefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainArrayLElemDefn& array_ldefn)
 {
-  be_global->impl_ << "XTypes::PlainSequenceLElemDefn(";
-  print(seq_ldefn.header);
-  be_global->impl_ << ",";
-  print_sbound(seq_ldefn.bound);
-  be_global->impl_ << ",";
-  print(*seq_ldefn.element_identifier);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::PlainArrayLElemDefn("
+    << array_ldefn.header << ","
+    << array_ldefn.array_bound_seq << ","
+    << *array_ldefn.element_identifier
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::PlainArraySElemDefn& array_sdefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapSTypeDefn& map_sdefn)
 {
-  be_global->impl_ << "XTypes::PlainArraySElemDefn(";
-  print(array_sdefn.header);
-  be_global->impl_ << ",";
-  print(array_sdefn.array_bound_seq);
-  be_global->impl_ << ",";
-  print(*array_sdefn.element_identifier);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::PlainMapSTypeDefn("
+    << map_sdefn.header << ","
+    << SBoundPrinter(map_sdefn.bound) << ","
+    << *map_sdefn.element_identifier << ","
+    << CollectionElementFlagsPrinter(map_sdefn.key_flags) << ","
+    << *map_sdefn.key_identifier
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::PlainArrayLElemDefn& array_ldefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapLTypeDefn& map_ldefn)
 {
-  be_global->impl_ << "XTypes::PlainArrayLElemDefn(";
-  print(array_ldefn.header);
-  be_global->impl_ << ",";
-  print(array_ldefn.array_bound_seq);
-  be_global->impl_ << ",";
-  print(*array_ldefn.element_identifier);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::PlainMapLTypeDefn("
+    << map_ldefn.header << ","
+    << LBoundPrinter(map_ldefn.bound) << ","
+    << *map_ldefn.element_identifier << ","
+    << CollectionElementFlagsPrinter(map_ldefn.key_flags) << ","
+    << *map_ldefn.key_identifier
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::PlainMapSTypeDefn& map_sdefn)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
 {
-  be_global->impl_ << "XTypes::PlainMapSTypeDefn(";
-  print(map_sdefn.header);
-  be_global->impl_ << ",";
-  print_sbound(map_sdefn.bound);
-  be_global->impl_ << ",";
-  print(*map_sdefn.element_identifier);
-  be_global->impl_ << ",";
-  print_collection_element_flags(map_sdefn.key_flags);
-  be_global->impl_ << ",";
-  print(*map_sdefn.key_identifier);
-  be_global->impl_ << ")";
-}
-
-void
-print(const OpenDDS::XTypes::PlainMapLTypeDefn& map_ldefn)
-{
-  be_global->impl_ << "XTypes::PlainMapLTypeDefn(";
-  print(map_ldefn.header);
-  be_global->impl_ << ",";
-  print_lbound(map_ldefn.bound);
-  be_global->impl_ << ",";
-  print(*map_ldefn.element_identifier);
-  be_global->impl_ << ",";
-  print_collection_element_flags(map_ldefn.key_flags);
-  be_global->impl_ << ",";
-  print(*map_ldefn.key_identifier);
-  be_global->impl_ << ")";
-}
-
-void
-print(const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
-{
-  be_global->impl_
+  return out
     << '{'
     << static_cast<int>(equivalence_hash[0])
     << ','
@@ -272,272 +311,187 @@ print(const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
     << '}';
 }
 
-void
-print(const OpenDDS::XTypes::TypeObjectHashId& id)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObjectHashId& id)
 {
-  be_global->impl_ << "XTypes::TypeObjectHashId(";
-  print_equivalence_kind(id.kind);
-  be_global->impl_ << ",";
-  print(id.hash);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::TypeObjectHashId("
+    << EquivalenceKindPrinter(id.kind) << ","
+    << id.hash
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::StronglyConnectedComponentId& scc)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::StronglyConnectedComponentId& scc)
 {
-  be_global->impl_ << "XTypes::StronglyConnectedComponentId(";
-  print(scc.sc_component_id);
-  be_global->impl_ << ", " << scc.scc_length << ", " << scc.scc_index;
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::StronglyConnectedComponentId("
+    << scc.sc_component_id << ", "
+    << scc.scc_length << ", "
+    << scc.scc_index
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::TypeIdentifier& ti)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
 {
+  out << "XTypes::TypeIdentifier(";
   switch (ti.kind()) {
   case OpenDDS::XTypes::TK_NONE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_NONE)";
+    out << "XTypes::TK_NONE";
     break;
   case OpenDDS::XTypes::TK_BOOLEAN:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_BOOLEAN)";
+    out << "XTypes::TK_BOOLEAN";
     break;
   case OpenDDS::XTypes::TK_BYTE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_BYTE)";
+    out << "XTypes::TK_BYTE";
     break;
   case OpenDDS::XTypes::TK_INT16:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_INT16)";
+    out << "XTypes::TK_INT16";
     break;
   case OpenDDS::XTypes::TK_INT32:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_INT32)";
+    out << "XTypes::TK_INT32";
     break;
   case OpenDDS::XTypes::TK_INT64:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_INT64)";
+    out << "XTypes::TK_INT64";
     break;
   case OpenDDS::XTypes::TK_UINT16:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_UINT16)";
+    out << "XTypes::TK_UINT16";
     break;
   case OpenDDS::XTypes::TK_UINT32:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_UINT32)";
+    out << "XTypes::TK_UINT32";
     break;
   case OpenDDS::XTypes::TK_UINT64:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_UINT64)";
+    out << "XTypes::TK_UINT64";
     break;
   case OpenDDS::XTypes::TK_FLOAT32:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_FLOAT32)";
+    out << "XTypes::TK_FLOAT32";
     break;
   case OpenDDS::XTypes::TK_FLOAT64:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_FLOAT64)";
+    out << "XTypes::TK_FLOAT64";
     break;
   case OpenDDS::XTypes::TK_FLOAT128:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_FLOAT128)";
+    out << "XTypes::TK_FLOAT128";
     break;
   case OpenDDS::XTypes::TK_CHAR8:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_CHAR8)";
+    out << "XTypes::TK_CHAR8";
     break;
   case OpenDDS::XTypes::TK_CHAR16:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TK_CHAR16)";
+    out << "XTypes::TK_CHAR16";
     break;
   case OpenDDS::XTypes::TI_STRING8_SMALL:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_STRING8_SMALL,";
-    print(ti.string_sdefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_STRING8_SMALL," << ti.string_sdefn();
     break;
   case OpenDDS::XTypes::TI_STRING16_SMALL:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_STRING16_SMALL,";
-    print(ti.string_sdefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_STRING16_SMALL," << ti.string_sdefn();
     break;
   case OpenDDS::XTypes::TI_STRING8_LARGE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_STRING8_LARGE,";
-    print(ti.string_ldefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_STRING8_LARGE," << ti.string_ldefn();
     break;
   case OpenDDS::XTypes::TI_STRING16_LARGE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_STRING16_LARGE,";
-    print(ti.string_ldefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_STRING16_LARGE," << ti.string_ldefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_PLAIN_SEQUENCE_SMALL,";
-    print(ti.seq_sdefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_PLAIN_SEQUENCE_SMALL," << ti.seq_sdefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_SEQUENCE_LARGE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_PLAIN_SEQUENCE_LARGE,";
-    print(ti.seq_ldefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_PLAIN_SEQUENCE_LARGE," << ti.seq_ldefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_ARRAY_SMALL:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_PLAIN_ARRAY_SMALL,";
-    print(ti.array_sdefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_PLAIN_ARRAY_SMALL," << ti.array_sdefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_ARRAY_LARGE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_PLAIN_ARRAY_LARGE,";
-    print(ti.array_ldefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_PLAIN_ARRAY_LARGE," << ti.array_ldefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_MAP_SMALL:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_PLAIN_MAP_SMALL,";
-    print(ti.map_sdefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_PLAIN_MAP_SMALL," << ti.map_sdefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_MAP_LARGE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_PLAIN_MAP_LARGE,";
-    print(ti.map_ldefn());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_PLAIN_MAP_LARGE," << ti.map_ldefn();
     break;
   case OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::TI_STRONGLY_CONNECTED_COMPONENT,";
-    print(ti.sc_component_id());
-    be_global->impl_ << ")";
+    out << "XTypes::TI_STRONGLY_CONNECTED_COMPONENT," << ti.sc_component_id();
     break;
   case OpenDDS::XTypes::EK_COMPLETE:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::EK_COMPLETE,";
-    print(ti.equivalence_hash());
-    be_global->impl_ << ")";
+    out << "XTypes::EK_COMPLETE," << ti.equivalence_hash();
     break;
   case OpenDDS::XTypes::EK_MINIMAL:
-    be_global->impl_ << "XTypes::TypeIdentifier(XTypes::EK_MINIMAL,";
-    print(ti.equivalence_hash());
-    be_global->impl_ << ")";
+    out << "XTypes::EK_MINIMAL," << ti.equivalence_hash();
     break;
   default:
-    idl_global->err()->misc_error("Extended type definitions output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Extended type definitions output is not supported");
     break;
   }
+
+  out << ')';
+  return out;
 }
 
-void
-print_alias_type_flags(const OpenDDS::XTypes::AliasTypeFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasHeader&)
 {
-  be_global->impl_ << flags;
+  return out << "XTypes::MinimalAliasHeader()";
 }
 
-void
-print_struct_type_flags(const OpenDDS::XTypes::StructTypeFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CommonAliasBody& common)
 {
-  be_global->impl_ << flags;
+  return out
+    << "XTypes::CommonAliasBody("
+    << AliasMemberFlagsPrinter(common.related_flags) << ","
+    << common.related_type
+    << ")";
 }
 
-void
-print_enum_type_flags(const OpenDDS::XTypes::EnumTypeFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasBody& body)
 {
-  be_global->impl_ << flags;
+  return out << "XTypes::MinimalAliasBody(" << body.common << ")";
 }
 
-void
-print_union_type_flags(const OpenDDS::XTypes::UnionTypeFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasType& alias_type)
 {
-  be_global->impl_ << flags;
+  return out
+    << "XTypes::MinimalAliasType("
+    << AliasTypeFlagsPrinter(alias_type.alias_flags) << ","
+    << alias_type.header << ","
+    << alias_type.body
+    << ")";
 }
 
-void
-print_alias_member_flags(const OpenDDS::XTypes::AliasMemberFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalTypeDetail&)
 {
-  be_global->impl_ << flags;
+  return out << "XTypes::MinimalTypeDetail()";
 }
 
-void
-print_struct_member_flags(const OpenDDS::XTypes::StructMemberFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructHeader& header)
 {
-  be_global->impl_ << flags;
+  return out
+    << "XTypes::MinimalStructHeader("
+    << header.base_type << ", "
+    << header.detail
+    << ")";
 }
 
-void
-print_union_member_flags(const OpenDDS::XTypes::UnionMemberFlag& flags)
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CommonStructMember& common)
 {
-  be_global->impl_ << flags;
+  return out
+    << "XTypes::CommonStructMember("
+    << MemberIdPrinter(common.member_id) << ","
+    << StructMemberFlagsPrinter(common.member_flags) << ","
+    << common.member_type_id
+    << ")";
 }
 
-void
-print_enumerated_literal_flags(const OpenDDS::XTypes::EnumeratedLiteralFlag& flags)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::NameHash& name_hash)
 {
-  be_global->impl_ << flags;
-}
-
-void
-print_union_discriminator_flags(const OpenDDS::XTypes::UnionDiscriminatorFlag& flags)
-{
-  be_global->impl_ << flags;
-}
-
-void
-print(const OpenDDS::XTypes::MinimalAliasHeader&)
-{
-  be_global->impl_ << "XTypes::MinimalAliasHeader()";
-}
-
-void
-print(const OpenDDS::XTypes::CommonAliasBody& common)
-{
-  be_global->impl_ << "XTypes::CommonAliasBody(";
-  print_alias_member_flags(common.related_flags);
-  be_global->impl_ << ",";
-  print(common.related_type);
-  be_global->impl_ << ")";
-
-}
-
-void
-print(const OpenDDS::XTypes::MinimalAliasBody& body)
-{
-  be_global->impl_ << "XTypes::MinimalAliasBody(";
-  print(body.common);
-  be_global->impl_ << ")";
-}
-
-void
-print(const OpenDDS::XTypes::MinimalAliasType& alias_type)
-{
-  be_global->impl_ << "XTypes::MinimalAliasType(";
-  print_alias_type_flags(alias_type.alias_flags);
-  be_global->impl_ << ",";
-  print(alias_type.header);
-  be_global->impl_ << ",";
-  print(alias_type.body);
-  be_global->impl_ << ")";
-}
-
-void
-print(const OpenDDS::XTypes::MinimalTypeDetail&)
-{
-  be_global->impl_ << "XTypes::MinimalTypeDetail()";
-}
-
-void
-print(const OpenDDS::XTypes::MinimalStructHeader& header)
-{
-  be_global->impl_ << "XTypes::MinimalStructHeader(";
-  print(header.base_type);
-  be_global->impl_ << ", ";
-  print(header.detail);
-  be_global->impl_ << ")";
-}
-
-void
-print_member_id(const OpenDDS::XTypes::MemberId& id)
-{
-  be_global->impl_ << id;
-}
-
-void
-print(const OpenDDS::XTypes::CommonStructMember& common)
-{
-  be_global->impl_ << "XTypes::CommonStructMember(";
-  print_member_id(common.member_id);
-  be_global->impl_ << ",";
-  print_struct_member_flags(common.member_flags);
-  be_global->impl_ << ",";
-  print(common.member_type_id);
-  be_global->impl_ << ")";
-}
-
-void
-print(const OpenDDS::XTypes::NameHash& name_hash)
-{
-  be_global->impl_
+  return out
     << '{'
     << static_cast<int>(name_hash[0])
     << ','
@@ -549,253 +503,224 @@ print(const OpenDDS::XTypes::NameHash& name_hash)
     << '}';
 }
 
-void
-print(const OpenDDS::XTypes::MinimalMemberDetail& detail)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalMemberDetail& detail)
 {
-  be_global->impl_ << "XTypes::MinimalMemberDetail(";
-  print(detail.name_hash);
-  be_global->impl_ << ")";;
+  return out << "XTypes::MinimalMemberDetail(" << detail.name_hash << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalStructMember& member)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructMember& member)
 {
-  be_global->impl_ << "XTypes::MinimalStructMember(";
-  print(member.common);
-  be_global->impl_ << ",";
-  print(member.detail);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::MinimalStructMember("
+    << member.common << ","
+    << member.detail
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalStructMemberSeq& member_seq)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructMemberSeq& member_seq)
 {
-  be_global->impl_ << "XTypes::MinimalStructMemberSeq()";
+  out << "XTypes::MinimalStructMemberSeq()";
   for (OpenDDS::XTypes::MinimalStructMemberSeq::const_iterator pos = member_seq.begin(), limit = member_seq.end(); pos != limit; ++pos) {
-    be_global->impl_ << ".append(";
-    print(*pos);
-    be_global->impl_ << ")";
+    out << ".append(" << *pos << ")";
   }
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::MinimalStructType& struct_type)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructType& struct_type)
 {
-  be_global->impl_ << "XTypes::MinimalStructType(";
-  print_struct_type_flags(struct_type.struct_flags);
-  be_global->impl_ << ",";
-  print(struct_type.header);
-  be_global->impl_ << ",";
-  print(struct_type.member_seq);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::MinimalStructType("
+    << StructTypeFlagsPrinter(struct_type.struct_flags) << ","
+    << struct_type.header << ","
+    << struct_type.member_seq
+    << ")";
 }
 
-void
-print_bit_bound(const OpenDDS::XTypes::BitBound& bit_bound)
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CommonEnumeratedHeader& common)
 {
-  be_global->impl_ << bit_bound;
+  return out << "XTypes::CommonEnumeratedHeader(" << BitBoundPrinter(common.bit_bound) << ")";
 }
 
-void
-print(const OpenDDS::XTypes::CommonEnumeratedHeader& common)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedHeader& header)
 {
-  be_global->impl_ << "XTypes::CommonEnumeratedHeader(";
-  print_bit_bound(common.bit_bound);
-  be_global->impl_ << ")";
+  return out << "XTypes::MinimalEnumeratedHeader(" << header.common << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalEnumeratedHeader& header)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CommonEnumeratedLiteral& common)
 {
-  be_global->impl_ << "XTypes::MinimalEnumeratedHeader(";
-  print(header.common);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::CommonEnumeratedLiteral("
+    << common.value << ","
+    << EnumeratedLiteralFlagsPrinter(common.flags)
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::CommonEnumeratedLiteral& common)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedLiteral& literal)
 {
-  be_global->impl_ << "XTypes::CommonEnumeratedLiteral(";
-  be_global->impl_ << common.value;
-  be_global->impl_ << ",";
-  print_enumerated_literal_flags(common.flags);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::MinimalEnumeratedLiteral("
+    << literal.common << ","
+    << literal.detail
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalEnumeratedLiteral& literal)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedLiteralSeq& literal_seq)
 {
-  be_global->impl_ << "XTypes::MinimalEnumeratedLiteral(";
-  print(literal.common);
-  be_global->impl_ << ",";
-  print(literal.detail);
-  be_global->impl_ << ")";
-}
-
-void
-print(const OpenDDS::XTypes::MinimalEnumeratedLiteralSeq& literal_seq)
-{
-  be_global->impl_ << "XTypes::MinimalEnumeratedLiteralSeq()";
+  out << "XTypes::MinimalEnumeratedLiteralSeq()";
   for (OpenDDS::XTypes::MinimalEnumeratedLiteralSeq::const_iterator pos = literal_seq.begin(), limit = literal_seq.end(); pos != limit; ++pos) {
-    be_global->impl_ << ".append(";
-    print(*pos);
-    be_global->impl_ << ")";
+    out << ".append(" << *pos << ")";
   }
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::MinimalEnumeratedType& enumerated_type)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedType& enumerated_type)
 {
-  be_global->impl_ << "XTypes::MinimalEnumeratedType(";
-  print_enum_type_flags(enumerated_type.enum_flags);
-  be_global->impl_ << ",";
-  print(enumerated_type.header);
-  be_global->impl_ << ",";
-  print(enumerated_type.literal_seq);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::MinimalEnumeratedType("
+    << EnumTypeFlagsPrinter(enumerated_type.enum_flags) << ","
+    << enumerated_type.header << ","
+    << enumerated_type.literal_seq
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalUnionHeader& header)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionHeader& header)
 {
-  be_global->impl_ << "XTypes::MinimalUnionHeader(";
-  print(header.detail);
-  be_global->impl_ << ")";
+  return out << "XTypes::MinimalUnionHeader(" << header.detail << ")";
 }
 
-void
-print(const OpenDDS::XTypes::CommonDiscriminatorMember& member)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CommonDiscriminatorMember& member)
 {
-  be_global->impl_ << "XTypes::CommonDiscriminatorMember(";
-  print_union_discriminator_flags(member.member_flags);
-  be_global->impl_ << ",";
-  print(member.type_id);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::CommonDiscriminatorMember("
+    << UnionDiscriminatorFlagsPrinter(member.member_flags) << ","
+    << member.type_id
+   << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalDiscriminatorMember& member)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalDiscriminatorMember& member)
 {
-  be_global->impl_ << "XTypes::MinimalDiscriminatorMember(";
-  print(member.common);
-  be_global->impl_ << ")";
+  return out << "XTypes::MinimalDiscriminatorMember(" << member.common << ")";
 }
 
-void
-print(const OpenDDS::XTypes::UnionCaseLabelSeq& seq)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::UnionCaseLabelSeq& seq)
 {
-  be_global->impl_ << "XTypes::UnionCaseLabelSeq()";
+  out << "XTypes::UnionCaseLabelSeq()";
   for (OpenDDS::XTypes::UnionCaseLabelSeq::const_iterator pos = seq.begin(), limit = seq.end(); pos != limit; ++pos) {
-    be_global->impl_ << ".append(" << *pos << ")";
+    out << ".append(" << *pos << ")";
   }
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::CommonUnionMember& member)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CommonUnionMember& member)
 {
-  be_global->impl_ << "XTypes::CommonUnionMember(";
-  print_member_id(member.member_id);
-  be_global->impl_ << ",";
-  print_union_member_flags(member.member_flags);
-  be_global->impl_ << ",";
-  print(member.type_id);
-  be_global->impl_ << ",";
-  print(member.label_seq);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::CommonUnionMember("
+    << MemberIdPrinter(member.member_id) << ","
+    << UnionMemberFlagsPrinter(member.member_flags) << ","
+    << member.type_id << ","
+    << member.label_seq
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalUnionMember& member)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionMember& member)
 {
-  be_global->impl_ << "XTypes::MinimalUnionMember(";
-  print(member.common);
-  be_global->impl_ << ",";
-  print(member.detail);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::MinimalUnionMember("
+    << member.common << ","
+    << member.detail
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalUnionMemberSeq& seq)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionMemberSeq& seq)
 {
-  be_global->impl_ << "XTypes::MinimalUnionMemberSeq()";
+  out << "XTypes::MinimalUnionMemberSeq()";
   for (OpenDDS::XTypes::MinimalUnionMemberSeq::const_iterator pos = seq.begin(), limit = seq.end(); pos != limit; ++pos) {
-    be_global->impl_ << ".append(";
-    print(*pos);
-    be_global->impl_ << ")";
+    out << ".append(" << *pos << ")";
   }
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::MinimalUnionType& union_type)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionType& union_type)
 {
-  be_global->impl_ << "XTypes::MinimalUnionType(";
-  print_union_type_flags(union_type.union_flags);
-  be_global->impl_ << ",";
-  print(union_type.header);
-  be_global->impl_ << ",";
-  print(union_type.discriminator);
-  be_global->impl_ << ",";
-  print(union_type.member_seq);
-  be_global->impl_ << ")";
+  return out
+    << "XTypes::MinimalUnionType("
+    << UnionTypeFlagsPrinter(union_type.union_flags) << ","
+    << union_type.header << ","
+    << union_type.discriminator << ","
+    << union_type.member_seq
+    << ")";
 }
 
-void
-print(const OpenDDS::XTypes::MinimalTypeObject& minimal)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalTypeObject& minimal)
 {
-  be_global->impl_ << "XTypes::MinimalTypeObject(";
+  out << "XTypes::MinimalTypeObject(";
   switch (minimal.kind) {
   case OpenDDS::XTypes::TK_ALIAS:
-    print(minimal.alias_type);
+    out << minimal.alias_type;
     break;
   case OpenDDS::XTypes::TK_ANNOTATION:
-    idl_global->err()->misc_error("Annotation output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Annotation output is not supported");
     break;
   case OpenDDS::XTypes::TK_STRUCTURE:
-    print(minimal.struct_type);
+    out << minimal.struct_type;
     break;
   case OpenDDS::XTypes::TK_UNION:
-    print(minimal.union_type);
+    out << minimal.union_type;
     break;
   case OpenDDS::XTypes::TK_BITSET:
-    idl_global->err()->misc_error("Bitset output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Bitset output is not supported");
     break;
   case OpenDDS::XTypes::TK_SEQUENCE:
-    idl_global->err()->misc_error("Sequence output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Sequence output is not supported");
     break;
   case OpenDDS::XTypes::TK_ARRAY:
-    idl_global->err()->misc_error("Array output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Array output is not supported");
     break;
   case OpenDDS::XTypes::TK_MAP:
-    idl_global->err()->misc_error("Map output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Map output is not supported");
     break;
   case OpenDDS::XTypes::TK_ENUM:
-    print(minimal.enumerated_type);
+    out << minimal.enumerated_type;
     break;
   case OpenDDS::XTypes::TK_BITMASK:
-    idl_global->err()->misc_error("Bitmask output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Bitmask output is not supported");
     break;
   }
-
-  be_global->impl_ << ")";
+  out << ")";
+  return out;
 }
 
-void
-print(const OpenDDS::XTypes::TypeObject& to)
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
 {
-  be_global->impl_ << "XTypes::TypeObject(";
+  out << "XTypes::TypeObject(";
   if (to.kind == OpenDDS::XTypes::EK_MINIMAL) {
-    print(to.minimal);
+    out << to.minimal;
   } else {
-    idl_global->err()->misc_error("Complete output is not supported");
-    BE_abort();
+    be_util::misc_error_and_abort("Complete output is not supported");
   }
-  be_global->impl_ << ")";
+  out << ")";
+  return out;
 }
 
 }
@@ -988,8 +913,7 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
   case AST_ConcreteType::NT_union_branch:
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
-    idl_global->err()->misc_error("Unexpected AST type", type);
-    BE_abort();
+    be_util::misc_error_and_abort("Unexpected AST type", type);
     break;
   }
 
@@ -1003,7 +927,7 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
 void
 typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
 {
-  // Generate the minimal identifier ()and type object) and cache.
+  // Generate the minimal identifier (and type object) and cache.
   switch (type->node_type()) {
 
   case AST_ConcreteType::NT_union:
@@ -1118,7 +1042,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
       }
 
       // TODO: Support inheritance.
-      to.minimal.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE));
+      to.minimal.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
       // to.minimal.struct_type.header.detail is not used.
 
       ACE_CDR::ULong member_id = 0;
@@ -1400,8 +1324,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
       case AST_PredefinedType::PT_abstract:
       case AST_PredefinedType::PT_void:
       case AST_PredefinedType::PT_pseudo:
-        idl_global->err()->misc_error("Unexpected primitive type");
-        BE_abort();
+        be_util::misc_error_and_abort("Unexpected primitive type");
       }
       break;
     }
@@ -1450,8 +1373,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type)
   case AST_ConcreteType::NT_union_branch:
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
-    idl_global->err()->misc_error("Unexpected AST type", type);
-    BE_abort();
+    be_util::misc_error_and_abort("Unexpected AST type", type);
   }
 }
 
@@ -1524,7 +1446,9 @@ typeobject_generator::generate_minimal(AST_Type* type)
     size_t size = serialized_size(encoding, seq);
     ACE_Message_Block buff(size);
     OpenDDS::DCPS::Serializer ser(&buff, encoding);
-    ser << seq;
+    if (!(ser << seq)) {
+      be_util::misc_error_and_abort("Failed to serialize type object sequence in strongly-connected component", type);
+    }
 
     unsigned char result[16];
     OpenDDS::DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
@@ -1610,10 +1534,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     gto.endArgs();
     const OpenDDS::XTypes::TypeObject to = get_minimal_type_object(node);
     be_global->impl_ <<
-      "  static const XTypes::TypeObject to = ";
-    print(to);
-    be_global->impl_ <<
-      ";\n"
+      "  static const XTypes::TypeObject to = " << to << ";\n"
       "  return to;\n";
   }
   {
@@ -1622,10 +1543,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     gti.endArgs();
     const OpenDDS::XTypes::TypeIdentifier ti = get_minimal_type_identifier(node);
     be_global->impl_ <<
-      "  static const XTypes::TypeIdentifier ti = ";
-    print(ti);
-    be_global->impl_ <<
-      ";\n"
+      "  static const XTypes::TypeIdentifier ti = " << ti << ";\n"
       "  return ti;\n";
   }
   return true;

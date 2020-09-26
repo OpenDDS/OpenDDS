@@ -894,7 +894,7 @@ namespace XTypes {
     NameHash name_hash;
 
     MinimalMemberDetail() {}
-    MinimalMemberDetail(const NameHash& a_name_hash)
+    explicit MinimalMemberDetail(const NameHash& a_name_hash)
     {
       std::memcpy(&name_hash, &a_name_hash, sizeof name_hash);
     }
