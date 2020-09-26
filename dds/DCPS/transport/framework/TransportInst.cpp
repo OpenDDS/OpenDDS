@@ -169,6 +169,24 @@ OpenDDS::DCPS::TransportInst::get_ice_endpoint()
 }
 
 void
+OpenDDS::DCPS::TransportInst::rtps_relay_only_now(bool flag)
+{
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  if (temp) {
+    temp->rtps_relay_only_now(flag);
+  }
+}
+
+void
+OpenDDS::DCPS::TransportInst::use_rtps_relay_now(bool flag)
+{
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  if (temp) {
+    temp->use_rtps_relay_now(flag);
+  }
+}
+
+void
 OpenDDS::DCPS::TransportInst::use_ice_now(bool flag)
 {
   const OpenDDS::DCPS::TransportImpl_rch temp = impl();

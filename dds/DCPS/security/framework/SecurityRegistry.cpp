@@ -29,6 +29,7 @@ namespace OpenDDS {
 namespace Security {
 
 const char* SecurityRegistry::DEFAULT_CONFIG_NAME = "_OPENDDS_DEFAULT_CONFIG";
+const char* SecurityRegistry::BUILTIN_CONFIG_NAME = "_OPENDDS_BUILTIN_CONFIG";
 const char* SecurityRegistry::DEFAULT_INST_PREFIX = "_OPENDDS_";
 const char* SecurityRegistry::DEFAULT_PLUGIN_NAME = "BuiltIn";
 const char* SecurityRegistry::SECURITY_SECTION_NAME = "security";
@@ -274,6 +275,33 @@ SecurityRegistry::default_config(const SecurityConfig_rch& config)
   default_config_ = config;
 }
 
+SecurityConfig_rch
+SecurityRegistry::builtin_config() const
+{
+#if defined(OPENDDS_SECURITY)
+  GuardType g1(default_load_lock_);
+  GuardType guard(lock_);
+  if (!builtin_config_) {
+#if !defined(ACE_AS_STATIC_LIBS)
+    LibDirectiveMap::const_iterator lib_iter = lib_directive_map_.find(DEFAULT_PLUGIN_NAME);
+    OPENDDS_ASSERT(lib_iter != lib_directive_map_.end());
+    ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
+    guard.release();
+    ACE_Service_Config::process_directive(directive.c_str());
+    guard.acquire();
+#endif
+  }
+#endif
+  return builtin_config_;
+}
+
+void
+SecurityRegistry::builtin_config(const SecurityConfig_rch& config)
+{
+  GuardType guard(lock_);
+  builtin_config_ = config;
+}
+
 void
 SecurityRegistry::bind_config(const OPENDDS_STRING& name,
                               DDS::DomainParticipant_ptr domain_participant)
@@ -366,19 +394,6 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
   }
 
   return 0;
-}
-
-SecurityConfig_rch
-SecurityRegistry::fix_empty_default()
-{
-#if defined(OPENDDS_SECURITY)
-  GuardType guard(default_load_lock_);
-  if (!default_config()) {
-    load_security_plugin_lib(DEFAULT_PLUGIN_NAME);
-  }
-#endif
-
-  return default_config();
 }
 
 void

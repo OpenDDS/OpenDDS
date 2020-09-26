@@ -243,6 +243,18 @@ namespace {
     return qos.value.length();
   }
 
+  bool not_default(const DDS::TypeConsistencyEnforcementQosPolicy& tceqp)
+  {
+    DDS::TypeConsistencyEnforcementQosPolicy def_tceqp =
+        TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
+    return (tceqp.kind != def_tceqp.kind ||
+      tceqp.ignore_sequence_bounds != def_tceqp.ignore_sequence_bounds ||
+      tceqp.ignore_string_bounds != def_tceqp.ignore_string_bounds ||
+      tceqp.ignore_member_names != def_tceqp.ignore_member_names ||
+      tceqp.prevent_type_widening != def_tceqp.prevent_type_widening ||
+      tceqp.force_type_validation != def_tceqp.force_type_validation);
+  }
+
   void normalize(DDS::Duration_t& dur)
   {
     // Interoperability note:

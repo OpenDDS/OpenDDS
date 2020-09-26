@@ -32,6 +32,7 @@
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+#include "../../common/ConnectionRecordLogger.h"
 
 #include <iostream>
 
@@ -93,6 +94,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
     }
+
+    OpenDDS::Test::install_connection_record_logger(participant);
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =

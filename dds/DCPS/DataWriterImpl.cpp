@@ -179,6 +179,17 @@ DataWriterImpl::get_next_handle()
   return DDS::HANDLE_NIL;
 }
 
+DDS::Subscriber_var
+DataWriterImpl::get_builtin_subscriber() const
+{
+  RcHandle<DomainParticipantImpl> participant_servant = participant_servant_.lock();
+  if (participant_servant) {
+    return participant_servant->get_builtin_subscriber();
+  }
+
+  return DDS::Subscriber_var();
+}
+
 void
 DataWriterImpl::add_association(const RepoId& yourId,
                                 const ReaderAssociation& reader,

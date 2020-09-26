@@ -58,8 +58,6 @@ std::string reprs_to_string(const Reprs& reprs)
         ss << "XCDR2";
       } else if (*i == DDS::XML_DATA_REPRESENTATION) {
         ss << "XML";
-      } else if (*i == OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION) {
-        ss << "UNALIGNED CDR";
       } else {
         ss << "Unknown Value " << *i;
       }
@@ -472,16 +470,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     Reprs xcdr2_repr;
     xcdr2_repr.push_back(DDS::XCDR2_DATA_REPRESENTATION);
 
-    Reprs unaligned_repr;
-    unaligned_repr.push_back(OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION);
-
     Reprs xml_repr;
     xml_repr.push_back(DDS::XML_DATA_REPRESENTATION);
 
     Reprs explicit_default_reprs; // Or at least what is default as of writing
     explicit_default_reprs.push_back(DDS::XCDR_DATA_REPRESENTATION);
-    explicit_default_reprs.push_back(
-      OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION);
 
     Test test(participant, publisher, subscriber);
 

@@ -439,8 +439,7 @@ namespace OpenDDS {
       "    enum Kind_t {\n"
       "      XCDR1,\n"
       "      XML,\n"
-      "      XCDR2,\n"
-      "      UNALIGNED_CDR\n"
+      "      XCDR2\n"
       "    };\n"
       "    Kind_t kind;\n"
       "  };\n"
@@ -483,9 +482,6 @@ namespace OpenDDS {
         break;
       case 2: // Kind_t::XCDR2
         value.xcdr2 = true;
-        break;
-      case 3: // Kind_t::UNALIGNED_CDR
-        value.unaligned_cdr = true;
         break;
       }
     }

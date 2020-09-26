@@ -39,7 +39,7 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) 
   // Set the type.
   agent_info_.type = FULL;
 
-  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
+  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
 
   change_username();
   set_host_addresses(endpoint->host_addresses());
@@ -158,14 +158,14 @@ void EndpointManager::receive(const ACE_INET_Addr& a_local_address,
     return;
   }
 
-  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::receive: WARNING Unknown ICE message class %d\n"), a_message.class_));
+  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::receive: WARNING Unknown STUN message class %d\n"), a_message.class_));
 }
 
 void EndpointManager::change_username()
 {
   // Generate the username.
   unsigned char username[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(username, sizeof(username));
+  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(username, sizeof(username));
   agent_info_.username = OpenDDS::DCPS::to_hex_dds_string(username, 16, 0, 0);
   change_password(false);
 }
@@ -173,7 +173,7 @@ void EndpointManager::change_username()
 void EndpointManager::change_password(bool password_only)
 {
   unsigned char password[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(password, sizeof(password));
+  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(password, sizeof(password));
   agent_info_.password = OpenDDS::DCPS::to_hex_dds_string(password, 16, 0, 0);
   regenerate_agent_info(password_only);
 }
@@ -300,14 +300,12 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 
     send(next_stun_server_address_, binding_request_);
 
-    if (!requesting_ && send_count_ == agent_impl->get_configuration().server_reflexive_indication_count() - 1) {
+    if (!requesting_ && send_count_ == ICE::Configuration::instance()->server_reflexive_indication_count() - 1) {
       requesting_ = true;
     }
 
-    send_count_ = (send_count_ + 1) % agent_impl->get_configuration().server_reflexive_indication_count();
-  }
-
-  else {
+    send_count_ = (send_count_ + 1) % ICE::Configuration::instance()->server_reflexive_indication_count();
+  } else {
     requesting_ = true;
     send_count_ = 0;
   }
@@ -323,9 +321,7 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 
     if (list.empty()) {
       deferred_triggered_checks_.erase(pos++);
-    }
-
-    else {
+    } else {
       ++pos;
     }
   }
@@ -570,14 +566,14 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
         deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
       x.first->second.push_back(DeferredTriggeredCheck(
         a_local_address, a_remote_address, priority, use_candidate,
-        MonotonicTimePoint::now() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
+        MonotonicTimePoint::now() + ICE::Configuration::instance()->deferred_triggered_check_ttl()));
     }
   }
   break;
 
   default:
     // Unknown method.  Stop processing.
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING Unknown ICE method\n")));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING Unknown STUN method\n")));
     send(a_remote_address,
          make_bad_request_error_response(a_message, "Bad Request: Unknown method"));
     break;
@@ -646,7 +642,7 @@ void EndpointManager::indication(const ACE_INET_Addr& /*a_local_address*/,
 
   default:
     // Unknown method.  Stop processing.
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::indication: WARNING Unknown ICE method\n")));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::indication: WARNING Unknown STUN method\n")));
     break;
   }
 }
@@ -676,7 +672,7 @@ void EndpointManager::success_response(const ACE_INET_Addr& a_local_address,
 
   default:
     // Unknown method.  Stop processing.
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::success_response: WARNING Unknown ICE method\n")));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::success_response: WARNING Unknown STUN method\n")));
     break;
   }
 }
@@ -706,7 +702,7 @@ void EndpointManager::error_response(const ACE_INET_Addr& a_local_address,
 
   default:
     // Unknown method.  Stop processing.
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::error_response: WARNING Unknown ICE method\n")));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::error_response: WARNING Unknown STUN method\n")));
     break;
   }
 }
@@ -728,7 +724,7 @@ void EndpointManager::check_invariants() const
     const DeferredTriggeredCheckListType& list = pos->second;
     ACE_UNUSED_ARG(list);
     OPENDDS_ASSERT(!list.empty());
-    OPENDDS_ASSERT(list.front().expiration_date >= MonotonicTimePoint::now() - agent_impl->get_configuration().server_reflexive_address_period() - agent_impl->get_configuration().server_reflexive_address_period());
+    OPENDDS_ASSERT(list.front().expiration_date >= MonotonicTimePoint::now() - ICE::Configuration::instance()->server_reflexive_address_period() - ICE::Configuration::instance()->server_reflexive_address_period());
   }
 
   for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
@@ -781,7 +777,7 @@ void EndpointManager::ServerReflexiveTask::execute(const MonotonicTimePoint& a_n
   DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
   if (em) {
     em->server_reflexive_task(a_now);
-    enqueue(a_now + em->agent_impl->get_configuration().server_reflexive_address_period());
+    enqueue(a_now + ICE::Configuration::instance()->server_reflexive_address_period());
   }
 }
 
@@ -789,7 +785,7 @@ EndpointManager::ChangePasswordTask::ChangePasswordTask(DCPS::RcHandle<EndpointM
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(MonotonicTimePoint::now() + a_endpoint_manager->agent_impl->get_configuration().change_password_period());
+  enqueue(MonotonicTimePoint::now() + ICE::Configuration::instance()->change_password_period());
 }
 
 void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_now)
@@ -797,7 +793,7 @@ void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_no
   DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
   if (em) {
     em->change_password(true);
-    enqueue(a_now + em->agent_impl->get_configuration().change_password_period());
+    enqueue(a_now + ICE::Configuration::instance()->change_password_period());
   }
 }
 
