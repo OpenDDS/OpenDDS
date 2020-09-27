@@ -41,10 +41,12 @@ Observer::Sample::Sample(DDS::InstanceHandle_t i, const DataSampleElement& e, co
 Observer::Sample::Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i)
   : instance_(i)
   , instance_state_(to_instance_state(s.header_.message_id_))
-  , timestamp_{s.header_.source_timestamp_sec_, s.header_.source_timestamp_nanosec_}
   , seq_n_(s.header_.sequence_)
   , data_(s.sample_.get())
-{}
+{
+  timestamp_.sec = s.header_.source_timestamp_sec_;
+  timestamp_.nanosec = s.header_.source_timestamp_nanosec_;
+}
 
 Observer::Sample::Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i, DDS::InstanceStateKind instance_state)
   : instance_(i)
