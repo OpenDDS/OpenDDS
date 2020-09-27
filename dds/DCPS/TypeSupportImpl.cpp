@@ -49,8 +49,12 @@ TypeSupportImpl::get_type_name()
 
 void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
 {
-  const XTypes::TypeObject& minTypeObject = getMinimalTypeObject();
-  type_info.minimal.typeid_with_size.type_id = XTypes::makeTypeIdentifier(minTypeObject);
+  const XTypes::TypeIdentifier& minTypeId = getMinimalTypeIdentifier();
+  const XTypes::TypeMap& minTypeMap = getMinimalTypeMap();
+  XTypes::TypeMap::const_iterator pos = minTypeMap.find(minTypeId);
+  const XTypes::TypeObject& minTypeObject = pos->second;
+
+  type_info.minimal.typeid_with_size.type_id = minTypeId;
   type_info.minimal.typeid_with_size.typeobject_serialized_size =
     serialized_size(XTypes::get_typeobject_encoding(), minTypeObject);
   type_info.minimal.dependent_typeid_count = 0;

@@ -13,6 +13,7 @@
 #include "LocalObject.h"
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
+#include "XTypes/TypeObject.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
@@ -24,12 +25,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 
 namespace OpenDDS {
-
-namespace XTypes {
-  struct TypeInformation;
-  struct TypeObject;
-}
-
 namespace DCPS {
 
 class MetaStruct;
@@ -96,7 +91,8 @@ public:
   virtual void representations_allowed_by_type(
     DDS::DataRepresentationIdSeq& seq) = 0;
 
-  virtual const XTypes::TypeObject& getMinimalTypeObject() const = 0;
+  virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
+  virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
 
   virtual Extensibility getExtensibility() const = 0;
 

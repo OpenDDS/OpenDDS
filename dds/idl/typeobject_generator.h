@@ -13,6 +13,10 @@
 
 class typeobject_generator : public dds_generator {
 public:
+  void gen_prologue();
+
+  void gen_epilogue();
+
   bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
@@ -44,7 +48,7 @@ private:
   };
 
   size_t compute_dependencies(AST_Type* type, const std::string& anonymous_name);
-  void generate_minimal_type_identifier(AST_Type* type);
+  void generate_minimal_type_identifier(AST_Type* type, bool force_type_object);
   static bool name_sorter(const Element& x, const Element& y);
   void generate_minimal(AST_Type* type);
   OpenDDS::XTypes::TypeObject get_minimal_type_object(AST_Type* type);
@@ -55,6 +59,7 @@ private:
   MinimalTypeObjectMap minimal_type_object_map_;
   typedef std::map<AST_Type*, OpenDDS::XTypes::TypeIdentifier> MinimalTypeIdentifierMap;
   MinimalTypeIdentifierMap minimal_type_identifier_map_;
+  OpenDDS::XTypes::TypeMap minimal_type_map_;
 
   typedef std::vector<Element> SortedDependencies;
   SortedDependencies sorted_dependencies_;

@@ -52,12 +52,7 @@ public:
 
 private:
   // Only minimal Type Objects for now
-  typedef std::map<TypeIdentifier, TypeObject> TypeObjectMap;
-  TypeObjectMap type_object_map_;
-
-  typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
-  TypeIdentifierWithSizeSeqMap type_dependencies_map_;
-
+  TypeMap minimal_type_map_;
   TypeObject to_empty_;
 
   DCPS::SequenceNumber rpc_sequence_number_;

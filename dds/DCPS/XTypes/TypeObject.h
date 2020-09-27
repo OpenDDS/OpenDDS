@@ -1221,6 +1221,13 @@ namespace XTypes {
   struct CommonCollectionElement {
     CollectionElementFlag element_flags;
     TypeIdentifier type;
+
+    CommonCollectionElement() {}
+    CommonCollectionElement(CollectionElementFlag a_element_flags,
+                            const TypeIdentifier& a_type)
+      : element_flags(a_element_flags)
+      , type(a_type)
+    {}
   };
 
   struct CompleteCollectionElement {
@@ -1230,10 +1237,16 @@ namespace XTypes {
 
   struct MinimalCollectionElement {
     CommonCollectionElement common;
+
+    MinimalCollectionElement() {}
+    MinimalCollectionElement(const CommonCollectionElement& a_common) : common(a_common) {}
   };
 
   struct CommonCollectionHeader {
     LBound bound;
+
+    CommonCollectionHeader() {}
+    CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
   };
 
   struct CompleteCollectionHeader {
@@ -1243,6 +1256,9 @@ namespace XTypes {
 
   struct MinimalCollectionHeader {
     CommonCollectionHeader common;
+
+    MinimalCollectionHeader() {}
+    MinimalCollectionHeader(const CommonCollectionHeader& a_common) : common(a_common) {}
   };
 
   // --- Sequence: ------------------------------------------------------
@@ -1256,11 +1272,23 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     MinimalCollectionHeader header;
     MinimalCollectionElement element;
+
+    MinimalSequenceType() {}
+    MinimalSequenceType(CollectionTypeFlag a_collection_flag,
+                        const MinimalCollectionHeader& a_header,
+                        const MinimalCollectionElement& a_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(a_element)
+    {}
   };
 
   // --- Array: ------------------------------------------------------
   struct CommonArrayHeader {
     LBoundSeq bound_seq;
+
+    CommonArrayHeader() {}
+    CommonArrayHeader(const LBoundSeq& a_bound_seq) : bound_seq(a_bound_seq) {}
   };
 
   struct CompleteArrayHeader {
@@ -1270,6 +1298,11 @@ namespace XTypes {
 
   struct MinimalArrayHeader {
     CommonArrayHeader common;
+
+    MinimalArrayHeader() {}
+    MinimalArrayHeader(const CommonArrayHeader& a_common)
+      : common(a_common)
+    {}
   };
 
   struct CompleteArrayType  {
@@ -1282,6 +1315,15 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     MinimalArrayHeader header;
     MinimalCollectionElement element;
+
+    MinimalArrayType() {}
+    MinimalArrayType(CollectionTypeFlag a_collection_flag,
+                     const MinimalArrayHeader& a_header,
+                     const MinimalCollectionElement& a_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(a_element)
+    {}
   };
 
   // --- Map: ------------------------------------------------------
@@ -1749,15 +1791,33 @@ namespace XTypes {
   OpenDDS_Dcps_Export
   bool is_fully_descriptive(const TypeIdentifier& ti);
 
+  typedef std::map<TypeIdentifier, TypeObject> TypeMap;
+
+  struct TypeMapBuilder {
+    TypeMap type_map_;
+
+    TypeMapBuilder& insert(const TypeIdentifier& ti, const TypeObject& to)
+    {
+      type_map_[ti] = to;
+      return *this;
+    }
+
+    operator TypeMap&() { return type_map_; }
+  };
+
+  void compute_dependencies(const TypeMap& type_map,
+                            const TypeIdentifier& type_identifier,
+                            std::set<TypeIdentifier>& dependencies);
+
 } // namespace XTypes
 
 namespace DCPS {
 
 template<typename T>
-const XTypes::TypeObject& getMinimalTypeObject();
+const XTypes::TypeIdentifier& getMinimalTypeIdentifier();
 
 template<typename T>
-XTypes::TypeIdentifier getMinimalTypeIdentifier();
+const XTypes::TypeMap& getMinimalTypeMap();
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
