@@ -815,8 +815,9 @@ namespace OpenDDS {
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
-      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq&,
-                                            const DCPS::RepoId&, bool)
+      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq& /*type_ids*/,
+                                            const DCPS::RepoId& /*endpoint*/,
+                                            bool /*is_discovery_protected*/)
       { return true; }
 
       void match_endpoints(RepoId repoId, const TopicDetails& td,

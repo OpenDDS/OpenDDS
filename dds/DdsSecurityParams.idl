@@ -29,6 +29,7 @@ module DDS {
     const ParameterId_t PID_ENDPOINT_SECURITY_INFO = 0x1004;
     const ParameterId_t PID_PARTICIPANT_SECURITY_INFO = 0x1005;
     const ParameterId_t PID_IDENTITY_STATUS_TOKEN = 0x1006;
+    // https://issues.omg.org/browse/DDSSEC12-87
     const ParameterId_t PID_EXTENDED_BUILTIN_ENDPOINTS = 0x1007;
 
     struct DataHolder {
@@ -112,6 +113,7 @@ module DDS {
     const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER = 1 << 26;
     const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_READER = 1 << 27;
 
+    // https://issues.omg.org/browse/DDSSEC12-87
     typedef unsigned long ExtendedBuiltinEndpointSet_t;
     const ExtendedBuiltinEndpointSet_t TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE = 1 << 0;
     const ExtendedBuiltinEndpointSet_t TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE = 1 << 1;

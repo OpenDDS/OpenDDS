@@ -3188,8 +3188,9 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 #endif
 
 #ifdef OPENDDS_SECURITY
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail,
-                     const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail, const ICE::AgentInfo& agent_info)
+void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t avail,
+                     DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
+                     const ICE::AgentInfo& agent_info)
 {
   RepoId l = guid_;
 
@@ -3329,8 +3330,8 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
   }
 }
 
-void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail,
-                    const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail) {
+void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
+                    DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail) {
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -3600,9 +3601,11 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     if (sedp_pos != ai_map.end()) {
-      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, pdata.participantProxy.availableExtendedBuiltinEndpoints, sedp_pos->second);
+      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
+                pdata.participantProxy.availableExtendedBuiltinEndpoints, sedp_pos->second);
     } else {
-      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, pdata.participantProxy.availableExtendedBuiltinEndpoints);
+      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
+               pdata.participantProxy.availableExtendedBuiltinEndpoints);
     }
   }
   ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
