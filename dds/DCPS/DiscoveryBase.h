@@ -1913,6 +1913,7 @@ namespace OpenDDS {
         DDS::TopicDescription_var bit_connection_record_topic =
           participant->lookup_topicdescription(BUILT_IN_CONNECTION_RECORD_TOPIC);
         create_bit_dr(bit_connection_record_topic, BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE,
+                      sub, dr_qos);
 
         DDS::TopicDescription_var bit_internal_thread_topic =
           participant->lookup_topicdescription(BUILT_IN_INTERNAL_THREAD_TOPIC);
