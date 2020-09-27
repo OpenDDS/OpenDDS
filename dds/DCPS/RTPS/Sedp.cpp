@@ -469,15 +469,17 @@ Sedp::init(const RepoId& guid,
   dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER &&
+      spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
     type_lookup_request_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_request_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
-  type_lookup_request_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
-  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER &&
+      spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
     type_lookup_reply_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
-  type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
   max_type_lookup_service_reply_period_ = disco.config()->max_type_lookup_service_reply_period();
 
