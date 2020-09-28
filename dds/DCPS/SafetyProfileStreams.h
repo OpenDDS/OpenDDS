@@ -6,6 +6,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/OS_NS_stdio.h"
+#include "ace/INET_Addr.h"
 #include "tao/Basic_Types.h"
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -27,6 +28,7 @@ OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long to_convert, bool as_hex = false);
+OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr);
 
 OpenDDS_Dcps_Export const char* retcode_to_string(DDS::ReturnCode_t value);
 

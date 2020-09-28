@@ -42,6 +42,7 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#include "dds/DCPS/RTPS/ICE/Ice.h"
 #endif
 
 class DDS_TEST;
@@ -187,6 +188,8 @@ public:
 
   static bool separate_message(EntityId_t entity);
 #endif
+
+  RtpsUdpTransport& transport();
 
 private:
   void join_multicast_group(const DCPS::NetworkInterface& nic,
@@ -591,7 +594,6 @@ private:
   void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
   void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
-  void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
 
@@ -627,7 +629,7 @@ private:
   Multi heartbeat_, heartbeat_reply_;
 
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
-  Periodic heartbeatchecker_, relay_beacon_;
+  Periodic heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

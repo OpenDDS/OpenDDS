@@ -376,7 +376,6 @@ Sedp::init(const RepoId& guid,
 #endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());
-  rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();
   rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
   rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
 
@@ -3166,6 +3165,12 @@ Sedp::Endpoint::~Endpoint()
   transport_stop();
 }
 
+DDS::Subscriber_var
+Sedp::Endpoint::get_builtin_subscriber() const
+{
+  return sedp_.spdp_.bit_subscriber();
+}
+
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
@@ -4530,6 +4535,14 @@ Sedp::write_subscription_data_unsecure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
+
+    DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
+    Parameter param;
+    param.type_consistency(tceqp);
+    const CORBA::ULong length = plist.length();
+    plist.length(length + 1);
+    plist[length] = param;
+
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
@@ -5464,19 +5477,15 @@ Sedp::AssociationComplete::execute() {
 }
 
 void
-Sedp::rtps_relay_only(bool f)
+Sedp::rtps_relay_only_now(bool f)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->rtps_relay_only_ = f;
+  transport_inst_->rtps_relay_only_now(f);
 }
 
 void
-Sedp::use_rtps_relay(bool f)
+Sedp::use_rtps_relay_now(bool f)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->use_rtps_relay_ = f;
+  transport_inst_->use_rtps_relay_now(f);
 }
 
 void

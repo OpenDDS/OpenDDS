@@ -73,7 +73,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical;
-  unsigned short stun_port = 3478;
   std::string user_data;
   std::size_t max_throughput = 80; // in MBps
   bool run_relay = true;
@@ -113,9 +112,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-StunPort"))) {
-      stun_port = ACE_OS::atoi(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
@@ -423,9 +419,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_INET_Addr data_vertical_addr(nic_vertical);
     data_vertical_addr.set_port_number(port_vertical++);
 
-    ACE_INET_Addr stun_addr = nic_vertical;
-    stun_addr.set_port_number(stun_port);
-
     // Set up the application participant.
     DDS::DomainParticipantQos participant_qos;
     factory->get_default_participant_qos(participant_qos);
@@ -529,10 +522,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     SpdpHandler spdp_vertical_handler(config, "VSPDP", spdp_horizontal_addr, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, spdp);
     SedpHandler sedp_vertical_handler(config, "VSEDP", sedp_horizontal_addr, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, sedp);
     DataHandler data_vertical_handler(config, "VDATA", data_horizontal_addr, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto);
-
-#ifdef OPENDDS_SECURITY
-    StunHandler stun_handler(config, "STUN", reactor, governor);
-#endif
 
     HorizontalHandler spdp_horizontal_handler(config, "HSPDP", reactor, governor);
     HorizontalHandler sedp_horizontal_handler(config, "HSEDP", reactor, governor);
@@ -640,21 +629,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-#ifdef OPENDDS_SECURITY
-    if (stun_handler.open(stun_addr) == -1) {
-      return EXIT_FAILURE;
-    }
-#endif
-
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Horizontal listening on %C\n"), addr_to_string(spdp_horizontal_addr).c_str()));
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Horizontal listening on %C\n"), addr_to_string(sedp_horizontal_addr).c_str()));
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Horizontal listening on %C\n"), addr_to_string(data_horizontal_addr).c_str()));
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_addr).c_str()));
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_addr).c_str()));
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Vertical listening on %C\n"), addr_to_string(data_vertical_addr).c_str()));
-#ifdef OPENDDS_SECURITY
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l STUN listening on %C\n"), addr_to_string(stun_addr).c_str()));
-#endif
 
     reactor->run_reactor_event_loop();
   } else if (report_handler_statistics || report_domain_statistics || report_participant_statistics) {
