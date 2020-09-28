@@ -1879,9 +1879,6 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
-<<<<<<< HEAD
-  tport_->open(sedp_.reactor_task());
-=======
 
   if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
     // configure thread status
@@ -1891,12 +1888,11 @@ Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
     thread_status_data_.bit = internal_thread_bit();
     thread_status_data_.status = status;
 
-    tport_->open(&thread_status_handler_, &thread_status_data_);
+    tport_->open(sedp_.reactor_task(),&thread_status_handler_, &thread_status_data_);
   } else {
-    tport_->open();
+    tport_->open(sedp_.reactor_task());
   }
 
->>>>>>> Internal thread BIT implementation
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
