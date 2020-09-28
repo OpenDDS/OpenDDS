@@ -6,3 +6,11 @@ struct Property {
   long value;
   sequence<octet> extra;
 };
+
+@topic
+struct Property_2 {
+  @key long key;
+  string value;
+  sequence<octet> extra;
+};
+
