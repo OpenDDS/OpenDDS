@@ -787,6 +787,14 @@ Service_Participant::initialize()
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+
+  initial_TypeConsistencyEnforcementQosPolicy_.kind = DDS::ALLOW_TYPE_COERCION;
+  initial_TypeConsistencyEnforcementQosPolicy_.prevent_type_widening = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_sequence_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_string_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
+
 }
 
 void

@@ -2141,19 +2141,16 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 #ifdef OPENDDS_SECURITY
   handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
   handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
-#endif
 
   relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
-  if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
-      outer_->config_->use_rtps_relay()) {
-    relay_sender_->enable(false, outer_->config_->spdp_rtps_relay_send_period());
-  }
+  relay_stun_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
 
-  relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay_beacon);
-  if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
-      outer_->config_->use_rtps_relay()) {
-    relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
+  if (outer_->config_->use_rtps_relay() ||
+      outer_->config_->rtps_relay_only()) {
+    relay_sender_->enable(false, outer_->config_->spdp_rtps_relay_send_period());
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   }
+#endif
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer_->config_->use_ncm() && ncm) {
@@ -2254,13 +2251,13 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (handshake_resend_processor_) {
     handshake_resend_processor_->cancel_and_wait();
   }
-#endif
   if (relay_sender_) {
     relay_sender_->disable_and_wait();
   }
-  if (relay_beacon_) {
-    relay_beacon_->disable_and_wait();
+  if (relay_stun_task_) {
+    relay_stun_task_->disable_and_wait();
   }
+#endif
   if (local_sender_) {
     local_sender_->disable_and_wait();
   }
@@ -2535,121 +2532,128 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0;
   }
 
+  if ((buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4) == 0) {
+    DCPS::Serializer ser(&buff_, encoding_plain_native);
+    Header header;
+    if (!(ser >> header)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                 ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
+      return 0;
+    }
+
+    while (buff_.length() > 3) {
+      const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
+      ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
+      const size_t start = buff_.length();
+      CORBA::UShort submessageLength = 0;
+      switch (subm) {
+      case DATA: {
+        DataSubmessage data;
+        if (!(ser >> data)) {
+          ACE_ERROR((
+                     LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                     ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
+          return 0;
+        }
+        submessageLength = data.smHeader.submessageLength;
+
+        if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
+          // Not our message: this could be the same multicast group used
+          // for SEDP and other traffic.
+          break;
+        }
+
+        ParameterList plist;
+        if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
+          ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
+          CORBA::UShort encap, options;
+          if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                       ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+            return 0;
+          }
+          ser >> options;
+          // bit 8 in encap is on if it's PL_CDR_LE
+          ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          if (!(ser >> plist)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                       ACE_TEXT("failed to deserialize data payload for SPDP\n")));
+            return 0;
+          }
+        } else {
+          plist.length(1);
+          const RepoId guid = make_id(header.guidPrefix, ENTITYID_PARTICIPANT);
+          plist[0].guid(guid);
+          plist[0]._d(PID_PARTICIPANT_GUID);
+        }
+
+        outer_->data_received(data, plist, remote);
+        break;
+      }
+      default:
+        SubmessageHeader smHeader;
+        if (!(ser >> smHeader)) {
+          ACE_ERROR((
+                     LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                     ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
+          return 0;
+        }
+        submessageLength = smHeader.submessageLength;
+        break;
+      }
+      if (submessageLength && buff_.length()) {
+        const size_t read = start - buff_.length();
+        if (read < static_cast<size_t>(submessageLength + SMHDR_SZ)) {
+          if (!ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ
+                                                   - read))) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                       ACE_TEXT("failed to skip sub message length\n")));
+            return 0;
+          }
+        }
+      } else if (!submessageLength) {
+        break; // submessageLength of 0 indicates the last submessage
+      }
+    }
+  }
+
   // Handle some RTI protocol multicast to the same address
-  if ((buff_.size() >= 4) && (!ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4))) {
+  if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
     return 0; // Ignore
   }
 
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint && (buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4)) {
-# ifndef ACE_RECVPKTINFO
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() ")
-      ACE_TEXT("potential STUN message received but this version of the ACE ")
-      ACE_TEXT("library doesn't support the local_address extension in ")
-      ACE_TEXT("ACE_SOCK_Dgram::recv\n")));
-    ACE_NOTSUP_RETURN(0);
-# else
+  // Assume STUN
+
+#ifndef ACE_RECVPKTINFO
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() ")
+             ACE_TEXT("potential STUN message received but this version of the ACE ")
+             ACE_TEXT("library doesn't support the local_address extension in ")
+             ACE_TEXT("ACE_SOCK_Dgram::recv\n")));
+  ACE_NOTSUP_RETURN(0);
+#else
 
 #ifdef OPENDDS_SECURITY
-    // Assume STUN
-    DCPS::Serializer serializer(&buff_, STUN::encoding);
-    STUN::Message message;
-    message.block = &buff_;
-    if (serializer >> message) {
-      ICE::Agent::instance()->receive(endpoint, local, remote, message);
+  DCPS::Serializer serializer(&buff_, STUN::encoding);
+  STUN::Message message;
+  message.block = &buff_;
+  if (serializer >> message) {
+    if (relay_srsm_.is_response(message)) {
+      process_relay_sra(relay_srsm_.receive(message));
+    } else {
+      ICE::Endpoint* endpoint = get_ice_endpoint();
+      if (endpoint) {
+        ICE::Agent::instance()->receive(endpoint, local, remote, message);
+      }
     }
+  }
 #endif
-    return 0;
-# endif
-  }
-  DCPS::Serializer ser(&buff_, encoding_plain_native);
-  Header header;
-  if (!(ser >> header)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-               ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
-    return 0;
-  }
-
-  while (buff_.length() > 3) {
-    const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
-    ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
-    const size_t start = buff_.length();
-    CORBA::UShort submessageLength = 0;
-    switch (subm) {
-    case DATA: {
-      DataSubmessage data;
-      if (!(ser >> data)) {
-        ACE_ERROR((
-              LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-              ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
-        return 0;
-      }
-      submessageLength = data.smHeader.submessageLength;
-
-      if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
-        // Not our message: this could be the same multicast group used
-        // for SEDP and other traffic.
-        break;
-      }
-
-      ParameterList plist;
-      if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
-        ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-        CORBA::UShort encap, options;
-        if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-            ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
-          return 0;
-        }
-        ser >> options;
-        // bit 8 in encap is on if it's PL_CDR_LE
-        ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
-        if (!(ser >> plist)) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-            ACE_TEXT("failed to deserialize data payload for SPDP\n")));
-          return 0;
-        }
-      } else {
-        plist.length(1);
-        const RepoId guid = make_id(header.guidPrefix, ENTITYID_PARTICIPANT);
-        plist[0].guid(guid);
-        plist[0]._d(PID_PARTICIPANT_GUID);
-      }
-
-      outer_->data_received(data, plist, remote);
-      break;
-    }
-    default:
-      SubmessageHeader smHeader;
-      if (!(ser >> smHeader)) {
-        ACE_ERROR((
-              LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-              ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
-        return 0;
-      }
-      submessageLength = smHeader.submessageLength;
-      break;
-    }
-    if (submessageLength && buff_.length()) {
-      const size_t read = start - buff_.length();
-      if (read < static_cast<size_t>(submessageLength + SMHDR_SZ)) {
-        if (!ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ
-                                                 - read))) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-            ACE_TEXT("failed to skip sub message length\n")));
-          return 0;
-        }
-      }
-    } else if (!submessageLength) {
-      break; // submessageLength of 0 indicates the last submessage
-    }
-  }
+#endif
 
   return 0;
 }
@@ -3372,38 +3376,64 @@ Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
   }
   return DDS::HANDLE_NIL;
 }
-#endif
 
-void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
+void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-
-  if (outer_->config_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
+  // Request and maintain a server-reflexive address.
+  if (!(outer_->config_->use_rtps_relay() ||
+        outer_->config_->rtps_relay_only())) {
     return;
   }
 
-  static const PadSubmessage pad = { { PAD, FLAG_E, 0 } };
+  const ACE_INET_Addr stun_server_address = outer_->config_->spdp_rtps_relay_address();
 
-  wbuff_.reset();
-  DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << pad)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send_relay_beacon() - ")
-               ACE_TEXT("failed to serialize headers for SPDP\n")));
+  process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), outer_->guid_.guidPrefix));
+
+  if (stun_server_address != ACE_INET_Addr()) {
+    send(stun_server_address, relay_srsm_.message());
+  }
+}
+
+void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ConnectionRecord connection_record;
+  std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
+  connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
+
+  DCPS::ConnectionRecordDataReaderImpl* dr = outer_->connection_record_bit();
+  if (!dr) {
     return;
   }
 
-  send(SEND_TO_RELAY);
+  switch (sc) {
+  case ICE::ServerReflexiveStateMachine::SRSM_None:
+    break;
+  case ICE::ServerReflexiveStateMachine::SRSM_Set:
+  case ICE::ServerReflexiveStateMachine::SRSM_Change:
+    connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
+    break;
+  case ICE::ServerReflexiveStateMachine::SRSM_Unset:
+    {
+      connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+      const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);
+      dr->set_instance_state(ih, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      break;
+    }
+  }
+#else
+  ACE_UNUSED_ARG(sc);
+#endif
 }
 
 void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  if (outer_->config_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
-    return;
+  if ((outer_->config_->use_rtps_relay() || outer_->config_->rtps_relay_only()) && outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+    write(SEND_TO_RELAY);
   }
-
-  write(SEND_TO_RELAY);
 }
+#endif
 
 void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
@@ -3537,17 +3567,25 @@ const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) co
 void
 Spdp::rtps_relay_only_now(bool f)
 {
-  sedp_->rtps_relay_only(f);
+  ACE_UNUSED_ARG(f);
+
+#ifdef OPENDDS_SECURITY
+  sedp_->rtps_relay_only_now(f);
+
+  if (f) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    DCPS::ReactorTask_rch reactor_task = sedp_->reactor_task();
+
+    tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
+    tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (f) {
     const DCPS::ParticipantLocation mask =
       DCPS::LOCATION_LOCAL |
       DCPS::LOCATION_LOCAL6 |
       DCPS::LOCATION_ICE |
       DCPS::LOCATION_ICE6;
-
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     DCPS::RepoIdSet participant_ids;
     get_discovered_participant_ids(participant_ids);
@@ -3560,6 +3598,16 @@ Spdp::rtps_relay_only_now(bool f)
         process_location_updates_i(iter);
       }
     }
+#endif
+  } else {
+    if (!config_->use_rtps_relay()) {
+      if (tport_->relay_sender_) {
+        tport_->relay_sender_->disable();
+      }
+      if (tport_->relay_stun_task_) {
+        tport_->relay_stun_task_->disable();
+      }
+    }
   }
 #endif
 }
@@ -3567,15 +3615,23 @@ Spdp::rtps_relay_only_now(bool f)
 void
 Spdp::use_rtps_relay_now(bool f)
 {
-  sedp_->use_rtps_relay(f);
+  ACE_UNUSED_ARG(f);
+
+#ifdef OPENDDS_SECURITY
+  sedp_->use_rtps_relay_now(f);
+
+  if (!f) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    DCPS::ReactorTask_rch reactor_task = sedp_->reactor_task();
+
+    tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
+    tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (!f) {
     const DCPS::ParticipantLocation mask =
       DCPS::LOCATION_RELAY |
       DCPS::LOCATION_RELAY6;
-
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     DCPS::RepoIdSet participant_ids;
     get_discovered_participant_ids(participant_ids);
@@ -3586,6 +3642,16 @@ Spdp::use_rtps_relay_now(bool f)
       if (iter != participants_.end()) {
         enqueue_location_update_i(iter, mask, ACE_INET_Addr());
         process_location_updates_i(iter);
+      }
+    }
+#endif
+  } else {
+    if (!config_->rtps_relay_only()) {
+      if (tport_->relay_sender_) {
+        tport_->relay_sender_->disable();
+      }
+      if (tport_->relay_stun_task_) {
+        tport_->relay_stun_task_->disable();
       }
     }
   }
@@ -3630,21 +3696,19 @@ Spdp::use_ice_now(bool f)
     tport_->ice_endpoint_added_ = false;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-    if (!f) {
-      const DCPS::ParticipantLocation mask =
-        DCPS::LOCATION_ICE |
-        DCPS::LOCATION_ICE6;
+    const DCPS::ParticipantLocation mask =
+      DCPS::LOCATION_ICE |
+      DCPS::LOCATION_ICE6;
 
-      DCPS::RepoIdSet participant_ids;
-      get_discovered_participant_ids(participant_ids);
-      for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
-           participant_id != participant_ids.end();
-           ++participant_id) {
-        DiscoveredParticipantIter iter = participants_.find(*participant_id);
-        if (iter != participants_.end()) {
-          enqueue_location_update_i(iter, mask, ACE_INET_Addr());
-          process_location_updates_i(iter);
-        }
+    DCPS::RepoIdSet participant_ids;
+    get_discovered_participant_ids(participant_ids);
+    for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
+         participant_id != participant_ids.end();
+         ++participant_id) {
+      DiscoveredParticipantIter iter = participants_.find(*participant_id);
+      if (iter != participants_.end()) {
+        enqueue_location_update_i(iter, mask, ACE_INET_Addr());
+        process_location_updates_i(iter);
       }
     }
 #endif
