@@ -212,25 +212,6 @@ private:
 
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
-  // thread status reporting
-  class ThreadStatusHandler : public ACE_Event_Handler
-  {
-    public:
-      int handle_timeout(const ACE_Time_Value &time, const void* ptr = 0);
-  };
-
-  ThreadStatusHandler thread_status_handler_;
-
-  struct ThreadStatusData {
-    DCPS::RepoId guid;
-    DCPS::InternalThreadBuiltinTopicDataDataReaderImpl *bit;
-    DCPS::ThreadStatus* status;
-
-    ThreadStatusData() : bit(0) { };
-  };
-
-  ThreadStatusData thread_status_data_;
-
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
@@ -258,7 +239,7 @@ private:
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch& reactor_task, ThreadStatusHandler* hp = 0, ThreadStatusData* dp = 0);
+    void open(const DCPS::ReactorTask_rch&);
 
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
@@ -321,6 +302,9 @@ private:
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpMulti> local_sender_;
+    DCPS::ThreadStatus* thread_status_;
+    void thread_status_task(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
 #ifdef OPENDDS_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
