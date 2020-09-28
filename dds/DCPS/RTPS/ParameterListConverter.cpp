@@ -746,9 +746,11 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 {
   DDS::DataRepresentationQosPolicy dr_qos;
   dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
-  Parameter param;
-  param.representation(dr_qos);
-  add_param(param_list, param);
+  if (dr_qos.value.lenght() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
+    Parameter param;
+    param.representation(dr_qos);
+    add_param(param_list, param);
+  }
 }
 
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
