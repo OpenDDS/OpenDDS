@@ -1,7 +1,7 @@
 project(Compiler_*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
   exename = *
   Source_Files {
-      TryConstruct.cpp
+    TryConstruct.cpp
   }
   TypeSupport_Files {
     TryConstruct.idl

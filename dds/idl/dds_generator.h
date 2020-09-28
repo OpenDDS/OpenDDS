@@ -597,12 +597,14 @@ void generateCaseBody(
         } else {
           brType = ((br_cls & CL_WIDE) ? "OPENDDS_WSTRING" : "OPENDDS_STRING");
         }
-        std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
         if ((lmap == BE_GlobalData::LANGMAP_FACE_CXX) && (br_cls & CL_WIDE)) {
           rhs = "ACE_InputCDR::to_wstring(tmp.out(), " + bounded_arg(br) + ")";
         } else if (lmap == BE_GlobalData::LANGMAP_FACE_CXX) {
           rhs = "ACE_InputCDR::to_string(tmp.out(), " + bounded_arg(br) + ")";
-        } else { rhs = "Serializer::ToBoundedString<" + char_type + ">(tmp, " + bounded_arg(br) + ")";}
+        } else {
+          rhs = "Serializer::ToBoundedString<" + std::string((br_cls & CL_WIDE) ? "wchar_t" : "char")
+            + ">(tmp, " + bounded_arg(br) + ")";
+        }
       } else {
         if (use_cxx11) {
           brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
@@ -637,50 +639,51 @@ void generateCaseBody(
       "      uni._d(disc);\n"
       "      return true;\n"
       "    }\n";
-      if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
-          be_global->impl_ << "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
-                   "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-                   "        return true;\n";
-        } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
-                   ((br_cls & CL_STRING) || (br_cls & CL_SEQUENCE))) {
-          if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
-            std::string check_not_empty = "!tmp.empty()";
-            std::string get_length = (use_cxx11) ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
-            std::string inout = (use_cxx11) ? "" : ".inout()";
-            be_global->impl_ <<
-              "        if (strm.good_bit() && " << check_not_empty << " && ("
-                       << bounded_arg(br) << " < " << get_length << ")) {\n";
-            if (br_cls & CL_WIDE) {
-              be_global->impl_ << "          std::wstring s = tmp;\n";
-            } else {
-              be_global->impl_ << "          std::string s = tmp;\n";
-            }
-            be_global->impl_ <<
-              "          s.resize(" << bounded_arg(br) << ");\n"
-              "          uni." << name << "(s.c_str());\n"
-              "          return true;\n"
-              "        }";
-            be_global->impl_ <<
-              "        else {\n"
-              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-              "          return false;\n"
-              "        }\n";
-          } else if (br_cls & CL_SEQUENCE) {
-            be_global->impl_ <<
-              "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
-              "          return false;\n"
-              "        }\n"
-              "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
-              "        uni._d(disc);\n"
-              "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-              "        return true;\n";
-          }
+    if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
+      be_global->impl_ <<
+        "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
+        "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+        "        return true;\n";
+    } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
+                ((br_cls & CL_STRING) || (br_cls & CL_SEQUENCE))) {
+      if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
+        std::string check_not_empty = "!tmp.empty()";
+        std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
+        std::string inout = use_cxx11 ? "" : ".inout()";
+        be_global->impl_ <<
+          "        if (strm.good_bit() && " << check_not_empty << " && ("
+                    << bounded_arg(br) << " < " << get_length << ")) {\n";
+        if (br_cls & CL_WIDE) {
+          be_global->impl_ << "          std::wstring s = tmp;\n";
         } else {
-          //discard/default
-          be_global->impl_ <<
-            "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-            "        return false;\n  ";
+          be_global->impl_ << "          std::string s = tmp;\n";
         }
+        be_global->impl_ <<
+          "          s.resize(" << bounded_arg(br) << ");\n"
+          "          uni." << name << "(s.c_str());\n"
+          "          return true;\n"
+          "        }";
+        be_global->impl_ <<
+          "        else {\n"
+          "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "          return false;\n"
+          "        }\n";
+      } else if (br_cls & CL_SEQUENCE) {
+        be_global->impl_ <<
+          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "          return false;\n"
+          "        }\n"
+          "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+          "        uni._d(disc);\n"
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "        return true;\n";
+      }
+    } else {
+      //discard/default
+      be_global->impl_ <<
+        "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "        return false;\n  ";
+    }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
     if (commonFn2) {

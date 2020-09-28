@@ -452,7 +452,7 @@ namespace {
     be_global->impl_ <<
       "      if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
       "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-      "        strm.skip(end_of_seq - strm.pos());\n"
+      "        strm.skip(end_of_arr - strm.pos());\n"
       "        return false;\n"
       "      } else {\n"
       "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
@@ -798,10 +798,11 @@ namespace {
         std::string seq_resize_func = use_cxx11 ? "resize" : "length";
 
         if (try_construct == tryconstructfailaction_use_default) {
-          be_global->impl_ << "     " << type_to_default(elem, "seq[i]") <<
-                              "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          be_global->impl_ <<
+            "     " << type_to_default(elem, "seq[i]") <<
+            "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
-                   ((elem_cls & CL_STRING) || (elem_cls & CL_SEQUENCE))) {
+                   (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING){
             string check_not_empty = use_cxx11 ? "!seq[i].empty()" : "seq[i].in()";
             string get_length = use_cxx11 ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
@@ -953,7 +954,9 @@ namespace {
       insertion.addArg(sf.arg_.c_str(), sf.const_ref_);
       insertion.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -1022,7 +1025,9 @@ namespace {
       extraction.addArg(sf.arg_.c_str(), sf.ref_);
       extraction.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
@@ -1141,7 +1146,7 @@ namespace {
             "     " << type_to_default(sf.as_base_, "seq[i]") <<
             "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (sf.as_cls_ & CL_BOUNDED) &&
-                   ((sf.as_cls_ & CL_STRING) || (sf.as_cls_ & CL_SEQUENCE))) {
+                   (sf.as_cls_ & (CL_STRING | CL_SEQUENCE))) {
           if (sf.as_cls_ & CL_STRING){
             string check_not_empty = use_cxx11 ? "!seq[i].empty()" : "seq[i].in()";
             string get_length = use_cxx11 ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
@@ -1370,8 +1375,8 @@ namespace {
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
-      if (!primitive) {
-        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+      if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
+        be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << unwrap;
@@ -1403,14 +1408,15 @@ namespace {
         }
         if (try_construct == tryconstructfailaction_use_default) {
           if (elem_cls & CL_ARRAY) {
-            be_global->impl_ << "      " << type_to_default(elem, "arr" + nfl.index_) <<
-                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+            be_global->impl_ <<
+              "      " << type_to_default(elem, "arr" + nfl.index_) <<
+              "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           } else {
             be_global->impl_ << "      " << type_to_default(elem, "arr" + nfl.index_ + suffix) <<
                                 "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           }
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
-                   ((elem_cls & CL_STRING) || (elem_cls & CL_SEQUENCE))) {
+                   (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING) {
             string check_not_empty = use_cxx11 ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
             string get_length = use_cxx11 ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
@@ -1551,7 +1557,9 @@ namespace {
       insertion.addArg(af.arg_.c_str(), af.const_ref_);
       insertion.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -1602,15 +1610,17 @@ namespace {
       AST_Annotation_Appl* ann_appl = af.arr_->base_type_annotations().find("::@try_construct");
       TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
 
-      be_global->impl_ << "  bool discard_flag = false;\n"
-                       << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  bool discard_flag = false;\n"
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
-      if (!primitive) {
-        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+      if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
+        be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << af.unwrap_;
@@ -1650,7 +1660,7 @@ namespace {
               "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           }
         } else if ((try_construct == tryconstructfailaction_trim) && (af.as_cls_ & CL_BOUNDED) &&
-                   ((af.as_cls_ & CL_STRING) || (af.as_cls_ & CL_SEQUENCE))) {
+                   (af.as_cls_ & (CL_STRING | CL_SEQUENCE))) {
           if (af.as_cls_ & CL_STRING){
             string check_not_empty = use_cxx11 ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
             string get_length = use_cxx11 ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
@@ -3094,6 +3104,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
+        "  set_default(stru);\n"
         "  while (true) {\n";
 
       if (repr.xcdr2) {
@@ -3132,9 +3143,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "      return true;\n"
           "    }\n";
       }
-      be_global->impl_ << "    const size_t end_of_field = strm.pos() + field_size;\n";
+      be_global->impl_ <<
+        "    const size_t end_of_field = strm.pos() + field_size;\n"
+        "    ACE_UNUSED_ARG(end_of_field);\n";
 
-      //be_global->impl_ << "    set_default(stru);\n";
       std::ostringstream cases;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
@@ -3162,7 +3174,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
         } else if ((be_global->try_construct(fields[i]) == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
-                   ((fld_cls & CL_STRING) || (fld_cls & CL_SEQUENCE))) {
+                   (fld_cls & (CL_STRING | CL_SEQUENCE))) {
           if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
             string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
             string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
@@ -3729,9 +3741,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_octet && ev->u.oval == 0) ||
               (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
           {
-            be_global->impl_ << "  " << scoped(branch->field_type()->name()) << " btemp;\n";
-            be_global->impl_ << type_to_default(branch->field_type(), "btemp");
-            be_global->impl_ << "  uni." << branch->local_name()->get_string() << "(btemp);\n";
+            be_global->impl_ << type_to_default(branch->field_type(), string("uni.")
+              + branch->local_name()->get_string(), false, true);
             found = true;
             break;
           }
@@ -3960,7 +3971,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.endArgs();
 
     if (has_key) {
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("serialized_size(encoding, total_size, uni);");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -4002,7 +4015,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (has_key) {
       // DHEADER
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
