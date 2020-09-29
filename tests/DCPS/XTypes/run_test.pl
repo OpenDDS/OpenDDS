@@ -19,15 +19,17 @@ GetOptions(
 my @common_args = ('-DCPSConfigFile', 'rtps_disc.ini');
 push(@common_args, "--verbose") if ($verbose);
 
-my @reader_args = ('--reader', '--type Property');
+my @reader_args = ('--reader', '--type Property_1');
 push(@reader_args, @common_args);
 $test->process('reader1', 'XTypes', join(' ', @reader_args));
 $test->start_process('reader1');
 
-my @writer_args = ('--writer', '--type Property');
+my @writer_args = ('--writer', '--type Property_1');
 push(@writer_args, @common_args);
 $test->process('writer1', 'XTypes', join(' ', @writer_args));
 $test->start_process('writer1');
+
+sleep 5;
 
 my @reader_args = ('--reader', '--type Property_2');
 push(@reader_args, @common_args);

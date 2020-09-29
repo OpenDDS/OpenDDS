@@ -9,15 +9,9 @@
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include <set>
-#include <performance-tests\bench_2\common\util.h>
-
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
-const unsigned large_sample_seq_size =
- static_cast<unsigned>(
-    OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE);
 
 template<typename T1, typename T2>
 bool read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
@@ -64,25 +58,20 @@ bool read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
 }
 
 
+template<typename T>
+void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Topic_var& topic)
+{
+  ts->register_type(dp, "");
+  CORBA::String_var type_name = ts->get_type_name();
+  topic = dp->create_topic(topic_name, type_name,
+    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp = dpf->create_participant(23,
     PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-
-  PropertyTypeSupport_var ts = new PropertyTypeSupportImpl;
-  ts->register_type(dp, "");
-  CORBA::String_var type_name = ts->get_type_name();
-  Topic_var topic = dp->create_topic("MyTopic", type_name,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-
-  //2
-  Property_2TypeSupport_var ts2 = new Property_2TypeSupportImpl;
-  ts2->register_type(dp, "");
-  CORBA::String_var type_name2 = ts2->get_type_name();
-  Topic_var topic2 = dp->create_topic("MyTopic2", type_name2,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-  ///
 
   bool verbose = false;
   bool writer = false;
@@ -112,6 +101,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   bool failed = false;
 
+  Topic_var topic;
+  if (type == "Property_1") {
+    Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
+    get_topic(ts, dp, "MyTopic1", topic);
+  } else if (type == "Property_2") {
+    Property_2TypeSupport_var ts = new Property_2TypeSupportImpl;
+    get_topic(ts, dp, "MyTopic2", topic);
+  }
+
   if (writer) {
     Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
@@ -119,35 +117,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     pub->get_default_datawriter_qos(dw_qos);
     dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    if (type == "Property") {
-      DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
-        DEFAULT_STATUS_MASK);
-      PropertyDataWriter_var pdw = PropertyDataWriter::_narrow(dw);
+    DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
+      DEFAULT_STATUS_MASK);
 
-      Property p;
-      p.extra.length(0);
+    if (type == "Property_1") {
+      Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
+
+      Property_1 p;
       p.key = 1;
       p.value = 1;
       pdw->write(p, HANDLE_NIL);
       if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "writer: Property\n"));
+        ACE_DEBUG((LM_DEBUG, "writer: Property_1\n"));
       }
-      ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
     } else if (type == "Property_2") {
-      DataWriter_var dw2 = pub->create_datawriter(topic2, dw_qos, 0,
-        DEFAULT_STATUS_MASK);
-      Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw2);
+      Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw);
 
       Property_2 p2;
-      p2.extra.length(0);
       p2.key = 1;
       p2.value = "Test";
       pdw2->write(p2, HANDLE_NIL);
       if (verbose) {
         ACE_DEBUG((LM_DEBUG, "writer: Property_2\n"));
       }
-      ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
+    } else {
+      ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+      failed = 1;
     }
+
+    ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
+
   } else if (reader) {
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
 
@@ -158,22 +157,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
     dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    if (type == "Property") {
-      DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
-        DEFAULT_STATUS_MASK);
-      PropertyDataReader_var pdr = PropertyDataReader::_narrow(dr);
-      ::PropertySeq data;
+    DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
+      DEFAULT_STATUS_MASK);
+
+    if (type == "Property_1") {
+      Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
+      ::Property_1Seq data;
       failed = !read(dr, pdr, data, verbose);
     } else if (type == "Property_2") {
-      DataReader_var dr2 = sub->create_datareader(topic2, dr_qos, 0,
-        DEFAULT_STATUS_MASK);
-      Property_2DataReader_var pdr2 = Property_2DataReader::_narrow(dr2);
-      ::Property_2Seq data2;
-      failed = failed || !read(dr2, pdr2, data2, verbose);
+      Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
+      ::Property_2Seq data;
+      failed = !read(dr, pdr, data, verbose);
+    } else {
+      ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+      failed = 1;
+    }
+
+    if (failed) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %s\n", type.c_str()));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
-    return 1;
+    failed = 1;
   }
 
   topic = 0;
