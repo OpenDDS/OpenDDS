@@ -21,6 +21,7 @@
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/Util.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
@@ -43,33 +44,6 @@
 #endif  /* __ACE_INLINE__ */
 
 namespace {
-
-/// Return the number of CORBA::Longs required for the bitmap representation of
-/// sequence numbers between low and high, inclusive (maximum 8 longs).
-CORBA::ULong
-bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
-                 const OpenDDS::DCPS::SequenceNumber& high)
-{
-  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
-}
-
-bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
-{
-  for (CORBA::ULong i = 0; i < snSet.bitmap.length(); ++i) {
-    if (snSet.bitmap[i]) {
-      if (snSet.numBits >= (i + 1) * 32) {
-        return true;
-      }
-      for (int bit = 31; bit >= 0; --bit) {
-        if ((snSet.bitmap[i] & (1 << bit))
-            && snSet.numBits > i * 32 + (31 - bit)) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
 
 bool compare_and_update_counts(CORBA::Long incoming, CORBA::Long& existing) {
   static const CORBA::Long ONE_QUARTER_MAX_POSITIVE = 0x20000000;

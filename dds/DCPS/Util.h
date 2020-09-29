@@ -8,6 +8,9 @@
 #ifndef OPENDDS_DCPS_UTIL_H
 #define OPENDDS_DCPS_UTIL_H
 
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/SequenceNumber.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -196,6 +199,8 @@ bool set_intersect(SetA& sA, const SortedB& sB, LessThan lessThan)
   }
   return !sA.empty();
 }
+
+OpenDDS_Dcps_Export CORBA::ULong bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low, const OpenDDS::DCPS::SequenceNumber& high);
 
 } // namespace DCPS
 } // namespace OpenDDS
