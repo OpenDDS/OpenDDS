@@ -10,6 +10,7 @@
 #endif
 
 #include <set>
+#include <performance-tests\bench_2\common\util.h>
 
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
@@ -86,6 +87,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool verbose = false;
   bool writer = false;
   bool reader = false;
+  std::string type;
+
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
@@ -94,6 +97,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       writer = true;
     } else if (arg == ACE_TEXT("--reader")) {
       reader = true;
+    } else if (arg == ACE_TEXT("--type")) {
+      if (i + 1 < argc) {
+        type = argv[++i];
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
+        return 1;
+      }
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -109,42 +119,35 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     pub->get_default_datawriter_qos(dw_qos);
     dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
-                                               DEFAULT_STATUS_MASK);
-    PropertyDataWriter_var pdw = PropertyDataWriter::_narrow(dw);
+    if (type == "Property") {
+      DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
+        DEFAULT_STATUS_MASK);
+      PropertyDataWriter_var pdw = PropertyDataWriter::_narrow(dw);
 
-    Property p;
-    p.extra.length(0);
-
-    for (int i = 1; i <= 1; ++i) {
-      p.key = i;
-      p.value = i;
+      Property p;
+      p.extra.length(0);
+      p.key = 1;
+      p.value = 1;
       pdw->write(p, HANDLE_NIL);
-      ACE_OS::sleep(ACE_Time_Value(0, 50 * 1000));
       if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "writer: Count: %d\n", i));
+        ACE_DEBUG((LM_DEBUG, "writer: Property\n"));
       }
-    }
+      ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
+    } else if (type == "Property_2") {
+      DataWriter_var dw2 = pub->create_datawriter(topic2, dw_qos, 0,
+        DEFAULT_STATUS_MASK);
+      Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw2);
 
-    ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
-    //2
-    DataWriter_var dw2 = pub->create_datawriter(topic2, dw_qos, 0,
-      DEFAULT_STATUS_MASK);
-    Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw2);
-
-    Property_2 p2;
-    p2.extra.length(0);
-
-    for (int i = 1; i <= 1; ++i) {
-      p2.key = i;
+      Property_2 p2;
+      p2.extra.length(0);
+      p2.key = 1;
       p2.value = "Test";
       pdw2->write(p2, HANDLE_NIL);
-      ACE_OS::sleep(ACE_Time_Value(0, 50 * 1000));
       if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "writer: Count: %d\n", i));
+        ACE_DEBUG((LM_DEBUG, "writer: Property_2\n"));
       }
+      ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
     }
-    ///
   } else if (reader) {
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
 
@@ -155,19 +158,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
     dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
-                                               DEFAULT_STATUS_MASK);
-    PropertyDataReader_var pdr = PropertyDataReader::_narrow(dr);
-    ::PropertySeq data;
-    failed = !read(dr, pdr, data, verbose);
-
-    //2
-    DataReader_var dr2 = sub->create_datareader(topic2, dr_qos, 0,
-      DEFAULT_STATUS_MASK);
-    Property_2DataReader_var pdr2 = Property_2DataReader::_narrow(dr2);
-    ::Property_2Seq data2;
-    failed = failed || !read(dr2, pdr2, data2, verbose);
-    ///
+    if (type == "Property") {
+      DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
+        DEFAULT_STATUS_MASK);
+      PropertyDataReader_var pdr = PropertyDataReader::_narrow(dr);
+      ::PropertySeq data;
+      failed = !read(dr, pdr, data, verbose);
+    } else if (type == "Property_2") {
+      DataReader_var dr2 = sub->create_datareader(topic2, dr_qos, 0,
+        DEFAULT_STATUS_MASK);
+      Property_2DataReader_var pdr2 = Property_2DataReader::_narrow(dr2);
+      ::Property_2Seq data2;
+      failed = failed || !read(dr2, pdr2, data2, verbose);
+    }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
     return 1;

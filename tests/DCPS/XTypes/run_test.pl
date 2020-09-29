@@ -19,14 +19,24 @@ GetOptions(
 my @common_args = ('-DCPSConfigFile', 'rtps_disc.ini');
 push(@common_args, "--verbose") if ($verbose);
 
-my @reader_args = ('--reader');
+my @reader_args = ('--reader', '--type Property');
 push(@reader_args, @common_args);
-$test->process('reader', 'XTypes', join(' ', @reader_args));
-$test->start_process('reader');
+$test->process('reader1', 'XTypes', join(' ', @reader_args));
+$test->start_process('reader1');
 
-my @writer_args = ('--writer');
+my @writer_args = ('--writer', '--type Property');
 push(@writer_args, @common_args);
-$test->process('writer', 'XTypes', join(' ', @writer_args));
-$test->start_process('writer');
+$test->process('writer1', 'XTypes', join(' ', @writer_args));
+$test->start_process('writer1');
+
+my @reader_args = ('--reader', '--type Property_2');
+push(@reader_args, @common_args);
+$test->process('reader2', 'XTypes', join(' ', @reader_args));
+$test->start_process('reader2');
+
+my @writer_args = ('--writer', '--type Property_2');
+push(@writer_args, @common_args);
+$test->process('writer2', 'XTypes', join(' ', @writer_args));
+$test->start_process('writer2');
 
 exit $test->finish(60);
