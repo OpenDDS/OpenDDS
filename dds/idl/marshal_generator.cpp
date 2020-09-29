@@ -2268,7 +2268,7 @@ namespace {
       generate_marshal_traits_struct_bounds_functions(node, keys, info, true); // Key Fields
   }
 
-  bool generate_marshal_traits_union(AST_Union* node, bool has_key)
+  bool generate_marshal_traits_union(AST_Union* node, bool has_key, ExtensibilityKind exten)
   {
     be_global->header_ <<
       "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
@@ -2300,14 +2300,19 @@ namespace {
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      size_t size = 0;
-      // Union can only have discriminator as key, and the discriminator is always bounded.
-      if (has_key) {
-        idl_max_serialized_size(encoding, size, node->disc_type());
-      }
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-        "      return SerializedSizeBound(" << size << ");\n";
+        "      return SerializedSizeBound(";
+      // TODO(iguessthislldo): This is the same workaround for
+      // idl_max_serialized_size as in is_bounded_type
+      if (exten == extensibilitykind_final) {
+        size_t size = 0;
+        if (has_key) {
+          idl_max_serialized_size(encoding, size, node->disc_type());
+        }
+        be_global->header_ << size;
+      }
+      be_global->header_ << ");\n";
     }
     be_global->header_ <<
       "    default:\n"
@@ -2350,7 +2355,7 @@ namespace {
       }
     } else if (node->node_type() == AST_Decl::NT_union) {
       if (!generate_marshal_traits_union(
-            dynamic_cast<AST_Union*>(node), keys.count())) {
+            dynamic_cast<AST_Union*>(node), keys.count(), exten)) {
         return false;
       }
     } else {
