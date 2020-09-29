@@ -25,9 +25,12 @@ $test->{dcps_transport_debug_level} = 1;
 $test->{add_transport_config} = 0;
 
 $test->process("publisher", "publisher", "-DCPSThreadStatusInterval 2 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
+$test->process("subscriber", "subscriber", "-DCPSThreadStatusInterval 4 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
 
+$test->start_process("subscriber");
 $test->start_process("publisher");
 
-$test->stop_process(15, "publisher");
+$test->stop_process(15, "subscriber");
+$test->stop_process(20, "publisher");
 
 exit $test->finish();

@@ -11,7 +11,7 @@
 #include <string>
 
 // Implementation skeleton constructor
-InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl()
+InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(OPENDDS_STRING id) : id_(id)
 {
 }
 
@@ -42,7 +42,7 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
     OpenDDS::DCPS::RepoId guid;
     std::memcpy(&guid, &thread_info.guid, sizeof(guid));
 
-    std::cout << "==  Thread Info ==" << std::endl;
+    std::cout << "== " << id_ << " Thread Info ==" << std::endl;
     std::cout
     << "  guid: " << guid << std::endl
     << "   tid: " << thread_info.thread_id << std::endl

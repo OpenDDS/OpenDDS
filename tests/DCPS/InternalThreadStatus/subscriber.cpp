@@ -38,7 +38,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int status = EXIT_SUCCESS;
 
   try {
-    std::cout << "Starting publisher" << std::endl;
+    std::cout << "Starting subscriber" << std::endl;
 
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -86,41 +86,41 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        EXIT_FAILURE);
     }
 
-    // Create Publisher
-    DDS::PublisherQos publisher_qos;
-    participant->get_default_publisher_qos(publisher_qos);
-    publisher_qos.partition.name.length(1);
-    publisher_qos.partition.name[0] = "OCI";
+    // Create Subscriber
+    DDS::SubscriberQos subscriber_qos;
+    participant->get_default_subscriber_qos(subscriber_qos);
+    subscriber_qos.partition.name.length(1);
+    subscriber_qos.partition.name[0] = "OCI";
 
-    DDS::Publisher_var pub =
-      participant->create_publisher(publisher_qos,
-                                    DDS::PublisherListener::_nil(),
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Subscriber_var pub =
+      participant->create_subscriber(subscriber_qos,
+                                     DDS::SubscriberListener::_nil(),
+                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(pub.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_publisher failed!\n")),
+                        ACE_TEXT(" ERROR: create_subscriber failed!\n")),
                        EXIT_FAILURE);
     }
 
-    DDS::DataWriterQos qos;
-    pub->get_default_datawriter_qos(qos);
-    std::cout << "Reliable DataWriter" << std::endl;
+    DDS::DataReaderQos qos;
+    pub->get_default_datareader_qos(qos);
+    std::cout << "Reliable DataReader" << std::endl;
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    // Create DataWriter
-    DDS::DataWriter_var dw =
-      pub->create_datawriter(topic.in(),
+    // Create DataReader
+    DDS::DataReader_var dw =
+      pub->create_datareader(topic.in(),
                              qos,
-                             DDS::DataWriterListener::_nil(),
+                             DDS::DataReaderListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(dw.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_datawriter failed!\n")),
+                        ACE_TEXT(" ERROR: create_datareader failed!\n")),
                        EXIT_FAILURE);
     }
 
@@ -134,7 +134,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher");
+    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Subscriber");
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =

@@ -24,7 +24,7 @@ class InternalThreadStatusListenerImpl
 {
 public:
   //Constructor
-  explicit InternalThreadStatusListenerImpl();
+  explicit InternalThreadStatusListenerImpl(OPENDDS_STRING id);
 
   //Destructor
   virtual ~InternalThreadStatusListenerImpl();
@@ -55,7 +55,9 @@ public:
   virtual void on_sample_lost(
                               DDS::DataReader_ptr reader,
                               const DDS::SampleLostStatus& status);
+private:
 
+  OPENDDS_STRING id_;
 };
 
 #endif /* INTERNAL_THREAD_STATUS_LISTENER_IMPL  */
