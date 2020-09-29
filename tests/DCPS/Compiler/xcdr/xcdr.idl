@@ -19,66 +19,18 @@
   case E_LONG_LONG_FIELD: \
     long long long_long_field;
 
-// Generic XCDR1 Tests =======================================================
-
 @final
-@OpenDDS::data_representation(XCDR1)
-struct FinalXcdr1Struct {
+struct FinalStruct {
   COMMON_FIELDS
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR1)
-struct AppendableXcdr1Struct {
+struct AppendableStruct {
   COMMON_FIELDS
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR1)
-struct MutableXcdr1Struct {
-  COMMON_FIELDS
-};
-
-// Generic XCDR2 Tests =======================================================
-
-@final
-@OpenDDS::data_representation(XCDR2)
-struct FinalXcdr2Struct {
-  COMMON_FIELDS
-};
-
-@appendable
-@OpenDDS::data_representation(XCDR2)
-struct AppendableXcdr2Struct {
-  COMMON_FIELDS
-};
-
-@mutable
-@OpenDDS::data_representation(XCDR2)
-struct MutableXcdr2Struct {
-  COMMON_FIELDS
-};
-
-// Generic XCDR1/2 Tests =====================================================
-
-@final
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
-struct FinalXcdr12Struct {
-  COMMON_FIELDS
-};
-
-@appendable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
-struct AppendableXcdr12Struct {
-  COMMON_FIELDS
-};
-
-@mutable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
-struct MutableXcdr12Struct {
+struct MutableStruct {
   COMMON_FIELDS
 };
 
@@ -91,62 +43,32 @@ enum UnionDisc {
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
-union MutableXcdr12Union switch (UnionDisc) {
+union MutableUnion switch (UnionDisc) {
   COMMON_BRANCHES
 };
 
 @final
-struct NoDataRepFinalStruct {
-  COMMON_FIELDS
-};
-
-@appendable
-struct NoDataRepAppendableStruct {
-  COMMON_FIELDS
-};
-
-@mutable
-struct NoDataRepMutableStruct {
-  COMMON_FIELDS
-};
-
-@final
-union NoDataRepFinalUnion switch(UnionDisc) {
-  COMMON_BRANCHES
-};
-
-@appendable
-union NoDataRepAppendableUnion switch(UnionDisc) {
-  COMMON_BRANCHES
-};
-
-@mutable
-union NoDataRepMutableUnion switch(UnionDisc) {
+union FinalUnion switch(UnionDisc) {
   COMMON_BRANCHES
 };
 
 // Appendable Tests ==========================================================
 
-typedef AppendableXcdr2Struct NestedStruct;
+typedef AppendableStruct NestedStruct;
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
-struct AppendableStruct {
+struct AppendableWithNestedStruct {
   NestedStruct nested;
   COMMON_FIELDS
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct AdditionalFieldNestedStruct {
   COMMON_FIELDS
   long additional_field;
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct AdditionalFieldAppendableStruct {
   AdditionalFieldNestedStruct nested;
   COMMON_FIELDS
@@ -154,20 +76,17 @@ struct AdditionalFieldAppendableStruct {
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
-struct AppendableStruct2 {
+struct AppendableWithNestedStruct2 {
   string string_field;
   NestedStruct nested;
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
 union AppendableUnion switch (UnionDisc) {
   COMMON_BRANCHES
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
 union ModifiedAppendableUnion switch (UnionDisc) {
   COMMON_BRANCHES
 case E_ADDITIONAL_FIELD:
@@ -178,9 +97,7 @@ case E_ADDITIONAL_FIELD:
 // Mutable Tests =============================================================
 
 @mutable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
-struct MutableStruct {
+struct MutableStructWithExplicitIDs {
   @id(4) short short_field;
   @id(6) long long_field;
   @id(8) octet octet_field;
@@ -188,8 +105,6 @@ struct MutableStruct {
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
 struct ReorderedMutableStruct {
   @id(6) long long_field;
   @id(10) long long long_long_field;
@@ -198,8 +113,6 @@ struct ReorderedMutableStruct {
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
 struct AdditionalFieldMutableStruct {
   @id(6) long long_field;
   @id(1) long additional_field;
@@ -245,7 +158,6 @@ struct Long3 {
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct LengthCodeStruct { //LC Size
   @key
   @id(0) octet o;         // 0    1
@@ -272,7 +184,6 @@ typedef sequence<long long, 3> LongLong3S;
 typedef sequence<short, 3> Short3S;
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct LC567Struct {            //LC Size
   @id(0) sequence<octet, 3> o3; // 5    3
   @id(1) sequence<long, 3> l3;  // 6  4x3
@@ -286,9 +197,7 @@ struct LC567Struct {            //LC Size
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR1)
-@OpenDDS::data_representation(XCDR2)
-union MutableUnion switch (UnionDisc) {
+union MutableUnionWithExplicitIDs switch (UnionDisc) {
 case E_SHORT_FIELD:
   @id(4) short short_field;
 case E_LONG_FIELD:
@@ -300,7 +209,6 @@ case E_LONG_LONG_FIELD:
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 union ModifiedMutableUnion switch (UnionDisc) {
 case E_LONG_FIELD:
   @id(6) long long_field;
@@ -313,7 +221,6 @@ case E_ADDITIONAL_FIELD:
 typedef sequence<long> LongSeq;
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 union NestedUnion switch(short) {
 case 1:
   @id(1) short short_field;
@@ -328,7 +235,6 @@ default:
 typedef sequence<string> StringSeq;
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct MixedMutableStruct {
   @id(1) MutableStruct struct_nested;
   @id(2) sequence<short> sequence_field;
@@ -337,7 +243,6 @@ struct MixedMutableStruct {
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct ModifiedMixedMutableStruct {
   @id(3) NestedUnion union_nested;
   @id(4) StringSeq sequence_field2;
@@ -347,28 +252,25 @@ struct ModifiedMixedMutableStruct {
 // Mixed Extensibility Tests =================================================
 
 @final
-@OpenDDS::data_representation(XCDR2)
 struct NestingFinalStruct {
   string string_field;
-  AppendableXcdr2Struct appendable_nested;
+  AppendableStruct appendable_nested;
   sequence<short> sequence_field;
-  MutableXcdr2Struct mutable_nested;
+  MutableStruct mutable_nested;
 };
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct NestingAppendableStruct {
   string string_field;
-  MutableXcdr2Struct mutable_nested;
+  MutableStruct mutable_nested;
   sequence<long> sequence_field;
-  FinalXcdr2Struct final_nested;
+  FinalStruct final_nested;
 };
 
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct NestingMutableStruct {
   string string_field;
-  AppendableXcdr2Struct appendable_nested;
+  AppendableStruct appendable_nested;
   sequence<octet> sequence_field;
-  FinalXcdr2Struct final_nested;
+  FinalStruct final_nested;
 };
