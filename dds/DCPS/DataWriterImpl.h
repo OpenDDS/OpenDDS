@@ -252,7 +252,8 @@ public:
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
                           DDS::InstanceHandle_t handle,
                           const DDS::Time_t& source_timestamp,
-                          GUIDSeq* filter_out);
+                          GUIDSeq* filter_out,
+                          const void* real_data);
 
   /**
    * Delegate to the WriteDataContainer to dispose all data
@@ -470,6 +471,8 @@ protected:
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
+
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;

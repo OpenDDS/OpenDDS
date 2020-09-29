@@ -6,9 +6,11 @@
  */
 
 #include "TestObserver.h"
-#include <dds/DCPS/DataWriterImpl.h>
+
 #include <dds/DCPS/DataReaderImpl.h>
+#include <dds/DCPS/DataWriterImpl.h>
 #include <dds/DCPS/GuidUtils.h>
+#include "../common/JsonValueWriter.h"
 
 #include <ace/OS_NS_time.h>
 
@@ -66,17 +68,23 @@ std::string TestObserver::to_str(DDS::DataReader_ptr r)
   return o.str();
 }
 
-std::string TestObserver::to_str(const Sample& s)
+std::string TestObserver::to_str(const Sample& s, const OpenDDS::DCPS::ValueWriterDispatcher& vwd)
 {
   const std::string t("    ");
   std::time_t seconds = OpenDDS::DCPS::time_to_time_value(s.timestamp_).sec();
   ACE_TCHAR buffer[32];
-  std::ostringstream o; o << '\n'
+  std::ostringstream o;
+  o << '\n'
     << t << "Timestamp: " << ACE_OS::ctime_r(&seconds, buffer, 32)
     << t << "Instance : " << s.instance_ << '\n'
     << t << "State    : " << s.instance_state_ << '\n'
     << t << "SequenceN: " << s.seq_n_.getValue() << '\n'
-    << t << "Data     : " << s.data_ << '\n';
+    << t << "Data     : " << s.data_ << ' ';
+
+  OpenDDS::Test::JsonValueWriter jvw(o);
+  vwd.write(jvw, s.data_);
+  o << '\n';
+
   return o.str();
 }
 
@@ -156,28 +164,28 @@ void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::
 // ========== ========== ========== ========== ========== ========== ==========
 // 3. Sample: sent, received, read, taken
 
-void TestObserver::on_sample_sent(DDS::DataWriter_ptr w, const Sample& s)
+void TestObserver::on_sample_sent(DDS::DataWriter_ptr w, const Sample& s, const OpenDDS::DCPS::ValueWriterDispatcher& vwd)
 {
   ++sent_;
-  std::cout << "on_sample_sent " << sent_ << to_str(w) << to_str(s);
+  std::cout << "on_sample_sent " << sent_ << to_str(w) << to_str(s, vwd);
 }
 
-void TestObserver::on_sample_received(DDS::DataReader_ptr r, const Sample& s)
+void TestObserver::on_sample_received(DDS::DataReader_ptr r, const Sample& s, const OpenDDS::DCPS::ValueWriterDispatcher& vwd)
 {
   ++received_;
-  std::cout << "on_sample_received " << received_ << to_str(r) << to_str(s);
+  std::cout << "on_sample_received " << received_ << to_str(r) << to_str(s, vwd);
 }
 
-void TestObserver::on_sample_read(DDS::DataReader_ptr r, const Sample& s)
+void TestObserver::on_sample_read(DDS::DataReader_ptr r, const Sample& s, const OpenDDS::DCPS::ValueWriterDispatcher& vwd)
 {
   ++read_;
-  std::cout << "on_sample_read " << read_ << to_str(r) << to_str(s);
+  std::cout << "on_sample_read " << read_ << to_str(r) << to_str(s, vwd);
 }
 
-void TestObserver::on_sample_taken(DDS::DataReader_ptr r, const Sample& s)
+void TestObserver::on_sample_taken(DDS::DataReader_ptr r, const Sample& s, const OpenDDS::DCPS::ValueWriterDispatcher& vwd)
 {
   ++taken_;
-  std::cout << "on_sample_taken " << taken_ << to_str(r) << to_str(s);
+  std::cout << "on_sample_taken " << taken_ << to_str(r) << to_str(s, vwd);
 }
 
 // ========== ========== ========== ========== ========== ========== ==========

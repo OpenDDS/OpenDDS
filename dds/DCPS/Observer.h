@@ -11,6 +11,7 @@
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
+#include "ValueWriter.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -56,12 +57,11 @@ public:
     DDS::Time_t timestamp_;
     SequenceNumber seq_n_;
     const void* data_;
-    static DDS::InstanceStateKind to_instance_state(char message_id);
-    Sample(DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t);
-    explicit Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i = 0);
-    explicit Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i = 0, DDS::InstanceStateKind instance_state = 0);
-    Sample(DDS::InstanceHandle_t i, DDS::InstanceStateKind instance_state,
-      const DDS::Time_t& t, const SequenceNumber& sn, const void* data);
+    Sample(DDS::InstanceHandle_t i,
+           DDS::InstanceStateKind instance_state,
+           const DDS::Time_t& t,
+           const SequenceNumber& sn,
+           const void* data);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed
@@ -79,10 +79,10 @@ public:
   virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
 
   // Group 3: Sample sent, received, read, taken
-  virtual void on_sample_sent(DDS::DataWriter_ptr, const Sample&) {}
-  virtual void on_sample_received(DDS::DataReader_ptr, const Sample&) {}
-  virtual void on_sample_read(DDS::DataReader_ptr, const Sample&) {}
-  virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_sent(DDS::DataWriter_ptr, const Sample&, const ValueWriterDispatcher&) {}
+  virtual void on_sample_received(DDS::DataReader_ptr, const Sample&, const ValueWriterDispatcher&) {}
+  virtual void on_sample_read(DDS::DataReader_ptr, const Sample&, const ValueWriterDispatcher&) {}
+  virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&, const ValueWriterDispatcher&) {}
 
   virtual ~Observer();
 protected:
