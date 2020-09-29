@@ -2183,6 +2183,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
+#ifndef ACE_HAS_MINIMUM_BIT
   // internal thread bit reporting
   TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
 
@@ -2199,6 +2200,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
     thread_status_sender_->enable(false, interval);
   }
+#endif /* ACE_HAS_MINIMUM_BIT */
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer_->config_->use_ncm() && ncm) {
@@ -3497,6 +3499,7 @@ void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
+#ifndef ACE_HAS_MINIMUM_BIT
   if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "%T (%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
@@ -3508,7 +3511,6 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
     if (thread_status_ && bit) {
       thread_status_->lock.acquire_read();
-      DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
 
       for (OPENDDS_MAP(ACE_thread_t, ACE_Time_Value)::const_iterator i = thread_status_->map.begin(); i != thread_status_->map.end(); ++i) {
         const ACE_Time_Value t = i->second;
@@ -3518,7 +3520,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         data.timestamp.sec = t.sec();
         data.timestamp.nanosec = t.usec() * 1000;
 
-        handle = bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+        bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
 
       thread_status_->lock.release();
@@ -3528,6 +3530,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
                  "%T (%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
     }
   }
+#endif /* ACE_HAS_MINIMUM_BIT */
 }
 
 

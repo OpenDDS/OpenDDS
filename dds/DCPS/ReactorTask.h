@@ -33,7 +33,7 @@ namespace DCPS {
 // thread status reporting forward
 struct ThreadStatus {
   ACE_Recursive_Thread_Mutex lock;
-  OPENDDS_MAP(ACE_thread_t, ACE_Time_Value) map;
+  OPENDDS_MAP(unsigned long, ACE_Time_Value) map;
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
@@ -104,8 +104,8 @@ private:
   TimerQueueType* timer_queue_;
 
   // thread status reporting
-  TimeDuration timeout_;
   ThreadStatus* thread_status_;
+  TimeDuration timeout_;
 
   ReactorInterceptor_rch interceptor_;
 };
