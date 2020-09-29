@@ -1,0 +1,14 @@
+#include <tao/OctetSeq.pidl>
+
+@topic
+struct Property_1 {
+  @key long key;
+  long value;
+};
+
+@topic
+struct Property_2 {
+  @key long key;
+  string value;
+};
+
