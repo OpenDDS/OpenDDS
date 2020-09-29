@@ -1,4 +1,4 @@
-#include "dds/DCPS/RTPS/Util.h"
+#include "Util.h"
 
 #include "dds/DCPS/Definitions.h"
 
@@ -19,9 +19,10 @@ bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
 
   const size_t last_index = num_ulongs - 1;
   if (last_index > 0) {
-    for (CORBA::ULong i = 0; i < last_index; ++i)
-    if (snSet.bitmap[i]) {
-      return true;
+    for (CORBA::ULong i = 0; i < last_index; ++i) {
+      if (snSet.bitmap[i]) {
+        return true;
+      }
     }
   }
 

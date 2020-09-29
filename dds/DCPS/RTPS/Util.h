@@ -12,7 +12,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/RTPS/rtps_export.h"
+#include "rtps_export.h"
 #include "RtpsCoreC.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -20,7 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-OpenDDS_Rtps_Export bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet);
+OpenDDS_Rtps_Export bool bitmapNonEmpty(const SequenceNumberSet& snSet);
 
 } // namespace RTPS
 } // namespace OpenDDS
