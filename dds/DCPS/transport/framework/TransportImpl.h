@@ -158,6 +158,8 @@ public:
   };
 
   virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual void rtps_relay_only_now(bool /*flag*/) {}
+  virtual void use_rtps_relay_now(bool /*flag*/) {}
   virtual void use_ice_now(bool /*flag*/) {}
 
 protected:

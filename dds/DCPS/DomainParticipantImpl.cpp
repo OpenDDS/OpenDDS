@@ -1630,7 +1630,8 @@ DomainParticipantImpl::enable()
   if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
     if (!security_config_) {
-      security_config_ = TheSecurityRegistry->fix_empty_default();
+      security_config_ = TheSecurityRegistry->builtin_config();
+      TheSecurityRegistry->default_config(security_config_);
     }
   }
 #endif

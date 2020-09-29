@@ -177,6 +177,16 @@ bool operator==(const DataView& a, const DataView& b)
     << result.str();
 }
 
+::testing::AssertionResult assert_SerializedSizeBound(
+  const char* a_expr, const char* b_expr,
+  const SerializedSizeBound& a, const SerializedSizeBound& b)
+{
+  return a == b ? ::testing::AssertionSuccess() :
+    (::testing::AssertionFailure()
+      << a_expr << " (" << a.to_string() << ") isn't the same as "
+      << b_expr << " (" << b.to_string() << ").\n");
+}
+
 template<typename T>
 void deserialize_compare(
   const Encoding& encoding, const DataView& data, const T& expected)
@@ -241,12 +251,22 @@ void serializer_test_union(const Encoding& encoding, const DataView& expected_cd
 }
 
 template<typename Type>
-void baseline_checks(const Encoding& encoding, const DataView& expected_cdr)
+void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
+  SerializedSizeBound bound = SerializedSizeBound())
 {
+  EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
+    MarshalTraits<Type>::serialized_size_bound(encoding), bound);
+  /*
+   * TODO(iguessthislldo): Assuming key only size is bounded to 0 if the type
+   * as normal is bounded for now. Maybe add keys to types? If so also check
+   * key only serialization.
+   */
+  EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
+    MarshalTraits<Type>::key_only_serialized_size_bound(encoding), 0);
+
   Type value;
+  set_values(value);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-  // TODO(iguessthislldo): Does not work for XCDR1 and XCDR2 Mutable and XCDR2 Appendable
-  /* EXPECT_EQ(max_serialized_size(encoding, value), expected_cdr.size); */
 
   serializer_test<Type>(encoding, expected_cdr);
 }
@@ -339,10 +359,12 @@ const unsigned char final_xcdr1_struct_expected[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // +7 pad = 16
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // +8 = 24
 };
+const size_t final_xcdr1_struct_max_size = 24;
 
 TEST(BasicTests, FinalXcdr1Struct)
 {
-  baseline_checks<FinalXcdr1Struct>(xcdr1, final_xcdr1_struct_expected);
+  baseline_checks<FinalXcdr1Struct>(xcdr1,
+    final_xcdr1_struct_expected, final_xcdr1_struct_max_size);
 }
 
 const DataView appendable_xcdr1_struct_expected(final_xcdr1_struct_expected);
@@ -395,10 +417,12 @@ const unsigned char FinalXcdr2StructExpectedBE::expected[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // +8 = 20
 };
 const unsigned FinalXcdr2StructExpectedBE::layout[] = {2,2,4,1,3,8};
+const size_t final_xcdr2_struct_max_size = 20;
 
 TEST(BasicTests, FinalXcdr2Struct)
 {
-  baseline_checks<FinalXcdr2Struct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
+  baseline_checks<FinalXcdr2Struct>(xcdr2,
+    FinalXcdr2StructExpectedBE::expected, final_xcdr2_struct_max_size);
 }
 
 TEST(BasicTests, FinalXcdr2StructLE)
@@ -463,8 +487,10 @@ TEST(BasicTests, MutableXcdr2StructLE)
 
 TEST(BasicTests, FinalXcdr12Struct)
 {
-  baseline_checks<FinalXcdr12Struct>(xcdr1, final_xcdr1_struct_expected);
-  baseline_checks<FinalXcdr12Struct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
+  baseline_checks<FinalXcdr12Struct>(xcdr1,
+    final_xcdr1_struct_expected, final_xcdr2_struct_max_size);
+  baseline_checks<FinalXcdr12Struct>(xcdr2,
+    FinalXcdr2StructExpectedBE::expected, final_xcdr2_struct_max_size);
 }
 
 TEST(BasicTests, FinalXcdr12StructLE)
@@ -594,7 +620,8 @@ TEST(BasicTests, MutableXcdr12UnionLE)
 
 TEST(BasicTests, NoDataRepFinalStruct)
 {
-  baseline_checks<NoDataRepFinalStruct>(xcdr2, FinalXcdr2StructExpectedBE::expected);
+  baseline_checks<NoDataRepFinalStruct>(xcdr2,
+    FinalXcdr2StructExpectedBE::expected, final_xcdr2_struct_max_size);
 }
 
 TEST(BasicTests, NoDataRepAppendableStruct)

@@ -1873,7 +1873,7 @@ template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
                      const XTypes::Sequence<T>& seq)
 {
-  serialized_size_ulong(encoding, size);
+  primitive_serialized_size_ulong(encoding, size);
   for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }

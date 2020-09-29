@@ -47,12 +47,19 @@ bool operator>>(Serializer& strm, KeyOnly<TestMsg> stru);
 
 template <>
 struct MarshalTraits<TestMsg> {
-  static bool gen_is_bounded_size() { return false; }
-  static bool gen_is_bounded_key_size() { return true; }
+  static SerializedSizeBound serialized_size_bound(const Encoding&)
+  {
+    return SerializedSizeBound();
+  }
+
+  static SerializedSizeBound key_only_serialized_size_bound(const Encoding&)
+  {
+    return uint32_cdr_size;
+  }
 };
 
-}
-}
+} // namespace DCPS
+} // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_TRANSPORT_TEST_MSG_H */

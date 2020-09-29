@@ -275,7 +275,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       if (be_global->has_key(union_node)) {
         current_value_ = root_;
         return *this;
-      } else {
+      } else if (level_ > 0) {
         throw Error(union_node, "union type is marked as key, "
           "but its discriminator isn't");
       }

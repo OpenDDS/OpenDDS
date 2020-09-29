@@ -147,3 +147,9 @@
 /OpenDDS_DCPS_transport_TransportInst.h
 /OpenDDS_DCPS_transport_UdpInst.h
 /OpenDDS_DCPS_TypeSupportHelper.h
+/OpenDDS_DCPS_ConnectionRecordDataReaderHelper.h
+/OpenDDS_DCPS_ConnectionRecordDataWriterHelper.h
+/OpenDDS_DCPS_ConnectionRecordTypeSupportHelper.h
+/OpenDDS_DCPS__ConnectionRecordDataReaderTAOPeer.h
+/OpenDDS_DCPS__ConnectionRecordDataWriterTAOPeer.h
+/OpenDDS_DCPS__ConnectionRecordTypeSupportTAOPeer.h

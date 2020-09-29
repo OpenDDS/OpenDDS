@@ -1,15 +1,16 @@
 #include "../idl_test1_lib/FooDefTypeSupportImpl.h"
 
-#include "dds/Version.h"
+#include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/Version.h>
 
-#include "ace/ACE.h"
-#include "ace/Log_Msg.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
+#include <ace/ACE.h>
+#include <ace/Log_Msg.h>
 
 #include <map>
 #include <cstring>
 
 using OpenDDS::DCPS::Encoding;
+using OpenDDS::DCPS::SerializedSizeBound;
 
 const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
 const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
@@ -300,34 +301,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "NOTE: _dcps_has_key(foo) returned false\n"));
   }
 
-  const bool expected_bounded = false;
-  const size_t expected_find_size = 97;
+  const SerializedSizeBound expected_bound;
+  const size_t expected_size = 90;
 
-  size_t ms = OpenDDS::DCPS::max_serialized_size(encoding_plain_native, my_foo);
-  const bool bounded = OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
-  size_t cs = serialized_size(encoding_plain_native, my_foo);
+  const SerializedSizeBound actual_bound =
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::serialized_size_bound(encoding_unaligned_native);
+  const size_t actual_size = serialized_size(encoding_unaligned_native, my_foo);
 
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_max_marshaled_size(my_foo) => %B\n", ms));
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_is_bounded_size(my_foo) => %d\n", int(bounded)));
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_find_size(my_foo) => %B\n", cs));
+  ACE_DEBUG((LM_DEBUG, "serialized_size_bound => %C\n", actual_bound.to_string().c_str()));
+  ACE_DEBUG((LM_DEBUG, "serialized_size => %B\n", actual_size));
 
-  if (bounded != expected_bounded) {
-    ACE_ERROR((LM_ERROR, "OpenDDS::DCPS::gen_is_bounded_size(Foo) failed - expected %d got %d\n",
-      int(expected_bounded), int(bounded)));
+  if (actual_bound != expected_bound) {
+    ACE_ERROR((LM_ERROR,
+      "serialized_size_bound failed: expected %C got %C\n",
+      expected_bound.to_string().c_str(), actual_bound.to_string().c_str()));
     failed = true;
   }
 
-  if (!bounded && cs != expected_find_size) {
+  if (actual_size != expected_size) {
     ACE_ERROR((LM_ERROR,
-      "OpenDDS::DCPS::gen_find_size(Foo) returned %B when was expecting %B\n",
-      cs, expected_find_size));
+      "serialized_size(my_foo) failed: returned %B when was expecting %B\n",
+      actual_size, expected_size));
     failed = true;
   }
 
   // test serializing
 
-  const size_t buff_size = bounded ? ms : cs;
-  ACE_Message_Block mb(buff_size);
+  ACE_Message_Block mb(actual_size);
   OpenDDS::DCPS::Serializer ss(&mb, encoding_unaligned_native);
   OpenDDS::DCPS::Serializer ss2(&mb, encoding_unaligned_native);
 

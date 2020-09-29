@@ -376,7 +376,6 @@ Sedp::init(const RepoId& guid,
 #endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());
-  rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();
   rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
   rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
 
@@ -3168,6 +3167,12 @@ Sedp::Endpoint::~Endpoint()
   transport_stop();
 }
 
+DDS::Subscriber_var
+Sedp::Endpoint::get_builtin_subscriber() const
+{
+  return sedp_.spdp_.bit_subscriber();
+}
+
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
@@ -3264,7 +3269,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, plist);
 
   // Build and send RTPS message
@@ -3293,7 +3298,7 @@ Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& 
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, pmd);
 
   // Build and send RTPS message
@@ -3322,7 +3327,7 @@ Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantSt
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
@@ -3352,7 +3357,7 @@ Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::Partici
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, msg);
 
   ACE_Message_Block payload(
@@ -3421,7 +3426,7 @@ Sedp::DiscoveryWriter::write_unregister_dispose(const RepoId& rid, CORBA::UShort
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, plist);
 
   DCPS::Message_Block_Ptr payload(
@@ -3587,7 +3592,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, type_lookup_request);
 
   // Build and send type lookup message
@@ -3618,7 +3623,7 @@ Sedp::TypeLookupReplyWriter::send_type_lookup_reply(const DCPS::ReceivedDataSamp
 
   // Determine message length
   size_t size = 0;
-  DCPS::serialized_size_ulong(sedp_encoding, size);
+  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
   DCPS::serialized_size(sedp_encoding, size, type_lookup_reply);
 
   // Build and send type lookup message
@@ -4607,6 +4612,14 @@ Sedp::write_subscription_data_unsecure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
+
+    DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
+    Parameter param;
+    param.type_consistency(tceqp);
+    const CORBA::ULong length = plist.length();
+    plist.length(length + 1);
+    plist[length] = param;
+
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
@@ -4770,7 +4783,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
     } else if (locs.length()) {
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
-      DCPS::max_serialized_size_boolean(encoding, size);
+      DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
@@ -4782,7 +4795,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       rTls->length(1);
       (*rTls)[0] = tl;
     } else {
@@ -4812,7 +4825,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
     } else if (locs.length()) {
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
-      DCPS::max_serialized_size_boolean(encoding, size);
+      DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
@@ -4821,7 +4834,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       wTls->length(1);
       (*wTls)[0] = tl;
     } else {
@@ -5541,19 +5554,15 @@ Sedp::AssociationComplete::execute() {
 }
 
 void
-Sedp::rtps_relay_only(bool f)
+Sedp::rtps_relay_only_now(bool f)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->rtps_relay_only_ = f;
+  transport_inst_->rtps_relay_only_now(f);
 }
 
 void
-Sedp::use_rtps_relay(bool f)
+Sedp::use_rtps_relay_now(bool f)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->use_rtps_relay_ = f;
+  transport_inst_->use_rtps_relay_now(f);
 }
 
 void
