@@ -1909,10 +1909,12 @@ inline void serialized_size(const Encoding&, size_t&, const XTypes::MinimalTypeD
 inline bool operator<<(Serializer&, const XTypes::MinimalTypeDetail&) { return true; }
 inline bool operator>>(Serializer&, XTypes::MinimalTypeDetail&) { return true; }
 
-inline void serialized_size(const Encoding&, size_t&, const XTypes::ExtendedAnnotationParameterValue&)
-{}
-inline bool operator<<(Serializer&, const XTypes::ExtendedAnnotationParameterValue&) { return true; }
-inline bool operator>>(Serializer&, XTypes::ExtendedAnnotationParameterValue&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedAnnotationParameterValue& stru);
+bool operator<<(Serializer& strm,
+  const XTypes::ExtendedAnnotationParameterValue& stru);
+bool operator>>(Serializer& strm,
+  XTypes::ExtendedAnnotationParameterValue& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::NameHash_forany& arr);
@@ -2049,20 +2051,20 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& ser, const XTypes::MinimalBitsetType& stru);
 bool operator>>(Serializer& ser, XTypes::MinimalBitsetType& stru);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::CompleteExtendedType&) {}
-inline bool operator<<(Serializer&, const XTypes::CompleteExtendedType&) { return true; }
-inline bool operator>>(Serializer&, XTypes::CompleteExtendedType&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteExtendedType& stru);
+bool operator<<(Serializer& strm, const XTypes::CompleteExtendedType& stru);
+bool operator>>(Serializer& strm, XTypes::CompleteExtendedType& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteTypeObject& type_object);
 bool operator<<(Serializer& ser, const XTypes::CompleteTypeObject& type_object);
 bool operator>>(Serializer& ser, XTypes::CompleteTypeObject& type_object);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::MinimalExtendedType&) {}
-inline bool operator<<(Serializer&, const XTypes::MinimalExtendedType&) { return true; }
-inline bool operator>>(Serializer&, XTypes::MinimalExtendedType&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalExtendedType& stru);
+bool operator<<(Serializer& strm, const XTypes::MinimalExtendedType& stru);
+bool operator>>(Serializer& strm, XTypes::MinimalExtendedType& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalTypeObject& type_object);
@@ -2367,11 +2369,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::MinimalMemberDetail& stru);
 bool operator>>(Serializer& strm, XTypes::MinimalMemberDetail& stru);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::ExtendedTypeDefn&) {}
-inline bool operator<<(Serializer&, const XTypes::ExtendedTypeDefn&)
-{ return true; }
-inline bool operator>>(Serializer&, XTypes::ExtendedTypeDefn&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedTypeDefn& stru);
+bool operator<<(Serializer& strm, const XTypes::ExtendedTypeDefn& stru);
+bool operator>>(Serializer& strm, XTypes::ExtendedTypeDefn& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainArrayLElemDefn& stru);

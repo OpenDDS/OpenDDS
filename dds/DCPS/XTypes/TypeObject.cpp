@@ -725,6 +725,19 @@ void compute_dependencies(const TypeMap& type_map,
   }
 }
 
+bool write_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
+{
+  return strm.write_delimiter(0);
+}
+
+bool read_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
+{
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+  return strm.skip(total_size);
+}
 
 } // namespace XTypes
 
@@ -957,6 +970,23 @@ bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq)
     return true;
   }
   return strm.read_long_array(seq.get_buffer(), length);
+}
+
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedAnnotationParameterValue&)
+{
+  serialized_size_delimiter(encoding, size);
+}
+
+bool operator<<(Serializer& strm, const XTypes::ExtendedAnnotationParameterValue&)
+{
+  return XTypes::write_empty_xcdr2_nonfinal(strm);
+}
+
+bool operator>>(Serializer& strm, XTypes::ExtendedAnnotationParameterValue&)
+{
+  return XTypes::read_empty_xcdr2_nonfinal(strm);
 }
 
 
@@ -1398,6 +1428,24 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitsetType& stru)
     && (strm << stru.field_seq);
 }
 
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteExtendedType&)
+{
+  serialized_size_delimiter(encoding, size);
+}
+
+bool operator<<(Serializer& strm, const XTypes::CompleteExtendedType&)
+{
+  return XTypes::write_empty_xcdr2_nonfinal(strm);
+}
+
+bool operator>>(Serializer& strm, XTypes::CompleteExtendedType&)
+{
+  return XTypes::read_empty_xcdr2_nonfinal(strm);
+}
+
+
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSize& stru)
 {
@@ -1483,20 +1531,38 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithDependencies& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedAnnotation& stru)
 {
+  serialized_size_delimiter(encoding, size);
   serialized_size(encoding, size, stru.annotation_typeid);
   serialized_size(encoding, size, stru.param_seq);
 }
 
 bool operator<<(Serializer& strm, const XTypes::AppliedAnnotation& stru)
 {
+  size_t total_size = 0;
+  serialized_size(strm.encoding(), total_size, stru);
+  if (!strm.write_delimiter(total_size)) {
+    return false;
+  }
+
   return (strm << stru.annotation_typeid)
     && (strm << stru.param_seq);
 }
 
 bool operator>>(Serializer& strm, XTypes::AppliedAnnotation& stru)
 {
-  return (strm >> stru.annotation_typeid)
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  const size_t start_pos = strm.pos();
+  const bool ret = (strm >> stru.annotation_typeid)
     && (strm >> stru.param_seq);
+
+  if (ret && strm.pos() - start_pos < total_size) {
+    strm.skip(total_size - strm.pos() + start_pos);
+  }
+  return ret;
 }
 
 
@@ -1762,20 +1828,40 @@ bool operator>>(Serializer& strm, XTypes::CompleteEnumeratedLiteral& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteStructMember& stru)
 {
+  serialized_size_delimiter(encoding, size);
   serialized_size(encoding, size, stru.common);
   serialized_size(encoding, size, stru.detail);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CompleteStructMember& stru)
 {
+  size_t total_size = 0;
+  serialized_size(strm.encoding(), total_size, stru);
+  if (!strm.write_delimiter(total_size)) {
+    return false;
+  }
+
   return (strm << stru.common)
     && (strm << stru.detail);
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteStructMember& stru)
 {
-  return (strm >> stru.common)
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  const size_t start_pos = strm.pos();
+
+  const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
+
+  if (ret && strm.pos() - start_pos < total_size) {
+    strm.skip(total_size - strm.pos() + start_pos);
+  }
+
+  return ret;
 }
 
 
@@ -2408,6 +2494,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedAnnotationParameter& stru)
 {
+  serialized_size_delimiter(encoding, size);
   XTypes::NameHash_forany stru_paramname_hash(const_cast<XTypes::NameHash_slice*>(stru.paramname_hash));
   serialized_size(encoding, size, stru_paramname_hash);
   serialized_size(encoding, size, stru.value);
@@ -2415,6 +2502,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::AppliedAnnotationParameter& stru)
 {
+  size_t total_size = 0;
+  serialized_size(strm.encoding(), total_size, stru);
+  if (!strm.write_delimiter(total_size)) {
+    return false;
+  }
+
   XTypes::NameHash_forany stru_paramname_hash(const_cast<XTypes::NameHash_slice*>(stru.paramname_hash));
   return (strm << stru_paramname_hash)
     && (strm << stru.value);
@@ -2422,15 +2515,29 @@ bool operator<<(Serializer& strm, const XTypes::AppliedAnnotationParameter& stru
 
 bool operator>>(Serializer& strm, XTypes::AppliedAnnotationParameter& stru)
 {
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  const size_t start_pos = strm.pos();
+
   XTypes::NameHash_forany stru_paramname_hash(const_cast<XTypes::NameHash_slice*>(stru.paramname_hash));
-  return (strm >> stru_paramname_hash)
+  const bool ret = (strm >> stru_paramname_hash)
     && (strm >> stru.value);
+
+  if (ret && strm.pos() - start_pos < total_size) {
+    strm.skip(total_size - strm.pos() + start_pos);
+  }
+  return ret;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedBuiltinMemberAnnotations& stru)
 {
+  serialized_size_delimiter(encoding, size);
+
   size += DCPS::boolean_cdr_size;
   if (stru.unit.present) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
@@ -2449,6 +2556,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::AppliedBuiltinMemberAnnotations& stru)
 {
+  size_t total_size = 0;
+  serialized_size(strm.encoding(), total_size, stru);
+  if (!strm.write_delimiter(total_size)) {
+    return false;
+  }
+
   return (strm << stru.unit)
     && (strm << stru.min)
     && (strm << stru.max)
@@ -2457,11 +2570,24 @@ bool operator<<(Serializer& strm, const XTypes::AppliedBuiltinMemberAnnotations&
 
 bool operator>>(Serializer& strm, XTypes::AppliedBuiltinMemberAnnotations& stru)
 {
-  return (strm >> stru.unit)
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  const size_t start_pos = strm.pos();
+
+  const bool ret = (strm >> stru.unit)
     && (strm >> stru.min)
     && (strm >> stru.max)
     && (strm >> stru.hash_id);
+
+  if (ret && strm.pos() - start_pos < total_size) {
+    strm.skip(total_size - strm.pos() + start_pos);
+  }
+  return ret;
 }
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedVerbatimAnnotation& stru)
@@ -2800,6 +2926,23 @@ bool operator>>(Serializer& strm, XTypes::MinimalMemberDetail& stru)
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedTypeDefn&)
+{
+  serialized_size_delimiter(encoding, size);
+}
+
+bool operator<<(Serializer& strm, const XTypes::ExtendedTypeDefn&)
+{
+  return XTypes::write_empty_xcdr2_nonfinal(strm);
+}
+
+bool operator>>(Serializer& strm, XTypes::ExtendedTypeDefn&)
+{
+  return XTypes::read_empty_xcdr2_nonfinal(strm);
+}
+
+
+void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainArrayLElemDefn& stru)
 {
   serialized_size(encoding, size, stru.header);
@@ -2986,6 +3129,7 @@ bool operator>>(Serializer& strm, XTypes::StringSTypeDefn& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::StronglyConnectedComponentId& stru)
 {
+  serialized_size_delimiter(encoding, size);
   serialized_size(encoding, size, stru.sc_component_id);
   primitive_serialized_size(encoding, size, stru.scc_length);
   primitive_serialized_size(encoding, size, stru.scc_index);
@@ -2993,6 +3137,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::StronglyConnectedComponentId& stru)
 {
+  size_t total_size = 0;
+  serialized_size(XTypes::get_typeobject_encoding(), total_size, stru);
+  if (!strm.write_delimiter(total_size)) {
+    return false;
+  }
+
   return (strm << stru.sc_component_id)
     && (strm << stru.scc_length)
     && (strm << stru.scc_index);
@@ -3000,9 +3150,24 @@ bool operator<<(Serializer& strm, const XTypes::StronglyConnectedComponentId& st
 
 bool operator>>(Serializer& strm, XTypes::StronglyConnectedComponentId& stru)
 {
-  return (strm >> stru.sc_component_id)
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  const size_t start_pos = strm.pos();
+
+  // appendable, but no need to handle truncated streams since
+  // this struct is defined in the spec with the following members:
+  const bool ret = (strm >> stru.sc_component_id)
     && (strm >> stru.scc_length)
     && (strm >> stru.scc_index);
+
+  if (ret && strm.pos() - start_pos < total_size) {
+    strm.skip(total_size - strm.pos() + start_pos);
+  }
+
+  return ret;
 }
 
 
@@ -3272,21 +3437,39 @@ bool operator>>(Serializer& ser, XTypes::TypeObject& type_object)
   return true;
 }
 
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalExtendedType&)
+{
+  serialized_size_delimiter(encoding, size);
+}
+
+bool operator<<(Serializer& strm, const XTypes::MinimalExtendedType&)
+{
+  return XTypes::write_empty_xcdr2_nonfinal(strm);
+}
+
+bool operator>>(Serializer& strm, XTypes::MinimalExtendedType&)
+{
+  return XTypes::read_empty_xcdr2_nonfinal(strm);
+}
+
+
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeInformation& stru)
-{
+{ //TODO: nonempty mutable
   serialized_size(encoding, size, stru.minimal);
   serialized_size(encoding, size, stru.complete);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeInformation& stru)
-{
+{ //TODO: nonempty mutable
   return (strm << stru.minimal)
     && (strm << stru.complete);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
-{
+{ //TODO: nonempty mutable
   return (strm >> stru.minimal)
     && (strm >> stru.complete);
 }
