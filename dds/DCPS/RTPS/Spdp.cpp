@@ -3512,7 +3512,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
     if (thread_status_ && bit) {
       thread_status_->lock.acquire_read();
 
-      for (OPENDDS_MAP(ACE_thread_t, ACE_Time_Value)::const_iterator i = thread_status_->map.begin(); i != thread_status_->map.end(); ++i) {
+      for (OPENDDS_MAP(unsigned long, ACE_Time_Value)::const_iterator i = thread_status_->map.begin(); i != thread_status_->map.end(); ++i) {
         const ACE_Time_Value t = i->second;
         DCPS::InternalThreadBuiltinTopicData data;
         ACE_OS::memcpy(&(data.guid), &(guid), 16);

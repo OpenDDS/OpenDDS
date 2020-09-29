@@ -27,10 +27,10 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
-  , thread_status_(0)
-  , timeout_(TimeDuration(0))
   , use_async_send_(useAsyncSend)
   , timer_queue_(0)
+  , thread_status_(0)
+  , timeout_(TimeDuration(0))
 {
 }
 
@@ -163,7 +163,18 @@ OpenDDS::DCPS::ReactorTask::svc()
     if (timeout_ == TimeDuration(0)) {
      reactor_->run_reactor_event_loop();
     } else {
-      ACE_thread_t tid = ACE_OS::thr_self();
+      unsigned long tid = 0;
+#ifdef ACE_HAS_MAC_OSX
+      uint64_t osx_tid;
+      if (!pthread_threadid_np(NULL, &osx_tid)) {
+        tid = static_cast<unsigned long>(osx_tid);
+      } else {
+        tid = 0;
+        ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
+      }
+#else
+        tid = ACE_OS::thr_self();
+#endif /* ACE_HAS_MAC_OSX */
       ACE_Time_Value t = timeout_.value();
       ACE_Time_Value expire = MonotonicTimePoint::now().value() + t;
 

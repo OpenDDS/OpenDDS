@@ -98,7 +98,17 @@ namespace OpenDDS {
       {
         interval = TheServiceParticipant->get_thread_status_interval();
         status = TheServiceParticipant->get_thread_statuses();
+#ifdef ACE_HAS_MAC_OSX
+        uint64_t osx_tid;
+        if (!pthread_threadid_np(NULL, &osx_tid)) {
+          tid = static_cast<unsigned long>(osx_tid);
+        } else {
+          tid = 0;
+          ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
+        }
+#else
         tid = ACE_OS::thr_self();
+#endif /* ACE_HAS_MAC_OSX */
         has_timeout = interval > TimeDuration(0);
       }
 
@@ -182,7 +192,7 @@ namespace OpenDDS {
       // thread reporting
       TimeDuration interval;
       ThreadStatus* status;
-      ACE_thread_t tid;
+      unsigned long tid;
       bool has_timeout;
     };
 
