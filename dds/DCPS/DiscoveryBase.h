@@ -237,7 +237,7 @@ namespace OpenDDS {
       {
         if (type_lookup_reply_deadline_processor_) {
           type_lookup_reply_deadline_processor_->cancel_and_wait();
-          type_lookup_reply_deadline_processor_.reset();
+          type_lookup_reply_deadline_processor_->reset(); // (sonndinh): where is this method?
         }
       }
 
