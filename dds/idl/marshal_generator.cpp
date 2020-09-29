@@ -157,11 +157,17 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     extraction.endArgs();
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
-      "  if (strm >> temp) {\n"
-      "    if (temp >= " << vals.size() << ") {\n"
-      "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-      "      return false;\n"
-      "    }\n"
+      "  if (strm >> temp) {\n";
+    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
+      // that are not valid enum values (see ParameterListConverter::to_param_list())
+      be_global->impl_ <<
+        "    if (temp >= " << vals.size() << ") {\n"
+        "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "      return false;\n"
+        "    }\n";
+    }
+    be_global->impl_ <<
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"
       "  }\n"
