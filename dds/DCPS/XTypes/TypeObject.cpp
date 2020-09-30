@@ -210,7 +210,7 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
   return ti;
 }
 
-ACE_CDR::ULong hash_member_name_to_id(const std::string& name)
+ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name)
 {
   ACE_CDR::ULong name_hash;
 
@@ -221,7 +221,7 @@ ACE_CDR::ULong hash_member_name_to_id(const std::string& name)
   return name_hash & 0x0FFFFFFF;
 }
 
-void hash_member_name(NameHash& name_hash, const std::string& name)
+void hash_member_name(NameHash& name_hash, const OPENDDS_STRING& name)
 {
   unsigned char result[16];
   DCPS::MD5Hash(result, name.c_str(), name.size());
@@ -273,46 +273,46 @@ namespace {
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructMember& type,
-                          std::set<TypeIdentifier>& dependencies);
+                          OPENDDS_SET(TypeIdentifier)& dependencies);
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalUnionMember& type,
-                          std::set<TypeIdentifier>& dependencies);
+                          OPENDDS_SET(TypeIdentifier)& dependencies);
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalEnumeratedLiteral& type,
-                          std::set<TypeIdentifier>& dependencies);
+                          OPENDDS_SET(TypeIdentifier)& dependencies);
 
 void compute_dependencies(const TypeMap&,
                           const CompleteTypeObject&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // TODO: Implement this.
 }
 void compute_dependencies(const TypeMap&,
                           const MinimalAliasHeader&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonAliasBody& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.related_type, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalAliasBody& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalAliasType& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.body, dependencies);
@@ -320,21 +320,21 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const MinimalAnnotationType&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // TODO: Implement this.
 }
 
 void compute_dependencies(const TypeMap&,
                           const MinimalTypeDetail&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructHeader& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.base_type, dependencies);
   compute_dependencies(type_map, type.detail, dependencies);
@@ -342,21 +342,21 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonStructMember& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.member_type_id, dependencies);
 }
 
 void compute_dependencies(const TypeMap&,
                           const MinimalMemberDetail&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructMember& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
   compute_dependencies(type_map, type.detail, dependencies);
@@ -365,7 +365,7 @@ void compute_dependencies(const TypeMap& type_map,
 template <typename T>
 void compute_dependencies(const TypeMap& type_map,
                           const Sequence<T>& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
     compute_dependencies(type_map, *pos, dependencies);
@@ -374,7 +374,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructType& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.member_seq, dependencies);
@@ -382,35 +382,35 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalUnionHeader& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonDiscriminatorMember& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.type_id, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalDiscriminatorMember& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonUnionMember& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.type_id, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalUnionMember& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
   compute_dependencies(type_map, type.detail, dependencies);
@@ -418,7 +418,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalUnionType& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.discriminator, dependencies);
@@ -427,42 +427,42 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const MinimalBitsetType&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // TODO: Implement this.
 }
 
 void compute_dependencies(const TypeMap&,
                           const CommonCollectionHeader&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalCollectionHeader& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonCollectionElement& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.type, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalCollectionElement& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalSequenceType& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.element, dependencies);
@@ -470,21 +470,21 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const CommonArrayHeader&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalArrayHeader& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalArrayType& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.element, dependencies);
@@ -492,35 +492,35 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const MinimalMapType&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // TODO: Implement this.
 }
 
 void compute_dependencies(const TypeMap&,
                           const CommonEnumeratedHeader&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalEnumeratedHeader& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
 }
 
 void compute_dependencies(const TypeMap&,
                           const CommonEnumeratedLiteral&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalEnumeratedLiteral& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
   compute_dependencies(type_map, type.detail, dependencies);
@@ -528,7 +528,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalEnumeratedType& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.literal_seq, dependencies);
@@ -536,14 +536,14 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const MinimalBitmaskType&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // TODO: Implement this.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalTypeObject& type_object,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   switch (type_object.kind) {
   case TK_ALIAS:
@@ -581,7 +581,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const TypeObject& type_object,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   switch (type_object.kind) {
   case EK_COMPLETE:
@@ -595,28 +595,28 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const StringSTypeDefn&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap&,
                           const StringLTypeDefn&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap&,
                           const PlainCollectionHeader&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const PlainSequenceSElemDefn& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, *type.element_identifier, dependencies);
@@ -624,7 +624,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const PlainSequenceLElemDefn& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, *type.element_identifier, dependencies);
@@ -632,7 +632,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const PlainArraySElemDefn& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, *type.element_identifier, dependencies);
@@ -640,7 +640,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const PlainArrayLElemDefn& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, *type.element_identifier, dependencies);
@@ -648,7 +648,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const PlainMapSTypeDefn& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, *type.element_identifier, dependencies);
@@ -657,7 +657,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap& type_map,
                           const PlainMapLTypeDefn& type,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, *type.element_identifier, dependencies);
@@ -666,7 +666,7 @@ void compute_dependencies(const TypeMap& type_map,
 
 void compute_dependencies(const TypeMap&,
                           const StronglyConnectedComponentId&,
-                          std::set<TypeIdentifier>&)
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
 }
@@ -675,7 +675,7 @@ void compute_dependencies(const TypeMap&,
 
 void compute_dependencies(const TypeMap& type_map,
                           const TypeIdentifier& type_identifier,
-                          std::set<TypeIdentifier>& dependencies)
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   if (dependencies.count(type_identifier) != 0) {
     return;

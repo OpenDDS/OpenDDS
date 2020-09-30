@@ -77,7 +77,8 @@ private:
 };
 
 AST_Expression::AST_ExprValue* get_annotation_member_ev(AST_Annotation_Appl* appl,
-                                                        const char* member_name);
+                                                        const char* member_name,
+                                                        AST_Expression::ExprType type);
 
 bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
                                       const char* member_name);
