@@ -308,6 +308,14 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER
   ;
 
+#ifdef OPENDDS_SECURITY
+  const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+#endif
+
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
@@ -342,7 +350,7 @@ bool run_test()
       , qos.property
       , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
 #ifdef OPENDDS_SECURITY
-      , 0 /*TLS_TODO: init availableExtendedBuiltinEndpoints in ParticipantProxy_t??? */
+      , availableExtendedBuiltinEndpoints
 #endif
     },
     { // Duration_t (leaseDuration)

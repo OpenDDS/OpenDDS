@@ -209,6 +209,7 @@ namespace OpenDDS {
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
         : max_type_lookup_service_reply_period_(0)
+        , type_lookup_service_sequence_number_(0)
         , lock_(lock)
         , participant_id_(participant_id)
         , publication_counter_(0)
@@ -966,6 +967,7 @@ namespace OpenDDS {
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
       ACE_Thread_Mutex matching_data_buffer_lock_;
+      DCPS::SequenceNumber type_lookup_service_sequence_number_;
 
 
       void
@@ -1150,7 +1152,7 @@ namespace OpenDDS {
               if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
                 XTypes::TypeIdentifierSeq type_ids;
                 type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
+                md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
                 MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
                 if (md_it != matching_data_buffer_.end()) {
                   md_it->second = md;
@@ -1169,7 +1171,7 @@ namespace OpenDDS {
               if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
                 XTypes::TypeIdentifierSeq type_ids;
                 type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
+                md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
                 MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
                 if (md_it != matching_data_buffer_.end()) {
                   md_it->second = md;

@@ -168,7 +168,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
-    available_extended_builtin_endpoints_ |=
+    available_extended_builtin_endpoints_ =
       DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
       DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
       DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |

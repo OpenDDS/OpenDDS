@@ -503,7 +503,6 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, be_param);
 
-  // TLS_TODO: verify it's the right place to handle extended builtin endpoints
 #ifdef OPENDDS_SECURITY
   Parameter ebe_param;
   ebe_param.extended_builtin_endpoints(
@@ -598,7 +597,6 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
-      //TLS_TODO: verify it's the right place where secure parameters should be added to the proxy
 #ifdef OPENDDS_SECURITY
       case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
         proxy.availableExtendedBuiltinEndpoints =
