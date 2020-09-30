@@ -136,7 +136,7 @@ namespace {
 
 } /* namespace */
 
-bool marshal_generator::gen_enum(AST_Enum* en, UTL_ScopedName* name,
+bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& vals, const char*)
 {
   NamespaceGuard ng;
@@ -147,6 +147,15 @@ bool marshal_generator::gen_enum(AST_Enum* en, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
+    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
+      // that are not valid enum values (see ParameterListConverter::to_param_list())
+      be_global->impl_ <<
+        "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
+        "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
+        "      return false;\n"
+        "    }\n";
+    }
     be_global->impl_ <<
       "  return strm << static_cast<CORBA::ULong>(enumval);\n";
   }
@@ -158,9 +167,9 @@ bool marshal_generator::gen_enum(AST_Enum* en, UTL_ScopedName* name,
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n";
-    const ExtensibilityKind exten = be_global->extensibility(en);
-    // Uninitialized enums written by the writer can cause a problem otherwise
-    if (exten == extensibilitykind_mutable) {
+    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
+      // that are not valid enum values (see ParameterListConverter::to_param_list())
       be_global->impl_ <<
         "    if (temp >= " << vals.size() << ") {\n"
         "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"

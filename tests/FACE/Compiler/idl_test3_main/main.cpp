@@ -19,6 +19,12 @@ using OpenDDS::DCPS::Encoding;
 const Encoding unaligned_encoding(Encoding::KIND_UNALIGNED_CDR);
 const Encoding aligned_encoding(Encoding::KIND_XCDR1);
 
+void initialize_enums(Xyz::AStruct& stru) {
+  stru.f8 = Xyz::redx;
+  for (ACE_INT16 i = 0; i < 5; ++i) stru.f15[i] = Xyz::redx;
+  for (ACE_INT16 i = 0; i < 7; ++i) for (ACE_INT16 j = 0; j < 5; ++j) stru.f55[i][j] = Xyz::redx;
+}
+
 template<typename FOO>
 bool try_marshaling(const FOO& in_foo, FOO& out_foo,
   SerializedSizeBound expected_bound, size_t expected_size,
@@ -532,6 +538,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //    ** see breakdown in comment at the end of this file
   //  AStructSeq theStructSeq; //+4 = 911
   //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
+  initialize_enums(my_foo.thestruct);
+  for (ACE_INT16 k = 0; k < 3; ++k) {
+    initialize_enums(my_foo.structArray[k]);
+  }
+
   my_foo.theUnion.rv("a string"); // +4+4+8+1 = 3583
   //  SeqOfAUnion theSeqOfUnion; // +4 = 3587 {padding +3 = 509}
   //  BigUnion theBigUnion; // +4 = 3591
