@@ -273,7 +273,8 @@ namespace {
       PERM_TOKEN_FIELD = 0x02,
       PROPERTY_LIST_FIELD = 0x04,
       PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
-      IDENTITY_STATUS_TOKEN_FIELD = 0x10
+      IDENTITY_STATUS_TOKEN_FIELD = 0x10,
+      EXTENDED_BUILTIN_ENDPOINTS = 0x20
     };
 
     unsigned char field_mask = 0x00;
@@ -296,6 +297,9 @@ namespace {
           break;
         case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
           field_mask |= IDENTITY_STATUS_TOKEN_FIELD;
+          break;
+        case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+          field_mask |= EXTENDED_BUILTIN_ENDPOINTS;
           break;
       }
     }
@@ -376,6 +380,10 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   param_psi.participant_security_info(pbtd.security_info);
   add_param(param_list, param_psi);
 
+  Parameter param_ebe;
+  param_ebe.extended_builtin_endpoints(pbtd.extended_builtin_endpoints);
+  add_param(param_list, param_ebe);
+
   return true;
 }
 
@@ -403,6 +411,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
         pbtd.security_info = param.participant_security_info();
+        break;
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        pbtd.extended_builtin_endpoints = param.extended_builtin_endpoints();
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -504,6 +515,13 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, be_param);
 
+#ifdef OPENDDS_SECURITY
+  Parameter ebe_param;
+  ebe_param.extended_builtin_endpoints(
+    proxy.availableExtendedBuiltinEndpoints);
+  add_param(param_list, abe_param);
+#endif
+
   // Each locator
   add_param_locator_seq(
       param_list,
@@ -549,6 +567,9 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
+#ifdef OPENDDS_SECURITY
+  proxy.availableExtendedBuiltinEndpoints = 0;
+#endif
   proxy.expectsInlineQos = false;
 
   CORBA::ULong length = param_list.length();
@@ -588,6 +609,12 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
+#ifdef OPENDDS_SECURITY
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        proxy.availableExtendedBuiltinEndpoints =
+          param.extended_builtin_endpoints();
+        break;
+#endif
       case PID_METATRAFFIC_UNICAST_LOCATOR:
         append_locator(
             proxy.metatrafficUnicastLocatorList,

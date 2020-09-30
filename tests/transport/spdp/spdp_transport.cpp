@@ -308,6 +308,14 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER
   ;
 
+#ifdef OPENDDS_SECURITY
+  const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+#endif
+
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
@@ -325,22 +333,25 @@ bool run_test()
       qos.user_data
     },
     {
-      domain,
-      "",
-      PROTOCOLVERSION,
-      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
-      VENDORID_OPENDDS,
-      false /*expectsIQoS*/,
-      availableBuiltinEndpoints,
-      0,
-      nonEmptyList /* sedp_multicast */,
-      nonEmptyList /* sedp_unicast */,
-      nonEmptyList /*defaultMulticastLocatorList*/,
-      nonEmptyList /*defaultUnicastLocatorList*/,
-      { 0 /*manualLivelinessCount*/ },
-      qos.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      domain
+      , ""
+      , PROTOCOLVERSION
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , VENDORID_OPENDDS
+      , false /*expectsIQoS*/
+      , availableBuiltinEndpoints
+      , 0
+      , nonEmptyList /* sedp_multicast */
+      , nonEmptyList /* sedp_unicast */
+      , nonEmptyList /*defaultMulticastLocatorList*/
+      , nonEmptyList /*defaultUnicastLocatorList*/
+      , { 0 /*manualLivelinessCount*/ }
+      , qos.property
+      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+#ifdef OPENDDS_SECURITY
+      , availableExtendedBuiltinEndpoints
+#endif
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
