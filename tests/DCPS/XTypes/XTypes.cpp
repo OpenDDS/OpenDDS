@@ -14,7 +14,7 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 
 template<typename T1, typename T2>
-bool read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
+ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -31,10 +31,10 @@ bool read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
     if (verbose) {
       ACE_DEBUG((LM_DEBUG, "reader: Timedout\n"));
     }
-    return false;
+    return ret;
   } else if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
-    return false;
+    return ret;
   }
   // data;
   SampleInfoSeq info;
@@ -49,12 +49,12 @@ bool read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
   }
   if (ret != RETCODE_NO_DATA && ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
-    return false;
+    return ret;
   }
 
   ws->detach_condition(dr_rc);
   dr->delete_readcondition(dr_rc);
-  return true;
+  return ret;
 }
 
 
@@ -77,6 +77,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool writer = false;
   bool reader = false;
   std::string type;
+  bool expect_to_fail = false;
 
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
@@ -93,6 +94,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
         return 1;
       }
+    } else if (arg == ACE_TEXT("--expect_to_fail")) {
+      expect_to_fail = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -167,7 +170,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if (type == "Property_2") {
       Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
       ::Property_2Seq data;
-      failed = !read(dr, pdr, data, verbose);
+      // TODO: handle expect_to_fail
+      failed = read(dr, pdr, data, verbose) != RETCODE_OK;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;
