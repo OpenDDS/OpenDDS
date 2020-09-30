@@ -1176,7 +1176,7 @@ DataReaderImpl::enable()
 
   if (topic_servant_) {
     if (!topic_servant_->check_data_representation(
-      get_effective_data_rep_qos(qos_.representation.value, true), false)) {
+        get_effective_data_rep_qos(qos_.representation.value, true), false)) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
           ACE_TEXT("none of the data representation QoS is allowed by the ")

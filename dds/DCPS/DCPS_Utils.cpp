@@ -398,12 +398,15 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader) {
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader)
+{
   if (qos.length() == 0) {
-    DDS::DataRepresentationIdSeq ids(reader ? 2 : 1);
+    DDS::DataRepresentationIdSeq ids;
     ids.length(reader ? 2 : 1);
     ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
-    if (reader) { ids[1] = DDS::XCDR_DATA_REPRESENTATION; }
+    if (reader) {
+      ids[1] = DDS::XCDR_DATA_REPRESENTATION;
+    }
     return ids;
   }
   return qos;

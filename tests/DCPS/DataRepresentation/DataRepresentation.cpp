@@ -75,7 +75,6 @@ private:
   enum CheckMatchResult { check_match_error, check_match_expected, check_match_unexpected };
   CheckMatchResult check_match(DDS::DataReader* reader, DDS::DataWriter* writer, bool expect_match);
   void add_result(bool passed);
-  int any_failed() const;
 
   DDS::DomainParticipantFactory_var dpf_;
   DDS::DomainParticipant_var participant_;
@@ -122,7 +121,14 @@ int Test::run()
   test_Registered_Xcdr1Type();
   test_Registered_Xcdr2Type();
   test_Registered_XmlType();
-  return any_failed();
+
+  const unsigned n_failed = cases_total_ - cases_passed_;
+  if (n_failed == 0) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("INFO: %u of %u cases passed\n"), cases_passed_, cases_total_));
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: %u of %u cases failed\n"), n_failed, cases_total_));
+  }
+  return (n_failed == 0) ? 0 : 1;
 }
 
 void Test::cleanup()
@@ -315,14 +321,22 @@ std::string Test::to_string(const Dri& dri)
 {
   if (dri.size()) {
     std::stringstream ss;
-    const Dri::const_iterator begin = dri.begin();
     bool first = true;
-    for (Dri::const_iterator i = begin; i != dri.end(); ++i) {
-      if (first) { first = false; } else { ss << ", "; }
-      if      (*i == DDS::XCDR_DATA_REPRESENTATION) { ss << "XCDR1"; }
-      else if (*i == DDS::XCDR2_DATA_REPRESENTATION) { ss << "XCDR2"; }
-      else if (*i == DDS::XML_DATA_REPRESENTATION) { ss << "XML"; }
-      else { ss << "Unknown Value " << *i; }
+    for (Dri::const_iterator i = dri.begin(); i != dri.end(); ++i) {
+      if (first) {
+        first = false;
+      } else {
+        ss << ", ";
+      }
+      if(*i == DDS::XCDR_DATA_REPRESENTATION) {
+        ss << "XCDR1";
+      } else if (*i == DDS::XCDR2_DATA_REPRESENTATION) {
+        ss << "XCDR2";
+      } else if (*i == DDS::XML_DATA_REPRESENTATION) {
+        ss << "XML";
+      } else {
+        ss << "Unknown Value " << *i;
+      }
     }
     return ss.str();
   }
@@ -439,24 +453,21 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
   return check_match_expected;
 }
 
-void Test::add_result(bool passed){
-  if (passed) { ++cases_passed_; }
+void Test::add_result(bool passed)
+{
+  if (passed) {
+    ++cases_passed_;
+  }
   ++cases_total_;
-}
-
-int Test::any_failed() const {
-  if (cases_passed_ != cases_total_) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: %u out of %u cases failed\n"), cases_total_ - cases_passed_, cases_total_));
-  } else ACE_DEBUG((LM_INFO, ACE_TEXT("INFO: %u out of %u cases passed\n"), cases_passed_, cases_total_));
-  return cases_total_ - cases_passed_;
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  int ret = 1;
   try {
     Test test(argc, argv);
-    ret = test.run();
-  } catch (...) { ret = 1; }
-  return ret;
+    return test.run();
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ACE_TMAIN() ERROR: exception caught\n")));
+    return 1;
+  }
 }
