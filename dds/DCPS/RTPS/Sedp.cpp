@@ -3266,7 +3266,7 @@ bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
   return writer->send_type_lookup_request(type_ids,
     remote_reader,
     sequence,
-    type_lookup_service_->rpc_sequence_number(),
+    type_lookup_service_sequence_number_,
     participant_id_) == DDS::RETCODE_OK;
 }
 
