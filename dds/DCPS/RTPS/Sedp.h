@@ -163,7 +163,7 @@ public:
 
   bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                 const DCPS::RepoId& reader,
-                                const CORBA::ULong tl_kind);
+                                bool sendGetTypes);
 
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);

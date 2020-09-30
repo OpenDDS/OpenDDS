@@ -3116,7 +3116,7 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 
 bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
                                     const DCPS::RepoId& reader,
-                                    const CORBA::ULong tl_kind)
+                                    bool sendGetTypes)
 {
   const DCPS::RepoId remote_reader = make_id(reader, ENTITYID_TL_SVC_REQ_READER);
   DCPS::SequenceNumber sequence = 0;
@@ -3126,7 +3126,7 @@ bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
     sequence,
     type_lookup_service_->rpc_sequence_number(),
     participant_id_,
-    tl_kind) == DDS::RETCODE_OK;
+    sendGetTypes? XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId) == DDS::RETCODE_OK;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3578,8 +3578,14 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
   type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 
-  // As per chapter 7.6.3.3.4 of XTypes spec
-  const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") + DCPS::to_string(participant_id);
+  // As per chapter 7.6.3.3.4 of XTypes spec.
+  // NOTE(sonndinh): Looks like the prefix "dds.builtin.TOS" should be "dds.builtin.TLS".
+  // Also, in DDS-XTypes 1.3, page 226, the built-in endpoint names should be TypeLookupServiceXyz
+  // instead of TypeObjectServiceXyz.
+  const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") +
+    DCPS::to_hex_dds_string(&participant_id.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
+    DCPS::to_hex_dds_string(&participant_id.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
+    DCPS::to_dds_string(unsigned(participant_id.entityId.entityKind), true);
   type_lookup_request.header.instance_name = instance_name.c_str();
   type_lookup_request.data.kind = tl_kind;
 
@@ -3757,7 +3763,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
     }
 
     DCPS::RepoId remote_guid = sample.header_.publication_id_;
-    if (!sedp_.send_type_lookup_request(req_type_ids, remote_guid, XTypes::TypeLookup_getTypes_HashId)) {
+    if (!sedp_.send_type_lookup_request(req_type_ids, remote_guid, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
                  ACE_TEXT("failed to send type lookup request\n")));
       return DDS::RETCODE_ERROR;

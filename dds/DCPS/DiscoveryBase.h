@@ -18,7 +18,6 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "SporadicTask.h"
-#include "RTPS/TypeLookup.h"
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
@@ -819,7 +818,7 @@ namespace OpenDDS {
 
       virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq&,
                                             const DCPS::RepoId&,
-                                            const CORBA::ULong)
+                                            bool /*sendGetTypes*/)
       { return true; }
 
       void match_endpoints(RepoId repoId, const TopicDetails& td,
@@ -1228,20 +1227,20 @@ namespace OpenDDS {
         // Get the top-level TypeObject
         XTypes::TypeIdentifierSeq type_ids;
         type_ids.append(type_info->minimal.typeid_with_size.type_id);
-        send_type_lookup_request(type_ids, remote_id, XTypes::TypeLookup_getTypes_HashId);
+        send_type_lookup_request(type_ids, remote_id, true);
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
 
         // Get dependent TypeObjects
         if (type_info->minimal.dependent_typeid_count == -1 ||
             type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
-          send_type_lookup_request(type_ids, remote_id, XTypes::TypeLookup_getDependencies_HashId);
+          send_type_lookup_request(type_ids, remote_id, false);
         } else {
           XTypes::TypeIdentifierSeq dependencies;
           dependencies.length(type_info->minimal.dependent_typeid_count);
           for (size_t i = 0; i < (size_t)type_info->minimal.dependent_typeid_count; ++i) {
             dependencies[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
-          send_type_lookup_request(dependencies, remote_id, XTypes::TypeLookup_getTypes_HashId);
+          send_type_lookup_request(dependencies, remote_id, true);
         }
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
       }
