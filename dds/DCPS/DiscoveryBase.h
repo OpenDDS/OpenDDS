@@ -966,7 +966,6 @@ namespace OpenDDS {
       typedef PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
-      ACE_Thread_Mutex matching_data_buffer_lock_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
 
 
@@ -1130,7 +1129,6 @@ namespace OpenDDS {
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
           MatchingData md;
-          ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
 
           // if the type object is not in cache, send RPC request
           md.dwQos = *dwQos;
@@ -1247,7 +1245,7 @@ namespace OpenDDS {
       void
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         MatchingDataIter end_iter = matching_data_buffer_.end();
 
         for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
@@ -1263,7 +1261,6 @@ namespace OpenDDS {
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-        ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {
@@ -1310,8 +1307,6 @@ namespace OpenDDS {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
                 ACE_TEXT("match_continue failed\n")));
             }
-            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
-            ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
             ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
             ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
             return;
@@ -1373,8 +1368,6 @@ namespace OpenDDS {
           add_security_info(wTls, writer, reader), writer, pubQos, dwQos,
           octet_seq_type_info_writer
         };
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
-        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         static const bool writer_active = true;
