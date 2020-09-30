@@ -238,7 +238,7 @@ namespace OpenDDS {
       {
         if (type_lookup_reply_deadline_processor_) {
           type_lookup_reply_deadline_processor_->cancel_and_wait();
-          type_lookup_reply_deadline_processor_->reset(); // (sonndinh): where is this method?
+          type_lookup_reply_deadline_processor_.reset();
         }
       }
 
@@ -1148,36 +1148,14 @@ namespace OpenDDS {
 
           if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
               (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
-            if (!writer_local) {
-              if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
-                XTypes::TypeIdentifierSeq type_ids;
-                type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
-                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-                if (md_it != matching_data_buffer_.end()) {
-                  md_it->second = md;
-                } else {
-                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-                }
-                send_type_lookup_request(type_ids, writer, XTypes::TypeLookup_getTypes_HashId);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                return;
-              }
-            } else if (!reader_local) {
-              if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
-                XTypes::TypeIdentifierSeq type_ids;
-                type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
-                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-                if (md_it != matching_data_buffer_.end()) {
-                  md_it->second = md;
-                } else {
-                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-                }
-                send_type_lookup_request(type_ids, reader, XTypes::TypeLookup_getTypes_HashId);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                return;
-              }
+            if (!writer_local && type_lookup_service_ &&
+                !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
+              save_matching_data_and_get_typeobjects(writer_type_info, md, MatchingPair(writer, reader), writer);
+              return;
+            } else if (!reader_local && type_lookup_service_ &&
+                       !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
+              save_matching_data_and_get_typeobjects(reader_type_info, md, MatchingPair(writer, reader), reader);
+              return;
             }
           }
 
@@ -1234,6 +1212,38 @@ namespace OpenDDS {
             drr->update_incompatible_qos(readerStatus);
           }
         }
+      }
+
+      void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info, MatchingData& md,
+                                                  const MatchingPair mp, const RepoId& remote_id)
+      {
+        md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
+        MatchingDataIter md_it = matching_data_buffer_.find(mp);
+        if (md_it != matching_data_buffer_.end()) {
+          md_it->second = md;
+        } else {
+          matching_data_buffer_.insert(std::make_pair(mp, md));
+        }
+
+        // Get the top-level TypeObject
+        XTypes::TypeIdentifierSeq type_ids;
+        type_ids.append(type_info->minimal.typeid_with_size.type_id);
+        send_type_lookup_request(type_ids, remote_id, XTypes::TypeLookup_getTypes_HashId);
+        type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
+
+        // Get dependent TypeObjects
+        if (type_info->minimal.dependent_typeid_count == -1 ||
+            type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
+          send_type_lookup_request(type_ids, remote_id, XTypes::TypeLookup_getDependencies_HashId);
+        } else {
+          XTypes::TypeIdentifierSeq dependencies;
+          dependencies.length(type_info->minimal.dependent_typeid_count);
+          for (size_t i = 0; i < (size_t)type_info->minimal.dependent_typeid_count; ++i) {
+            dependencies[i] = type_info->minimal.dependent_typeids[i].type_id;
+          }
+          send_type_lookup_request(dependencies, remote_id, XTypes::TypeLookup_getTypes_HashId);
+        }
+        type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
       }
 
       void
