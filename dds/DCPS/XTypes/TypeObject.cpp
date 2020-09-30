@@ -1138,6 +1138,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteStructType& stru)
     && (strm << stru.member_seq);
 }
 
+bool operator>>(Serializer& strm, XTypes::CompleteStructType& stru)
+{
+  return (strm >> stru.struct_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.member_seq);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalStructType& stru)
@@ -1152,6 +1159,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalStructType& stru)
   return (strm << stru.struct_flags)
     && (strm << stru.header)
     && (strm << stru.member_seq);
+}
+
+bool operator>>(Serializer& strm, XTypes::MinimalStructType& stru)
+{
+  return (strm >> stru.struct_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.member_seq);
 }
 
 
@@ -1172,6 +1186,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteUnionType& stru)
     && (strm << stru.member_seq);
 }
 
+bool operator>>(Serializer& strm, XTypes::CompleteUnionType& stru)
+{
+  return (strm >> stru.union_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.discriminator)
+    && (strm >> stru.member_seq);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalUnionType& stru)
@@ -1190,6 +1212,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalUnionType& stru)
     && (strm << stru.member_seq);
 }
 
+bool operator>>(Serializer& strm, XTypes::MinimalUnionType& stru)
+{
+  return (strm >> stru.union_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.discriminator)
+    && (strm >> stru.member_seq);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteAnnotationType& stru)
@@ -1204,6 +1234,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationType& stru)
   return (strm << stru.annotation_flag)
     && (strm << stru.header)
     && (strm << stru.member_seq);
+}
+
+bool operator>>(Serializer& strm, XTypes::CompleteAnnotationType& stru)
+{
+  return (strm >> stru.annotation_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.member_seq);
 }
 
 
@@ -1222,6 +1259,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalAnnotationType& stru)
     && (strm << stru.member_seq);
 }
 
+bool operator>>(Serializer& strm, XTypes::MinimalAnnotationType& stru)
+{
+  return (strm >> stru.annotation_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.member_seq);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteAliasType& stru)
@@ -1236,6 +1280,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAliasType& stru)
   return (strm << stru.alias_flags)
     && (strm << stru.header)
     && (strm << stru.body);
+}
+
+bool operator>>(Serializer& strm, XTypes::CompleteAliasType& stru)
+{
+  return (strm >> stru.alias_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.body);
 }
 
 
@@ -1254,6 +1305,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalAliasType& stru)
     && (strm << stru.body);
 }
 
+bool operator>>(Serializer& strm, XTypes::MinimalAliasType& stru)
+{
+  return (strm >> stru.alias_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.body);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteSequenceType& stru)
@@ -1270,6 +1328,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteSequenceType& stru)
     && (strm << stru.element);
 }
 
+bool operator>>(Serializer& strm, XTypes::CompleteSequenceType& stru)
+{
+  return (strm >> stru.collection_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.element);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalSequenceType& stru)
@@ -1284,6 +1349,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalSequenceType& stru)
   return (strm << stru.collection_flag)
     && (strm << stru.header)
     && (strm << stru.element);
+}
+
+bool operator>>(Serializer& strm, XTypes::MinimalSequenceType& stru)
+{
+  return (strm >> stru.collection_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.element);
 }
 
 
@@ -1344,6 +1416,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalArrayType& stru)
     && (strm << stru.element);
 }
 
+bool operator>>(Serializer& strm, XTypes::MinimalArrayType& stru)
+{
+  return (strm >> stru.collection_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.element);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteMapType& stru)
@@ -1360,6 +1439,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteMapType& stru)
     && (strm << stru.header)
     && (strm << stru.key)
     && (strm << stru.element);
+}
+
+bool operator>>(Serializer& strm, XTypes::CompleteMapType& stru)
+{
+  return (strm >> stru.collection_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.key)
+    && (strm >> stru.element);
 }
 
 
@@ -1379,6 +1466,15 @@ bool operator<<(Serializer& strm, const XTypes::MinimalMapType& stru)
     && (strm << stru.key)
     && (strm << stru.element);
 }
+
+bool operator>>(Serializer& strm, XTypes::MinimalMapType& stru)
+{
+  return (strm >> stru.collection_flag)
+    && (strm >> stru.header)
+    && (strm >> stru.key)
+    && (strm >> stru.element);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteEnumeratedHeader& stru)
@@ -1469,6 +1565,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteEnumeratedType& stru)
     && (strm << stru.literal_seq);
 }
 
+bool operator>>(Serializer& strm, XTypes::CompleteEnumeratedType& stru)
+{
+  return (strm >> stru.enum_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.literal_seq);
+}
+
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalEnumeratedType& stru)
@@ -1483,6 +1586,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalEnumeratedType& stru)
   return (strm << stru.enum_flags)
     && (strm << stru.header)
     && (strm << stru.literal_seq);
+}
+
+bool operator>>(Serializer& strm, XTypes::MinimalEnumeratedType& stru)
+{
+  return (strm >> stru.enum_flags)
+    && (strm >> stru.header)
+    && (strm >> stru.literal_seq);
 }
 
 
