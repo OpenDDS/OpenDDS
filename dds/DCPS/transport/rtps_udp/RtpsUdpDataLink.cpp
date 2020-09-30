@@ -31,6 +31,7 @@
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Util.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
