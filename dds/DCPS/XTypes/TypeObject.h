@@ -1246,7 +1246,7 @@ namespace XTypes {
     LBound bound;
 
     CommonCollectionHeader() {}
-    CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
+    explicit CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
   };
 
   struct CompleteCollectionHeader {
@@ -1288,7 +1288,7 @@ namespace XTypes {
     LBoundSeq bound_seq;
 
     CommonArrayHeader() {}
-    CommonArrayHeader(const LBoundSeq& a_bound_seq) : bound_seq(a_bound_seq) {}
+    explicit CommonArrayHeader(const LBoundSeq& a_bound_seq) : bound_seq(a_bound_seq) {}
   };
 
   struct CompleteArrayHeader {
@@ -1783,15 +1783,15 @@ namespace XTypes {
   }
 
   OpenDDS_Dcps_Export
-  ACE_CDR::ULong hash_member_name_to_id(const std::string& name);
+  ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name);
 
   OpenDDS_Dcps_Export
-  void hash_member_name(NameHash& name_hash, const std::string& name);
+  void hash_member_name(NameHash& name_hash, const OPENDDS_STRING& name);
 
   OpenDDS_Dcps_Export
   bool is_fully_descriptive(const TypeIdentifier& ti);
 
-  typedef std::map<TypeIdentifier, TypeObject> TypeMap;
+  typedef OPENDDS_MAP(TypeIdentifier, TypeObject) TypeMap;
 
   struct TypeMapBuilder {
     TypeMap type_map_;
@@ -1807,7 +1807,7 @@ namespace XTypes {
 
   void compute_dependencies(const TypeMap& type_map,
                             const TypeIdentifier& type_identifier,
-                            std::set<TypeIdentifier>& dependencies);
+                            OPENDDS_SET(TypeIdentifier)& dependencies);
 
 } // namespace XTypes
 

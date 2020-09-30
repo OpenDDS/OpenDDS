@@ -7,11 +7,12 @@
 
 #include "typeobject_generator.h"
 
+#include "utl_identifier.h"
+#include "topic_keys.h"
+#include "dds_visitor.h"
+
 #include "be_extern.h"
 #include "be_util.h"
-#include "dds_visitor.h"
-#include "topic_keys.h"
-#include "utl_identifier.h"
 
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
@@ -74,6 +75,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_enum:
     return ev.u.eval;
   default:
+    // Spec issue DDSXTY14-36 (64-bit integers as case labels in TypeObject)
     be_util::misc_error_and_abort("Illegal conversion to long");
     return 0;
   }
@@ -91,15 +93,15 @@ operator<<(std::ostream& out, const Printer& printer)
 }
 
 template <typename T>
-struct ValuePrinter : public Printer {
-  ValuePrinter(const T& a_value) : value(a_value) {}
+struct ValuePrinter : Printer {
+  explicit ValuePrinter(const T& a_value) : value(a_value) {}
 
   const T value;
 };
 
 template <typename T>
-struct UintPrinter : public ValuePrinter<T> {
-  UintPrinter(const T& a_value) : ValuePrinter<T>(a_value) {}
+struct UintPrinter : ValuePrinter<T> {
+  explicit UintPrinter(const T& a_value) : ValuePrinter<T>(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
@@ -107,16 +109,16 @@ struct UintPrinter : public ValuePrinter<T> {
   }
 };
 
-struct SBoundPrinter : public UintPrinter<OpenDDS::XTypes::SBound> {
-  SBoundPrinter(const OpenDDS::XTypes::SBound a_value) : UintPrinter(a_value) {}
+struct SBoundPrinter : UintPrinter<OpenDDS::XTypes::SBound> {
+  explicit SBoundPrinter(const OpenDDS::XTypes::SBound a_value) : UintPrinter(a_value) {}
 };
 
-struct LBoundPrinter : public UintPrinter<OpenDDS::XTypes::LBound> {
-  LBoundPrinter(const OpenDDS::XTypes::LBound a_value) : UintPrinter(a_value) {}
+struct LBoundPrinter : UintPrinter<OpenDDS::XTypes::LBound> {
+  explicit LBoundPrinter(const OpenDDS::XTypes::LBound a_value) : UintPrinter(a_value) {}
 };
 
-struct EquivalenceKindPrinter : public ValuePrinter<OpenDDS::XTypes::EquivalenceKind> {
-  EquivalenceKindPrinter(const OpenDDS::XTypes::EquivalenceKind a_value) : ValuePrinter(a_value) {}
+struct EquivalenceKindPrinter : ValuePrinter<OpenDDS::XTypes::EquivalenceKind> {
+  explicit EquivalenceKindPrinter(const OpenDDS::XTypes::EquivalenceKind a_value) : ValuePrinter(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
@@ -132,112 +134,137 @@ struct EquivalenceKindPrinter : public ValuePrinter<OpenDDS::XTypes::Equivalence
   }
 };
 
-struct MemberFlagPrinter : public ValuePrinter<OpenDDS::XTypes::MemberFlag> {
-  MemberFlagPrinter(const OpenDDS::XTypes::EquivalenceKind a_value) : ValuePrinter(a_value) {}
+struct BitmaskPrintHelper {
+  explicit BitmaskPrintHelper(std::ostream& os) : os_(os), first_(true) {}
+
+  std::ostream& os_;
+  bool first_;
+
+  BitmaskPrintHelper& operator<<(const char* str)
+  {
+    if (first_) {
+      first_ = false;
+    } else {
+      os_ << " | ";
+    }
+    os_ << str;
+    return *this;
+  }
+
+  ~BitmaskPrintHelper()
+  {
+    if (first_) {
+      os_ << '0';
+    }
+  }
+};
+
+struct MemberFlagPrinter : ValuePrinter<OpenDDS::XTypes::MemberFlag> {
+  explicit MemberFlagPrinter(const OpenDDS::XTypes::MemberFlag a_value) : ValuePrinter(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
-    out << "0";
+    BitmaskPrintHelper bph(out);
     if (this->value & OpenDDS::XTypes::TRY_CONSTRUCT1) {
-      out << " | XTypes::TRY_CONSTRUCT1";
+      bph << "XTypes::TRY_CONSTRUCT1";
     }
     if (this->value & OpenDDS::XTypes::TRY_CONSTRUCT2) {
-      out << " | XTypes::TRY_CONSTRUCT2";
+      bph << "XTypes::TRY_CONSTRUCT2";
     }
     if (this->value & OpenDDS::XTypes::IS_EXTERNAL) {
-      out << " | XTypes::IS_EXTERNAL";
+      bph << "XTypes::IS_EXTERNAL";
     }
     if (this->value & OpenDDS::XTypes::IS_OPTIONAL) {
-      out << " | XTypes::IS_OPTIONAL";
+      bph << "XTypes::IS_OPTIONAL";
     }
     if (this->value & OpenDDS::XTypes::IS_MUST_UNDERSTAND) {
-      out << " | XTypes::IS_MUST_UNDERSTAND";
+      bph << "XTypes::IS_MUST_UNDERSTAND";
     }
     if (this->value & OpenDDS::XTypes::IS_KEY) {
-      out << " | XTypes::IS_KEY";
+      bph << "XTypes::IS_KEY";
     }
     if (this->value & OpenDDS::XTypes::IS_DEFAULT) {
-      out << " | XTypes::IS_DEFAULT";
+      bph << "XTypes::IS_DEFAULT";
     }
     return out;
   }
 };
 
-struct CollectionElementFlagPrinter : public MemberFlagPrinter {
-  CollectionElementFlagPrinter(const OpenDDS::XTypes::CollectionElementFlag a_value) : MemberFlagPrinter(a_value) {}
+struct CollectionElementFlagPrinter : MemberFlagPrinter {
+  explicit CollectionElementFlagPrinter(const OpenDDS::XTypes::CollectionElementFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
-struct StructMemberFlagPrinter : public MemberFlagPrinter {
-  StructMemberFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+struct StructMemberFlagPrinter : MemberFlagPrinter {
+  explicit StructMemberFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
-struct UnionMemberFlagPrinter : public MemberFlagPrinter {
-  UnionMemberFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+struct UnionMemberFlagPrinter : MemberFlagPrinter {
+  explicit UnionMemberFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
-struct UnionDiscriminatorFlagPrinter : public MemberFlagPrinter {
-  UnionDiscriminatorFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+struct UnionDiscriminatorFlagPrinter : MemberFlagPrinter {
+  explicit UnionDiscriminatorFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
-struct EnumeratedLiteralFlagPrinter : public MemberFlagPrinter {
-  EnumeratedLiteralFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+struct EnumeratedLiteralFlagPrinter : MemberFlagPrinter {
+  explicit EnumeratedLiteralFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
-struct AliasMemberFlagPrinter : public MemberFlagPrinter {
-  AliasMemberFlagPrinter(const OpenDDS::XTypes::AliasMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+struct AliasMemberFlagPrinter : MemberFlagPrinter {
+  explicit AliasMemberFlagPrinter(const OpenDDS::XTypes::AliasMemberFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
-struct TypeFlagPrinter : public ValuePrinter<OpenDDS::XTypes::TypeFlag> {
-  TypeFlagPrinter(const OpenDDS::XTypes::EquivalenceKind a_value) : ValuePrinter(a_value) {}
+struct TypeFlagPrinter : ValuePrinter<OpenDDS::XTypes::TypeFlag> {
+  explicit TypeFlagPrinter(const OpenDDS::XTypes::TypeFlag a_value) : ValuePrinter(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
-    out << "0";
+    BitmaskPrintHelper bph(out);
     if (this->value & OpenDDS::XTypes::IS_FINAL) {
-      out << " | XTypes::IS_FINAL";
+      bph << "XTypes::IS_FINAL";
     }
     if (this->value & OpenDDS::XTypes::IS_APPENDABLE) {
-      out << " | XTypes::IS_APPENDABLE";
+      bph << "XTypes::IS_APPENDABLE";
     }
     if (this->value & OpenDDS::XTypes::IS_MUTABLE) {
-      out << " | XTypes::IS_MUTABLE";
+      bph << "XTypes::IS_MUTABLE";
     }
     if (this->value & OpenDDS::XTypes::IS_NESTED) {
-      out << " | XTypes::IS_NESTED";
+      bph << "XTypes::IS_NESTED";
     }
     if (this->value & OpenDDS::XTypes::IS_AUTOID_HASH) {
-      out << " | XTypes::IS_AUTOID_HASH";
+      bph << "XTypes::IS_AUTOID_HASH";
     }
     return out;
   }
 };
 
-struct StructTypeFlagPrinter : public TypeFlagPrinter {
-  StructTypeFlagPrinter(const OpenDDS::XTypes::StructTypeFlag a_value) : TypeFlagPrinter(a_value) {}
+struct StructTypeFlagPrinter : TypeFlagPrinter {
+  explicit StructTypeFlagPrinter(const OpenDDS::XTypes::StructTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct UnionTypeFlagPrinter : public  TypeFlagPrinter {
-  UnionTypeFlagPrinter(const OpenDDS::XTypes::UnionTypeFlag a_value) : TypeFlagPrinter(a_value) {}
+struct UnionTypeFlagPrinter :  TypeFlagPrinter {
+  explicit UnionTypeFlagPrinter(const OpenDDS::XTypes::UnionTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct CollectionTypeFlagPrinter : public  TypeFlagPrinter {
-  CollectionTypeFlagPrinter(const OpenDDS::XTypes::CollectionTypeFlag a_value) : TypeFlagPrinter(a_value) {}
+struct CollectionTypeFlagPrinter :  TypeFlagPrinter {
+  explicit CollectionTypeFlagPrinter(const OpenDDS::XTypes::CollectionTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct AliasTypeFlagPrinter : public  TypeFlagPrinter {
-  AliasTypeFlagPrinter(const OpenDDS::XTypes::AliasTypeFlag a_value) : TypeFlagPrinter(a_value) {}
+struct AliasTypeFlagPrinter :  TypeFlagPrinter {
+  explicit AliasTypeFlagPrinter(const OpenDDS::XTypes::AliasTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct EnumTypeFlagPrinter : public  TypeFlagPrinter {
-  EnumTypeFlagPrinter(const OpenDDS::XTypes::EnumTypeFlag a_value) : TypeFlagPrinter(a_value) {}
+struct EnumTypeFlagPrinter :  TypeFlagPrinter {
+  explicit EnumTypeFlagPrinter(const OpenDDS::XTypes::EnumTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct MemberIdPrinter : public UintPrinter<OpenDDS::XTypes::MemberId> {
-  MemberIdPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : UintPrinter(a_value) {}
+struct MemberIdPrinter : UintPrinter<OpenDDS::XTypes::MemberId> {
+  explicit MemberIdPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : UintPrinter(a_value) {}
 };
 
-struct BitBoundPrinter : public UintPrinter<OpenDDS::XTypes::BitBound> {
-  BitBoundPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : UintPrinter(a_value) {}
+struct BitBoundPrinter : UintPrinter<OpenDDS::XTypes::BitBound> {
+  explicit BitBoundPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : UintPrinter(a_value) {}
 };
 
 std::ostream&
@@ -1622,12 +1649,12 @@ typeobject_generator::generate_minimal(AST_Type* type)
     OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
     ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
     std::memset(&ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
-    ti.sc_component_id().scc_length = std::distance(group_begin, group_end);
+    ti.sc_component_id().scc_length = static_cast<int>(std::distance(group_begin, group_end));
 
     {
       size_t idx = 0;
       for (SortedDependencies::const_iterator group_pos = group_begin; group_pos != group_end; ++group_pos) {
-        ti.sc_component_id().scc_index = ++idx; // Starts at 1.
+        ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
         minimal_type_identifier_map_[group_pos->type] = ti;
       }
     }
@@ -1657,7 +1684,7 @@ typeobject_generator::generate_minimal(AST_Type* type)
     {
       size_t idx = 0;
       for (SortedDependencies::const_iterator group_pos = group_begin; group_pos != group_end; ++group_pos) {
-        ti.sc_component_id().scc_index = ++idx;
+        ti.sc_component_id().scc_index = static_cast<int>(++idx);
         minimal_type_identifier_map_[group_pos->type] = ti;
         minimal_type_map_[ti] = minimal_type_object_map_[group_pos->type];
       }

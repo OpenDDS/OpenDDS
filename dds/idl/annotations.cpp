@@ -87,20 +87,27 @@ void Annotation::cache()
 }
 
 AST_Expression::AST_ExprValue* get_annotation_member_ev(
-  AST_Annotation_Appl* appl, const char* member_name)
+  AST_Annotation_Appl* appl, const char* member_name, AST_Expression::ExprType type)
 {
   AST_Annotation_Member* member =
     dynamic_cast<AST_Annotation_Member*>((*appl)[member_name]);
   if (member) {
     AST_Expression* e = member->value();
-    if (e) {
+    if (e && e->ev()) {
+      if (e->ev()->et != type) {
+        be_util::misc_error_and_abort(std::string("Found unexpected expression type "
+                                      "while getting value of member \"") +
+                                      member_name + "\" of annotation \"" +
+                                      appl->local_name()->get_string() + '"',
+                                      appl);
+      }
       return e->ev();
     }
   }
 
   be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
                                 member_name + "\" of annotation \"" +
-                                appl->local_name()->get_string() + "\"",
+                                appl->local_name()->get_string() + '"',
                                 appl);
   return 0;
 }
@@ -108,47 +115,25 @@ AST_Expression::AST_ExprValue* get_annotation_member_ev(
 bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
                                       const char* member_name)
 {
-  AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
-  if (!ev) {
-    be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
-                                  member_name + "\" of annotation \"" +
-                                  appl->local_name()->get_string() + "\"",
-                                  appl);
-  }
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_bool);
   return ev->u.bval;
 }
 
 ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
                                            const char* member_name)
 {
-  AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
-  if (!ev) {
-    be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
-                                  member_name + "\" of annotation \"" +
-                                  appl->local_name()->get_string() + "\"",
-                                  appl);
-  }
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_ulong);
   return ev->u.ulval;
 }
 
 std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
                                             const char* member_name)
 {
-  AST_Expression::AST_ExprValue* ev = get_annotation_member_ev(appl, member_name);
-  if (!ev) {
-    be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
-                                  member_name + "\" of annotation \"" +
-                                  appl->local_name()->get_string() + "\"",
-                                  appl);
-  }
-  UTL_String* idlstr = ev->u.strval;
-  if (!idlstr) {
-    be_util::misc_error_and_abort(std::string("Found null pointer while getting string value of member \"") +
-                                  member_name + "\" of annotation \"" +
-                                  appl->local_name()->get_string() + "\"",
-                                  appl);
-  }
-  return idlstr->get_string();
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_string);
+  return ev->u.strval->get_string();
 }
 
 template<>
