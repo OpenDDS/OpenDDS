@@ -136,7 +136,7 @@ namespace {
 
 } /* namespace */
 
-bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
+bool marshal_generator::gen_enum(AST_Enum* en, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& vals, const char*)
 {
   NamespaceGuard ng;
@@ -158,9 +158,9 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n";
-    if (cxx != "DDS::ReliabilityQosPolicyKind") {
-      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
-      // that are not valid enum values (see ParameterListConverter::to_param_list())
+    const ExtensibilityKind exten = be_global->extensibility(en);
+    // Uninitialized enums written by the writer can cause a problem otherwise
+    if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "    if (temp >= " << vals.size() << ") {\n"
         "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
