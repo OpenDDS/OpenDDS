@@ -514,6 +514,12 @@ module DDS {
         in    AccessControlListener  listener,
         inout SecurityException      ex);
 
+      // This method is not in the spec but is necessary for cleanup.
+      boolean
+      return_permissions_handle(
+        in    PermissionsHandle  handle,
+        inout SecurityException  ex);
+
       boolean
       return_permissions_token(
         in    PermissionsToken   token,
