@@ -1889,6 +1889,9 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
   return true;
 }
 
+
+// non-template overloads for sequences of basic types:
+
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq);
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq);
@@ -1903,6 +1906,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::UnionCaseLabelSeq& seq);
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq);
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq);
+
 
 inline void serialized_size(const Encoding&, size_t&, const XTypes::MinimalTypeDetail&)
 {}
@@ -2100,14 +2104,6 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSize& stru);
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size,
-  const XTypes::TypeIdentifierWithSizeSeq& stru);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSizeSeq& stru);
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSizeSeq& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru);
@@ -2444,15 +2440,6 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size,
-  const XTypes::TypeIdentifierPairSeq& stru);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& stru);
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& stru);
-
 
 } // namespace DCPS
 } // namespace OpenDDS
