@@ -11,7 +11,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-TypeLookupService::TypeLookupService() : rpc_sequence_number_(0)
+TypeLookupService::TypeLookupService()
 {
   to_empty_.minimal.kind = TK_NONE;
   to_empty_.complete.kind = TK_NONE;

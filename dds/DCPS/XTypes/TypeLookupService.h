@@ -40,22 +40,10 @@ public:
 
   bool type_object_in_cache(const TypeIdentifier& ti) const;
 
-  const DCPS::SequenceNumber& next_rpc_sequence_number()
-  {
-    return ++rpc_sequence_number_;
-  }
-
-  const DCPS::SequenceNumber& rpc_sequence_number() const
-  {
-    return rpc_sequence_number_;
-  }
-
 private:
   // Only minimal Type Objects for now
   TypeMap minimal_type_map_;
   TypeObject to_empty_;
-
-  DCPS::SequenceNumber rpc_sequence_number_;
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
