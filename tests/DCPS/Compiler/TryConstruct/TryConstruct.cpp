@@ -203,6 +203,7 @@ TEST(StructandSeq, DISCARD)
 TEST(StructandSeq, USE_DEFAULT)
 {
   TryCon::NestedStructTest1 sent;
+  OpenDDS::DCPS::set_default(sent);
   sent.ns.str64_d = "abcdefghijklmnopqrstuvwxyz";
   sent.ns.str64_ud = "abcdefghijklmnopqrstuvwxyz";
   sent.ns.str64_t = "abcdefghijklmnopqrstuvwxyz";
@@ -212,7 +213,9 @@ TEST(StructandSeq, USE_DEFAULT)
   sent.ns.upsu_ud.length(1);
   sent.ns.upsb_ud.length(1);
   sent.ns.esu_ud.length(1);
+  sent.ns.esu_ud[0] = VALUE1;
   sent.ns.esb_ud.length(1);
+  sent.ns.esb_ud[0] = VALUE1;
   sent.ns.strsu_ud.length(1);
   sent.ns.strsb_ud.length(1);
   sent.ns.wstrsu_ud.length(1);
