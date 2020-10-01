@@ -515,6 +515,7 @@ module DDS {
         inout SecurityException      ex);
 
       // This method is not in the spec but is necessary for cleanup.
+      // See DDSSEC12-89.
       boolean
       return_permissions_handle(
         in    PermissionsHandle  handle,
