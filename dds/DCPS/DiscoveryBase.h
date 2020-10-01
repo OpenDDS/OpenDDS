@@ -210,6 +210,7 @@ namespace OpenDDS {
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
         : max_type_lookup_service_reply_period_(0)
+        , type_lookup_service_sequence_number_(0)
         , lock_(lock)
         , participant_id_(participant_id)
         , publication_counter_(0)
@@ -816,9 +817,10 @@ namespace OpenDDS {
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
-      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq&,
-                                            const DCPS::RepoId&,
-                                            bool /*sendGetTypes*/)
+      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq& /*type_ids*/,
+                                            const DCPS::RepoId& /*endpoint*/,
+                                            bool /*is_discovery_protected*/,
+                                            bool /*send_get_types*/)
       { return true; }
 
       void match_endpoints(RepoId repoId, const TopicDetails& td,
@@ -966,7 +968,7 @@ namespace OpenDDS {
       typedef PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
-      ACE_Thread_Mutex matching_data_buffer_lock_;
+      DCPS::SequenceNumber type_lookup_service_sequence_number_;
 
 
       void
@@ -1129,7 +1131,6 @@ namespace OpenDDS {
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
           MatchingData md;
-          ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
 
           // if the type object is not in cache, send RPC request
           md.dwQos = *dwQos;
@@ -1147,13 +1148,20 @@ namespace OpenDDS {
 
           if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
               (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+            bool is_discovery_protected = false;
             if (!writer_local && type_lookup_service_ &&
                 !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
-              save_matching_data_and_get_typeobjects(writer_type_info, md, MatchingPair(writer, reader), writer);
+#ifdef OPENDDS_SECURITY
+              is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
+#endif
+              save_matching_data_and_get_typeobjects(writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
               return;
             } else if (!reader_local && type_lookup_service_ &&
                        !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
-              save_matching_data_and_get_typeobjects(reader_type_info, md, MatchingPair(writer, reader), reader);
+#ifdef OPENDDS_SECURITY
+              is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+#endif
+              save_matching_data_and_get_typeobjects(reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
               return;
             }
           }
@@ -1214,9 +1222,10 @@ namespace OpenDDS {
       }
 
       void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info, MatchingData& md,
-                                                  const MatchingPair mp, const RepoId& remote_id)
+                                                  const MatchingPair mp, const RepoId& remote_id,
+                                                  bool is_discovery_protected)
       {
-        md.rpc_sequence_number = type_lookup_service_->next_rpc_sequence_number();
+        md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
         MatchingDataIter md_it = matching_data_buffer_.find(mp);
         if (md_it != matching_data_buffer_.end()) {
           md_it->second = md;
@@ -1227,20 +1236,20 @@ namespace OpenDDS {
         // Get the top-level TypeObject
         XTypes::TypeIdentifierSeq type_ids;
         type_ids.append(type_info->minimal.typeid_with_size.type_id);
-        send_type_lookup_request(type_ids, remote_id, true);
+        send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
 
         // Get dependent TypeObjects
         if (type_info->minimal.dependent_typeid_count == -1 ||
             type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
-          send_type_lookup_request(type_ids, remote_id, false);
+          send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
         } else {
           XTypes::TypeIdentifierSeq dependencies;
           dependencies.length(type_info->minimal.dependent_typeid_count);
           for (size_t i = 0; i < (size_t)type_info->minimal.dependent_typeid_count; ++i) {
             dependencies[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
-          send_type_lookup_request(dependencies, remote_id, true);
+          send_type_lookup_request(dependencies, remote_id, is_discovery_protected, true);
         }
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
       }
@@ -1248,7 +1257,7 @@ namespace OpenDDS {
       void
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         MatchingDataIter end_iter = matching_data_buffer_.end();
 
         for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
@@ -1264,7 +1273,6 @@ namespace OpenDDS {
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-        ACE_GUARD(ACE_Thread_Mutex, g1, matching_data_buffer_lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {
@@ -1311,8 +1319,6 @@ namespace OpenDDS {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
                 ACE_TEXT("match_continue failed\n")));
             }
-            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
-            ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
             ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
             ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
             return;
@@ -1374,8 +1380,6 @@ namespace OpenDDS {
           add_security_info(wTls, writer, reader), writer, pubQos, dwQos,
           octet_seq_type_info_writer
         };
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock_mdb(matching_data_buffer_lock_);
-        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg1, rev_lock_mdb);
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         static const bool writer_active = true;
@@ -1864,6 +1868,7 @@ namespace OpenDDS {
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
+        , extended_builtin_endpoints_(0)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1898,6 +1903,7 @@ namespace OpenDDS {
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
+        , extended_builtin_endpoints_(0)
 #endif
         {
           RepoId guid;
@@ -1977,6 +1983,7 @@ namespace OpenDDS {
         DDS::Security::PermissionsHandle permissions_handle_;
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
         DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
+        DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints_;
 #endif
       };
 
