@@ -9,8 +9,6 @@
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Hash.h"
 
-#include <dds/DdsDcpsCoreC.h>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -34,7 +32,6 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 
   std::memcpy(name_hash, result, sizeof name_hash);
 }
-
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
   : kind_(kind)
@@ -90,15 +87,6 @@ TypeIdentifier::TypeIdentifier(const TypeIdentifier& other)
   activate(&other);
 }
 
-void TypeIdentifier::kind(ACE_CDR::Octet k)
-{
-  if (kind_ != k) {
-    reset();
-    kind_ = k;
-    activate();
-  }
-}
-
 void TypeIdentifier::reset()
 {
   if (!active_) {
@@ -145,9 +133,66 @@ TypeIdentifier& TypeIdentifier::operator=(const TypeIdentifier& other)
   return *this;
 }
 
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StringSTypeDefn& sdefn)
+  : kind_(k)
+{
+  activate();
+  string_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StringLTypeDefn& ldefn)
+  : kind_(k)
+{
+  activate();
+  string_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainSequenceSElemDefn& sdefn)
+  : kind_(k)
+{
+  activate();
+  seq_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainSequenceLElemDefn& ldefn)
+  : kind_(k)
+{
+  activate();
+  seq_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArraySElemDefn& sdefn)
+  : kind_(k)
+{
+  activate();
+  array_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArrayLElemDefn& ldefn)
+  : kind_(k)
+{
+  activate();
+  array_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHash& eh)
+  : kind_(k)
+{
+  activate();
+  std::memcpy(equivalence_hash(), eh, sizeof eh);
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponentId& id)
+  : kind_(k)
+{
+  activate();
+  sc_component_id() = id;
+}
 
 TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 {
+  OPENDDS_ASSERT(type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE);
+
   const Encoding& encoding = get_typeobject_encoding();
   size_t size = serialized_size(encoding, type_object);
   ACE_Message_Block buff(size);
@@ -159,34 +204,524 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 
   // First 14 bytes of MD5 of the serialized TypeObject using XCDR
   // version 2 with Little Endian encoding
-  EquivalenceHash eh;
-  std::memcpy(eh, result, sizeof eh);
+  TypeIdentifier ti(type_object.kind);
+  std::memcpy(ti.equivalence_hash(), result, sizeof(EquivalenceHash));
 
-  if (type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE) {
-    return TypeIdentifier::make(type_object.kind, eh);
-  }
-
-  return TypeIdentifier();
+  return ti;
 }
 
-void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq)
+ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name)
 {
-  seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
-  DCPS::MessageBlockHelper helper(seq);
-  DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
-  if (!(serializer << type_info)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
-              ACE_TEXT("serialization of type information failed.\n")));
+  ACE_CDR::ULong name_hash;
+
+  unsigned char result[16];
+  DCPS::MD5Hash(result, name.c_str(), name.size());
+
+  std::memcpy(&name_hash, result, sizeof name_hash);
+  return name_hash & 0x0FFFFFFF;
+}
+
+void hash_member_name(NameHash& name_hash, const OPENDDS_STRING& name)
+{
+  unsigned char result[16];
+  DCPS::MD5Hash(result, name.c_str(), name.size());
+
+  std::memcpy(&name_hash, result, sizeof name_hash);
+}
+
+bool is_fully_descriptive(const TypeIdentifier& ti)
+{
+  switch (ti.kind()) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TI_STRING8_SMALL:
+  case TI_STRING8_LARGE:
+  case TI_STRING16_SMALL:
+  case TI_STRING16_LARGE:
+    return true;
+  case TI_PLAIN_SEQUENCE_SMALL:
+    return ti.seq_sdefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_SEQUENCE_LARGE:
+    return ti.seq_ldefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_ARRAY_SMALL:
+    return ti.array_sdefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_ARRAY_LARGE:
+    return ti.array_ldefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_MAP_SMALL:
+    return ti.map_sdefn().header.equiv_kind == EK_BOTH;
+  case TI_PLAIN_MAP_LARGE:
+    return ti.map_ldefn().header.equiv_kind == EK_BOTH;
+  }
+
+  return false;
+}
+
+namespace {
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalStructMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies);
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalUnionMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies);
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalEnumeratedLiteral& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies);
+
+void compute_dependencies(const TypeMap&,
+                          const CompleteTypeObject&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // TODO: Implement this.
+}
+void compute_dependencies(const TypeMap&,
+                          const MinimalAliasHeader&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonAliasBody& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.related_type, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalAliasBody& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalAliasType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.body, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalAnnotationType&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // TODO: Implement this.
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalTypeDetail&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalStructHeader& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.base_type, dependencies);
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonStructMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.member_type_id, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalMemberDetail&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalStructMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+template <typename T>
+void compute_dependencies(const TypeMap& type_map,
+                          const Sequence<T>& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
+    compute_dependencies(type_map, *pos, dependencies);
   }
 }
 
-void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq)
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalStructType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  DCPS::MessageBlockHelper helper(seq);
-  DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
-  if (!(serializer >> type_info)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
-              ACE_TEXT("deserialization of type information failed.\n")));
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.member_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalUnionHeader& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonDiscriminatorMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.type_id, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalDiscriminatorMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonUnionMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.type_id, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalUnionMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalUnionType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.discriminator, dependencies);
+  compute_dependencies(type_map, type.member_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalBitsetType&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // TODO: Implement this.
+}
+
+void compute_dependencies(const TypeMap&,
+                          const CommonCollectionHeader&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalCollectionHeader& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonCollectionElement& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.type, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalCollectionElement& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalSequenceType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const CommonArrayHeader&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalArrayHeader& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalArrayType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalMapType&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // TODO: Implement this.
+}
+
+void compute_dependencies(const TypeMap&,
+                          const CommonEnumeratedHeader&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalEnumeratedHeader& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const CommonEnumeratedLiteral&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalEnumeratedLiteral& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalEnumeratedType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.literal_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalBitmaskType&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // TODO: Implement this.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalTypeObject& type_object,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  switch (type_object.kind) {
+  case TK_ALIAS:
+    compute_dependencies(type_map, type_object.alias_type, dependencies);
+    break;
+  case TK_ANNOTATION:
+    compute_dependencies(type_map, type_object.annotation_type, dependencies);
+    break;
+  case TK_STRUCTURE:
+    compute_dependencies(type_map, type_object.struct_type, dependencies);
+    break;
+  case TK_UNION:
+    compute_dependencies(type_map, type_object.union_type, dependencies);
+    break;
+  case TK_BITSET:
+    compute_dependencies(type_map, type_object.bitset_type, dependencies);
+    break;
+  case TK_SEQUENCE:
+    compute_dependencies(type_map, type_object.sequence_type, dependencies);
+    break;
+  case TK_ARRAY:
+    compute_dependencies(type_map, type_object.array_type, dependencies);
+    break;
+  case TK_MAP:
+    compute_dependencies(type_map, type_object.map_type, dependencies);
+    break;
+  case TK_ENUM:
+    compute_dependencies(type_map, type_object.enumerated_type, dependencies);
+    break;
+  case TK_BITMASK:
+    compute_dependencies(type_map, type_object.bitmask_type, dependencies);
+    break;
+  }
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const TypeObject& type_object,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  switch (type_object.kind) {
+  case EK_COMPLETE:
+    compute_dependencies(type_map, type_object.complete, dependencies);
+    break;
+  case EK_MINIMAL:
+    compute_dependencies(type_map, type_object.minimal, dependencies);
+    break;
+  }
+}
+
+void compute_dependencies(const TypeMap&,
+                          const StringSTypeDefn&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap&,
+                          const StringLTypeDefn&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap&,
+                          const PlainCollectionHeader&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const PlainSequenceSElemDefn& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, *type.element_identifier, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const PlainSequenceLElemDefn& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, *type.element_identifier, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const PlainArraySElemDefn& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, *type.element_identifier, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const PlainArrayLElemDefn& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, *type.element_identifier, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const PlainMapSTypeDefn& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, *type.element_identifier, dependencies);
+  compute_dependencies(type_map, *type.key_identifier, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const PlainMapLTypeDefn& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, *type.element_identifier, dependencies);
+  compute_dependencies(type_map, *type.key_identifier, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const StronglyConnectedComponentId&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Do nothing.
+}
+
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const TypeIdentifier& type_identifier,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  if (dependencies.count(type_identifier) != 0) {
+    return;
+  }
+
+  dependencies.insert(type_identifier);
+
+  switch (type_identifier.kind()) {
+  case TI_STRING8_SMALL:
+  case TI_STRING16_SMALL:
+    compute_dependencies(type_map, type_identifier.string_sdefn(), dependencies);
+    break;
+  case XTypes::TI_STRING8_LARGE:
+  case XTypes::TI_STRING16_LARGE:
+    compute_dependencies(type_map, type_identifier.string_ldefn(), dependencies);
+    break;
+  case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+    compute_dependencies(type_map, type_identifier.seq_sdefn(), dependencies);
+    break;
+  case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+    compute_dependencies(type_map, type_identifier.seq_ldefn(), dependencies);
+    break;
+  case XTypes::TI_PLAIN_ARRAY_SMALL:
+    compute_dependencies(type_map, type_identifier.array_sdefn(), dependencies);
+    break;
+  case XTypes::TI_PLAIN_ARRAY_LARGE:
+    compute_dependencies(type_map, type_identifier.array_ldefn(), dependencies);
+    break;
+  case XTypes::TI_PLAIN_MAP_SMALL:
+    compute_dependencies(type_map, type_identifier.map_sdefn(), dependencies);
+    break;
+  case XTypes::TI_PLAIN_MAP_LARGE:
+    compute_dependencies(type_map, type_identifier.map_ldefn(), dependencies);
+    break;
+  case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+    compute_dependencies(type_map, type_identifier.sc_component_id(), dependencies);
+    break;
+  case XTypes::EK_COMPLETE:
+  case XTypes::EK_MINIMAL:
+    {
+      TypeMap::const_iterator pos = type_map.find(type_identifier);
+      if (pos != type_map.end()) {
+        compute_dependencies(type_map, pos->second, dependencies);
+      }
+      break;
+    }
   }
 }
 
@@ -324,12 +859,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   if (seq.length() == 0) {
     return;
   }
-  primitive_serialized_size(encoding, size, CORBA::ULong(), seq.length());
+  primitive_serialized_size(encoding, size, ACE_CDR::ULong(), seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
@@ -341,7 +876,7 @@ bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
@@ -365,7 +900,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
@@ -377,7 +912,7 @@ bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
@@ -396,12 +931,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   if (seq.length() == 0) {
     return;
   }
-  primitive_serialized_size(encoding, size, CORBA::Long(), seq.length());
+  primitive_serialized_size(encoding, size, ACE_CDR::Long(), seq.length());
 }
 
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
@@ -413,7 +948,7 @@ bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
@@ -887,18 +1422,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSizeSeq& seq)
 {
   DCPS::primitive_serialized_size_ulong(encoding, size);
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSizeSeq& seq)
 {
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm << seq[i])) {
       return false;
     }
@@ -908,12 +1443,12 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSizeSeq& seq)
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSizeSeq& seq)
 {
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
   seq.length(length);
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
       return false;
     }
@@ -1712,7 +2247,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   }
   switch (kind) {
   case XTypes::TK_BOOLEAN: {
-    CORBA::Boolean tmp;
+    ACE_CDR::Boolean tmp;
     if (strm >> ACE_InputCDR::to_boolean(tmp)) {
       uni.boolean_value = tmp;
       uni.kind = kind;
@@ -1721,7 +2256,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_BYTE: {
-    CORBA::Octet tmp;
+    ACE_CDR::Octet tmp;
     if (strm >> ACE_InputCDR::to_octet(tmp)) {
       uni.byte_value = tmp;
       uni.kind = kind;
@@ -1730,7 +2265,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_INT16: {
-    CORBA::Short tmp;
+    ACE_CDR::Short tmp;
     if (strm >> tmp) {
       uni.int16_value = tmp;
       uni.kind = kind;
@@ -1739,7 +2274,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_UINT16: {
-    CORBA::UShort tmp;
+    ACE_CDR::UShort tmp;
     if (strm >> tmp) {
       uni.uint_16_value = tmp;
       uni.kind = kind;
@@ -1748,7 +2283,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_INT32: {
-    CORBA::Long tmp;
+    ACE_CDR::Long tmp;
     if (strm >> tmp) {
       uni.int32_value = tmp;
       uni.kind = kind;
@@ -1757,7 +2292,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_UINT32: {
-    CORBA::ULong tmp;
+    ACE_CDR::ULong tmp;
     if (strm >> tmp) {
       uni.uint32_value = tmp;
       uni.kind = kind;
@@ -1766,7 +2301,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_INT64: {
-    CORBA::LongLong tmp;
+    ACE_CDR::LongLong tmp;
     if (strm >> tmp) {
       uni.int64_value = tmp;
       uni.kind = kind;
@@ -1775,7 +2310,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_UINT64: {
-    CORBA::ULongLong tmp;
+    ACE_CDR::ULongLong tmp;
     if (strm >> tmp) {
       uni.uint64_value = tmp;
       uni.kind = kind;
@@ -1784,7 +2319,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_FLOAT32: {
-    CORBA::Float tmp;
+    ACE_CDR::Float tmp;
     if (strm >> tmp) {
       uni.float32_value = tmp;
       uni.kind = kind;
@@ -1793,7 +2328,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_FLOAT64: {
-    CORBA::Double tmp;
+    ACE_CDR::Double tmp;
     if (strm >> tmp) {
       uni.float64_value = tmp;
       uni.kind = kind;
@@ -1802,7 +2337,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_FLOAT128: {
-    CORBA::LongDouble tmp;
+    ACE_CDR::LongDouble tmp;
     if (strm >> tmp) {
       uni.float128_value = tmp;
       uni.kind = kind;
@@ -1811,7 +2346,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_CHAR8: {
-    CORBA::Char tmp;
+    ACE_CDR::Char tmp;
     if (strm >> ACE_InputCDR::to_char(tmp)) {
       uni.char_value = tmp;
       uni.kind = kind;
@@ -1820,7 +2355,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_CHAR16: {
-    CORBA::WChar tmp;
+    ACE_CDR::WChar tmp;
     if (strm >> ACE_InputCDR::to_wchar(tmp)) {
       uni.wchar_value = tmp;
       uni.kind = kind;
@@ -1829,7 +2364,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_ENUM: {
-    CORBA::Long tmp;
+    ACE_CDR::Long tmp;
     if (strm >> tmp) {
       uni.enumerated_value = tmp;
       uni.kind = kind;
@@ -2805,7 +3340,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 {
   // TODO: needs correct implementation
   DCPS::primitive_serialized_size_ulong(encoding, size);
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
   }
 }
@@ -2813,11 +3348,11 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& seq)
 {
   // TODO: needs correct implementation
-  const CORBA::ULong length = seq.length();
+  const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
   }
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm << seq[i])) {
       return false;
     }
@@ -2828,130 +3363,17 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& seq)
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& seq)
 {
   // TODO: needs correct implementation
-  CORBA::ULong length;
+  ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
   seq.length(length);
-  for (CORBA::ULong i = 0; i < length; ++i) {
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
       return false;
     }
   }
   return true;
-}
-
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<void>()
-{
-  static const XTypes::TypeIdentifier ti;
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Boolean>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_BOOLEAN);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Octet>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_BYTE);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Short>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_INT16);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Long>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_INT32);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongLong>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_INT64);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::UShort>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT16);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULong>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT32);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULongLong>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT64);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Float>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT32);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Double>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT64);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongDouble>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT128);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_CHAR8);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>()
-{
-  static const XTypes::TypeIdentifier ti(XTypes::TK_CHAR16);
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char*>()
-{
-  static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(false, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
-  return ti;
-}
-
-template<>
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::WChar*>()
-{
-  static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(true, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
-  return ti;
 }
 
 } // namespace DCPS

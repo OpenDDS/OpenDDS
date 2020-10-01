@@ -27,6 +27,7 @@
 #include "Util.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
+#include "DCPS_Utils.h"
 
 #include "tao/debug.h"
 

@@ -1758,6 +1758,7 @@ workspace {
   $(ACE_ROOT)/ace/ace.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL
+  dds/DCPS/OpenDDS_Util.mpc
   dds/idl
   java/idl2jni/codegen
 EOT

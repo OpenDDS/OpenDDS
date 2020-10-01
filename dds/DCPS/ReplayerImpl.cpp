@@ -364,10 +364,8 @@ ReplayerImpl::enable()
   XTypes::TypeInformation type_info;
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
-  type_info.minimal.typeid_with_size.type_id.kind(XTypes::TK_NONE);
   type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
   type_info.complete.dependent_typeid_count = 0;
-  type_info.complete.typeid_with_size.type_id.kind(XTypes::TK_NONE);
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
