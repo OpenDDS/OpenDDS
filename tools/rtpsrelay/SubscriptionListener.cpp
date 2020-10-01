@@ -63,6 +63,7 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
   data_reader_qos.reliability = data.reliability;
   data_reader_qos.destination_order = data.destination_order;
   // data_reader_qos.history not used.
+  data_reader_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
   // data_reader_qos.resource_limits not used.
   data_reader_qos.user_data = data.user_data;
   data_reader_qos.ownership = data.ownership;
