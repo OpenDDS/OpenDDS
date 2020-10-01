@@ -63,7 +63,13 @@ Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, cons
 {
   try {
     std::cout << name << " observes " << (e & Observer::e_SAMPLE_READ ? "SAMPLE_READ" : "SAMPLE_TAKEN") << std::endl;
-    reader_ = s->create_datareader(d.topic.in(), DATAREADER_QOS_DEFAULT, listener_.in(), DEFAULT_STATUS_MASK);
+    DDS::DataReaderQos qos;
+    if (s->get_default_datareader_qos(qos) != DDS::RETCODE_OK) {
+      throw ACE_TEXT("get_default_datareader_qos failed.");
+    }
+    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    qos.reliability.max_blocking_time = {2, 0};
+    reader_ = s->create_datareader(d.topic.in(), qos, listener_.in(), DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(reader_.in())) {
       throw ACE_TEXT("create_datareader failed.");
     }
