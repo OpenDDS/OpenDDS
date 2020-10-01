@@ -50,11 +50,12 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 }
 
 int
-OpenDDS::DCPS::ReactorTask::open(void*, TimeDuration timeout, ThreadStatus* thread_stat)
+OpenDDS::DCPS::ReactorTask::open(void*, TimeDuration timeout, ThreadStatus* thread_stat, OPENDDS_STRING name)
 {
   // thread status reporting support
   timeout_ = timeout;
   thread_status_ = thread_stat;
+  name_ = name;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
   if (use_async_send_) {
@@ -173,24 +174,31 @@ OpenDDS::DCPS::ReactorTask::svc()
         ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
       }
 #else
-        tid = ACE_OS::thr_self();
+      tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
+      MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
+
+      OPENDDS_STRING key = std::to_string(tid);
+      if (name_ != "") {
+        key += " (" + name_ + ")";
+      }
+
       ACE_Time_Value t = timeout_.value();
-      ACE_Time_Value expire = MonotonicTimePoint::now().value() + t;
 
       while (state_ == STATE_RUNNING) {
         reactor_->run_reactor_event_loop(t, 0);
-        ACE_Time_Value now = MonotonicTimePoint::now().value();
+        MonotonicTimePoint now = MonotonicTimePoint::now();
         if (now > expire) {
-          expire = now + timeout_.value();
+          expire = now + timeout_;
           if (thread_status_) {
             if (DCPS_debug_level > 4) {
               ACE_DEBUG((LM_DEBUG,
                         "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
             }
-            thread_status_->lock.acquire_write();
-            thread_status_->map[tid] = now;
-            thread_status_->lock.release();
+            {
+              ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
+              thread_status_->map[key] = now;
+            }
           }
         }
       }

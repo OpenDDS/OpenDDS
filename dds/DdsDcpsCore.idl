@@ -480,7 +480,7 @@ module OpenDDS {
     BUILT_IN_TOPIC_TYPE
     struct InternalThreadBuiltinTopicData {
             BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
-            unsigned long thread_id;
+            string thread_id;
             DDS::Time_t timestamp;
     };
 

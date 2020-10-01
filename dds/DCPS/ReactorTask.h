@@ -32,8 +32,8 @@ namespace DCPS {
 
 // thread status reporting forward
 struct ThreadStatus {
-  ACE_Recursive_Thread_Mutex lock;
-  OPENDDS_MAP(unsigned long, ACE_Time_Value) map;
+  ACE_Thread_Mutex lock;
+  OPENDDS_MAP(OPENDDS_STRING, MonotonicTimePoint) map;
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
@@ -45,7 +45,7 @@ public:
   virtual ~ReactorTask();
 
 public:
-  virtual int open(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0);
+  virtual int open(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, OPENDDS_STRING name = "");
   virtual int svc();
   virtual int close(u_long flags = 0);
 
@@ -106,6 +106,7 @@ private:
   // thread status reporting
   ThreadStatus* thread_status_;
   TimeDuration timeout_;
+  OPENDDS_STRING name_;
 
   ReactorInterceptor_rch interceptor_;
 };

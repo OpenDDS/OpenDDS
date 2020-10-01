@@ -43,7 +43,8 @@ public:
   : work_available_(lock_),
       shutdown_initiated_(false),
       opened_(false),
-      thr_id_(ACE_OS::NULL_thread) {
+      thr_id_(ACE_OS::NULL_thread),
+      name_("QueueTaskBase") {
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
 
@@ -119,10 +120,15 @@ public:
         ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
       }
 #else
-        tid = thr_id_;
+      tid = thr_id_;
 #endif /* ACE_HAS_MAC_OSX */
     TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
     ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
+
+    OPENDDS_STRING key = std::to_string(tid);
+    if (name_ != "") {
+      key += " (" + name_ + ")";
+    }
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
@@ -132,22 +138,22 @@ public:
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {
           if (interval > TimeDuration(0)) {
-            ACE_Time_Value t = interval.value();
-            ACE_Time_Value expire = MonotonicTimePoint::now().value() + t;
+            MonotonicTimePoint expire = MonotonicTimePoint::now() + interval;
 
             do {
-              this->work_available_.wait(&expire); // wait uses abstime
-              ACE_Time_Value now = MonotonicTimePoint::now().value();
+              this->work_available_.wait(&expire.value()); // wait uses abstime
+              MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
-                expire = now + interval.value();
+                expire = now + interval;
                 if (status) {
                   if (DCPS_debug_level > 4) {
                     ACE_DEBUG((LM_DEBUG,
                               "%T (%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                   }
-                  status->lock.acquire_write();
-                  status->map[tid] = now;
-                  status->lock.release();
+                  {
+                    ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
+                    status->map[key] = now;
+                  }
                 }
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
@@ -240,6 +246,9 @@ private:
 
   /// The id of the thread created by this task.
   ACE_thread_t thr_id_;
+
+  /// name for trhead monitoring BIT
+  OPENDDS_STRING name_;
 };
 
 } // namespace DCPS

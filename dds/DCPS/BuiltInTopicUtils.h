@@ -42,7 +42,7 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_CONNECTION_RECORD_TOPIC_TY
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_INTERNAL_THREAD_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE;
 
-enum { NUMBER_OF_BUILT_IN_TOPICS = 7 };
+const size_t NUMBER_OF_BUILT_IN_TOPICS = 7;
 
 /**
  * Returns true if the topic name and type pair matches one of the built-in

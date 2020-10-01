@@ -3510,20 +3510,21 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
 
   if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
     if (thread_status_ && bit) {
-      thread_status_->lock.acquire_read();
+      {
+        ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_->lock);
 
-      for (OPENDDS_MAP(unsigned long, ACE_Time_Value)::const_iterator i = thread_status_->map.begin(); i != thread_status_->map.end(); ++i) {
-        const ACE_Time_Value t = i->second;
-        DCPS::InternalThreadBuiltinTopicData data;
-        ACE_OS::memcpy(&(data.guid), &(guid), 16);
-        data.thread_id = i->first;
-        data.timestamp.sec = t.sec();
-        data.timestamp.nanosec = t.usec() * 1000;
+        for (OPENDDS_MAP(OPENDDS_STRING, MonotonicTimePoint)::const_iterator i = thread_status_->map.begin(); i != thread_status_->map.end(); ++i) {
+          const MonotonicTimePoint t = i->second;
+          DCPS::InternalThreadBuiltinTopicData data;
+          ACE_OS::memcpy(&(data.guid), &(guid), 16);
+          data.thread_id = i->first.c_str();
+          data.timestamp.sec = t.value().sec();
+          data.timestamp.nanosec = t.value().usec() * 1000;
 
-        bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+          bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+        }
+
       }
-
-      thread_status_->lock.release();
     } else {
       // Not necessarily and error. App could be shutting down.
       ACE_DEBUG((LM_DEBUG,

@@ -40,8 +40,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     DDS::ParticipantBuiltinTopicDataTypeSupport_var ts =
       new DDS::ParticipantBuiltinTopicDataTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-                                              BUILT_IN_PARTICIPANT_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -77,8 +77,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataTypeSupport_var ts =
       new OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-      BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -114,8 +114,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     OpenDDS::DCPS::InternalThreadBuiltinTopicDataTypeSupport_var ts =
       new OpenDDS::DCPS::InternalThreadBuiltinTopicDataTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-      BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -151,8 +151,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     OpenDDS::DCPS::ConnectionRecordTypeSupport_var ts =
       new OpenDDS::DCPS::ConnectionRecordTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-      BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -188,8 +188,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     DDS::TopicBuiltinTopicDataTypeSupport_var ts =
       new DDS::TopicBuiltinTopicDataTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-                                              BUILT_IN_TOPIC_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_TOPIC_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -225,8 +225,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     DDS::SubscriptionBuiltinTopicDataTypeSupport_var ts =
       new DDS::SubscriptionBuiltinTopicDataTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-                                              BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -262,8 +262,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     DDS::PublicationBuiltinTopicDataTypeSupport_var ts =
       new DDS::PublicationBuiltinTopicDataTypeSupportImpl;
 
-    DDS::ReturnCode_t ret = ts->register_type(participant,
-                                              BUILT_IN_PUBLICATION_TOPIC_TYPE);
+    const DDS::ReturnCode_t ret = ts->register_type(participant,
+                                                    BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
