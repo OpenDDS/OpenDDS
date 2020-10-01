@@ -943,17 +943,25 @@ namespace OpenDDS {
       ser.encoding(encoding);
     }
 
+    bool ser_ret = true;
     MessageType data;
     if (sample.header_.key_fields_only_) {
-      ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data);
+      ser_ret = (ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data));
     } else {
-      ser >> data;
+      ser_ret = (ser >> data);
     }
-    if (!ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                 ACE_TEXT("deserialization failed.\n"),
-                 TraitsType::type_name()));
-      return;
+    if (!ser_ret) {
+      if (!ser.good_bit()) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                  ACE_TEXT("deserialization failed.\n"),
+                  TraitsType::type_name()));
+        return;
+      } else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                  ACE_TEXT("object construction failure, dropping sample.\n"),
+                  TraitsType::type_name()));
+        return;
+      }
     }
 
     DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
@@ -1065,16 +1073,25 @@ protected:
 
     const bool key_only_marshaling =
       marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING;
+
+    bool ser_ret = true;
     if (key_only_marshaling) {
-      ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
+      ser_ret = (ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data));
     } else {
-      ser >> *data;
+      ser_ret = (ser >> *data);
     }
-    if (!ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
-                 ACE_TEXT("deserialization failed, dropping sample.\n"),
-                 TraitsType::type_name()));
-      return;
+    if (!ser_ret) {
+      if (!ser.good_bit()) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
+                  ACE_TEXT("deserialization failed, dropping sample.\n"),
+                  TraitsType::type_name()));
+        return;
+      } else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                  ACE_TEXT("object construction failure, dropping sample.\n"),
+                  TraitsType::type_name()));
+        return;
+      }
     }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
