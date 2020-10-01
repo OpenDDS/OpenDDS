@@ -51,8 +51,7 @@ public:
 
 private:
   // Only minimal Type Objects for now
-  typedef std::map<TypeIdentifier, TypeObject> TypeObjectMap;
-  TypeObjectMap type_object_map_;
+  TypeMap minimal_type_map_;
 
   // For dependencies of local types
   typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;

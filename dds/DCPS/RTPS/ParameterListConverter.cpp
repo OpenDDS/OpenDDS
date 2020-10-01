@@ -14,6 +14,7 @@
 
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
 
 #include <cstring>

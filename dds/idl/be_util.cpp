@@ -161,3 +161,10 @@ be_util::dds_root()
   }
   return value;
 }
+
+void
+be_util::misc_error_and_abort(const std::string& message, AST_Decl* node)
+{
+  idl_global->err()->misc_error(message.c_str(), node);
+  BE_abort();
+}
