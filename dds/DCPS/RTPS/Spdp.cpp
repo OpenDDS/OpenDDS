@@ -2312,6 +2312,10 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
     local_sender_->disable_and_wait();
   }
 
+  if (thread_status_sender_) {
+    thread_status_sender_->disable_and_wait();
+  }
+
   ACE_Reactor* reactor = reactor_task->get_reactor();
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
