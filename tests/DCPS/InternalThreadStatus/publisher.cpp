@@ -29,9 +29,21 @@
 #include "MessengerTypeSupportImpl.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
+
+#include "tests/Utils/StatusMatching.h"
+
 #include "InternalThreadStatusListenerImpl.h"
 
 #include <iostream>
+
+ACE_Thread_Mutex lock;
+ACE_Condition_Thread_Mutex cond(lock);
+
+void done_callback()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(lock);
+  cond.signal();
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -124,6 +136,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        EXIT_FAILURE);
     }
 
+    Messenger::MessageDataWriter_var message_writer =
+      Messenger::MessageDataWriter::_narrow(dw);
+
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
@@ -134,7 +149,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher");
+    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher", done_callback);
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
@@ -145,8 +160,38 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
-    ACE_OS::sleep(10);
+    // wait for subscriber
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is waiting for subscriber\n"));
+    Utils::wait_match(dw, 1);
+
+    // write samples
+    Messenger::Message message;
+    message.from = "Publisher";
+    message.subject = "Test Message";
+    message.subject_id = 1;
+    message.text = "Testing...";
+    message.count = 0;
+    for (int i = 0; i < 10; ++i) {
+      DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
+      ++message.count;
+
+      if (error != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR: %N:%l: main() -")
+                   ACE_TEXT(" write returned %d!\n"), error));
+      }
+    }
+
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is waiting for acknowledgments\n"));
+    DDS::Duration_t timeout = { 30, 0 };
+    message_writer->wait_for_acknowledgments(timeout);
+    // With static discovery, it's not an error for wait_for_acks to fail
+    // since the peer process may have terminated before sending acks.
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is done\n"));
+
+    // wait for internal thread status reports
+    ACE_Guard<ACE_Thread_Mutex> g(lock);
+    cond.wait();
 
     // Clean-up!
     std::cerr << "publisher deleting contained entities" << std::endl;

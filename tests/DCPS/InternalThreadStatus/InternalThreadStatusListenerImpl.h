@@ -18,13 +18,14 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+typedef void (*callback_t)();
 
 class InternalThreadStatusListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor
-  explicit InternalThreadStatusListenerImpl(OPENDDS_STRING id);
+  explicit InternalThreadStatusListenerImpl(OPENDDS_STRING id, callback_t callback);
 
   //Destructor
   virtual ~InternalThreadStatusListenerImpl();
@@ -58,6 +59,10 @@ public:
 private:
 
   OPENDDS_STRING id_;
+  callback_t callback_;
+  int count_;
+  bool done_;
+
 };
 
 #endif /* INTERNAL_THREAD_STATUS_LISTENER_IMPL  */

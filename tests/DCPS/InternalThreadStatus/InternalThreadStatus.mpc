@@ -23,5 +23,6 @@ project(InternalThreadStatusSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_trans
   Source_Files {
     subscriber.cpp
     InternalThreadStatusListenerImpl.cpp
+		DataReaderListenerImpl.cpp
   }
 }

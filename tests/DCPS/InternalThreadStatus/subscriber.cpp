@@ -30,8 +30,18 @@
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include "InternalThreadStatusListenerImpl.h"
+#include "DataReaderListenerImpl.h"
 
 #include <iostream>
+
+ACE_Thread_Mutex reader_done_lock;
+ACE_Condition_Thread_Mutex reader_done_cond(reader_done_lock);
+
+void reader_done_callback()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(reader_done_lock);
+  reader_done_cond.signal();
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -92,12 +102,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     subscriber_qos.partition.name.length(1);
     subscriber_qos.partition.name[0] = "OCI";
 
-    DDS::Subscriber_var pub =
+    DDS::Subscriber_var sub =
       participant->create_subscriber(subscriber_qos,
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(pub.in())) {
+    if (CORBA::is_nil(sub.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_subscriber failed!\n")),
@@ -105,14 +115,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     DDS::DataReaderQos qos;
-    pub->get_default_datareader_qos(qos);
+    sub->get_default_datareader_qos(qos);
     std::cout << "Reliable DataReader" << std::endl;
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     // Create DataReader
     DDS::DataReader_var dw =
-      pub->create_datareader(topic.in(),
+      sub->create_datareader(topic.in(),
                              qos,
                              DDS::DataReaderListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -134,7 +144,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Subscriber");
+    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Subscriber", reader_done_callback);
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
@@ -145,15 +155,54 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
-    ACE_OS::sleep(10);
+    // Create DataReaders
+    DDS::DataReaderListener_var dr_listener(new DataReaderListenerImpl("Subscriber", 10, reader_done_callback));
+
+    DDS::DataReaderQos dr_qos;
+    sub->get_default_datareader_qos(dr_qos);
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+    DDS::DataReader_var reader =
+      sub->create_datareader(topic,
+                             dr_qos,
+                             dr_listener,
+                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!reader) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_datareader failed!\n")), -1);
+    }
+
+    Messenger::MessageDataReader_var reader_i =
+      Messenger::MessageDataReader::_narrow(reader);
+
+    if (!reader_i) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" _narrow failed!\n")),
+                      -1);
+    }
+
+    // wait for message reader
+    {
+    ACE_Guard<ACE_Thread_Mutex> g(reader_done_lock);
+    reader_done_cond.wait();
+    }
+
+    // wait for internal thread status reports
+    // use same condition
+    {
+    ACE_Guard<ACE_Thread_Mutex> g(reader_done_lock);
+    reader_done_cond.wait();
+    }
 
     // Clean-up!
-    std::cerr << "publisher deleting contained entities" << std::endl;
+    std::cerr << "subscriber deleting contained entities" << std::endl;
     participant->delete_contained_entities();
-    std::cerr << "publisher deleting participant" << std::endl;
+    std::cerr << "subscriber deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
-    std::cerr << "publisher shutdown" << std::endl;
+    std::cerr << "subscriber shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

@@ -19,18 +19,18 @@ my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
 
-$test->{dcps_debug_level} = 1;
-$test->{dcps_transport_debug_level} = 1;
+$test->{dcps_debug_level} = 10;
+$test->{dcps_transport_debug_level} = 10;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 
-$test->process("publisher", "publisher", "-DCPSThreadStatusInterval 2 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
-$test->process("subscriber", "subscriber", "-DCPSThreadStatusInterval 4 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
+$test->process("publisher", "publisher", "-DCPSThreadStatusInterval 1 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
+$test->process("subscriber", "subscriber", "-DCPSThreadStatusInterval 1 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
 
-$test->start_process("subscriber");
 $test->start_process("publisher");
+$test->start_process("subscriber");
 
-$test->stop_process(15, "subscriber");
+$test->stop_process(20, "subscriber");
 $test->stop_process(20, "publisher");
 
 exit $test->finish();
