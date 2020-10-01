@@ -65,14 +65,13 @@ void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
     }
   }
 
+  // All dependent TypeIdentifiers are expected to have an entry in the TypeObject cache.
   dependencies.length(tmp.size());
   std::set<TypeIdentifier>::const_iterator iter = tmp.begin();
   size_t i = 0;
   for (; iter != tmp.end(); ++i, ++iter) {
-    // TODO(sonndinh): do we include TypeIdentifiers that don't have TypeObjects?
-    // Currently, only the ones that have TypeObjects are included.
-    const TypeObjectMap::const_iterator tobj_it = type_object_map_.find(*iter);
-    if (tobj_it != type_object_map_.end()) {
+    const TypeMap::const_iterator tobj_it = minimal_type_map_.find(*iter);
+    if (tobj_it != minimal_type_map_.end()) {
       dependencies[i].type_id = *iter;
       dependencies[i].typeobject_serialized_size = DCPS::serialized_size(get_typeobject_encoding(), tobj_it->second);
     }
