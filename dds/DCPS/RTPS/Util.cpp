@@ -18,16 +18,14 @@ bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
   }
 
   const size_t last_index = num_ulongs - 1;
-  if (last_index > 0) {
-    for (CORBA::ULong i = 0; i < last_index; ++i) {
-      if (snSet.bitmap[i]) {
-        return true;
-      }
+  for (CORBA::ULong i = 0; i < last_index; ++i) {
+    if (snSet.bitmap[i]) {
+      return true;
     }
   }
 
   const CORBA::ULong mod = snSet.numBits % 32;
-  const CORBA::ULong mask = mod ? ~((0x1u << (32 - mod)) - 1) : 0xFFFFFFFF;
+  const CORBA::ULong mask = mod ? -(1u << (32 - mod)) : 0xFFFFFFFF;
   return snSet.bitmap[last_index] & mask;
 }
 
