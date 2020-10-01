@@ -12,6 +12,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/TimeTypes.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"

@@ -13,6 +13,7 @@
 #include "EntryExit.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -125,7 +126,7 @@ public:
     TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
     ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
 
-    OPENDDS_STRING key = std::to_string(tid);
+    OPENDDS_STRING key = to_dds_string(tid);
     if (name_ != "") {
       key += " (" + name_ + ")";
     }
@@ -247,7 +248,7 @@ private:
   /// The id of the thread created by this task.
   ACE_thread_t thr_id_;
 
-  /// name for trhead monitoring BIT
+  /// name for thread monitoring BIT
   OPENDDS_STRING name_;
 };
 

@@ -116,7 +116,7 @@ namespace OpenDDS {
         tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
 
-        key = std::to_string(tid) + " (DcpsUpcalls)";
+        key = to_dds_string(tid) + " (DcpsUpcalls)";
       }
 
       int svc()

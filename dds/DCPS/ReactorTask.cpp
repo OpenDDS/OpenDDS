@@ -178,7 +178,7 @@ OpenDDS::DCPS::ReactorTask::svc()
 #endif /* ACE_HAS_MAC_OSX */
       MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
 
-      OPENDDS_STRING key = std::to_string(tid);
+      OPENDDS_STRING key = to_dds_string(tid);
       if (name_ != "") {
         key += " (" + name_ + ")";
       }
