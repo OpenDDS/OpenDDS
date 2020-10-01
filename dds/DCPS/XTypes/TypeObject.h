@@ -613,18 +613,18 @@ namespace XTypes {
   //   /*
   //     case TK_NONE:
   //     case TK_BOOLEAN:
-  //     case TK_BYTE_TYPE:
-  //     case TK_INT16_TYPE:
-  //     case TK_INT32_TYPE:
-  //     case TK_INT64_TYPE:
-  //     case TK_UINT16_TYPE:
-  //     case TK_UINT32_TYPE:
-  //     case TK_UINT64_TYPE:
-  //     case TK_FLOAT32_TYPE:
-  //     case TK_FLOAT64_TYPE:
-  //     case TK_FLOAT128_TYPE:
-  //     case TK_CHAR8_TYPE:
-  //     case TK_CHAR16_TYPE:
+  //     case TK_BYTE:
+  //     case TK_INT16:
+  //     case TK_INT32:
+  //     case TK_INT64:
+  //     case TK_UINT16:
+  //     case TK_UINT32:
+  //     case TK_UINT64:
+  //     case TK_FLOAT32:
+  //     case TK_FLOAT64:
+  //     case TK_FLOAT128:
+  //     case TK_CHAR8:
+  //     case TK_CHAR16:
   //     // No Value
   //     */
 

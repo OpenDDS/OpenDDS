@@ -49,30 +49,45 @@ void TypeIdentifier::activate(const TypeIdentifier* other)
   case TI_STRING8_SMALL:
   case TI_STRING16_SMALL:
     OPENDDS_BRANCH_ACTIVATE(StringSTypeDefn, string_sdefn);
-  case XTypes::TI_STRING8_LARGE:
-  case XTypes::TI_STRING16_LARGE:
+  case TI_STRING8_LARGE:
+  case TI_STRING16_LARGE:
     OPENDDS_BRANCH_ACTIVATE(StringLTypeDefn, string_ldefn);
-  case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+  case TI_PLAIN_SEQUENCE_SMALL:
     OPENDDS_BRANCH_ACTIVATE(PlainSequenceSElemDefn, seq_sdefn);
-  case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+  case TI_PLAIN_SEQUENCE_LARGE:
     OPENDDS_BRANCH_ACTIVATE(PlainSequenceLElemDefn, seq_ldefn);
-  case XTypes::TI_PLAIN_ARRAY_SMALL:
+  case TI_PLAIN_ARRAY_SMALL:
     OPENDDS_BRANCH_ACTIVATE(PlainArraySElemDefn, array_sdefn);
-  case XTypes::TI_PLAIN_ARRAY_LARGE:
+  case TI_PLAIN_ARRAY_LARGE:
     OPENDDS_BRANCH_ACTIVATE(PlainArrayLElemDefn, array_ldefn);
-  case XTypes::TI_PLAIN_MAP_SMALL:
+  case TI_PLAIN_MAP_SMALL:
     OPENDDS_BRANCH_ACTIVATE(PlainMapSTypeDefn, map_sdefn);
-  case XTypes::TI_PLAIN_MAP_LARGE:
+  case TI_PLAIN_MAP_LARGE:
     OPENDDS_BRANCH_ACTIVATE(PlainMapLTypeDefn, map_ldefn);
-  case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+  case TI_STRONGLY_CONNECTED_COMPONENT:
     OPENDDS_BRANCH_ACTIVATE(StronglyConnectedComponentId, sc_component_id);
-  case XTypes::EK_COMPLETE:
-  case XTypes::EK_MINIMAL:
+  case EK_COMPLETE:
+  case EK_MINIMAL:
     active_ = equivalence_hash_;
     if (other) {
       std::memcpy(equivalence_hash(), other->equivalence_hash(), sizeof(EquivalenceHash));
     }
     break;
+  case TK_NONE:
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+    break; // no-op, no member selected
   default:
     OPENDDS_BRANCH_ACTIVATE(ExtendedTypeDefn, extended_defn);
   }
@@ -95,26 +110,41 @@ void TypeIdentifier::reset()
   case TI_STRING8_SMALL:
   case TI_STRING16_SMALL:
     OPENDDS_BRANCH_RESET(StringSTypeDefn);
-  case XTypes::TI_STRING8_LARGE:
-  case XTypes::TI_STRING16_LARGE:
+  case TI_STRING8_LARGE:
+  case TI_STRING16_LARGE:
     OPENDDS_BRANCH_RESET(StringLTypeDefn);
-  case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+  case TI_PLAIN_SEQUENCE_SMALL:
     OPENDDS_BRANCH_RESET(PlainSequenceSElemDefn);
-  case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+  case TI_PLAIN_SEQUENCE_LARGE:
     OPENDDS_BRANCH_RESET(PlainSequenceLElemDefn);
-  case XTypes::TI_PLAIN_ARRAY_SMALL:
+  case TI_PLAIN_ARRAY_SMALL:
     OPENDDS_BRANCH_RESET(PlainArraySElemDefn);
-  case XTypes::TI_PLAIN_ARRAY_LARGE:
+  case TI_PLAIN_ARRAY_LARGE:
     OPENDDS_BRANCH_RESET(PlainArrayLElemDefn);
-  case XTypes::TI_PLAIN_MAP_SMALL:
+  case TI_PLAIN_MAP_SMALL:
     OPENDDS_BRANCH_RESET(PlainMapSTypeDefn);
-  case XTypes::TI_PLAIN_MAP_LARGE:
+  case TI_PLAIN_MAP_LARGE:
     OPENDDS_BRANCH_RESET(PlainMapLTypeDefn);
-  case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+  case TI_STRONGLY_CONNECTED_COMPONENT:
     OPENDDS_BRANCH_RESET(StronglyConnectedComponentId);
-  case XTypes::EK_COMPLETE:
-  case XTypes::EK_MINIMAL:
+  case EK_COMPLETE:
+  case EK_MINIMAL:
     break; // no-op, data is just an array of octets
+  case TK_NONE:
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+    break; // no-op, no member selected
   default:
     OPENDDS_BRANCH_RESET(ExtendedTypeDefn);
   }
@@ -686,33 +716,33 @@ void compute_dependencies(const TypeMap& type_map,
   case TI_STRING16_SMALL:
     compute_dependencies(type_map, type_identifier.string_sdefn(), dependencies);
     break;
-  case XTypes::TI_STRING8_LARGE:
-  case XTypes::TI_STRING16_LARGE:
+  case TI_STRING8_LARGE:
+  case TI_STRING16_LARGE:
     compute_dependencies(type_map, type_identifier.string_ldefn(), dependencies);
     break;
-  case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+  case TI_PLAIN_SEQUENCE_SMALL:
     compute_dependencies(type_map, type_identifier.seq_sdefn(), dependencies);
     break;
-  case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+  case TI_PLAIN_SEQUENCE_LARGE:
     compute_dependencies(type_map, type_identifier.seq_ldefn(), dependencies);
     break;
-  case XTypes::TI_PLAIN_ARRAY_SMALL:
+  case TI_PLAIN_ARRAY_SMALL:
     compute_dependencies(type_map, type_identifier.array_sdefn(), dependencies);
     break;
-  case XTypes::TI_PLAIN_ARRAY_LARGE:
+  case TI_PLAIN_ARRAY_LARGE:
     compute_dependencies(type_map, type_identifier.array_ldefn(), dependencies);
     break;
-  case XTypes::TI_PLAIN_MAP_SMALL:
+  case TI_PLAIN_MAP_SMALL:
     compute_dependencies(type_map, type_identifier.map_sdefn(), dependencies);
     break;
-  case XTypes::TI_PLAIN_MAP_LARGE:
+  case TI_PLAIN_MAP_LARGE:
     compute_dependencies(type_map, type_identifier.map_ldefn(), dependencies);
     break;
-  case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+  case TI_STRONGLY_CONNECTED_COMPONENT:
     compute_dependencies(type_map, type_identifier.sc_component_id(), dependencies);
     break;
-  case XTypes::EK_COMPLETE:
-  case XTypes::EK_MINIMAL:
+  case EK_COMPLETE:
+  case EK_MINIMAL:
     {
       TypeMap::const_iterator pos = type_map.find(type_identifier);
       if (pos != type_map.end()) {
@@ -747,6 +777,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& uni)
 {
   primitive_serialized_size_octet(encoding, size);
+
   switch (uni.kind()) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
@@ -778,11 +809,27 @@ void serialized_size(const Encoding& encoding, size_t& size,
     serialized_size(encoding, size, uni.sc_component_id());
     break;
   case XTypes::EK_COMPLETE:
-  case XTypes::EK_MINIMAL: {
-    XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash()));
-    serialized_size(encoding, size, uni_equivalence_hash);
-    break;
-  }
+  case XTypes::EK_MINIMAL:
+    {
+      XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash()));
+      serialized_size(encoding, size, uni_equivalence_hash);
+      break;
+    }
+  case XTypes::TK_NONE:
+  case XTypes::TK_BOOLEAN:
+  case XTypes::TK_BYTE:
+  case XTypes::TK_INT16:
+  case XTypes::TK_INT32:
+  case XTypes::TK_INT64:
+  case XTypes::TK_UINT16:
+  case XTypes::TK_UINT32:
+  case XTypes::TK_UINT64:
+  case XTypes::TK_FLOAT32:
+  case XTypes::TK_FLOAT64:
+  case XTypes::TK_FLOAT128:
+  case XTypes::TK_CHAR8:
+  case XTypes::TK_CHAR16:
+    break; // no-op, no member selected
   default:
     serialized_size(encoding, size, uni.extended_defn());
   }
@@ -793,6 +840,7 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
   if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
     return false;
   }
+
   switch (uni.kind()) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
@@ -815,10 +863,26 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
   case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
     return (strm << uni.sc_component_id());
   case XTypes::EK_COMPLETE:
-  case XTypes::EK_MINIMAL: {
-    XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash()));
-    return (strm << uni_equivalence_hash);
-  }
+  case XTypes::EK_MINIMAL:
+    {
+      XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash()));
+      return (strm << uni_equivalence_hash);
+    }
+  case XTypes::TK_NONE:
+  case XTypes::TK_BOOLEAN:
+  case XTypes::TK_BYTE:
+  case XTypes::TK_INT16:
+  case XTypes::TK_INT32:
+  case XTypes::TK_INT64:
+  case XTypes::TK_UINT16:
+  case XTypes::TK_UINT32:
+  case XTypes::TK_UINT64:
+  case XTypes::TK_FLOAT32:
+  case XTypes::TK_FLOAT64:
+  case XTypes::TK_FLOAT128:
+  case XTypes::TK_CHAR8:
+  case XTypes::TK_CHAR16:
+    return true; // no-op, no member selected
   default:
     return (strm << uni.extended_defn());
   }
@@ -831,6 +895,7 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
     return false;
   }
   uni = XTypes::TypeIdentifier(k);
+
   switch (k) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
@@ -853,10 +918,26 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
   case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
     return (strm >> uni.sc_component_id());
   case XTypes::EK_COMPLETE:
-  case XTypes::EK_MINIMAL: {
-    XTypes::EquivalenceHash_forany uni_equivalence_hash(uni.equivalence_hash());
-    return (strm >> uni_equivalence_hash);
-  }
+  case XTypes::EK_MINIMAL:
+    {
+      XTypes::EquivalenceHash_forany uni_equivalence_hash(uni.equivalence_hash());
+      return (strm >> uni_equivalence_hash);
+    }
+  case XTypes::TK_NONE:
+  case XTypes::TK_BOOLEAN:
+  case XTypes::TK_BYTE:
+  case XTypes::TK_INT16:
+  case XTypes::TK_INT32:
+  case XTypes::TK_INT64:
+  case XTypes::TK_UINT16:
+  case XTypes::TK_UINT32:
+  case XTypes::TK_UINT64:
+  case XTypes::TK_FLOAT32:
+  case XTypes::TK_FLOAT64:
+  case XTypes::TK_FLOAT128:
+  case XTypes::TK_CHAR8:
+  case XTypes::TK_CHAR16:
+    return true; // no-op, no member selected
   default:
     return (strm >> uni.extended_defn());
   }
@@ -4400,9 +4481,6 @@ bool operator>>(Serializer& strm, XTypes::MinimalExtendedType&)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeInformation& stru)
 {
-  serialized_size(encoding, size, stru.minimal);
-  serialized_size(encoding, size, stru.complete);
-
   size_t mutable_running_total = 0;
   serialized_size_delimiter(encoding, size);
 
@@ -4411,6 +4489,8 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
   serialized_size_parameter_id(encoding, size, mutable_running_total);
   serialized_size(encoding, size, stru.complete);
+
+  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeInformation& stru)
