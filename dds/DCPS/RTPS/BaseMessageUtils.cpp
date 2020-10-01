@@ -199,7 +199,7 @@ DCPS::TimeDuration rtps_duration_to_time_duration(const Duration_t& rtps_duratio
   }
 }
 
-bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
+bool bitmapNonEmpty(const SequenceNumberSet& snSet)
 {
   const size_t num_ulongs = (snSet.numBits + 31) / 32;
 
