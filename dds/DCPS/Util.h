@@ -8,9 +8,6 @@
 #ifndef OPENDDS_DCPS_UTIL_H
 #define OPENDDS_DCPS_UTIL_H
 
-#include "dcps_export.h"
-#include "SequenceNumber.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -199,10 +196,6 @@ bool set_intersect(SetA& sA, const SortedB& sB, LessThan lessThan)
   }
   return !sA.empty();
 }
-
-/// Return the number of CORBA::Longs required for the bitmap representation of
-/// sequence numbers between low and high, inclusive (maximum 8 longs).
-OpenDDS_Dcps_Export CORBA::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
 
 } // namespace DCPS
 } // namespace OpenDDS

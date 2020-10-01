@@ -21,7 +21,6 @@
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/Util.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
@@ -2086,7 +2085,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
 
       if (recvd.disjoint()) {
-        bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
+        bitmap.length(DisjointSequence::bitmap_num_longs(ack, recvd.last_ack().previous()));
         if (bitmap.length() > 0) {
           (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
             num_bits, true);
@@ -2101,7 +2100,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
         const SequenceNumber::Value eff_high_val = eff_high.getValue();
         // Nack the range between the received high and the effective high.
         const CORBA::ULong old_len = bitmap.length(),
-          new_len = bitmap_num_longs(ack, eff_high);
+          new_len = DisjointSequence::bitmap_num_longs(ack, eff_high);
         if (new_len > old_len) {
           bitmap.length(new_len);
           for (CORBA::ULong i = old_len; i < new_len; ++i) {
@@ -2680,7 +2679,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
   LongSeq8 bitmap;
 
   if (gaps.disjoint()) {
-    bitmap.length(bitmap_num_longs(base, gaps.high()));
+    bitmap.length(DisjointSequence::bitmap_num_longs(base, gaps.high()));
     if (bitmap.length() > 0) {
       (void)gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
     }

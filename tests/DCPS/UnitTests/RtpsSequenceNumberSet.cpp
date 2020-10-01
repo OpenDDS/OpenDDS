@@ -7,7 +7,7 @@
 
 #include "ace/OS_main.h"
 
-#include "dds/DCPS/RTPS/Util.h"
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
 #include "../common/TestSupport.h"
 
