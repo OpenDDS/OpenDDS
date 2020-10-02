@@ -147,13 +147,10 @@ bool value_writer_generator::gen_enum(AST_Enum*,
   const std::string type_name = scoped(name);
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
-  be_global->impl_ << be_global->versioning_begin() << "\n";
   {
-    ScopedNamespaceGuard hguard(name, be_global->header_);
-    ScopedNamespaceGuard iguard(name, be_global->impl_);
+    NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "template <> void");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
@@ -168,8 +165,6 @@ bool value_writer_generator::gen_enum(AST_Enum*,
     }
     be_global->impl_ << "}\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
-  be_global->impl_ << be_global->versioning_end() << "\n";
 
   return true;
 }
@@ -194,13 +189,10 @@ bool value_writer_generator::gen_struct(AST_Structure*,
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   const std::string accessor_suffix = use_cxx11 ? "()" : "";
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
-  be_global->impl_ << be_global->versioning_begin() << "\n";
   {
-    ScopedNamespaceGuard hguard(name, be_global->header_);
-    ScopedNamespaceGuard iguard(name, be_global->impl_);
+    NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "template <> void");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
@@ -215,8 +207,6 @@ bool value_writer_generator::gen_struct(AST_Structure*,
     }
     be_global->impl_ << "  value_writer.end_struct();\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
-  be_global->impl_ << be_global->versioning_end() << "\n";
 
   return true;
 }
@@ -232,13 +222,10 @@ bool value_writer_generator::gen_union(AST_Union*,
 
   const std::string type_name = scoped(name);
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
-  be_global->impl_ << be_global->versioning_begin() << "\n";
   {
-    ScopedNamespaceGuard hguard(name, be_global->header_);
-    ScopedNamespaceGuard iguard(name, be_global->impl_);
+    NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "template <> void");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
@@ -252,8 +239,6 @@ bool value_writer_generator::gen_union(AST_Union*,
 
     be_global->impl_ << "  value_writer.end_union();\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
-  be_global->impl_ << be_global->versioning_end() << "\n";
 
   return true;
 }
