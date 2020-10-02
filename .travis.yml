@@ -49,7 +49,7 @@ matrix:
     - os: osx
       osx_image: xcode11.6
       compiler: clang
-      env: COMPILER=clang++ NO_INLINE=1 NO_DEBUG=1 NO_TESTS=1
+      env: COMPILER=clang++ NO_INLINE=1 NO_DEBUG=1 NO_TESTS=1 CMAKE_SKIP_CXX11=1
 
 addons:
   apt:
@@ -101,7 +101,7 @@ script:
         exit 1;
     fi
   - if [ "$SAFETY_PROFILE" != "1" ]; then
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl ${STATIC:+--no-shared};
+      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl ${STATIC:+--no-shared} ${CMAKE_SKIP_CXX11:+--skip-cxx11};
     fi
   - if [ "$NO_TESTS" == "1" ]; then
       echo Building Messenger;
