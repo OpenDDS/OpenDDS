@@ -759,7 +759,9 @@ void compute_dependencies(const TypeMap& type_map,
 
 bool write_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
 {
-  return strm.write_delimiter(0);
+  size_t size = 0;
+  serialized_size_delimiter(strm.encoding(), size);
+  return strm.write_delimiter(size);
 }
 
 bool read_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
