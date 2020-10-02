@@ -216,8 +216,8 @@ namespace DCPS {
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_Call& stru)
   {
-    ACE_CDR::Octet kind;
-    if (!(strm >> ACE_InputCDR::to_octet(kind))) {
+    CORBA::ULong kind;
+    if (!(strm >> kind)) {
       return false;
     }
     switch (kind) {
@@ -298,8 +298,8 @@ namespace DCPS {
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_Return& stru)
   {
-    ACE_CDR::Octet kind;
-    if (!(strm >> ACE_InputCDR::to_octet(kind))) {
+    CORBA::ULong kind;
+    if (!(strm >> kind)) {
       return false;
     }
     switch (kind) {

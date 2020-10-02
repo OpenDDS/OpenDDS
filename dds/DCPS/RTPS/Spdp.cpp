@@ -212,11 +212,9 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
-#ifdef OPENDDS_SECURITY
-  , available_extended_builtin_endpoints_(0)
-#endif
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
 #ifdef OPENDDS_SECURITY
+  , available_extended_builtin_endpoints_(0)
   , security_config_()
   , security_enabled_(false)
   , identity_handle_(DDS::HANDLE_NIL)
@@ -254,8 +252,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
-  , available_extended_builtin_endpoints_(0)
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
+  , available_extended_builtin_endpoints_(0)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
   , identity_handle_(identity_handle)

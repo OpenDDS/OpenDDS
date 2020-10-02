@@ -612,8 +612,8 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t send_tl_reply(const DCPS::ReceivedDataSample& sample,
-      XTypes::TypeLookup_Reply& type_lookup_reply, const DCPS::RepoId& reader);
+    DDS::ReturnCode_t send_tl_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
+      const DCPS::RepoId& reader);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
