@@ -298,7 +298,7 @@ namespace DCPS {
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_Return& stru)
   {
-    CORBA::ULong kind;
+    CORBA::Long kind;
     if (!(strm >> kind)) {
       return false;
     }
