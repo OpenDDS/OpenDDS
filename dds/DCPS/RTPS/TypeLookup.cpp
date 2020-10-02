@@ -78,7 +78,7 @@ namespace DCPS {
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Result& stru)
   {
-    CORBA::ULong return_code;
+    CORBA::Long return_code;
     if (!(strm >> return_code)) {
       return false;
     }
@@ -167,7 +167,7 @@ namespace DCPS {
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result& stru)
   {
-    CORBA::ULong return_code;
+    CORBA::Long return_code;
     if (!(strm >> return_code)) {
       return false;
     }
@@ -216,7 +216,7 @@ namespace DCPS {
 
   bool operator>>(Serializer& strm, XTypes::TypeLookup_Call& stru)
   {
-    CORBA::ULong kind;
+    CORBA::Long kind;
     if (!(strm >> kind)) {
       return false;
     }
