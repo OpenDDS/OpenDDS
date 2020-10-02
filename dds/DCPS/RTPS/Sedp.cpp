@@ -3865,8 +3865,10 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     DCPS::SequenceNumber rpc_sequence;
     rpc_sequence.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
                           type_lookup_reply.header.related_request_id.sequence_number.low);
-    // TODO(sonndinh): Is this a correct place to call match_continue?
-    sedp_.match_continue(rpc_sequence);
+    if (type_lookup_reply.data.kind == XTypes::TypeLookup_getTypes_HashId &&
+        has_all_dependencies_) {
+      sedp_.match_continue(rpc_sequence);
+    }
   }
   return DDS::RETCODE_OK;
 }
@@ -3888,24 +3890,37 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
 {
   const XTypes::TypeLookup_getTypeDependencies_Out& data = reply.data.getTypeDependencies.result;
   continuation_point_ = data.continuation_point;
+
+  const DCPS::RepoId remote_id = sample.header_.publication_id_;
   if (data.dependent_typeids.length() > 0) {
-    XTypes::TypeIdentifierSeq req_type_ids;
     for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
       const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
       if (!sedp_.type_lookup_service_->type_object_in_cache(ti)) {
-        req_type_ids.append(ti);
+        dependencies_.append(ti);
       }
     }
 
-    const DCPS::RepoId remote_id = sample.header_.publication_id_;
+    // Keep sending getTypeDependencies requests until there is no more dependencies received
+    // TODO(sonndinh): set type_id to the TypeIdentifier of the topic type
+    if (!sedp_.send_type_lookup_request(type_id, remote_id, is_discovery_protected, false)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
+        ACE_TEXT("failed to send type lookup request for more dependencies\n")));
+      return DDS::RETCODE_ERROR;
+    }
+  } else {
+    // This part assumes that the remote never sends an empty reply if there are still
+    // remaining dependent TypeIdentifiers to be sent. Then when a reply with no dependencies
+    // is received, that means we have got all dependencies.
+    has_all_dependencies_ = true;
+
+    // Send getTypes request when we have all dependencies
     if (!sedp_.send_type_lookup_request(req_type_ids, remote_id, is_discovery_protected, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send type lookup request\n")));
       return DDS::RETCODE_ERROR;
     }
-    return DDS::RETCODE_OK;
   }
-  return DDS::RETCODE_NO_DATA;
+  return DDS::RETCODE_OK;
 }
 
 Sedp::Reader::~Reader()

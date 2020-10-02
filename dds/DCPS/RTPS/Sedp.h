@@ -780,14 +780,10 @@ private:
 
     // TODO(sonndinh): If one object of this class is used to communicate
     // with built-in endpoints from more than 1 participants, we must use
-    // something like maps for the following two variables.
-
-    // Store continuation point from getTypeDependencies reply
+    // something like map for the the following.
+    // Continuation point from the previously getTypeDependencies reply.
     XTypes::OctetSeq32 continuation_point_;
-
-    // Whether all TypeObjects needed by the matching have been acquired
-    // and the matching process can continue
-    bool continue_matching;
+    XTypes::TypeIdentifierSeq dependencies_;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;

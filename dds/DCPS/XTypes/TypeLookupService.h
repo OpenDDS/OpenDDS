@@ -40,7 +40,7 @@ public:
     TypeIdentifierWithSizeSeq& dependencies) const;
   void get_type_dependencies(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
-  void add_depend_type_identifiers(const TypeIdentifier& type_id,
+  void add_type_dependencies(const TypeIdentifier& type_id,
     const TypeIdentifierWithSizeSeq& dependencies);
 
   // For adding local endpoint types

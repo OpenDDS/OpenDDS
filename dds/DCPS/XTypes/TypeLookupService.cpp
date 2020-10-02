@@ -103,7 +103,7 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, cons
   }
 }
 
-void TypeLookupService::add_depend_type_identifiers(const TypeIdentifier& type_id,
+void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,
   const TypeIdentifierWithSizeSeq& dependencies)
 {
   if (type_dependencies_map_.find(type_id) == type_dependencies_map_.end()) {

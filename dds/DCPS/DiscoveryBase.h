@@ -216,6 +216,7 @@ namespace OpenDDS {
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
+        , has_all_dependencies_(false)
 #ifdef OPENDDS_SECURITY
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
@@ -1250,6 +1251,7 @@ namespace OpenDDS {
           for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
             type_ids[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
+          has_all_dependencies_ = true;
 
           // Get TypeObjects of the topic type and all of its dependent types
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
@@ -1626,6 +1628,7 @@ namespace OpenDDS {
       OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) relay_only_readers_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
       XTypes::TypeLookupService_rch type_lookup_service_;
+      bool has_all_dependencies_; // Whether it has all dependent TypeIdentifiers
 
 
 #ifdef OPENDDS_SECURITY
