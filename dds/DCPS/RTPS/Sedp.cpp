@@ -329,10 +329,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   , publication_agent_info_listener_(*this)
   , subscription_agent_info_listener_(*this)
 #endif // OPENDDS_SECURITY
-{
-  pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
-  sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
-}
+{}
 
 DDS::ReturnCode_t
 Sedp::init(const RepoId& guid,
@@ -766,17 +763,15 @@ Sedp::multicast_group() const
 void
 Sedp::assign_bit_key(DiscoveredPublication& pub)
 {
-  increment_key(pub_bit_key_);
-  pub_key_to_id_[pub_bit_key_] = pub.writer_data_.writerProxy.remoteWriterGuid;
-  pub.writer_data_.ddsPublicationData.key = pub_bit_key_;
+  const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(pub.writer_data_.writerProxy.remoteWriterGuid);
+  pub.writer_data_.ddsPublicationData.key = key;
 }
 
 void
 Sedp::assign_bit_key(DiscoveredSubscription& sub)
 {
-  increment_key(sub_bit_key_);
-  sub_key_to_id_[sub_bit_key_] = sub.reader_data_.readerProxy.remoteReaderGuid;
-  sub.reader_data_.ddsSubscriptionData.key = sub_bit_key_;
+  const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(sub.reader_data_.readerProxy.remoteReaderGuid);
+  sub.reader_data_.ddsSubscriptionData.key = key;
 }
 
 void
@@ -2103,8 +2098,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         // Upsert the remote topic.
         td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in());
 
-        std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
-                    guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
+        pub.writer_data_.ddsPublicationData.participant_key = repo_id_to_bit_key(guid);
         assign_bit_key(pub);
         wdata_copy = pub.writer_data_;
       }
@@ -2434,8 +2428,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         // Upsert the remote topic.
         td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in());
 
-        std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
-                    guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
+        sub.reader_data_.ddsSubscriptionData.participant_key = repo_id_to_bit_key(guid);
         assign_bit_key(sub);
         rdata_copy = sub.reader_data_;
       }

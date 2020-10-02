@@ -569,10 +569,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       return;
     }
 
-    // copy guid prefix (octet[12]) into BIT key (long[3])
-    std::memcpy(partBitData(pdata).key.value,
-      pdata.participantProxy.guidPrefix,
-      sizeof(DDS::BuiltinTopicKey_t));
+    partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
       DCPS::GuidConverter local(guid_), remote(guid);

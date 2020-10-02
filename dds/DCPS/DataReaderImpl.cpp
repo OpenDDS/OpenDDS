@@ -2461,7 +2461,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
     CORBA::String_var topic = topic_servant_->get_name();
 
-    RepoId id = disc->bit_key_to_repo_id(participant.in(), topic, key);
+    RepoId id = bit_key_to_repo_id(key);
     return participant->id_to_handle(id);
 
   } else {
