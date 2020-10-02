@@ -590,7 +590,7 @@ struct Intro {
 typedef std::string (*CommonFn)(
   const std::string& indent,
   const std::string& name, AST_Type* type,
-  const std::string& prefix, Intro& intro,
+  const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
   const std::string&, bool printing);
 
 inline
@@ -711,14 +711,14 @@ void generateCaseBody(
     if (commonFn2) {
       const unsigned id = be_global->get_id(type, branch, default_id);
       contents
-        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false)
+        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "", false)
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
         << indent << "  return false;\n"
         << indent << "}\n";
     }
     const std::string expr = commonFn(indent,
       name + (parens ? "()" : ""), branch->field_type(),
-      std::string(namePrefix) + "uni", intro, uni, printing);
+      std::string(namePrefix) + "uni", false, intro, uni, printing);
     if (*statementPrefix) {
       contents <<
         indent << statementPrefix << " " << expr << ";\n" <<
@@ -869,10 +869,10 @@ std::string insert_cxx11_accessor_parens(const std::string& full_var_name_, bool
     ? full_var_name : full_var_name + "()";
 }
 
-enum FieldType {
-  FieldType_All,
-  FieldType_NestedKeyOnly,
-  FieldType_KeyOnly
+enum FieldFilter {
+  FieldFilter_All,
+  FieldFilter_NestedKeyOnly,
+  FieldFilter_KeyOnly
 };
 
 inline AST_Field* get_struct_field(AST_Structure* struct_node, size_t index)
@@ -897,23 +897,12 @@ public:
     typedef AST_Field*& reference;
     typedef std::input_iterator_tag iterator_category;
 
-    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0, FieldType type = FieldType_All)
+    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0, bool just_keys = false)
     : node_(node)
     , pos_(pos)
-    , just_keys_(type == FieldType_KeyOnly) // FieldType_NestedKeyOnly case is checked below
+    , just_keys_(just_keys)
     {
       check();
-
-      // Check for implied keys rule for non-topic type cases
-      if (node && type_ == FieldType_NestedKeyOnly) {
-        for (size_t i = 0; i < node_->nfields(); ++i) {
-          bool marked_as_key = false;
-          be_global->check_key(get_struct_field(node_, pos_), marked_as_key);
-          if (marked_as_key) {
-            just_keys_ = true;
-          }
-        }
-      }
     }
 
     bool valid() const
@@ -978,14 +967,23 @@ public:
   private:
     AST_Structure* node_;
     unsigned pos_;
-    FieldType type_;
     bool just_keys_;
   };
 
-  explicit Fields(AST_Structure* node = 0, FieldType type = FieldType_All)
+  explicit Fields(AST_Structure* node = 0, FieldFilter type = FieldFilter_All)
   : node_(node)
-  , type_(type)
+  , just_keys_(type == FieldFilter_KeyOnly) // FieldType_NestedKeyOnly case is checked below
   {
+    // Check for implied keys rule for non-topic type cases
+    if (node && type == FieldFilter_NestedKeyOnly) {
+      for (size_t i = 0; i < node_->nfields(); ++i) {
+        bool marked_as_key = false;
+        be_global->check_key(get_struct_field(node, i), marked_as_key);
+        if (marked_as_key) {
+          just_keys_ = true;
+        }
+      }
+    }
   }
 
   AST_Structure* node() const
@@ -995,7 +993,7 @@ public:
 
   Iterator begin() const
   {
-    return Iterator(node_, 0, type_);
+    return Iterator(node_, 0, just_keys_);
   }
 
   Iterator end() const
@@ -1011,7 +1009,7 @@ public:
 
 private:
   AST_Structure* node_;
-  FieldType type_;
+  bool just_keys_;
 };
 
 #endif

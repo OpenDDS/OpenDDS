@@ -132,7 +132,7 @@ namespace {
   };
 
   string streamCommon(const std::string& indent, const string& name, AST_Type* type,
-                      const string& prefix, Intro& intro,
+                      const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru = "", bool printing = false);
 } /* namespace */
 
@@ -1398,7 +1398,7 @@ namespace {
           Intro intro;
           be_global->impl_ <<
             "    if (!" <<
-              streamCommon("", "", arr->base_type(), string(">> ") + "arr" + nfl.index_, intro) <<
+              streamCommon("", "", arr->base_type(), string(">> ") + "arr" + nfl.index_, false, intro) <<
               ") {\n";
         }
         if (try_construct == tryconstructfailaction_use_default) {
@@ -1636,7 +1636,7 @@ namespace {
         } else {
           Intro intro;
           be_global->impl_ << "    if (!"
-            << streamCommon("", "", af.as_base_, string(">> ") + "arr" + nfl.index_, intro)
+            << streamCommon("", "", af.as_base_, string(">> ") + "arr" + nfl.index_, false, intro)
             << ") {\n";
         }
         if (try_construct == tryconstructfailaction_use_default) {
@@ -1700,6 +1700,25 @@ namespace {
     }
   }
 
+  std::string wrap_in_nested_key_only(
+    const std::string& type_name, std::string what, bool& wrap)
+  {
+    // Remove shift operator if it's there.
+    const size_t shift_len = 3;
+    if (what.size() > shift_len) {
+      const std::string first3 = what.substr(0, shift_len);
+      if (first3 == "<< " || first3 == ">> ") {
+        what.erase(0, 3);
+      }
+    }
+
+    if (wrap) {
+      wrap = false;
+      return "NestedKeyOnly<" + type_name + ">(" + what + ")";
+    }
+    return what;
+  }
+
   std::string valid_var_name(std::string prefix)
   {
     size_t i;
@@ -1709,7 +1728,9 @@ namespace {
     return prefix;
   }
 
-  std::string getArrayForany(Intro& intro, const char* prefix, const char* fname, const std::string& cxx_fld)
+  std::string getArrayForany(
+    Intro& intro, const std::string& prefix, const std::string& fname, const std::string& cxx_fld,
+    bool wrap_nested_key_only)
   {
     std::string local = fname;
     if (local.size() > 2 && local.substr(local.size() - 2, 2) == "()") {
@@ -1717,7 +1738,8 @@ namespace {
     }
     const std::string name = valid_var_name(prefix) + '_' + local;
     intro.insert(cxx_fld + "_forany " + name + "(const_cast<"
-      + cxx_fld + "_slice*>(" + prefix + "." + fname + "));");
+      + cxx_fld + "_slice*>("
+      + wrap_in_nested_key_only(cxx_fld, prefix + "." + fname, wrap_nested_key_only) + "));");
     return name;
   }
 
@@ -2089,13 +2111,12 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 namespace {
   // common to both fields (in structs) and branches (in unions)
   string findSizeCommon(const std::string& indent, const string& name, AST_Type* type,
-                        const string& prefix, Intro& intro,
+                        const string& prefix, bool wrap_nested_key_only, Intro& intro,
                         const string& = "", bool = false) // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix == "uni";
 
-    AST_Type* typedeff = type;
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
@@ -2124,25 +2145,28 @@ namespace {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
-      string tdname = scoped(typedeff->name());
+      const std::string tdname = scoped(type->name());
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
-        fieldref = getArrayForany(intro, prefix.c_str(), name.c_str(), tdname);
+        fieldref = getArrayForany(
+          intro, prefix.c_str(), name.c_str(), tdname, wrap_nested_key_only);
         local = "";
       } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) {
         fieldref = "IDL::DistinctType<const " + tdname + ", " +
-          dds_generator::scoped_helper(typedeff->name(), "_") + "_tag>("
+          dds_generator::scoped_helper(type->name(), "_") + "_tag>("
           + fieldref + '.';
         local += ')';
       } else {
         fieldref += '.';
       }
       return indent +
-        "serialized_size(encoding, size, " + fieldref + local + ");\n";
+        "serialized_size(encoding, size, " +
+        wrap_in_nested_key_only(tdname, fieldref + local, wrap_nested_key_only) + ");\n";
     }
   }
 
   bool findSizeAnonymous(
-    const std::string& indent, AST_Field* field, const string& prefix, Intro& intro, string& expr)
+    const std::string& indent, AST_Field* field, const string& prefix,
+    bool wrap_nested_key_only, Intro& intro, string& expr)
   {
     FieldInfo af(*field);
     if (!af.anonymous()) {
@@ -2153,25 +2177,27 @@ namespace {
       fieldref = af.const_ref_ + "(" + fieldref + '.';
       local += ')';
     } else if (af.cls_ & CL_ARRAY) {
-      fieldref = getArrayForany(intro, prefix.c_str(), af.name_.c_str(), af.scoped_type_);
+      fieldref = getArrayForany(
+        intro, prefix.c_str(), af.name_.c_str(), af.scoped_type_, wrap_nested_key_only);
       local = "";
     } else {
       fieldref += '.';
     }
-    expr += indent + "serialized_size(encoding, size, " + fieldref + local + ");\n";
+    expr += indent + "serialized_size(encoding, size, " +
+      wrap_in_nested_key_only(af.scoped_type_, fieldref + local, wrap_nested_key_only) +
+      ");\n";
     return true;
   }
 
   // common to both fields (in structs) and branches (in unions)
   string streamCommon(const std::string& /*indent*/, const string& name, AST_Type* type,
-                      const string& prefix, Intro& intro,
+                      const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru, bool printing)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
 
-    AST_Type* typedeff = type;
-    const string tdname = scoped(typedeff->name());
+    const std::string tdname = scoped(type->name());
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
@@ -2205,7 +2231,8 @@ namespace {
         if (shift == ">>" || shift == "<<") {
           pre.erase(0, 3);
         }
-        fieldref = shift + " " + getArrayForany(intro, pre.c_str(), name.c_str(), tdname);
+        fieldref = shift + " " + getArrayForany(
+          intro, pre.c_str(), name.c_str(), tdname, wrap_nested_key_only);
         local = "";
       } else if (!local.empty()) {
         fieldref += '.';
@@ -2222,15 +2249,17 @@ namespace {
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
         return "(strm " + shift + " IDL::DistinctType<" +
           (dir == WD_OUTPUT ? "const " : "") + tdname + ", " +
-          dds_generator::scoped_helper(typedeff->name(), "_") + "_tag>("
+          dds_generator::scoped_helper(type->name(), "_") + "_tag>("
           + (fieldref + local).substr(3) + "))";
       }
-      return "(strm " + fieldref + local + ')';
+      return "(strm " + shift + " " +
+        wrap_in_nested_key_only(tdname, fieldref + local, wrap_nested_key_only) + ")";
     }
   }
 
   bool streamAnonymous(
-    AST_Field* field, const string& shift, const std::string& cpp_type, Intro& intro, string& expr)
+    AST_Field* field, const string& shift, const std::string& cpp_type,
+    bool wrap_nested_key_only, Intro& intro, string& expr)
   {
     FieldInfo af(*field);
     if (!af.anonymous()) {
@@ -2239,14 +2268,16 @@ namespace {
     string local = insert_cxx11_accessor_parens(af.name_, false);
     if (af.cxx11()) {
       expr += "(strm " + shift + " " + ((shift == "<<") ? af.const_ref_ : af.ref_)
-        + "(" + cpp_type + "." + local + "))";
+        + wrap_in_nested_key_only(af.scoped_type_, cpp_type + "." + local, wrap_nested_key_only) + ")";
     } else {
       string fieldref = cpp_type + ((af.cls_ & CL_ARRAY) ? '_' : '.');
       if (af.cls_ & CL_ARRAY) {
-        fieldref = getArrayForany(intro, cpp_type.c_str(), af.name_.c_str(), af.scoped_type_);
+        fieldref = getArrayForany(
+          intro, cpp_type.c_str(), af.name_.c_str(), af.scoped_type_, wrap_nested_key_only);
         local = "";
       }
-      expr += "(strm " + shift + " " + fieldref + local + ')';
+      expr += "(strm " + shift + " " +
+        wrap_in_nested_key_only(af.scoped_type_, fieldref + local, wrap_nested_key_only) + ')';
     }
     return true;
   }
@@ -2613,7 +2644,7 @@ namespace {
     const std::string& indent, Encoding, const string& key_name, AST_Type* ast_type,
     size_t*, string* expr, Intro* intro)
   {
-    *expr += findSizeCommon(indent, key_name, ast_type, "stru.value", *intro);
+    *expr += findSizeCommon(indent, key_name, ast_type, "stru.value", false, *intro);
   }
 
   std::string fill_datareprseq(
@@ -2910,27 +2941,26 @@ namespace {
     return true;
   }
 
-  bool generate_struct_serialization(AST_Structure* node, FieldType field_type)
+  bool generate_struct_serialization(AST_Structure* node, FieldFilter field_type)
   {
     const std::string actual_cpp_name = scoped(node->name());
     std::string cpp_name = actual_cpp_name;
     std::string const_cpp_name;
-    std::string value_access;
     switch (field_type) {
-    case FieldType_All:
+    case FieldFilter_All:
       const_cpp_name = "const " + actual_cpp_name + "&";
       break;
-    case FieldType_NestedKeyOnly:
+    case FieldFilter_NestedKeyOnly:
       cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
       const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
-      value_access = ".value";
       break;
-    case FieldType_KeyOnly:
+    case FieldFilter_KeyOnly:
       cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
       const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
-      value_access = ".value";
       break;
     }
+    const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
+    const bool wrap_nested_key_only = field_type != FieldFilter_All;
     const Fields fields(node, field_type);
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
@@ -2980,8 +3010,11 @@ namespace {
           expr +=
             "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
         }
-        if (!findSizeAnonymous(indent, field, "stru" + value_access, intro, expr)) {
-          expr += findSizeCommon(indent, field_name, field->field_type(), "stru" + value_access, intro);
+        if (!findSizeAnonymous(indent, field, "stru" + value_access,
+            wrap_nested_key_only, intro, expr)) {
+          expr += findSizeCommon(
+            indent, field_name, field->field_type(), "stru" + value_access,
+            wrap_nested_key_only, intro);
         }
         if (!cond.empty()) {
           expr += "  }\n";
@@ -3031,19 +3064,25 @@ namespace {
 
           mutable_fields << "\n";
           expr = "";
-          if (!findSizeAnonymous(mutable_indent, field, "stru" + value_access, intro, expr)) {
-            expr += findSizeCommon(mutable_indent, field_name, field->field_type(), "stru" + value_access, intro);
+          if (!findSizeAnonymous(mutable_indent, field, "stru" + value_access,
+              wrap_nested_key_only, intro, expr)) {
+            expr += findSizeCommon(
+              mutable_indent, field_name, field->field_type(), "stru" + value_access,
+              wrap_nested_key_only, intro);
           }
           mutable_fields << expr << "\n";
           expr = "";
           mutable_fields <<
-            "    if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
+            "    if (!strm.write_parameter_id("
+              << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
             "      return false;\n"
             "    }\n"
             "    size = 0;\n"
             "    if (!";
-          if (!streamAnonymous(field, "<<", "stru" + value_access, intro, expr)) {
-            expr += streamCommon(mutable_indent, field_name, field->field_type(), "<< stru" + value_access, intro, cpp_name);
+          if (!streamAnonymous(field, "<<", "stru" + value_access,  wrap_nested_key_only, intro, expr)) {
+            expr += streamCommon(
+              mutable_indent, field_name, field->field_type(),
+              "<< stru" + value_access, wrap_nested_key_only, intro, cpp_name);
           }
           mutable_fields << expr << ") {\n"
             "    return false;\n"
@@ -3066,9 +3105,11 @@ namespace {
         if (!cond.empty()) {
           expr += "(!(" + cond + ") || ";
         }
-        if (!streamAnonymous(field, "<<", "stru" + value_access, intro, expr)) {
+        if (!streamAnonymous(field, "<<", "stru" + value_access,
+            wrap_nested_key_only, intro, expr)) {
           expr += streamCommon(
-            indent, field_name, field->field_type(), "<< stru" + value_access, intro, cpp_name);
+            indent, field_name, field->field_type(), "<< stru" + value_access,
+            wrap_nested_key_only, intro, cpp_name);
         }
         if (!cond.empty()) {
           expr += ")";
@@ -3139,14 +3180,15 @@ namespace {
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
           const unsigned id = be_global->get_id(node, field, i.pos());
-          string field_name = string("stru") + value_access + "." + field->local_name()->get_string();
+          string field_name =
+            string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
             "      case " << id << ": {\n"
             "        if (!";
           expr = "";
-          if (!streamAnonymous(field, ">>",  "stru" + value_access, intro, expr)) {
+          if (!streamAnonymous(field, ">>",  "stru" + value_access, wrap_nested_key_only, intro, expr)) {
             expr += streamCommon(indent, field->local_name()->get_string(), field->field_type(),
-              ">> stru" + value_access, intro, cpp_name);
+              ">> stru" + value_access, wrap_nested_key_only, intro, cpp_name);
           }
           cases << expr << ") {\n";
           AST_Type* field_type = resolveActualType(field->field_type());
@@ -3261,9 +3303,11 @@ namespace {
         } else if (is_appendable) {
           expr += "  if (!";
         }
-        if (!streamAnonymous(field, ">>",  "stru" + value_access, intro, expr)) {
+        if (!streamAnonymous(field, ">>",  "stru" + value_access,
+            wrap_nested_key_only, intro, expr)) {
           expr += streamCommon(
-            indent, field_name, field->field_type(), ">> stru" + value_access, intro, cpp_name);
+            indent, field_name, field->field_type(), ">> stru" + value_access,
+            wrap_nested_key_only, intro, cpp_name);
         }
         if (is_appendable) {
           expr += ") {\n"
@@ -3332,8 +3376,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
   }
 
-  if (!generate_struct_serialization(node, FieldType_All) ||
-      !generate_struct_serialization(node, FieldType_NestedKeyOnly)) {
+  if (!generate_struct_serialization(node, FieldFilter_All) ||
+      !generate_struct_serialization(node, FieldFilter_NestedKeyOnly)) {
     return false;
   }
 
@@ -3374,7 +3418,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "  strm.os() << '\"';\n";
       }
       expr += indent + streamCommon(
-        indent, field_name, fields[i]->field_type(), "<< stru", intro, cxx, true);
+        indent, field_name, fields[i]->field_type(), "<< stru", false, intro, cxx, true);
       if (is_string_type) {
         expr += " << '\"'";
       }
@@ -3395,7 +3439,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     keys = TopicKeys(node);
     info = 0; // Annotations Override DCPS_DATA_TYPE
 
-    if (!generate_struct_serialization(node, FieldType_KeyOnly)) {
+    if (!generate_struct_serialization(node, FieldFilter_KeyOnly)) {
       return false;
     }
   }
@@ -3464,7 +3508,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, key_name, field_type, "<< stru.value", intro);
+        expr += streamCommon(indent, key_name, field_type, "<< stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3498,7 +3542,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, key_name, field_type, ">> stru.value", intro);
+        expr += streamCommon(indent, key_name, field_type, ">> stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
