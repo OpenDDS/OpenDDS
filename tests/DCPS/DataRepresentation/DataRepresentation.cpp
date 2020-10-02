@@ -71,7 +71,7 @@ private:
 
   static void dr_to_qos(const Dri& dri, DDS::DataRepresentationQosPolicy& qos);
   static std::string to_string(const Dri& dri);
-  static bool check_qos(const char* what, const CORBA::ULong expected, const DDS::QosPolicyCountSeq& q);
+  static bool check_policies(const char* what, bool expect_match, const DDS::QosPolicyCountSeq& q);
   enum CheckMatchResult { check_match_error, check_match_expected, check_match_unexpected };
   CheckMatchResult check_match(DDS::DataReader* reader, DDS::DataWriter* writer, bool expect_match);
   void add_result(bool passed);
@@ -343,23 +343,24 @@ std::string Test::to_string(const Dri& dri)
   return "Default";
 }
 
-bool Test::check_qos(const char* what, const CORBA::ULong expected, const DDS::QosPolicyCountSeq& q)
+bool Test::check_policies(const char* what, bool expect_match, const DDS::QosPolicyCountSeq& q)
 {
+  const CORBA::ULong exp = expect_match ? 0 : 1;
   const CORBA::ULong cnt = q.length();
   bool rv = true;
   bool print = false;
-  if (expected != cnt) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_qos() ERROR: %C %d != %d\n"), what, expected, cnt));
+  if (exp != cnt) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_policies() ERROR: %C %d != %d\n"), what, exp, cnt));
     rv = false;
     print = cnt > 0;
   } else if (cnt == 1 && q[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_qos() ERROR: %C %d != %d\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_policies() ERROR: %C %d != %d\n"),
       what, DDS::DATA_REPRESENTATION_QOS_POLICY_ID, q[0].policy_id));
     rv = false;
     print = true;
   }
   if (print) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_qos() ERROR: %C:\n"), what));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_policies() ERROR: %C:\n"), what));
     for (CORBA::ULong i = 0; i < cnt; ++i) {
       ACE_ERROR((LM_ERROR, ACE_TEXT(" - id:%u, count:%d\n"), q[i].policy_id, q[i].count));
     }
@@ -399,7 +400,7 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
             retcode_to_string(rc)));
           return check_match_error;
         }
-        if (expected_match != writer_match.total_count) {
+        if (expected_match != writer_match.total_count_change) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: publication match %d != %d\n"),
             expected_match, writer_match.total_count));
           unexpected_result = true;
@@ -417,7 +418,7 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
             incompatible_qos, writer_qos_fail.total_count));
           unexpected_result = true;
         }
-        if (!check_qos("offered incompatible qos", incompatible_qos, writer_qos_fail.policies)) {
+        if (!check_policies("offered incompatible qos", expect_match, writer_qos_fail.policies)) {
           unexpected_result = true;
         }
         writer_done = true;
@@ -430,7 +431,7 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
             retcode_to_string(rc)));
           return check_match_error;
         }
-        if (expected_match != reader_match.total_count) {
+        if (expected_match != reader_match.total_count_change) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: subscription match %d != %d\n"),
             expected_match, reader_match.total_count));
           unexpected_result = true;
@@ -448,7 +449,7 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
             incompatible_qos, reader_qos_fail.total_count));
           unexpected_result = true;
         }
-        if (!check_qos("requested incompatible qos", incompatible_qos, reader_qos_fail.policies)) {
+        if (!check_policies("requested incompatible qos", expect_match, reader_qos_fail.policies)) {
           unexpected_result = true;
         }
         reader_done = true;
