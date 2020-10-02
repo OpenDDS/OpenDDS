@@ -1193,7 +1193,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
         be_util::misc_error_and_abort("Failed to serialize type object sequence in strongly-connected component", type);
       }
 
-      unsigned char result[16];
+      unsigned char result[sizeof(OpenDDS::DCPS::MD5Result)];
       OpenDDS::DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
 
       // First 14 bytes of MD5 of the serialized TypeObject using XCDR

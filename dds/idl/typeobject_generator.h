@@ -56,7 +56,7 @@ private:
   MinimalTypeIdentifierMap minimal_type_identifier_map_;
   OpenDDS::XTypes::TypeMap minimal_type_map_;
 
-  size_t index_ = 0;
+  size_t index_;
   typedef std::vector<AST_Type*> Stack;
   Stack stack_;
   std::map<AST_Type*, Element> element_;
