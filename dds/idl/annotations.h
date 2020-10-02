@@ -317,6 +317,8 @@ enum TryConstructFailAction {
   tryconstructfailaction_trim,
 };
 
+TryConstructFailAction get_try_construct_annotation(AST_Annotation_Appl* ann_appl);
+
 class TryConstructAnnotation : public AnnotationWithEnumValue<TryConstructFailAction>, public AbsentValue<TryConstructFailAction> {
 public:
   TryConstructAnnotation()

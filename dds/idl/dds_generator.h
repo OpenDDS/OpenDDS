@@ -651,7 +651,7 @@ void generateCaseBody(
         std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
         std::string inout = use_cxx11 ? "" : ".inout()";
         be_global->impl_ <<
-          "        if (strm.good_bit() && " << check_not_empty << " && ("
+          "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
                     << bounded_arg(br) << " < " << get_length << ")) {\n";
         if (br_cls & CL_WIDE) {
           be_global->impl_ << "          std::wstring s = tmp;\n";
@@ -661,6 +661,7 @@ void generateCaseBody(
         be_global->impl_ <<
           "          s.resize(" << bounded_arg(br) << ");\n"
           "          uni." << name << "(s.c_str());\n"
+          "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
           "          return true;\n"
           "        }";
         be_global->impl_ <<

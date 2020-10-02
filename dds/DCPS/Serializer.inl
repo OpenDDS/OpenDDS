@@ -1315,16 +1315,22 @@ ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_string x)
 {
   const size_t length = s.read_string(const_cast<char*&>(x.val_));
-  return s.good_bit()
-         && ((x.bound_ == 0) || (length <= x.bound_));
+  if ((x.bound_ != 0) && (length > x.bound_)) {
+    s.set_construction_status(Serializer::BoundConstructionFailure);
+    return false;
+  }
+  return s.good_bit();
 }
 
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
 {
   const size_t length = s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
-  return s.good_bit()
-         && ((x.bound_ == 0) || (length <= x.bound_));
+  if ((x.bound_ != 0) && (length > x.bound_)) {
+    s.set_construction_status(Serializer::BoundConstructionFailure);
+    return false;
+  }
+  return s.good_bit();
 }
 
 ACE_INLINE bool
@@ -1340,7 +1346,14 @@ operator>>(Serializer& s, OPENDDS_STRING& x)
 ACE_INLINE bool
 operator>>(Serializer& s, Serializer::ToBoundedString<char> x)
 {
-  return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
+  if (s >> x.str_) {
+    if ((x.bound_ != 0) && (x.str_.size() > x.bound_)) {
+      s.set_construction_status(Serializer::BoundConstructionFailure);
+      return false;
+    }
+    return true;
+  }
+  return false;
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -1357,7 +1370,14 @@ operator>>(Serializer& s, OPENDDS_WSTRING& x)
 ACE_INLINE bool
 operator>>(Serializer& s, Serializer::ToBoundedString<wchar_t> x)
 {
-  return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
+  if (s >> x.str_) {
+    if ((x.bound_ != 0) && (x.str_.size() > x.bound_)) {
+      s.set_construction_status(Serializer::BoundConstructionFailure);
+      return false;
+    }
+    return true;
+  }
+  return false;
 }
 #endif /* DDS_HAS_WCHAR */
 

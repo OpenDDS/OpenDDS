@@ -19,7 +19,8 @@ using OpenDDS::DCPS::Encoding;
 const Encoding unaligned_encoding(Encoding::KIND_UNALIGNED_CDR);
 const Encoding aligned_encoding(Encoding::KIND_XCDR1);
 
-void initialize_enums(Xyz::AStruct& stru) {
+void initialize_enums(Xyz::AStruct& stru)
+{
   stru.f8 = Xyz::redx;
   for (ACE_INT16 i = 0; i < 5; ++i) stru.f15[i] = Xyz::redx;
   for (ACE_INT16 i = 0; i < 7; ++i) for (ACE_INT16 j = 0; j < 5; ++j) stru.f55[i][j] = Xyz::redx;

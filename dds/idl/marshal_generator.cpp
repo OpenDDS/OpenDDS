@@ -477,28 +477,6 @@ namespace {
       "      }\n";
   }
 
-  TryConstructFailAction get_try_construct_annotation(AST_Annotation_Appl* ann_appl)
-  {
-    TryConstructFailAction try_construct = tryconstructfailaction_discard;
-    if (ann_appl) {
-      switch (get_u32_annotation_member_value(ann_appl, "value"))
-      {
-      case 0:
-        try_construct = tryconstructfailaction_discard;
-        break;
-      case 1:
-        try_construct = tryconstructfailaction_use_default;
-        break;
-      case 2:
-        try_construct = tryconstructfailaction_trim;
-        break;
-      default:
-        try_construct = tryconstructfailaction_discard;
-      }
-    }
-    return try_construct;
-  }
-
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -824,19 +802,13 @@ namespace {
             string check_not_empty = use_cxx11 ? "!seq[i].empty()" : "seq[i].in()";
             string get_length = use_cxx11 ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "      if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "        seq[i]" << inout <<inout << ".resize(" << bounded_arg(elem) <<  ");\n"
-                "      }";
-            } else {
-              be_global->impl_ <<
-                "      if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "        seq[i]" << inout << "[" << bounded_arg(elem) << "] = 0;\n"
-                "      }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "          seq[i]" << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ");\n") : ("[" + bounded_arg(elem) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ <<
               "  else {\n"
               "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
@@ -1168,19 +1140,13 @@ namespace {
             string check_not_empty = use_cxx11 ? "!seq[i].empty()" : "seq[i].in()";
             string get_length = use_cxx11 ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && (" <<
-                bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
-                "          seq[i]" << inout << ".resize(" << bounded_arg(sf.as_act_) <<  ");\n"
-                "        }";
-            } else {
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && (" <<
-                bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
-                "          seq[i]" << inout << "[" << bounded_arg(sf.as_act_) << "] = 0;\n"
-                "        }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
+              "          seq[i]" << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(sf.as_act_) +  ");\n") : ("[" + bounded_arg(sf.as_act_) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ <<
               "      else {\n"
               "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
@@ -1438,19 +1404,13 @@ namespace {
             string check_not_empty = use_cxx11 ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
             string get_length = use_cxx11 ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "          arr" << nfl.index_ << inout << ".resize(" << bounded_arg(elem) <<  ");\n"
-                "        }";
-            } else {
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "          arr" << nfl.index_ << inout << "[" << bounded_arg(elem) << "] = 0;\n"
-                "        }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "          arr" << nfl.index_ << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ");\n") : ("[" + bounded_arg(elem) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ << " else {\n";
             skip_to_end_array();
             be_global->impl_ << "      }\n";
@@ -1682,19 +1642,13 @@ namespace {
             string check_not_empty = use_cxx11 ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
             string get_length = use_cxx11 ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
-                "        arr" << nfl.index_ << inout << ".resize(" << bounded_arg(af.as_act_) <<  ");\n"
-                "        }";
-            } else {
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
-                "        arr" << nfl.index_ << inout << "[" << bounded_arg(af.as_act_) << "] = 0;\n"
-                "        }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
+              "          arr" << nfl.index_ << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(af.as_act_) +  ");\n") : ("[" + bounded_arg(af.as_act_) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ << " else {\n";
             skip_to_end_array();
             be_global->impl_ << "      }\n";
@@ -3057,8 +3011,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
         fields_encode << expr << "\n";
         expr = "";
-        fields_encode << "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
-
+        fields_encode <<
+          "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
           "    return false;\n"
           "  }\n"
           "  size = 0;\n"
@@ -3202,19 +3156,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
             string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              cases <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(field_type) << " < " << get_length << ")) {\n"
-                "          " << field_name << inout << ".resize(" << bounded_arg(field_type) <<  ");\n"
-                "        }";
-            } else {
-              cases <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(field_type) << " < " << get_length << ")) {\n"
-                "          " << field_name << inout << "[" << bounded_arg(field_type) << "] = 0;\n"
-                "        }";
-            }
+            cases <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(field_type) << " < " << get_length << ")) {\n"
+              "          " << field_name << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(field_type) +  ");\n") : ("[" + bounded_arg(field_type) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             cases <<
               " else {\n"
               "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"

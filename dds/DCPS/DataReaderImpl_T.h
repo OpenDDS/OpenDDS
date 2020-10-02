@@ -951,17 +951,16 @@ namespace OpenDDS {
       ser_ret = (ser >> data);
     }
     if (!ser_ret) {
-      if (!ser.good_bit()) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                  ACE_TEXT("deserialization failed.\n"),
-                  TraitsType::type_name()));
-        return;
-      } else {
+      if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
                   ACE_TEXT("object construction failure, dropping sample.\n"),
                   TraitsType::type_name()));
-        return;
+      } else {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                  ACE_TEXT("deserialization failed.\n"),
+                  TraitsType::type_name()));
       }
+      return;
     }
 
     DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
@@ -1081,17 +1080,16 @@ protected:
       ser_ret = (ser >> *data);
     }
     if (!ser_ret) {
-      if (!ser.good_bit()) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("deserialization failed, dropping sample.\n"),
-                  TraitsType::type_name()));
-        return;
-      } else {
+      if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
                   ACE_TEXT("object construction failure, dropping sample.\n"),
                   TraitsType::type_name()));
-        return;
+      } else {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
+                  ACE_TEXT("deserialization failed, dropping sample.\n"),
+                  TraitsType::type_name()));
       }
+      return;
     }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
