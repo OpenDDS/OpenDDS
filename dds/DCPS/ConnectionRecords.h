@@ -16,8 +16,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-typedef std::pair<bool, ConnectionRecord> ACR;
-typedef OPENDDS_VECTOR(ACR) ConnectionRecords;
+typedef std::pair<bool, ConnectionRecord> ActionConnectionRecord;
+typedef OPENDDS_VECTOR(ActionConnectionRecord) ConnectionRecords;
 
 struct WriteConnectionRecords : public DCPS::JobQueue::Job {
   WriteConnectionRecords(DDS::Subscriber_var bit_sub,
