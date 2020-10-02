@@ -12,9 +12,10 @@
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
+bool verbose = false;
 
 template<typename T1, typename T2>
-ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
+ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -57,6 +58,49 @@ ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data, bool verbose)
   return ret;
 }
 
+ReturnCode_t read_property_1(DataReader_var dr)
+{
+  Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
+  ::Property_1Seq data;
+  return read(dr, pdr, data);
+}
+
+
+ReturnCode_t read_property_2(DataReader_var dr)
+{
+  Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
+  ::Property_2Seq data;
+  return read(dr, pdr, data);
+}
+
+
+void write_property_1(DataWriter_var dw)
+{
+  Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
+
+  Property_1 p;
+  p.key = 1;
+  p.value = 1;
+  pdw->write(p, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: Property_1\n"));
+  }
+}
+
+
+void write_property_2(DataWriter_var dw)
+{
+  Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw);
+
+  Property_2 p2;
+  p2.key = 1;
+  p2.value = "Test";
+  pdw2->write(p2, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: Property_2\n"));
+  }
+}
+
 
 template<typename T>
 void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Topic_var& topic)
@@ -73,7 +117,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DomainParticipant_var dp = dpf->create_participant(23,
     PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
-  bool verbose = false;
   bool writer = false;
   bool reader = false;
   std::string type;
@@ -107,10 +150,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Topic_var topic;
   if (type == "Property_1") {
     Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
-    get_topic(ts, dp, "MyTopic1", topic);
+    get_topic(ts, dp, "Property_1_Topic", topic);
   } else if (type == "Property_2") {
     Property_2TypeSupport_var ts = new Property_2TypeSupportImpl;
-    get_topic(ts, dp, "MyTopic2", topic);
+    get_topic(ts, dp, "Property_2_Topic", topic);
   }
 
   if (writer) {
@@ -124,25 +167,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DEFAULT_STATUS_MASK);
 
     if (type == "Property_1") {
-      Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
-
-      Property_1 p;
-      p.key = 1;
-      p.value = 1;
-      pdw->write(p, HANDLE_NIL);
-      if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "writer: Property_1\n"));
-      }
+      write_property_1(dw);
     } else if (type == "Property_2") {
-      Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw);
-
-      Property_2 p2;
-      p2.key = 1;
-      p2.value = "Test";
-      pdw2->write(p2, HANDLE_NIL);
-      if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "writer: Property_2\n"));
-      }
+      write_property_2(dw);
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;
@@ -164,14 +191,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DEFAULT_STATUS_MASK);
 
     if (type == "Property_1") {
-      Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
-      ::Property_1Seq data;
-      failed = !read(dr, pdr, data, verbose);
-    } else if (type == "Property_2") {
-      Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
-      ::Property_2Seq data;
       // TODO: handle expect_to_fail
-      failed = read(dr, pdr, data, verbose) != RETCODE_OK;
+      failed = read_property_1(dr) != RETCODE_NO_DATA;
+    } else if (type == "Property_2") {
+      // TODO: handle expect_to_fail
+      failed = read_property_2(dr) != RETCODE_NO_DATA;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;
