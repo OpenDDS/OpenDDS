@@ -221,12 +221,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
     get_topic(ts, dp, "AppendableStruct_Topic", topic);
   } else if (type == "AdditionalPrefixFieldStruct") {
-    AdditionalPrefixFieldStructTypeSupport_var ts = 
-      new AdditionalPrefixFieldStructTypeSupportImpl;
+    AdditionalPrefixFieldStructTypeSupport_var ts = new AdditionalPrefixFieldStructTypeSupportImpl;
     get_topic(ts, dp, "AdditionalPrefixFieldStruct_Topic", topic);
   } else if (type == "AdditionalPostfixFieldStruct") {
-    AdditionalPostfixFieldStructTypeSupport_var ts =
-      new AdditionalPostfixFieldStructTypeSupportImpl;
+    AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
     get_topic(ts, dp, "AdditionalPostfixFieldStruct_Topic", topic);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
