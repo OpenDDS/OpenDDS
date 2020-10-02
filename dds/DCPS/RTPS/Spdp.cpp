@@ -1774,12 +1774,13 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
   if (security_config_) {
     DDS::Security::SecurityException se = {"", 0, 0};
     DDS::Security::Authentication_var auth = security_config_->get_authentication();
+    DDS::Security::AccessControl_var access = security_config_->get_access_control();
 
     if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return identity handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
@@ -1791,7 +1792,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
       if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return handshake handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
@@ -1803,18 +1804,26 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
       if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::match_authenticated() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return sharedsecret handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
         }
       }
     }
-  }
 
-  // TODO:  What other security related clean up needs to be performed? (is every register unregistered)
-  // TODO:  Is a local participant that is destroyed being cleaned up?
-  // TODO:  How should this be split between here and DiscoveryBase?
+    if (iter->second.permissions_handle_ != DDS::HANDLE_NIL) {
+      if (!access->return_permissions_handle(iter->second.permissions_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
+                     ACE_TEXT("Unable to return permissions handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
+  }
 #endif
 }
 
