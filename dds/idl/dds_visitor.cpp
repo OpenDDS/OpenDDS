@@ -75,7 +75,7 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     gen_target_.add_generator(&key_gen_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
-    if (!be_global->suppress_xtypes()) {
+    if (!be_global->suppress_xtypes() && !java_ts_only) {
       gen_target_.add_generator(&to_gen_);
     }
   }
