@@ -576,16 +576,13 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CommonStructMember& common)
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::NameHash& name_hash)
 {
-  return out
-    << '{'
-    << static_cast<int>(name_hash[0])
-    << ','
-    << static_cast<int>(name_hash[1])
-    << ','
-    << static_cast<int>(name_hash[2])
-    << ','
-    << static_cast<int>(name_hash[3])
-    << '}';
+  for (size_t i = 0; i < sizeof name_hash; ++i) {
+    out << int(name_hash[i]);
+    if (i < sizeof name_hash - 1) {
+      out << ", ";
+    }
+  }
+  return out;
 }
 
 std::ostream&
