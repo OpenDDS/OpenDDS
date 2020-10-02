@@ -3839,12 +3839,13 @@ Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::Ty
 
 DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataSample& sample,
-                                                       DCPS::Serializer& ser)
+                                                       DCPS::Serializer& ser,
+                                                       bool is_discovery_protected)
 {
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (!(ser >> type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-               ACE_TEXT("failed to deserialize type lookup reply\n")));
+      ACE_TEXT("failed to deserialize type lookup reply\n")));
     return DDS::RETCODE_ERROR;
   }
 
@@ -3854,7 +3855,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     retcode = process_get_types_reply(type_lookup_reply);
     break;
   case XTypes::TypeLookup_getDependencies_HashId:
-    retcode = process_get_dependencies_reply(sample, type_lookup_reply);
+    retcode = process_get_dependencies_reply(sample, type_lookup_reply, is_discovery_protected);
     break;
   default:
     return DDS::RETCODE_UNSUPPORTED;
@@ -3882,7 +3883,8 @@ Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Re
 
 DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::ReceivedDataSample& sample,
-                                                            const XTypes::TypeLookup_Reply& reply)
+                                                            const XTypes::TypeLookup_Reply& reply,
+                                                            bool is_discovery_protected)
 {
   const XTypes::TypeLookup_getTypeDependencies_Out& data = reply.data.getTypeDependencies.result;
   continuation_point_ = data.continuation_point;
@@ -3895,15 +3897,12 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
       }
     }
 
-    DCPS::RepoId remote_guid = sample.header_.publication_id_;
-    // TODO(sonndinh): Setup is_discovery_protected correctly.
-    bool is_discovery_protected = false;
-    if (!sedp_.send_type_lookup_request(req_type_ids, remote_guid, is_discovery_protected, true)) {
+    const DCPS::RepoId remote_id = sample.header_.publication_id_;
+    if (!sedp_.send_type_lookup_request(req_type_ids, remote_id, is_discovery_protected, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
-                 ACE_TEXT("failed to send type lookup request\n")));
+        ACE_TEXT("failed to send type lookup request\n")));
       return DDS::RETCODE_ERROR;
     }
-    sedp_.type_lookup_reply_deadline_processor_->schedule(sedp_.max_type_lookup_service_reply_period_);
     return DDS::RETCODE_OK;
   }
   return DDS::RETCODE_NO_DATA;
@@ -4316,15 +4315,31 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
 
 void
 Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sample,
-  const DCPS::EntityId_t&,
+  const DCPS::EntityId_t& remote_id,
   DCPS::Serializer& ser,
   DCPS::Extensibility)
 {
-  if (!process_type_lookup_reply(sample, ser)) {
+#ifdef OPENDDS_SECURITY
+  if (remote_id == ENTITYID_TL_SVC_REPLY_WRITER_SECURE) {
+    if (!process_type_lookup_reply(sample, ser, true)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
+        ACE_TEXT("failed to process secure type lookup reply\n")));
+      return;
+    }
+  } else if (remote_id == ENTITYID_TL_SVC_REPLY_WRITER) {
+    if (!process_type_lookup_reply(sample, ser, false)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
+        ACE_TEXT("failed to process type lookup reply\n")));
+      return;
+    }
+  }
+#else
+  if (!process_type_lookup_reply(sample, ser, false)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
-      ACE_TEXT("failed to take type lookup reply\n")));
+      ACE_TEXT("failed to process type lookup reply\n")));
     return;
   }
+#endif
 }
 
 void

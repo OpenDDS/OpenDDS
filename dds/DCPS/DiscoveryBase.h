@@ -1221,8 +1221,9 @@ namespace OpenDDS {
         }
       }
 
-      void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info, MatchingData& md,
-                                                  const MatchingPair mp, const RepoId& remote_id,
+      void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
+                                                  MatchingData& md, const MatchingPair mp,
+                                                  const RepoId& remote_id,
                                                   bool is_discovery_protected)
       {
         md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
@@ -1233,23 +1234,25 @@ namespace OpenDDS {
           matching_data_buffer_.insert(std::make_pair(mp, md));
         }
 
-        // Get the top-level TypeObject
         XTypes::TypeIdentifierSeq type_ids;
-        type_ids.append(type_info->minimal.typeid_with_size.type_id);
-        send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
-        type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-
-        // Get dependent TypeObjects
         if (type_info->minimal.dependent_typeid_count == -1 ||
             type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
+          type_ids.append(type_info->minimal.typeid_with_size.type_id);
+
+          // Get TypeObject of the topic type
+          send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
+
+          // Get the dependent TypeIdentifiers of the topic type
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
         } else {
-          XTypes::TypeIdentifierSeq dependencies;
-          dependencies.length(type_info->minimal.dependent_typeid_count);
-          for (size_t i = 0; i < (size_t)type_info->minimal.dependent_typeid_count; ++i) {
-            dependencies[i] = type_info->minimal.dependent_typeids[i].type_id;
+          type_ids.length(type_info->minimal.dependent_typeid_count + 1);
+          type_ids[0] = type_info->minimal.typeid_with_size.type_id;
+          for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
+            type_ids[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
-          send_type_lookup_request(dependencies, remote_id, is_discovery_protected, true);
+
+          // Get TypeObjects of the topic type and all of its dependent types
+          send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         }
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
       }
@@ -1258,10 +1261,11 @@ namespace OpenDDS {
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        MonotonicTimePoint now = MonotonicTimePoint::now();
         MatchingDataIter end_iter = matching_data_buffer_.end();
 
         for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
-          if (MonotonicTimePoint::now() - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
+          if (now - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
             matching_data_buffer_.erase(iter++);
           } else {
             ++iter;

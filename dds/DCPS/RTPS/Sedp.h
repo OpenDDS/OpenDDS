@@ -771,13 +771,23 @@ private:
       DCPS::Extensibility extensibility);
 
     DDS::ReturnCode_t process_type_lookup_reply(const DCPS::ReceivedDataSample&,
-                                                DCPS::Serializer& ser);
+                                                DCPS::Serializer& ser,
+                                                bool is_discovery_protected);
     DDS::ReturnCode_t process_get_types_reply(const XTypes::TypeLookup_Reply&);
     DDS::ReturnCode_t process_get_dependencies_reply(const DCPS::ReceivedDataSample&,
-                                                     const XTypes::TypeLookup_Reply&);
+                                                     const XTypes::TypeLookup_Reply&,
+                                                     bool is_discovery_protected);
 
-    // Store continuation point of getTypeDependencies reply
+    // TODO(sonndinh): If one object of this class is used to communicate
+    // with built-in endpoints from more than 1 participants, we must use
+    // something like maps for the following two variables.
+
+    // Store continuation point from getTypeDependencies reply
     XTypes::OctetSeq32 continuation_point_;
+
+    // Whether all TypeObjects needed by the matching have been acquired
+    // and the matching process can continue
+    bool continue_matching;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
