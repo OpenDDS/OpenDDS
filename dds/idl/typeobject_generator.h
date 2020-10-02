@@ -13,6 +13,10 @@
 
 class typeobject_generator : public dds_generator {
 public:
+  typeobject_generator()
+    : index_(0)
+  {}
+
   void gen_prologue();
 
   void gen_epilogue();
