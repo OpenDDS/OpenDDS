@@ -85,6 +85,8 @@ void TypeIdentifier::activate(const TypeIdentifier* other)
   case TK_FLOAT32:
   case TK_FLOAT64:
   case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
   case TK_CHAR8:
   case TK_CHAR16:
     break; // no-op, no member selected
@@ -142,6 +144,8 @@ void TypeIdentifier::reset()
   case TK_FLOAT32:
   case TK_FLOAT64:
   case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
   case TK_CHAR8:
   case TK_CHAR16:
     break; // no-op, no member selected
@@ -827,6 +831,8 @@ void serialized_size(const Encoding& encoding, size_t& size,
   case XTypes::TK_FLOAT32:
   case XTypes::TK_FLOAT64:
   case XTypes::TK_FLOAT128:
+  case XTypes::TK_INT8:
+  case XTypes::TK_UINT8:
   case XTypes::TK_CHAR8:
   case XTypes::TK_CHAR16:
     break; // no-op, no member selected
@@ -880,6 +886,8 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
   case XTypes::TK_FLOAT32:
   case XTypes::TK_FLOAT64:
   case XTypes::TK_FLOAT128:
+  case XTypes::TK_INT8:
+  case XTypes::TK_UINT8:
   case XTypes::TK_CHAR8:
   case XTypes::TK_CHAR16:
     return true; // no-op, no member selected
@@ -935,6 +943,8 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
   case XTypes::TK_FLOAT32:
   case XTypes::TK_FLOAT64:
   case XTypes::TK_FLOAT128:
+  case XTypes::TK_INT8:
+  case XTypes::TK_UINT8:
   case XTypes::TK_CHAR8:
   case XTypes::TK_CHAR16:
     return true; // no-op, no member selected

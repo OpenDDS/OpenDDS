@@ -335,6 +335,8 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
         case TK_FLOAT32:
         case TK_FLOAT64:
         case TK_FLOAT128:
+        case TK_INT8:
+        case TK_UINT8:
         case TK_CHAR8:
         case TK_CHAR16:
             // No Value
