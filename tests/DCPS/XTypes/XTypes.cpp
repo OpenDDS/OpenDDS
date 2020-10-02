@@ -13,6 +13,7 @@ using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 bool verbose = false;
+bool expect_to_fail = false;
 
 template<typename T1, typename T2>
 ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
@@ -22,6 +23,7 @@ ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
     ALIVE_INSTANCE_STATE);
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_rc);
+  // TODO: remove if not needed
   unsigned counter = 0;
   std::set<int> instances;
 
@@ -39,7 +41,7 @@ ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
   }
   // data;
   SampleInfoSeq info;
-  while ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
+  if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
     for (unsigned int i = 0; i < data.length(); ++i) {
       ++counter;
       instances.insert(data[i].key);
@@ -47,8 +49,7 @@ ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
         ACE_DEBUG((LM_DEBUG, "reader: Counter: %u Instance: %d\n", counter, data[i].key));
       }
     }
-  }
-  if (ret != RETCODE_NO_DATA && ret != RETCODE_OK) {
+  } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
     return ret;
   }
@@ -70,6 +71,30 @@ ReturnCode_t read_property_2(DataReader_var dr)
 {
   Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
   ::Property_2Seq data;
+  return read(dr, pdr, data);
+}
+
+
+ReturnCode_t read_appendable_struct(DataReader_var dr)
+{
+  AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
+  ::AppendableStructSeq data;
+  return read(dr, pdr, data);
+}
+
+
+ReturnCode_t read_additional_prefix_field_struct(DataReader_var dr)
+{
+  AdditionalPrefixFieldStructDataReader_var pdr = AdditionalPrefixFieldStructDataReader::_narrow(dr);
+  ::AdditionalPrefixFieldStructSeq data;
+  return read(dr, pdr, data);
+}
+
+
+ReturnCode_t read_additional_postfix_field_struct(DataReader_var dr)
+{
+  AdditionalPostfixFieldStructDataReader_var pdr = AdditionalPostfixFieldStructDataReader::_narrow(dr);
+  ::AdditionalPostfixFieldStructSeq data;
   return read(dr, pdr, data);
 }
 
@@ -102,6 +127,45 @@ void write_property_2(DataWriter_var dw)
 }
 
 
+void write_appendable_struct(DataWriter_var dw)
+{
+  AppendableStructDataWriter_var typed_dw = AppendableStructDataWriter::_narrow(dw);
+
+  AppendableStruct as;
+  as.key = 1;
+  typed_dw->write(as, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: AppendableStruct\n"));
+  }
+}
+
+
+void write_additional_prefix_field_struct(DataWriter_var dw)
+{
+  AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
+
+  AdditionalPrefixFieldStruct as;
+  as.key = 1;
+  typed_dw->write(as, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: AdditionalPrefixFieldStruct\n"));
+  }
+}
+
+
+void write_additional_postfix_field_struct(DataWriter_var dw)
+{
+  AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
+
+  AdditionalPostfixFieldStruct as;
+  as.key = 1;
+  typed_dw->write(as, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: AdditionalPostfixFieldStruct\n"));
+  }
+}
+
+
 template<typename T>
 void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Topic_var& topic)
 {
@@ -120,7 +184,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool writer = false;
   bool reader = false;
   std::string type;
-  bool expect_to_fail = false;
 
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
@@ -154,6 +217,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "Property_2") {
     Property_2TypeSupport_var ts = new Property_2TypeSupportImpl;
     get_topic(ts, dp, "Property_2_Topic", topic);
+  } else if (type == "AppendableStruct") {
+    AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
+    get_topic(ts, dp, "AppendableStruct_Topic", topic);
+  } else if (type == "AdditionalPrefixFieldStruct") {
+    AdditionalPrefixFieldStructTypeSupport_var ts = 
+      new AdditionalPrefixFieldStructTypeSupportImpl;
+    get_topic(ts, dp, "AdditionalPrefixFieldStruct_Topic", topic);
+  } else if (type == "AdditionalPostfixFieldStruct") {
+    AdditionalPostfixFieldStructTypeSupport_var ts =
+      new AdditionalPostfixFieldStructTypeSupportImpl;
+    get_topic(ts, dp, "AdditionalPostfixFieldStruct_Topic", topic);
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+    return 1;
   }
 
   if (writer) {
@@ -170,6 +247,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       write_property_1(dw);
     } else if (type == "Property_2") {
       write_property_2(dw);
+    } else if (type == "AppendableStruct") {
+      write_appendable_struct(dw);
+    } else if (type == "AdditionalPrefixFieldStruct") {
+      write_additional_prefix_field_struct(dw);
+    } else if (type == "AdditionalPostfixFieldStruct") {
+      write_additional_postfix_field_struct(dw);
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;
@@ -191,11 +274,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DEFAULT_STATUS_MASK);
 
     if (type == "Property_1") {
-      // TODO: handle expect_to_fail
-      failed = read_property_1(dr) != RETCODE_NO_DATA;
+      failed = !((read_property_1(dr) == RETCODE_OK) ^ expect_to_fail);
     } else if (type == "Property_2") {
-      // TODO: handle expect_to_fail
-      failed = read_property_2(dr) != RETCODE_NO_DATA;
+      failed = !((read_property_2(dr) == RETCODE_OK) ^ expect_to_fail);
+    } else if (type == "AppendableStruct") {
+      failed = !((read_appendable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+    } else if (type == "AdditionalPrefixFieldStruct") {
+      failed = !((read_additional_prefix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+    } else if (type == "AdditionalPostfixFieldStruct") {
+      failed = !((read_additional_postfix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;

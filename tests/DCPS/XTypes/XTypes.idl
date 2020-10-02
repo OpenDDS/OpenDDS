@@ -6,9 +6,32 @@ struct Property_1 {
   long value;
 };
 
+// TODO: remove if not needed
 @topic
 struct Property_2 {
   @key long key;
   string value;
 };
 
+@topic
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AppendableStruct {
+  @key long key;
+};
+
+@topic
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalPostfixFieldStruct {
+  @key long key;
+  long additional_field;
+};
+
+@topic
+@appendable
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalPrefixFieldStruct {
+  long additional_field;
+  @key long key;
+};
