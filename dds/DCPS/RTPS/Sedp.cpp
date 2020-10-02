@@ -3260,6 +3260,8 @@ bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
     writer = type_lookup_request_secure_writer_;
     remote_reader = make_id(reader, ENTITYID_TL_SVC_REPLY_READER_SECURE);
   }
+#else
+  ACE_UNUSED_ARG(is_discovery_protected);
 #endif
 
   return writer->send_type_lookup_request(type_ids,
@@ -4223,6 +4225,7 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
       ACE_TEXT("failed to send type lookup reply\n")));
     return;
   }
+  ACE_UNUSED_ARG(entity_id);
 #endif
 }
 
