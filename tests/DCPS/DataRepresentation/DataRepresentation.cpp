@@ -15,6 +15,7 @@
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #include <vector>
 #include <sstream>

@@ -14,6 +14,7 @@
 #include "Marked_Default_Qos.h"
 #include "SubscriberImpl.h"
 #include "TypeSupportImpl.h"
+#include "DCPS_Utils.h"
 
 #include <stdexcept>
 

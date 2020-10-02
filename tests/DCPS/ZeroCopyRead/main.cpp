@@ -18,6 +18,7 @@
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 

@@ -35,6 +35,7 @@ namespace {
 
   typedef is_special_case is_special_union;
   typedef bool (*gen_special_union)(const string& cxx,
+                                    AST_Union* u,
                                     AST_Type* discriminator,
                                     const std::vector<AST_UnionBranch*>& branches);
 
@@ -67,6 +68,7 @@ namespace {
 
   bool isRtpsSpecialUnion(const string& cxx);
   bool genRtpsSpecialUnion(const string& cxx,
+                           AST_Union* u,
                            AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches);
 
@@ -2749,7 +2751,7 @@ namespace {
       generate_marshal_traits_struct_bounds_functions(node, keys, info, true); // Key Fields
   }
 
-  bool generate_marshal_traits_union(AST_Union* node, bool has_key)
+  bool generate_marshal_traits_union(AST_Union* node, bool has_key, ExtensibilityKind exten)
   {
     be_global->header_ <<
       "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
@@ -2781,14 +2783,19 @@ namespace {
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      size_t size = 0;
-      // Union can only have discriminator as key, and the discriminator is always bounded.
-      if (has_key) {
-        idl_max_serialized_size(encoding, size, node->disc_type());
-      }
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-        "      return SerializedSizeBound(" << size << ");\n";
+        "      return SerializedSizeBound(";
+      // TODO(iguessthislldo): This is the same workaround for
+      // idl_max_serialized_size as in is_bounded_type
+      if (exten == extensibilitykind_final) {
+        size_t size = 0;
+        if (has_key) {
+          idl_max_serialized_size(encoding, size, node->disc_type());
+        }
+        be_global->header_ << size;
+      }
+      be_global->header_ << ");\n";
     }
     be_global->header_ <<
       "    default:\n"
@@ -2831,7 +2838,7 @@ namespace {
       }
     } else if (node->node_type() == AST_Decl::NT_union) {
       if (!generate_marshal_traits_union(
-            dynamic_cast<AST_Union*>(node), keys.count())) {
+            dynamic_cast<AST_Union*>(node), keys.count(), exten)) {
         return false;
       }
     } else {
@@ -3036,8 +3043,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "  size_t size = 0;\n";
       std::ostringstream fields_encode;
+      const AutoidKind auto_id = be_global->autoid(node);
+      ACE_CDR::ULong member_id = 0;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
+        const ACE_CDR::ULong id = be_global->get_id(fields[i], auto_id, member_id);
         const string field_name = fields[i]->local_name()->get_string();
         bool is_key = false;
         be_global->check_key(fields[i], is_key);
@@ -3160,8 +3169,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "    ACE_UNUSED_ARG(end_of_field);\n";
 
       std::ostringstream cases;
+      const AutoidKind auto_id = be_global->autoid(node);
+      ACE_CDR::ULong member_id = 0;
       for (size_t i = 0; i < fields.size(); ++i) {
-        const unsigned id = be_global->get_id(node, fields[i], static_cast<unsigned>(i));
+        const ACE_CDR::ULong id = be_global->get_id(fields[i], auto_id, member_id);
         string field_name = string("stru.") + fields[i]->local_name()->get_string();
         cases <<
           "    case " << id << ": {\n"
@@ -3557,7 +3568,7 @@ namespace {
       || cxx == "OpenDDS::RTPS::Submessage";
   }
 
-  bool genRtpsParameter(AST_Type* discriminator,
+  bool genRtpsParameter(AST_Union* u, AST_Type* discriminator,
                         const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = "OpenDDS::RTPS::Parameter";
@@ -3567,7 +3578,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("uni", "const " + cxx + "&");
       serialized_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
       be_global->impl_ <<
         "  size += 4; // parameterId & length\n";
@@ -3612,7 +3623,7 @@ namespace {
       insertData.addArg("strm", "Serializer&");
       insertData.addArg("uni", "const " + cxx + "&");
       insertData.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
+      generateSwitchForUnion(u, "uni._d()", streamCommon, branches, discriminator,
                              "return", "<< ", cxx.c_str());
     }
     {
@@ -3640,7 +3651,7 @@ namespace {
         "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
         "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
-      generateSwitchBody(streamCommon, branches, discriminator,
+      generateSwitchBody(u, streamCommon, branches, discriminator,
                          "return", ">> ", cxx.c_str(), true);
       be_global->impl_ <<
         "  default:\n"
@@ -3656,7 +3667,7 @@ namespace {
     return true;
   }
 
-  bool genRtpsSubmessage(AST_Type* discriminator,
+  bool genRtpsSubmessage(AST_Union* u, AST_Type* discriminator,
                          const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = "OpenDDS::RTPS::Submessage";
@@ -3666,7 +3677,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("uni", "const " + cxx + "&");
       serialized_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
     }
     {
@@ -3674,7 +3685,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", streamCommon, branches,
                              discriminator, "return", "<< ", cxx.c_str());
     }
     {
@@ -3687,13 +3698,13 @@ namespace {
     return true;
   }
 
-  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
+  bool genRtpsSpecialUnion(const string& cxx, AST_Union* u, AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches)
   {
     if (cxx == "OpenDDS::RTPS::Parameter") {
-      return genRtpsParameter(discriminator, branches);
+      return genRtpsParameter(u, discriminator, branches);
     } else if (cxx == "OpenDDS::RTPS::Submessage") {
-      return genRtpsSubmessage(discriminator, branches);
+      return genRtpsSubmessage(u, discriminator, branches);
     } else {
       return false;
     }
@@ -3765,7 +3776,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
-      return special_unions[i].gen(cxx, discriminator, branches);
+      return special_unions[i].gen(cxx, node, discriminator, branches);
     }
   }
 
@@ -3800,7 +3811,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
 
-    generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
+    generateSwitchForUnion(node, "uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
@@ -3846,11 +3857,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
-    if (generateSwitchForUnion("uni._d()", streamCommon, branches,
+    if (generateSwitchForUnion(node, "uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
-                               exten == extensibilitykind_mutable ? findSizeCommon : 0,
-                               exten == extensibilitykind_mutable ? node : 0)) {
+                               exten == extensibilitykind_mutable ? findSizeCommon : 0)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3912,7 +3922,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "    return false;\n"
         "  }\n";
 
-      if (generateSwitchForUnion("disc", streamCommon, branches,
+      if (generateSwitchForUnion(node, "disc", streamCommon, branches,
         discriminator, "if", ">> ", cxx.c_str(), false, true, true, 0)) {
         be_global->impl_ <<
           "  return true;\n";
@@ -3921,7 +3931,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-      if (generateSwitchForUnion("disc", streamCommon, branches,
+      if (generateSwitchForUnion(node, "disc", streamCommon, branches,
           discriminator, "if", ">> ", cxx.c_str())) {
         be_global->impl_ <<
           "  return true;\n";
@@ -3929,7 +3939,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  const bool has_key = be_global->has_key(node);
+  const bool has_key = be_global->union_discriminator_is_key(node);
   const bool is_topic_type = be_global->is_topic_type(node);
 
   if (!is_topic_type) {

@@ -13,6 +13,7 @@
 #include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "DCPS_Utils.h"
 
 #ifndef DDS_HAS_MINIMUM_BIT
 #include "DdsDcpsCoreTypeSupportImpl.h"
