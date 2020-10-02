@@ -203,11 +203,11 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArrayLElemDefn& ldef
   array_ldefn() = ldefn;
 }
 
-TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHash& eh)
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHashWrapper& eh)
   : kind_(k)
 {
   activate();
-  std::memcpy(equivalence_hash(), eh, sizeof eh);
+  std::memcpy(equivalence_hash(), eh.eh_, sizeof eh.eh_);
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponentId& id)
@@ -4456,7 +4456,6 @@ bool operator>>(Serializer& ser, XTypes::TypeObject& type_object)
     break;
   }
 
-  //TODO: XCDR2 appendable union - need to handle extra data in stream?
   return ret;
 }
 

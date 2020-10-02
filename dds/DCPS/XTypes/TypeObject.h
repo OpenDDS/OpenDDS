@@ -583,6 +583,17 @@ namespace XTypes {
     // Empty. Available for future extension
   };
 
+  struct EquivalenceHashWrapper { // not in spec
+    EquivalenceHashWrapper(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d,
+                           ACE_CDR::Octet e, ACE_CDR::Octet f, ACE_CDR::Octet g, ACE_CDR::Octet h,
+                           ACE_CDR::Octet i, ACE_CDR::Octet j, ACE_CDR::Octet k, ACE_CDR::Octet l,
+                           ACE_CDR::Octet m, ACE_CDR::Octet n)
+    {
+      eh_[0] = a; eh_[1] = b; eh_[2] = c; eh_[3] = d; eh_[4] = e; eh_[5] = f; eh_[6] = g;
+      eh_[7] = h; eh_[8] = i; eh_[9] = j; eh_[10] = k; eh_[11] = l; eh_[12] = m; eh_[13] = n;
+    }
+    EquivalenceHash eh_;
+  };
 
 
   // The TypeIdentifier uniquely identifies a type (a set of equivalent
@@ -681,7 +692,7 @@ namespace XTypes {
     TypeIdentifier(ACE_CDR::Octet kind, const PlainSequenceLElemDefn& ldefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArraySElemDefn& sdefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArrayLElemDefn& ldefn);
-    TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHash& equivalence_hash);
+    TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHashWrapper& equivalence_hash);
     TypeIdentifier(ACE_CDR::Octet kind, const StronglyConnectedComponentId& sc_component_id);
 
     ACE_CDR::Octet kind() const { return kind_; }

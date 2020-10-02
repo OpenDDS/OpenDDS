@@ -13,6 +13,10 @@
 
 class typeobject_generator : public dds_generator {
 public:
+  typeobject_generator()
+    : group_counter_(0)
+  {}
+
   void gen_prologue();
 
   void gen_epilogue();
@@ -65,7 +69,7 @@ private:
   SortedDependencies sorted_dependencies_;
   std::set<AST_Type*> in_sorted_dependencies_;
   std::map<AST_Type*, size_t> in_progress_;
-  size_t group_counter_ = 0;
+  size_t group_counter_;
 };
 
 #endif

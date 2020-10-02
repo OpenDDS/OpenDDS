@@ -386,36 +386,14 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapLTypeDefn& map_ldef
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
 {
-  return out
-    << '{'
-    << static_cast<int>(equivalence_hash[0])
-    << ','
-    << static_cast<int>(equivalence_hash[1])
-    << ','
-    << static_cast<int>(equivalence_hash[2])
-    << ','
-    << static_cast<int>(equivalence_hash[3])
-    << ','
-    << static_cast<int>(equivalence_hash[4])
-    << ','
-    << static_cast<int>(equivalence_hash[5])
-    << ','
-    << static_cast<int>(equivalence_hash[6])
-    << ','
-    << static_cast<int>(equivalence_hash[7])
-    << ','
-    << static_cast<int>(equivalence_hash[8])
-    << ','
-    << static_cast<int>(equivalence_hash[9])
-    << ','
-    << static_cast<int>(equivalence_hash[10])
-    << ','
-    << static_cast<int>(equivalence_hash[11])
-    << ','
-    << static_cast<int>(equivalence_hash[12])
-    << ','
-    << static_cast<int>(equivalence_hash[13])
-    << '}';
+  out << "XTypes::EquivalenceHashWrapper(";
+  for (size_t i = 0; i < sizeof equivalence_hash; ++i) {
+    out << int(equivalence_hash[i]);
+    if (i < sizeof equivalence_hash - 1) {
+      out << ", ";
+    }
+  }
+  return out << ')';
 }
 
 std::ostream&
