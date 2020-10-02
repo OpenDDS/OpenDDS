@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DCPS_CONNECTION_RECORDS_H
 #define OPENDDS_DCPS_CONNECTION_RECORDS_H
 
+#include "dcps_export.h"
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
@@ -19,7 +20,8 @@ namespace DCPS {
 typedef std::pair<bool, ConnectionRecord> ActionConnectionRecord;
 typedef OPENDDS_VECTOR(ActionConnectionRecord) ConnectionRecords;
 
-struct WriteConnectionRecords : public DCPS::JobQueue::Job {
+class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::JobQueue::Job {
+ public:
   WriteConnectionRecords(DDS::Subscriber_var bit_sub,
                          const ConnectionRecords& records)
     : bit_sub_(bit_sub)
@@ -36,6 +38,7 @@ struct WriteConnectionRecords : public DCPS::JobQueue::Job {
 
   void execute();
 
+ private:
   DDS::Subscriber_var bit_sub_;
   ConnectionRecords records_;
 };
