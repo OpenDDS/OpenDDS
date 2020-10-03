@@ -8,11 +8,12 @@
 #ifndef OPENDDS_DCPS_ENTITY_IMPL_H
 #define OPENDDS_DCPS_ENTITY_IMPL_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "ace/Atomic_Op_T.h"
-#include "dds/DCPS/LocalObject.h"
+#include "Observer.h"
+#include "LocalObject.h"
 #include "Definitions.h"
-#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
+#include "transport/framework/TransportConfig_rch.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <ace/Atomic_Op_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -59,6 +60,10 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const { return RcHandle<EntityImpl>(); }
 
+  void set_observer(Observer_rch observer, Observer::Event e);
+
+  Observer_rch get_observer(Observer::Event e);
+
 protected:
   DDS::ReturnCode_t set_enabled();
 
@@ -82,6 +87,9 @@ private:
   DDS::StatusCondition_var status_condition_;
 
   TransportConfig_rch transport_config_;
+
+  Observer_rch observer_;
+  Observer::Event events_;
 
   mutable ACE_Thread_Mutex lock_;
 };

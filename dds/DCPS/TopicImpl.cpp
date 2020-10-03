@@ -219,14 +219,17 @@ TopicImpl::inconsistent_topic(int count)
 
 bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer)
 {
-  DDS::DataRepresentationIdSeq type_allowed_reprs;
   if (!type_support_) {
     return true;
   }
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
   type_support_->representations_allowed_by_type(type_allowed_reprs);
   //default for blank annotation is to allow all types of data representation
   if (type_allowed_reprs.length() == 0) {
     return true;
+  }
+  if (qos_ids.length() == 0) {
+    return false;
   }
   //Data Writer will only use the 1st QoS declared
   if (is_data_writer) {

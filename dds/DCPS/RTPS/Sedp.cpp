@@ -3260,6 +3260,8 @@ bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
     writer = type_lookup_request_secure_writer_;
     remote_reader = make_id(reader, ENTITYID_TL_SVC_REPLY_READER_SECURE);
   }
+#else
+  ACE_UNUSED_ARG(is_discovery_protected);
 #endif
 
   return writer->send_type_lookup_request(type_ids,
@@ -3735,8 +3737,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupReplyWriter::send_tl_reply(const DCPS::ReceivedDataSample& sample,
-                                           XTypes::TypeLookup_Reply& type_lookup_reply,
+Sedp::TypeLookupReplyWriter::send_tl_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
                                            const DCPS::RepoId& reader)
 {
   DCPS::SequenceNumber sequence = 0;
@@ -4204,14 +4205,14 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
 #ifdef OPENDDS_SECURITY
   if (entity_id == ENTITYID_TL_SVC_REQ_WRITER_SECURE) {
     const DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER_SECURE);
-    if (DDS::RETCODE_OK != sedp_.type_lookup_reply_secure_writer_->send_tl_reply(sample, type_lookup_reply, reader)) {
+    if (DDS::RETCODE_OK != sedp_.type_lookup_reply_secure_writer_->send_tl_reply(type_lookup_reply, reader)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
         ACE_TEXT("failed to send type lookup reply\n")));
       return;
     }
   } else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
     const DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
-    if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(sample, type_lookup_reply, reader)) {
+    if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(type_lookup_reply, reader)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
         ACE_TEXT("failed to send type lookup reply\n")));
       return;
@@ -4219,11 +4220,12 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   }
 #else
   const DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
-  if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(sample, type_lookup_reply, reader)) {
+  if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_tl_reply(type_lookup_reply, reader)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
       ACE_TEXT("failed to send type lookup reply\n")));
     return;
   }
+  ACE_UNUSED_ARG(entity_id);
 #endif
 }
 
