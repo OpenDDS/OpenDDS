@@ -940,8 +940,8 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   return generate(node, name);
 }
 
-size_t
-typeobject_generator::compute_dependencies(AST_Type* type, const std::string& anonymous_name)
+void
+typeobject_generator::consider(Element& v, AST_Type* type, const std::string& anonymous_name)
 {
   switch (type->node_type()) {
   case AST_ConcreteType::NT_union_fwd:
@@ -960,38 +960,54 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
     break;
   }
 
-  if (minimal_type_identifier_map_.find(type) != minimal_type_identifier_map_.end()) {
-    // Done.
-    return -1;
+  if (element_.find(type) == element_.end()) {
+    strong_connect(type, anonymous_name);
+    v.lowlink = std::min(v.lowlink, element_[type].lowlink);
+  } else if (element_[type].on_stack) {
+    v.lowlink = std::min(v.lowlink, element_[type].index);
+  }
+}
+
+void
+typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymous_name)
+{
+  switch (type->node_type()) {
+  case AST_ConcreteType::NT_union_fwd:
+    {
+      AST_UnionFwd* n = AST_UnionFwd::narrow_from_decl(type);
+      type = n->full_definition();
+      break;
+    }
+  case AST_ConcreteType::NT_struct_fwd:
+    {
+      AST_StructureFwd* n = AST_StructureFwd::narrow_from_decl(type);
+      type = n->full_definition();
+      break;
+    }
+  default:
+    break;
   }
 
-  if (in_sorted_dependencies_.count(type) != 0) {
-    // Done.
-    return -1;
-  }
-
-  if (in_progress_.count(type) != 0) {
-    // Recursion.
-    return in_progress_[type];
-  }
-
-  const size_t group = group_counter_++;
-  in_progress_[type] = group;
-  size_t dependencies_group = -1;
-  std::string name;
+  Element& v = element_[type];
+  v.type = type;
+  v.index = index_;
+  v.lowlink = index_;
+  ++index_;
+  stack_.push_back(type);
+  v.on_stack = true;
 
   switch (type->node_type()) {
 
   case AST_ConcreteType::NT_union:
     {
       AST_Union* n = AST_Union::narrow_from_decl(type);
-      name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = dds_generator::scoped_helper(n->name(), "::");
 
       AST_Type* discriminator = n->disc_type();
       const Fields fields(n);
       const Fields::Iterator fields_end = fields.end();
 
-      dependencies_group = std::min(compute_dependencies(discriminator, name), dependencies_group);
+      consider(v, discriminator, v.name + ".d");
 
       const AutoidKind auto_id = be_global->autoid(n);
       ACE_CDR::ULong member_id = 0;
@@ -999,7 +1015,7 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
         const ACE_CDR::ULong id = be_global->get_id(ub, auto_id, member_id);
-        dependencies_group = std::min(compute_dependencies(ub->field_type(), name + "." + OpenDDS::DCPS::to_dds_string(id)), dependencies_group);
+        consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
       break;
@@ -1008,7 +1024,9 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
   case AST_ConcreteType::NT_struct:
     {
       AST_Structure* n = AST_Structure::narrow_from_decl(type);
-      name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = dds_generator::scoped_helper(n->name(), "::");
+
+      // TODO: Struct inheritance.
 
       const Fields fields(n);
       const Fields::Iterator fields_end = fields.end();
@@ -1019,7 +1037,7 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* field = *i;
         const ACE_CDR::ULong id = be_global->get_id(field, auto_id, member_id);
-        dependencies_group = std::min(compute_dependencies(field->field_type(), name + "." + OpenDDS::DCPS::to_dds_string(id)), dependencies_group);
+        consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
       break;
@@ -1028,33 +1046,33 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
   case AST_ConcreteType::NT_array:
     {
       AST_Array* n = AST_Array::narrow_from_decl(type);
-      name = anonymous_name + ".a";
-      dependencies_group = std::min(compute_dependencies(n->base_type(), name), dependencies_group);
+      v.name = anonymous_name + ".a";
+      consider(v, n->base_type(), v.name);
       break;
     }
 
   case AST_ConcreteType::NT_sequence:
     {
       AST_Sequence* n = AST_Sequence::narrow_from_decl(type);
-      name = anonymous_name + ".s";
-      dependencies_group = std::min(compute_dependencies(n->base_type(), name), dependencies_group);
+      v.name = anonymous_name + ".s";
+      consider(v, n->base_type(), v.name);
       break;
     }
 
   case AST_ConcreteType::NT_typedef:
     {
       AST_Typedef* n = AST_Typedef::narrow_from_decl(type);
-      name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = dds_generator::scoped_helper(n->name(), "::");
       // TODO: What is the member name for an anonymous type in a  typedef?
       // 7.3.4.9.2
-      dependencies_group = std::min(compute_dependencies(n->base_type(), name + ".0"), dependencies_group);
+      consider(v, n->base_type(), v.name + ".0");
       break;
     }
 
   case AST_ConcreteType::NT_enum:
     {
       AST_Enum* n = AST_Enum::narrow_from_decl(type);
-      name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = dds_generator::scoped_helper(n->name(), "::");
       break;
     }
 
@@ -1107,11 +1125,66 @@ typeobject_generator::compute_dependencies(AST_Type* type, const std::string& an
     break;
   }
 
-  in_progress_.erase(type);
-  sorted_dependencies_.push_back(Element(type, dependencies_group, name));
-  in_sorted_dependencies_.insert(type);
+  if (v.lowlink == v.index) {
+    typedef std::vector<Element> List;
+    List scc;
+    AST_Type* wt;
+    do {
+      wt = stack_.back();
+      stack_.pop_back();
+      Element& w = element_[wt];
+      w.on_stack = false;
+      scc.push_back(w);
+    } while (wt != v.type);
 
-  return dependencies_group;
+    if (scc.size() == 1) {
+      generate_minimal_type_identifier(scc[0].type, false);
+    } else {
+      OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
+      ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
+      std::memset(&ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
+      ti.sc_component_id().scc_length = static_cast<int>(scc.size());
+
+      {
+        size_t idx = 0;
+        for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
+          ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
+          minimal_type_identifier_map_[pos->type] = ti;
+        }
+      }
+
+      OpenDDS::XTypes::TypeObjectSeq seq;
+      for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
+        generate_minimal_type_identifier(pos->type, true);
+        OPENDDS_ASSERT(minimal_type_object_map_.count(pos->type) != 0);
+        seq.append(minimal_type_object_map_[pos->type]);
+      }
+
+      const OpenDDS::DCPS::Encoding& encoding = OpenDDS::XTypes::get_typeobject_encoding();
+      size_t size = serialized_size(encoding, seq);
+      ACE_Message_Block buff(size);
+      OpenDDS::DCPS::Serializer ser(&buff, encoding);
+      if (!(ser << seq)) {
+        be_util::misc_error_and_abort("Failed to serialize type object sequence in strongly-connected component", type);
+      }
+
+      unsigned char result[sizeof(OpenDDS::DCPS::MD5Result)];
+      OpenDDS::DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
+
+      // First 14 bytes of MD5 of the serialized TypeObject using XCDR
+      // version 2 with Little Endian encoding
+      std::memcpy(ti.sc_component_id().sc_component_id.hash, result, sizeof(OpenDDS::XTypes::EquivalenceHash));
+
+      {
+        size_t idx = 0;
+        for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
+          ti.sc_component_id().scc_index = static_cast<int>(++idx);
+          minimal_type_identifier_map_[pos->type] = ti;
+          minimal_type_map_[ti] = minimal_type_object_map_[pos->type];
+        }
+      }
+    }
+  }
 }
 
 void
@@ -1581,96 +1654,6 @@ typeobject_generator::name_sorter(const Element& x, const Element& y)
   return x.name < y.name;
 }
 
-void
-typeobject_generator::generate_minimal(AST_Type* type)
-{
-  switch (type->node_type()) {
-  case AST_ConcreteType::NT_union_fwd:
-    {
-      AST_UnionFwd* n = AST_UnionFwd::narrow_from_decl(type);
-      type = n->full_definition();
-      break;
-    }
-  case AST_ConcreteType::NT_struct_fwd:
-    {
-      AST_StructureFwd* n = AST_StructureFwd::narrow_from_decl(type);
-      type = n->full_definition();
-      break;
-    }
-  default:
-    break;
-  }
-
-  group_counter_ = 0;
-  compute_dependencies(type, "");
-
-  for (SortedDependencies::iterator pos = sorted_dependencies_.begin(), limit = sorted_dependencies_.end(); pos != limit;) {
-    if (pos->group == static_cast<size_t>(-1)) {
-      generate_minimal_type_identifier(pos->type, false);
-      ++pos;
-      continue;
-    }
-
-    // Process strongly connected components.
-    const size_t group = pos->group;
-    const SortedDependencies::iterator group_begin = pos;
-    while (pos != limit && pos->group == group) {
-      ++pos;
-    }
-    const SortedDependencies::iterator group_end = pos;
-
-    std::sort(group_begin, group_end, name_sorter);
-
-    OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
-    ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
-    std::memset(&ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
-    ti.sc_component_id().scc_length = static_cast<int>(std::distance(group_begin, group_end));
-
-    {
-      size_t idx = 0;
-      for (SortedDependencies::const_iterator group_pos = group_begin; group_pos != group_end; ++group_pos) {
-        ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
-        minimal_type_identifier_map_[group_pos->type] = ti;
-      }
-    }
-
-    OpenDDS::XTypes::TypeObjectSeq seq;
-    for (SortedDependencies::const_iterator group_pos = group_begin; group_pos != group_end; ++group_pos) {
-      generate_minimal_type_identifier(group_pos->type, true);
-      OPENDDS_ASSERT(minimal_type_object_map_.count(group_pos->type) != 0);
-      seq.append(minimal_type_object_map_[group_pos->type]);
-    }
-
-    const OpenDDS::DCPS::Encoding& encoding = OpenDDS::XTypes::get_typeobject_encoding();
-    size_t size = serialized_size(encoding, seq);
-    ACE_Message_Block buff(size);
-    OpenDDS::DCPS::Serializer ser(&buff, encoding);
-    if (!(ser << seq)) {
-      be_util::misc_error_and_abort("Failed to serialize type object sequence in strongly-connected component", type);
-    }
-
-    unsigned char result[16];
-    OpenDDS::DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
-
-    // First 14 bytes of MD5 of the serialized TypeObject using XCDR
-    // version 2 with Little Endian encoding
-    std::memcpy(ti.sc_component_id().sc_component_id.hash, result, sizeof(OpenDDS::XTypes::EquivalenceHash));
-
-    {
-      size_t idx = 0;
-      for (SortedDependencies::const_iterator group_pos = group_begin; group_pos != group_end; ++group_pos) {
-        ti.sc_component_id().scc_index = static_cast<int>(++idx);
-        minimal_type_identifier_map_[group_pos->type] = ti;
-        minimal_type_map_[ti] = minimal_type_object_map_[group_pos->type];
-      }
-    }
-  }
-
-  sorted_dependencies_.clear();
-  in_sorted_dependencies_.clear();
-  OPENDDS_ASSERT(in_progress_.empty());
-}
-
 OpenDDS::XTypes::TypeObject
 typeobject_generator::get_minimal_type_object(AST_Type* type)
 {
@@ -1720,7 +1703,7 @@ typeobject_generator::get_minimal_type_identifier(AST_Type* type)
 bool
 typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
 {
-  generate_minimal(node);
+  strong_connect(node, "");
 
   NamespaceGuard ng;
   const string clazz = tag_type(name);
