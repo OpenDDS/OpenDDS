@@ -3866,7 +3866,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     rpc_sequence.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
                           type_lookup_reply.header.related_request_id.sequence_number.low);
     if (type_lookup_reply.data.kind == XTypes::TypeLookup_getTypes_HashId &&
-        has_all_dependencies_) {
+        sedp_.has_all_dependencies_) {
       sedp_.match_continue(rpc_sequence);
     }
   }
@@ -3901,7 +3901,8 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
     }
 
     // Keep sending getTypeDependencies requests until there is no more dependencies received
-    // TODO(sonndinh): set type_id to the TypeIdentifier of the topic type
+    // TODO(sonndinh): set type_id to contain the TypeIdentifier of the topic type
+    XTypes::TypeIdentifierSeq type_id;
     if (!sedp_.send_type_lookup_request(type_id, remote_id, is_discovery_protected, false)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send type lookup request for more dependencies\n")));
@@ -3911,10 +3912,10 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
     // This part assumes that the remote never sends an empty reply if there are still
     // remaining dependent TypeIdentifiers to be sent. Then when a reply with no dependencies
     // is received, that means we have got all dependencies.
-    has_all_dependencies_ = true;
+    sedp_.has_all_dependencies_ = true;
 
     // Send getTypes request when we have all dependencies
-    if (!sedp_.send_type_lookup_request(req_type_ids, remote_id, is_discovery_protected, true)) {
+    if (!sedp_.send_type_lookup_request(dependencies_, remote_id, is_discovery_protected, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send type lookup request\n")));
       return DDS::RETCODE_ERROR;

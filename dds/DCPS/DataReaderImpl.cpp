@@ -1300,12 +1300,12 @@ DataReaderImpl::enable()
     XTypes::compute_dependencies(type_map, type_id, dependencies);
 
     XTypes::TypeIdentifierWithSizeSeq dependencies_with_sizes;
-    OPENDDS_SET(XTypes::TypeIdentifer)::const_iterator it = dependencies.begin();
+    OPENDDS_SET(XTypes::TypeIdentifier)::const_iterator it = dependencies.begin();
     for (; it != dependencies.end(); ++it) {
       XTypes::TypeMap::const_iterator iter = type_map.find(*it);
       if (iter != type_map.end()) {
-        size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
-        dependencies_with_sizes.append({*it, tobj_size});
+        const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
+        dependencies_with_sizes.append({*it, static_cast<ACE_CDR::ULong>(tobj_size)});
       } else {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
