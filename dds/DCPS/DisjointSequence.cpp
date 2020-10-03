@@ -333,6 +333,13 @@ DisjointSequence::dump() const
   }
 }
 
+CORBA::ULong
+DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high)
+{
+  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
+}
+
+
 } // namespace DCPS
 } // namespace OpenDDS
 
