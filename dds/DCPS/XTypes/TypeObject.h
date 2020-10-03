@@ -235,6 +235,18 @@ namespace XTypes {
   typedef Sequence<SBound> SBoundSeq;
   const SBound INVALID_SBOUND = 0;
 
+  struct EquivalenceHashWrapper { // not in spec
+    EquivalenceHashWrapper(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d,
+                           ACE_CDR::Octet e, ACE_CDR::Octet f, ACE_CDR::Octet g, ACE_CDR::Octet h,
+                           ACE_CDR::Octet i, ACE_CDR::Octet j, ACE_CDR::Octet k, ACE_CDR::Octet l,
+                           ACE_CDR::Octet m, ACE_CDR::Octet n)
+    {
+      eh_[0] = a; eh_[1] = b; eh_[2] = c; eh_[3] = d; eh_[4] = e; eh_[5] = f; eh_[6] = g;
+      eh_[7] = h; eh_[8] = i; eh_[9] = j; eh_[10] = k; eh_[11] = l; eh_[12] = m; eh_[13] = n;
+    }
+    EquivalenceHash eh_;
+  };
+
   // union TypeObjectHashId switch (octet) {
   //     case EK_COMPLETE:
   //     case EK_MINIMAL:
@@ -247,10 +259,10 @@ namespace XTypes {
     TypeObjectHashId() {}
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
-                     const EquivalenceHash& a_hash)
+                     const EquivalenceHashWrapper& a_hash)
       : kind(a_kind)
     {
-      std::memcpy(hash, a_hash, sizeof hash);
+      std::memcpy(hash, a_hash.eh_, sizeof hash);
     }
 
     bool operator<(const TypeObjectHashId& other) const
@@ -583,8 +595,6 @@ namespace XTypes {
     // Empty. Available for future extension
   };
 
-
-
   // The TypeIdentifier uniquely identifies a type (a set of equivalent
   // types according to an equivalence relationship:  COMPLETE, MNIMAL).
   //
@@ -613,18 +623,18 @@ namespace XTypes {
   //   /*
   //     case TK_NONE:
   //     case TK_BOOLEAN:
-  //     case TK_BYTE_TYPE:
-  //     case TK_INT16_TYPE:
-  //     case TK_INT32_TYPE:
-  //     case TK_INT64_TYPE:
-  //     case TK_UINT16_TYPE:
-  //     case TK_UINT32_TYPE:
-  //     case TK_UINT64_TYPE:
-  //     case TK_FLOAT32_TYPE:
-  //     case TK_FLOAT64_TYPE:
-  //     case TK_FLOAT128_TYPE:
-  //     case TK_CHAR8_TYPE:
-  //     case TK_CHAR16_TYPE:
+  //     case TK_BYTE:
+  //     case TK_INT16:
+  //     case TK_INT32:
+  //     case TK_INT64:
+  //     case TK_UINT16:
+  //     case TK_UINT32:
+  //     case TK_UINT64:
+  //     case TK_FLOAT32:
+  //     case TK_FLOAT64:
+  //     case TK_FLOAT128:
+  //     case TK_CHAR8:
+  //     case TK_CHAR16:
   //     // No Value
   //     */
 
@@ -681,7 +691,7 @@ namespace XTypes {
     TypeIdentifier(ACE_CDR::Octet kind, const PlainSequenceLElemDefn& ldefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArraySElemDefn& sdefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArrayLElemDefn& ldefn);
-    TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHash& equivalence_hash);
+    TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHashWrapper& equivalence_hash);
     TypeIdentifier(ACE_CDR::Octet kind, const StronglyConnectedComponentId& sc_component_id);
 
     ACE_CDR::Octet kind() const { return kind_; }
@@ -894,6 +904,10 @@ namespace XTypes {
     NameHash name_hash;
 
     MinimalMemberDetail() {}
+    MinimalMemberDetail(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d)
+    {
+      name_hash[0] = a; name_hash[1] = b; name_hash[2] = c; name_hash[3] = d;
+    }
     explicit MinimalMemberDetail(const NameHash& a_name_hash)
     {
       std::memcpy(&name_hash, &a_name_hash, sizeof name_hash);
@@ -1889,6 +1903,9 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
   return true;
 }
 
+
+// non-template overloads for sequences of basic types:
+
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq);
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq);
@@ -1904,15 +1921,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq);
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq);
 
+
 inline void serialized_size(const Encoding&, size_t&, const XTypes::MinimalTypeDetail&)
 {}
 inline bool operator<<(Serializer&, const XTypes::MinimalTypeDetail&) { return true; }
 inline bool operator>>(Serializer&, XTypes::MinimalTypeDetail&) { return true; }
 
-inline void serialized_size(const Encoding&, size_t&, const XTypes::ExtendedAnnotationParameterValue&)
-{}
-inline bool operator<<(Serializer&, const XTypes::ExtendedAnnotationParameterValue&) { return true; }
-inline bool operator>>(Serializer&, XTypes::ExtendedAnnotationParameterValue&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedAnnotationParameterValue& stru);
+bool operator<<(Serializer& strm,
+  const XTypes::ExtendedAnnotationParameterValue& stru);
+bool operator>>(Serializer& strm,
+  XTypes::ExtendedAnnotationParameterValue& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::NameHash_forany& arr);
@@ -2049,20 +2069,20 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& ser, const XTypes::MinimalBitsetType& stru);
 bool operator>>(Serializer& ser, XTypes::MinimalBitsetType& stru);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::CompleteExtendedType&) {}
-inline bool operator<<(Serializer&, const XTypes::CompleteExtendedType&) { return true; }
-inline bool operator>>(Serializer&, XTypes::CompleteExtendedType&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteExtendedType& stru);
+bool operator<<(Serializer& strm, const XTypes::CompleteExtendedType& stru);
+bool operator>>(Serializer& strm, XTypes::CompleteExtendedType& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteTypeObject& type_object);
 bool operator<<(Serializer& ser, const XTypes::CompleteTypeObject& type_object);
 bool operator>>(Serializer& ser, XTypes::CompleteTypeObject& type_object);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::MinimalExtendedType&) {}
-inline bool operator<<(Serializer&, const XTypes::MinimalExtendedType&) { return true; }
-inline bool operator>>(Serializer&, XTypes::MinimalExtendedType&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalExtendedType& stru);
+bool operator<<(Serializer& strm, const XTypes::MinimalExtendedType& stru);
+bool operator>>(Serializer& strm, XTypes::MinimalExtendedType& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalTypeObject& type_object);
@@ -2098,14 +2118,6 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSize& stru);
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size,
-  const XTypes::TypeIdentifierWithSizeSeq& stru);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSizeSeq& stru);
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSizeSeq& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru);
@@ -2367,11 +2379,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::MinimalMemberDetail& stru);
 bool operator>>(Serializer& strm, XTypes::MinimalMemberDetail& stru);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::ExtendedTypeDefn&) {}
-inline bool operator<<(Serializer&, const XTypes::ExtendedTypeDefn&)
-{ return true; }
-inline bool operator>>(Serializer&, XTypes::ExtendedTypeDefn&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedTypeDefn& stru);
+bool operator<<(Serializer& strm, const XTypes::ExtendedTypeDefn& stru);
+bool operator>>(Serializer& strm, XTypes::ExtendedTypeDefn& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainArrayLElemDefn& stru);
@@ -2443,15 +2454,6 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size,
-  const XTypes::TypeIdentifierPairSeq& stru);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& stru);
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& stru);
-
 
 } // namespace DCPS
 } // namespace OpenDDS

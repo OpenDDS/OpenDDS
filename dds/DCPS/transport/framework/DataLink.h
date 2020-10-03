@@ -258,7 +258,6 @@ public:
   typedef WeakRcHandle<TransportClient> TransportClient_wrch;
   typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
 
-  void add_pending_on_start(const RepoId& local, const RepoId& remote);
   bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);

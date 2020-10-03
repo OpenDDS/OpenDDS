@@ -333,6 +333,13 @@ DisjointSequence::dump() const
   }
 }
 
+ACE_CDR::ULong
+DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high)
+{
+  return high < low ? 0u : std::min(8u, unsigned((high.getValue() - low.getValue() + 32) / 32));
+}
+
+
 } // namespace DCPS
 } // namespace OpenDDS
 

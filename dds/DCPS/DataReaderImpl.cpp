@@ -330,7 +330,12 @@ DataReaderImpl::add_association(const RepoId& yourId,
   //is held here anyway
   guard.release();
 
-  if (!associate(data, active)) {
+  if (associate(data, active)) {
+    const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
+    if (observer) {
+      observer->on_associated(this, data.remote_id_);
+    }
+  } else {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
@@ -470,6 +475,13 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
   if (writers.length() == 0) {
     return;
+  }
+
+  const Observer_rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < writers.length(); ++i) {
+      observer->on_disassociated(this, writers[i]);
+    }
   }
 
   if (DCPS_debug_level >= 1) {
@@ -894,9 +906,13 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
       }
     }
 
-
     qos_change(qos);
     qos_ = qos;
+
+    const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
+    if (observer) {
+      observer->on_qos_changed(this);
+    }
 
     return DDS::RETCODE_OK;
 
@@ -1147,11 +1163,10 @@ DataReaderImpl::get_matched_publication_data(
 DDS::ReturnCode_t
 DataReaderImpl::enable()
 {
-  //According spec:
-  // - Calling enable on an already enabled Entity returns OK and has no
-  // effect.
+  // According to spec:
+  // - Calling enable on an already enabled Entity has no effect and returns OK.
   // - Calling enable on an Entity whose factory is not enabled will fail
-  // and return PRECONDITION_NOT_MET.
+  //   and return PRECONDITION_NOT_MET.
 
   if (this->is_enabled()) {
     return DDS::RETCODE_OK;
@@ -1176,7 +1191,8 @@ DataReaderImpl::enable()
   }
 
   if (topic_servant_) {
-    if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), false)) {
+    if (!topic_servant_->check_data_representation(
+        get_effective_data_rep_qos(qos_.representation.value, true), false)) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
           ACE_TEXT("none of the data representation QoS is allowed by the ")
@@ -1249,7 +1265,6 @@ DataReaderImpl::enable()
   this->set_enabled();
 
   if (topic_servant_ && !transport_disabled_) {
-
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
@@ -1258,7 +1273,6 @@ DataReaderImpl::enable()
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
           ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
-
     }
 
     const DDS::ReturnCode_t setup_deserialization_result = setup_deserialization();
@@ -1335,19 +1349,24 @@ DataReaderImpl::enable()
     }
   }
 
+  DDS::ReturnCode_t return_value = DDS::RETCODE_OK;
   if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
-    DDS::ReturnCode_t return_value =
-        subscriber->reader_enabled(name.in(), this);
+    return_value = subscriber->reader_enabled(name.in(), this);
 
     if (this->monitor_) {
       this->monitor_->report();
     }
-
-    return return_value;
-  } else {
-    return DDS::RETCODE_OK;
   }
+
+  if (return_value == DDS::RETCODE_OK) {
+    const Observer_rch observer = get_observer(Observer::e_ENABLED);
+    if (observer) {
+      observer->on_enabled(this);
+    }
+  }
+
+  return return_value;
 }
 
 void
@@ -1429,6 +1448,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
+  SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
   case INSTANCE_REGISTRATION: {
@@ -1454,7 +1474,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     // This also adds to the sample container and makes any callbacks
     // and condition modifications.
 
-    SubscriptionInstance_rch instance;
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
@@ -1694,6 +1713,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         "unexpected message_id = %d\n",
         sample.header_.message_id_));
     break;
+  }
+
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+  if (observer) {
+    Observer::Sample s(sample, instance ? instance->instance_handle_ : DDS::HANDLE_NIL);
+    observer->on_sample_received(this, s);
   }
 }
 
@@ -2452,6 +2477,11 @@ DataReaderImpl::statistics_enabled(
 void
 DataReaderImpl::prepare_to_delete()
 {
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
+
   this->set_deleted(true);
   this->stop_associating();
   this->send_final_acks();
@@ -3322,14 +3352,13 @@ DataReaderImpl::get_ice_endpoint()
 DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
   const DDS::DataRepresentationIdSeq repIds =
-    get_effective_data_rep_qos(qos_.representation.value);
+    get_effective_data_rep_qos(qos_.representation.value, true);
   bool success = false;
   if (cdr_encapsulation()) {
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
       Encoding::Kind encoding_kind;
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-        if (Encoding::KIND_XCDR1 == encoding_kind ||
-            Encoding::KIND_XCDR2 == encoding_kind) {
+        if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
           decoding_modes_.insert(encoding_kind);
           success = true;
         } else if (DCPS_debug_level >= 2) {

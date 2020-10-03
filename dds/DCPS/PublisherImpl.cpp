@@ -322,7 +322,9 @@ bool PublisherImpl::prepare_to_delete_datawriters()
   for (DataWriterMap::iterator i = datawriter_map_.begin(); i != end; ++i) {
     DataWriterImpl* const writer = dynamic_cast<DataWriterImpl*>(i->second.in());
     if (writer) {
-      writer->prepare_to_delete();
+      if (!writer->get_deleted()) {
+        writer->prepare_to_delete();
+      }
     } else {
       result = false;
     }
