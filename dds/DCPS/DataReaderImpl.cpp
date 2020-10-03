@@ -1163,11 +1163,10 @@ DataReaderImpl::get_matched_publication_data(
 DDS::ReturnCode_t
 DataReaderImpl::enable()
 {
-  //According spec:
-  // - Calling enable on an already enabled Entity returns OK and has no
-  // effect.
+  // According to spec:
+  // - Calling enable on an already enabled Entity has no effect and returns OK.
   // - Calling enable on an Entity whose factory is not enabled will fail
-  // and return PRECONDITION_NOT_MET.
+  //   and return PRECONDITION_NOT_MET.
 
   if (this->is_enabled()) {
     return DDS::RETCODE_OK;
@@ -1192,7 +1191,8 @@ DataReaderImpl::enable()
   }
 
   if (topic_servant_) {
-    if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), false)) {
+    if (!topic_servant_->check_data_representation(
+        get_effective_data_rep_qos(qos_.representation.value, true), false)) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
           ACE_TEXT("none of the data representation QoS is allowed by the ")
@@ -1265,7 +1265,6 @@ DataReaderImpl::enable()
   this->set_enabled();
 
   if (topic_servant_ && !transport_disabled_) {
-
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
@@ -1274,7 +1273,6 @@ DataReaderImpl::enable()
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
           ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
-
     }
 
     const DDS::ReturnCode_t setup_deserialization_result = setup_deserialization();
@@ -3332,14 +3330,13 @@ DataReaderImpl::get_ice_endpoint()
 DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
   const DDS::DataRepresentationIdSeq repIds =
-    get_effective_data_rep_qos(qos_.representation.value);
+    get_effective_data_rep_qos(qos_.representation.value, true);
   bool success = false;
   if (cdr_encapsulation()) {
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
       Encoding::Kind encoding_kind;
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-        if (Encoding::KIND_XCDR1 == encoding_kind ||
-            Encoding::KIND_XCDR2 == encoding_kind) {
+        if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
           decoding_modes_.insert(encoding_kind);
           success = true;
         } else if (DCPS_debug_level >= 2) {
