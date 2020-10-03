@@ -532,7 +532,7 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     wa.writerQos = writer_pos->second.qos;
 #else
     const WriterAssociation wa =
-      {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
+      {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, 0};
 #endif
     drr->add_association(readerid, wa, false);
   }

@@ -8,12 +8,12 @@
 // - bitmask is not in opendds_idl, typedef of basic unsigned type used
 // - forward-declared TypeIdentifier not supported, this file has a placeholder
 // - empty structs not supported by opendds_idl, a single "dummy" field is added
-// - anonymous types (sequences, bounded strings) are not supported
+// - some uses of anonymous types (bounded strings, use in union branches) are not supported
 // - fixed typo "Identfier"
 // Impact on serialization:
 // - @optional fields need to be handled (XTypes 1.3 section 7.4.1.1.5.2)
 // - Serializing TypeIdentifier itself is out of scope for this file
-//   - see dds/DCPS/TypeObject.cpp
+//   - see dds/DCPS/XTypes/TypeObject.cpp
 // - 'octet dummy;' for empty structs should not be serialized
 
 // The types in this file shall be serialized with XCDR encoding version 2
@@ -175,7 +175,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     // Selects  T1, T2, O, M, K, D
     const   unsigned short  MemberFlagMinimalMask = 0x003f;
 
-    // Flags that apply to type declarationa and DO affect assignability
+    // Flags that apply to type declaration and DO affect assignability
     // Depending on the flag it may not apply to all types
     // When not all, the applicable  types are listed
 #ifdef __OPENDDS_IDL
@@ -325,18 +325,20 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
         /*
         case TK_NONE:
         case TK_BOOLEAN:
-        case TK_BYTE_TYPE:
-        case TK_INT16_TYPE:
-        case TK_INT32_TYPE:
-        case TK_INT64_TYPE:
-        case TK_UINT16_TYPE:
-        case TK_UINT32_TYPE:
-        case TK_UINT64_TYPE:
-        case TK_FLOAT32_TYPE:
-        case TK_FLOAT64_TYPE:
-        case TK_FLOAT128_TYPE:
-        case TK_CHAR8_TYPE:
-        case TK_CHAR16_TYPE:
+        case TK_BYTE:
+        case TK_INT16:
+        case TK_INT32:
+        case TK_INT64:
+        case TK_UINT16:
+        case TK_UINT32:
+        case TK_UINT64:
+        case TK_FLOAT32:
+        case TK_FLOAT64:
+        case TK_FLOAT128:
+        case TK_INT8:
+        case TK_UINT8:
+        case TK_CHAR8:
+        case TK_CHAR16:
             // No Value
         */
 
@@ -1131,7 +1133,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
         TypeIdentifierWithSize            typeid_with_size;
         // The total additional types related to minimal_type
         long                             dependent_typeid_count;
-        TypeIdentifierWithSizeSeq dependent_typeids; // spec: anonymous type
+        sequence<TypeIdentifierWithSize> dependent_typeids;
     };
     typedef
     sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
