@@ -140,7 +140,7 @@ public:
 
   /// Return the number of CORBA::Longs required for the bitmap representation of
   /// sequence numbers between low and high, inclusive (maximum 8 longs).
-  static CORBA::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
+  static ACE_CDR::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
 };
 
 } // namespace DCPS

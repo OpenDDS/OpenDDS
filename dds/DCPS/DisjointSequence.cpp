@@ -333,10 +333,10 @@ DisjointSequence::dump() const
   }
 }
 
-CORBA::ULong
+ACE_CDR::ULong
 DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high)
 {
-  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
+  return high < low ? 0u : std::min(8u, unsigned((high.getValue() - low.getValue() + 32) / 32));
 }
 
 
