@@ -216,6 +216,12 @@ public:
 
     Message_Block_Ptr marshalled(
       dds_marshal(instance_data, OpenDDS::DCPS::FULL_MARSHALING));
+    if (!marshalled) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %CDataWriterImpl::write_w_timestamp: "
+        "failed to serialize sample\n",
+        TraitsType::type_name()));
+      return DDS::RETCODE_ERROR;
+    }
     return OpenDDS::DCPS::DataWriterImpl::write(
       move(marshalled), handle, source_timestamp, filter_out._retn());
   }
@@ -320,8 +326,7 @@ public:
       for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
         Encoding::Kind encoding_kind;
         if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-          if (Encoding::KIND_XCDR1 == encoding_kind ||
-              Encoding::KIND_XCDR2 == encoding_kind) {
+          if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
             encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
             break;
           } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
@@ -434,7 +439,7 @@ private:
           0);
       mb.reset(tmp_mb);
       if (!MarshalTraitsType::to_message_block(*mb, instance_data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_marshal: ")
                    ACE_TEXT("attempting to skip serialize but bad from_message_block.\n")));
       }
       return mb.release();
@@ -574,6 +579,12 @@ private:
       Message_Block_Ptr marshalled(
         this->dds_marshal(instance_data,
                           OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+      if (!marshalled) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %CDataWriterImpl::get_or_create_instance_handle: "
+          "failed to serialize sample\n",
+          TraitsType::type_name()));
+        return DDS::RETCODE_ERROR;
+      }
 
       // tell DataWriterLocal and Publisher about the instance.
       DDS::ReturnCode_t ret = register_instance_i(handle, move(marshalled), source_timestamp);

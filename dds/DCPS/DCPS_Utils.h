@@ -25,6 +25,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+OpenDDS_Dcps_Export const char* retcode_to_string(DDS::ReturnCode_t value);
+
 OpenDDS_Dcps_Export
 bool
 is_wildcard(const char *str);
@@ -98,7 +100,7 @@ OpenDDS_Dcps_Export
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
 
 OpenDDS_Dcps_Export
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(DDS::DataRepresentationIdSeq qos);
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader = false);
 
 } // namespace DCPS
 } // namespace OpenDDS

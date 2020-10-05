@@ -111,7 +111,7 @@ void Encoding::align(size_t& value, size_t by) const
 {
   const size_t max_alignment = max_align();
   if (max_alignment) {
-    DCPS::align(value, std::min(max_alignment, by));
+    DCPS::align(value, (std::min)(max_alignment, by));
   }
 }
 
@@ -426,7 +426,7 @@ Serializer::length() const
 ACE_INLINE bool
 Serializer::skip(ACE_CDR::UShort n, int size)
 {
-  if (size > 1 && !align_r(std::min(size_t(size), encoding().max_align()))) {
+  if (size > 1 && !align_r((std::min)(size_t(size), encoding().max_align()))) {
     return false;
   }
 
@@ -771,7 +771,7 @@ bool Serializer::align_r(size_t al)
     good_bit_ = false;
     return false;
   }
-  al = std::min(al, encoding().max_align());
+  al = (std::min)(al, encoding().max_align());
   const size_t len =
     (al - ptrdiff_t(this->current_->rd_ptr()) + this->align_rshift_) % al;
 
@@ -788,7 +788,7 @@ bool Serializer::align_w(size_t al)
     good_bit_ = false;
     return false;
   }
-  al = std::min(al, encoding().max_align());
+  al = (std::min)(al, encoding().max_align());
   size_t len =
     (al - ptrdiff_t(this->current_->wr_ptr()) + this->align_wshift_) % al;
   while (len) {
@@ -1333,7 +1333,7 @@ operator>>(Serializer& s, OPENDDS_STRING& x)
   char* buf = 0;
   const size_t length = s.read_string(buf);
   x.assign(buf, length);
-  CORBA::string_free(buf);
+  s.free_string(buf);
   return s.good_bit();
 }
 
@@ -1350,7 +1350,7 @@ operator>>(Serializer& s, OPENDDS_WSTRING& x)
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
   x.assign(buf, length);
-  CORBA::wstring_free(buf);
+  s.free_string(buf);
   return s.good_bit();
 }
 

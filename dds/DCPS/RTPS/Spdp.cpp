@@ -168,6 +168,12 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
+    available_extended_builtin_endpoints_ =
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+
     if (enable_writers) {
       available_builtin_endpoints_ |=
         DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
@@ -208,6 +214,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , available_builtin_endpoints_(0)
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
 #ifdef OPENDDS_SECURITY
+  , available_extended_builtin_endpoints_(0)
   , security_config_()
   , security_enabled_(false)
   , identity_handle_(DDS::HANDLE_NIL)
@@ -246,6 +253,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
+  , available_extended_builtin_endpoints_(0)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
   , identity_handle_(identity_handle)
@@ -345,7 +353,8 @@ Spdp::~Spdp()
 #ifdef OPENDDS_SECURITY
         ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                   part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
         ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
@@ -639,6 +648,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
         iter->second.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
         iter->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
+        iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
         attempt_authentication(iter, true);
         if (iter->second.auth_state_ == DCPS::AUTH_STATE_UNAUTHENTICATED) {
@@ -690,7 +700,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
       ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
-        stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                 iter->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
       ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
@@ -892,7 +903,8 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
       identity_token_,
       permissions_token_,
       qos_.property,
-      {0, 0}
+      {0, 0},
+      0
     },
     identity_status_token_
   };
@@ -904,6 +916,9 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   }
   if (participant_sec_attr_.is_discovery_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    pbtds.base.extended_builtin_endpoints =
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
   }
   if (participant_sec_attr_.is_liveliness_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
@@ -1389,7 +1404,8 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints);
+          stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                   pit->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
         ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
@@ -1804,7 +1820,8 @@ Spdp::remove_expired_participants()
 #ifdef OPENDDS_SECURITY
         ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                   part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
         ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
@@ -1827,12 +1844,13 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
   if (security_config_) {
     DDS::Security::SecurityException se = {"", 0, 0};
     DDS::Security::Authentication_var auth = security_config_->get_authentication();
+    DDS::Security::AccessControl_var access = security_config_->get_access_control();
 
     if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return identity handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
@@ -1844,7 +1862,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
       if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return handshake handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
@@ -1856,18 +1874,26 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
       if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::match_authenticated() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return sharedsecret handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
         }
       }
     }
-  }
 
-  // TODO:  What other security related clean up needs to be performed? (is every register unregistered)
-  // TODO:  Is a local participant that is destroyed being cleaned up?
-  // TODO:  How should this be split between here and DiscoveryBase?
+    if (iter->second.permissions_handle_ != DDS::HANDLE_NIL) {
+      if (!access->return_permissions_handle(iter->second.permissions_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
+                     ACE_TEXT("Unable to return permissions handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
+  }
 #endif
 }
 
@@ -1954,7 +1980,8 @@ Spdp::build_local_pdata(
         {
           security_attributes_to_bitmask(participant_sec_attr_),
           participant_sec_attr_.plugin_participant_attributes
-        }
+        },
+        available_extended_builtin_endpoints_
       },
       identity_status_token_
     },
@@ -1966,22 +1993,25 @@ Spdp::build_local_pdata(
     },
 #endif
     { // ParticipantProxy_t
-      domain_,
-      "",
-      PROTOCOLVERSION,
-      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
-      VENDORID_OPENDDS,
-      false /*expectsIQoS*/,
-      available_builtin_endpoints_,
-      0,
-      unicast_locators,
-      multicast_locators,
-      nonEmptyList /*defaultMulticastLocatorList*/,
-      nonEmptyList /*defaultUnicastLocatorList*/,
-      {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
-      qos_.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      domain_
+      , ""
+      , PROTOCOLVERSION
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , VENDORID_OPENDDS
+      , false /*expectsIQoS*/
+      , available_builtin_endpoints_
+      , 0
+      , unicast_locators
+      , multicast_locators
+      , nonEmptyList /*defaultMulticastLocatorList*/
+      , nonEmptyList /*defaultUnicastLocatorList*/
+      , {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
+      , qos_.property
+      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+#ifdef OPENDDS_SECURITY
+      , available_extended_builtin_endpoints_
+#endif
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
@@ -2115,6 +2145,18 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
   ACE_Reactor* reactor = reactor_task->get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
@@ -2122,6 +2164,19 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 
 #ifdef ACE_HAS_IPV6
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    unicast_ipv6_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+
   if (reactor->register_handler(unicast_ipv6_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast IPv6 input handler");
@@ -3169,7 +3224,10 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 #endif
 
 #ifdef OPENDDS_SECURITY
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
+void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t avail,
+                     DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
+                     const ICE::AgentInfo& agent_info)
+{
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -3201,6 +3259,26 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
 
@@ -3264,11 +3342,32 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
 }
 
-void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail) {
+void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
+                    DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail) {
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -3300,6 +3399,26 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
 
@@ -3363,6 +3482,26 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+  }
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
 }
@@ -3524,9 +3663,11 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     if (sedp_pos != ai_map.end()) {
-      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, sedp_pos->second);
+      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
+                pdata.participantProxy.availableExtendedBuiltinEndpoints, sedp_pos->second);
     } else {
-      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
+      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
+               pdata.participantProxy.availableExtendedBuiltinEndpoints);
     }
   }
   ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
@@ -3687,7 +3828,8 @@ Spdp::use_ice_now(bool f)
       }
 
       if (sedp_endpoint && pos->second.have_sedp_info_) {
-        start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
+        start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                  pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
       }
     }
   } else {

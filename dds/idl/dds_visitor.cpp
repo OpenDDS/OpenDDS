@@ -65,18 +65,6 @@ namespace {
   langmap_generator lm_gen_;
   typeobject_generator to_gen_;
 
-  template <typename T>
-  void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
-  {
-    UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
-    for (; !it.is_done(); it.next()) {
-      AST_Decl* item = it.item();
-      if (item->node_type() == nt) {
-        v.push_back(dynamic_cast<T*>(item));
-      }
-    }
-  }
-
 } // namespace
 
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
@@ -87,7 +75,7 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     gen_target_.add_generator(&key_gen_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
-    if (!be_global->suppress_xtypes()) {
+    if (!be_global->suppress_xtypes() && !java_ts_only) {
       gen_target_.add_generator(&to_gen_);
     }
   }

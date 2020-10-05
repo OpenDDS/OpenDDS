@@ -13,6 +13,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"

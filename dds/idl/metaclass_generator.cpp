@@ -451,7 +451,7 @@ namespace {
         key_count = info->key_list_.size();
       }
     } else { // Union
-      key_count = be_global->has_key(union_node) ? 1 : 0;
+      key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
     }
 
     be_global->impl_ <<
@@ -769,7 +769,7 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
       "    return false;\n"
       "  }\n";
-    if (generateSwitchForUnion("disc", func, branches, discriminator, "", "", "",
+    if (generateSwitchForUnion(node, "disc", func, branches, discriminator, "", "", "",
                                false, true, false)) {
       be_global->impl_ <<
         "  return true;\n";

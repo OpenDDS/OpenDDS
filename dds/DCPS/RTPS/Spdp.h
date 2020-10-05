@@ -175,6 +175,12 @@ public:
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
+#ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const
+  {
+    return available_extended_builtin_endpoints_;
+  }
+#endif
 
   ICE::Endpoint* get_ice_endpoint_if_added();
 
@@ -395,6 +401,7 @@ private:
   DCPS::RcHandle<Sedp>  sedp_;
 
 #ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 
@@ -415,8 +422,11 @@ private:
   TimeQueue handshake_deadlines_;
   TimeQueue handshake_resends_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
+  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
+                 const ICE::AgentInfo& agent_info);
+  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+                DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);
   void purge_handshake_resends(DiscoveredParticipantIter iter);

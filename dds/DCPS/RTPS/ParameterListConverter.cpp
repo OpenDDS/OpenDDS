@@ -12,8 +12,10 @@
 #  include "SecurityHelpers.h"
 #endif
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
 
 #include <cstring>
@@ -237,23 +239,6 @@ namespace {
     return flags.bits != PFLAGS_EMPTY;
   }
 
-  bool not_default(const DDS::DataRepresentationQosPolicy& qos)
-  {
-    return qos.value.length();
-  }
-
-  bool not_default(const DDS::TypeConsistencyEnforcementQosPolicy& tceqp)
-  {
-    DDS::TypeConsistencyEnforcementQosPolicy def_tceqp =
-        TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
-    return (tceqp.kind != def_tceqp.kind ||
-      tceqp.ignore_sequence_bounds != def_tceqp.ignore_sequence_bounds ||
-      tceqp.ignore_string_bounds != def_tceqp.ignore_string_bounds ||
-      tceqp.ignore_member_names != def_tceqp.ignore_member_names ||
-      tceqp.prevent_type_widening != def_tceqp.prevent_type_widening ||
-      tceqp.force_type_validation != def_tceqp.force_type_validation);
-  }
-
   void normalize(DDS::Duration_t& dur)
   {
     // Interoperability note:
@@ -273,7 +258,8 @@ namespace {
       PERM_TOKEN_FIELD = 0x02,
       PROPERTY_LIST_FIELD = 0x04,
       PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
-      IDENTITY_STATUS_TOKEN_FIELD = 0x10
+      IDENTITY_STATUS_TOKEN_FIELD = 0x10,
+      EXTENDED_BUILTIN_ENDPOINTS = 0x20
     };
 
     unsigned char field_mask = 0x00;
@@ -296,6 +282,9 @@ namespace {
           break;
         case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
           field_mask |= IDENTITY_STATUS_TOKEN_FIELD;
+          break;
+        case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+          field_mask |= EXTENDED_BUILTIN_ENDPOINTS;
           break;
       }
     }
@@ -376,6 +365,10 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   param_psi.participant_security_info(pbtd.security_info);
   add_param(param_list, param_psi);
 
+  Parameter param_ebe;
+  param_ebe.extended_builtin_endpoints(pbtd.extended_builtin_endpoints);
+  add_param(param_list, param_ebe);
+
   return true;
 }
 
@@ -403,6 +396,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
         pbtd.security_info = param.participant_security_info();
+        break;
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        pbtd.extended_builtin_endpoints = param.extended_builtin_endpoints();
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -504,6 +500,13 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, be_param);
 
+#ifdef OPENDDS_SECURITY
+  Parameter ebe_param;
+  ebe_param.extended_builtin_endpoints(
+    proxy.availableExtendedBuiltinEndpoints);
+  add_param(param_list, abe_param);
+#endif
+
   // Each locator
   add_param_locator_seq(
       param_list,
@@ -549,6 +552,9 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
+#ifdef OPENDDS_SECURITY
+  proxy.availableExtendedBuiltinEndpoints = 0;
+#endif
   proxy.expectsInlineQos = false;
 
   CORBA::ULong length = param_list.length();
@@ -588,6 +594,12 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
+#ifdef OPENDDS_SECURITY
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        proxy.availableExtendedBuiltinEndpoints =
+          param.extended_builtin_endpoints();
+        break;
+#endif
       case PID_METATRAFFIC_UNICAST_LOCATOR:
         append_locator(
             proxy.metatrafficUnicastLocatorList,
@@ -759,6 +771,17 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
+{
+  DDS::DataRepresentationQosPolicy dr_qos;
+  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
+  if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
+    Parameter param;
+    param.representation(dr_qos);
+    add_param(param_list, param);
+  }
+}
+
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    const XTypes::TypeInformation& type_info,
@@ -897,12 +920,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.representation))
-  {
-    Parameter param;
-    param.representation(writer_data.ddsPublicationData.representation);
-    add_param(param_list, param);
-  }
+  add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value);
 
   {
     Parameter param;
@@ -982,8 +1000,8 @@ bool from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
-  writer_data.ddsPublicationData.representation =
-    TheServiceParticipant->initial_DataRepresentationQosPolicy();
+  writer_data.ddsPublicationData.representation.value.length(1);
+  writer_data.ddsPublicationData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1063,7 +1081,9 @@ bool from_param_list(const ParameterList& param_list,
         writer_data.ddsPublicationData.group_data = param.group_data();
         break;
       case PID_DATA_REPRESENTATION:
-        writer_data.ddsPublicationData.representation = param.representation();
+        if (param.representation().value.length() != 0) {
+          writer_data.ddsPublicationData.representation = param.representation();
+        }
         break;
       case PID_ENDPOINT_GUID:
         writer_data.writerProxy.remoteWriterGuid = param.guid();
@@ -1246,12 +1266,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.representation))
-  {
-    Parameter param;
-    param.representation(reader_data.ddsSubscriptionData.representation);
-    add_param(param_list, param);
-  }
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
 
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
@@ -1331,8 +1346,8 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterClassName = "";
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
-  reader_data.ddsSubscriptionData.representation =
-    TheServiceParticipant->initial_DataRepresentationQosPolicy();
+  reader_data.ddsSubscriptionData.representation.value.length(1);
+  reader_data.ddsSubscriptionData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1403,7 +1418,9 @@ bool from_param_list(const ParameterList& param_list,
         reader_data.ddsSubscriptionData.group_data = param.group_data();
         break;
       case PID_DATA_REPRESENTATION:
-        reader_data.ddsSubscriptionData.representation = param.representation();
+        if (param.representation().value.length() != 0) {
+          reader_data.ddsSubscriptionData.representation = param.representation();
+        }
         break;
       case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();

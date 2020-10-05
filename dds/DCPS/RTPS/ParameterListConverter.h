@@ -7,16 +7,16 @@
 #ifndef PARAMETER_LIST_CONVERTER_H
 #define PARAMETER_LIST_CONVERTER_H
 
-#include "dds/DCPS/RTPS/rtps_export.h"
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-
-#include "dds/DCPS/RTPS/ICE/Ice.h"
-
-#include "dds/DCPS/XTypes/TypeObject.h"
+#include "rtps_export.h"
+#include "RtpsCoreC.h"
 
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/RtpsSecurityC.h"
+#include "RtpsSecurityC.h"
 #endif
+
+#include "ICE/Ice.h"
+
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -105,6 +105,9 @@ bool from_param_list(const ParameterList& param_list,
 #endif
 
 // OpenDDS::DCPS::DiscoveredWriterData
+
+OpenDDS_Rtps_Export
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader = false);
 
 OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,

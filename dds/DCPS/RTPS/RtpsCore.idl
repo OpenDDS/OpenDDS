@@ -468,6 +468,9 @@ module OpenDDS {
 
       case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
         DDS::Security::IdentityStatusToken identity_status_token;
+
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
 #endif
 
       case PID_OPENDDS_ICE_GENERAL:
@@ -593,6 +596,9 @@ module OpenDDS {
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
+#ifdef OPENDDS_SECURITY
+      DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
+#endif
     };
 
     // top-level data type for SPDP

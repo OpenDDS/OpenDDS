@@ -11,21 +11,53 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/Serializer.h"
 
-#include <tao/Array_VarOut_T.h>
-
 #include <ace/CDR_Base.h>
 
 #include <algorithm>
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
-
-
-namespace DDS {
-  class OctetSeq;
-}
 namespace OpenDDS {
+
 namespace XTypes {
+  struct TypeInformation;
+}
+
+namespace DCPS {
+  OpenDDS_Dcps_Export
+  bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
+
+  OpenDDS_Dcps_Export
+  bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
+}
+
+namespace XTypes {
+
+  template<typename T, typename T_slice, typename TAG>
+  class Fake_TAO_Array_Forany_T {
+  public:
+    typedef T_slice _slice_type;
+
+    Fake_TAO_Array_Forany_T (_slice_type *p)
+      : ptr_(p)
+    {}
+
+    typedef const _slice_type *   _in_type;
+    typedef       _slice_type * & _out_type;
+
+    _in_type      in (void) const
+    {
+      return (const T_slice *) this->ptr_;
+    }
+
+    _out_type     out (void)
+    {
+      return this->ptr_;
+    }
+
+  private:
+    _slice_type * ptr_;
+  };
 
   OpenDDS_Dcps_Export
   const DCPS::Encoding& get_typeobject_encoding();
@@ -47,7 +79,8 @@ namespace XTypes {
 
   template <typename T>
   struct Sequence {
-    OPENDDS_VECTOR(T) members;
+    typedef OPENDDS_VECTOR(T) Members;
+    Members members;
 
     Sequence& append(const T& member)
     {
@@ -85,6 +118,10 @@ namespace XTypes {
 
     T* get_buffer() { return &members[0]; }
     const T* get_buffer() const { return &members[0]; }
+
+    typedef typename Members::const_iterator const_iterator;
+    const_iterator begin() const { return members.begin(); }
+    const_iterator end() const { return members.end(); }
   };
 
   // Based on dds-xtypes_typeobject.idl
@@ -178,7 +215,7 @@ namespace XTypes {
   typedef ACE_CDR::Octet EquivalenceHash[14];
   struct EquivalenceHash_tag {};
   typedef ACE_CDR::Octet EquivalenceHash_slice;
-  typedef TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
+  typedef Fake_TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
 
   // First 4 bytes of MD5 of of a member name converted to bytes
   // using UTF-8 encoding and without a 'nul' terminator.
@@ -186,7 +223,7 @@ namespace XTypes {
   typedef ACE_CDR::Octet NameHash[4];
   struct NameHash_tag {};
   typedef ACE_CDR::Octet NameHash_slice;
-  typedef TAO_Array_Forany_T<NameHash, NameHash_slice, NameHash_tag> NameHash_forany;
+  typedef Fake_TAO_Array_Forany_T<NameHash, NameHash_slice, NameHash_tag> NameHash_forany;
 
   // Long Bound of a collection type
   typedef ACE_CDR::ULong LBound;
@@ -197,6 +234,18 @@ namespace XTypes {
   typedef ACE_CDR::Octet SBound;
   typedef Sequence<SBound> SBoundSeq;
   const SBound INVALID_SBOUND = 0;
+
+  struct EquivalenceHashWrapper { // not in spec
+    EquivalenceHashWrapper(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d,
+                           ACE_CDR::Octet e, ACE_CDR::Octet f, ACE_CDR::Octet g, ACE_CDR::Octet h,
+                           ACE_CDR::Octet i, ACE_CDR::Octet j, ACE_CDR::Octet k, ACE_CDR::Octet l,
+                           ACE_CDR::Octet m, ACE_CDR::Octet n)
+    {
+      eh_[0] = a; eh_[1] = b; eh_[2] = c; eh_[3] = d; eh_[4] = e; eh_[5] = f; eh_[6] = g;
+      eh_[7] = h; eh_[8] = i; eh_[9] = j; eh_[10] = k; eh_[11] = l; eh_[12] = m; eh_[13] = n;
+    }
+    EquivalenceHash eh_;
+  };
 
   // union TypeObjectHashId switch (octet) {
   //     case EK_COMPLETE:
@@ -210,10 +259,10 @@ namespace XTypes {
     TypeObjectHashId() {}
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
-                     const EquivalenceHash& a_hash)
+                     const EquivalenceHashWrapper& a_hash)
       : kind(a_kind)
     {
-      std::memcpy(hash, a_hash, sizeof hash);
+      std::memcpy(hash, a_hash.eh_, sizeof hash);
     }
 
     bool operator<(const TypeObjectHashId& other) const
@@ -546,8 +595,6 @@ namespace XTypes {
     // Empty. Available for future extension
   };
 
-
-
   // The TypeIdentifier uniquely identifies a type (a set of equivalent
   // types according to an equivalence relationship:  COMPLETE, MNIMAL).
   //
@@ -576,18 +623,18 @@ namespace XTypes {
   //   /*
   //     case TK_NONE:
   //     case TK_BOOLEAN:
-  //     case TK_BYTE_TYPE:
-  //     case TK_INT16_TYPE:
-  //     case TK_INT32_TYPE:
-  //     case TK_INT64_TYPE:
-  //     case TK_UINT16_TYPE:
-  //     case TK_UINT32_TYPE:
-  //     case TK_UINT64_TYPE:
-  //     case TK_FLOAT32_TYPE:
-  //     case TK_FLOAT64_TYPE:
-  //     case TK_FLOAT128_TYPE:
-  //     case TK_CHAR8_TYPE:
-  //     case TK_CHAR16_TYPE:
+  //     case TK_BYTE:
+  //     case TK_INT16:
+  //     case TK_INT32:
+  //     case TK_INT64:
+  //     case TK_UINT16:
+  //     case TK_UINT32:
+  //     case TK_UINT64:
+  //     case TK_FLOAT32:
+  //     case TK_FLOAT64:
+  //     case TK_FLOAT128:
+  //     case TK_CHAR8:
+  //     case TK_CHAR16:
   //     // No Value
   //     */
 
@@ -638,8 +685,16 @@ namespace XTypes {
     TypeIdentifier& operator=(const TypeIdentifier& other);
     ~TypeIdentifier() { reset(); }
 
+    TypeIdentifier(ACE_CDR::Octet kind, const StringSTypeDefn& sdefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const StringLTypeDefn& ldefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainSequenceSElemDefn& sdefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainSequenceLElemDefn& ldefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainArraySElemDefn& sdefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainArrayLElemDefn& ldefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHashWrapper& equivalence_hash);
+    TypeIdentifier(ACE_CDR::Octet kind, const StronglyConnectedComponentId& sc_component_id);
+
     ACE_CDR::Octet kind() const { return kind_; }
-    void kind(ACE_CDR::Octet k);
 
 #define OPENDDS_UNION_ACCESSORS(T, N)                         \
     const T& N() const { return *static_cast<T*>(active_); }  \
@@ -656,116 +711,6 @@ namespace XTypes {
     OPENDDS_UNION_ACCESSORS(EquivalenceHash, equivalence_hash);
     OPENDDS_UNION_ACCESSORS(ExtendedTypeDefn, extended_defn);
 #undef OPENDDS_UNION_ACCESSORS
-
-    static TypeIdentifier makeString(bool wide, const StringSTypeDefn& string_sdefn)
-    {
-      TypeIdentifier ti(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
-      ti.string_sdefn() = string_sdefn;
-      return ti;
-    }
-
-    static TypeIdentifier makeString(bool wide, const StringLTypeDefn& string_ldefn)
-    {
-      TypeIdentifier ti(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
-      ti.string_ldefn() = string_ldefn;
-      return ti;
-    }
-
-    static TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
-                                            const SBound& bound)
-    {
-      TypeIdentifier ti(TI_PLAIN_SEQUENCE_SMALL);
-      ti.seq_sdefn() = PlainSequenceSElemDefn
-        (
-         PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
-          CollectionElementFlag()), // TODO [anonymous]: Set this
-         bound,
-         base_type);
-      return ti;
-    }
-
-    static TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
-                                            const LBound& bound)
-    {
-      TypeIdentifier ti(TI_PLAIN_SEQUENCE_LARGE);
-      ti.seq_ldefn() = PlainSequenceLElemDefn
-        (
-         PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
-          CollectionElementFlag()), // TODO [anonymous]: Set this.
-         bound,
-         base_type);
-      return ti;
-    }
-
-    static TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
-                                         const SBoundSeq& bound_seq)
-    {
-      TypeIdentifier ti(TI_PLAIN_ARRAY_SMALL);
-      ti.array_sdefn() = PlainArraySElemDefn
-        (
-         PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
-          CollectionElementFlag()), // TODO [anonymous]: Set this
-         bound_seq,
-         base_type);
-      return ti;
-    }
-
-    static TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
-                                         const LBoundSeq& bound_seq)
-    {
-      TypeIdentifier ti(TI_PLAIN_ARRAY_LARGE);
-      ti.array_ldefn() = PlainArrayLElemDefn
-        (
-         PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
-          CollectionElementFlag()), // TODO [anonymous]: Set this.
-         bound_seq,
-         base_type);
-      return ti;
-    }
-
-    static TypeIdentifier make(ACE_CDR::Octet k,
-                               const PlainMapSTypeDefn& map_sdefn)
-    {
-      TypeIdentifier ti(k);
-      ti.map_sdefn() = map_sdefn;
-      return ti;
-    }
-
-    static TypeIdentifier make(ACE_CDR::Octet k,
-                               const PlainMapLTypeDefn& map_ldefn)
-    {
-      TypeIdentifier ti(k);
-      ti.map_ldefn() = map_ldefn;
-      return ti;
-    }
-
-    static TypeIdentifier make(ACE_CDR::Octet k,
-                               const StronglyConnectedComponentId& sc_component_id)
-    {
-      TypeIdentifier ti(k);
-      ti.sc_component_id() = sc_component_id;
-      return ti;
-    }
-
-    static TypeIdentifier make(ACE_CDR::Octet k,
-                               const EquivalenceHash& equivalence_hash)
-    {
-      TypeIdentifier ti(k);
-      std::memcpy(ti.equivalence_hash(), equivalence_hash, sizeof equivalence_hash);
-      return ti;
-    }
-
-    static TypeIdentifier make(ACE_CDR::Octet k,
-                               const ExtendedTypeDefn& extended_defn)
-    {
-      TypeIdentifier ti(k);
-      ti.extended_defn() = extended_defn;
-      return ti;
-    }
 
     bool operator<(const TypeIdentifier& other) const
     {
@@ -937,6 +882,7 @@ namespace XTypes {
     StructMemberFlag member_flags;
     TypeIdentifier member_type_id;
 
+    CommonStructMember() {}
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
                         const TypeIdentifier& a_member_type_id)
@@ -958,6 +904,14 @@ namespace XTypes {
     NameHash name_hash;
 
     MinimalMemberDetail() {}
+    MinimalMemberDetail(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d)
+    {
+      name_hash[0] = a; name_hash[1] = b; name_hash[2] = c; name_hash[3] = d;
+    }
+    explicit MinimalMemberDetail(const NameHash& a_name_hash)
+    {
+      std::memcpy(&name_hash, &a_name_hash, sizeof name_hash);
+    }
     explicit MinimalMemberDetail(const OPENDDS_STRING& name);
   };
 
@@ -973,6 +927,8 @@ namespace XTypes {
   struct MinimalStructMember {
     CommonStructMember common;
     MinimalMemberDetail detail;
+
+    MinimalStructMember () {}
 
     MinimalStructMember(const CommonStructMember& a_common,
                         const MinimalMemberDetail& a_detail)
@@ -1279,6 +1235,13 @@ namespace XTypes {
   struct CommonCollectionElement {
     CollectionElementFlag element_flags;
     TypeIdentifier type;
+
+    CommonCollectionElement() {}
+    CommonCollectionElement(CollectionElementFlag a_element_flags,
+                            const TypeIdentifier& a_type)
+      : element_flags(a_element_flags)
+      , type(a_type)
+    {}
   };
 
   struct CompleteCollectionElement {
@@ -1288,10 +1251,16 @@ namespace XTypes {
 
   struct MinimalCollectionElement {
     CommonCollectionElement common;
+
+    MinimalCollectionElement() {}
+    MinimalCollectionElement(const CommonCollectionElement& a_common) : common(a_common) {}
   };
 
   struct CommonCollectionHeader {
     LBound bound;
+
+    CommonCollectionHeader() {}
+    explicit CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
   };
 
   struct CompleteCollectionHeader {
@@ -1301,6 +1270,9 @@ namespace XTypes {
 
   struct MinimalCollectionHeader {
     CommonCollectionHeader common;
+
+    MinimalCollectionHeader() {}
+    MinimalCollectionHeader(const CommonCollectionHeader& a_common) : common(a_common) {}
   };
 
   // --- Sequence: ------------------------------------------------------
@@ -1314,11 +1286,23 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     MinimalCollectionHeader header;
     MinimalCollectionElement element;
+
+    MinimalSequenceType() {}
+    MinimalSequenceType(CollectionTypeFlag a_collection_flag,
+                        const MinimalCollectionHeader& a_header,
+                        const MinimalCollectionElement& a_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(a_element)
+    {}
   };
 
   // --- Array: ------------------------------------------------------
   struct CommonArrayHeader {
     LBoundSeq bound_seq;
+
+    CommonArrayHeader() {}
+    explicit CommonArrayHeader(const LBoundSeq& a_bound_seq) : bound_seq(a_bound_seq) {}
   };
 
   struct CompleteArrayHeader {
@@ -1328,6 +1312,11 @@ namespace XTypes {
 
   struct MinimalArrayHeader {
     CommonArrayHeader common;
+
+    MinimalArrayHeader() {}
+    MinimalArrayHeader(const CommonArrayHeader& a_common)
+      : common(a_common)
+    {}
   };
 
   struct CompleteArrayType  {
@@ -1340,6 +1329,15 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     MinimalArrayHeader header;
     MinimalCollectionElement element;
+
+    MinimalArrayType() {}
+    MinimalArrayType(CollectionTypeFlag a_collection_flag,
+                     const MinimalArrayHeader& a_header,
+                     const MinimalCollectionElement& a_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(a_element)
+    {}
   };
 
   // --- Map: ------------------------------------------------------
@@ -1703,12 +1701,12 @@ namespace XTypes {
 
     TypeObject() {}
 
-    TypeObject(const CompleteTypeObject& a_complete)
+    explicit TypeObject(const CompleteTypeObject& a_complete)
       : kind(EK_COMPLETE)
       , complete(a_complete)
     {}
 
-    TypeObject(const MinimalTypeObject& a_minimal)
+    explicit TypeObject(const MinimalTypeObject& a_minimal)
       : kind(EK_MINIMAL)
       , minimal(a_minimal)
     {}
@@ -1775,70 +1773,65 @@ namespace XTypes {
   OpenDDS_Dcps_Export
   TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
 
-  OpenDDS_Dcps_Export
-  void serialize_type_info(const TypeInformation& type_info, DDS::OctetSeq& seq);
+  template <typename T>
+  void serialize_type_info(const TypeInformation& type_info, T& seq)
+  {
+    seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
+    DCPS::MessageBlockHelper<T> helper(seq);
+    DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
+    if (!(serializer << type_info)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
+                 ACE_TEXT("serialization of type information failed.\n")));
+    }
+  }
+
+  template <typename T>
+  void deserialize_type_info(TypeInformation& type_info, const T& seq)
+  {
+    DCPS::MessageBlockHelper<T> helper(seq);
+    DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
+    if (!(serializer >> type_info)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
+                 ACE_TEXT("deserialization of type information failed.\n")));
+    }
+  }
 
   OpenDDS_Dcps_Export
-  void deserialize_type_info(TypeInformation& type_info, const DDS::OctetSeq& seq);
+  ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name);
+
+  OpenDDS_Dcps_Export
+  void hash_member_name(NameHash& name_hash, const OPENDDS_STRING& name);
+
+  OpenDDS_Dcps_Export
+  bool is_fully_descriptive(const TypeIdentifier& ti);
+
+  typedef OPENDDS_MAP(TypeIdentifier, TypeObject) TypeMap;
+
+  struct TypeMapBuilder {
+    TypeMap type_map_;
+
+    TypeMapBuilder& insert(const TypeIdentifier& ti, const TypeObject& to)
+    {
+      type_map_[ti] = to;
+      return *this;
+    }
+
+    operator TypeMap&() { return type_map_; }
+  };
+
+  void compute_dependencies(const TypeMap& type_map,
+                            const TypeIdentifier& type_identifier,
+                            OPENDDS_SET(TypeIdentifier)& dependencies);
 
 } // namespace XTypes
 
 namespace DCPS {
 
 template<typename T>
-const XTypes::TypeObject& getMinimalTypeObject();
+const XTypes::TypeIdentifier& getMinimalTypeIdentifier();
 
 template<typename T>
-XTypes::TypeIdentifier getMinimalTypeIdentifier();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<void>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Boolean>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Octet>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Short>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Long>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongLong>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::UShort>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULong>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULongLong>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Float>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Double>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongDouble>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char*>();
-
-template<> OpenDDS_Dcps_Export
-XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::WChar*>();
-
+const XTypes::TypeMap& getMinimalTypeMap();
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
@@ -1910,6 +1903,9 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
   return true;
 }
 
+
+// non-template overloads for sequences of basic types:
+
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq);
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq);
@@ -1925,15 +1921,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq);
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq);
 
+
 inline void serialized_size(const Encoding&, size_t&, const XTypes::MinimalTypeDetail&)
 {}
 inline bool operator<<(Serializer&, const XTypes::MinimalTypeDetail&) { return true; }
 inline bool operator>>(Serializer&, XTypes::MinimalTypeDetail&) { return true; }
 
-inline void serialized_size(const Encoding&, size_t&, const XTypes::ExtendedAnnotationParameterValue&)
-{}
-inline bool operator<<(Serializer&, const XTypes::ExtendedAnnotationParameterValue&) { return true; }
-inline bool operator>>(Serializer&, XTypes::ExtendedAnnotationParameterValue&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedAnnotationParameterValue& stru);
+bool operator<<(Serializer& strm,
+  const XTypes::ExtendedAnnotationParameterValue& stru);
+bool operator>>(Serializer& strm,
+  XTypes::ExtendedAnnotationParameterValue& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::NameHash_forany& arr);
@@ -2070,20 +2069,20 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& ser, const XTypes::MinimalBitsetType& stru);
 bool operator>>(Serializer& ser, XTypes::MinimalBitsetType& stru);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::CompleteExtendedType&) {}
-inline bool operator<<(Serializer&, const XTypes::CompleteExtendedType&) { return true; }
-inline bool operator>>(Serializer&, XTypes::CompleteExtendedType&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteExtendedType& stru);
+bool operator<<(Serializer& strm, const XTypes::CompleteExtendedType& stru);
+bool operator>>(Serializer& strm, XTypes::CompleteExtendedType& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteTypeObject& type_object);
 bool operator<<(Serializer& ser, const XTypes::CompleteTypeObject& type_object);
 bool operator>>(Serializer& ser, XTypes::CompleteTypeObject& type_object);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::MinimalExtendedType&) {}
-inline bool operator<<(Serializer&, const XTypes::MinimalExtendedType&) { return true; }
-inline bool operator>>(Serializer&, XTypes::MinimalExtendedType&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalExtendedType& stru);
+bool operator<<(Serializer& strm, const XTypes::MinimalExtendedType& stru);
+bool operator>>(Serializer& strm, XTypes::MinimalExtendedType& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalTypeObject& type_object);
@@ -2105,12 +2104,6 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeInformation& type_info);
 
 OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
-
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
-
-OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& stru);
 OpenDDS_Dcps_Export
@@ -2125,14 +2118,6 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSize& stru);
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size,
-  const XTypes::TypeIdentifierWithSizeSeq& stru);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSizeSeq& stru);
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSizeSeq& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru);
@@ -2394,11 +2379,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
 bool operator<<(Serializer& strm, const XTypes::MinimalMemberDetail& stru);
 bool operator>>(Serializer& strm, XTypes::MinimalMemberDetail& stru);
 
-inline void serialized_size(const Encoding&, size_t&,
-  const XTypes::ExtendedTypeDefn&) {}
-inline bool operator<<(Serializer&, const XTypes::ExtendedTypeDefn&)
-{ return true; }
-inline bool operator>>(Serializer&, XTypes::ExtendedTypeDefn&) { return true; }
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::ExtendedTypeDefn& stru);
+bool operator<<(Serializer& strm, const XTypes::ExtendedTypeDefn& stru);
+bool operator>>(Serializer& strm, XTypes::ExtendedTypeDefn& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::PlainArrayLElemDefn& stru);
@@ -2470,15 +2454,6 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size,
-  const XTypes::TypeIdentifierPairSeq& stru);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPairSeq& stru);
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& strm, XTypes::TypeIdentifierPairSeq& stru);
-
 
 } // namespace DCPS
 } // namespace OpenDDS

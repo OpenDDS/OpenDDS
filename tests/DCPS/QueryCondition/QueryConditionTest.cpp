@@ -6,6 +6,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/StaticIncludes.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/DCPS_Utils.h"
 #include "MessengerTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
