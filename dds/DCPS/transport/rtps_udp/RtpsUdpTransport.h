@@ -144,7 +144,10 @@ private:
 #endif
 
 #ifdef OPENDDS_SECURITY
+
+#ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ConnectionRecords deferred_connection_records_;
+#endif
 
   struct IceEndpoint : public ACE_Event_Handler, public ICE::Endpoint {
     RtpsUdpTransport& transport;

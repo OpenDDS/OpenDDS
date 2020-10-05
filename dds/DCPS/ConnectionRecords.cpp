@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef DDS_HAS_MINIMUM_BIT
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "ConnectionRecords.h"
@@ -43,3 +45,5 @@ void WriteConnectionRecords::execute()
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif /* DDS_HAS_MINIMUM_BIT */

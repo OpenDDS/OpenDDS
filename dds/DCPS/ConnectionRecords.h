@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DCPS_CONNECTION_RECORDS_H
 #define OPENDDS_DCPS_CONNECTION_RECORDS_H
 
+#ifndef DDS_HAS_MINIMUM_BIT
+
 #include "dcps_export.h"
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
@@ -16,6 +18,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
 
 typedef std::pair<bool, ConnectionRecord> ActionConnectionRecord;
 typedef OPENDDS_VECTOR(ActionConnectionRecord) ConnectionRecords;
@@ -47,5 +50,7 @@ class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::JobQueue::Job {
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 #endif  /* OPENDDS_DCPS_CONNECTION_RECORDS_H */
