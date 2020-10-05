@@ -17,17 +17,9 @@ public class InternalThreadStatusSubscriber {
   private static DomainParticipantFactory dpf;
   private static DomainParticipant participant;
 
-  private static boolean noIce = false;
-
   public static void main(String[] args) throws Exception {
     System.out.println("Start Subscriber");
     dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
-
-    for (String s: args) {
-      if (s.equals("-n")) {
-        noIce = true;
-      }
-    }
 
     participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
