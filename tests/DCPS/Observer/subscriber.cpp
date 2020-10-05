@@ -68,8 +68,7 @@ Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, cons
       throw ACE_TEXT("get_default_datareader_qos failed.");
     }
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-    qos.reliability.max_blocking_time = {2, 0};
-    reader_ = s->create_datareader(d.topic.in(), qos, listener_.in(), DEFAULT_STATUS_MASK);
+    reader_ = s->create_datareader(d.topic, qos, listener_, DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(reader_.in())) {
       throw ACE_TEXT("create_datareader failed.");
     }
