@@ -28,6 +28,8 @@
 #include <map>
 #include <set>
 
+class AST_Array;
+class AST_Sequence;
 class AST_Decl;
 class AST_Union;
 class AST_Annotation_Decl;
@@ -317,8 +319,6 @@ enum TryConstructFailAction {
   tryconstructfailaction_trim,
 };
 
-TryConstructFailAction get_try_construct_annotation(AST_Annotation_Appl* ann_appl);
-
 class TryConstructAnnotation : public AnnotationWithEnumValue<TryConstructFailAction>, public AbsentValue<TryConstructFailAction> {
 public:
   TryConstructAnnotation()
@@ -328,6 +328,8 @@ public:
   std::string definition() const;
   std::string name() const;
 
+  TryConstructFailAction sequence_element_value(AST_Sequence* node) const;
+  TryConstructFailAction array_element_value(AST_Array* node) const;
   TryConstructFailAction union_value(AST_Union* node) const;
 };
 

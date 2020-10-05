@@ -9,7 +9,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $name = 'Compiler__TryConstruct_C++11';
+my $name = 'Compiler_TryConstruct_C++11';
 my $status = 0;
 my $TESTDVR = PerlDDS::create_process ($name);
 

@@ -957,15 +957,17 @@ namespace OpenDDS {
     bool ser_ret = true;
     MessageType data;
     if (sample.header_.key_fields_only_) {
-      ser_ret = (ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data));
+      ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data);
     } else {
-      ser_ret = (ser >> data);
+      ser_ret = ser >> data;
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                  ACE_TEXT("object construction failure, dropping sample.\n"),
-                  TraitsType::type_name()));
+        if (DCPS_debug_level > 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                    ACE_TEXT("object construction failure, dropping sample.\n"),
+                    TraitsType::type_name()));
+        }
       } else {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
                   ACE_TEXT("deserialization failed.\n"),
@@ -1086,15 +1088,17 @@ protected:
 
     bool ser_ret = true;
     if (key_only_marshaling) {
-      ser_ret = (ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data));
+      ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
-      ser_ret = (ser >> *data);
+      ser_ret = ser >> *data;
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("object construction failure, dropping sample.\n"),
-                  TraitsType::type_name()));
+        if (DCPS_debug_level > 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                    ACE_TEXT("object construction failure, dropping sample.\n"),
+                    TraitsType::type_name()));
+        }
       } else {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
                   ACE_TEXT("deserialization failed, dropping sample.\n"),

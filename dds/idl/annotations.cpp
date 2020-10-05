@@ -6,6 +6,8 @@
 #include <ast_annotation_appl.h>
 #include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
+#include <ast_sequence.h>
+#include <ast_array.h>
 #include <ast_union.h>
 #include <utl_string.h>
 
@@ -134,28 +136,6 @@ std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
   AST_Expression::AST_ExprValue* const ev =
     get_annotation_member_ev(appl, member_name, AST_Expression::EV_string);
   return ev->u.strval->get_string();
-}
-
-TryConstructFailAction get_try_construct_annotation(AST_Annotation_Appl* ann_appl)
-{
-  TryConstructFailAction try_construct = tryconstructfailaction_discard;
-  if (ann_appl) {
-    switch (get_u32_annotation_member_value(ann_appl, "value"))
-    {
-    case 0:
-      try_construct = tryconstructfailaction_discard;
-      break;
-    case 1:
-      try_construct = tryconstructfailaction_use_default;
-      break;
-    case 2:
-      try_construct = tryconstructfailaction_trim;
-      break;
-    default:
-      try_construct = tryconstructfailaction_discard;
-    }
-  }
-  return try_construct;
 }
 
 template<>
@@ -424,6 +404,20 @@ std::string TryConstructAnnotation::definition() const
 std::string TryConstructAnnotation::name() const
 {
   return "try_construct";
+}
+
+TryConstructFailAction TryConstructAnnotation::sequence_element_value(AST_Sequence* node) const
+{
+  AST_Annotation_Appl* appl = node->base_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::array_element_value(AST_Array* node) const
+{
+  AST_Annotation_Appl* appl = node->base_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
 }
 
 TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) const

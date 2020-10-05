@@ -491,8 +491,7 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(seq->base_type());
-    AST_Annotation_Appl* ann_appl = seq->base_type_annotations().find("::@try_construct");
-    TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
+    TryConstructFailAction try_construct = be_global->sequence_element_try_construct(seq);
 
     Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
@@ -689,7 +688,7 @@ namespace {
       AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
       string bound;
       if (!seq->unbounded()) {
-        bound = (use_cxx11 ? bounded_arg(seq) : "seq.maximum()");
+        bound = use_cxx11 ? bounded_arg(seq) : "seq.maximum()";
       }
       //create a variable called newlength which tells us how long we need to copy to
       //for an unbounded sequence this is just our length
@@ -1025,8 +1024,7 @@ namespace {
 
       const string cxx_elem = scoped(sf.seq_->base_type()->name()),
         elem_underscores = dds_generator::scoped_helper(sf.seq_->base_type()->name(), "_");
-      AST_Annotation_Appl* ann_appl = sf.seq_->base_type_annotations().find("::@try_construct");
-      TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
+      TryConstructFailAction try_construct = be_global->sequence_element_try_construct(sf.seq_);
 
       if (!primitive) {
         be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
@@ -1037,7 +1035,7 @@ namespace {
       AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(sf.as_act_);
       string bound;
       if (!sf.seq_->unbounded()) {
-        bound = (use_cxx11 ? bounded_arg(sf.seq_) : "seq.maximum()");
+        bound = use_cxx11 ? bounded_arg(sf.seq_) : "seq.maximum()";
       }
       be_global->impl_ << "  CORBA::ULong new_length = length;\n";
       if (sf.as_cls_ & CL_PRIMITIVE) {
@@ -1210,8 +1208,7 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(arr->base_type());
-    AST_Annotation_Appl* ann_appl = arr->base_type_annotations().find("::@try_construct");
-    TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
+    TryConstructFailAction try_construct = be_global->array_element_try_construct(arr);
     Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()
@@ -1584,8 +1581,7 @@ namespace {
       extraction.addArg(af.arg_.c_str(), af.ref_);
       extraction.endArgs();
 
-      AST_Annotation_Appl* ann_appl = af.arr_->base_type_annotations().find("::@try_construct");
-      TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
+      TryConstructFailAction try_construct = be_global->array_element_try_construct(af.arr_);
 
       be_global->impl_ <<
         "  bool discard_flag = false;\n"
@@ -2154,7 +2150,9 @@ namespace {
 
     string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
     // if there is a stray '.' on the end, strip it off
-    if (qual[qual.length() - 1] == '.') qual.pop_back();
+    if (qual[qual.length() - 1] == '.') {
+      qual.erase(qual.length() - 1);
+    }
     const string shift = prefix.substr(0, 2),
                  expr = qual.substr(3);
 
@@ -3009,7 +3007,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         if (!findSizeAnonymous(fields[i], "stru", intro, expr)) {
           expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
         }
-        fields_encode << expr << "\n";
+        fields_encode << expr;
         expr = "";
         fields_encode <<
           "  if (!strm.write_parameter_id(" << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
@@ -3021,7 +3019,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += streamCommon(field_name, fields[i]->field_type(),
               "<< stru", intro, cxx);
         }
-        fields_encode << expr << "\n"
+        fields_encode << expr <<
                       ") {\n"
                       "    return false;\n"
                       "  }\n";
@@ -3137,7 +3135,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             ">> stru", intro, cxx);
         }
         cases <<
-          expr << "\n"
+          expr <<
           ") {\n";
         AST_Type* field_type = resolveActualType(fields[i]->field_type());
         Classification fld_cls = classify(field_type);
@@ -3212,7 +3210,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         // TODO (sonndinh): Integrate with try-construct for when the stream
         // ends before some fields on the reader side get their values.
         if (exten == extensibilitykind_appendable) {
-          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&";
+          expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
           expr += "      strm.pos() - start_pos >= total_size) {\n";
           expr += "    return true;\n";
           expr += "  }\n";
@@ -3247,7 +3245,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
       }
       if (exten == extensibilitykind_appendable) {
-        expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&";
+        expr += "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2 &&\n";
         expr += "      strm.pos() - start_pos < total_size) {\n";
         expr += "    strm.skip(total_size - strm.pos() + start_pos);\n";
         expr += "  }\n";
@@ -3837,8 +3835,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
         "  }\n";
-      AST_Annotation_Appl* ann_appl = node->disc_annotations().find("::@try_construct");
-      TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
+      TryConstructFailAction try_construct = be_global->union_discriminator_try_construct(node);
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n"
         "  if (!(strm >> disc)) {\n";
