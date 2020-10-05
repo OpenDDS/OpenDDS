@@ -2442,8 +2442,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   be_global->add_include("dds/DCPS/Serializer.h");
   const string cxx = scoped(name); // name as a C++ class
   const ExtensibilityKind exten = be_global->extensibility(node);
-  const OpenDDS::DataRepresentation repr =
-    be_global->data_representations(node);
+  OpenDDS::DataRepresentation repr;
+  repr.set_all(true);
 
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
@@ -2974,7 +2974,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    if (!generate_marshal_traits(node, cxx, repr, exten, keys, info, octetSeqOnly)) {
+    if (!generate_marshal_traits(node, cxx, be_global->data_representations(node), exten, keys, info, octetSeqOnly)) {
       return false;
     }
   }

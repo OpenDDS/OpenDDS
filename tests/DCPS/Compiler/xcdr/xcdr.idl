@@ -236,7 +236,7 @@ typedef sequence<string> StringSeq;
 
 @mutable
 struct MixedMutableStruct {
-  @id(1) MutableStruct struct_nested;
+  @id(1) MutableStructWithExplicitIDs struct_nested;
   @id(2) sequence<short> sequence_field;
   @id(3) NestedUnion union_nested;
   @id(4) StringSeq sequence_field2;
@@ -246,7 +246,7 @@ struct MixedMutableStruct {
 struct ModifiedMixedMutableStruct {
   @id(3) NestedUnion union_nested;
   @id(4) StringSeq sequence_field2;
-  @id(1) MutableStruct struct_nested;
+  @id(1) MutableStructWithExplicitIDs struct_nested;
 };
 
 // Mixed Extensibility Tests =================================================

@@ -756,12 +756,12 @@ void expect_values_equal(const AppendableWithNestedStruct& a, const AppendableWi
 
 TEST(AppendableTests, BothAppendableStruct)
 {
-  serializer_test<AppendableStruct>(xcdr2, AppendableExpectedXcdr2BE::expected);
+  serializer_test<AppendableWithNestedStruct>(xcdr2, AppendableExpectedXcdr2BE::expected);
 }
 
 TEST(AppendableTests, BothAppendableStructLE)
 {
-  test_little_endian<AppendableStruct, AppendableExpectedXcdr2BE>();
+  test_little_endian<AppendableWithNestedStruct, AppendableExpectedXcdr2BE>();
 }
 
 template<>
@@ -773,13 +773,13 @@ void expect_values_equal(const AppendableWithNestedStruct& a,
 
 TEST(AppendableTests, FromAppendableStruct)
 {
-  amalgam_serializer_test<AppendableStruct, AdditionalFieldAppendableStruct>(
+  amalgam_serializer_test<AppendableWithNestedStruct, AdditionalFieldAppendableStruct>(
     xcdr2, AppendableExpectedXcdr2BE::expected);
 }
 
 TEST(AppendableTests, FromAppendableStructLE)
 {
-  test_little_endian<AppendableStruct, AdditionalFieldAppendableStruct,
+  test_little_endian<AppendableWithNestedStruct, AdditionalFieldAppendableStruct,
                      AppendableExpectedXcdr2BE>();
 }
 
@@ -831,7 +831,6 @@ void set_values(AdditionalFieldAppendableStruct& value)
 
 template<>
 void expect_values_equal(const AdditionalFieldAppendableStruct& a,
-                         //const AppendableStruct& b)
                          const AppendableWithNestedStruct& b)
 {
   expect_equal_with_nested(a, b);
@@ -839,13 +838,13 @@ void expect_values_equal(const AdditionalFieldAppendableStruct& a,
 
 TEST(AppendableTests, FromAdditionalAppendableStruct)
 {
-  amalgam_serializer_test<AdditionalFieldAppendableStruct, AppendableStruct>(
+  amalgam_serializer_test<AdditionalFieldAppendableStruct, AppendableWithNestedStruct>(
     xcdr2, AdditionalAppendableExpectedXcdr2BE::expected);
 }
 
 TEST(AppendableTests, FromAdditionalAppendableStructLE)
 {
-  test_little_endian<AdditionalFieldAppendableStruct, AppendableStruct,
+  test_little_endian<AdditionalFieldAppendableStruct, AppendableWithNestedStruct,
                      AdditionalAppendableExpectedXcdr2BE>();
 }
 
@@ -1036,17 +1035,17 @@ const unsigned MutableStructExpectedXcdr2BE::layout[] = {4,4,2,2,4,4,4,1,3,4,8};
 
 TEST(MutableTests, BaselineXcdr1Test)
 {
-  baseline_checks<MutableStruct>(xcdr1, mutable_struct_expected_xcdr1);
+  baseline_checks<MutableStructWithExplicitIDs>(xcdr1, mutable_struct_expected_xcdr1);
 }
 
 TEST(MutableTests, BaselineXcdr2Test)
 {
-  baseline_checks<MutableStruct>(xcdr2, MutableStructExpectedXcdr2BE::expected);
+  baseline_checks<MutableStructWithExplicitIDs>(xcdr2, MutableStructExpectedXcdr2BE::expected);
 }
 
 TEST(MutableTests, BaselineXcdr2TestLE)
 {
-  test_little_endian<MutableStruct, MutableStructExpectedXcdr2BE>();
+  test_little_endian<MutableStructWithExplicitIDs, MutableStructExpectedXcdr2BE>();
 }
 
 // ---------- MutableUnion
@@ -1113,7 +1112,7 @@ const unsigned char MutableUnionExpectedXcdr2LongLongBE::expected[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 value = 24
 };
 const unsigned MutableUnionExpectedXcdr2LongLongBE::layout[] = {4,4,4,4,8};
-
+/*
 TEST(MutableTests, BaselineXcdr2TestUnion)
 {
   baseline_checks_union<MutableUnion>(
@@ -1137,7 +1136,7 @@ TEST(MutableTests, BaselineXcdr2TestUnionLE)
   test_little_endian_union<MutableUnion,
                            MutableUnionExpectedXcdr2LongLongBE>(E_LONG_LONG_FIELD);
 }
-
+*/
 template<typename TypeA, typename TypeB>
 void expect_values_equal_base_union2(const TypeA& a, const TypeB& b)
 {
@@ -1155,24 +1154,24 @@ void expect_values_equal_base_union2(const TypeA& a, const TypeB& b)
 }
 
 template<>
-void expect_values_equal(const MutableUnion& a, const ModifiedMutableUnion& b)
+void expect_values_equal(const MutableUnionWithExplicitIDs& a, const ModifiedMutableUnion& b)
 {
   expect_values_equal_base_union2(a, b);
 }
 
 TEST(MutableTests, FromMutableUnion)
 {
-  amalgam_serializer_test_union<MutableUnion, ModifiedMutableUnion>(
+  amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
     xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
-  amalgam_serializer_test_union<MutableUnion, ModifiedMutableUnion>(
+  amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
     xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
 }
 
 TEST(MutableTests, FromMutableUnionLE)
 {
-  test_little_endian_union<MutableUnion, ModifiedMutableUnion,
+  test_little_endian_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion,
                            MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
-  test_little_endian_union<MutableUnion, ModifiedMutableUnion,
+  test_little_endian_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion,
                            MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
 }
 
@@ -1225,7 +1224,7 @@ TEST(MutableTests, FromModifiedMutableUnionLE)
 
 TEST(MutableTests, ToReorderedXcdr1Test)
 {
-  amalgam_serializer_test<MutableStruct, ReorderedMutableStruct>(
+  amalgam_serializer_test<MutableStructWithExplicitIDs, ReorderedMutableStruct>(
     xcdr1, mutable_struct_expected_xcdr1);
 }
 
@@ -1249,18 +1248,18 @@ TEST(MutableTests, FromReorderedXcdr1Test)
     0x00, 0x00, // +2 pad = 36
     0x3f, 0x02, 0x00, 0x00 // +4 = 40
   };
-  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr1, expected);
+  amalgam_serializer_test<ReorderedMutableStruct, MutableStructWithExplicitIDs>(xcdr1, expected);
 }
 
 TEST(MutableTests, ToReorderedXcdr2Test)
 {
-  amalgam_serializer_test<MutableStruct, ReorderedMutableStruct>(
+  amalgam_serializer_test<MutableStructWithExplicitIDs, ReorderedMutableStruct>(
     xcdr2, MutableStructExpectedXcdr2BE::expected);
 }
 
 TEST(MutableTests, ToReorderedXcdr2TestLE)
 {
-  test_little_endian<MutableStruct, ReorderedMutableStruct,
+  test_little_endian<MutableStructWithExplicitIDs, ReorderedMutableStruct,
                      MutableStructExpectedXcdr2BE>();
 }
 
@@ -1275,11 +1274,11 @@ TEST(MutableTests, FromReorderedXcdr2Test)
   };
   const unsigned layout[] = {4,4,4,4,8,4,1,3,4,2};
 
-  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr2, expected);
+  amalgam_serializer_test<ReorderedMutableStruct, MutableStructWithExplicitIDs>(xcdr2, expected);
 
   // Little-endian test
   change_endianness(expected, layout, sizeof(layout)/sizeof(unsigned));
-  amalgam_serializer_test<ReorderedMutableStruct, MutableStruct>(xcdr2_le, expected);
+  amalgam_serializer_test<ReorderedMutableStruct, MutableStructWithExplicitIDs>(xcdr2_le, expected);
 }
 
 // ---------- AdditionalFieldMutableStruct
@@ -1295,7 +1294,7 @@ void set_values<AdditionalFieldMutableStruct>(
 
 TEST(MutableTests, ToAdditionalFieldXcdr1Test)
 {
-  MutableStruct value;
+  MutableStructWithExplicitIDs value;
   set_values(value);
   AdditionalFieldMutableStruct result;
   amalgam_serializer_test(xcdr1, mutable_struct_expected_xcdr1, value, result);
@@ -1326,19 +1325,19 @@ TEST(MutableTests, FromAdditionalFieldXcdr1Test)
     0x00, 0x00, // +2 pad = 44
     0x3f, 0x02, 0x00, 0x00 // +4 = 48
   };
-  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr1, expected);
+  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStructWithExplicitIDs>(xcdr1, expected);
 }
 
 TEST(MutableTests, ToAdditionalFieldXcdr2Test)
 {
-  MutableStruct value;
+  MutableStructWithExplicitIDs value;
   set_values(value);
   AdditionalFieldMutableStruct result;
   amalgam_serializer_test(xcdr2, MutableStructExpectedXcdr2BE::expected, value, result);
   /// TODO(iguessthidlldo): Test for correct try construct behavior (default
   /// value?) if we decide on that.
 
-  test_little_endian<MutableStruct, AdditionalFieldMutableStruct,
+  test_little_endian<MutableStructWithExplicitIDs, AdditionalFieldMutableStruct,
                      MutableStructExpectedXcdr2BE>();
 }
 
@@ -1358,7 +1357,7 @@ TEST(MutableTests, FromAdditionalFieldMustUnderstandTest)
   ACE_Message_Block buffer(1024);
   buffer.copy((const char*)additional_field_must_understand, sizeof(additional_field_must_understand));
   Serializer serializer(&buffer, xcdr2);
-  MutableStruct result;
+  MutableStructWithExplicitIDs result;
   EXPECT_FALSE(serializer >> result);
 
   // Deserialize and Compare C++ Values
@@ -1384,9 +1383,9 @@ TEST(MutableTests, FromAdditionalFieldXcdr2Test)
   };
   unsigned layout[] = {4,4,4,4,4,4,8,4,1,3,4,2};
 
-  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2, expected);
+  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStructWithExplicitIDs>(xcdr2, expected);
   change_endianness(expected, layout, sizeof(layout)/sizeof(unsigned));
-  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStruct>(xcdr2_le, expected);
+  amalgam_serializer_test<AdditionalFieldMutableStruct, MutableStructWithExplicitIDs>(xcdr2_le, expected);
 }
 
 // ---------- LengthCodeStruct
