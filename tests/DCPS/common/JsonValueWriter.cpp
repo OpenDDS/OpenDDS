@@ -7,7 +7,7 @@
 
 #include "JsonValueWriter.h"
 
-#include <cmath>
+#include <math.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

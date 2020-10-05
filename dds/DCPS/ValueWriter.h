@@ -65,6 +65,16 @@ struct ValueWriter {
   virtual void write_float32(ACE_CDR::Float /*value*/) = 0;
   virtual void write_float64(ACE_CDR::Double /*value*/) = 0;
   virtual void write_float128(ACE_CDR::LongDouble /*value*/) = 0;
+
+#ifdef NONNATIVE_LONGDOUBLE
+  void write_float128(long double value)
+  {
+    ACE_CDR::LongDouble ld;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, value);
+    write_float128(ld);
+  }
+#endif
+
   virtual void write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/) = 0;
   virtual void write_char8(ACE_CDR::Char /*value*/) = 0;
   virtual void write_char16(ACE_CDR::WChar /*value*/) = 0;
