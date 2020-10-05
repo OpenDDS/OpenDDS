@@ -6,21 +6,25 @@
 #ifndef OPENDDS_RTPS_RPC_IDL
 #define OPENDDS_RTPS_RPC_IDL
 
-
 #include "RtpsCore.idl"
-
 #include <dds/DdsDcpsGuid.idl>
+
+// Types from DDS-RPC 1.0 section 7.5.1.1.1 reused in XTypes
+
+// Use XCDR2 with final extensibility (DDSXTY14-30)
 
 module DDS {
 
-// namespace, as per chapter 7.11.1.4.1 of RPC spec
-module RPC {
+@final
 struct SampleIdentity {
   OpenDDS::DCPS::GUID_t writer_guid;
   OpenDDS::RTPS::SequenceNumber_t sequence_number;
 };
 
+module RPC {
+
 typedef string<255> InstanceName;
+
 enum RemoteExceptionCode_t
 {
   REMOTE_EX_OK,
@@ -31,10 +35,13 @@ enum RemoteExceptionCode_t
   REMOTE_EX_UNKNOWN_EXCEPTION
 };
 
+@final
 struct RequestHeader {
   SampleIdentity request_id;
   InstanceName instance_name;
 };
+
+@final
 struct ResponseHeader {
   SampleIdentity related_request_id;
   RemoteExceptionCode_t remote_ex;
