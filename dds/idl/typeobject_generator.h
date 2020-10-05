@@ -13,6 +13,10 @@
 
 class typeobject_generator : public dds_generator {
 public:
+  typeobject_generator()
+    : index_(0)
+  {}
+
   void gen_prologue();
 
   void gen_epilogue();
@@ -33,24 +37,19 @@ public:
   static std::string tag_type(UTL_ScopedName* name);
 
 private:
+
   struct Element {
     AST_Type* type;
-    size_t group;
+    size_t index;
+    size_t lowlink;
+    bool on_stack;
     std::string name;
-
-    Element() {}
-
-    Element(AST_Type* a_type, size_t a_group, const std::string& a_name)
-      : type(a_type)
-      , group(a_group)
-      , name(a_name)
-    {}
   };
 
-  size_t compute_dependencies(AST_Type* type, const std::string& anonymous_name);
+  void consider(Element& v, AST_Type* type, const std::string& anonymous_name);
+  void strong_connect(AST_Type* type, const std::string& anonymous_name);
   void generate_minimal_type_identifier(AST_Type* type, bool force_type_object);
   static bool name_sorter(const Element& x, const Element& y);
-  void generate_minimal(AST_Type* type);
   OpenDDS::XTypes::TypeObject get_minimal_type_object(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
   bool generate(AST_Type* node, UTL_ScopedName* name);
@@ -61,11 +60,10 @@ private:
   MinimalTypeIdentifierMap minimal_type_identifier_map_;
   OpenDDS::XTypes::TypeMap minimal_type_map_;
 
-  typedef std::vector<Element> SortedDependencies;
-  SortedDependencies sorted_dependencies_;
-  std::set<AST_Type*> in_sorted_dependencies_;
-  std::map<AST_Type*, size_t> in_progress_;
-  size_t group_counter_ = 0;
+  size_t index_;
+  typedef std::vector<AST_Type*> Stack;
+  Stack stack_;
+  std::map<AST_Type*, Element> element_;
 };
 
 #endif

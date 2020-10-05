@@ -22,7 +22,7 @@ namespace {
   }
 
   TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
-                                          const SBound& bound)
+                                   const SBound& bound)
   {
     TypeIdentifier ti(TI_PLAIN_SEQUENCE_SMALL);
     ti.seq_sdefn() = PlainSequenceSElemDefn
@@ -36,7 +36,7 @@ namespace {
   }
 
   TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
-                                          const LBound& bound)
+                                   const LBound& bound)
   {
     TypeIdentifier ti(TI_PLAIN_SEQUENCE_LARGE);
     ti.seq_ldefn() = PlainSequenceLElemDefn
@@ -50,7 +50,7 @@ namespace {
   }
 
   TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
-                                       const SBoundSeq& bound_seq)
+                                const SBoundSeq& bound_seq)
   {
     TypeIdentifier ti(TI_PLAIN_ARRAY_SMALL);
     ti.array_sdefn() = PlainArraySElemDefn
@@ -64,7 +64,7 @@ namespace {
   }
 
   TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
-                                       const LBoundSeq& bound_seq)
+                                const LBoundSeq& bound_seq)
   {
     TypeIdentifier ti(TI_PLAIN_ARRAY_LARGE);
     ti.array_ldefn() = PlainArrayLElemDefn
@@ -78,7 +78,7 @@ namespace {
   }
 
   TypeIdentifier make(ACE_CDR::Octet k,
-                             const PlainMapSTypeDefn& map_sdefn)
+                      const PlainMapSTypeDefn& map_sdefn)
   {
     TypeIdentifier ti(k);
     ti.map_sdefn() = map_sdefn;
@@ -86,7 +86,7 @@ namespace {
   }
 
   TypeIdentifier make(ACE_CDR::Octet k,
-                             const PlainMapLTypeDefn& map_ldefn)
+                      const PlainMapLTypeDefn& map_ldefn)
   {
     TypeIdentifier ti(k);
     ti.map_ldefn() = map_ldefn;
@@ -94,26 +94,10 @@ namespace {
   }
 
   TypeIdentifier make(ACE_CDR::Octet k,
-                             const StronglyConnectedComponentId& sc_component_id)
-  {
-    TypeIdentifier ti(k);
-    ti.sc_component_id() = sc_component_id;
-    return ti;
-  }
-
-  TypeIdentifier make(ACE_CDR::Octet k,
-                             const EquivalenceHash& equivalence_hash)
+                      const EquivalenceHash& equivalence_hash)
   {
     TypeIdentifier ti(k);
     std::memcpy(ti.equivalence_hash(), equivalence_hash, sizeof equivalence_hash);
-    return ti;
-  }
-
-  TypeIdentifier make(ACE_CDR::Octet k,
-                             const ExtendedTypeDefn& extended_defn)
-  {
-    TypeIdentifier ti(k);
-    ti.extended_defn() = extended_defn;
     return ti;
   }
 

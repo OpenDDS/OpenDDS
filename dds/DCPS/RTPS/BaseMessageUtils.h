@@ -221,6 +221,9 @@ private:
   size_t smContentStart_;
 };
 
+OpenDDS_Rtps_Export
+bool bitmapNonEmpty(const SequenceNumberSet& snSet);
+
 }
 }
 

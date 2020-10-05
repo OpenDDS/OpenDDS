@@ -359,7 +359,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     // Find a common data representation
     bool found = false;
     DDS::DataRepresentationIdSeq readerIds =
-      get_effective_data_rep_qos(readerQos->representation.value);
+      get_effective_data_rep_qos(readerQos->representation.value, true);
     DDS::DataRepresentationIdSeq writerIds =
       get_effective_data_rep_qos(writerQos->representation.value);
     const CORBA::ULong reader_count = readerIds.length();
@@ -443,13 +443,18 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(DDS::DataRepresentationIdSeq qos) {
-  DDS::DataRepresentationIdSeq qos_ids = qos;
-  if (qos_ids.length() == 0) {
-    qos_ids.length(1);
-    qos_ids[0] = DDS::XCDR_DATA_REPRESENTATION;
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader)
+{
+  if (qos.length() == 0) {
+    DDS::DataRepresentationIdSeq ids;
+    ids.length(reader ? 2 : 1);
+    ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    if (reader) {
+      ids[1] = DDS::XCDR_DATA_REPRESENTATION;
+    }
+    return ids;
   }
-  return qos_ids;
+  return qos;
 }
 
 } // namespace DCPS
