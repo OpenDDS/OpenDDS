@@ -5,9 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DDS_HAS_MINIMUM_BIT
-
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "ConnectionRecords.h"
 
