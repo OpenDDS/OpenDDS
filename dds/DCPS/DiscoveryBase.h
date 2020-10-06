@@ -1313,7 +1313,25 @@ namespace OpenDDS {
             return;
           }
         }
+         // for Xtypes, check consistency
+        if ((writer_type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
+        (reader_type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+          //look up topic name
+          TopicNameMap::iterator name_iter = topic_names_.find(writer);
+          if (name_iter != topic_names_.end()) {
+            //find TopicDetails instance in topics_
+            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator TDiter = topics_.find(name_iter->second);
+            if (TDiter != topics_.end()) {
+              TDiter->second.add_pub_sub(writer); //TODO create new vesion of add_pub_sub to used assignable() for consistency check
+            }
 
+          } else {
+            //something bad happened TODO what to do here?
+          }
+
+          //call new add_pub_sub; if assignability is false then what; remove endpoint and other cleanup
+
+        }
         const LocalPublicationIter lpi = local_publications_.find(writer);
         if (lpi != local_publications_.end()) {
           writer_local = true;
