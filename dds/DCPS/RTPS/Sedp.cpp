@@ -3714,7 +3714,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 
   // As per chapter 7.6.3.3.4 of XTypes spec.
-  // NOTE(sonndinh): Looks like the prefix "dds.builtin.TOS" should be "dds.builtin.TLS".
+  // NOTE: Looks like the prefix "dds.builtin.TOS" should be "dds.builtin.TLS".
   // Also, in DDS-XTypes 1.3, page 226, the built-in endpoint names should be TypeLookupServiceXyz
   // instead of TypeObjectServiceXyz.
   const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") +
@@ -3728,7 +3728,8 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
     type_lookup_request.data.getTypes.type_ids = type_ids;
   } else {
     type_lookup_request.data.getTypeDependencies.type_ids = type_ids;
-    type_lookup_request.data.getTypeDependencies.continuation_point = sedp_.type_lookup_reply_reader_->continuation_point();
+    sedp_.type_lookup_reply_reader_->get_continuation_point(reader.guidPrefix, type_ids[0],
+      type_lookup_request.data.getTypeDependencies.continuation_point);
   }
 
   // Determine message length
@@ -3821,21 +3822,40 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
   return DDS::RETCODE_NO_DATA;
 }
 
+void Sedp::TypeLookupRequestReader::gen_continuation_point(XTypes::OctetSeq32& cont_point) const
+{
+  // We are sending all dependencies of requested types in 1 reply, and thus
+  // the continuation_point will be "absent" by setting its length to zero.
+  cont_point.length(0);
+}
+
 DDS::ReturnCode_t
 Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
   XTypes::TypeLookup_Reply& reply)
 {
-  // TODO(sonndinh): Is sending a complete set of dependencies ok in case it is big?
-  // How is continuation_point set?
+  // Send all dependencies of the requested types
   sedp_.type_lookup_service_->get_type_dependencies(request.data.getTypeDependencies.type_ids,
     reply.data.getTypeDependencies.result.dependent_typeids);
   if (reply.data.getTypeDependencies.result.dependent_typeids.length() > 0) {
     reply.data.kind = XTypes::TypeLookup_getDependencies_HashId;
     reply.data.getTypeDependencies.return_code = DDS::RETCODE_OK;
+    gen_continuation_point(reply.data.getTypeDependencies.result.continuation_point);
     reply.header.related_request_id = request.header.request_id;
     return DDS::RETCODE_OK;
   }
   return DDS::RETCODE_NO_DATA;
+}
+
+void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& guid_prefix,
+                                                         const XTypes::TypeIdentifier& remote_ti,
+                                                         XTypes::OctetSeq32& cont_point) const
+{
+  const DependenciesMap::const_iterator it = dependencies_.find(guid_prefix);
+  if (it == dependencies_.end() || it->second.find(remote_ti) == it->second.end()) {
+    cont_point.length(0);
+  } else {
+    cont_point = it->second.find(remote_ti)->second.first;
+  }
 }
 
 DDS::ReturnCode_t
@@ -3890,14 +3910,16 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
                                                             bool is_discovery_protected)
 {
   const XTypes::TypeLookup_getTypeDependencies_Out& data = reply.data.getTypeDependencies.result;
-  continuation_point_ = data.continuation_point;
+  // TODO(sonndinh): Store the received continuation_point
+  //  continuation_point_ = data.continuation_point;
 
   const DCPS::RepoId remote_id = sample.header_.publication_id_;
   if (data.dependent_typeids.length() > 0) {
     for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
       const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
       if (!sedp_.type_lookup_service_->type_object_in_cache(ti)) {
-        dependencies_.append(ti);
+        // TODO(sonndinh): Store the received dependent types
+        //dependencies_.append(ti);
       }
     }
 
@@ -3915,12 +3937,13 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
     // is received, that means we have got all dependencies.
     sedp_.has_all_dependencies_ = true;
 
-    // Send getTypes request when we have all dependencies
+    // TODO(sonndinh): Send getTypes request when we have all dependencies
+    /*
     if (!sedp_.send_type_lookup_request(dependencies_, remote_id, is_discovery_protected, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send type lookup request\n")));
       return DDS::RETCODE_ERROR;
-    }
+      }*/
   }
   return DDS::RETCODE_OK;
 }

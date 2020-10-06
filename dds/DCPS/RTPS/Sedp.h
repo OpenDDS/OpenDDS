@@ -749,6 +749,8 @@ private:
 
     DDS::ReturnCode_t process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
       XTypes::TypeLookup_Reply& reply);
+
+    void gen_continuation_point(XTypes::OctetSeq32& cont_point) const;
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
@@ -762,7 +764,9 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
-    const XTypes::OctetSeq32& continuation_point() const { return continuation_point_; }
+    void get_continuation_point(const GuidPrefix_t& guid_prefix,
+                                const XTypes::TypeIdentifier& remote_ti,
+                                XTypes::OctetSeq32& cont_point) const;
 
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
@@ -778,12 +782,22 @@ private:
                                                      const XTypes::TypeLookup_Reply&,
                                                      bool is_discovery_protected);
 
-    // TODO(sonndinh): If one object of this class is used to communicate
-    // with built-in endpoints from more than 1 participants, we must use
-    // something like map for the the following.
-    // Continuation point from the previously getTypeDependencies reply.
-    XTypes::OctetSeq32 continuation_point_;
-    XTypes::TypeIdentifierSeq dependencies_;
+    typedef std::pair<XTypes::OctetSeq32, XTypes::TypeIdentifierSeq> ContinuationPair;
+
+    // Map from each remote type to the most recent continuation_point
+    // and all dependencies received for that type so far.
+    typedef OPENDDS_MAP(XTypes::TypeIdentifier, ContinuationPair) RemoteDependencies;
+
+    struct GuidPrefix_tKeyLessThan {
+      bool operator()(const GuidPrefix_t& a, const GuidPrefix_t& b) const
+      {
+        return std::memcmp(&a[0], &b[0], sizeof(GuidPrefix_t)) < 0;
+      }
+    };
+
+    // Map from each remote participant to the data stored for its types.
+    typedef OPENDDS_MAP_CMP(GuidPrefix_t, RemoteDependencies, GuidPrefix_tKeyLessThan) DependenciesMap;
+    DependenciesMap dependencies_;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
