@@ -367,8 +367,6 @@ public:
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
-  RepoId get_subscription_id() const;
-
   bool have_sample_states(DDS::SampleStateMask sample_states) const;
   bool have_view_states(DDS::ViewStateMask view_states) const;
   bool have_instance_states(DDS::InstanceStateMask instance_states) const;
@@ -566,6 +564,8 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
+  const RepoId& get_repo_id() const { return this->subscription_id_; }
+
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
@@ -687,8 +687,6 @@ private:
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
 #endif
-
-  const RepoId& get_repo_id() const { return this->subscription_id_; }
 
   DDS::Subscriber_var get_builtin_subscriber() const
   {

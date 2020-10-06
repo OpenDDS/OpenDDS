@@ -765,6 +765,7 @@ Sedp::assign_bit_key(DiscoveredPublication& pub)
 {
   const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(pub.writer_data_.writerProxy.remoteWriterGuid);
   pub.writer_data_.ddsPublicationData.key = key;
+  pub.writer_data_.ddsPublicationData.participant_key = repo_id_to_bit_key(make_id(pub.writer_data_.writerProxy.remoteWriterGuid, ENTITYID_PARTICIPANT));
 }
 
 void
@@ -772,6 +773,7 @@ Sedp::assign_bit_key(DiscoveredSubscription& sub)
 {
   const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(sub.reader_data_.readerProxy.remoteReaderGuid);
   sub.reader_data_.ddsSubscriptionData.key = key;
+  sub.reader_data_.ddsSubscriptionData.participant_key = repo_id_to_bit_key(make_id(sub.reader_data_.readerProxy.remoteReaderGuid, ENTITYID_PARTICIPANT));
 }
 
 void
@@ -2098,7 +2100,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         // Upsert the remote topic.
         td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in());
 
-        pub.writer_data_.ddsPublicationData.participant_key = repo_id_to_bit_key(guid);
         assign_bit_key(pub);
         wdata_copy = pub.writer_data_;
       }
@@ -2428,7 +2429,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         // Upsert the remote topic.
         td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in());
 
-        sub.reader_data_.ddsSubscriptionData.participant_key = repo_id_to_bit_key(guid);
         assign_bit_key(sub);
         rdata_copy = sub.reader_data_;
       }

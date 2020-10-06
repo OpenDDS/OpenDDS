@@ -1598,9 +1598,7 @@ namespace OpenDDS {
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
-          guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+          const RepoId guid = make_guid(p.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
           std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;

@@ -409,15 +409,16 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
+      OpenDDS::DCPS::RepoId publication_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
       OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
 
       OpenDDS::DCPS::GuidConverter converter(repo_id);
 
       ACE_DEBUG((LM_DEBUG,
-                 "%P Read Publication BIT with key: %x %x %x and handle %d\n"
+                 "%P Read Publication BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 data[i].key.value[0], data[i].key.value[1],
-                 data[i].key.value[2], infos[i].instance_handle,
+                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(publication_repo_id)).c_str(),
+                 infos[i].instance_handle,
                  OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
 
@@ -536,15 +537,16 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
+      OpenDDS::DCPS::RepoId subscription_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
       OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
 
       OpenDDS::DCPS::GuidConverter converter(repo_id);
 
       ACE_DEBUG((LM_DEBUG,
-                 "%P Read Subscription BIT with key: %x %x %x and handle %d\n"
+                 "%P Read Subscription BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 data[i].key.value[0], data[i].key.value[1],
-                 data[i].key.value[2], infos[i].instance_handle,
+                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(subscription_repo_id)).c_str(),
+                 infos[i].instance_handle,
                  OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
       if (repo_id == subscriber_repo_id) {
