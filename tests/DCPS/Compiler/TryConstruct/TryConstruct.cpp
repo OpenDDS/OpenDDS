@@ -1035,7 +1035,6 @@ TEST(Union, USE_DEFAULT)
     TryCon::DefaultUnion expected;
     expected._d(10);
     StringSeqBound temp_seq2;
-    temp_seq2.length(0);
     expected.strs_ud(temp_seq2);
     TryCon::DefaultUnion actual;
     {
