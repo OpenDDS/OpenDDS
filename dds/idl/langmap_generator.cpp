@@ -23,6 +23,8 @@ using namespace AstTypeClassification;
 struct GeneratorBase;
 
 namespace {
+  std::string string_ns = "::CORBA";
+
   GeneratorBase* generator_ = 0;
 
   std::map<AST_PredefinedType::PredefinedType, std::string> primtype_;
@@ -291,12 +293,12 @@ struct GeneratorBase
           "  }\n"
           "  void " << field_name << " (const " << primtype << "* x) {\n"
           "    _reset();\n"
-          "    this->_u." << field_name << " = ::CORBA::string_dup(x);\n"
+          "    this->_u." << field_name << " = " << string_ns << "::string_dup(x);\n"
           "    _discriminator = " << first_label.str() << ";\n"
           "  }\n"
           "  void " << field_name << " (const " << helper << "& x) {\n"
           "    _reset();\n" <<
-          "    this->_u." << field_name << " = ::CORBA::string_dup(x.in());\n"
+          "    this->_u." << field_name << " = " << string_ns << "::string_dup(x.in());\n"
           "    _discriminator = " << first_label.str() << ";\n"
           "  }\n"
           "  const " << primtype << "* " << field_name << " () const {\n"
@@ -403,7 +405,7 @@ struct GeneratorBase
         "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << string_ns << "::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
@@ -430,7 +432,7 @@ struct GeneratorBase
         "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << string_ns << "::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
@@ -484,7 +486,7 @@ struct GeneratorBase
       // Do nothing.
     } else if (cls & CL_STRING) {
       ss <<
-        "    ::CORBA::string_free(this->_u." << name << ");\n"
+        "    " << string_ns << "::string_free(this->_u." << name << ");\n"
         "    this->_u." << name << " = 0;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
@@ -568,7 +570,7 @@ struct GeneratorBase
         nm << "::" << nm << "(const " << nm << "& other)\n"
         "{\n"
         "  this->_discriminator = other._discriminator;\n";
-      generateSwitchForUnion("this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
@@ -580,7 +582,7 @@ struct GeneratorBase
         "  }\n\n"
         "  _reset();\n"
         "  this->_discriminator = other._discriminator;\n";
-      generateSwitchForUnion("this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "  return *this;\n"
         "}\n\n";
@@ -589,7 +591,7 @@ struct GeneratorBase
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
         "  if (this->_discriminator != rhs._discriminator) return false;\n";
-      if (generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
+      if (generateSwitchForUnion(u, "this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
         be_global->impl_ <<
           "  return false;\n";
       }
@@ -599,7 +601,7 @@ struct GeneratorBase
       be_global->impl_ <<
         "void " << nm << "::_reset()\n"
         "{\n";
-      generateSwitchForUnion("this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
@@ -1678,13 +1680,13 @@ struct Cxx11Generator : GeneratorBase
       nm << "::" << nm << "(const " << nm << "& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion("_disc", union_copy, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_copy, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "::" << nm << '(' << nm << "&& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion("_disc", union_move, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_move, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
@@ -1692,7 +1694,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (this == &rhs) {\n"
       "    return *this;\n"
       "  }\n";
-    generateSwitchForUnion("rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1702,7 +1704,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (this == &rhs) {\n"
       "    return *this;\n"
       "  }\n";
-    generateSwitchForUnion("rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1712,7 +1714,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (_set && d != _disc) {\n"
       "    _reset();\n"
       "  }\n";
-    generateSwitchForUnion("d", union_activate, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "d", union_activate, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _set = true;\n"
       "  _disc = d;\n"
@@ -1720,7 +1722,7 @@ struct Cxx11Generator : GeneratorBase
       "void " << nm << "::_reset()\n"
       "{\n"
       "  if (!_set) return;\n";
-    generateSwitchForUnion("_disc", union_reset, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_reset, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _set = false;\n"
       "}\n\n"
@@ -1740,14 +1742,17 @@ void langmap_generator::init()
 {
   switch (be_global->language_mapping()) {
   case BE_GlobalData::LANGMAP_FACE_CXX:
+    string_ns = "::FACE";
     generator_ = &FaceGenerator::instance;
     generator_->init();
     break;
   case BE_GlobalData::LANGMAP_SP_CXX:
+    string_ns = "::CORBA";
     generator_ = &SafetyProfileGenerator::instance;
     generator_->init();
     break;
   case BE_GlobalData::LANGMAP_CXX11:
+    string_ns = "::CORBA";
     generator_ = &Cxx11Generator::instance;
     generator_->init();
     break;

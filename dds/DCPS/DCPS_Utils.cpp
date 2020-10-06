@@ -14,12 +14,57 @@
 #include <ace/ACE.h> /* For ACE::wild_match() */
 #include <ace/OS_NS_string.h>
 
+#ifdef OPENDDS_SECURITY
+#  include "dds/DdsSecurityCoreC.h"
+#endif
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+const char* retcode_to_string(DDS::ReturnCode_t value)
+{
+  switch (value) {
+  case DDS::RETCODE_OK:
+    return "OK";
+  case DDS::RETCODE_ERROR:
+    return "Error";
+  case DDS::RETCODE_UNSUPPORTED:
+    return "Unsupported";
+  case DDS::RETCODE_BAD_PARAMETER:
+    return "Bad parameter";
+  case DDS::RETCODE_PRECONDITION_NOT_MET:
+    return "Precondition not met";
+  case DDS::RETCODE_OUT_OF_RESOURCES:
+    return "Out of resources";
+  case DDS::RETCODE_NOT_ENABLED:
+    return "Not enabled";
+  case DDS::RETCODE_IMMUTABLE_POLICY:
+    return "Immutable policy";
+  case DDS::RETCODE_INCONSISTENT_POLICY:
+    return "Inconsistent policy";
+  case DDS::RETCODE_ALREADY_DELETED:
+    return "Already deleted";
+  case DDS::RETCODE_TIMEOUT:
+    return "Timeout";
+  case DDS::RETCODE_NO_DATA:
+    return "No data";
+  case DDS::RETCODE_ILLEGAL_OPERATION:
+    return "Illegal operation";
+#ifdef OPENDDS_SECURITY
+  case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
+    return "Not allowed by security";
+#endif
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: retcode_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid return code";
+  }
+}
 
 bool
 is_wildcard(const char *str)
@@ -314,7 +359,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     // Find a common data representation
     bool found = false;
     DDS::DataRepresentationIdSeq readerIds =
-      get_effective_data_rep_qos(readerQos->representation.value);
+      get_effective_data_rep_qos(readerQos->representation.value, true);
     DDS::DataRepresentationIdSeq writerIds =
       get_effective_data_rep_qos(writerQos->representation.value);
     const CORBA::ULong reader_count = readerIds.length();
@@ -386,9 +431,6 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind)
 {
   switch(repr) {
-  case UNALIGNED_CDR_DATA_REPRESENTATION:
-    kind = Encoding::KIND_UNALIGNED_CDR;
-    break;
   case DDS::XCDR_DATA_REPRESENTATION:
     kind = Encoding::KIND_XCDR1;
     break;
@@ -401,13 +443,18 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(DDS::DataRepresentationIdSeq qos) {
-  DDS::DataRepresentationIdSeq qos_ids = qos;
-  if (qos_ids.length() == 0) {
-    qos_ids.length(1);
-    qos_ids[0] = DDS::XCDR_DATA_REPRESENTATION;
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader)
+{
+  if (qos.length() == 0) {
+    DDS::DataRepresentationIdSeq ids;
+    ids.length(reader ? 2 : 1);
+    ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    if (reader) {
+      ids[1] = DDS::XCDR_DATA_REPRESENTATION;
+    }
+    return ids;
   }
-  return qos_ids;
+  return qos;
 }
 
 } // namespace DCPS

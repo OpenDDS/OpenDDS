@@ -272,7 +272,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       AST_Union* union_node = dynamic_cast<AST_Union*>(root_);
-      if (be_global->has_key(union_node)) {
+      if (be_global->union_discriminator_is_key(union_node)) {
         current_value_ = root_;
         return *this;
       } else if (level_ > 0) {

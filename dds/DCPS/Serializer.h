@@ -38,8 +38,6 @@
 #include "PoolAllocator.h"
 #include "Message_Block_Ptr.h"
 
-#include <tao/String_Alloc.h>
-
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
 
@@ -52,12 +50,19 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace DDS {
-  class OctetSeq;
-}
-
 namespace OpenDDS {
 namespace DCPS {
+
+class OctetSeq {
+public:
+  void length(size_t size) { data_.resize(size); }
+  size_t length() const { return data_.size(); }
+  const void* get_buffer() const { return data_.data(); }
+  void* get_buffer() { return const_cast<char*>(data_.data()); }
+
+private:
+  std::string data_;
+};
 
 enum Endianness {
   ENDIAN_BIG = 0,
@@ -286,17 +291,36 @@ size_t serialized_size(const Encoding& encoding, const T& value)
 }
 
 /**
- * This helper class can be used to construct ace message blocks from OctetSeqs
- * and be used with the Serializer to serialize/deserialize directly into the OctetSeq buffer.
- * The OctetSeq must have its length set before constructing this object.
+ * This helper class can be used to construct ace message blocks from
+ * byte buffers like DDS::OctetSeq and DCPS::OctetSeq and be used with
+ * the Serializer to serialize/deserialize directly into the byte
+ * buffer.  The sequence must have its length set before constructing
+ * this object.  T should provide a length() method which is the size
+ * of the buffer and get_buffer() which returns a pointer to the
+ * underlying byte sequence.
  */
-class OpenDDS_Dcps_Export MessageBlockHelper {
+template <typename T>
+class MessageBlockHelper {
 public:
   /**
    * This constructor receives an already populated OctetSeq so the write pointer is advanced
    */
-  explicit MessageBlockHelper(const DDS::OctetSeq& seq);
-  explicit MessageBlockHelper(DDS::OctetSeq& seq);
+  explicit MessageBlockHelper(const T& seq)
+    : db_(seq.length(), ACE_Message_Block::MB_DATA,
+          reinterpret_cast<const char*>(seq.get_buffer()),
+          0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+    , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+  {
+    mb_.wr_ptr(mb_.space());
+  }
+
+  explicit MessageBlockHelper(T& seq)
+    : db_(seq.length(), ACE_Message_Block::MB_DATA,
+          reinterpret_cast<const char*>(seq.get_buffer()),
+          0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
+    , mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
+  {}
+
   operator ACE_Message_Block*() { return &mb_; }
 
 private:
@@ -386,13 +410,19 @@ public:
 
   /// Read a narrow string.
   size_t read_string(ACE_CDR::Char*& dest,
-    ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = CORBA::string_alloc,
-    void str_free(ACE_CDR::Char*) = CORBA::string_free);
+                     ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = 0,
+                     void str_free(ACE_CDR::Char*) = 0);
+
+  void free_string(ACE_CDR::Char* str,
+                   void str_free(ACE_CDR::Char*) = 0);
 
   /// Read a wide string.
   size_t read_string(ACE_CDR::WChar*& dest,
-    ACE_CDR::WChar* str_alloc(ACE_CDR::ULong) = CORBA::wstring_alloc,
-    void str_free(ACE_CDR::WChar*) = CORBA::wstring_free);
+                     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong) = 0,
+                     void str_free(ACE_CDR::WChar*) = 0);
+
+  void free_string(ACE_CDR::WChar* str,
+                   void str_free(ACE_CDR::WChar*) = 0);
 
   /// Skip the logical rd_ptr() over a given number of bytes = n * size.
   /// If alignment is enabled, skips any padding to align to 'size' before

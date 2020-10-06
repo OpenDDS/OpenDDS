@@ -15,10 +15,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 EntityImpl::EntityImpl()
-  : enabled_(false),
-    entity_deleted_(false),
-    status_changes_(0),
-    status_condition_(new StatusConditionImpl(this))
+  : enabled_(false)
+  , entity_deleted_(false)
+  , status_changes_(0)
+  , status_condition_(new StatusConditionImpl(this))
+  , observer_()
+  , events_(Observer::e_NONE)
 {
 }
 
@@ -80,6 +82,12 @@ EntityImpl::get_deleted()
   return this->entity_deleted_.value();
 }
 
+Observer_rch EntityImpl::get_observer(Observer::Event e)
+{
+  return (observer_ && (events_ & e)) ? observer_ :
+         parent() ? parent()->get_observer(e) : Observer_rch();
+}
+
 void
 EntityImpl::notify_status_condition()
 {
@@ -106,6 +114,12 @@ EntityImpl::transport_config() const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TransportConfig_rch());
   return transport_config_;
+}
+
+void EntityImpl::set_observer(Observer_rch observer, Observer::Event e)
+{
+  observer_ = observer;
+  events_ = e;
 }
 
 } // namespace DCPS

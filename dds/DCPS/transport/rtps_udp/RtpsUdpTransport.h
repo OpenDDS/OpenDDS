@@ -34,7 +34,13 @@ public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
   virtual ICE::Endpoint* get_ice_endpoint();
+  virtual void rtps_relay_only_now(bool flag);
+  virtual void use_rtps_relay_now(bool flag);
   virtual void use_ice_now(bool flag);
+#ifdef OPENDDS_SECURITY
+  ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
+  void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+#endif
 
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
@@ -114,6 +120,9 @@ private:
   typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;
 
+  DDS::Subscriber_var bit_sub_;
+  GuidPrefix_t local_prefix_;
+
   /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same
   /// domain participant (same GUID prefix).  Use by a second participant
@@ -146,6 +155,10 @@ private:
     virtual ACE_INET_Addr stun_server_address() const;
   };
   IceEndpoint ice_endpoint_;
+  ICE::ServerReflexiveStateMachine relay_srsm_;
+  typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
+  RcHandle<Periodic> relay_stun_task_;
+  void relay_stun_task(const DCPS::MonotonicTimePoint& now);
 
   void start_ice();
   void stop_ice();

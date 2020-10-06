@@ -40,7 +40,7 @@ jobs:
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
-      rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
+      rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees %VCPKG_ROOT%\downloads
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
   - task: BatchScript@1
@@ -131,7 +131,7 @@ jobs:
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
-      rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
+      rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees %VCPKG_ROOT%\downloads
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
     condition: not(and(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildPlatform'], 'x64')))

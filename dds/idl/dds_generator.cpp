@@ -242,107 +242,101 @@ NestedForLoops::~NestedForLoops()
   }
 }
 
-string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bool is_union)
+string type_to_default_array(AST_Type* type, const string& name,
+  bool is_anonymous, bool is_union, bool use_cxx11, Classification fld_cls)
 {
   string val;
+  string temp = name;
+  if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
+    temp.erase(temp.size() - 2);
+  }
+  temp += "_temp";
+  replace(temp.begin(), temp.end(), '.', '_');
+  replace(temp.begin(), temp.end(), '[', '_');
+  replace(temp.begin(), temp.end(), ']', '_');
+  if (use_cxx11) {
+    string n = scoped(type->name());
+    if (is_anonymous) {
+      n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
+      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+    }
+    string v = n;
+    size_t index = 0;
+    while (true) {
+      index = v.find("::", index);
+      if (index == string::npos) break;
+      v.replace(index, 2, "_");
+      index += 1;
+    }
+    string pre;
+    if (is_union) {
+      pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(tmp)";
+    } else {
+      pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(" + name + ")";
+    }
+    val += "      set_default(" + pre + ");\n";
+  } else {
+    string n = scoped(type->name());
+    if (is_anonymous) {
+      n = n.substr(0, n.rfind("::") + 2) + "_" + type->local_name()->get_string();
+      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+    }
+    if (is_union) {
+      val = "    " + n + "_forany " + temp + "(const_cast<"
+        + n + "_slice*>(tmp));\n";
+    } else {
+      val = "    " + n + "_forany " + temp + "(const_cast<"
+        + n + "_slice*>(" + name + "));\n";
+    }
+    val += "    set_default(" + temp + ");\n";
+    if (is_union) {
+      val += "    " + name + "(tmp);\n";
+    }
+  }
+  return val;
+}
+
+string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bool is_union)
+{
   AST_Type* actual_type = resolveActualType(type);
   Classification fld_cls = classify(actual_type);
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  if ((fld_cls & CL_STRUCTURE) || (fld_cls & CL_UNION)) {
-    if (is_union) {
-    val = "set_default(" + name + "());\n";
-    } else {
-    val = "set_default(" + name + ");\n";
-    }
+  string def_val;
+  if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
+    return "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
-    string temp = name;
-    if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
-      temp.erase(temp.size() - 2);
-    }
-    temp += "_temp";
-    replace(temp.begin(), temp.end(), '.', '_');
-    replace(temp.begin(), temp.end(), '[', '_');
-    replace(temp.begin(), temp.end(), ']', '_');
-    if (use_cxx11) {
-      string n = scoped(type->name());
-      if (is_anonymous) {
-        n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
-        n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
-      }
-      string v = n;
-      size_t index = 0;
-      while (true) {
-        index = v.find("::", index);
-        if (index == string::npos) break;
-        v.replace(index, 2, "_");
-        index += 1;
-      }
-      string pre;
-      if (is_union) {
-        pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(tmp)";
-      } else {
-        pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(" + name + ")";
-      }
-      val += "      set_default(" + pre + ");\n";
-    } else {
-      string n = scoped(type->name());
-      if (is_anonymous) {
-        n = n.substr(0, n.rfind("::") + 2) + "_" + type->local_name()->get_string();
-        n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
-      }
-      if (is_union) {
-        val = n + "_forany " + temp + "(const_cast<"
-          + n + "_slice*>(tmp));\n";
-      } else {
-        val = n + "_forany " + temp + "(const_cast<"
-          + n + "_slice*>(" + name + "));\n";
-      }
-      val += "      set_default(" + temp + ");\n";
-      if (is_union) {
-        val += name + "(tmp);\n";
-      }
-    }
+    return type_to_default_array(type, name, is_anonymous, is_union, use_cxx11, fld_cls);
   } else if (fld_cls & CL_ENUM) {
     // For now, simply return the first value of the enumeration.
     // Must be changed, if support for @default_literal is desired.
     AST_Enum* enu = dynamic_cast<AST_Enum*>(actual_type);
     UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
     AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
-    string enum_val = item->name()->get_string_copy();
+    def_val = item->name()->get_string_copy();
     if (use_cxx11) {
-      enum_val = scoped(type->name()) + "::" + item->local_name()->get_string();
-    }
-    if (is_union) {
-      val = name + "(" + enum_val + ");\n";
-    } else {
-      val = name + " = " + enum_val + ";\n";
+      def_val = scoped(type->name()) + "::" + item->local_name()->get_string();
     }
   } else if (fld_cls & CL_SEQUENCE) {
     string seq_resize_func = (use_cxx11) ? "resize" : "length";
     if (is_union) {
-      val = "tmp." + seq_resize_func + "(0);\n";
-      val += name + "(tmp);\n";
+      return "tmp." + seq_resize_func + "(0);\n" + name + "(tmp);\n";
     } else {
-      val = name + "." + seq_resize_func + "(0);\n";
+      return name + "." + seq_resize_func + "(0);\n";
     }
   } else if (fld_cls & CL_STRING) {
-    string def_val = (fld_cls & CL_WIDE) ? "L\"\"" : "\"\"";
-    if (is_union) {
-      val = name + "(" + def_val + ");\n";
-    } else {
-      val = name + " = " + def_val + ";\n";
-    }
-  } else if ((fld_cls & CL_PRIMITIVE) || (fld_cls & CL_FIXED)) {
+    def_val = (fld_cls & CL_WIDE) ? "L\"\"" : "\"\"";
+    if (!use_cxx11 && (fld_cls & CL_WIDE)) def_val = "TAO::WString_Manager::s_traits::default_initializer()";
+  } else if (fld_cls & (CL_PRIMITIVE | CL_FIXED)) {
     AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(actual_type);
     if (pt && (pt->pt() == AST_PredefinedType::PT_longdouble)) {
-      val = name + " = ACE_CDR_LONG_DOUBLE_INITIALIZER;\n";
+      def_val = use_cxx11 ? "0.0L" : "ACE_CDR_LONG_DOUBLE_INITIALIZER";
     } else {
-      val = name + " = 0;\n";
+      def_val =  "0";
     }
-  } else {
-    // TODO: Remove
-    abort();
   }
-  return val;
+  if (is_union) {
+    return name + "(" + def_val + ");\n";
+  } else {
+    return name + " = " + def_val + ";\n";
+  }
 }
-

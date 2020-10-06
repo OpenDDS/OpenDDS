@@ -19,6 +19,7 @@
 #include <string>
 
 class AST_Generator;
+class AST_Decl;
 
 namespace be_util {
 
@@ -36,6 +37,9 @@ namespace be_util {
 
   /// Get DDS_ROOT. It is a fatal error if it wasn't set.
   const char* dds_root();
+
+  /// Report a miscellaneous error and abort.
+  void misc_error_and_abort(const std::string& message, AST_Decl* node = 0);
 };
 
 #endif // if !defined

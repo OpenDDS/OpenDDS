@@ -36,6 +36,7 @@ namespace {
 
   typedef is_special_case is_special_union;
   typedef bool (*gen_special_union)(const string& cxx,
+                                    AST_Union* u,
                                     AST_Type* discriminator,
                                     const std::vector<AST_UnionBranch*>& branches);
 
@@ -68,6 +69,7 @@ namespace {
 
   bool isRtpsSpecialUnion(const string& cxx);
   bool genRtpsSpecialUnion(const string& cxx,
+                           AST_Union* u,
                            AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches);
 
@@ -147,6 +149,15 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
+    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
+      // that are not valid enum values (see ParameterListConverter::to_param_list())
+      be_global->impl_ <<
+        "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
+        "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
+        "      return false;\n"
+        "    }\n";
+    }
     be_global->impl_ <<
       "  return strm << static_cast<CORBA::ULong>(enumval);\n";
   }
@@ -157,11 +168,17 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     extraction.endArgs();
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
-      "  if (strm >> temp) {\n"
-      "    if (temp >= " << vals.size() << ") {\n"
-      "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-      "      return false;\n"
-      "    }\n"
+      "  if (strm >> temp) {\n";
+    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
+      // that are not valid enum values (see ParameterListConverter::to_param_list())
+      be_global->impl_ <<
+        "    if (temp >= " << vals.size() << ") {\n"
+        "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "      return false;\n"
+        "    }\n";
+    }
+    be_global->impl_ <<
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"
       "  }\n"
@@ -452,34 +469,12 @@ namespace {
     be_global->impl_ <<
       "      if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
       "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-      "        strm.skip(end_of_seq - strm.pos());\n"
+      "        strm.skip(end_of_arr - strm.pos());\n"
       "        return false;\n"
       "      } else {\n"
       "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
       "        discard_flag = true;\n"
       "      }\n";
-  }
-
-  TryConstructFailAction get_try_construct_annotation(AST_Annotation_Appl* ann_appl)
-  {
-    TryConstructFailAction try_construct = tryconstructfailaction_discard;
-    if (ann_appl) {
-      switch (get_u32_annotation_member_value(ann_appl, "value"))
-      {
-      case 0:
-        try_construct = tryconstructfailaction_discard;
-        break;
-      case 1:
-        try_construct = tryconstructfailaction_use_default;
-        break;
-      case 2:
-        try_construct = tryconstructfailaction_trim;
-        break;
-      default:
-        try_construct = tryconstructfailaction_discard;
-      }
-    }
-    return try_construct;
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
@@ -798,27 +793,22 @@ namespace {
         std::string seq_resize_func = use_cxx11 ? "resize" : "length";
 
         if (try_construct == tryconstructfailaction_use_default) {
-          be_global->impl_ << "     " << type_to_default(elem, "seq[i]") <<
-                              "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          be_global->impl_ <<
+            "     " << type_to_default(elem, "seq[i]") <<
+            "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
-                   ((elem_cls & CL_STRING) || (elem_cls & CL_SEQUENCE))) {
+                   (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING){
             string check_not_empty = use_cxx11 ? "!seq[i].empty()" : "seq[i].in()";
             string get_length = use_cxx11 ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "      if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "        seq[i]" << inout <<inout << ".resize(" << bounded_arg(elem) <<  ");\n"
-                "      }";
-            } else {
-              be_global->impl_ <<
-                "      if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "        seq[i]" << inout << "[" << bounded_arg(elem) << "] = 0;\n"
-                "      }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "          seq[i]" << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ");\n") : ("[" + bounded_arg(elem) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ <<
               "  else {\n"
               "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
@@ -953,7 +943,9 @@ namespace {
       insertion.addArg(sf.arg_.c_str(), sf.const_ref_);
       insertion.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -1022,7 +1014,9 @@ namespace {
       extraction.addArg(sf.arg_.c_str(), sf.ref_);
       extraction.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
@@ -1141,24 +1135,18 @@ namespace {
             "     " << type_to_default(sf.as_base_, "seq[i]") <<
             "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (sf.as_cls_ & CL_BOUNDED) &&
-                   ((sf.as_cls_ & CL_STRING) || (sf.as_cls_ & CL_SEQUENCE))) {
+                   (sf.as_cls_ & (CL_STRING | CL_SEQUENCE))) {
           if (sf.as_cls_ & CL_STRING){
             string check_not_empty = use_cxx11 ? "!seq[i].empty()" : "seq[i].in()";
             string get_length = use_cxx11 ? "seq[i].length()" : "ACE_OS::strlen(seq[i].in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && (" <<
-                bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
-                "          seq[i]" << inout << ".resize(" << bounded_arg(sf.as_act_) <<  ");\n"
-                "        }";
-            } else {
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && (" <<
-                bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
-                "          seq[i]" << inout << "[" << bounded_arg(sf.as_act_) << "] = 0;\n"
-                "        }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(sf.as_act_) << " < " << get_length << ")) {\n"
+              "          seq[i]" << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(sf.as_act_) +  ");\n") : ("[" + bounded_arg(sf.as_act_) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ <<
               "      else {\n"
               "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
@@ -1370,8 +1358,8 @@ namespace {
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
-      if (!primitive) {
-        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+      if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
+        be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << unwrap;
@@ -1403,31 +1391,26 @@ namespace {
         }
         if (try_construct == tryconstructfailaction_use_default) {
           if (elem_cls & CL_ARRAY) {
-            be_global->impl_ << "      " << type_to_default(elem, "arr" + nfl.index_) <<
-                                "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+            be_global->impl_ <<
+              "      " << type_to_default(elem, "arr" + nfl.index_) <<
+              "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           } else {
             be_global->impl_ << "      " << type_to_default(elem, "arr" + nfl.index_ + suffix) <<
                                 "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           }
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
-                   ((elem_cls & CL_STRING) || (elem_cls & CL_SEQUENCE))) {
+                   (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING) {
             string check_not_empty = use_cxx11 ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
             string get_length = use_cxx11 ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "          arr" << nfl.index_ << inout << ".resize(" << bounded_arg(elem) <<  ");\n"
-                "        }";
-            } else {
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(elem) << " < " << get_length << ")) {\n"
-                "          arr" << nfl.index_ << inout << "[" << bounded_arg(elem) << "] = 0;\n"
-                "        }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(elem) << " < " << get_length << ")) {\n"
+              "          arr" << nfl.index_ << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ");\n") : ("[" + bounded_arg(elem) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ << " else {\n";
             skip_to_end_array();
             be_global->impl_ << "      }\n";
@@ -1551,7 +1534,9 @@ namespace {
       insertion.addArg(af.arg_.c_str(), af.const_ref_);
       insertion.endArgs();
 
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -1602,15 +1587,17 @@ namespace {
       AST_Annotation_Appl* ann_appl = af.arr_->base_type_annotations().find("::@try_construct");
       TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
 
-      be_global->impl_ << "  bool discard_flag = false;\n"
-                       << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  bool discard_flag = false;\n"
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
-      if (!primitive) {
-        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+      if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
+        be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
 
       be_global->impl_ << af.unwrap_;
@@ -1650,24 +1637,18 @@ namespace {
               "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           }
         } else if ((try_construct == tryconstructfailaction_trim) && (af.as_cls_ & CL_BOUNDED) &&
-                   ((af.as_cls_ & CL_STRING) || (af.as_cls_ & CL_SEQUENCE))) {
+                   (af.as_cls_ & (CL_STRING | CL_SEQUENCE))) {
           if (af.as_cls_ & CL_STRING){
             string check_not_empty = use_cxx11 ? "!arr" + nfl.index_ + ".empty()" : "arr" + nfl.index_ + ".in()";
             string get_length = use_cxx11 ? "arr" + nfl.index_ + ".length()" : "ACE_OS::strlen(arr" + nfl.index_ + ".in())";
             string inout = use_cxx11 ? "" : ".inout()";
-            if (use_cxx11){
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
-                "        arr" << nfl.index_ << inout << ".resize(" << bounded_arg(af.as_act_) <<  ");\n"
-                "        }";
-            } else {
-              be_global->impl_ <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                        << bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
-                "        arr" << nfl.index_ << inout << "[" << bounded_arg(af.as_act_) << "] = 0;\n"
-                "        }";
-            }
+            be_global->impl_ <<
+              "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
+              bounded_arg(af.as_act_) << " < " << get_length << ")) {\n"
+              "          arr" << nfl.index_ << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(af.as_act_) +  ");\n") : ("[" + bounded_arg(af.as_act_) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        }";
             be_global->impl_ << " else {\n";
             skip_to_end_array();
             be_global->impl_ << "      }\n";
@@ -2662,9 +2643,6 @@ namespace {
     if (repr.xml) {
       values.push_back("DDS::XML_DATA_REPRESENTATION");
     }
-    if (repr.unaligned_cdr) {
-      values.push_back("UNALIGNED_CDR_DATA_REPRESENTATION");
-    }
 
     std::ostringstream ss;
     ss << indent << name << ".length(" << values.size() << ");\n";
@@ -2759,7 +2737,7 @@ namespace {
       generate_marshal_traits_struct_bounds_functions(node, keys, info, true); // Key Fields
   }
 
-  bool generate_marshal_traits_union(AST_Union* node, bool has_key)
+  bool generate_marshal_traits_union(AST_Union* node, bool has_key, ExtensibilityKind exten)
   {
     be_global->header_ <<
       "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
@@ -2791,14 +2769,19 @@ namespace {
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      size_t size = 0;
-      // Union can only have discriminator as key, and the discriminator is always bounded.
-      if (has_key) {
-        idl_max_serialized_size(encoding, size, node->disc_type());
-      }
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
-        "      return SerializedSizeBound(" << size << ");\n";
+        "      return SerializedSizeBound(";
+      // TODO(iguessthislldo): This is the same workaround for
+      // idl_max_serialized_size as in is_bounded_type
+      if (exten == extensibilitykind_final) {
+        size_t size = 0;
+        if (has_key) {
+          idl_max_serialized_size(encoding, size, node->disc_type());
+        }
+        be_global->header_ << size;
+      }
+      be_global->header_ << ");\n";
     }
     be_global->header_ <<
       "    default:\n"
@@ -2859,11 +2842,11 @@ namespace {
       "\n";
 
     if (struct_node) {
-      if (!generate_marshal_traits_struct(struct_node , keys, info)) {
+      if (!generate_marshal_traits_struct(struct_node, keys, info)) {
         return false;
       }
     } else if (union_node) {
-      if (!generate_marshal_traits_union(union_node, keys.count())) {
+      if (!generate_marshal_traits_union(union_node, keys.count(), exten)) {
         return false;
       }
     }
@@ -3045,7 +3028,7 @@ namespace {
       code.push_back("}");
       generate_dheader_code(code, not_final);
 
-      // Write the fields
+      // Mutable Code
       std::ostringstream mutable_fields;
       Intro intro = rtpsCustom.intro_;
       const std::string indent = "  ";
@@ -3055,9 +3038,11 @@ namespace {
         mutable_fields <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
           "    size_t size = 0;\n";
+        const AutoidKind auto_id = be_global->autoid(node);
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
-          const unsigned id = be_global->get_id(node, field, i.pos());
+          ACE_CDR::ULong default_id = i.pos();
+          const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
           const string field_name = field->local_name()->get_string();
           bool is_key = false;
           be_global->check_key(field, is_key);
@@ -3096,6 +3081,7 @@ namespace {
           "  }\n";
       }
 
+      // Non-Mutable Code
       string expr;
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
@@ -3148,6 +3134,8 @@ namespace {
       if (is_mutable) {
         be_global->impl_ <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
+          "    set_default(stru);\n"
+          "\n"
           "    unsigned member_id;\n"
           "    size_t field_size;\n"
           "    while (true) {\n";
@@ -3177,9 +3165,11 @@ namespace {
           "\n";
 
         std::ostringstream cases;
+        const AutoidKind auto_id = be_global->autoid(node);
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
-          const unsigned id = be_global->get_id(node, field, i.pos());
+          ACE_CDR::ULong default_id = i.pos();
+          const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
           string field_name =
             string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
@@ -3233,6 +3223,7 @@ namespace {
                 "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
                 "          strm.skip(end_of_field - strm.pos());\n";
             }
+
           } else { //discard/default
             cases <<
               "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
@@ -3561,7 +3552,7 @@ namespace {
       || cxx == "OpenDDS::RTPS::Submessage";
   }
 
-  bool genRtpsParameter(AST_Type* discriminator,
+  bool genRtpsParameter(AST_Union* u, AST_Type* discriminator,
                         const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = "OpenDDS::RTPS::Parameter";
@@ -3571,7 +3562,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("uni", "const " + cxx + "&");
       serialized_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
       be_global->impl_ <<
         "  size += 4; // parameterId & length\n";
@@ -3616,7 +3607,7 @@ namespace {
       insertData.addArg("strm", "Serializer&");
       insertData.addArg("uni", "const " + cxx + "&");
       insertData.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
+      generateSwitchForUnion(u, "uni._d()", streamCommon, branches, discriminator,
                              "return", "<< ", cxx.c_str());
     }
     {
@@ -3644,7 +3635,7 @@ namespace {
         "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
         "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
-      generateSwitchBody(streamCommon, branches, discriminator,
+      generateSwitchBody(u, streamCommon, branches, discriminator,
                          "return", ">> ", cxx.c_str(), true);
       be_global->impl_ <<
         "  default:\n"
@@ -3660,7 +3651,7 @@ namespace {
     return true;
   }
 
-  bool genRtpsSubmessage(AST_Type* discriminator,
+  bool genRtpsSubmessage(AST_Union* u, AST_Type* discriminator,
                          const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = "OpenDDS::RTPS::Submessage";
@@ -3670,7 +3661,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("uni", "const " + cxx + "&");
       serialized_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
     }
     {
@@ -3678,7 +3669,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches,
+      generateSwitchForUnion(u, "uni._d()", streamCommon, branches,
                              discriminator, "return", "<< ", cxx.c_str());
     }
     {
@@ -3691,13 +3682,13 @@ namespace {
     return true;
   }
 
-  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
+  bool genRtpsSpecialUnion(const string& cxx, AST_Union* u, AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches)
   {
     if (cxx == "OpenDDS::RTPS::Parameter") {
-      return genRtpsParameter(discriminator, branches);
+      return genRtpsParameter(u, discriminator, branches);
     } else if (cxx == "OpenDDS::RTPS::Submessage") {
-      return genRtpsSubmessage(discriminator, branches);
+      return genRtpsSubmessage(u, discriminator, branches);
     } else {
       return false;
     }
@@ -3718,11 +3709,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   {
     Function set_default("set_default", "void");
-    set_default.addArg("stru", cxx + "&");
+    set_default.addArg("uni", cxx + "&");
     set_default.endArgs();
     be_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";
     be_global->impl_ << type_to_default(discriminator, "  temp");
-    be_global->impl_ << "  stru._d(temp);\n";
+    be_global->impl_ << "  uni._d(temp);\n";
     AST_Type* disc_type = resolveActualType(discriminator);
     Classification disc_cls = classify(disc_type);
     ACE_CDR::ULong default_enum_val = 0;
@@ -3754,9 +3745,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_octet && ev->u.oval == 0) ||
               (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
           {
-            be_global->impl_ << "  " << scoped(branch->field_type()->name()) << " btemp;\n";
-            be_global->impl_ << type_to_default(branch->field_type(), "btemp");
-            be_global->impl_ << "  stru." << branch->local_name()->get_string() << "(btemp);\n";
+            be_global->impl_ << type_to_default(branch->field_type(), string("uni.")
+              + branch->local_name()->get_string(), false, true);
             found = true;
             break;
           }
@@ -3767,7 +3757,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
-      return special_unions[i].gen(cxx, discriminator, branches);
+      return special_unions[i].gen(cxx, node, discriminator, branches);
     }
   }
 
@@ -3802,7 +3792,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
 
-    generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
+    generateSwitchForUnion(node, "uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
@@ -3848,11 +3838,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
-    if (generateSwitchForUnion("uni._d()", streamCommon, branches,
+    if (generateSwitchForUnion(node, "uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
-                               exten == extensibilitykind_mutable ? findSizeCommon : 0,
-                               exten == extensibilitykind_mutable ? node : 0)) {
+                               exten == extensibilitykind_mutable ? findSizeCommon : 0)) {
       be_global->impl_ <<
         "  return true;\n";
     }
@@ -3881,10 +3870,30 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
         "  }\n";
-
+      AST_Annotation_Appl* ann_appl = node->disc_annotations().find("::@try_construct");
+      TryConstructFailAction try_construct = get_try_construct_annotation(ann_appl);
       be_global->impl_ <<
-        "  " << scoped(discriminator->name()) << " disc;\n" <<
-        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+        "  " << scoped(discriminator->name()) << " disc;\n"
+        "  if (!(strm >> disc)) {\n";
+      if (try_construct == tryconstructfailaction_use_default) {
+        be_global->impl_ <<
+          "    set_default(uni);\n"
+          "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    strm.skip(field_size);\n"
+          "    strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "    return true;\n";
+      } else {
+        be_global->impl_ <<
+          "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    strm.skip(field_size);\n"
+          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "    return false;\n";
+      }
+      be_global->impl_ << "  }\n";
 
       be_global->impl_ <<
         "  member_id = 0;\n"
@@ -3894,7 +3903,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "    return false;\n"
         "  }\n";
 
-      if (generateSwitchForUnion("disc", streamCommon, branches,
+      if (generateSwitchForUnion(node, "disc", streamCommon, branches,
         discriminator, "if", ">> ", cxx.c_str(), false, true, true, 0)) {
         be_global->impl_ <<
           "  return true;\n";
@@ -3903,7 +3912,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-      if (generateSwitchForUnion("disc", streamCommon, branches,
+      if (generateSwitchForUnion(node, "disc", streamCommon, branches,
           discriminator, "if", ">> ", cxx.c_str())) {
         be_global->impl_ <<
           "  return true;\n";
@@ -3911,7 +3920,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  const bool has_key = be_global->has_key(node);
+  const bool has_key = be_global->union_discriminator_is_key(node);
   const bool is_topic_type = be_global->is_topic_type(node);
 
   if (!is_topic_type) {
@@ -3965,7 +3974,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.endArgs();
 
     if (has_key) {
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("serialized_size(encoding, total_size, uni);");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
@@ -4007,7 +4018,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (has_key) {
       // DHEADER
-      be_global->impl_ << "  const Encoding& encoding = strm.encoding();\n";
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back("if (!strm.read_delimiter(total_size)) {");
       code.push_back("  return false;");

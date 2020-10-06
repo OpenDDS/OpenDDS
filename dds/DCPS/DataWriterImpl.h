@@ -555,6 +555,8 @@ private:
     return this->publication_id_;
   }
 
+  DDS::Subscriber_var get_builtin_subscriber() const;
+
   DDS::DomainId_t domain_id() const {
     return this->domain_id_;
   }

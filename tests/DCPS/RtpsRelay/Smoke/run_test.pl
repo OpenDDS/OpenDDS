@@ -14,6 +14,7 @@ use PerlDDS::Run_Test;
 use strict;
 
 PerlDDS::add_lib_path('../../ConsolidatedMessengerIdl');
+PerlDDS::add_lib_path('../../common');
 
 my $status = 0;
 
@@ -38,8 +39,8 @@ if ($test->flag('single')) {
     $sub_ini = $pub_ini;
 }
 
-$test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -StunPort 3478 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1 -StatisticsInterval 3" . $relay_security_opts);
-$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay2.ini -ApplicationDomain 42 -StunPort 3479 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544 -UserData relay2 -StatisticsInterval 3" . $relay_security_opts);
+$test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1 -StatisticsInterval 3" . $relay_security_opts);
+$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay2.ini -ApplicationDomain 42 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544 -UserData relay2 -StatisticsInterval 3" . $relay_security_opts);
 $test->process("reporter", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile reporter.ini -RunRelay 0 -ReportStatistics 1");
 $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);

@@ -1,9 +1,10 @@
 #include "annotations.h"
 
 #include "be_extern.h"
+#include "be_util.h"
 
-#include <ast_annotation_decl.h>
 #include <ast_annotation_appl.h>
+#include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
 #include <ast_union.h>
 #include <utl_string.h>
@@ -17,6 +18,9 @@ void Annotations::register_all()
   register_one<IdAnnotation>();
   register_one<AutoidAnnotation>();
   register_one<HashidAnnotation>();
+  register_one<OptionalAnnotation>();
+  register_one<MustUnderstandAnnotation>();
+  register_one<ExternalAnnotation>();
   register_one<ExtensibilityAnnotation>();
   register_one<FinalAnnotation>();
   register_one<AppendableAnnotation>();
@@ -40,9 +44,7 @@ Annotation* Annotations::operator[](const std::string& annotation) const
 {
   const MapType::const_iterator i = map_.find(annotation);
   if (i == map_.end()) {
-    idl_global->err()->misc_error(
-      (std::string("No such annotation: ") + annotation).c_str());
-    BE_abort();
+    be_util::misc_error_and_abort(std::string("No such annotation: ") + annotation);
   }
   return i->second;
 }
@@ -85,74 +87,93 @@ void Annotation::cache()
 }
 
 AST_Expression::AST_ExprValue* get_annotation_member_ev(
-  AST_Annotation_Appl* appl, const char* member_name)
+  AST_Annotation_Appl* appl, const char* member_name, AST_Expression::ExprType type)
 {
   AST_Annotation_Member* member =
     dynamic_cast<AST_Annotation_Member*>((*appl)[member_name]);
-  AST_Expression::AST_ExprValue* ev = 0;
   if (member) {
     AST_Expression* e = member->value();
-    if (e) {
-      ev = e->ev();
+    if (e && e->ev()) {
+      if (e->ev()->et != type) {
+        be_util::misc_error_and_abort(std::string("Found unexpected expression type "
+                                      "while getting value of member \"") +
+                                      member_name + "\" of annotation \"" +
+                                      appl->local_name()->get_string() + '"',
+                                      appl);
+      }
+      return e->ev();
     }
   }
-  if (!ev) {
-    idl_global->err()->misc_error(
-      (std::string("Found null pointer while getting value of member \"") +
-        member_name + "\" of annotation \"" +
-        appl->local_name()->get_string() + "\"").c_str(),
-      appl);
-    BE_abort();
+
+  be_util::misc_error_and_abort(std::string("Found null pointer while getting value of member \"") +
+                                member_name + "\" of annotation \"" +
+                                appl->local_name()->get_string() + '"',
+                                appl);
+  return 0;
+}
+
+bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
+                                      const char* member_name)
+{
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_bool);
+  return ev->u.bval;
+}
+
+ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
+                                           const char* member_name)
+{
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_ulong);
+  return ev->u.ulval;
+}
+
+std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
+                                            const char* member_name)
+{
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_string);
+  return ev->u.strval->get_string();
+}
+
+TryConstructFailAction get_try_construct_annotation(AST_Annotation_Appl* ann_appl)
+{
+  TryConstructFailAction try_construct = tryconstructfailaction_discard;
+  if (ann_appl) {
+    switch (get_u32_annotation_member_value(ann_appl, "value"))
+    {
+    case 0:
+      try_construct = tryconstructfailaction_discard;
+      break;
+    case 1:
+      try_construct = tryconstructfailaction_use_default;
+      break;
+    case 2:
+      try_construct = tryconstructfailaction_trim;
+      break;
+    default:
+      try_construct = tryconstructfailaction_discard;
+    }
   }
-  return ev;
-}
-
-bool get_bool_annotation_member_value(
-  AST_Annotation_Appl* appl, const char* member_name)
-{
-  return get_annotation_member_ev(appl, member_name)->u.bval;
-}
-
-ACE_UINT32 get_u32_annotation_member_value(
-  AST_Annotation_Appl* appl, const char* member_name)
-{
-  return get_annotation_member_ev(appl, member_name)->u.ulval;
-}
-
-std::string get_str_annotation_member_value(
-  AST_Annotation_Appl* appl, const char* member_name)
-{
-  UTL_String* idlstr = get_annotation_member_ev(appl, member_name)->u.strval;
-  if (!idlstr) {
-    idl_global->err()->misc_error(
-      (std::string("Found null pointer while getting string value of member \"") +
-        member_name + "\" of annotation \"" +
-        appl->local_name()->get_string() + "\"").c_str(),
-      appl);
-    BE_abort();
-  }
-  return idlstr->get_string();
+  return try_construct;
 }
 
 template<>
-bool AnnotationWithValue<bool>::value_from_appl(
-  AST_Annotation_Appl* appl) const
+bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const
 {
-  return appl ? get_bool_annotation_member_value(appl, "value") : default_value();
+  return get_bool_annotation_member_value(appl, "value");
 }
 
 template<>
-ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(
-  AST_Annotation_Appl* appl) const
+ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const
 {
-  return appl ? get_u32_annotation_member_value(appl, "value") : default_value();
+  return get_u32_annotation_member_value(appl, "value");
 }
 
 template<>
-std::string AnnotationWithValue<std::string>::value_from_appl(
-  AST_Annotation_Appl* appl) const
+std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl) const
 {
-  return appl ? get_str_annotation_member_value(appl, "value") : default_value();
+  return get_str_annotation_member_value(appl, "value");
 }
 
 // @key ======================================================================
@@ -172,16 +193,15 @@ std::string KeyAnnotation::name() const
 
 bool KeyAnnotation::union_value(AST_Union* node) const
 {
-  return value_from_appl(node->disc_annotations().find(declaration()));
+  AST_Annotation_Appl* appl = node->disc_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
 }
 
 // @topic ====================================================================
 
 TopicAnnotation::TopicAnnotation()
 {
-  platforms_.insert("*");
-  platforms_.insert("DDS");
-  platforms_.insert("OpenDDS");
 }
 
 std::string TopicAnnotation::definition() const
@@ -198,25 +218,12 @@ std::string TopicAnnotation::name() const
   return "topic";
 }
 
-bool TopicAnnotation::node_value(AST_Decl* node) const
+TopicValue TopicAnnotation::value_from_appl(AST_Annotation_Appl* appl) const
 {
-  if (node) {
-    for (AST_Annotation_Appls::iterator i = node->annotations().begin();
-        i != node->annotations().end(); ++i) {
-      if (value_from_appl(i->get())) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool TopicAnnotation::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  if (appl && appl->annotation_decl() == declaration()) {
-    return platforms_.count(get_str_annotation_member_value(appl, "platform"));
-  }
-  return false;
+  TopicValue value;
+  value.name = get_str_annotation_member_value(appl, "name");
+  value.platform = get_str_annotation_member_value(appl, "platform");
+  return value;
 }
 
 // @nested ===================================================================
@@ -283,11 +290,6 @@ std::string AutoidAnnotation::name() const
   return "autoid";
 }
 
-AutoidKind AutoidAnnotation::default_value() const
-{
-  return autoidkind_sequential;
-}
-
 // @hashid ===================================================================
 
 std::string HashidAnnotation::definition() const
@@ -301,6 +303,51 @@ std::string HashidAnnotation::definition() const
 std::string HashidAnnotation::name() const
 {
   return "hashid";
+}
+
+// @optional =================================================================
+
+std::string OptionalAnnotation::definition() const
+{
+  return
+    "@annotation optional {\n"
+    "  boolean value default TRUE;"
+    "};\n";
+}
+
+std::string OptionalAnnotation::name() const
+{
+  return "optional";
+}
+
+// @must_understand =================================================================
+
+std::string MustUnderstandAnnotation::definition() const
+{
+  return
+    "@annotation must_understand {\n"
+    "  boolean value default TRUE;"
+    "};\n";
+}
+
+std::string MustUnderstandAnnotation::name() const
+{
+  return "must_understand";
+}
+
+// @external =================================================================
+
+std::string ExternalAnnotation::definition() const
+{
+  return
+    "@annotation external {\n"
+    "  boolean value default TRUE;"
+    "};\n";
+}
+
+std::string ExternalAnnotation::name() const
+{
+  return "external";
 }
 
 // @extensibility ============================================================
@@ -379,6 +426,13 @@ std::string TryConstructAnnotation::name() const
   return "try_construct";
 }
 
+TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) const
+{
+  AST_Annotation_Appl* appl = node->disc_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
@@ -392,8 +446,7 @@ namespace OpenDDS {
       "    enum Kind_t {\n"
       "      XCDR1,\n"
       "      XML,\n"
-      "      XCDR2,\n"
-      "      UNALIGNED_CDR\n"
+      "      XCDR2\n"
       "    };\n"
       "    Kind_t kind;\n"
       "  };\n"
@@ -423,8 +476,7 @@ namespace OpenDDS {
     return found;
   }
 
-  DataRepresentation DataRepresentationAnnotation::value_from_appl(
-    AST_Annotation_Appl* appl) const
+  DataRepresentation DataRepresentationAnnotation::value_from_appl(AST_Annotation_Appl* appl) const
   {
     DataRepresentation value;
     if (appl && appl->annotation_decl() == declaration()) {
@@ -437,9 +489,6 @@ namespace OpenDDS {
         break;
       case 2: // Kind_t::XCDR2
         value.xcdr2 = true;
-        break;
-      case 3: // Kind_t::UNALIGNED_CDR
-        value.unaligned_cdr = true;
         break;
       }
     }

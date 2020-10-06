@@ -595,10 +595,10 @@ typedef std::string (*CommonFn)(
 
 inline
 void generateCaseBody(
-  CommonFn commonFn, CommonFn commonFn2, AST_UnionBranch* branch,
-  const char* statementPrefix, const char* namePrefix,
-  const char* uni, bool generateBreaks, bool parens,
-  bool printing = false, unsigned default_id = 0, AST_Structure* type = 0)
+  CommonFn commonFn, CommonFn commonFn2,
+  AST_UnionBranch* branch, AutoidKind auto_id, ACE_CDR::ULong& member_id,
+  const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens,
+  bool printing = false)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -615,16 +615,19 @@ void generateCaseBody(
     std::string rhs;
     if (br_cls & CL_STRING) {
       if (br_cls & CL_BOUNDED) {
-        const std::string nmspace = lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "std::";
-        brType = nmspace + ((br_cls & CL_WIDE) ?
-          (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "WString_var" : "wstring" )
-          : (lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "String_var" : "string" ));
-        std::string char_type = (br_cls & CL_WIDE) ? "wchar_t" : "char";
+        if (lmap == BE_GlobalData::LANGMAP_FACE_CXX) {
+          brType = std::string("FACE::") + ((br_cls & CL_WIDE) ? "WString_var" : "String_var");
+        } else {
+          brType = ((br_cls & CL_WIDE) ? "OPENDDS_WSTRING" : "OPENDDS_STRING");
+        }
         if ((lmap == BE_GlobalData::LANGMAP_FACE_CXX) && (br_cls & CL_WIDE)) {
           rhs = "ACE_InputCDR::to_wstring(tmp.out(), " + bounded_arg(br) + ")";
         } else if (lmap == BE_GlobalData::LANGMAP_FACE_CXX) {
           rhs = "ACE_InputCDR::to_string(tmp.out(), " + bounded_arg(br) + ")";
-        } else { rhs = "Serializer::ToBoundedString<" + char_type + ">(tmp, " + bounded_arg(br) + ")";}
+        } else {
+          rhs = "Serializer::ToBoundedString<" + std::string((br_cls & CL_WIDE) ? "wchar_t" : "char")
+            + ">(tmp, " + bounded_arg(br) + ")";
+        }
       } else {
         if (use_cxx11) {
           brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
@@ -659,57 +662,59 @@ void generateCaseBody(
       "      uni._d(disc);\n"
       "      return true;\n"
       "    }\n";
-      if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
-          be_global->impl_ << "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
-                   "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-                   "        return true;\n";
-        } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
-                   ((br_cls & CL_STRING) || (br_cls & CL_SEQUENCE))) {
-          if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
-            std::string check_not_empty = "!tmp.empty()";
-            std::string get_length = (use_cxx11) ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
-            std::string inout = (use_cxx11) ? "" : ".inout()";
-            be_global->impl_ <<
-              "        if (strm.good_bit() && " << check_not_empty << " && ("
-                       << bounded_arg(br) << " < " << get_length << ")) {\n";
-            if (br_cls & CL_WIDE) {
-              be_global->impl_ << "          std::wstring s = tmp;\n";
-            } else {
-              be_global->impl_ << "          std::string s = tmp;\n";
-            }
-            be_global->impl_ <<
-              "          s.resize(" << bounded_arg(br) << ");\n"
-              "          uni." << name << "(s.c_str());\n"
-              "          return true;\n"
-              "        }";
-            be_global->impl_ <<
-              "        else {\n"
-              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-              "          return false;\n"
-              "        }\n";
-          } else if (br_cls & CL_SEQUENCE) {
-            be_global->impl_ <<
-              "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
-              "          return false;\n"
-              "        }\n"
-              "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
-              "        uni._d(disc);\n"
-              "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-              "        return true;\n";
-          }
+    if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
+      be_global->impl_ <<
+        "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
+        "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+        "        return true;\n";
+    } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
+                ((br_cls & CL_STRING) || (br_cls & CL_SEQUENCE))) {
+      if ((br_cls & CL_STRING) && (br_cls & CL_BOUNDED)) {
+        std::string check_not_empty = "!tmp.empty()";
+        std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
+        std::string inout = use_cxx11 ? "" : ".inout()";
+        be_global->impl_ <<
+          "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
+                    << bounded_arg(br) << " < " << get_length << ")) {\n";
+        if (br_cls & CL_WIDE) {
+          be_global->impl_ << "          std::wstring s = tmp;\n";
         } else {
-          //discard/default
-          be_global->impl_ <<
-            "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-            "        return false;\n  ";
+          be_global->impl_ << "          std::string s = tmp;\n";
         }
+        be_global->impl_ <<
+          "          s.resize(" << bounded_arg(br) << ");\n"
+          "          uni." << name << "(s.c_str());\n"
+          "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "          return true;\n"
+          "        }";
+        be_global->impl_ <<
+          "        else {\n"
+          "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "          return false;\n"
+          "        }\n";
+      } else if (br_cls & CL_SEQUENCE) {
+        be_global->impl_ <<
+          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "          return false;\n"
+          "        }\n"
+          "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+          "        uni._d(disc);\n"
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "        return true;\n";
+      }
+    } else {
+      //discard/default
+      be_global->impl_ <<
+        "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "        return false;\n  ";
+    }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
     const std::string indent = "    ";
     Intro intro;
     std::ostringstream contents;
     if (commonFn2) {
-      const unsigned id = be_global->get_id(type, branch, default_id);
+      const unsigned id = be_global->get_id(branch, auto_id, member_id);
       contents
         << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "", false)
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
@@ -732,14 +737,16 @@ void generateCaseBody(
 }
 
 inline
-bool generateSwitchBody(CommonFn commonFn,
+bool generateSwitchBody(AST_Union* u, CommonFn commonFn,
                         const std::vector<AST_UnionBranch*>& branches,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
                         bool forceDisableDefault = false, bool parens = true,
-                        bool breaks = true, CommonFn commonFn2 = 0,
-                        AST_Structure* type = 0)
+                        bool breaks = true, CommonFn commonFn2 = 0)
 {
+  const AutoidKind auto_id = be_global->autoid(u);
+  ACE_CDR::ULong member_id = 0;
+
   size_t n_labels = 0;
   bool has_default = false;
   for (size_t i = 0; i < branches.size(); ++i) {
@@ -757,8 +764,8 @@ bool generateSwitchBody(CommonFn commonFn,
       }
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
-    generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
-                     uni, breaks, parens, false, static_cast<unsigned>(i), type);
+    generateCaseBody(commonFn, commonFn2, branch, auto_id, member_id, statementPrefix, namePrefix,
+                     uni, breaks, parens, false);
     be_global->impl_ <<
       "  }\n";
   }
@@ -774,13 +781,12 @@ bool generateSwitchBody(CommonFn commonFn,
 
 /// returns true if a default: branch was generated (no default: label in IDL)
 inline
-bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
+bool generateSwitchForUnion(AST_Union* u, const char* switchExpr, CommonFn commonFn,
                             const std::vector<AST_UnionBranch*>& branches,
                             AST_Type* discriminator, const char* statementPrefix,
                             const char* namePrefix = "", const char* uni = "",
                             bool forceDisableDefault = false, bool parens = true,
-                            bool breaks = true, CommonFn commonFn2 = 0,
-                            AST_Structure* type = 0)
+                            bool breaks = true, CommonFn commonFn2 = 0)
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
@@ -812,16 +818,19 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
         "  {\n";
     }
 
+    const AutoidKind auto_id = be_global->autoid(u);
+    ACE_CDR::ULong member_id = 0;
+
     if (true_branch || default_branch) {
       generateCaseBody(commonFn, commonFn2, true_branch ? true_branch : default_branch,
-                       statementPrefix, namePrefix, uni, false, parens);
+                       auto_id, member_id, statementPrefix, namePrefix, uni, false, parens);
     }
 
     if (false_branch || (default_branch && true_branch)) {
       be_global->impl_ <<
         "  } else {\n";
       generateCaseBody(commonFn, commonFn2, false_branch ? false_branch : default_branch,
-                       statementPrefix, namePrefix, uni, false, parens);
+                       auto_id, member_id, statementPrefix, namePrefix, uni, false, parens);
     }
 
     be_global->impl_ <<
@@ -832,10 +841,10 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
   } else {
     be_global->impl_ <<
       "  switch (" << switchExpr << ") {\n";
-    bool b(generateSwitchBody(commonFn, branches, discriminator,
+    bool b(generateSwitchBody(u, commonFn, branches, discriminator,
                               statementPrefix, namePrefix, uni,
                               forceDisableDefault, parens, breaks,
-                              commonFn2, type));
+                              commonFn2));
     be_global->impl_ <<
       "  }\n";
     return b;

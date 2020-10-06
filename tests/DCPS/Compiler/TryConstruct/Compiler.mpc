@@ -1,7 +1,7 @@
 project(*TryConstruct): dcps_test, googletest, msvc_bigobj{
   exename = *
   Source_Files {
-      TryConstruct.cpp
+    TryConstruct.cpp
   }
   TypeSupport_Files {
     TryConstruct.idl

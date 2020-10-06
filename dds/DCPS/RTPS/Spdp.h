@@ -175,6 +175,12 @@ public:
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
+#ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const
+  {
+    return available_extended_builtin_endpoints_;
+  }
+#endif
 
   ICE::Endpoint* get_ice_endpoint_if_added();
 
@@ -306,11 +312,13 @@ private:
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
     void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_resend_processor_;
-#endif
     void send_relay(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_sender_;
-    void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> relay_beacon_;
+    void relay_stun_task(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
+    ICE::ServerReflexiveStateMachine relay_srsm_;
+    void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+#endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
   } *tport_;
@@ -393,6 +401,7 @@ private:
   DCPS::RcHandle<Sedp>  sedp_;
 
 #ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 
@@ -413,8 +422,11 @@ private:
   TimeQueue handshake_deadlines_;
   TimeQueue handshake_resends_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
+  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
+                 const ICE::AgentInfo& agent_info);
+  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+                DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);
   void purge_handshake_resends(DiscoveredParticipantIter iter);

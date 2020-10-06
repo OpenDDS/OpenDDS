@@ -615,7 +615,7 @@ bool rapidjson_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
     ctv.endArgs();
     gen_copyto("dst", "alloc", "src._d()", discriminator, "\"_d\"");
-    generateSwitchForUnion("src._d()", branchGenTo, branches, discriminator, "", "", clazz.c_str(), false, false);
+    generateSwitchForUnion(node, "src._d()", branchGenTo, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
   {
     Function vtc("copyFromRapidJson", "void");
@@ -623,7 +623,7 @@ bool rapidjson_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     vtc.addArg("out", clazz + '&');
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
-    generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
+    generateSwitchForUnion(node, "out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
   if (be_global->is_topic_type(node)) {
     gen_type_support(name);

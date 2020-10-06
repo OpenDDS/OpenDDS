@@ -118,6 +118,8 @@ module DDS {
       PermissionsToken  permissions_token;
       PropertyQosPolicy property;
       ParticipantSecurityInfo  security_info;
+      // https://issues.omg.org/browse/DDSSEC12-87
+      ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
     };
 
     //@extensibility(MUTABLE)
@@ -513,6 +515,13 @@ module DDS {
       set_listener(
         in    AccessControlListener  listener,
         inout SecurityException      ex);
+
+      // This method is not in the spec but is necessary for cleanup.
+      // See DDSSEC12-89.
+      boolean
+      return_permissions_handle(
+        in    PermissionsHandle  handle,
+        inout SecurityException  ex);
 
       boolean
       return_permissions_token(

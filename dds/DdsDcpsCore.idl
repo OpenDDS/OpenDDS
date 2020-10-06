@@ -272,22 +272,26 @@ module DDS {
       DISALLOW_TYPE_COERCION,
       ALLOW_TYPE_COERCION
     };
-
+    */
+    typedef short TypeConsistencyEnforcementQosPolicyKind_t;
+    const TypeConsistencyEnforcementQosPolicyKind_t DISALLOW_TYPE_COERCION = 1;
+    const TypeConsistencyEnforcementQosPolicyKind_t ALLOW_TYPE_COERCION = 2;
+    /*
     const QosPolicyId_t TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID = 24;
     const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME =
       "TypeConsistencyEnforcement";
 
     // This is for when we support XCDR1.
     // @appendable
+    */
     struct TypeConsistencyEnforcementQosPolicy {
-      TypeConsistencyKind kind;
+      TypeConsistencyEnforcementQosPolicyKind_t kind;
       boolean ignore_sequence_bounds;
       boolean ignore_string_bounds;
       boolean ignore_member_names;
       boolean prevent_type_widening;
       boolean force_type_validation;
     };
-    */
 
     // This is for when we support XCDR1.
     // @mutable
@@ -365,9 +369,6 @@ module DDS {
       TimeBasedFilterQosPolicy time_based_filter;
       ReaderDataLifecycleQosPolicy reader_data_lifecycle;
       DataRepresentationQosPolicy representation;
-      /* TODO
-      TypeConsistencyEnforcementQosPolicy type_consistency;
-      */
     };
 
     struct SubscriberQos {
@@ -471,9 +472,6 @@ module DDS {
       @id(0x002E) TopicDataQosPolicy topic_data;
       @id(0x002D) GroupDataQosPolicy group_data;
       @id(0x0073) DataRepresentationQosPolicy representation;
-      /* TODO
-      @id(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
-      */
     };
 
     BUILT_IN_TOPIC_TYPE
@@ -605,9 +603,14 @@ module OpenDDS {
             DDS::Time_t relay6_timestamp;
     };
 
-    // Represents Encoding::KIND_UNALIGNED_CDR
-    const DDS::DataRepresentationId_t UNALIGNED_CDR_DATA_REPRESENTATION =
-      -12140;
+    const string RTPS_RELAY_STUN_PROTOCOL = "RtspRelay:STUN";
+
+    BUILT_IN_TOPIC_TYPE
+    struct ConnectionRecord {
+            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            BUILT_IN_TOPIC_KEY string address;
+            BUILT_IN_TOPIC_KEY string protocol;
+    };
 
   };// End of module DCPS
 }; // End of module OpenDDS

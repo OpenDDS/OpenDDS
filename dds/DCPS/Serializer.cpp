@@ -11,7 +11,9 @@
 
 #include "SafetyProfileStreams.h"
 
+#ifndef NOTAO
 #include <tao/String_Alloc.h>
+#endif
 
 #include <ace/OS_NS_string.h>
 #include <ace/OS_Memory.h>
@@ -24,6 +26,32 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+#ifdef NOTAO
+namespace {
+
+ACE_CDR::Char* string_alloc(ACE_CDR::ULong size)
+{
+  return static_cast<ACE_CDR::Char*>(std::malloc(size + 1));
+}
+
+void string_free(ACE_CDR::Char* ptr)
+{
+  std::free(ptr);
+}
+
+ACE_CDR::WChar* wstring_alloc(ACE_CDR::ULong size)
+{
+  return static_cast<ACE_CDR::WChar*>(std::malloc(sizeof(ACE_CDR::WChar) * (size + 1)));
+}
+
+void wstring_free(ACE_CDR::WChar* ptr)
+{
+  std::free(ptr);
+}
+
+}
+#endif
 
 OPENDDS_STRING endianness_to_string(Endianness endianness)
 {
@@ -288,22 +316,6 @@ OPENDDS_STRING Encoding::to_string() const
   return rv;
 }
 
-MessageBlockHelper::MessageBlockHelper(const DDS::OctetSeq& seq)
-: db_(seq.length(), ACE_Message_Block::MB_DATA,
-      reinterpret_cast<const char*>(seq.get_buffer()),
-      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-{
-  mb_.wr_ptr(mb_.space());
-}
-
-MessageBlockHelper::MessageBlockHelper(DDS::OctetSeq& seq)
-: db_(seq.length(), ACE_Message_Block::MB_DATA,
-      reinterpret_cast<const char*>(seq.get_buffer()),
-      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/)
-, mb_(&db_, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/)
-{}
-
 const char Serializer::ALIGN_PAD[] = {0};
 
 Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
@@ -427,10 +439,18 @@ Serializer::read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::Char*))
 {
+  if (str_alloc == 0) {
+#ifdef NOTAO
+    str_alloc = string_alloc;
+#else
+    str_alloc = CORBA::string_alloc;
+#endif
+  }
+
   //
   // Ensure no bad values leave the routine.
   //
-  str_free(dest);
+  free_string(dest, str_free);
   dest = 0;
 
   //
@@ -467,7 +487,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
     }
 
     if (!this->good_bit_) {
-      str_free(dest);
+      free_string(dest, str_free);
       dest = 0;
     }
 
@@ -478,15 +498,37 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   return length - 1;
 }
 
+void
+Serializer::free_string(ACE_CDR::Char* str,
+                        void str_free(ACE_CDR::Char*))
+{
+  if (str_free == 0) {
+#ifdef NOTAO
+    str_free = string_free;
+#else
+    str_free = CORBA::string_free;
+#endif
+  }
+  str_free(str);
+}
+
 size_t
 Serializer::read_string(ACE_CDR::WChar*& dest,
     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::WChar*))
 {
+  if (str_alloc == 0) {
+#ifdef NOTAO
+    str_alloc = wstring_alloc;
+#else
+    str_alloc = CORBA::wstring_alloc;
+#endif
+  }
+
   //
   // Ensure no bad values leave the routine.
   //
-  str_free(dest);
+  free_string(dest, str_free);
   dest = 0;
 
   //
@@ -530,7 +572,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
       //
       dest[length] = L'\0';
     } else {
-      str_free(dest);
+      free_string(dest, str_free);
       dest = 0;
       length = 0;
     }
@@ -540,6 +582,20 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   }
 
   return length;
+}
+
+void
+Serializer::free_string(ACE_CDR::WChar* str,
+                        void str_free(ACE_CDR::WChar*))
+{
+  if (str_free == 0) {
+#ifdef NOTAO
+    str_free = wstring_free;
+#else
+    str_free = CORBA::wstring_free;
+#endif
+  }
+  str_free(str);
 }
 
 bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_understand)

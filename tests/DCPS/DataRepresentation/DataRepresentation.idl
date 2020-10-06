@@ -1,18 +1,24 @@
 @topic
-struct DefaultedType {
+struct DefaultType {
   long value;
 };
 
 @topic
+@::OpenDDS::data_representation(XCDR2)
 @::OpenDDS::data_representation(XCDR1)
-@::OpenDDS::data_representation(UNALIGNED_CDR)
-struct ExplicitDefaultType {
+struct Xcdr2Xcdr1Type {
   long value;
 };
 
 @topic
 @::OpenDDS::data_representation(XCDR1)
 struct Xcdr1Type {
+  long value;
+};
+
+@topic
+@::OpenDDS::data_representation(XCDR2)
+struct Xcdr2Type {
   long value;
 };
 

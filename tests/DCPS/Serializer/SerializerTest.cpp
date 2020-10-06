@@ -124,10 +124,9 @@ void print(const size_t& pos, const size_t& expectedPos,
   prevPos = pos;
 }
 
-bool extractions(ACE_Message_Block* chain, Values& values,
+bool extractions(Serializer& serializer, Values& values,
   const Encoding& encoding, const bool checkPos)
 {
-  Serializer serializer(chain, encoding);
   bool readPosOk = true;
   size_t pos = serializer.pos(), expectedPos = 0, prevPos = pos;
   if (pos != expectedPos) {
@@ -579,7 +578,8 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
 #endif
 #endif
                     };
-  bool readPosOk = extractions(testchain, observed, encoding, checkPos);
+  Serializer serializer(testchain, encoding);
+  bool readPosOk = extractions(serializer, observed, encoding, checkPos);
   if (!readPosOk) {
     failed = true;
   }
@@ -589,9 +589,9 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   }
   checkValues(expected, observed);
 
-  CORBA::string_free(observed.stringValue);
+  serializer.free_string(observed.stringValue);
 #ifdef DDS_HAS_WCHAR
-  CORBA::wstring_free(observed.wstringValue);
+  serializer.free_string(observed.wstringValue);
 #endif
   testchain->release();
 
@@ -699,7 +699,7 @@ bool runOverrunTest()
 bool runEncapsulationOptionsTest()
 {
   std::cerr << "\nRunning encapsulation options tests...\n";
-  const CORBA::Octet arr[4] = {0};
+  const ACE_CDR::Octet arr[4] = {0};
   OpenDDS::DCPS::EncapsulationHeader encap;
   const OpenDDS::DCPS::Encoding encoding = OpenDDS::DCPS::Encoding(
     OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);

@@ -30,6 +30,7 @@
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Util.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
@@ -43,33 +44,6 @@
 #endif  /* __ACE_INLINE__ */
 
 namespace {
-
-/// Return the number of CORBA::Longs required for the bitmap representation of
-/// sequence numbers between low and high, inclusive (maximum 8 longs).
-CORBA::ULong
-bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
-                 const OpenDDS::DCPS::SequenceNumber& high)
-{
-  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
-}
-
-bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
-{
-  for (CORBA::ULong i = 0; i < snSet.bitmap.length(); ++i) {
-    if (snSet.bitmap[i]) {
-      if (snSet.numBits >= (i + 1) * 32) {
-        return true;
-      }
-      for (int bit = 31; bit >= 0; --bit) {
-        if ((snSet.bitmap[i] & (1 << bit))
-            && snSet.numBits > i * 32 + (31 - bit)) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
 
 bool compare_and_update_counts(CORBA::Long incoming, CORBA::Long& existing) {
   static const CORBA::Long ONE_QUARTER_MAX_POSITIVE = 0x20000000;
@@ -108,7 +82,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , heartbeat_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeat_reply_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeat_replies)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
-  , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
   , quick_heartbeat_delay_(config.heartbeat_period_ * config.quick_reply_ratio_)
@@ -391,11 +364,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
-  }
-
-  if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
-      cfg.use_rtps_relay()) {
-    relay_beacon_.enable(false, cfg.rtps_relay_beacon_period_);
   }
 
   NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
@@ -938,7 +906,6 @@ RtpsUdpDataLink::stop_i()
   heartbeat_reply_.disable_and_wait();
   heartbeat_.disable_and_wait();
   heartbeatchecker_.disable_and_wait();
-  relay_beacon_.disable_and_wait();
   unicast_socket_.close();
   multicast_socket_.close();
 #ifdef ACE_HAS_IPV6
@@ -2113,7 +2080,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
 
       if (recvd.disjoint()) {
-        bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
+        bitmap.length(DisjointSequence::bitmap_num_longs(ack, recvd.last_ack().previous()));
         if (bitmap.length() > 0) {
           (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
             num_bits, true);
@@ -2128,7 +2095,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
         const SequenceNumber::Value eff_high_val = eff_high.getValue();
         // Nack the range between the received high and the effective high.
         const CORBA::ULong old_len = bitmap.length(),
-          new_len = bitmap_num_longs(ack, eff_high);
+          new_len = DisjointSequence::bitmap_num_longs(ack, eff_high);
         if (new_len > old_len) {
           bitmap.length(new_len);
           for (CORBA::ULong i = old_len; i < new_len; ++i) {
@@ -2707,7 +2674,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
   LongSeq8 bitmap;
 
   if (gaps.disjoint()) {
-    bitmap.length(bitmap_num_longs(base, gaps.high()));
+    bitmap.length(DisjointSequence::bitmap_num_longs(base, gaps.high()));
     if (bitmap.length() > 0) {
       (void)gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
     }
@@ -3694,20 +3661,6 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
 }
 
 void
-RtpsUdpDataLink::send_relay_beacon(const DCPS::MonotonicTimePoint& /*now*/)
-{
-  const ACE_INET_Addr rra = config().rtps_relay_address();
-  if (rra == ACE_INET_Addr()) {
-    return;
-  }
-
-  // Create a message with a few bytes of data for the beacon
-  ACE_Message_Block mb(reinterpret_cast<const char*>(OpenDDS::RTPS::BEACON_MESSAGE), OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
-  mb.wr_ptr(OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
-  send_strategy()->send_rtps_control(mb, rra);
-}
-
-void
 RtpsUdpDataLink::send_heartbeats_manual_i(const TransportSendControlElement* tsce, MetaSubmessageVec& meta_submessages)
 {
   using namespace OpenDDS::RTPS;
@@ -4050,6 +4003,12 @@ ACE_Event_Handler::Reference_Count
 RtpsUdpDataLink::HeldDataDeliveryHandler::remove_reference()
 {
   return link_->remove_reference();
+}
+
+RtpsUdpTransport&
+RtpsUdpDataLink::transport()
+{
+  return static_cast<RtpsUdpTransport&>(impl());
 }
 
 RtpsUdpSendStrategy*
