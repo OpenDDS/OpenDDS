@@ -690,7 +690,7 @@ void generateCaseBody(
     if (commonFn2) {
       std::string intro;
       const unsigned id = be_global->get_id(branch, auto_id, member_id);
-      std::string expr = commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false);
+      const std::string expr = commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false);
       be_global->impl_ << intro <<
         expr <<
         "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
