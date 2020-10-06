@@ -11,7 +11,7 @@
 #include "common_export.h"
 
 #include <dds/DCPS/ValueWriter.h>
-#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsTopicC.h>
 
 #include <sstream>
