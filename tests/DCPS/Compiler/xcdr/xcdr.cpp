@@ -1112,31 +1112,29 @@ const unsigned char MutableUnionExpectedXcdr2LongLongBE::expected[] = {
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 value = 24
 };
 const unsigned MutableUnionExpectedXcdr2LongLongBE::layout[] = {4,4,4,4,8};
-/*
+
+template<>
+void expect_values_equal(const MutableUnionWithExplicitIDs& a, const MutableUnionWithExplicitIDs& b)
+{
+  expect_values_equal_base_union(a, b);
+}
+
 TEST(MutableTests, BaselineXcdr2TestUnion)
 {
-  baseline_checks_union<MutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
-  baseline_checks_union<MutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
-  baseline_checks_union<MutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2OctetBE::expected, E_OCTET_FIELD);
-  baseline_checks_union<MutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2LongLongBE::expected, E_LONG_LONG_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2OctetBE::expected, E_OCTET_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2LongLongBE::expected, E_LONG_LONG_FIELD);
 }
 
 TEST(MutableTests, BaselineXcdr2TestUnionLE)
 {
-  test_little_endian_union<MutableUnion,
-                           MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
-  test_little_endian_union<MutableUnion,
-                           MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
-  test_little_endian_union<MutableUnion,
-                           MutableUnionExpectedXcdr2OctetBE>(E_OCTET_FIELD);
-  test_little_endian_union<MutableUnion,
-                           MutableUnionExpectedXcdr2LongLongBE>(E_LONG_LONG_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2OctetBE>(E_OCTET_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2LongLongBE>(E_LONG_LONG_FIELD);
 }
-*/
+
 template<typename TypeA, typename TypeB>
 void expect_values_equal_base_union2(const TypeA& a, const TypeB& b)
 {
