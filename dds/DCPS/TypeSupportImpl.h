@@ -98,6 +98,10 @@ public:
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
+  void get_dependencies(const XTypes::TypeMap& type_map,
+                        const XTypes::TypeIdentifier& type_id,
+                        XTypes::TypeIdentifierWithSizeSeq& deps_with_size) const;
+
 private:
   virtual const char* default_type_name() const = 0;
 

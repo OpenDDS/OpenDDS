@@ -971,7 +971,8 @@ namespace OpenDDS {
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
 
-      typedef OPENDDS_MAP(SequenceNumber, std::pair<XTypes::TypeIdentifier, SequenceNumber>) OrigSeqNumberMap;
+      typedef std::pair<XTypes::TypeIdentifier, SequenceNumber> TypeIdSeqNumberPair;
+      typedef OPENDDS_MAP(SequenceNumber, TypeIdSeqNumberPair) OrigSeqNumberMap;
 
       // Map from the sequence number of the most recent request for a type to its TypeIdentifier
       // and the sequence number of the first request sent for that type. Every time a new request

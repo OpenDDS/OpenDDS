@@ -70,6 +70,27 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   type_info.complete.dependent_typeid_count = 0;
 }
 
+void TypeSupportImpl::get_dependencies(const XTypes::TypeMap& type_map,
+                                       const XTypes::TypeIdentifier& type_id,
+                                       XTypes::TypeIdentifierWithSizeSeq& deps_with_size) const
+{
+  OPENDDS_SET(XTypes::TypeIdentifier) dependencies;
+  XTypes::compute_dependencies(type_map, type_id, dependencies);
+
+  OPENDDS_SET(XTypes::TypeIdentifier)::const_iterator it = dependencies.begin();
+  for (; it != dependencies.end(); ++it) {
+    XTypes::TypeMap::const_iterator iter = type_map.find(*it);
+    if (iter != type_map.end()) {
+      const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
+      deps_with_size.append({*it, static_cast<ACE_CDR::ULong>(tobj_size)});
+    } else {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TypeSupportImpl::get_dependencies, ")
+                 ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
+    }
+  }
+}
+
 }
 }
 

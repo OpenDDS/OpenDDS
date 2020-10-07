@@ -1307,26 +1307,12 @@ DataReaderImpl::enable()
     type_lookup_service->add_type_objects_to_cache(*typesupport);
 
     // Populate local type dependencies cache
-    // TODO(sonndinh): Duplicate with the counterpart in DataWriterImpl.
-    const XTypes::TypeMap& type_map = typesupport->getMinimalTypeMap();
-    const XTypes::TypeIdentifier& type_id = typesupport->getMinimalTypeIdentifier();
-    OPENDDS_SET(XTypes::TypeIdentifier) dependencies;
-    XTypes::compute_dependencies(type_map, type_id, dependencies);
-
-    XTypes::TypeIdentifierWithSizeSeq dependencies_with_sizes;
-    OPENDDS_SET(XTypes::TypeIdentifier)::const_iterator it = dependencies.begin();
-    for (; it != dependencies.end(); ++it) {
-      XTypes::TypeMap::const_iterator iter = type_map.find(*it);
-      if (iter != type_map.end()) {
-        const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
-        dependencies_with_sizes.append({*it, static_cast<ACE_CDR::ULong>(tobj_size)});
-      } else {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
-                   ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
-      }
-    }
-    type_lookup_service->add_type_dependencies(type_id, dependencies_with_sizes);
+    XTypes::TypeIdentifierWithSizeSeq dependencies_with_size;
+    typesupport->get_dependencies(typesupport->getMinimalTypeMap(),
+                                  typesupport->getMinimalTypeIdentifier(),
+                                  dependencies_with_size);
+    type_lookup_service->add_type_dependencies(typesupport->getMinimalTypeIdentifier(),
+                                               dependencies_with_size);
 
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,

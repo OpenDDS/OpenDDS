@@ -3892,12 +3892,24 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
                      type_lookup_reply.header.related_request_id.sequence_number.low);
     const OrigSeqNumberMap::const_iterator it = sedp_.orig_seq_numbers_.find(seq_num);
     if (it != sedp_.orig_seq_numbers_.end()) {
-      // TODO(sonndinh): Cleanup orig_seq_numbers_ and internal caches
+      // Cleanup data
+      const XTypes::TypeIdentifier remote_ti = sedp_.orig_seq_numbers_[seq_num].first;
+      OrigSeqNumberMap::iterator it = sedp_.orig_seq_numbers_.begin();
+      for (; it != sedp_.orig_seq_numbers_.end();) {
+        // TODO(sonndinh): Implement operator== for TypeIdentifier
+        if (it->second.first == remote_ti) {
+          sedp_.orig_seq_numbers_.erase(it++);
+        } else {
+          ++it;
+        }
+      }
+
+      // All type objects are ready, continue with matching now
       sedp_.match_continue(it->second.second);
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
         ACE_TEXT("could not find entry associated with the reply\n")));
-      return DDS:RETCODE_ERROR;
+      return DDS::RETCODE_ERROR;
     }
   }
 
@@ -3923,13 +3935,14 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
   const DCPS::RepoId remote_id = sample.header_.publication_id_;
 
   // Get the stored data of the related request
-  const DCPS::SequenceNumber seq_num = setValue(reply.header.related_request_id.sequence_number.high,
-                                                reply.header.related_request_id.sequence_number.low);
+  DCPS::SequenceNumber seq_num;
+  seq_num.setValue(reply.header.related_request_id.sequence_number.high,
+                   reply.header.related_request_id.sequence_number.low);
   const OrigSeqNumberMap::const_iterator it = sedp_.orig_seq_numbers_.find(seq_num);
   if (it == sedp_.orig_seq_numbers_.end()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
       ACE_TEXT("could not find entry associated with the reply\n")));
-    return DDS:RETCODE_ERROR;
+    return DDS::RETCODE_ERROR;
   }
 
   // Store the received dependencies and continuation point
@@ -3945,12 +3958,13 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
   }
   dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
 
+  // Store an entry for either the final getTypes or next getTypeDependencies request
+  sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
+                                                it->second));
+
   if (data.continuation_point.length() == 0) {
     // All dependencies have been received
-    sedp_.has_all_dependencies = true;
-
-    // Store an entry for the final getTypes request
-    orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_, it->second));
+    sedp_.has_all_dependencies_ = true;
 
     // Get the type objects of all dependencies
     if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true)) {
@@ -3959,9 +3973,6 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
       return DDS::RETCODE_ERROR;
     }
   } else {
-    // Store an entry for the next getTypeDependencies request
-    orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_, it->second));
-
     // Get more dependencies
     XTypes::TypeIdentifierSeq type_ids;
     type_ids.append(remote_ti);
