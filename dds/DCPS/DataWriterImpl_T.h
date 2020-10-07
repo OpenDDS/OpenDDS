@@ -26,9 +26,9 @@ class
   OpenDDS_Dcps_Export
 #endif
 DataWriterImpl_T
-: public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataWriterType>
-, public virtual OpenDDS::DCPS::DataWriterImpl
-, public OpenDDS::DCPS::ValueWriterDispatcher
+: public virtual LocalObject<typename DDSTraits<MessageType>::DataWriterType>
+, public virtual DataWriterImpl
+, public ValueWriterDispatcher
 {
 public:
   typedef DDSTraits<MessageType> TraitsType;

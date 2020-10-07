@@ -60,8 +60,7 @@ namespace {
     } else if (c & CL_STRING) {
       if (c & CL_WIDE) {
         be_global->impl_ << "value_writer.write_wstring(" << expression << ");\n";
-      }
-      else {
+      } else {
         be_global->impl_ << "value_writer.write_string(" << expression << ");\n";
       }
     } else if (c & CL_PRIMITIVE) {
@@ -111,7 +110,6 @@ namespace {
       case AST_PredefinedType::PT_abstract:
       case AST_PredefinedType::PT_void:
       case AST_PredefinedType::PT_pseudo:
-        // TODO
         break;
       }
     } else {
@@ -155,7 +153,7 @@ bool value_writer_generator::gen_enum(AST_Enum*,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
-    be_global->impl_ << "switch(value) {\n";
+    be_global->impl_ << "switch (value) {\n";
     for (std::vector<AST_EnumVal*>::const_iterator pos = contents.begin(), limit = contents.end(); pos != limit; ++pos) {
       AST_EnumVal* val = *pos;
       const std::string value_name = (use_cxx11 ? (type_name + "::") : module_scope(name)) + val->local_name()->get_string();
@@ -170,9 +168,9 @@ bool value_writer_generator::gen_enum(AST_Enum*,
 }
 
 bool value_writer_generator::gen_typedef(AST_Typedef*,
-                                   UTL_ScopedName*,
-                                   AST_Type*,
-                                   const char*)
+                                         UTL_ScopedName*,
+                                         AST_Type*,
+                                         const char*)
 {
   return true;
 }

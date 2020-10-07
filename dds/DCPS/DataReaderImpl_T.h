@@ -30,9 +30,9 @@ namespace OpenDDS {
     OpenDDS_Dcps_Export
 #endif
     DataReaderImpl_T
-    : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>
-    , public virtual OpenDDS::DCPS::DataReaderImpl
-    , public OpenDDS::DCPS::ValueWriterDispatcher
+    : public virtual LocalObject<typename DDSTraits<MessageType>::DataReaderType>
+    , public virtual DataReaderImpl
+    , public ValueWriterDispatcher
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
@@ -262,7 +262,7 @@ namespace OpenDDS {
 
           const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
           if (observer && item->registered_data_ && vwd) {
-            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, item->source_timestamp_, item->sequence_, item->registered_data_);
+            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, *item);
             observer->on_sample_read(this, s, *vwd);
           }
 
@@ -326,7 +326,7 @@ namespace OpenDDS {
 
           const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
           if (observer && item->registered_data_ && vwd) {
-            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, item->source_timestamp_, item->sequence_, item->registered_data_);
+            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, *item);
             observer->on_sample_taken(this, s, *vwd);
           }
 
@@ -1204,7 +1204,7 @@ private:
 
             const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
             if (observer && item->registered_data_ && vwd) {
-              Observer::Sample s(handle, inst->instance_state_->instance_state(), item->source_timestamp_, item->sequence_, item->registered_data_);
+              Observer::Sample s(handle, inst->instance_state_->instance_state(), *item);
               observer->on_sample_read(this, s, *vwd);
             }
           }
@@ -1219,7 +1219,7 @@ private:
     if (observer && item.rde_->registered_data_ && vwd) {
       typename InstanceMap::iterator i = instance_map_.begin();
       const DDS::InstanceHandle_t handle = (i != instance_map_.end()) ? i->second : DDS::HANDLE_NIL;
-      Observer::Sample s(handle, item.si_->instance_state_->instance_state(), item.rde_->source_timestamp_, item.rde_->sequence_, item.rde_->registered_data_);
+      Observer::Sample s(handle, item.si_->instance_state_->instance_state(), *item.rde_);
       observer->on_sample_read(this, s, *vwd);
     }
   }
@@ -1297,7 +1297,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
 
             const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
             if (observer && item->registered_data_ && vwd) {
-              Observer::Sample s(handle, inst->instance_state_->instance_state(), item->source_timestamp_, item->sequence_, item->registered_data_);
+              Observer::Sample s(handle, inst->instance_state_->instance_state(), *item);
               observer->on_sample_taken(this, s, *vwd);
             }
           }
@@ -1362,7 +1362,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
         results.insert_sample(item, inst, ++i);
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
         if (observer && item->registered_data_ && vwd) {
-          Observer::Sample s(a_handle, inst->instance_state_->instance_state(), item->source_timestamp_, item->sequence_, item->registered_data_);
+          Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item);
           observer->on_sample_read(this, s, *vwd);
         }
       }
@@ -1434,7 +1434,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
         results.insert_sample(item, inst, ++i);
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
         if (observer && item->registered_data_ && vwd) {
-          Observer::Sample s(a_handle, inst->instance_state_->instance_state(), item->source_timestamp_, item->sequence_, item->registered_data_);
+          Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item);
           observer->on_sample_taken(this, s, *vwd);
         }
       }

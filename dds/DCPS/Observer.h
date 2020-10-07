@@ -12,6 +12,7 @@
 #include "Definitions.h"
 #include "SequenceNumber.h"
 #include "ValueWriter.h"
+#include "ReceivedDataElementList.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -62,6 +63,10 @@ public:
            const DDS::Time_t& t,
            const SequenceNumber& sn,
            const void* data);
+
+    Sample(DDS::InstanceHandle_t i,
+           DDS::InstanceStateKind instance_state,
+           const ReceivedDataElement& rde);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed

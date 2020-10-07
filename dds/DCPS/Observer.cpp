@@ -29,6 +29,16 @@ Observer::Sample::Sample(DDS::InstanceHandle_t i,
   , data_(data)
 {}
 
+Observer::Sample::Sample(DDS::InstanceHandle_t i,
+                         DDS::InstanceStateKind instance_state,
+                         const ReceivedDataElement& rde)
+  : instance_(i)
+  , instance_state_(instance_state)
+  , timestamp_(rde.source_timestamp_)
+  , seq_n_(rde.sequence_)
+  , data_(rde.registered_data_)
+{}
+
 Observer::~Observer() {}
 
 } // namespace DCPS
