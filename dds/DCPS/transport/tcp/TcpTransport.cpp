@@ -333,7 +333,7 @@ TcpTransport::configure_i(TcpInst& config)
 {
   DBG_ENTRY_LVL("TcpTransport", "configure_i", 6);
 
-  this->create_reactor_task(false, "TcpTransport");
+  this->create_reactor_task(false, "TcpTransport" + config.name());
 
   connector_.open(reactor_task()->get_reactor());
 

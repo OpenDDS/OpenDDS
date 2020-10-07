@@ -152,7 +152,7 @@ UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
 bool
 UdpTransport::configure_i(UdpInst& config)
 {
-  create_reactor_task(false, "UdpTransport");
+  create_reactor_task(false, "UdpTransport" + config.name());
 
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr() &&
