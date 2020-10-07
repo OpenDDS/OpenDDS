@@ -126,6 +126,7 @@ namespace {
     },
   };
 
+  // TODO(iguessthislldo): Replace with Encoding::Kind from libOpenDDS_Util. See XTYPE-140
   enum Encoding {
     encoding_unaligned_cdr,
     encoding_xcdr1,
@@ -1913,6 +1914,7 @@ namespace {
     }
   }
 
+  // TODO(iguessthislldo): Replace with align from libOpenDDS_Util. See XTYPE-140
   void align(Encoding encoding, size_t& value, size_t by)
   {
     const size_t align_by = std::min(max_alignment(encoding), by);
