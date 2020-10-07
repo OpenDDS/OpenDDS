@@ -20,6 +20,7 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/ConnectionRecords.h"
 
 #ifdef OPENDDS_SECURITY
 #include "SecurityHelpers.h"
@@ -2764,11 +2765,20 @@ Spdp::SendStun::execute()
   res = socket.send(tport_->wbuff_.rd_ptr(), tport_->wbuff_.length(), address_);
 
   if (res < 0) {
-    const int e = errno;
-    ACE_TCHAR addr_buff[256] = {};
-    address_.addr_to_string(addr_buff, 256);
-    errno = e;
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - destination %s failed %m\n"), addr_buff));
+    const int err = errno;
+    if (err != ENETUNREACH || !tport_->network_is_unreachable_) {
+      ACE_TCHAR addr_buff[256] = {};
+      address_.addr_to_string(addr_buff, 256);
+      errno = err;
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: Spdp::SendStun::execute() - ")
+                 ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
+    }
+    if (err == ENETUNREACH) {
+      tport_->network_is_unreachable_ = true;
+    }
+  } else {
+    tport_->network_is_unreachable_ = false;
   }
 }
 
@@ -3441,15 +3451,12 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
-    dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
+    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
-    {
-      connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
-      const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);
-      dr->set_instance_state(ih, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-      break;
-    }
+    connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, false, connection_record));
+    break;
   }
 #else
   ACE_UNUSED_ARG(sc);

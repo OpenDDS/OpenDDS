@@ -466,7 +466,7 @@ module OpenDDS {
             DDS::Time_t relay6_timestamp;
     };
 
-    const string RTPS_RELAY_STUN_PROTOCOL = "RtspRelay:STUN";
+    const string RTPS_RELAY_STUN_PROTOCOL = "RtpsRelay:STUN";
 
     BUILT_IN_TOPIC_TYPE
     struct ConnectionRecord {
