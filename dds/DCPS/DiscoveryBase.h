@@ -1313,6 +1313,16 @@ namespace OpenDDS {
             return;
           }
         }
+
+        const LocalPublicationIter lpi = local_publications_.find(writer);
+        if (lpi != local_publications_.end()) {
+          writer_local = true;
+        }
+        const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+        if (lsi != local_subscriptions_.end()) {
+          reader_local = true;
+        }
+
          // for Xtypes, check consistency
         if ((writer_type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
         (reader_type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
@@ -1322,7 +1332,20 @@ namespace OpenDDS {
             //find TopicDetails instance in topics_
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator TDiter = topics_.find(name_iter->second);
             if (TDiter != topics_.end()) {
-              TDiter->second.add_pub_sub(writer); //TODO create new vesion of add_pub_sub to used assignable() for consistency check
+              if (!reader_local || !writer_local) { //skip for writer and reader both local
+                if (reader_local) {
+                  // TDiter->second.set_local(reader);
+                } else {
+                  TDiter->second.add_pub_sub(reader);
+                }
+
+                if (writer_local) {
+                  // TDiter->second.set_local(writer);
+                } else {
+                  TDiter->second.add_pub_sub(writer);
+                }
+                //TODO create new vesion of add_pub_sub to used assignable() for consistency check
+              }
             }
 
           } else {
@@ -1331,14 +1354,6 @@ namespace OpenDDS {
 
           //call new add_pub_sub; if assignability is false then what; remove endpoint and other cleanup
 
-        }
-        const LocalPublicationIter lpi = local_publications_.find(writer);
-        if (lpi != local_publications_.end()) {
-          writer_local = true;
-        }
-        const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-        if (lsi != local_subscriptions_.end()) {
-          reader_local = true;
         }
 
         if (writer_local) {
