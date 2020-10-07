@@ -3945,8 +3945,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
 
   // Store the received dependencies and continuation point
   const XTypes::TypeIdentifier& remote_ti = it->second.first;
-  //  XTypes::TypeIdentifierSeq& deps = dependencies_[remote_id.guidPrefix][remote_ti].second;
-  XTypes::TypeIdentifierSeq deps;
+  XTypes::TypeIdentifierSeq& deps = dependencies_[remote_id.guidPrefix][remote_ti].second;
   for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
     const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
     // Optimization - only store TypeIdentifiers for which TypeObjects haven't
@@ -3955,7 +3954,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
       deps.append(ti);
     }
   }
-  //  dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
+  dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
 
   // Store an entry for either the final getTypes or next getTypeDependencies request
   sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
