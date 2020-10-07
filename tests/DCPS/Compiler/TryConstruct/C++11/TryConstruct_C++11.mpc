@@ -1,7 +1,6 @@
 project(Compiler*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
   exename = *
   idlflags += -I..
-  dcps_ts_flags += -DCPP11_MAPPING
 
   Source_Files {
     TryConstruct.cpp

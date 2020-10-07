@@ -904,8 +904,27 @@ TEST(Union, DISCARD)
   {
     TryCon::BaseUnion sent;
     sent._d(12);
-    sent.e_d(EnumType2::B3);
+    sent.e_d(EnumType2::BExtra);
     TryCon::DiscardUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_FALSE(serializer >> actual);
+      }
+    }
+  }
+  {
+    TryCon::BaseDiscrimUnion sent;
+    sent._d(EnumType2::BExtra);
+    sent.s4(5);
+    TryCon::DiscardDiscrimUnion actual;
     {
       Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
 
@@ -1033,7 +1052,7 @@ TEST(Union, USE_DEFAULT)
   {
     TryCon::BaseUnion sent;
     sent._d(13);
-    sent.e_ud(EnumType2::B3);
+    sent.e_ud(EnumType2::BExtra);
     TryCon::DefaultUnion expected;
     expected._d(13);
     expected.e_ud(EnumType::VALUE1);
@@ -1051,6 +1070,30 @@ TEST(Union, USE_DEFAULT)
         EXPECT_TRUE(serializer >> actual);
       }
       ASSERT_EQ(expected.e_ud(), actual.e_ud());
+    }
+  }
+  {
+    TryCon::BaseDiscrimUnion sent;
+    sent._d(EnumType2::BExtra);
+    sent.s4(5);
+    TryCon::DefaultDiscrimUnion expected;
+    expected._d(EnumType::VALUE1);
+    expected.s1(0);
+    TryCon::DefaultDiscrimUnion actual;
+    {
+      Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer << sent);
+      }
+
+      {
+        Serializer serializer(data.get(), xcdr2);
+        EXPECT_TRUE(serializer >> actual);
+      }
+      ASSERT_EQ(expected.s1(), actual.s1());
+      ASSERT_EQ(expected._d(), actual._d());
     }
   }
 }

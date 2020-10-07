@@ -907,7 +907,7 @@ TEST(Union, DISCARD)
   {
     TryCon::BaseUnion sent;
     sent._d(12);
-    sent.e_d(B3);
+    sent.e_d(BExtra);
     TryCon::DiscardUnion actual;
     {
       Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
@@ -925,8 +925,8 @@ TEST(Union, DISCARD)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(B3);
-    sent.s3(5);
+    sent._d(BExtra);
+    sent.s4(5);
     TryCon::DiscardDiscrimUnion actual;
     {
       Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
@@ -1055,7 +1055,7 @@ TEST(Union, USE_DEFAULT)
   {
     TryCon::BaseUnion sent;
     sent._d(13);
-    sent.e_ud(B3);
+    sent.e_ud(BExtra);
     TryCon::DefaultUnion expected;
     expected._d(13);
     expected.e_ud(VALUE1);
@@ -1077,8 +1077,8 @@ TEST(Union, USE_DEFAULT)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(B3);
-    sent.s3(5);
+    sent._d(BExtra);
+    sent.s4(5);
     TryCon::DefaultDiscrimUnion expected;
     expected._d(VALUE1);
     expected.s1(0);
