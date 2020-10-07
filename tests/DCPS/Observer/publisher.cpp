@@ -59,6 +59,7 @@ int Publisher::run()
   //Message{"from", "subject", @key subject_id, "text", count, ull, source_pid}
   Messenger::Message msg = {"", "Observer", 1, "test", 1, 0, 0};
   DDS::InstanceHandle_t handle = writer_->register_instance(msg);
+  const DDS::Duration_t timeout = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   for (msg.count = 1; msg.count <= TestObserver::n_MSG; ++msg.count) {
     DDS::ReturnCode_t r = writer_->write(msg, handle);
     if (r != ::DDS::RETCODE_OK) {
@@ -67,8 +68,9 @@ int Publisher::run()
     if (msg.count == 2) {
       change_writer_qos();
     }
-    ACE_OS::sleep(ACE_Time_Value(0, 300000)); // sleep 300 ms
+    writer_->wait_for_acknowledgments(timeout);
   }
+  ACE_OS::sleep(ACE_Time_Value(3, 0));
 
   return 0;
 }
