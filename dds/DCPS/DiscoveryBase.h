@@ -818,7 +818,7 @@ namespace OpenDDS {
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
-      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq& /*type_ids*/,
+      virtual bool send_type_lookup_request(const XTypes::TypeIdentifierSeq& /*type_ids*/,
                                             const DCPS::RepoId& /*endpoint*/,
                                             bool /*is_discovery_protected*/,
                                             bool /*send_get_types*/)
@@ -971,6 +971,12 @@ namespace OpenDDS {
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
 
+      typedef OPENDDS_MAP(SequenceNumber, std::pair<XTypes::TypeIdentifier, SequenceNumber>) OrigSeqNumberMap;
+
+      // Map from the sequence number of the most recent request for a type to its TypeIdentifier
+      // and the sequence number of the first request sent for that type. Every time a new request
+      // is sent for a type, a new entry must be stored.
+      OrigSeqNumberMap orig_seq_numbers_;
 
       void
       match(const RepoId& writer, const RepoId& reader)
@@ -1234,6 +1240,10 @@ namespace OpenDDS {
         } else {
           matching_data_buffer_.insert(std::make_pair(mp, md));
         }
+        // Store an entry for the first request
+        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number,
+                                                std::make_pair(type_info->minimal.typeid_with_size.type_id,
+                                                               md.rpc_sequence_number)));
 
         XTypes::TypeIdentifierSeq type_ids;
         if (type_info->minimal.dependent_typeid_count == -1 ||
@@ -1242,6 +1252,11 @@ namespace OpenDDS {
 
           // Get TypeObject of the topic type
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
+
+          // Store an entry for the next request
+          orig_seq_numbers_.insert(std::make_pair(++type_lookup_service_sequence_number_,
+                                                  std::make_pair(type_info->minimal.typeid_with_size.type_id,
+                                                                 md.rpc_sequence_number)));
 
           // Get the dependent TypeIdentifiers of the topic type
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);

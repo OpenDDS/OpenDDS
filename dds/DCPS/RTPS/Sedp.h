@@ -162,7 +162,8 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
-  bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids, const DCPS::RepoId& reader,
+  bool send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
+                                const DCPS::RepoId& reader,
                                 bool is_discovery_protected, bool send_get_types);
 
 #ifdef OPENDDS_SECURITY
@@ -593,7 +594,7 @@ private:
 
     virtual ~TypeLookupRequestWriter();
 
-    DDS::ReturnCode_t send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+    DDS::ReturnCode_t send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,

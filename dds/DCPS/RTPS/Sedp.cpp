@@ -3249,7 +3249,7 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 }
 
 
-bool Sedp::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
                                     const DCPS::RepoId& reader,
                                     bool is_discovery_protected,
                                     bool send_get_types)
@@ -3696,7 +3696,7 @@ Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
 }
 
 DDS::ReturnCode_t
-Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
   const DCPS::RepoId& reader,
   DCPS::SequenceNumber& sequence,
   const DCPS::SequenceNumber& rpc_sequence,
@@ -3715,8 +3715,8 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(XTypes::TypeIdentifierSe
 
   // As per chapter 7.6.3.3.4 of XTypes spec.
   // NOTE: Looks like the prefix "dds.builtin.TOS" should be "dds.builtin.TLS".
-  // Also, in DDS-XTypes 1.3, page 226, the built-in endpoint names should be TypeLookupServiceXyz
-  // instead of TypeObjectServiceXyz.
+  // Also, in DDS-XTypes 1.3, page 226, the built-in endpoint names should be
+  // TypeLookupServiceXyz instead of TypeObjectServiceXyz.
   const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") +
     DCPS::to_hex_dds_string(&participant_id.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
     DCPS::to_hex_dds_string(&participant_id.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
@@ -3813,6 +3813,8 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
     type_lookup_reply.data.getTypes.result.types);
+  // Send minimal type objects back
+  type_lookup_reply.data.getTypes.result.complete_to_minimal.length(0);
   if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
     type_lookup_reply.data.getTypes.return_code = DDS::RETCODE_OK;
     type_lookup_reply.data.kind = XTypes::TypeLookup_getTypes_HashId;
@@ -3882,15 +3884,23 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  if (DDS::RETCODE_OK == retcode) {
-    DCPS::SequenceNumber rpc_sequence;
-    rpc_sequence.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
-                          type_lookup_reply.header.related_request_id.sequence_number.low);
-    if (type_lookup_reply.data.kind == XTypes::TypeLookup_getTypes_HashId &&
-        sedp_.has_all_dependencies_) {
-      sedp_.match_continue(rpc_sequence);
+  if (DDS::RETCODE_OK == retcode &&
+      type_lookup_reply.data.kind == XTypes::TypeLookup_getTypes_HashId &&
+      sedp_.has_all_dependencies_) {
+    DCPS::SequenceNumber seq_num;
+    seq_num.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
+                     type_lookup_reply.header.related_request_id.sequence_number.low);
+    const OrigSeqNumberMap::const_iterator it = sedp_.orig_seq_numbers_.find(seq_num);
+    if (it != sedp_.orig_seq_numbers_.end()) {
+      // TODO(sonndinh): Cleanup orig_seq_numbers_ and internal caches
+      sedp_.match_continue(it->second.second);
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+        ACE_TEXT("could not find entry associated with the reply\n")));
+      return DDS:RETCODE_ERROR;
     }
   }
+
   return DDS::RETCODE_OK;
 }
 
@@ -3910,41 +3920,58 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
                                                             bool is_discovery_protected)
 {
   const XTypes::TypeLookup_getTypeDependencies_Out& data = reply.data.getTypeDependencies.result;
-  // TODO(sonndinh): Store the received continuation_point
-  //  continuation_point_ = data.continuation_point;
-
   const DCPS::RepoId remote_id = sample.header_.publication_id_;
-  if (data.dependent_typeids.length() > 0) {
-    for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
-      const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
-      if (!sedp_.type_lookup_service_->type_object_in_cache(ti)) {
-        // TODO(sonndinh): Store the received dependent types
-        //dependencies_.append(ti);
-      }
-    }
 
-    // Keep sending getTypeDependencies requests until there is no more dependencies received
-    // TODO(sonndinh): set type_id to contain the TypeIdentifier of the topic type
-    XTypes::TypeIdentifierSeq type_id;
-    if (!sedp_.send_type_lookup_request(type_id, remote_id, is_discovery_protected, false)) {
+  // Get the stored data of the related request
+  const DCPS::SequenceNumber seq_num = setValue(reply.header.related_request_id.sequence_number.high,
+                                                reply.header.related_request_id.sequence_number.low);
+  const OrigSeqNumberMap::const_iterator it = sedp_.orig_seq_numbers_.find(seq_num);
+  if (it == sedp_.orig_seq_numbers_.end()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
+      ACE_TEXT("could not find entry associated with the reply\n")));
+    return DDS:RETCODE_ERROR;
+  }
+
+  // Store the received dependencies and continuation point
+  const XTypes::TypeIdentifier& remote_ti = it->second.first;
+  XTypes::TypeIdentifierSeq& deps = dependencies_[remote_id.guidPrefix][remote_ti].second;
+  for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
+    const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
+    // Optimization - only store TypeIdentifiers for which TypeObjects haven't
+    // already been in the type objects cache yet
+    if (!sedp_.type_lookup_service_->type_object_in_cache(ti)) {
+      deps.append(ti);
+    }
+  }
+  dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
+
+  if (data.continuation_point.length() == 0) {
+    // All dependencies have been received
+    sedp_.has_all_dependencies = true;
+
+    // Store an entry for the final getTypes request
+    orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_, it->second));
+
+    // Get the type objects of all dependencies
+    if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
-        ACE_TEXT("failed to send type lookup request for more dependencies\n")));
+        ACE_TEXT("failed to send getTypes request\n")));
       return DDS::RETCODE_ERROR;
     }
   } else {
-    // This part assumes that the remote never sends an empty reply if there are still
-    // remaining dependent TypeIdentifiers to be sent. Then when a reply with no dependencies
-    // is received, that means we have got all dependencies.
-    sedp_.has_all_dependencies_ = true;
+    // Store an entry for the next getTypeDependencies request
+    orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_, it->second));
 
-    // TODO(sonndinh): Send getTypes request when we have all dependencies
-    /*
-    if (!sedp_.send_type_lookup_request(dependencies_, remote_id, is_discovery_protected, true)) {
+    // Get more dependencies
+    XTypes::TypeIdentifierSeq type_ids;
+    type_ids.append(remote_ti);
+    if (!sedp_.send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
-        ACE_TEXT("failed to send type lookup request\n")));
+        ACE_TEXT("failed to send getTypeDependencies request\n")));
       return DDS::RETCODE_ERROR;
-      }*/
+    }
   }
+
   return DDS::RETCODE_OK;
 }
 
