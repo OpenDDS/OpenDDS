@@ -12,8 +12,6 @@
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/GuidUtils.h>
 
-#include <map>
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */

@@ -3503,7 +3503,7 @@ void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
-#ifndef ACE_HAS_MINIMUM_BIT
+#ifndef DDS_HAS_MINIMUM_BIT
   if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "%T (%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
@@ -3535,9 +3535,8 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
                  "%T (%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
     }
   }
-#endif /* ACE_HAS_MINIMUM_BIT */
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
-
 
 #ifdef OPENDDS_SECURITY
 void Spdp::SpdpTransport::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
