@@ -35,3 +35,19 @@ struct AdditionalPrefixFieldStruct {
   long additional_field;
   @key long key;
 };
+
+@topic
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct AlteredMutableStruct {
+  @id(2) long additional_field;
+  @id(1) @key long key;
+};
+
+@topic
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct MutableStruct {
+  @id(1) @key long key;
+  @id(2) long additional_field;
+};

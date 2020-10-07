@@ -98,6 +98,20 @@ ReturnCode_t read_additional_postfix_field_struct(DataReader_var dr)
   return read(dr, pdr, data);
 }
 
+ReturnCode_t read_mutable_struct(DataReader_var dr)
+{
+  MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
+  ::MutableStructSeq data;
+  return read(dr, pdr, data);
+}
+
+ReturnCode_t read_altered_mutable_struct(DataReader_var dr)
+{
+  AlteredMutableStructDataReader_var pdr = AlteredMutableStructDataReader::_narrow(dr);
+  ::AlteredMutableStructSeq data;
+  return read(dr, pdr, data);
+}
+
 
 void write_property_1(DataWriter_var dw)
 {
@@ -166,6 +180,32 @@ void write_additional_postfix_field_struct(DataWriter_var dw)
 }
 
 
+void write_mutable_struct(DataWriter_var dw)
+{
+  MutableStructDataWriter_var typed_dw = MutableStructDataWriter::_narrow(dw);
+
+  MutableStruct as;
+  as.key = 1;
+  typed_dw->write(as, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: MutableStruct\n"));
+  }
+}
+
+
+void write_altered_mutable_struct(DataWriter_var dw)
+{
+  AlteredMutableStructDataWriter_var typed_dw = AlteredMutableStructDataWriter::_narrow(dw);
+
+  AlteredMutableStruct as;
+  as.key = 1;
+  typed_dw->write(as, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: AlteredMutableStruct\n"));
+  }
+}
+
+
 template<typename T>
 void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Topic_var& topic)
 {
@@ -226,6 +266,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "AdditionalPostfixFieldStruct") {
     AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
     get_topic(ts, dp, "AdditionalPostfixFieldStruct_Topic", topic);
+  } else if (type == "MutabledStruct") {
+    MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
+    get_topic(ts, dp, "MutabledStruct_Topic", topic);
+  } else if (type == "AlteredMutableStruct") {
+    AlteredMutableStructTypeSupport_var ts = new AlteredMutableStructTypeSupportImpl;
+    get_topic(ts, dp, "AlteredMutableStruct_Topic", topic);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
@@ -251,6 +297,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       write_additional_prefix_field_struct(dw);
     } else if (type == "AdditionalPostfixFieldStruct") {
       write_additional_postfix_field_struct(dw);
+    } else if (type == "MutableStruct") {
+      write_mutable_struct(dw);
+    } else if (type == "AlteredMutableStruct") {
+      write_altered_mutable_struct(dw);
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;
@@ -281,6 +331,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       failed = !((read_additional_prefix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
     } else if (type == "AdditionalPostfixFieldStruct") {
       failed = !((read_additional_postfix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+    } else if (type == "MutableStruct") {
+      failed = !((read_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+    } else if (type == "AlteredMutableStruct") {
+      failed = !((read_altered_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
       failed = 1;
