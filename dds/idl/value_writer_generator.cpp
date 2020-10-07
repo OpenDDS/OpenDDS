@@ -18,7 +18,7 @@ using namespace AstTypeClassification;
 
 namespace {
 
-  void generate_write(const std::string& expression, AST_Type* type, const std::string& idx);
+  void generate_write(const std::string& expression, bool string_manager, AST_Type* type, const std::string& idx);
 
   void array_helper(const std::string& expression, AST_Array* array, size_t dim_idx, const std::string& idx)
   {
@@ -32,14 +32,15 @@ namespace {
       be_global->impl_ << "}\n";
       be_global->impl_ << "value_writer.end_array();\n";
     } else {
-      generate_write(expression, array->base_type(), idx + "i");
+      generate_write(expression, false, array->base_type(), idx + "i");
     }
   }
 
-  void generate_write(const std::string& expression, AST_Type* type, const std::string& idx)
+  void generate_write(const std::string& expression, bool string_manager, AST_Type* type, const std::string& idx)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* length_func = use_cxx11 ? "size" : "length";
+    const char* string_post = (!use_cxx11 && string_manager) ? ".in()" : "";
     AST_Type* actual = resolveActualType(type);
 
     Classification c = classify(actual);
@@ -48,7 +49,7 @@ namespace {
       be_global->impl_ << "value_writer.begin_sequence();\n";
       be_global->impl_ << "for (size_t " << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
       be_global->impl_ << "  value_writer.begin_element(" << idx << ");\n";
-      generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i");
+      generate_write(expression + "[" + idx + "]", false, sequence->base_type(), idx + "i");
       be_global->impl_ << "  value_writer.end_element();\n";
       be_global->impl_ << "}\n";
       be_global->impl_ << "value_writer.end_sequence();\n";
@@ -59,9 +60,9 @@ namespace {
       be_global->impl_ << "value_writer.write_fixed(" << expression << ");\n";
     } else if (c & CL_STRING) {
       if (c & CL_WIDE) {
-        be_global->impl_ << "value_writer.write_wstring(" << expression << ");\n";
+        be_global->impl_ << "value_writer.write_wstring(" << expression << string_post << ");\n";
       } else {
-        be_global->impl_ << "value_writer.write_string(" << expression << ");\n";
+        be_global->impl_ << "value_writer.write_string(" << expression << string_post << ");\n";
       }
     } else if (c & CL_PRIMITIVE) {
       switch (dynamic_cast<AST_PredefinedType*>(actual)->pt()) {
@@ -126,7 +127,7 @@ namespace {
     be_global->impl_ <<
       "  {\n"
       "    value_writer.begin_field(\"" << field_name << "\");\n";
-    generate_write(std::string("value.") + field_name + "()", type, "i");
+    generate_write(std::string("value.") + field_name + "()", false, type, "i");
     be_global->impl_ <<
       "    value_writer.end_field();\n"
       "  }\n";
@@ -200,7 +201,7 @@ bool value_writer_generator::gen_struct(AST_Structure*,
       AST_Field* field = *pos;
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ << "  value_writer.begin_field(\"" << field_name << "\");\n";
-      generate_write(std::string("value.") + field_name + accessor_suffix, field->field_type(), "i");
+      generate_write(std::string("value.") + field_name + accessor_suffix, true, field->field_type(), "i");
       be_global->impl_ << "  value_writer.end_field();\n";
     }
     be_global->impl_ << "  value_writer.end_struct();\n";
@@ -230,7 +231,7 @@ bool value_writer_generator::gen_union(AST_Union*,
 
     be_global->impl_ << "  value_writer.begin_union();\n";
     be_global->impl_ << "  value_writer.begin_discriminator();\n";
-    generate_write("value._d()" , discriminator, "i");
+    generate_write("value._d()" , false, discriminator, "i");
     be_global->impl_ << "  value_writer.end_discriminator();\n";
 
     generateSwitchForUnion("value._d()", branch_helper, branches, discriminator, "", "", type_name.c_str(), false, false);
