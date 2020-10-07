@@ -2744,6 +2744,12 @@ Service_Participant::get_thread_status_interval()
   return thread_status_interval_;
 }
 
+void
+Service_Participant::set_thread_status_interval(TimeDuration interval)
+{
+  thread_status_interval_ = interval;
+}
+
 ThreadStatus*
 Service_Participant::get_thread_statuses()
 {

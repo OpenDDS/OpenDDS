@@ -222,6 +222,8 @@ public:
   void set_default_discovery(const Discovery::RepoKey& defaultDiscovery);
   Discovery::RepoKey get_default_discovery();
 
+
+
   /// Convert domainId to repository key.
   Discovery::RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
 
@@ -639,6 +641,7 @@ private:
 public:
   // thread status reporting
   TimeDuration get_thread_status_interval();
+  void set_thread_status_interval(TimeDuration interval);
 
   ThreadStatus* get_thread_statuses();
 
