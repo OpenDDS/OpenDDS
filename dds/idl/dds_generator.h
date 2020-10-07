@@ -185,7 +185,7 @@ struct Function {
   bool has_arg_;
   std::string preamble_;
 
-  Function(const char* name, const char* returntype)
+  Function(const std::string& name, const std::string returntype)
     : has_arg_(false)
   {
     using std::string;

@@ -180,6 +180,20 @@ private:
   };
 };
 
+class MessageHolder : public RcObject {
+public:
+  virtual const void* get() const = 0;
+};
+
+template <typename T>
+class MessageHolder_T : public MessageHolder {
+public:
+  MessageHolder_T(const T& v) : v_(v) {}
+  const void* get() const { return &v_; }
+private:
+  T v_;
+};
+
 /**
 * @class DataReaderImpl
 *
@@ -384,11 +398,11 @@ public:
                                         const DDS::StringSeq& params) = 0;
 #endif
 
-  virtual void dds_demarshal(const ReceivedDataSample& sample,
-                             SubscriptionInstance_rch& instance,
-                             bool& is_new_instance,
-                             bool& filtered,
-                             MarshalingType marshaling_type)= 0;
+  virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
+                                                SubscriptionInstance_rch& instance,
+                                                bool& is_new_instance,
+                                                bool& filtered,
+                                                MarshalingType marshaling_type)= 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   SubscriptionInstance_rch& instance);
@@ -578,6 +592,8 @@ protected:
 
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
+
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   void sample_info(DDS::SampleInfo & sample_info,
                    const ReceivedDataElement *ptr);

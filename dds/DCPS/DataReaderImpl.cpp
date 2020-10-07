@@ -1394,6 +1394,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
+  RcHandle<MessageHolder> real_data;
   SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
@@ -1425,7 +1426,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (sample.header_.key_fields_only_) {
       dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING);
     } else {
-      dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
+      real_data = dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
     }
 
     // Per sample logging
@@ -1660,10 +1661,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     break;
   }
 
+  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
-  if (observer) {
-    Observer::Sample s(sample, instance ? instance->instance_handle_ : DDS::HANDLE_NIL);
-    observer->on_sample_received(this, s);
+  if (observer && real_data && vwd) {
+    DDS::Time_t timestamp;
+    timestamp.sec = sample.header_.source_timestamp_sec_;
+    timestamp.nanosec = sample.header_.source_timestamp_nanosec_;
+    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get());
+    observer->on_sample_received(this, s, *vwd);
   }
 }
 
