@@ -3812,12 +3812,11 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
   XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
-    type_lookup_reply.data.getTypes.result.types);
-  // Send minimal type objects back
-  type_lookup_reply.data.getTypes.result.complete_to_minimal.length(0);
-  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
-    type_lookup_reply.data.getTypes.return_code = DDS::RETCODE_OK;
-    type_lookup_reply.data.kind = XTypes::TypeLookup_getTypes_HashId;
+    type_lookup_reply._cxx_return.getType.result.types);
+  type_lookup_reply._cxx_return.getType.result.complete_to_minimal.length(0);
+  if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
+    type_lookup_reply._cxx_return.getType.return_code = DDS::RETCODE_OK;
+    type_lookup_reply._cxx_return.kind = XTypes::TypeLookup_getTypes_HashId;
     type_lookup_reply.header.related_request_id = type_lookup_request.header.request_id;
     return DDS::RETCODE_OK;
   }
@@ -3837,11 +3836,11 @@ Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::Ty
 {
   // Send all dependencies of the requested types
   sedp_.type_lookup_service_->get_type_dependencies(request.data.getTypeDependencies.type_ids,
-    reply.data.getTypeDependencies.result.dependent_typeids);
-  if (reply.data.getTypeDependencies.result.dependent_typeids.length() > 0) {
-    reply.data.kind = XTypes::TypeLookup_getDependencies_HashId;
-    reply.data.getTypeDependencies.return_code = DDS::RETCODE_OK;
-    gen_continuation_point(reply.data.getTypeDependencies.result.continuation_point);
+    reply._cxx_return.getTypeDependencies.result.dependent_typeids);
+  if (reply._cxx_return.getTypeDependencies.result.dependent_typeids.length() > 0) {
+    reply._cxx_return.kind = XTypes::TypeLookup_getDependencies_HashId;
+    reply._cxx_return.getTypeDependencies.return_code = DDS::RETCODE_OK;
+    gen_continuation_point(reply._cxx_return.getTypeDependencies.result.continuation_point);
     reply.header.related_request_id = request.header.request_id;
     return DDS::RETCODE_OK;
   }
@@ -3873,7 +3872,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
   }
 
   DDS::ReturnCode_t retcode;
-  switch (type_lookup_reply.data.kind) {
+  switch (type_lookup_reply._cxx_return.kind) {
   case XTypes::TypeLookup_getTypes_HashId:
     retcode = process_get_types_reply(type_lookup_reply);
     break;
@@ -3885,7 +3884,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
   }
 
   if (DDS::RETCODE_OK == retcode &&
-      type_lookup_reply.data.kind == XTypes::TypeLookup_getTypes_HashId &&
+      type_lookup_reply._cxx_return.kind == XTypes::TypeLookup_getTypes_HashId &&
       sedp_.has_all_dependencies_) {
     DCPS::SequenceNumber seq_num;
     seq_num.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
@@ -3896,7 +3895,6 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
       const XTypes::TypeIdentifier remote_ti = sedp_.orig_seq_numbers_[seq_num].first;
       OrigSeqNumberMap::iterator it = sedp_.orig_seq_numbers_.begin();
       for (; it != sedp_.orig_seq_numbers_.end();) {
-        // TODO(sonndinh): Implement operator== for TypeIdentifier
         if (it->second.first == remote_ti) {
           sedp_.orig_seq_numbers_.erase(it++);
         } else {
@@ -3919,8 +3917,8 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
 DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Reply& reply)
 {
-  if (reply.data.getTypes.result.types.length() > 0) {
-    sedp_.type_lookup_service_->add_type_objects_to_cache(reply.data.getTypes.result.types);
+  if (reply._cxx_return.getType.result.types.length() > 0) {
+    sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType.result.types);
     return DDS::RETCODE_OK;
   }
   return DDS::RETCODE_NO_DATA;
@@ -3931,7 +3929,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
                                                             const XTypes::TypeLookup_Reply& reply,
                                                             bool is_discovery_protected)
 {
-  const XTypes::TypeLookup_getTypeDependencies_Out& data = reply.data.getTypeDependencies.result;
+  const XTypes::TypeLookup_getTypeDependencies_Out& data = reply._cxx_return.getTypeDependencies.result;
   const DCPS::RepoId remote_id = sample.header_.publication_id_;
 
   // Get the stored data of the related request
@@ -3947,7 +3945,8 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
 
   // Store the received dependencies and continuation point
   const XTypes::TypeIdentifier& remote_ti = it->second.first;
-  XTypes::TypeIdentifierSeq& deps = dependencies_[remote_id.guidPrefix][remote_ti].second;
+  //  XTypes::TypeIdentifierSeq& deps = dependencies_[remote_id.guidPrefix][remote_ti].second;
+  XTypes::TypeIdentifierSeq deps;
   for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
     const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
     // Optimization - only store TypeIdentifiers for which TypeObjects haven't
@@ -3956,7 +3955,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
       deps.append(ti);
     }
   }
-  dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
+  //  dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
 
   // Store an entry for either the final getTypes or next getTypeDependencies request
   sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
@@ -4394,7 +4393,7 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
 
 void
 Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sample,
-  const DCPS::EntityId_t& remote_id,
+  const DCPS::EntityId_t&,
   DCPS::Serializer& ser,
   DCPS::Extensibility)
 {
