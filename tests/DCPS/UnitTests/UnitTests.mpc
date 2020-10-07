@@ -126,10 +126,10 @@ project(*DataSampleHeader): dcps_test, googletest {
   }
 }
 
-project(*XtypesAssignability): dcps_test, googletest {
+project(*XTypesAssignability): dcps_test, googletest {
   exename = *
   Source_Files {
-    XtypesAssignability.cpp
+    XTypesAssignability.cpp
   }
 }
 
