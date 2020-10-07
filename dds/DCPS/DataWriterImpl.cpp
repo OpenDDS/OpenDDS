@@ -228,7 +228,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    GuidConverter converter(get_publication_id());
+    GuidConverter converter(get_repo_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
@@ -2071,12 +2071,6 @@ void
 DataWriterImpl::unregister_all()
 {
   data_container_->unregister_all();
-}
-
-RepoId
-DataWriterImpl::get_publication_id()
-{
-  return publication_id_;
 }
 
 RepoId

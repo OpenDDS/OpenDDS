@@ -993,19 +993,6 @@ DCPS_IR_Domain::last_participant_key(long key)
   this->participantIdGenerator_.last(key);
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-namespace {
-  void get_BuiltinTopicKey(DDS::BuiltinTopicKey_t& key,
-                           const OpenDDS::DCPS::RepoId& id)
-  {
-    OpenDDS::DCPS::RepoIdConverter c(id);
-    key.value[0] = c.federationId();
-    key.value[1] = c.participantId();
-    key.value[2] = c.entityId();
-  }
-}
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
 void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -1015,7 +1002,7 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
       const DDS::DomainParticipantQos* participantQos = participant->get_qos();
 
       DDS::ParticipantBuiltinTopicData data;
-      get_BuiltinTopicKey(data.key, participant->get_id());
+      data.key = repo_id_to_bit_key(participant->get_id());
       data.user_data = participantQos->user_data;
 
       DDS::InstanceHandle_t handle
@@ -1025,8 +1012,8 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-                   "(%P|%t) DCPS_IR_Domain::publish_participant_bit: [ %d, 0x%x, 0x%x], handle %d.\n",
-                   data.key.value[0], data.key.value[1], data.key.value[2], handle));
+                   "(%P|%t) DCPS_IR_Domain::publish_participant_bit: %C, handle %d.\n",
+                   OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
       }
 
       bitParticipantDataWriter_->write(data, handle);
@@ -1057,7 +1044,7 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::TopicBuiltinTopicData data;
-        get_BuiltinTopicKey(data.key, topic->get_id());
+        data.key = repo_id_to_bit_key(topic->get_id());
         data.name = name;
         data.type_name = type;
         data.durability = topicQos->durability;
@@ -1081,8 +1068,8 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
 
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DCPS_IR_Domain::publish_topic_bit: [ %d, 0x%x, 0x%x], handle %d.\n",
-                     data.key.value[0], data.key.value[1], data.key.value[2], handle));
+                     "(%P|%t) DCPS_IR_Domain::publish_topic_bit: %C, handle %d.\n",
+                     OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
         }
 
         bitTopicDataWriter_->write(data, handle);
@@ -1122,9 +1109,8 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::SubscriptionBuiltinTopicData data;
-        get_BuiltinTopicKey(data.key, subscription->get_id());
-        get_BuiltinTopicKey(data.participant_key,
-                            subscription->get_participant_id());
+        data.key = repo_id_to_bit_key(subscription->get_id());
+        data.participant_key = repo_id_to_bit_key(subscription->get_participant_id());
         data.topic_name = name;
         data.type_name = type;
         data.durability = readerQos->durability;
@@ -1148,8 +1134,8 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
 
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: [ %d, 0x%x, 0x%x], handle %d.\n",
-                     data.key.value[0], data.key.value[1], data.key.value[2], handle));
+                     "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: %C, handle %d.\n",
+                     OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
         }
 
         bitSubscriptionDataWriter_->write(data,
@@ -1197,9 +1183,8 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::PublicationBuiltinTopicData data;
-        get_BuiltinTopicKey(data.key, publication->get_id());
-        get_BuiltinTopicKey(data.participant_key,
-                            publication->get_participant_id());
+        data.key = repo_id_to_bit_key(publication->get_id());
+        data.participant_key = repo_id_to_bit_key(publication->get_participant_id());
         data.topic_name = desc->get_name();
         data.type_name = desc->get_dataTypeName();
         data.durability = writerQos->durability;
@@ -1225,8 +1210,8 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DCPS_IR_Domain::publish_publication_bit: [ %d, 0x%x, 0x%x], handle %d.\n",
-                     data.key.value[0], data.key.value[1], data.key.value[2], handle));
+                     "(%P|%t) DCPS_IR_Domain::publish_publication_bit: %C, handle %d.\n",
+                     OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
         }
 
         DDS::ReturnCode_t status = bitPublicationDataWriter_->write(data, handle);

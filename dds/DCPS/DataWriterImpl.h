@@ -281,11 +281,6 @@ public:
   }
 
   /**
-   * Accessor of the repository id of this datawriter/publication.
-   */
-  RepoId get_publication_id();
-
-  /**
    * Accessor of the repository id of the domain participant.
    */
   RepoId get_dp_id();
@@ -463,6 +458,10 @@ public:
 
  virtual ICE::Endpoint* get_ice_endpoint();
 
+ const RepoId& get_repo_id() const {
+    return this->publication_id_;
+  }
+
 protected:
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
@@ -548,10 +547,6 @@ private:
   /// Lookup the instance handles by the subscription repo ids
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
-
-  const RepoId& get_repo_id() const {
-    return this->publication_id_;
-  }
 
   DDS::Subscriber_var get_builtin_subscriber() const;
 

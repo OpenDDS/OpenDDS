@@ -52,7 +52,7 @@ std::string TestObserver::to_str(DDS::DataWriter_ptr w)
   o << " writer ";
   OpenDDS::DCPS::DataWriterImpl* p = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(w);
   if (p) {
-    o << to_str(p->get_publication_id());
+    o << to_str(p->get_repo_id());
   }
   return o.str();
 }
@@ -63,7 +63,7 @@ std::string TestObserver::to_str(DDS::DataReader_ptr r)
   o << " reader ";
   OpenDDS::DCPS::DataReaderImpl* p = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(r);
   if (p) {
-    o << to_str(p->get_subscription_id());
+    o << to_str(p->get_repo_id());
   }
   return o.str();
 }

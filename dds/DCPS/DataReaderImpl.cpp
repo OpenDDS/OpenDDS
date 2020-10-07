@@ -1712,11 +1712,6 @@ DataReaderImpl::get_subscriber_servant()
   return subscriber_servant_.lock();
 }
 
-RepoId DataReaderImpl::get_subscription_id() const
-{
-  return subscription_id_;
-}
-
 bool DataReaderImpl::have_sample_states(
     DDS::SampleStateMask sample_states) const
 {
@@ -1902,7 +1897,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   if (local_timer_id != -1 && cancel) {
     if (DCPS_debug_level >= 5) {
-      GuidConverter converter(data_reader->get_subscription_id());
+      GuidConverter converter(data_reader->get_repo_id());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
@@ -1966,7 +1961,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   }
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter converter(data_reader->get_subscription_id());
+    GuidConverter converter(data_reader->get_repo_id());
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
@@ -2463,10 +2458,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     return DDS::HANDLE_NIL;
 
   if (is_bit()) {
-    Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
-    CORBA::String_var topic = topic_servant_->get_name();
-
-    RepoId id = disc->bit_key_to_repo_id(participant.in(), topic, key);
+    const RepoId id = bit_key_to_repo_id(key);
     return participant->id_to_handle(id);
 
   } else {
