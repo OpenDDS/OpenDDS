@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Script to build and run the CMake integration tests. This is primarily for
 # continuous integration services (travis-ci, azure-pipelines) but it can also
