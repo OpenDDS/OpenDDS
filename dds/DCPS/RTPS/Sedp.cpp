@@ -2881,6 +2881,31 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
   } else {
     return;
   }
+
+  if (!send_tokens) {
+    return;
+  }
+
+  const DCPS::RepoId remote_volatile_reader = make_id(msg.message_identity.source_guid,
+                                                      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  if (associated_volatile_readers_.count(remote_volatile_reader) == 0) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::send_crypto_tokens: "
+                 "deferring send_participant_crypto_token until asociation complete %C\n",
+                 OPENDDS_STRING(DCPS::GuidConverter(remote_volatile_reader)).c_str()));
+    }
+    pending_volatile_readers_.insert(remote_volatile_reader);
+  } else {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::send_crypto_tokens: "
+                 "calling send_participant_crypto_tokens\n"));
+    }
+    spdp_.send_participant_crypto_tokens(remote_volatile_reader);
+    send_cached_crypto_tokens(remote_volatile_reader);
+    send_builtin_crypto_tokens(spdp_.get_participant_data(remote_volatile_reader));
+    resend_user_crypto_tokens(remote_volatile_reader);
+  }
 }
 #endif
 
