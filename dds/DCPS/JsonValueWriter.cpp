@@ -9,8 +9,6 @@
 
 #include "JsonValueWriter.h"
 
-#include <math.h>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -164,50 +162,23 @@ void JsonValueWriter::write_uint64(ACE_CDR::ULongLong value)
 void JsonValueWriter::write_float32(ACE_CDR::Float value)
 {
   // TODO: Formatting?
-  if (isinf(value)) {
-    if (value < 0) {
-      out_ << "\"-inf\"";
-    } else {
-      out_ << "\"inf\"";
-    }
-  } else if(isnan(value)) {
-    out_ << "\"nan\"";
-  } else {
-    out_ << value;
-  }
+  // TODO: isnan, isinf
+  out_ << value;
 }
 
 void JsonValueWriter::write_float64(ACE_CDR::Double value)
 {
   // TODO: Formatting?
-  if (isinf(value)) {
-    if (value < 0) {
-      out_ << "\"-inf\"";
-    } else {
-      out_ << "\"inf\"";
-    }
-  } else if(isnan(value)) {
-    out_ << "\"nan\"";
-  } else {
-    out_ << value;
-  }
+  // TODO: isnan, isinf
+  out_ << value;
 }
 
 void JsonValueWriter::write_float128(ACE_CDR::LongDouble value)
 {
   // TODO: Formatting?
+  // TODO: isnan, isinf
   // TODO: Base64 encode.
-  if (isinf(value)) {
-    if (value < 0) {
-      out_ << "\"-inf\"";
-    } else {
-      out_ << "\"inf\"";
-    }
-  } else if(isnan(value)) {
-    out_ << "\"nan\"";
-  } else {
-    out_ << value;
-  }
+  out_ << value;
 }
 
 void JsonValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
