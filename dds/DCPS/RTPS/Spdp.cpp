@@ -66,6 +66,7 @@ namespace {
     return from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantLocation compute_ice_location_mask(const ACE_INET_Addr& address)
   {
     if (address.get_type() == AF_INET6) {
@@ -73,6 +74,7 @@ namespace {
     }
     return DCPS::LOCATION_ICE;
   }
+#endif
 
 #ifdef OPENDDS_SECURITY
   bool operator==(const DDS::Security::Property_t& rhs, const DDS::Security::Property_t& lhs) {
