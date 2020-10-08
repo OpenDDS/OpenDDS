@@ -80,11 +80,15 @@ public:
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch) {}
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
-  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
-                             OpenDDS::DCPS::SubscriptionInstance_rch &,
-                             bool&,
-                             bool&,
-                             OpenDDS::DCPS::MarshalingType) {}
+  virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
+  dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
+                OpenDDS::DCPS::SubscriptionInstance_rch &,
+                bool&,
+                bool&,
+                OpenDDS::DCPS::MarshalingType)
+  {
+    return OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>();
+  }
   virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
   virtual void delete_instance_map (void *) {}
   bool contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask,

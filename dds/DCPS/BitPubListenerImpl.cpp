@@ -54,10 +54,7 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       if (status == DDS::RETCODE_OK) {
         if (si.valid_data) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-          Discovery_rch disc =
-            TheServiceParticipant->get_discovery(partipant_->get_domain_id());
-          PublicationId pub_id =
-            disc->bit_key_to_repo_id(partipant_, BUILT_IN_PUBLICATION_TOPIC, data.key);
+          const PublicationId pub_id = bit_key_to_repo_id(data.key);
           CORBA::Long const ownership_strength = data.ownership_strength.value;
           this->partipant_->update_ownership_strength(pub_id, ownership_strength);
           if (DCPS_debug_level > 4) {

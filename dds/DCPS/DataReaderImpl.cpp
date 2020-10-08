@@ -1394,6 +1394,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
+  RcHandle<MessageHolder> real_data;
   SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
@@ -1425,7 +1426,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (sample.header_.key_fields_only_) {
       dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING);
     } else {
-      dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
+      real_data = dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
     }
 
     // Per sample logging
@@ -1660,10 +1661,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     break;
   }
 
+  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
-  if (observer) {
-    Observer::Sample s(sample, instance ? instance->instance_handle_ : DDS::HANDLE_NIL);
-    observer->on_sample_received(this, s);
+  if (observer && real_data && vwd) {
+    DDS::Time_t timestamp;
+    timestamp.sec = sample.header_.source_timestamp_sec_;
+    timestamp.nanosec = sample.header_.source_timestamp_nanosec_;
+    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get());
+    observer->on_sample_received(this, s, *vwd);
   }
 }
 
@@ -1705,11 +1710,6 @@ RcHandle<SubscriberImpl>
 DataReaderImpl::get_subscriber_servant()
 {
   return subscriber_servant_.lock();
-}
-
-RepoId DataReaderImpl::get_subscription_id() const
-{
-  return subscription_id_;
 }
 
 bool DataReaderImpl::have_sample_states(
@@ -1897,7 +1897,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   if (local_timer_id != -1 && cancel) {
     if (DCPS_debug_level >= 5) {
-      GuidConverter converter(data_reader->get_subscription_id());
+      GuidConverter converter(data_reader->get_repo_id());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
@@ -1961,7 +1961,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   }
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter converter(data_reader->get_subscription_id());
+    GuidConverter converter(data_reader->get_repo_id());
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
@@ -2458,10 +2458,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     return DDS::HANDLE_NIL;
 
   if (is_bit()) {
-    Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
-    CORBA::String_var topic = topic_servant_->get_name();
-
-    RepoId id = disc->bit_key_to_repo_id(participant.in(), topic, key);
+    const RepoId id = bit_key_to_repo_id(key);
     return participant->id_to_handle(id);
 
   } else {

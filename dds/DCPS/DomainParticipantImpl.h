@@ -286,7 +286,7 @@ public:
   /**
    *  Return the id given by discovery.
    */
-  RepoId get_id();
+  RepoId get_id() const;
 
   /**
    * Return a unique string based on repo ID.
