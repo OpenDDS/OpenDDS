@@ -15,8 +15,39 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 bool verbose = false;
 bool expect_to_fail = false;
 
+enum KeyValue
+{
+  PROPERTY_1_KEY,
+  PROPERTY_2_KEY,
+  APPENDABLE_STRUCT_KEY,
+  ADDITIONAL_PREFIX_FIELD_STRUCT_KEY,
+  ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY,
+  MUTABLE_STRUCT_KEY,
+  ALTERED_MUTABLE_STRUCT_KEY
+};
+
+enum AdditionalFieldValue
+{
+  ADDITIONAL_PREFIX_FIELD_STRUCT_AF,
+  ADDITIONAL_POSTFIX_FIELD_STRUCT_AF,
+  MUTABLE_STRUCT_AF,
+  ALTERED_MUTABLE_STRUCT_AF
+};
+
+template<typename T1>
+ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected_additional_field_value)
+{
+  ReturnCode_t ret = RETCODE_OK;
+  if (data[0].additional_field != expected_additional_field_value) {
+    ACE_DEBUG((LM_DEBUG, "reader: expected key value: %d, received: %d\n", expected_additional_field_value, data[0].key));
+    ret = RETCODE_ERROR;
+  }
+
+  return ret;
+}
+
 template<typename T1, typename T2>
-ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
+ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_value)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -39,15 +70,22 @@ ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data)
     ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
     return ret;
   }
+
   // data;
   SampleInfoSeq info;
   if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
-    for (unsigned int i = 0; i < data.length(); ++i) {
-      ++counter;
-      instances.insert(data[i].key);
-      if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "reader: Counter: %u Instance: %d\n", counter, data[i].key));
-      }
+    if (data.length() != 1) {
+      ACE_DEBUG((LM_DEBUG, "reader: unexpected data length: %d", data.length()));
+      ret = RETCODE_ERROR;
+    }
+
+    if (data[0].key != expected_key_value) {
+      ACE_DEBUG((LM_DEBUG, "reader: expected key value: %d, received: %d\n", expected_key_value, data[0].key));
+      ret = RETCODE_ERROR;
+    }
+
+    if (verbose) {
+      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
@@ -63,7 +101,7 @@ ReturnCode_t read_property_1(DataReader_var dr)
 {
   Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
   ::Property_1Seq data;
-  return read(dr, pdr, data);
+  return read(dr, pdr, data, PROPERTY_1_KEY);
 }
 
 
@@ -71,7 +109,7 @@ ReturnCode_t read_property_2(DataReader_var dr)
 {
   Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
   ::Property_2Seq data;
-  return read(dr, pdr, data);
+  return read(dr, pdr, data, PROPERTY_2_KEY);
 }
 
 
@@ -79,7 +117,7 @@ ReturnCode_t read_appendable_struct(DataReader_var dr)
 {
   AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
   ::AppendableStructSeq data;
-  return read(dr, pdr, data);
+  return read(dr, pdr, data, APPENDABLE_STRUCT_KEY);
 }
 
 
@@ -87,7 +125,12 @@ ReturnCode_t read_additional_prefix_field_struct(DataReader_var dr)
 {
   AdditionalPrefixFieldStructDataReader_var pdr = AdditionalPrefixFieldStructDataReader::_narrow(dr);
   ::AdditionalPrefixFieldStructSeq data;
-  return read(dr, pdr, data);
+  ReturnCode_t ret;
+  ret = read(dr, pdr, data, ADDITIONAL_PREFIX_FIELD_STRUCT_KEY);
+  if (ret == RETCODE_OK) {
+    ret = check_additional_field_value(data, ADDITIONAL_PREFIX_FIELD_STRUCT_AF);
+  }
+  return ret;
 }
 
 
@@ -95,21 +138,36 @@ ReturnCode_t read_additional_postfix_field_struct(DataReader_var dr)
 {
   AdditionalPostfixFieldStructDataReader_var pdr = AdditionalPostfixFieldStructDataReader::_narrow(dr);
   ::AdditionalPostfixFieldStructSeq data;
-  return read(dr, pdr, data);
+  ReturnCode_t ret;
+  ret = read(dr, pdr, data, ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY);
+  if (ret == RETCODE_OK) {
+    ret = check_additional_field_value(data, ADDITIONAL_POSTFIX_FIELD_STRUCT_AF);
+  }
+  return ret;
 }
 
 ReturnCode_t read_mutable_struct(DataReader_var dr)
 {
   MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
   ::MutableStructSeq data;
-  return read(dr, pdr, data);
+  ReturnCode_t ret;
+  ret = read(dr, pdr, data, MUTABLE_STRUCT_KEY);
+  if (ret == RETCODE_OK) {
+    ret = check_additional_field_value(data, MUTABLE_STRUCT_AF);
+  }
+  return ret;
 }
 
 ReturnCode_t read_altered_mutable_struct(DataReader_var dr)
 {
   AlteredMutableStructDataReader_var pdr = AlteredMutableStructDataReader::_narrow(dr);
   ::AlteredMutableStructSeq data;
-  return read(dr, pdr, data);
+  ReturnCode_t ret;
+  ret = read(dr, pdr, data, ALTERED_MUTABLE_STRUCT_KEY);
+  if (ret == RETCODE_OK) {
+    ret = check_additional_field_value(data, ALTERED_MUTABLE_STRUCT_AF);
+  }
+  return ret;
 }
 
 
@@ -118,7 +176,7 @@ void write_property_1(DataWriter_var dw)
   Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
 
   Property_1 p;
-  p.key = 1;
+  p.key = PROPERTY_1_KEY;
   p.value = 1;
   pdw->write(p, HANDLE_NIL);
   if (verbose) {
@@ -132,7 +190,7 @@ void write_property_2(DataWriter_var dw)
   Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw);
 
   Property_2 p2;
-  p2.key = 1;
+  p2.key = PROPERTY_2_KEY;
   p2.value = "Test";
   pdw2->write(p2, HANDLE_NIL);
   if (verbose) {
@@ -146,7 +204,7 @@ void write_appendable_struct(DataWriter_var dw)
   AppendableStructDataWriter_var typed_dw = AppendableStructDataWriter::_narrow(dw);
 
   AppendableStruct as;
-  as.key = 1;
+  as.key = APPENDABLE_STRUCT_KEY;
   typed_dw->write(as, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AppendableStruct\n"));
@@ -158,9 +216,10 @@ void write_additional_prefix_field_struct(DataWriter_var dw)
 {
   AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
 
-  AdditionalPrefixFieldStruct as;
-  as.key = 1;
-  typed_dw->write(as, HANDLE_NIL);
+  AdditionalPrefixFieldStruct apfs;
+  apfs.key = ADDITIONAL_PREFIX_FIELD_STRUCT_KEY;
+  apfs.additional_field = ADDITIONAL_PREFIX_FIELD_STRUCT_AF;
+  typed_dw->write(apfs, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPrefixFieldStruct\n"));
   }
@@ -171,9 +230,10 @@ void write_additional_postfix_field_struct(DataWriter_var dw)
 {
   AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
 
-  AdditionalPostfixFieldStruct as;
-  as.key = 1;
-  typed_dw->write(as, HANDLE_NIL);
+  AdditionalPostfixFieldStruct apfs;
+  apfs.key = ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY;
+  apfs.additional_field = ADDITIONAL_POSTFIX_FIELD_STRUCT_AF;
+  typed_dw->write(apfs, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPostfixFieldStruct\n"));
   }
@@ -184,9 +244,10 @@ void write_mutable_struct(DataWriter_var dw)
 {
   MutableStructDataWriter_var typed_dw = MutableStructDataWriter::_narrow(dw);
 
-  MutableStruct as;
-  as.key = 1;
-  typed_dw->write(as, HANDLE_NIL);
+  MutableStruct ms;
+  ms.key = MUTABLE_STRUCT_KEY;
+  ms.additional_field = MUTABLE_STRUCT_AF;
+  typed_dw->write(ms, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: MutableStruct\n"));
   }
@@ -197,9 +258,10 @@ void write_altered_mutable_struct(DataWriter_var dw)
 {
   AlteredMutableStructDataWriter_var typed_dw = AlteredMutableStructDataWriter::_narrow(dw);
 
-  AlteredMutableStruct as;
-  as.key = 1;
-  typed_dw->write(as, HANDLE_NIL);
+  AlteredMutableStruct ams;
+  ams.key = ALTERED_MUTABLE_STRUCT_KEY;
+  ams.additional_field = ALTERED_MUTABLE_STRUCT_AF;
+  typed_dw->write(ams, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AlteredMutableStruct\n"));
   }
