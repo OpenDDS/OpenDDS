@@ -132,7 +132,7 @@ namespace OpenDDS {
 
         // Initialize.
         RemoteTopic& remote = remote_topic_iter->second;
-        remote.data_type_name_ = "";
+        remote.data_type_name_.clear();
         remote.type_id_= remote_type_id;
         XTypes::TypeAssignability ta(make_rch<XTypes::TypeLookupService>());
         remote.inconsistent_ = topic_callbacks_ && ta.assignable(local_type_id, remote.type_id_);
