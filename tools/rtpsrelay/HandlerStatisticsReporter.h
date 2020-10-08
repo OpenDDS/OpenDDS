@@ -7,7 +7,7 @@
 #include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
 
-#include <iostream>
+#include <dds/DCPS/JsonValueWriter.h>
 
 namespace RtpsRelay {
 
@@ -87,24 +87,7 @@ private:
     handler_statistics_.interval(time_diff_to_duration(d));
 
     if (config_.log_relay_statistics()) {
-      ACE_TCHAR timestamp[OpenDDS::DCPS::AceTimestampSize];
-      ACE::timestamp(timestamp, sizeof(timestamp) / sizeof(ACE_TCHAR));
-
-      std::cout << timestamp << ' '
-                << "application_participant_guid=" << guid_to_string(guid_to_repoid(handler_statistics_.application_participant_guid())) << ' '
-                << "name=\"" << handler_statistics_.name() << "\" "
-                << "interval=" << handler_statistics_.interval().sec() << '.' << handler_statistics_.interval().nanosec() << ' '
-                << "messages_in=" << handler_statistics_.messages_in() << ' '
-                << "bytes_in=" << handler_statistics_.bytes_in() << ' '
-                << "messages_out=" << handler_statistics_.messages_out() << ' '
-                << "bytes_out=" << handler_statistics_.bytes_out() << ' '
-                << "max_fan_out=" << handler_statistics_.max_fan_out() << ' '
-                << "max_queue_size=" << handler_statistics_.max_queue_size() << ' '
-                << "max_queue_latency=" << handler_statistics_.max_queue_latency().sec() << '.' << handler_statistics_.max_queue_latency().nanosec() << ' '
-                << "local_active_participants=" << handler_statistics_.local_active_participants() << ' '
-                << "error_count=" << handler_statistics_.error_count() << ' '
-                << "governor_count=" << handler_statistics_.governor_count()
-                << std::endl;
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l INFO: HandlerStatisticsReporter::report %C\n"), OpenDDS::DCPS::to_json(handler_statistics_).c_str()));
     }
 
     if (config_.publish_relay_statistics()) {

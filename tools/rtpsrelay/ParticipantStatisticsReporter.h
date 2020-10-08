@@ -7,7 +7,7 @@
 #include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
 
-#include <iostream>
+#include <dds/DCPS/JsonValueWriter.h>
 
 namespace RtpsRelay {
 
@@ -57,18 +57,7 @@ public:
     participant_statistics_.interval(time_diff_to_duration(d));
 
     if (config->log_relay_statistics()) {
-      ACE_TCHAR timestamp[OpenDDS::DCPS::AceTimestampSize];
-      ACE::timestamp(timestamp, sizeof(timestamp) / sizeof(ACE_TCHAR));
-
-      std::cout << timestamp << ' '
-                << "participant_guid=" << guid_to_string(guid_to_repoid(participant_statistics_.guid())) << ' '
-                << "interval=" << participant_statistics_.interval().sec() << '.' << participant_statistics_.interval().nanosec() << ' '
-                << "messages_in=" << participant_statistics_.messages_in() << ' '
-                << "bytes_in=" << participant_statistics_.bytes_in() << ' '
-                << "messages_out=" << participant_statistics_.messages_out() << ' '
-                << "bytes_out=" << participant_statistics_.bytes_out() << ' '
-                << "max_fan_out=" << participant_statistics_.max_fan_out() << ' '
-                << std::endl;
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l INFO: ParticipantStatisticsReporter::report %C\n"), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
     }
 
     if (config->publish_relay_statistics()) {

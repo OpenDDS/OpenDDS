@@ -5,26 +5,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef JSON_VALUE_WRITER_H
-#define JSON_VALUE_WRITER_H
+#ifndef OPENDDS_DCPS_JSON_VALUE_WRITER_H
+#define OPENDDS_DCPS_JSON_VALUE_WRITER_H
 
-#include "common_export.h"
+#include "dcps_export.h"
 
-#include <dds/DCPS/ValueWriter.h>
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#include <dds/DdsDcpsTopicC.h>
+#include "ValueWriter.h"
+
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "dds/DdsDcpsTopicC.h"
 
 #include <sstream>
 #include <vector>
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace Test {
+namespace DCPS {
 
 // Convert values to JSON.
 // Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
-class Common_Export JsonValueWriter : public DCPS::ValueWriter {
+class OpenDDS_Dcps_Export JsonValueWriter : public ValueWriter {
 public:
   JsonValueWriter(std::ostream& out)
     : out_(out)
@@ -72,6 +77,15 @@ private:
 };
 
 template<typename T>
+std::string to_json(const T& sample)
+{
+  std::stringstream str;
+  JsonValueWriter jvw(str);
+  vwrite(jvw, sample);
+  return str.str();
+}
+
+template<typename T>
 std::string to_json(const ::DDS::TopicDescription_ptr topic, const T& sample, const DDS::SampleInfo& sample_info)
 {
   std::stringstream str;
@@ -97,9 +111,9 @@ std::string to_json(const ::DDS::TopicDescription_ptr topic, const T& sample, co
   return str.str();
 }
 
-} // namespace Test
+} // namespace DCPS
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* JSON_VALUE_WRITER_H */
+#endif  /* OPENDDS_DCPS_JSON_VALUE_WRITER_H */
