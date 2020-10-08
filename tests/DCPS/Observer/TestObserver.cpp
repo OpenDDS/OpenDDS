@@ -10,7 +10,7 @@
 #include <dds/DCPS/DataReaderImpl.h>
 #include <dds/DCPS/DataWriterImpl.h>
 #include <dds/DCPS/GuidUtils.h>
-#include "../common/JsonValueWriter.h"
+#include <dds/DCPS/JsonValueWriter.h>
 
 #include <ace/OS_NS_time.h>
 
@@ -81,7 +81,7 @@ std::string TestObserver::to_str(const Sample& s, const OpenDDS::DCPS::ValueWrit
     << t << "SequenceN: " << s.seq_n_.getValue() << '\n'
     << t << "Data     : " << s.data_ << ' ';
 
-  OpenDDS::Test::JsonValueWriter jvw(o);
+  OpenDDS::DCPS::JsonValueWriter jvw(o);
   vwd.write(jvw, s.data_);
   o << '\n';
 

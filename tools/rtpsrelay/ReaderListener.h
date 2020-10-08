@@ -4,7 +4,7 @@
 #include "AssociationTable.h"
 #include "ListenerBase.h"
 #include "RelayHandler.h"
-#include "DomainStatisticsWriter.h"
+#include "DomainStatisticsReporter.h"
 
 namespace RtpsRelay {
 
@@ -12,14 +12,14 @@ class ReaderListener : public ListenerBase {
 public:
   ReaderListener(AssociationTable& association_table,
                  SpdpHandler& spdp_handler,
-                 DomainStatisticsWriter& stats_writer);
+                 DomainStatisticsReporter& stats_reporter);
 
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
 
   AssociationTable& association_table_;
   SpdpHandler& spdp_handler_;
-  DomainStatisticsWriter& stats_writer_;
+  DomainStatisticsReporter& stats_reporter_;
 };
 
 }
