@@ -15,7 +15,7 @@ class HandlerStatisticsReporter {
 public:
   HandlerStatisticsReporter(const Config& config,
                             const std::string& name,
-                            HandlerStatisticsDataWriter_ptr writer)
+                            HandlerStatisticsDataWriter_var writer)
     : config_(config)
     , last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , writer_(writer)
@@ -26,52 +26,52 @@ public:
 
   void input_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    handler_statistics_._bytes_in += byte_count;
-    ++handler_statistics_._messages_in;
+    handler_statistics_.bytes_in() += byte_count;
+    ++handler_statistics_.messages_in();
     report(now);
   }
 
   void output_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    handler_statistics_._bytes_out += byte_count;
-    ++handler_statistics_._messages_out;
+    handler_statistics_.bytes_out() += byte_count;
+    ++handler_statistics_.messages_out();
     report(now);
   }
 
   void max_fan_out(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    handler_statistics_._max_fan_out = std::max(handler_statistics_._max_fan_out, static_cast<uint32_t>(value));
+    handler_statistics_.max_fan_out() = std::max(handler_statistics_.max_fan_out(), static_cast<uint32_t>(value));
     report(now);
   }
 
   void max_queue_size(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    handler_statistics_._max_queue_size = std::max(handler_statistics_._max_queue_size, static_cast<uint32_t>(value));
+    handler_statistics_.max_queue_size() = std::max(handler_statistics_.max_queue_size(), static_cast<uint32_t>(value));
     report(now);
   }
 
   void max_queue_latency(const OpenDDS::DCPS::TimeDuration& latency, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    handler_statistics_._max_queue_latency = std::max(handler_statistics_._max_queue_latency, time_diff_to_duration(latency));
+    handler_statistics_.max_queue_latency() = std::max(handler_statistics_.max_queue_latency(), time_diff_to_duration(latency));
     report(now);
   }
 
 
   void local_active_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    handler_statistics_._local_active_participants = static_cast<uint32_t>(count);
+    handler_statistics_.local_active_participants() = static_cast<uint32_t>(count);
     report(now);
   }
 
   void error(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    ++handler_statistics_._error_count;
+    ++handler_statistics_.error_count();
     report(now);
   }
 
   void governor(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    ++handler_statistics_._governor_count;
+    ++handler_statistics_.governor_count();
     report(now);
   }
 
@@ -116,23 +116,23 @@ private:
 
     last_report_ = now;
 
-    handler_statistics_._messages_in = 0;
-    handler_statistics_._bytes_in = 0;
-    handler_statistics_._messages_out = 0;
-    handler_statistics_._bytes_out = 0;
-    handler_statistics_._max_fan_out = 0;
-    handler_statistics_._max_queue_size = 0;
-    handler_statistics_._max_queue_latency._sec = 0;
-    handler_statistics_._max_queue_latency._nanosec = 0;
+    handler_statistics_.messages_in(0);
+    handler_statistics_.bytes_in(0);
+    handler_statistics_.messages_out(0);
+    handler_statistics_.bytes_out(0);
+    handler_statistics_.max_fan_out(0);
+    handler_statistics_.max_queue_size(0);
+    handler_statistics_.max_queue_latency().sec(0);
+    handler_statistics_.max_queue_latency().nanosec(0);
     // Don't reset local_active_participant_count.
-    handler_statistics_._error_count = 0;
-    handler_statistics_._governor_count = 0;
+    handler_statistics_.error_count(0);
+    handler_statistics_.governor_count(0);
   }
 
   const Config& config_;
   OpenDDS::DCPS::MonotonicTimePoint last_report_;
   HandlerStatistics handler_statistics_;
-  HandlerStatisticsDataWriter_ptr writer_;
+  HandlerStatisticsDataWriter_var writer_;
 };
 
 }

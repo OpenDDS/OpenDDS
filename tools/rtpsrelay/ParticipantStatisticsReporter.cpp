@@ -3,6 +3,6 @@
 namespace RtpsRelay {
 
 const Config* ParticipantStatisticsReporter::config;
-ParticipantStatisticsDataWriter_ptr ParticipantStatisticsReporter::writer;
+ParticipantStatisticsDataWriter_var ParticipantStatisticsReporter::writer;
 
 }

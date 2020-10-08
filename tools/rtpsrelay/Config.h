@@ -18,9 +18,9 @@ public:
     , log_relay_statistics_(false)
   {}
 
-  void statistics_interval(const OpenDDS::DCPS::TimeDuration& flag)
+  void statistics_interval(const OpenDDS::DCPS::TimeDuration& value)
   {
-    statistics_interval_ = flag;
+    statistics_interval_ = value;
   }
 
   const OpenDDS::DCPS::TimeDuration& statistics_interval() const
@@ -28,9 +28,9 @@ public:
     return statistics_interval_;
   }
 
-  void application_participant_guid(const OpenDDS::DCPS::RepoId& flag)
+  void application_participant_guid(const OpenDDS::DCPS::RepoId& value)
   {
-    application_participant_guid_ = flag;
+    application_participant_guid_ = value;
   }
 
   const OpenDDS::DCPS::RepoId& application_participant_guid() const
@@ -38,9 +38,9 @@ public:
     return application_participant_guid_;
   }
 
-  void lifespan(const OpenDDS::DCPS::TimeDuration& flag)
+  void lifespan(const OpenDDS::DCPS::TimeDuration& value)
   {
-    lifespan_ = flag;
+    lifespan_ = value;
   }
 
   const OpenDDS::DCPS::TimeDuration& lifespan() const
@@ -48,9 +48,9 @@ public:
     return lifespan_;
   }
 
-  void application_domain(DDS::DomainId_t flag)
+  void application_domain(DDS::DomainId_t value)
   {
-    application_domain_ = flag;
+    application_domain_ = value;
   }
 
   DDS::DomainId_t application_domain() const

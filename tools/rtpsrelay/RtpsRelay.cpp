@@ -374,7 +374,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
   }
 
-  ParticipantEntryDataWriter_ptr participant_entry_writer = ParticipantEntryDataWriter::_narrow(participant_entry_writer_var);
+  ParticipantEntryDataWriter_var participant_entry_writer = ParticipantEntryDataWriter::_narrow(participant_entry_writer_var);
   if (!participant_entry_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Participant Entry data writer\n")));
     return EXIT_FAILURE;
@@ -387,7 +387,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  HandlerStatisticsDataWriter_ptr handler_statistics_writer = HandlerStatisticsDataWriter::_narrow(handler_statistics_writer_var);
+  HandlerStatisticsDataWriter_var handler_statistics_writer = HandlerStatisticsDataWriter::_narrow(handler_statistics_writer_var);
   if (!handler_statistics_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Handler Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -399,7 +399,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DomainStatisticsDataWriter_ptr domain_statistics_writer = DomainStatisticsDataWriter::_narrow(domain_statistics_writer_var);
+  DomainStatisticsDataWriter_var domain_statistics_writer = DomainStatisticsDataWriter::_narrow(domain_statistics_writer_var);
   if (!domain_statistics_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Domain Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -411,7 +411,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ParticipantStatisticsDataWriter_ptr participant_statistics_writer = ParticipantStatisticsDataWriter::_narrow(participant_statistics_writer_var);
+  ParticipantStatisticsDataWriter_var participant_statistics_writer = ParticipantStatisticsDataWriter::_narrow(participant_statistics_writer_var);
   if (!participant_statistics_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Participant Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -515,7 +515,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  GuidNameAddressDataWriter_ptr responsible_relay_writer = GuidNameAddressDataWriter::_narrow(responsible_relay_writer_var);
+  GuidNameAddressDataWriter_var responsible_relay_writer = GuidNameAddressDataWriter::_narrow(responsible_relay_writer_var);
 
   if (!responsible_relay_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data writer\n")));
@@ -529,7 +529,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  GuidNameAddressDataReader_ptr responsible_relay_reader = GuidNameAddressDataReader::_narrow(responsible_relay_reader_var);
+  GuidNameAddressDataReader_var responsible_relay_reader = GuidNameAddressDataReader::_narrow(responsible_relay_reader_var);
 
   if (!responsible_relay_reader) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data reader\n")));
@@ -581,7 +581,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ReaderEntryDataWriter_ptr reader_writer = ReaderEntryDataWriter::_narrow(reader_writer_var);
+  ReaderEntryDataWriter_var reader_writer = ReaderEntryDataWriter::_narrow(reader_writer_var);
 
   if (!reader_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Reader data writer\n")));
@@ -618,7 +618,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  WriterEntryDataWriter_ptr writer_writer = WriterEntryDataWriter::_narrow(writer_writer_var);
+  WriterEntryDataWriter_var writer_writer = WriterEntryDataWriter::_narrow(writer_writer_var);
 
   if (!writer_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Writer data writer\n")));

@@ -14,17 +14,12 @@ namespace RtpsRelay {
 class DomainStatisticsReporter {
 public:
   DomainStatisticsReporter(const Config& config,
-                           DomainStatisticsDataWriter_ptr writer)
+                           DomainStatisticsDataWriter_var writer)
     : config_(config)
     , last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , writer_(writer)
   {
     domain_statistics_.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
-    domain_statistics_.local_participants(0);
-    domain_statistics_.local_writers(0);
-    domain_statistics_.local_readers(0);
-    domain_statistics_.total_writers(0);
-    domain_statistics_.total_readers(0);
   }
 
   void add_local_participant(const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -113,7 +108,7 @@ private:
   const Config& config_;
   OpenDDS::DCPS::MonotonicTimePoint last_report_;
   DomainStatistics domain_statistics_;
-  DomainStatisticsDataWriter_ptr writer_;
+  DomainStatisticsDataWriter_var writer_;
 };
 
 }

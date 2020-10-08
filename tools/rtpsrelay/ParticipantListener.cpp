@@ -8,7 +8,7 @@ namespace RtpsRelay {
 
 ParticipantListener::ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          DomainStatisticsReporter& stats_reporter,
-                                         ParticipantEntryDataWriter_ptr participant_writer)
+                                         ParticipantEntryDataWriter_var participant_writer)
   : participant_(participant)
   , stats_reporter_(stats_reporter)
   , writer_(participant_writer)

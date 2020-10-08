@@ -14,7 +14,7 @@ namespace RtpsRelay {
 class ParticipantStatisticsReporter {
 public:
   static const Config* config;
-  static ParticipantStatisticsDataWriter_ptr writer;
+  static ParticipantStatisticsDataWriter_var writer;
 
   ParticipantStatisticsReporter() {}
 
@@ -28,21 +28,21 @@ public:
 
   void input_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_._bytes_in += byte_count;
-    ++participant_statistics_._messages_in;
+    participant_statistics_.bytes_in() += byte_count;
+    ++participant_statistics_.messages_in();
     report(now);
   }
 
   void output_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_._bytes_out += byte_count;
-    ++participant_statistics_._messages_out;
+    participant_statistics_.bytes_out() += byte_count;
+    ++participant_statistics_.messages_out();
     report(now);
   }
 
   void max_fan_out(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_._max_fan_out = std::max(participant_statistics_._max_fan_out, static_cast<uint32_t>(value));
+    participant_statistics_.max_fan_out() = std::max(participant_statistics_.max_fan_out(), static_cast<uint32_t>(value));
     report(now);
   }
 
@@ -80,11 +80,11 @@ public:
 
     last_report_ = now;
 
-    participant_statistics_._messages_in = 0;
-    participant_statistics_._bytes_in = 0;
-    participant_statistics_._messages_out = 0;
-    participant_statistics_._bytes_out = 0;
-    participant_statistics_._max_fan_out = 0;
+    participant_statistics_.messages_in(0);
+    participant_statistics_.bytes_in(0);
+    participant_statistics_.messages_out(0);
+    participant_statistics_.bytes_out(0);
+    participant_statistics_.max_fan_out(0);
   }
 
 private:

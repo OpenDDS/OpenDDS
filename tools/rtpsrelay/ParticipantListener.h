@@ -10,9 +10,9 @@ namespace RtpsRelay {
 
 class ParticipantListener : public ListenerBase {
 public:
-  explicit ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                               DomainStatisticsReporter& stats_reporter,
-                               ParticipantEntryDataWriter_ptr participant_writer);
+  ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+                      DomainStatisticsReporter& stats_reporter,
+                      ParticipantEntryDataWriter_var participant_writer);
 private:
   void on_data_available(DDS::DataReader_ptr reader) override;
   void write_sample(const DDS::ParticipantBuiltinTopicData& data,
@@ -21,7 +21,7 @@ private:
 
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   DomainStatisticsReporter& stats_reporter_;
-  ParticipantEntryDataWriter_ptr writer_;
+  ParticipantEntryDataWriter_var writer_;
 };
 
 }

@@ -96,8 +96,8 @@ public:
                   ACE_Reactor* reactor,
                   Governor& governor,
                   const AssociationTable& association_table,
-                  GuidNameAddressDataWriter_ptr responsible_relay_writer,
-                  GuidNameAddressDataReader_ptr responsible_relay_reader,
+                  GuidNameAddressDataWriter_var responsible_relay_writer,
+                  GuidNameAddressDataReader_var responsible_relay_reader,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   const CRYPTO_TYPE& crypto,
                   HandlerStatisticsReporter& stats_reporter);
@@ -149,8 +149,8 @@ protected:
   void populate_address_map(AddressMap& address_map, const GuidSet& to);
 
   const AssociationTable& association_table_;
-  GuidNameAddressDataWriter_ptr responsible_relay_writer_;
-  GuidNameAddressDataReader_ptr responsible_relay_reader_;
+  GuidNameAddressDataWriter_var responsible_relay_writer_;
+  GuidNameAddressDataReader_var responsible_relay_reader_;
   HorizontalHandler* horizontal_handler_;
   GuidAddrSetMap guid_addr_set_map_;
   typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidAddrExpirationMap;
@@ -210,8 +210,8 @@ public:
               ACE_Reactor* reactor,
               Governor& governor,
               const AssociationTable& association_table,
-              GuidNameAddressDataWriter_ptr responsible_relay_writer,
-              GuidNameAddressDataReader_ptr responsible_relay_reader,
+              GuidNameAddressDataWriter_var responsible_relay_writer,
+              GuidNameAddressDataReader_var responsible_relay_reader,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr,
@@ -253,8 +253,8 @@ public:
               ACE_Reactor* reactor,
               Governor& governor,
               const AssociationTable& association_table,
-              GuidNameAddressDataWriter_ptr responsible_relay_writer,
-              GuidNameAddressDataReader_ptr responsible_relay_reader,
+              GuidNameAddressDataWriter_var responsible_relay_writer,
+              GuidNameAddressDataReader_var responsible_relay_reader,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr,
@@ -279,8 +279,8 @@ public:
               ACE_Reactor* reactor,
               Governor& governor,
               const AssociationTable& association_table,
-              GuidNameAddressDataWriter_ptr responsible_relay_writer,
-              GuidNameAddressDataReader_ptr responsible_relay_reader,
+              GuidNameAddressDataWriter_var responsible_relay_writer,
+              GuidNameAddressDataReader_var responsible_relay_reader,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               HandlerStatisticsReporter& stats_reporter);
