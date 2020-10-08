@@ -14,94 +14,113 @@ namespace OpenDDS {
 namespace XTypes {
 
 // As per chapter 7.6.3.3.3 of XTypes spec
-// Used in TypeLookup_Call and TypeLookup_Return
-const CORBA::ULong TypeLookup_getTypes_HashId = 25318099U;
-const CORBA::ULong TypeLookup_getDependencies_HashId = 95091505U;
+// Issue DDSXTY14-30:
+// - These use XCDR2 and default to appendable.
+// - The @RPCRequestType/@RPCReplyType structs are final.
 
-struct TypeLookup_getTypes_In
-{
+// Used in TypeLookup_Call and TypeLookup_Return
+const ACE_CDR::ULong TypeLookup_getTypes_HashId = 0x018252d3;
+const ACE_CDR::ULong TypeLookup_getDependencies_HashId = 0x05aafb31;
+
+// @mutable
+struct TypeLookup_getTypes_In {
+  // @hashid
   TypeIdentifierSeq type_ids;
 
   TypeLookup_getTypes_In() {}
 };
 
-struct TypeLookup_getTypes_Out
-{
+// @mutable
+struct TypeLookup_getTypes_Out {
+  // @hashid
   TypeIdentifierTypeObjectPairSeq types;
+  // @hashid
   TypeIdentifierPairSeq complete_to_minimal;
 
   TypeLookup_getTypes_Out() {}
 };
 
-struct TypeLookup_getTypes_Result
-{
-  CORBA::ULong return_code;
+struct TypeLookup_getTypes_Result { //IDL: union switch (long)
+  ACE_CDR::Long return_code;
+
+  // case DDS_RETCODE_OK:
   TypeLookup_getTypes_Out result;
 
   TypeLookup_getTypes_Result() {}
 };
 
-struct OctetSeq32 : Sequence<ACE_CDR::Octet>
-{
+struct OctetSeq32 : Sequence<ACE_CDR::Octet> {
 };
 
-struct TypeLookup_getTypeDependencies_In
-{
+// @mutable
+struct TypeLookup_getTypeDependencies_In {
+  // @hashid
   TypeIdentifierSeq type_ids;
+  // @hashid
   OctetSeq32 continuation_point;
 
   TypeLookup_getTypeDependencies_In() {}
 };
 
-struct TypeLookup_getTypeDependencies_Out
-{
+// @mutable
+struct TypeLookup_getTypeDependencies_Out {
+  // @hashid
   TypeIdentifierWithSizeSeq dependent_typeids;
+  // @hashid
   OctetSeq32 continuation_point;
 
   TypeLookup_getTypeDependencies_Out() {}
 };
 
-struct TypeLookup_getTypeDependencies_Result
-{
-  CORBA::ULong return_code;
+struct TypeLookup_getTypeDependencies_Result { //IDL: union switch (long)
+  ACE_CDR::Long return_code;
+
+  // case DDS_RETCODE_OK:
   TypeLookup_getTypeDependencies_Out result;
 
   TypeLookup_getTypeDependencies_Result() {}
 };
 
-struct TypeLookup_Call
-{
-  CORBA::ULong kind;
+struct TypeLookup_Call { //IDL: union switch (long)
+  ACE_CDR::Long kind;
+
+  // case TypeLookup_getTypes_Hash:
   TypeLookup_getTypes_In getTypes;
+
+  // case TypeLookup_getDependencies_Hash:
   TypeLookup_getTypeDependencies_In getTypeDependencies;
 
   TypeLookup_Call() {}
 };
 
-struct TypeLookup_Request
-{
+// @final @RPCRequestType
+struct TypeLookup_Request {
   DDS::RPC::RequestHeader header;
   TypeLookup_Call data;
 
   TypeLookup_Request() {}
 };
 
-struct TypeLookup_Return
-{
-  CORBA::ULong kind;
-  TypeLookup_getTypes_Result getTypes;
+struct TypeLookup_Return { //IDL: union switch (long)
+  ACE_CDR::Long kind;
+
+  // case TypeLookup_getTypes_Hash:
+  TypeLookup_getTypes_Result getType;
+
+  // case TypeLookup_getDependencies_Hash:
   TypeLookup_getTypeDependencies_Result getTypeDependencies;
 
   TypeLookup_Return() {}
 };
 
-struct TypeLookup_Reply
-{
+// @final @RPCRequestType
+struct TypeLookup_Reply {
   DDS::RPC::ResponseHeader header;
-  TypeLookup_Return data;
+  TypeLookup_Return _cxx_return;
 
   TypeLookup_Reply() {}
 };
+
 } // namespace XTypes
 
 namespace DCPS {

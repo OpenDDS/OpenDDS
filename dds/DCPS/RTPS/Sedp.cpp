@@ -3793,10 +3793,10 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
                                                          XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
-    type_lookup_reply.data.getTypes.result.types);
-  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
-    type_lookup_reply.data.getTypes.return_code = DDS::RETCODE_OK;
-    type_lookup_reply.data.kind = XTypes::TypeLookup_getTypes_HashId;
+    type_lookup_reply._cxx_return.getType.result.types);
+  if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
+    type_lookup_reply._cxx_return.getType.return_code = DDS::RETCODE_OK;
+    type_lookup_reply._cxx_return.kind = XTypes::TypeLookup_getTypes_HashId;
     type_lookup_reply.header.related_request_id = type_lookup_request.header.request_id;
     return DDS::RETCODE_OK;
   }
@@ -3813,8 +3813,8 @@ Sedp::TypeLookupReplyReader::process_tl_reply(DCPS::Serializer& ser)
     return DDS::RETCODE_ERROR;
   }
 
-  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
-    sedp_.type_lookup_service_->add_type_objects_to_cache(type_lookup_reply.data.getTypes.result.types);
+  if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
+    sedp_.type_lookup_service_->add_type_objects_to_cache(type_lookup_reply._cxx_return.getType.result.types);
     DCPS::SequenceNumber rpc_sequence;
     rpc_sequence.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
       type_lookup_reply.header.related_request_id.sequence_number.low);

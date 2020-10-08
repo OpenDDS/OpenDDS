@@ -896,15 +896,17 @@ OpenDDS::DataRepresentation BE_GlobalData::data_representations(
 
 ACE_CDR::ULong BE_GlobalData::get_id(AST_Field* field, AutoidKind auto_id, ACE_CDR::ULong& member_id) const
 {
+  using OpenDDS::XTypes::hash_member_name_to_id;
+  const std::string field_name = field->local_name()->get_string();
   std::string hash_id;
   if (id(field, member_id)) {
     // @id
     return member_id++;
   } else if (hashid(field, hash_id)) {
     // @hashid
-    return OpenDDS::XTypes::hash_member_name_to_id(hash_id);
+    return hash_member_name_to_id(hash_id.empty() ? field_name : hash_id);
   } else if (auto_id == autoidkind_hash) {
-    return OpenDDS::XTypes::hash_member_name_to_id(field->local_name()->get_string());
+    return hash_member_name_to_id(field_name);
   } else {
     // auto_id == autoidkind_sequential
     return member_id++;
