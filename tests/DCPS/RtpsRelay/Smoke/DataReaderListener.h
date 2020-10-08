@@ -52,7 +52,7 @@ public:
     return num_reads_;
   }
 
-  bool is_valid() const;
+  bool is_valid(bool check_lease_recovery) const;
 
 private:
   typedef std::set<CORBA::Long> Counts;

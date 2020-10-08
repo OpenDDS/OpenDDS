@@ -30,6 +30,7 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
+#include "Args.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 #include "../../common/ConnectionRecordLogger.h"
@@ -38,6 +39,8 @@
 
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
+
+bool check_lease_recovery = false;
 
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
@@ -66,6 +69,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    int status = EXIT_SUCCESS;
+    if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
+      return status;
+    }
 
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
@@ -179,7 +187,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-      if (matches.current_count == 0 && matches.total_count > 0) {
+      if (matches.current_count == 0 && matches.total_count > 0 &&
+          (!check_lease_recovery || listener_servant->is_valid(check_lease_recovery))) {
         break;
       }
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
@@ -189,7 +198,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    status = listener_servant->is_valid() ? 0 : -1;
+    status = listener_servant->is_valid(check_lease_recovery) ? EXIT_SUCCESS : EXIT_FAILURE;
 
     ws->detach_condition(condition);
 

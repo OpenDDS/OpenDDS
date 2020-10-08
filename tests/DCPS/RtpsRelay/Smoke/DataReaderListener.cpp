@@ -149,8 +149,17 @@ void DataReaderListenerImpl::on_sample_lost(
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
 
-bool DataReaderListenerImpl::is_valid() const
+bool DataReaderListenerImpl::is_valid(bool check_lease_recovery) const
 {
+  if (check_lease_recovery) {
+    // This value will depend on the speed of rediscovery, which is currently temperamental.
+    // Assuming we allow for twice the minimum expected number of lost samples (6 seconds => 6 samples),
+    // we can assume this to be 30 - (2 * 6) = 18; If secure rediscovery is taking a particularly long
+    // time on some builds, we may need to reduce this further.
+    const CORBA::ULong check_lease_recovery_minimum = 18;
+    return valid_ && counts_.size() >= check_lease_recovery_minimum;
+  }
+
   CORBA::Long expected = 0;
   Counts::const_iterator count = counts_.begin();
   bool valid_count = true;
