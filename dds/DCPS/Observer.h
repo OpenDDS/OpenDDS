@@ -60,31 +60,17 @@ public:
     const void* data;
     const ValueWriterDispatcher& data_dispatcher;
 
-    Sample(DDS::InstanceHandle_t a_instance,
-           DDS::InstanceStateKind a_instance_state,
-           const DDS::Time_t& a_timestamp,
-           const SequenceNumber& a_sequence_number,
-           const void* a_data,
-           const ValueWriterDispatcher& a_data_dispatcher)
-      : instance(a_instance)
-      , instance_state(a_instance_state)
-      , timestamp(a_timestamp)
-      , sequence_number(a_sequence_number)
-      , data(a_data)
-      , data_dispatcher(a_data_dispatcher)
-    {}
+    Sample(DDS::InstanceHandle_t instance,
+           DDS::InstanceStateKind instance_state,
+           const DDS::Time_t& timestamp,
+           const SequenceNumber& sequence_number,
+           const void* data,
+           const ValueWriterDispatcher& data_dispatcher);
 
-    Sample(DDS::InstanceHandle_t a_instance,
-           DDS::InstanceStateKind a_instance_state,
-           const ReceivedDataElement& a_rde,
-           const ValueWriterDispatcher& a_data_dispatcher)
-      : instance(a_instance)
-      , instance_state(a_instance_state)
-      , timestamp(a_rde.source_timestamp_)
-      , sequence_number(a_rde.sequence_)
-      , data(a_rde.registered_data_)
-      , data_dispatcher(a_data_dispatcher)
-    {}
+    Sample(DDS::InstanceHandle_t instance,
+           DDS::InstanceStateKind instance_state,
+           const ReceivedDataElement& rde,
+           const ValueWriterDispatcher& data_dispatcher);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed
@@ -107,34 +93,15 @@ public:
   virtual void on_sample_read(DDS::DataReader_ptr, const Sample&) {}
   virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&) {}
 
-  virtual ~Observer() {}
+  virtual ~Observer();
 protected:
   Observer() {}
 };
 
 typedef RcHandle<Observer> Observer_rch;
 
-inline void
-vwrite(ValueWriter& vw, const Observer::Sample& sample)
-{
-  vw.begin_struct();
-  vw.begin_field("instance");
-  vw.write_int32(sample.instance);
-  vw.end_field();
-  vw.begin_field("instance_state");
-  vw.write_uint32(sample.instance_state);
-  vw.end_field();
-  vw.begin_field("timestamp");
-  vwrite(vw, sample.timestamp);
-  vw.end_field();
-  vw.begin_field("sequence_number");
-  vw.write_int64(sample.sequence_number.getValue());
-  vw.end_field();
-  vw.begin_field("data");
-  sample.data_dispatcher.write(vw, sample.data);
-  vw.end_field();
-  vw.end_struct();
-}
+void
+vwrite(ValueWriter& vw, const Observer::Sample& sample);
 
 } // namespace DCPS
 } // namespace OpenDDS
