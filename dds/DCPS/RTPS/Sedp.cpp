@@ -2306,7 +2306,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         TopicDetails& td = top_it->second;
 
         // Upsert the remote topic.
-        td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in());
+        td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in(), pub.type_info_.minimal.typeid_with_size.type_id); //TODO expecting pub's type_id to reflect that of the remote. If this isn't true then this needs to be removed. Same for call to add_pub_sub() for sub.
 
         std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
@@ -2639,7 +2639,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         TopicDetails& td = top_it->second;
 
         // Upsert the remote topic.
-        td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in());
+        td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in(),sub.type_info_.minimal.typeid_with_size.type_id);
 
         std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));

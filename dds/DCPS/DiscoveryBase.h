@@ -1324,27 +1324,23 @@ namespace OpenDDS {
         }
 
          // for Xtypes, check consistency
-        if ((writer_type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
-        (reader_type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+         XTypes::TypeIdentifier writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
+         XTypes::TypeIdentifier reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
+        if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
           //look up topic name
-          TopicNameMap::iterator name_iter = topic_names_.find(writer);
+          TopicNameMap::iterator name_iter = topic_names_.find(writer); //TODO find reader too?
           if (name_iter != topic_names_.end()) {
             //find TopicDetails instance in topics_
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator TDiter = topics_.find(name_iter->second);
             if (TDiter != topics_.end()) {
               if (!reader_local || !writer_local) { //skip for writer and reader both local
-                if (reader_local) {
-                  // TDiter->second.set_local(reader);
-                } else {
-                  TDiter->second.add_pub_sub(reader);
+                if (!reader_local) {
+                  TDiter->second.add_pub_sub_xtype(reader, writer_type_id, reader_type_id);
                 }
 
-                if (writer_local) {
-                  // TDiter->second.set_local(writer);
-                } else {
-                  TDiter->second.add_pub_sub(writer);
+                if (!writer_local) {
+                  TDiter->second.add_pub_sub_xtype(writer, reader_type_id, writer_type_id);
                 }
-                //TODO create new vesion of add_pub_sub to used assignable() for consistency check
               }
             }
 

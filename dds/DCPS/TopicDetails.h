@@ -10,6 +10,8 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
+#include "dds/DCPS/XTypes/TypeAssignability.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -23,10 +25,11 @@ namespace OpenDDS {
     struct TopicDetails {
 
       struct RemoteTopic {
-        RemoteTopic() : data_type_name_(), inconsistent_(false), endpoints_() {}
+        RemoteTopic() : data_type_name_(), inconsistent_(false), endpoints_(), type_id_() {}
         OPENDDS_STRING data_type_name_;
         bool inconsistent_;
         RepoIdSet endpoints_;
+        XTypes::TypeIdentifier type_id_;
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, RemoteTopic, DCPS::GUID_tKeyLessThan) RemoteTopicMap;
 
@@ -60,6 +63,8 @@ namespace OpenDDS {
         for (RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
              pos != limit; ++pos) {
           RemoteTopic& remote = pos->second;
+
+           //TODO should the set_local conistency check still occur if remote.type_id_ != XTypes::TK_NONE or should it be defferred?
           remote.inconsistent_ = !remote.data_type_name_.empty() && local_data_type_name_ != remote.data_type_name_;
           if (!remote.inconsistent_) {
             remote.data_type_name_.clear();
@@ -105,9 +110,76 @@ namespace OpenDDS {
         endpoints_.insert(guid);
       }
 
+      // Remote (assumes type_ids != TK_NONE)
+      void add_pub_sub_xtype(const DCPS::RepoId& remote_guid,
+                       const XTypes::TypeIdentifier& local_type_id,
+                       const XTypes::TypeIdentifier& remote_type_id) {
+
+        RepoId participant_id = remote_guid;
+        participant_id.entityId = ENTITYID_PARTICIPANT;
+
+        endpoints_.insert(remote_guid);
+
+        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
+        bool inconsistent_before;
+        if (remote_topic_iter == remote_topics_.end()) {
+          // Insert.
+          remote_topic_iter = remote_topics_.insert(std::make_pair(participant_id, RemoteTopic())).first;
+          inconsistent_before = false;
+        } else {
+          inconsistent_before = remote_topic_iter->second.inconsistent_;
+        }
+
+        // Initialize.
+        RemoteTopic& remote = remote_topic_iter->second;
+        remote.data_type_name_ = "";
+        remote.type_id_= remote_type_id;
+        XTypes::TypeAssignability ta(make_rch<XTypes::TypeLookupService>());
+        remote.inconsistent_ = topic_callbacks_ && ta.assignable(local_type_id, remote.type_id_);
+
+        //TODO from this point on could be made a helper function to be shared with add_pub_sub() to improve code maintenance
+        if (topic_callbacks_ && !remote.inconsistent_) {
+          remote.data_type_name_.clear();
+        }
+        remote.endpoints_.insert(remote_guid);
+
+        if (!inconsistent_before && remote.inconsistent_) {
+          ++inconsistent_topic_count_;
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_WARNING,
+                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
+                       ACE_TEXT("topic %C with data type %C now does not match discovered data type %C\n"),
+                       name_.c_str(),
+                       local_data_type_name_.c_str(),
+                       remote.data_type_name_.c_str()));
+          }
+          if (topic_callbacks_) {
+            topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+          }
+        } else if (inconsistent_before && !remote.inconsistent_) {
+          --inconsistent_topic_count_;
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_WARNING,
+                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
+                       ACE_TEXT("topic %C with data type %C now matches discovered data type %C\n"),
+                       name_.c_str(),
+                       local_data_type_name_.c_str(),
+                       remote.data_type_name_.c_str()));
+          }
+          if (topic_callbacks_) {
+            topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+          }
+        }
+
+        if (remote.inconsistent_) {
+          endpoints_.erase(remote_guid); //TODO is this a good idea since it's called from match_continue????
+        }
+      }
+
       // Remote
       void add_pub_sub(const DCPS::RepoId& guid,
-                       const OPENDDS_STRING& type_name) {
+                       const OPENDDS_STRING& type_name,
+                       const XTypes::TypeIdentifier& type_id) {
         // This function can be called before the local side of the
         // topic is initialized.  If this happens, the topic will
         // always be inconsistent meaning the inconsistent count
@@ -132,7 +204,18 @@ namespace OpenDDS {
         // Initialize.
         RemoteTopic& remote = remote_topic_iter->second;
         remote.data_type_name_ = type_name;
-        remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
+        remote.type_id_= type_id;
+        if (remote.type_id_.kind() == XTypes::TK_NONE) {
+          remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
+        } else { //deferring remaining checks until can check type_ids for both
+            if (DCPS::DCPS_debug_level) {
+              ACE_DEBUG((LM_WARNING,
+                         ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
+                         ACE_TEXT("defferring consistency check for Xtypes remote for topic %C\n"),
+                         name_.c_str()));
+            }
+            return;
+        }
         if (topic_callbacks_ && !remote.inconsistent_) {
           remote.data_type_name_.clear();
         }
