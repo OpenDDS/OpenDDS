@@ -27,6 +27,8 @@ module RtpsRelay {
     @key EntityId_t entityId;
   };
 
+  const string WRITERS_TOPIC_NAME = "Writers";
+
   @topic
   struct WriterEntry {
     @key GUID_t guid;
@@ -37,6 +39,8 @@ module RtpsRelay {
     DDS::PublisherQos publisher_qos;
   };
 
+  const string READERS_TOPIC_NAME = "Readers";
+
   @topic
   struct ReaderEntry {
     @key GUID_t guid;
@@ -46,6 +50,16 @@ module RtpsRelay {
     DDS::DataReaderQos data_reader_qos;
     DDS::SubscriberQos subscriber_qos;
   };
+
+  const string PARTICIPANTS_TOPIC_NAME = "Participants";
+
+  @topic
+  struct ParticipantEntry {
+    @key GUID_t guid;
+    DDS::UserDataQosPolicy user_data;
+  };
+
+  const string RESPONSIBLE_RELAY_TOPIC_NAME = "Responsible Relay";
 
   @topic
   struct GuidNameAddress {
@@ -65,8 +79,13 @@ module RtpsRelay {
     unsigned long nanosec;
   };
 
+  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
+
+  @topic
   struct ParticipantStatistics {
-    string address;
+    @key GUID_t guid;
+    @key string name;
+    Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
     unsigned long messages_out;
@@ -74,7 +93,7 @@ module RtpsRelay {
     unsigned long max_fan_out;
   };
 
-  typedef sequence<ParticipantStatistics> ParticipantStatisticsSequence;
+  const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
 
   @topic
   struct HandlerStatistics {
@@ -89,16 +108,21 @@ module RtpsRelay {
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
     unsigned long local_active_participants;
-    ParticipantStatisticsSequence participant_statistics;
+    unsigned long error_count;
+    unsigned long governor_count;
   };
+
+  const string DOMAIN_STATISTICS_TOPIC_NAME = "Domain Statistics";
 
   @topic
   struct DomainStatistics {
     @key GUID_t application_participant_guid;
+    Duration_t interval;
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
     unsigned long total_writers;
     unsigned long total_readers;
   };
+
 };
