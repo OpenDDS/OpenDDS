@@ -1,10 +1,9 @@
 #include "ConnectionRecordLogger.h"
 
-#include "JsonValueWriter.h"
-
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DiscoveryBase.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/JsonValueWriter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,7 +41,7 @@ class Listener : public DDS::DataReaderListener {
     while (r->take_next_sample(sample, sample_info) == DDS::RETCODE_OK) {
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("%C\n"),
-                 to_json(r->get_topicdescription(), sample, sample_info).c_str()));
+                 DCPS::to_json(r->get_topicdescription(), sample, sample_info).c_str()));
     }
   }
 
