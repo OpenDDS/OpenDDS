@@ -594,7 +594,7 @@ void generateCaseBody(
     const bool is_face = lmap == BE_GlobalData::LANGMAP_FACE_CXX;
     const bool is_wide = br_cls & CL_WIDE;
     const bool is_bound_string = (br_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED);
-    const std::string bound_string_suffix = (is_bound_string && is_face) ? ".c_str()" : "";
+    const std::string bound_string_suffix = (is_bound_string && !is_face) ? ".c_str()" : "";
 
     if (is_bound_string) {
       const std::string to_type = is_face ? is_wide ? "ACE_InputCDR::to_wstring" : "ACE_InputCDR::to_string"
