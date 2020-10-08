@@ -1091,6 +1091,27 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return true;
 }
 
+::CORBA::Boolean AccessControlBuiltInImpl::return_permissions_handle(
+    ::DDS::Security::PermissionsHandle handle,
+    ::DDS::Security::SecurityException& ex)
+{
+  if (DDS::HANDLE_NIL == handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::return_permissiosn_handle: Invalid permissions handle");
+    return false;
+  }
+
+  ACPermsMap::iterator ac_iter = local_ac_perms_.find(handle);
+
+  if (ac_iter == local_ac_perms_.end()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::return_permissions_handle: No matching permissions handle present");
+    return false;
+  }
+
+  local_ac_perms_.erase(ac_iter);
+
+  return true;
+}
+
 ::CORBA::Boolean AccessControlBuiltInImpl::return_permissions_token(
   const ::DDS::Security::PermissionsToken & token,
   ::DDS::Security::SecurityException & ex)

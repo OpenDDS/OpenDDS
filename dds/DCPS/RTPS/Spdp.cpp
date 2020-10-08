@@ -20,6 +20,7 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/ConnectionRecords.h"
 
 #ifdef OPENDDS_SECURITY
 #include "SecurityHelpers.h"
@@ -569,10 +570,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       return;
     }
 
-    // copy guid prefix (octet[12]) into BIT key (long[3])
-    std::memcpy(partBitData(pdata).key.value,
-      pdata.participantProxy.guidPrefix,
-      sizeof(DDS::BuiltinTopicKey_t));
+    partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
       DCPS::GuidConverter local(guid_), remote(guid);
@@ -1822,12 +1820,13 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
   if (security_config_) {
     DDS::Security::SecurityException se = {"", 0, 0};
     DDS::Security::Authentication_var auth = security_config_->get_authentication();
+    DDS::Security::AccessControl_var access = security_config_->get_access_control();
 
     if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return identity handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
@@ -1839,7 +1838,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
       if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return handshake handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
@@ -1851,18 +1850,26 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
       if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::match_authenticated() - ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
                      ACE_TEXT("Unable to return sharedsecret handle. ")
                      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                      se.code, se.minor_code, se.message.in()));
         }
       }
     }
-  }
 
-  // TODO:  What other security related clean up needs to be performed? (is every register unregistered)
-  // TODO:  Is a local participant that is destroyed being cleaned up?
-  // TODO:  How should this be split between here and DiscoveryBase?
+    if (iter->second.permissions_handle_ != DDS::HANDLE_NIL) {
+      if (!access->return_permissions_handle(iter->second.permissions_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
+                     ACE_TEXT("Unable to return permissions handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
+  }
 #endif
 }
 
@@ -2755,11 +2762,20 @@ Spdp::SendStun::execute()
   res = socket.send(tport_->wbuff_.rd_ptr(), tport_->wbuff_.length(), address_);
 
   if (res < 0) {
-    const int e = errno;
-    ACE_TCHAR addr_buff[256] = {};
-    address_.addr_to_string(addr_buff, 256);
-    errno = e;
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - destination %s failed %m\n"), addr_buff));
+    const int err = errno;
+    if (err != ENETUNREACH || !tport_->network_is_unreachable_) {
+      ACE_TCHAR addr_buff[256] = {};
+      address_.addr_to_string(addr_buff, 256);
+      errno = err;
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: Spdp::SendStun::execute() - ")
+                 ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
+    }
+    if (err == ENETUNREACH) {
+      tport_->network_is_unreachable_ = true;
+    }
+  } else {
+    tport_->network_is_unreachable_ = false;
   }
 }
 
@@ -3432,15 +3448,12 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
-    dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
+    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
-    {
-      connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
-      const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);
-      dr->set_instance_state(ih, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-      break;
-    }
+    connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, false, connection_record));
+    break;
   }
 #else
   ACE_UNUSED_ARG(sc);

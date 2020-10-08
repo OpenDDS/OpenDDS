@@ -32,7 +32,7 @@ void
 DRPeriodicMonitorImpl::report() {
   if (!CORBA::is_nil(this->dr_per_writer_.in())) {
     DataReaderPeriodicReport report;
-    report.dr_id   = dr_->get_subscription_id();
+    report.dr_id   = dr_->get_repo_id();
     //report.associations = dr_->
     this->dr_per_writer_->write(report, DDS::HANDLE_NIL);
   }

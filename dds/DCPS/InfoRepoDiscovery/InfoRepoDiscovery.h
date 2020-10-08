@@ -74,10 +74,6 @@ public:
 
   virtual void fini_bit(DCPS::DomainParticipantImpl* participant);
 
-  virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
-                                    const char* bit_topic_name,
-                                    const DDS::BuiltinTopicKey_t& key) const;
-
   virtual bool attach_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId);
