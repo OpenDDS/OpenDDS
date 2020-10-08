@@ -3851,7 +3851,8 @@ void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& gui
                                                          const XTypes::TypeIdentifier& remote_ti,
                                                          XTypes::OctetSeq32& cont_point) const
 {
-  const DependenciesMap::const_iterator it = dependencies_.find(guid_prefix);
+  const GuidPrefixWrapper guid_pref_wrap(guid_prefix);
+  const DependenciesMap::const_iterator it = dependencies_.find(guid_pref_wrap);
   if (it == dependencies_.end() || it->second.find(remote_ti) == it->second.end()) {
     cont_point.length(0);
   } else {
@@ -3945,7 +3946,8 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
 
   // Store the received dependencies and continuation point
   const XTypes::TypeIdentifier& remote_ti = it->second.first;
-  XTypes::TypeIdentifierSeq& deps = dependencies_[remote_id.guidPrefix][remote_ti].second;
+  const GuidPrefixWrapper guid_pref(remote_id.guidPrefix);
+  XTypes::TypeIdentifierSeq& deps = dependencies_[guid_pref][remote_ti].second;
   for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
     const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
     // Optimization - only store TypeIdentifiers for which TypeObjects haven't
@@ -3954,7 +3956,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
       deps.append(ti);
     }
   }
-  dependencies_[remote_id.guidPrefix][remote_ti].first = data.continuation_point;
+  dependencies_[guid_pref][remote_ti].first = data.continuation_point;
 
   // Store an entry for either the final getTypes or next getTypeDependencies request
   sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,

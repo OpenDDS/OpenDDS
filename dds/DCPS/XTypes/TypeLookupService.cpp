@@ -117,11 +117,6 @@ bool TypeLookupService::type_object_in_cache(const TypeIdentifier& ti) const
   return it_type_id_with_size_seq != minimal_type_map_.end();
 }
 
-bool TypeLookupService::type_dependencies_in_cache(const TypeIdentifier& ti) const
-{
-  return type_dependencies_map_.find(ti) != type_dependencies_map_.end();
-}
-
 } // namespace XTypes
 } // namespace OpenDDS
 
