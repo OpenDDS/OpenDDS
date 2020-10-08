@@ -1941,8 +1941,8 @@ DataWriterImpl::write(Message_Block_Ptr data,
   const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
   if (observer && real_data && vwd) {
-    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data);
-    observer->on_sample_sent(this, s, *vwd);
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vwd);
+    observer->on_sample_sent(this, s);
   }
 
   return DDS::RETCODE_OK;
