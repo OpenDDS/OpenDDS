@@ -58,13 +58,13 @@ public:
 
   void total_writers(size_t count)
   {
-    domain_statistics_.total_writers(count);
+    domain_statistics_.total_writers(static_cast<uint32_t>(count));
     write_sample();
   }
 
   void total_readers(size_t count)
   {
-    domain_statistics_.total_readers(count);
+    domain_statistics_.total_readers(static_cast<uint32_t>(count));
     write_sample();
   }
 
