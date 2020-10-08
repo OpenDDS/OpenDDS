@@ -215,6 +215,24 @@ void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Top
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 }
 
+
+bool check_inconsistent_topic_status(Topic_var topic)
+{
+  DDS::InconsistentTopicStatus status;
+  DDS::ReturnCode_t retcode;
+
+  retcode = topic->get_inconsistent_topic_status(status);
+  if (retcode != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
+    return false;
+  } else if (status.total_count != (expect_to_fail ? 1 : 0)) {
+    ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
+    return false;
+  }
+  return true;
+}
+
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -287,27 +305,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
       DEFAULT_STATUS_MASK);
 
-    if (type == "Property_1") {
-      write_property_1(dw);
-    } else if (type == "Property_2") {
-      write_property_2(dw);
-    } else if (type == "AppendableStruct") {
-      write_appendable_struct(dw);
-    } else if (type == "AdditionalPrefixFieldStruct") {
-      write_additional_prefix_field_struct(dw);
-    } else if (type == "AdditionalPostfixFieldStruct") {
-      write_additional_postfix_field_struct(dw);
-    } else if (type == "MutableStruct") {
-      write_mutable_struct(dw);
-    } else if (type == "AlteredMutableStruct") {
-      write_altered_mutable_struct(dw);
-    } else {
-      ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
-      failed = 1;
+    ACE_OS::sleep(ACE_Time_Value(1, 0));
+
+    failed = !check_inconsistent_topic_status(topic);
+
+    if (!failed) {
+      if (type == "Property_1") {
+        write_property_1(dw);
+      } else if (type == "Property_2") {
+        write_property_2(dw);
+      } else if (type == "AppendableStruct") {
+        write_appendable_struct(dw);
+      } else if (type == "AdditionalPrefixFieldStruct") {
+        write_additional_prefix_field_struct(dw);
+      } else if (type == "AdditionalPostfixFieldStruct") {
+        write_additional_postfix_field_struct(dw);
+      } else if (type == "MutableStruct") {
+        write_mutable_struct(dw);
+      } else if (type == "AlteredMutableStruct") {
+        write_altered_mutable_struct(dw);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+        failed = true;
+      }
     }
 
     ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
 
+    if (failed) {
+      ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
+    }
   } else if (reader) {
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
 
@@ -321,23 +348,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
       DEFAULT_STATUS_MASK);
 
-    if (type == "Property_1") {
-      failed = !((read_property_1(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else if (type == "Property_2") {
-      failed = !((read_property_2(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else if (type == "AppendableStruct") {
-      failed = !((read_appendable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else if (type == "AdditionalPrefixFieldStruct") {
-      failed = !((read_additional_prefix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else if (type == "AdditionalPostfixFieldStruct") {
-      failed = !((read_additional_postfix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else if (type == "MutableStruct") {
-      failed = !((read_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else if (type == "AlteredMutableStruct") {
-      failed = !((read_altered_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
-    } else {
-      ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
-      failed = 1;
+    ACE_OS::sleep(ACE_Time_Value(1, 0));
+
+    failed = !check_inconsistent_topic_status(topic);
+
+    if (!failed) {
+      if (type == "Property_1") {
+        failed = !((read_property_1(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "Property_2") {
+        failed = !((read_property_2(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "AppendableStruct") {
+        failed = !((read_appendable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "AdditionalPrefixFieldStruct") {
+        failed = !((read_additional_prefix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "AdditionalPostfixFieldStruct") {
+        failed = !((read_additional_postfix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "MutableStruct") {
+        failed = !((read_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "AlteredMutableStruct") {
+        failed = !((read_altered_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+        failed = true;
+      }
     }
 
     if (failed) {
@@ -345,7 +378,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
-    failed = 1;
+    failed = true;
   }
 
   topic = 0;
