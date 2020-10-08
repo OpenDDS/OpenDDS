@@ -4394,7 +4394,7 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
 
 void
 Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sample,
-  const DCPS::EntityId_t&,
+  const DCPS::EntityId_t& remote_id,
   DCPS::Serializer& ser,
   DCPS::Extensibility)
 {
@@ -4413,6 +4413,7 @@ Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sam
     }
   }
 #else
+  ACE_UNUSED_ARG(remote_id);
   if (!process_type_lookup_reply(sample, ser, false)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
       ACE_TEXT("failed to process type lookup reply\n")));
