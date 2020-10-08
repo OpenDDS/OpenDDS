@@ -246,7 +246,7 @@ protected:
 
   void populate_address_map(AddressMap& address_map, const GuidSet& to);
 
-  virtual uint32_t local_active_participants() const override { return (uint32_t)guid_addr_set_map_.size(); }
+  virtual uint32_t local_active_participants() const override { return static_cast<uint32_t>(guid_addr_set_map_.size()); }
 
   const AssociationTable& association_table_;
   GuidNameAddressDataWriter_ptr responsible_relay_writer_;

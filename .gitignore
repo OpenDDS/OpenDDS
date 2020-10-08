@@ -44,4 +44,3 @@ lib*.dylib
 .vs/
 /tags
 /host_tools.mwc*
-*.recipe
