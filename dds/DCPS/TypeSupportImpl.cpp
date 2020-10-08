@@ -82,7 +82,8 @@ void TypeSupportImpl::get_dependencies(const XTypes::TypeMap& type_map,
     XTypes::TypeMap::const_iterator iter = type_map.find(*it);
     if (iter != type_map.end()) {
       const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
-      deps_with_size.append({*it, static_cast<ACE_CDR::ULong>(tobj_size)});
+      XTypes::TypeIdentifierWithSize tmp = {*it, static_cast<ACE_CDR::ULong>(tobj_size)};
+      deps_with_size.append(tmp);
     } else {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TypeSupportImpl::get_dependencies, ")

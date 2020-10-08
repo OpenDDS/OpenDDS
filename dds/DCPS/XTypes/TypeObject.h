@@ -748,6 +748,7 @@ namespace XTypes {
       }
     }
 
+    // TODO(sonndinh): Make sure this work correctly.
     bool operator==(const TypeIdentifier& other) const
     {
       return !(*this < other) && !(other < *this);
