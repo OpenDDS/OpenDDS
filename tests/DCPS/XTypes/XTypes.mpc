@@ -1,4 +1,4 @@
-project: dcps_test, dcps_rtps_udp {
+project: dcps_test, dcps_rtps_udp, msvc_bigobj {
   TypeSupport_Files {
     XTypes.idl
   }

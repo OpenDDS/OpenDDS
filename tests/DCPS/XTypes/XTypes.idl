@@ -39,7 +39,7 @@ struct AdditionalPrefixFieldStruct {
 @topic
 @mutable
 @OpenDDS::data_representation(XCDR2)
-struct AlteredMutableStruct {
+struct ModifiedMutableStruct {
   @id(2) long additional_field;
   @id(1) @key long key;
 };
@@ -50,4 +50,35 @@ struct AlteredMutableStruct {
 struct MutableStruct {
   @id(1) @key long key;
   @id(2) long additional_field;
+};
+
+
+// Unions
+
+enum UnionDisc {
+  E_KEY,
+  E_OCTET_FIELD,
+  E_ADDITIONAL_FIELD
+};
+
+@topic
+@mutable
+@OpenDDS::data_representation(XCDR2)
+union MutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+@OpenDDS::data_representation(XCDR2)
+union ModifiedMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
 };

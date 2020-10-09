@@ -23,7 +23,9 @@ enum KeyValue
   ADDITIONAL_PREFIX_FIELD_STRUCT_KEY,
   ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY,
   MUTABLE_STRUCT_KEY,
-  ALTERED_MUTABLE_STRUCT_KEY
+  MODIFIED_MUTABLE_STRUCT_KEY,
+  MUTABLE_UNION_KEY,
+  MODIFIED_MUTABLE_UNION_KEY
 };
 
 enum AdditionalFieldValue
@@ -31,7 +33,8 @@ enum AdditionalFieldValue
   ADDITIONAL_PREFIX_FIELD_STRUCT_AF,
   ADDITIONAL_POSTFIX_FIELD_STRUCT_AF,
   MUTABLE_STRUCT_AF,
-  ALTERED_MUTABLE_STRUCT_AF
+  MODIFIED_MUTABLE_STRUCT_AF,
+  MODIFIED_MUTABLE_UNION_AF
 };
 
 template<typename T1>
@@ -39,7 +42,7 @@ ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected
 {
   ReturnCode_t ret = RETCODE_OK;
   if (data[0].additional_field != expected_additional_field_value) {
-    ACE_DEBUG((LM_DEBUG, "reader: expected key value: %d, received: %d\n", expected_additional_field_value, data[0].key));
+    ACE_DEBUG((LM_DEBUG, "reader: expected key value: %d, received: %d\n", expected_additional_field_value, data[0].additional_field));
     ret = RETCODE_ERROR;
   }
 
@@ -47,7 +50,7 @@ ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_value)
+ReturnCode_t read_struct(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_value)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -97,11 +100,79 @@ ReturnCode_t read(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_val
   return ret;
 }
 
+template<typename T1, typename T2, typename T3>
+ReturnCode_t read_union(DataReader_var dr, T1 pdr,
+  T2& data, T3 expected_value)
+{
+  ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
+    ANY_VIEW_STATE,
+    ALIVE_INSTANCE_STATE);
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_rc);
+  // TODO: remove if not needed
+  unsigned counter = 0;
+  std::set<int> instances;
+
+  ConditionSeq active;
+  const Duration_t max_wait = { 5, 0 };
+  ReturnCode_t ret = ws->wait(active, max_wait);
+  if (ret == RETCODE_TIMEOUT) {
+    if (verbose) {
+      ACE_DEBUG((LM_DEBUG, "reader: Timedout\n"));
+    }
+    return ret;
+  } else if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
+    return ret;
+  }
+
+  // data;
+  SampleInfoSeq info;
+  if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
+    if (data.length() != 1) {
+      ACE_DEBUG((LM_DEBUG, "reader: unexpected data length: %d", data.length()));
+      ret = RETCODE_ERROR;
+    }
+
+    switch (data[0]._d()) {
+    case E_KEY:
+      if (data[0].key() != expected_value) {
+        ACE_DEBUG((LM_DEBUG, "reader: expected union key value: %d, received: %d\n",
+          expected_value, data[0].key()));
+        ret = RETCODE_ERROR;
+      }
+      if (verbose) {
+        ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key()));
+      }
+      break;
+    case E_ADDITIONAL_FIELD:
+      if (data[0].additional_field() != expected_value) {
+        ACE_DEBUG((LM_DEBUG, "reader: expected additional_field value: %d, received: %d\n",
+          expected_value, data[0].additional_field()));
+        ret = RETCODE_ERROR;
+      }
+      if (verbose) {
+        ACE_DEBUG((LM_DEBUG, "reader: union additional_field %d\n", data[0].additional_field()));
+      }
+      break;
+    default:
+      break;
+    }
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
+    return ret;
+  }
+
+  ws->detach_condition(dr_rc);
+  dr->delete_readcondition(dr_rc);
+  return ret;
+}
+
 ReturnCode_t read_property_1(DataReader_var dr)
 {
   Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
   ::Property_1Seq data;
-  return read(dr, pdr, data, PROPERTY_1_KEY);
+  return read_struct(dr, pdr, data, PROPERTY_1_KEY);
 }
 
 
@@ -109,7 +180,7 @@ ReturnCode_t read_property_2(DataReader_var dr)
 {
   Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
   ::Property_2Seq data;
-  return read(dr, pdr, data, PROPERTY_2_KEY);
+  return read_struct(dr, pdr, data, PROPERTY_2_KEY);
 }
 
 
@@ -117,7 +188,7 @@ ReturnCode_t read_appendable_struct(DataReader_var dr)
 {
   AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
   ::AppendableStructSeq data;
-  return read(dr, pdr, data, APPENDABLE_STRUCT_KEY);
+  return read_struct(dr, pdr, data, APPENDABLE_STRUCT_KEY);
 }
 
 
@@ -126,7 +197,7 @@ ReturnCode_t read_additional_prefix_field_struct(DataReader_var dr)
   AdditionalPrefixFieldStructDataReader_var pdr = AdditionalPrefixFieldStructDataReader::_narrow(dr);
   ::AdditionalPrefixFieldStructSeq data;
   ReturnCode_t ret;
-  ret = read(dr, pdr, data, ADDITIONAL_PREFIX_FIELD_STRUCT_KEY);
+  ret = read_struct(dr, pdr, data, ADDITIONAL_PREFIX_FIELD_STRUCT_KEY);
   if (ret == RETCODE_OK) {
     ret = check_additional_field_value(data, ADDITIONAL_PREFIX_FIELD_STRUCT_AF);
   }
@@ -139,7 +210,7 @@ ReturnCode_t read_additional_postfix_field_struct(DataReader_var dr)
   AdditionalPostfixFieldStructDataReader_var pdr = AdditionalPostfixFieldStructDataReader::_narrow(dr);
   ::AdditionalPostfixFieldStructSeq data;
   ReturnCode_t ret;
-  ret = read(dr, pdr, data, ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY);
+  ret = read_struct(dr, pdr, data, ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY);
   if (ret == RETCODE_OK) {
     ret = check_additional_field_value(data, ADDITIONAL_POSTFIX_FIELD_STRUCT_AF);
   }
@@ -151,23 +222,37 @@ ReturnCode_t read_mutable_struct(DataReader_var dr)
   MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
   ::MutableStructSeq data;
   ReturnCode_t ret;
-  ret = read(dr, pdr, data, MUTABLE_STRUCT_KEY);
+  ret = read_struct(dr, pdr, data, MUTABLE_STRUCT_KEY);
   if (ret == RETCODE_OK) {
     ret = check_additional_field_value(data, MUTABLE_STRUCT_AF);
   }
   return ret;
 }
 
-ReturnCode_t read_altered_mutable_struct(DataReader_var dr)
+ReturnCode_t read_modified_mutable_struct(DataReader_var dr)
 {
-  AlteredMutableStructDataReader_var pdr = AlteredMutableStructDataReader::_narrow(dr);
-  ::AlteredMutableStructSeq data;
+  ModifiedMutableStructDataReader_var pdr = ModifiedMutableStructDataReader::_narrow(dr);
+  ::ModifiedMutableStructSeq data;
   ReturnCode_t ret;
-  ret = read(dr, pdr, data, ALTERED_MUTABLE_STRUCT_KEY);
+  ret = read_struct(dr, pdr, data, MODIFIED_MUTABLE_STRUCT_KEY);
   if (ret == RETCODE_OK) {
-    ret = check_additional_field_value(data, ALTERED_MUTABLE_STRUCT_AF);
+    ret = check_additional_field_value(data, MODIFIED_MUTABLE_STRUCT_AF);
   }
   return ret;
+}
+
+ReturnCode_t read_mutable_union(DataReader_var dr)
+{
+  MutableUnionDataReader_var pdr = MutableUnionDataReader::_narrow(dr);
+  ::MutableUnionSeq data;
+  return read_union(dr, pdr, data, MUTABLE_UNION_KEY);
+}
+
+ReturnCode_t read_modified_mutable_union(DataReader_var dr)
+{
+  ModifiedMutableUnionDataReader_var pdr = ModifiedMutableUnionDataReader::_narrow(dr);
+  ::ModifiedMutableUnionSeq data;
+  return read_union(dr, pdr, data, MODIFIED_MUTABLE_UNION_AF);
 }
 
 
@@ -254,16 +339,16 @@ void write_mutable_struct(DataWriter_var dw)
 }
 
 
-void write_altered_mutable_struct(DataWriter_var dw)
+void write_modified_mutable_struct(DataWriter_var dw)
 {
-  AlteredMutableStructDataWriter_var typed_dw = AlteredMutableStructDataWriter::_narrow(dw);
+  ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
 
-  AlteredMutableStruct ams;
-  ams.key = ALTERED_MUTABLE_STRUCT_KEY;
-  ams.additional_field = ALTERED_MUTABLE_STRUCT_AF;
+  ModifiedMutableStruct ams;
+  ams.key = MODIFIED_MUTABLE_STRUCT_KEY;
+  ams.additional_field = MODIFIED_MUTABLE_STRUCT_AF;
   typed_dw->write(ams, HANDLE_NIL);
   if (verbose) {
-    ACE_DEBUG((LM_DEBUG, "writer: AlteredMutableStruct\n"));
+    ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableStruct\n"));
   }
 }
 
@@ -349,9 +434,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "MutabledStruct") {
     MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
     get_topic(ts, dp, "MutabledStruct_Topic", topic);
-  } else if (type == "AlteredMutableStruct") {
-    AlteredMutableStructTypeSupport_var ts = new AlteredMutableStructTypeSupportImpl;
-    get_topic(ts, dp, "AlteredMutableStruct_Topic", topic);
+  } else if (type == "ModifiedMutableStruct") {
+    ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
+    get_topic(ts, dp, "ModifiedMutableStruct_Topic", topic);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
@@ -384,8 +469,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         write_additional_postfix_field_struct(dw);
       } else if (type == "MutableStruct") {
         write_mutable_struct(dw);
-      } else if (type == "AlteredMutableStruct") {
-        write_altered_mutable_struct(dw);
+      } else if (type == "ModifiedMutableStruct") {
+        write_modified_mutable_struct(dw);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;
@@ -427,8 +512,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         failed = !((read_additional_postfix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
       } else if (type == "MutableStruct") {
         failed = !((read_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
-      } else if (type == "AlteredMutableStruct") {
-        failed = !((read_altered_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "ModifiedMutableStruct") {
+        failed = !((read_modified_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;
