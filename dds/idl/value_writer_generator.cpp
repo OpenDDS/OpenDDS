@@ -22,14 +22,17 @@ namespace {
 
   void array_helper(const std::string& expression, AST_Array* array, size_t dim_idx, const std::string& idx)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+
     if (dim_idx < array->n_dims()) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ << "value_writer.begin_array();\n";
-#if defined __cplusplus >= 199707L
-      be_global->impl_ << "for (size_t " << idx << " = 0; " << idx << " != " << dim << "; ++" << idx << ") {\n";
-#else
-      be_global->impl_ << "for (unsigned int " << idx << " = 0; " << idx << " != " << dim << "; ++" << idx << ") {\n";
-#endif
+      if (use_cxx11) {
+          be_global->impl_ << "for (size_t " << idx << " = 0; " << idx << " != " << dim << "; ++" << idx << ") {\n";
+      }
+      else {
+          be_global->impl_ << "for (unsigned int " << idx << " = 0; " << idx << " != " << dim << "; ++" << idx << ") {\n";
+      }
       be_global->impl_ << "  value_writer.begin_element(" << idx << ");\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i");
       be_global->impl_ << "  value_writer.end_element();\n";
@@ -51,11 +54,12 @@ namespace {
     if (c & CL_SEQUENCE) {
       AST_Sequence* sequence = dynamic_cast<AST_Sequence*>(actual);
       be_global->impl_ << "value_writer.begin_sequence();\n";
-#if defined __cplusplus >= 199707L
-      be_global->impl_ << "for (size_t " << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
-#else
-      be_global->impl_ << "for (unsigned int " << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
-#endif
+      if (use_cxx11) {
+          be_global->impl_ << "for (size_t " << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
+      }
+      else {
+          be_global->impl_ << "for (unsigned int " << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
+      }
       be_global->impl_ << "  value_writer.begin_element(" << idx << ");\n";
       generate_write(expression + "[" + idx + "]", false, sequence->base_type(), idx + "i");
       be_global->impl_ << "  value_writer.end_element();\n";
