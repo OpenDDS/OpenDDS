@@ -14,7 +14,7 @@
 #include "ValueWriter.h"
 #include "ReceivedDataElementList.h"
 
-#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -53,20 +53,24 @@ public:
 
   struct OpenDDS_Dcps_Export Sample
   {
-    DDS::InstanceHandle_t instance_;
-    DDS::InstanceStateKind instance_state_;
-    DDS::Time_t timestamp_;
-    SequenceNumber seq_n_;
-    const void* data_;
-    Sample(DDS::InstanceHandle_t i,
-           DDS::InstanceStateKind instance_state,
-           const DDS::Time_t& t,
-           const SequenceNumber& sn,
-           const void* data);
+    DDS::InstanceHandle_t instance;
+    DDS::InstanceStateKind instance_state;
+    DDS::Time_t timestamp;
+    SequenceNumber sequence_number;
+    const void* data;
+    const ValueWriterDispatcher& data_dispatcher;
 
-    Sample(DDS::InstanceHandle_t i,
+    Sample(DDS::InstanceHandle_t instance,
            DDS::InstanceStateKind instance_state,
-           const ReceivedDataElement& rde);
+           const DDS::Time_t& timestamp,
+           const SequenceNumber& sequence_number,
+           const void* data,
+           const ValueWriterDispatcher& data_dispatcher);
+
+    Sample(DDS::InstanceHandle_t instance,
+           DDS::InstanceStateKind instance_state,
+           const ReceivedDataElement& rde,
+           const ValueWriterDispatcher& data_dispatcher);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed
@@ -84,10 +88,10 @@ public:
   virtual void on_disassociated(DDS::DataReader_ptr, const GUID_t& /* writerId */) {}
 
   // Group 3: Sample sent, received, read, taken
-  virtual void on_sample_sent(DDS::DataWriter_ptr, const Sample&, const ValueWriterDispatcher&) {}
-  virtual void on_sample_received(DDS::DataReader_ptr, const Sample&, const ValueWriterDispatcher&) {}
-  virtual void on_sample_read(DDS::DataReader_ptr, const Sample&, const ValueWriterDispatcher&) {}
-  virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&, const ValueWriterDispatcher&) {}
+  virtual void on_sample_sent(DDS::DataWriter_ptr, const Sample&) {}
+  virtual void on_sample_received(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_read(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&) {}
 
   virtual ~Observer();
 protected:
@@ -95,6 +99,9 @@ protected:
 };
 
 typedef RcHandle<Observer> Observer_rch;
+
+OpenDDS_Dcps_Export void
+vwrite(ValueWriter& vw, const Observer::Sample& sample);
 
 } // namespace DCPS
 } // namespace OpenDDS
