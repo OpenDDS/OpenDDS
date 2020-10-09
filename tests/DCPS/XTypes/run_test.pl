@@ -12,33 +12,44 @@ my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
 
 my $verbose = 0;
+my $test_name = "";
 GetOptions(
   "verbose" => \$verbose,
+  "test|f=s"   => \$test_name,
 );
 
-my @common_args = ('-DCPSConfigFile', 'rtps_disc.ini');
-push(@common_args, "--verbose") if ($verbose);
+my $common_args = ('-DCPSConfigFile rtps_disc.ini -ORBDebugLevel 1 -DCPSDebugLevel 6');
+if ($verbose) {
+    $common_args = ("$common_args, --verbose");
+}
 
-my @reader_args = ('--reader', '--type Property_1');
-push(@reader_args, @common_args);
-$test->process('reader1', 'XTypes', join(' ', @reader_args));
-$test->start_process('reader1');
+my %params = (
+  "FirstTest"                             => {reader_type => "Property_1", writer_type => "Property_1", expect_to_fail => ""},
+  "SecondTest"                            => {reader_type => "Property_2", writer_type => "Property_2", expect_to_fail => ""},
+);
 
-my @writer_args = ('--writer', '--type Property_1');
-push(@writer_args, @common_args);
-$test->process('writer1', 'XTypes', join(' ', @writer_args));
-$test->start_process('writer1');
+if ($test_name eq '') {
+  while (my ($k, $v) = each %params) {
+    my @reader_args = ("$common_args -ORBLogFile publisher_$k.log --reader --type $v->{reader_type} $v->{expect_to_fail}");
+    $test->process("reader_$k", 'XTypes', join(' ', @reader_args));
+    $test->start_process("reader_$k");
 
-sleep 5;
+    my @writer_args = ("$common_args -ORBLogFile subscriber_$k.log --writer --type $v->{writer_type} $v->{expect_to_fail}");
+    $test->process("writer_$k", 'XTypes', join(' ', @writer_args));
+    $test->start_process("writer_$k");
 
-my @reader_args = ('--reader', '--type Property_2');
-push(@reader_args, @common_args);
-$test->process('reader2', 'XTypes', join(' ', @reader_args));
-$test->start_process('reader2');
+    sleep 5;
+  }
+} else {
+  my $v = $params{$test_name};
+ 
+  my @reader_args = ("$common_args -ORBLogFile publisher_$test_name.log --reader --type $v->{reader_type} $v->{expect_to_fail}");
+  $test->process("reader_$test_name", 'XTypes', join(' ', @reader_args));
+  $test->start_process("reader_$test_name");
 
-my @writer_args = ('--writer', '--type Property_2');
-push(@writer_args, @common_args);
-$test->process('writer2', 'XTypes', join(' ', @writer_args));
-$test->start_process('writer2');
+  my @writer_args = ("$common_args -ORBLogFile subscriber_$test_name.log --writer --type $v->{writer_type} $v->{expect_to_fail}");
+  $test->process("writer_$test_name", 'XTypes', join(' ', @writer_args));
+  $test->start_process("writer_$test_name");
+}
 
 exit $test->finish(60);
