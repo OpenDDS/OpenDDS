@@ -218,7 +218,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
 
   const CORBA::ULong mod = snSet.numBits % 32;
   const CORBA::ULong mask = mod ? -(1u << (32 - mod)) : 0xFFFFFFFF;
-  return snSet.bitmap[last_index] & mask;
+  return static_cast<bool>(snSet.bitmap[last_index] & mask);
 }
 
 }

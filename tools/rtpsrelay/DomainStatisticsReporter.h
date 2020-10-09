@@ -60,13 +60,13 @@ public:
 
   void total_writers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    domain_statistics_.total_writers(count);
+    domain_statistics_.total_writers(static_cast<uint32_t>(count));
     report(now);
   }
 
   void total_readers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    domain_statistics_.total_readers(count);
+    domain_statistics_.total_readers(static_cast<uint32_t>(count));
     report(now);
   }
 

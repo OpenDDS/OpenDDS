@@ -186,8 +186,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     if (show_data_loss && num_messages_expected) {
-      const unsigned int missed_msgs = (num_messages_expected - received);
-      const unsigned int percent = (missed_msgs * 100) / num_messages_expected;
+      const unsigned int missed_msgs = static_cast<unsigned int>(num_messages_expected - received);
+      const unsigned int percent = static_cast<unsigned int>((missed_msgs * 100) / num_messages_expected);
 
       std::cout << error
                 << "data loss == " << percent << "% (" << received << "/"

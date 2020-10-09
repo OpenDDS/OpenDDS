@@ -154,7 +154,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     {
       Writer writer(datawriters, my_pid);
-      writer.write(reliable, samples_per_writer, data_field_length_offset);
+      writer.write(reliable, static_cast<int>(samples_per_writer), data_field_length_offset);
     }
 
     // Sleep to give subscriber a chance to nak before exiting
