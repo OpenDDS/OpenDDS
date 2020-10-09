@@ -3872,39 +3872,62 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     return DDS::RETCODE_ERROR;
   }
 
+  // Get the stored data of the corresponding request
+  DCPS::SequenceNumber seq_num;
+  seq_num.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
+                   type_lookup_reply.header.related_request_id.sequence_number.low);
+  const OrigSeqNumberMap::const_iterator seg_num_it = sedp_.orig_seq_numbers_.find(seq_num);
+  if (seg_num_it == sedp_.orig_seq_numbers_.end()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+      ACE_TEXT("could not find entry associated with the reply\n")));
+    return DDS::RETCODE_ERROR;
+  }
+  const XTypes::TypeIdentifier& remote_ti = seg_num_it->second.first;
+
   DDS::ReturnCode_t retcode;
   switch (type_lookup_reply._cxx_return.kind) {
   case XTypes::TypeLookup_getTypes_HashId:
     retcode = process_get_types_reply(type_lookup_reply);
     break;
   case XTypes::TypeLookup_getDependencies_HashId:
-    retcode = process_get_dependencies_reply(sample, type_lookup_reply, is_discovery_protected);
+    retcode = process_get_dependencies_reply(sample, type_lookup_reply, remote_ti, is_discovery_protected);
     break;
   default:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
+  // Whether all dependencies of the remote type have been gotten and match can continue
+  bool can_continue_match = false;
+  const GuidPrefixWrapper guid_pref(sample.header_.publication_id_.guidPrefix);
+  const HasAllDependenciesMap::iterator it = sedp_.has_all_dependencies_.find(guid_pref);
+  if (it != sedp_.has_all_dependencies_.end() &&
+      it->second.find(remote_ti) != it->second.end()) {
+    can_continue_match = true;
+  }
+
   if (DDS::RETCODE_OK == retcode &&
       type_lookup_reply._cxx_return.kind == XTypes::TypeLookup_getTypes_HashId &&
-      sedp_.has_all_dependencies_) {
+      can_continue_match) {
     DCPS::SequenceNumber seq_num;
     seq_num.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
                      type_lookup_reply.header.related_request_id.sequence_number.low);
-    const OrigSeqNumberMap::const_iterator it = sedp_.orig_seq_numbers_.find(seq_num);
-    if (it != sedp_.orig_seq_numbers_.end()) {
+    const OrigSeqNumberMap::const_iterator outer_it = sedp_.orig_seq_numbers_.find(seq_num);
+    if (outer_it != sedp_.orig_seq_numbers_.end()) {
+      DCPS::SequenceNumber key_seq_num = outer_it->second.second;
       // Cleanup data
-      const XTypes::TypeIdentifier remote_ti = sedp_.orig_seq_numbers_[seq_num].first;
-      OrigSeqNumberMap::iterator it = sedp_.orig_seq_numbers_.begin();
-      for (; it != sedp_.orig_seq_numbers_.end();) {
-        if (it->second.first == remote_ti) {
-          sedp_.orig_seq_numbers_.erase(it++);
+      const XTypes::TypeIdentifier remote_ti = outer_it->second.first;
+      OrigSeqNumberMap::iterator inner_it = sedp_.orig_seq_numbers_.begin();
+      for (; inner_it != sedp_.orig_seq_numbers_.end();) {
+        if (inner_it->second.first == remote_ti) {
+          sedp_.orig_seq_numbers_.erase(inner_it++);
         } else {
-          ++it;
+          ++inner_it;
         }
       }
+      it->second.erase(remote_ti);
 
       // All type objects are ready, continue with matching now
-      sedp_.match_continue(it->second.second);
+      sedp_.match_continue(key_seq_num);
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
         ACE_TEXT("could not find entry associated with the reply\n")));
@@ -3928,24 +3951,13 @@ Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Re
 DDS::ReturnCode_t
 Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::ReceivedDataSample& sample,
                                                             const XTypes::TypeLookup_Reply& reply,
+                                                            const XTypes::TypeIdentifier& remote_ti,
                                                             bool is_discovery_protected)
 {
   const XTypes::TypeLookup_getTypeDependencies_Out& data = reply._cxx_return.getTypeDependencies.result;
   const DCPS::RepoId remote_id = sample.header_.publication_id_;
 
-  // Get the stored data of the related request
-  DCPS::SequenceNumber seq_num;
-  seq_num.setValue(reply.header.related_request_id.sequence_number.high,
-                   reply.header.related_request_id.sequence_number.low);
-  const OrigSeqNumberMap::const_iterator it = sedp_.orig_seq_numbers_.find(seq_num);
-  if (it == sedp_.orig_seq_numbers_.end()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
-      ACE_TEXT("could not find entry associated with the reply\n")));
-    return DDS::RETCODE_ERROR;
-  }
-
   // Store the received dependencies and continuation point
-  const XTypes::TypeIdentifier& remote_ti = it->second.first;
   const GuidPrefixWrapper guid_pref(remote_id.guidPrefix);
   XTypes::TypeIdentifierSeq& deps = dependencies_[guid_pref][remote_ti].second;
   for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
@@ -3958,13 +3970,17 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
   }
   dependencies_[guid_pref][remote_ti].first = data.continuation_point;
 
+  DCPS::SequenceNumber seq_num;
+  seq_num.setValue(reply.header.related_request_id.sequence_number.high,
+                   reply.header.related_request_id.sequence_number.low);
+  const OrigSeqNumberMap::const_iterator seg_num_it = sedp_.orig_seq_numbers_.find(seq_num);
   // Store an entry for either the final getTypes or next getTypeDependencies request
   sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
-                                                it->second));
+                                                seg_num_it->second));
 
   if (data.continuation_point.length() == 0) {
     // All dependencies have been received
-    sedp_.has_all_dependencies_ = true;
+    sedp_.has_all_dependencies_[guid_pref].insert(remote_ti);
 
     // Get the type objects of all dependencies
     if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true)) {

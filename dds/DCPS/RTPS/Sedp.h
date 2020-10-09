@@ -781,6 +781,7 @@ private:
     DDS::ReturnCode_t process_get_types_reply(const XTypes::TypeLookup_Reply&);
     DDS::ReturnCode_t process_get_dependencies_reply(const DCPS::ReceivedDataSample&,
                                                      const XTypes::TypeLookup_Reply&,
+                                                     const XTypes::TypeIdentifier&,
                                                      bool is_discovery_protected);
 
     typedef std::pair<XTypes::OctetSeq32, XTypes::TypeIdentifierSeq> ContinuationPair;
@@ -788,31 +789,6 @@ private:
     // Map from each remote type to the most recent continuation_point
     // and all dependencies received for that type so far.
     typedef OPENDDS_MAP(XTypes::TypeIdentifier, ContinuationPair) RemoteDependencies;
-
-    struct GuidPrefixWrapper {
-      GuidPrefixWrapper(const GuidPrefix_t& prefix)
-      {
-        std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
-      }
-
-      GuidPrefixWrapper(const GuidPrefixWrapper& other)
-      {
-        std::memcpy(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t));
-      }
-
-      GuidPrefixWrapper& operator=(const GuidPrefixWrapper& other)
-      {
-        std::memcpy(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t));
-        return *this;
-      }
-
-      bool operator<(const GuidPrefixWrapper& other) const
-      {
-        return std::memcmp(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t)) < 0;
-      }
-
-      GuidPrefix_t prefix_;
-    };
 
     // Map from each remote participant to the data stored for its types.
     typedef OPENDDS_MAP(GuidPrefixWrapper, RemoteDependencies) DependenciesMap;

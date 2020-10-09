@@ -216,7 +216,6 @@ namespace OpenDDS {
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
-        , has_all_dependencies_(false)
 #ifdef OPENDDS_SECURITY
         , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
@@ -971,14 +970,6 @@ namespace OpenDDS {
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
 
-      typedef std::pair<XTypes::TypeIdentifier, SequenceNumber> TypeIdSeqNumberPair;
-      typedef OPENDDS_MAP(SequenceNumber, TypeIdSeqNumberPair) OrigSeqNumberMap;
-
-      // Map from the sequence number of the most recent request for a type to its TypeIdentifier
-      // and the sequence number of the first request sent for that type. Every time a new request
-      // is sent for a type, a new entry must be stored.
-      OrigSeqNumberMap orig_seq_numbers_;
-
       void
       match(const RepoId& writer, const RepoId& reader)
       {
@@ -1267,7 +1258,7 @@ namespace OpenDDS {
           for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
             type_ids[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
-          has_all_dependencies_ = true;
+          has_all_dependencies_[GuidPrefixWrapper(remote_id.guidPrefix)].insert(type_info->minimal.typeid_with_size.type_id);
 
           // Get TypeObjects of the topic type and all of its dependent types
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
@@ -1644,8 +1635,35 @@ namespace OpenDDS {
       OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) relay_only_readers_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
       XTypes::TypeLookupService_rch type_lookup_service_;
-      bool has_all_dependencies_; // Whether it has all dependent TypeIdentifiers
 
+      struct GuidPrefixWrapper {
+        GuidPrefixWrapper(const GuidPrefix_t& prefix)
+        {
+          std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
+        }
+
+        bool operator<(const GuidPrefixWrapper& other) const
+        {
+          return std::memcmp(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t)) < 0;
+        }
+
+        GuidPrefix_t prefix_;
+      };
+
+      // For each type in this set, all of its dependencies are gotten
+      typedef OPENDDS_SET(XTypes::TypeIdentifier) HasAllDepsInParticipantSet;
+
+      // Each remote participant has one entry in this map
+      typedef OPENDDS_MAP(GuidPrefixWrapper, HasAllDepsInParticipantSet) HasAllDependenciesMap;
+      HasAllDependenciesMap has_all_dependencies_;
+
+      typedef std::pair<XTypes::TypeIdentifier, SequenceNumber> TypeIdSeqNumberPair;
+
+      // Map from the sequence number of the most recent request for a type to its TypeIdentifier
+      // and the sequence number of the first request sent for that type. Every time a new request
+      // is sent for a type, a new entry must be stored.
+      typedef OPENDDS_MAP(SequenceNumber, TypeIdSeqNumberPair) OrigSeqNumberMap;
+      OrigSeqNumberMap orig_seq_numbers_;
 
 #ifdef OPENDDS_SECURITY
       DDS::Security::AccessControl_var access_control_;
