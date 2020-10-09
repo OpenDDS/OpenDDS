@@ -10,6 +10,7 @@ use PerlDDS::Run_Test;
 use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+PerlDDS::add_lib_path('../common');
 
 my $test = new PerlDDS::TestFramework();
 

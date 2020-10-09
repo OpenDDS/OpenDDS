@@ -186,7 +186,7 @@ struct Function {
   std::string preamble_;
   bool extra_newline_;
 
-  Function(const char* name, const char* returntype,
+  Function(const std::string& name, const std::string returntype,
            const char* template_args = 0)
     : has_arg_(false)
     , extra_newline_(true)

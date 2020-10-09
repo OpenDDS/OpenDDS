@@ -252,7 +252,8 @@ public:
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
                           DDS::InstanceHandle_t handle,
                           const DDS::Time_t& source_timestamp,
-                          GUIDSeq* filter_out);
+                          GUIDSeq* filter_out,
+                          const void* real_data);
 
   /**
    * Delegate to the WriteDataContainer to dispose all data
@@ -278,11 +279,6 @@ public:
   SendStateDataSampleList get_resend_data() {
     return data_container_->get_resend_data();
   }
-
-  /**
-   * Accessor of the repository id of this datawriter/publication.
-   */
-  RepoId get_publication_id();
 
   /**
    * Accessor of the repository id of the domain participant.
@@ -462,6 +458,10 @@ public:
 
  virtual ICE::Endpoint* get_ice_endpoint();
 
+ const RepoId& get_repo_id() const {
+    return this->publication_id_;
+  }
+
 protected:
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
@@ -470,6 +470,8 @@ protected:
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
+
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   /**
    * Setup CDR serialization options in type-specific DataWrtier.
@@ -550,10 +552,6 @@ private:
   /// Lookup the instance handles by the subscription repo ids
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
-
-  const RepoId& get_repo_id() const {
-    return this->publication_id_;
-  }
 
   DDS::Subscriber_var get_builtin_subscriber() const;
 

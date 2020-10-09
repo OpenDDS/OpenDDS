@@ -15,7 +15,6 @@
 #include "tao/LongSeq.pidl"
 
 #define HANDLE_TYPE_NATIVE long
-#define BUILTIN_TOPIC_KEY_TYPE_NATIVE long
 
 #if defined __OPENDDS_IDL && !defined DDS_HAS_MINIMUM_BIT
 #  define BUILT_IN_TOPIC_TYPE @topic
@@ -32,7 +31,6 @@ module DDS {
 
     typedef sequence<string> StringSeq;
     typedef HANDLE_TYPE_NATIVE InstanceHandle_t;
-    typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKeyValue[3];
 
     typedef sequence<InstanceHandle_t> InstanceHandleSeq;
 
@@ -388,10 +386,10 @@ module DDS {
                 PropertyQosPolicy property; // DDS-Security 1.1 ptc/2017-09-26
                 };
 
-    // This is for when we support XCDR1.
+    typedef octet OctetArray16[16];
     // @appendable
     struct BuiltinTopicKey_t {
-                BUILT_IN_TOPIC_KEY BuiltinTopicKeyValue value;
+                OctetArray16 value;
                 };
 
     // ----------------------------------------------------------------------
@@ -575,8 +573,6 @@ module OpenDDS {
     // network location/connection details.
     typedef unsigned long ParticipantLocation;
 
-    typedef octet OctetGuidArray16[16];
-
     const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
     const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
     const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
@@ -586,7 +582,7 @@ module OpenDDS {
 
     BUILT_IN_TOPIC_TYPE
     struct ParticipantLocationBuiltinTopicData {
-            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
             ParticipantLocation location;
             ParticipantLocation change_mask;
             string local_addr;
@@ -603,11 +599,11 @@ module OpenDDS {
             DDS::Time_t relay6_timestamp;
     };
 
-    const string RTPS_RELAY_STUN_PROTOCOL = "RtspRelay:STUN";
+    const string RTPS_RELAY_STUN_PROTOCOL = "RtpsRelay:STUN";
 
     BUILT_IN_TOPIC_TYPE
     struct ConnectionRecord {
-            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
             BUILT_IN_TOPIC_KEY string address;
             BUILT_IN_TOPIC_KEY string protocol;
     };
