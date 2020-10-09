@@ -223,7 +223,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   } catch (const CORBA::BAD_PARAM&) {
     return EXIT_FAILURE;
-  } 
+  }
 
   return 0;
 }
