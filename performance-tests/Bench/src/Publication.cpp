@@ -408,7 +408,7 @@ Publication::svc ()
   OpenDDS::DCPS::DataWriterImpl* servant
     = dynamic_cast< OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
 
-  OpenDDS::DCPS::GuidConverter converter(servant->get_publication_id());
+  OpenDDS::DCPS::GuidConverter converter(servant->get_repo_id());
   int pid = converter.checksum();
 
   ACE_Time_Value startTime = ACE_High_Res_Timer::gettimeofday_hr();

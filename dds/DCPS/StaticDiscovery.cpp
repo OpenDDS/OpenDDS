@@ -78,12 +78,9 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
   : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
   , registry_(registry)
   , participant_(participant)
-{
-  pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
-  sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
+{}
 
   type_lookup_init(TheServiceParticipant->interceptor());
-}
 
 void StaticEndpointManager::init_bit()
 {
@@ -97,14 +94,13 @@ void StaticEndpointManager::init_bit()
     const EndpointRegistry::Writer& writer = pos->second;
 
     if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
-      increment_key(pub_bit_key_);
-      pub_key_to_id_[pub_bit_key_] = remoteid;
+      const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
 
       // pos represents a remote.
       // Populate data.
       DDS::PublicationBuiltinTopicData data;
 
-      data.key = pub_bit_key_;
+      data.key = key;
       OPENDDS_STRING topic_name = writer.topic_name;
       data.topic_name = topic_name.c_str();
       const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
@@ -144,14 +140,13 @@ void StaticEndpointManager::init_bit()
     const EndpointRegistry::Reader& reader = pos->second;
 
     if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
-      increment_key(sub_bit_key_);
-      sub_key_to_id_[sub_bit_key_] = remoteid;
+      const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
 
       // pos represents a remote.
       // Populate data.
       DDS::SubscriptionBuiltinTopicData data;
 
-      data.key = sub_bit_key_;
+      data.key = key;
       OPENDDS_STRING topic_name = reader.topic_name;
       data.topic_name = topic_name.c_str();
       const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;

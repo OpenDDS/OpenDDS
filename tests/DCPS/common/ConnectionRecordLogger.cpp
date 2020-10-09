@@ -3,6 +3,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DiscoveryBase.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/JsonValueWriter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,35 +36,12 @@ class Listener : public DDS::DataReaderListener {
       return;
     }
 
-    OpenDDS::DCPS::ConnectionRecord data;
+    OpenDDS::DCPS::ConnectionRecord sample;
     DDS::SampleInfo sample_info;
-    while (r->take_next_sample(data, sample_info) == DDS::RETCODE_OK) {
-      DCPS::RepoId guid;
-      std::memcpy(&guid, data.guid, sizeof(guid));
-
-      switch (sample_info.instance_state) {
-      case DDS::ALIVE_INSTANCE_STATE:
-        ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("connect guid=%C address=%C protocol=%C timestamp=%d.%09d\n"),
-                   DCPS::LogGuid(guid).c_str(),
-                   data.address.in(),
-                   data.protocol.in(),
-                   sample_info.source_timestamp.sec,
-                   sample_info.source_timestamp.nanosec));
-        break;
-      case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-      case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-        ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("disconnect guid=%C address=%C protocol=%C timestamp=%d.%09d\n"),
-                   DCPS::LogGuid(guid).c_str(),
-                   data.address.in(),
-                   data.protocol.in(),
-                   sample_info.source_timestamp.sec,
-                   sample_info.source_timestamp.nanosec));
-        break;
-      }
-
-      // Time_t source_timestamp;
+    while (r->take_next_sample(sample, sample_info) == DDS::RETCODE_OK) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("%C\n"),
+                 DCPS::to_json(r->get_topicdescription(), sample, sample_info).c_str()));
     }
   }
 
