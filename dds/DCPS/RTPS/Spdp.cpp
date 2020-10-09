@@ -3560,11 +3560,11 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
-    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, true, connection_record));
+    outer_->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
-    outer_->sedp_.job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, false, connection_record));
+    outer_->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, false, connection_record));
     break;
   }
 #else

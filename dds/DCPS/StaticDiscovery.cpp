@@ -78,9 +78,9 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
   : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
   , registry_(registry)
   , participant_(participant)
-{}
-
+{
   type_lookup_init(TheServiceParticipant->interceptor());
+}
 
 void StaticEndpointManager::init_bit()
 {

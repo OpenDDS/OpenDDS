@@ -122,7 +122,8 @@ namespace {
                             AST_Type* type,
                             const std::string&,
                             std::string&,
-                            const std::string&)
+                            const std::string&,
+                            bool)
   {
     be_global->impl_ <<
       "  {\n"
@@ -211,7 +212,7 @@ bool value_writer_generator::gen_struct(AST_Structure*,
 }
 
 
-bool value_writer_generator::gen_union(AST_Union*,
+bool value_writer_generator::gen_union(AST_Union* u,
                                        UTL_ScopedName* name,
                                        const std::vector<AST_UnionBranch*>& branches,
                                        AST_Type* discriminator,
@@ -234,7 +235,9 @@ bool value_writer_generator::gen_union(AST_Union*,
     generate_write("value._d()" , false, discriminator, "i");
     be_global->impl_ << "  value_writer.end_discriminator();\n";
 
-    generateSwitchForUnion("value._d()", branch_helper, branches, discriminator, "", "", type_name.c_str(), false, false);
+    generateSwitchForUnion(u, "value._d()", branch_helper, branches,
+                           discriminator, "", "", type_name.c_str(),
+                           false, false);
 
     be_global->impl_ << "  value_writer.end_union();\n";
   }

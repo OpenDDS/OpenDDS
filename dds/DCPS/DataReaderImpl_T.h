@@ -1062,7 +1062,7 @@ protected:
       }
       Encoding encoding;
       if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
-        return;
+        return message_holder;
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
@@ -1074,7 +1074,7 @@ protected:
             TraitsType::type_name(),
             Encoding::kind_to_string(encoding.kind()).c_str()));
         }
-        return;
+        return message_holder;
       }
       if (DCPS_debug_level >= 8) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
