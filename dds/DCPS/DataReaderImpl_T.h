@@ -1110,13 +1110,13 @@ protected:
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
         if (DCPS_debug_level > 1) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
-                    ACE_TEXT("object construction failure, dropping sample.\n"),
-                    TraitsType::type_name()));
+                     ACE_TEXT("object construction failure, dropping sample.\n"),
+                     TraitsType::type_name()));
         }
       } else {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("deserialization failed, dropping sample.\n"),
-                  TraitsType::type_name()));
+                   ACE_TEXT("deserialization failed, dropping sample.\n"),
+                   TraitsType::type_name()));
       }
       return message_holder;
     }
