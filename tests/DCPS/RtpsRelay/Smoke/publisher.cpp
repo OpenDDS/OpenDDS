@@ -39,8 +39,6 @@
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 
-bool check_lease_recovery = false;
-
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_02_cert.pem";
@@ -57,6 +55,8 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 }
 
 #endif
+
+bool check_lease_recovery = false;
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
