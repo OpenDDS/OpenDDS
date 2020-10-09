@@ -781,7 +781,7 @@ private:
     DDS::ReturnCode_t process_get_types_reply(const XTypes::TypeLookup_Reply&);
     DDS::ReturnCode_t process_get_dependencies_reply(const DCPS::ReceivedDataSample&,
                                                      const XTypes::TypeLookup_Reply&,
-                                                     const XTypes::TypeIdentifier&,
+                                                     const DCPS::SequenceNumber&,
                                                      bool is_discovery_protected);
 
     typedef std::pair<XTypes::OctetSeq32, XTypes::TypeIdentifierSeq> ContinuationPair;

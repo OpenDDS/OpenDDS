@@ -1233,22 +1233,14 @@ namespace OpenDDS {
           matching_data_buffer_.insert(std::make_pair(mp, md));
         }
         // Store an entry for the first request
-        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number,
-                                                std::make_pair(type_info->minimal.typeid_with_size.type_id,
-                                                               md.rpc_sequence_number)));
+        TypeIdSeqNumberPair seq_num_pair = std::make_pair(type_info->minimal.typeid_with_size.type_id,
+                                                          md.rpc_sequence_number);
+        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, seq_num_pair));
 
         XTypes::TypeIdentifierSeq type_ids;
         if (type_info->minimal.dependent_typeid_count == -1 ||
             type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
           type_ids.append(type_info->minimal.typeid_with_size.type_id);
-
-          // Get TypeObject of the topic type
-          send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
-
-          // Store an entry for the next request
-          orig_seq_numbers_.insert(std::make_pair(++type_lookup_service_sequence_number_,
-                                                  std::make_pair(type_info->minimal.typeid_with_size.type_id,
-                                                                 md.rpc_sequence_number)));
 
           // Get the dependent TypeIdentifiers of the topic type
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
@@ -1258,8 +1250,6 @@ namespace OpenDDS {
           for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
             type_ids[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
-          has_all_dependencies_[GuidPrefixWrapper(remote_id.guidPrefix)].insert(type_info->minimal.typeid_with_size.type_id);
-
           // Get TypeObjects of the topic type and all of its dependent types
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         }
@@ -1649,13 +1639,6 @@ namespace OpenDDS {
 
         GuidPrefix_t prefix_;
       };
-
-      // For each type in this set, all of its dependencies are gotten
-      typedef OPENDDS_SET(XTypes::TypeIdentifier) HasAllDepsInParticipantSet;
-
-      // Each remote participant has one entry in this map
-      typedef OPENDDS_MAP(GuidPrefixWrapper, HasAllDepsInParticipantSet) HasAllDependenciesMap;
-      HasAllDependenciesMap has_all_dependencies_;
 
       typedef std::pair<XTypes::TypeIdentifier, SequenceNumber> TypeIdSeqNumberPair;
 

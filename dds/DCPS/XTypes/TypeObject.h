@@ -748,11 +748,6 @@ namespace XTypes {
       }
     }
 
-    bool operator==(const TypeIdentifier& other) const
-    {
-      return !(*this < other) && !(other < *this);
-    }
-
   private:
     ACE_CDR::Octet kind_;
     void* active_;
