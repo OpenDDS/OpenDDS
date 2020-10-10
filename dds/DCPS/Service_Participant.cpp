@@ -204,7 +204,9 @@ Service_Participant::Service_Participant()
     monitor_enabled_(false),
     shut_down_(false),
     shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT(""))
+    default_configuration_file_(ACE_TEXT("")),
+    bit_autopurge_nowriter_samples_delay_({DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC}),
+    bit_autopurge_disposed_samples_delay_({DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC})
 {
   initialize();
 }
@@ -2754,6 +2756,30 @@ NetworkConfigModifier* Service_Participant::network_config_modifier()
   return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
 }
 #endif
+
+DDS::Duration_t
+Service_Participant::bit_autopurge_nowriter_samples_delay() const
+{
+  return bit_autopurge_nowriter_samples_delay_;
+}
+
+void
+Service_Participant::bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration)
+{
+  bit_autopurge_nowriter_samples_delay_ = duration;
+}
+
+DDS::Duration_t
+Service_Participant::bit_autopurge_disposed_samples_delay() const
+{
+  return bit_autopurge_disposed_samples_delay_;
+}
+
+void
+Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
+{
+  bit_autopurge_disposed_samples_delay_ = duration;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
