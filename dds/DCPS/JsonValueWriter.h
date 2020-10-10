@@ -15,6 +15,7 @@
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DdsDcpsTopicC.h"
 
+#include <iosfwd>
 #include <sstream>
 #include <vector>
 
@@ -79,7 +80,7 @@ private:
 template<typename T>
 std::string to_json(const T& sample)
 {
-  std::stringstream str;
+  std::ostringstream str;
   JsonValueWriter jvw(str);
   vwrite(jvw, sample);
   return str.str();
@@ -88,7 +89,7 @@ std::string to_json(const T& sample)
 template<typename T>
 std::string to_json(const ::DDS::TopicDescription_ptr topic, const T& sample, const DDS::SampleInfo& sample_info)
 {
-  std::stringstream str;
+  std::ostringstream str;
   JsonValueWriter jvw(str);
   jvw.begin_struct();
   jvw.begin_field("topic");
