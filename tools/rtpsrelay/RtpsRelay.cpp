@@ -203,6 +203,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 #endif
 
+  const DDS::Duration_t one_minute = { 0, 0 };
+
+  TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
+  TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
+
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
@@ -362,11 +367,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
+  const DDS::Duration_t zero_seconds = { 0, 0 };
+
   DDS::DataReaderQos reader_qos;
   relay_subscriber->get_default_datareader_qos(reader_qos);
 
   reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = zero_seconds;
+  reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = zero_seconds;
 
   auto participant_entry_writer_var = relay_publisher->create_datawriter(participant_entry_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!participant_entry_writer_var) {
