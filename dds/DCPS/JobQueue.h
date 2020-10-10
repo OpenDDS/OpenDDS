@@ -33,7 +33,7 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
     const bool empty = job_queue_.empty();
-    job_queue_.push(job);
+    job_queue_.push_back(job);
     if (empty) {
       guard.release();
       reactor()->notify(this);
@@ -42,20 +42,19 @@ public:
 
 private:
   ACE_Thread_Mutex mutex_;
-  OPENDDS_QUEUE(JobPtr) job_queue_;
+  typedef OPENDDS_VECTOR(JobPtr) Queue;
+  Queue job_queue_;
 
   int handle_exception(ACE_HANDLE /*fd*/)
   {
+    Queue q;
+
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
-    size_t count = job_queue_.size();
-    while (count--) {
-      JobPtr job = job_queue_.front();
-      job_queue_.pop();
-      {
-        ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, -1);
-        job->execute();
-      }
+    q.swap(job_queue_);
+    for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
+      ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, -1);
+      (*pos)->execute();
     }
 
     if (!job_queue_.empty()) {
