@@ -44,7 +44,7 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 
 void ReactorInterceptor::process_command_queue_i()
 {
-  OPENDDS_DEQUE(CommandPtr) cq;
+  Queue cq;
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -52,11 +52,9 @@ void ReactorInterceptor::process_command_queue_i()
   if (!command_queue_.empty()) {
     cq.swap(command_queue_);
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
-    while (!cq.empty()) {
-      CommandPtr command = cq.front();
-      cq.pop_front();
-      command->execute();
-      command->executed();
+    for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
+      (*pos)->execute();
+      (*pos)->executed();
     }
   }
   if (!command_queue_.empty()) {
