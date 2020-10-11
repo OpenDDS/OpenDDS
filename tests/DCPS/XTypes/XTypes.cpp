@@ -37,6 +37,9 @@ enum AdditionalFieldValue
   MODIFIED_MUTABLE_UNION_AF
 };
 
+const std::string STRING_26 = "abcdefghijklmnopqrstuvwxyz";
+const std::string STRING_20 = "abcdefghijklmnopqrst";
+
 template<typename T1>
 ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected_additional_field_value)
 {
@@ -50,53 +53,75 @@ ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_struct(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_value)
+ReturnCode_t read_i(DataReader_var dr, T1 pdr, T2& data)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
     ALIVE_INSTANCE_STATE);
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_rc);
-  // TODO: remove if not needed
-  unsigned counter = 0;
   std::set<int> instances;
 
   ConditionSeq active;
   const Duration_t max_wait = { 5, 0 };
   ReturnCode_t ret = ws->wait(active, max_wait);
+
   if (ret == RETCODE_TIMEOUT) {
-    if (verbose) {
-      ACE_DEBUG((LM_DEBUG, "reader: Timedout\n"));
-    }
-    return ret;
+    ACE_DEBUG((LM_ERROR, "ERROR: reader timedout\n"));
   } else if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
-    return ret;
-  }
-
-  // data;
-  SampleInfoSeq info;
-  if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
-    if (data.length() != 1) {
-      ACE_DEBUG((LM_DEBUG, "reader: unexpected data length: %d", data.length()));
-      ret = RETCODE_ERROR;
-    }
-
-    if (data[0].key != expected_key_value) {
-      ACE_DEBUG((LM_DEBUG, "reader: expected key value: %d, received: %d\n", expected_key_value, data[0].key));
-      ret = RETCODE_ERROR;
-    }
-
-    if (verbose) {
-      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
-    }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
-    return ret;
+    SampleInfoSeq info;
+    if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
+    }
   }
 
   ws->detach_condition(dr_rc);
   dr->delete_readcondition(dr_rc);
+
+  return ret;
+}
+
+template<typename T1, typename T2>
+ReturnCode_t read_tryconstruct_struct(DataReader_var dr, T1 pdr, T2& data, const std::string& expected_value)
+{
+  ReturnCode_t ret = RETCODE_OK;
+  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
+    if (data.length() != 1) {
+      ACE_DEBUG((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
+      ret = RETCODE_ERROR;
+    } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
+      ACE_DEBUG((LM_ERROR, "ERROR: reader: expected key value: %s, received: %s\n", expected_value, data[0].trim_string));
+      ret = RETCODE_ERROR;
+    } else if (verbose) {
+        ACE_DEBUG((LM_DEBUG, "reader: %s\n", data[0].trim_string));
+    }
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+  }
+
+  return ret;
+}
+
+template<typename T1, typename T2>
+ReturnCode_t read_struct(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_value)
+{
+  ReturnCode_t ret = RETCODE_OK;
+  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
+    if (data.length() != 1) {
+      ACE_DEBUG((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ret = RETCODE_ERROR;
+    } else if (data[0].key != expected_key_value) {
+      ACE_DEBUG((LM_ERROR, "reader: expected key value: %d, received: %d\n", expected_key_value, data[0].key));
+      ret = RETCODE_ERROR;
+    } else if (verbose) {
+      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
+    }
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+  }
+
   return ret;
 }
 
@@ -104,40 +129,17 @@ template<typename T1, typename T2, typename T3>
 ReturnCode_t read_union(DataReader_var dr, T1 pdr,
   T2& data, T3 expected_value)
 {
-  ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
-    ANY_VIEW_STATE,
-    ALIVE_INSTANCE_STATE);
-  WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dr_rc);
-  // TODO: remove if not needed
-  unsigned counter = 0;
-  std::set<int> instances;
-
-  ConditionSeq active;
-  const Duration_t max_wait = { 5, 0 };
-  ReturnCode_t ret = ws->wait(active, max_wait);
-  if (ret == RETCODE_TIMEOUT) {
-    if (verbose) {
-      ACE_DEBUG((LM_DEBUG, "reader: Timedout\n"));
-    }
-    return ret;
-  } else if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
-    return ret;
-  }
-
-  // data;
-  SampleInfoSeq info;
-  if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) == RETCODE_OK) {
+  ReturnCode_t ret = RETCODE_OK;
+  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_DEBUG((LM_DEBUG, "reader: unexpected data length: %d", data.length()));
+      ACE_DEBUG((LM_ERROR, "reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
     }
 
     switch (data[0]._d()) {
     case E_KEY:
       if (data[0].key() != expected_value) {
-        ACE_DEBUG((LM_DEBUG, "reader: expected union key value: %d, received: %d\n",
+        ACE_DEBUG((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
           expected_value, data[0].key()));
         ret = RETCODE_ERROR;
       }
@@ -147,7 +149,7 @@ ReturnCode_t read_union(DataReader_var dr, T1 pdr,
       break;
     case E_ADDITIONAL_FIELD:
       if (data[0].additional_field() != expected_value) {
-        ACE_DEBUG((LM_DEBUG, "reader: expected additional_field value: %d, received: %d\n",
+        ACE_DEBUG((LM_ERROR, "reader: expected additional_field value: %d, received: %d\n",
           expected_value, data[0].additional_field()));
         ret = RETCODE_ERROR;
       }
@@ -159,12 +161,9 @@ ReturnCode_t read_union(DataReader_var dr, T1 pdr,
       break;
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
-    return ret;
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
   }
 
-  ws->detach_condition(dr_rc);
-  dr->delete_readcondition(dr_rc);
   return ret;
 }
 
@@ -253,6 +252,13 @@ ReturnCode_t read_modified_mutable_union(DataReader_var dr)
   ModifiedMutableUnionDataReader_var pdr = ModifiedMutableUnionDataReader::_narrow(dr);
   ::ModifiedMutableUnionSeq data;
   return read_union(dr, pdr, data, MODIFIED_MUTABLE_UNION_AF);
+}
+
+ReturnCode_t read_trim20_struct(DataReader_var dr)
+{
+  Trim20StructDataReader_var pdr = Trim20StructDataReader::_narrow(dr);
+  ::Trim20StructSeq data;
+  return read_tryconstruct_struct(dr, pdr, data, STRING_20);
 }
 
 
@@ -353,6 +359,45 @@ void write_modified_mutable_struct(DataWriter_var dw)
 }
 
 
+void write_mutable_union(DataWriter_var dw)
+{
+  MutableUnionDataWriter_var typed_dw = MutableUnionDataWriter::_narrow(dw);
+
+  MutableUnion mu;
+  mu.key(MUTABLE_UNION_KEY);
+  typed_dw->write(mu, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: MutableUnion\n"));
+  }
+}
+
+
+void write_modified_mutable_union(DataWriter_var dw)
+{
+  ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
+
+  ModifiedMutableUnion amu;
+  amu.additional_field(MODIFIED_MUTABLE_UNION_AF);
+  typed_dw->write(amu, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableUnion\n"));
+  }
+}
+
+
+void write_trim64_struct(DataWriter_var dw)
+{
+  Trim64StructDataWriter_var typed_dw = Trim64StructDataWriter::_narrow(dw);
+
+  Trim64Struct tcs;
+  tcs.trim_string = STRING_26.c_str();
+  typed_dw->write(tcs, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: Trim64Struct\n"));
+  }
+}
+
+
 template<typename T>
 void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Topic_var& topic)
 {
@@ -388,7 +433,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   bool writer = false;
   bool reader = false;
-  std::string type;
+  ACE_TString type;
 
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
@@ -431,12 +476,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "AdditionalPostfixFieldStruct") {
     AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
     get_topic(ts, dp, "AdditionalPostfixFieldStruct_Topic", topic);
-  } else if (type == "MutabledStruct") {
+  } else if (type == "MutableStruct") {
     MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
-    get_topic(ts, dp, "MutabledStruct_Topic", topic);
+    get_topic(ts, dp, "MutableStruct_Topic", topic);
   } else if (type == "ModifiedMutableStruct") {
     ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
     get_topic(ts, dp, "ModifiedMutableStruct_Topic", topic);
+  } else if (type == "MutableUnion") {
+    MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
+    get_topic(ts, dp, "MutableUnion_Topic", topic);
+  } else if (type == "ModifiedMutableUnion") {
+    ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl;
+    get_topic(ts, dp, "ModifiedMutableUnion_Topic", topic);
+  } else if (type == "Trim64Struct") {
+    Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl;
+    get_topic(ts, dp, "Trim64Struct_Topic", topic);
+  } else if (type == "Trim64Struct") {
+    Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
+    get_topic(ts, dp, "Trim20Struct_Topic", topic);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
@@ -471,6 +528,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         write_mutable_struct(dw);
       } else if (type == "ModifiedMutableStruct") {
         write_modified_mutable_struct(dw);
+      } else if (type == "MutableUnion") {
+        write_mutable_union(dw);
+      } else if (type == "ModifiedMutableUnion") {
+        write_modified_mutable_union(dw);
+      } else if (type == "ModifiedMutableUnion") {
+        write_modified_mutable_union(dw);
+      } else if (type == "Trim64Struct") {
+        write_trim64_struct(dw);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;
@@ -514,6 +579,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         failed = !((read_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
       } else if (type == "ModifiedMutableStruct") {
         failed = !((read_modified_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "MutableUnion") {
+        failed = !((read_mutable_union(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "ModifiedMutableUnion") {
+        failed = !((read_modified_mutable_union(dr) == RETCODE_OK) ^ expect_to_fail);
+      } else if (type == "Trim20Struct") {
+        failed = !((read_trim20_struct(dr) == RETCODE_OK) ^ expect_to_fail);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;

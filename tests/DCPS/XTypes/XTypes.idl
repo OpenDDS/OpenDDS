@@ -82,3 +82,23 @@ case E_KEY:
 case E_ADDITIONAL_FIELD:
   @id(12) long additional_field;
 };
+
+// Try Construct
+
+typedef string<20> str20;
+typedef string<64> str64;
+
+@topic
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct Trim64Struct {
+  @try_construct(TRIM) str64 trim_string;
+};
+
+@topic
+@mutable
+@OpenDDS::data_representation(XCDR2)
+struct Trim20Struct {
+  @try_construct(TRIM) str20 trim_string;
+};
+
