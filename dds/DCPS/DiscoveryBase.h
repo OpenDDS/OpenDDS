@@ -1323,9 +1323,9 @@ namespace OpenDDS {
           reader_local = true;
         }
 
-         // for Xtypes, check consistency
-         XTypes::TypeIdentifier writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
-         XTypes::TypeIdentifier reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
+        // for Xtypes, check consistency
+        XTypes::TypeIdentifier writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
+        XTypes::TypeIdentifier reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
         if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
           //look up topic name
           TopicNameMap::iterator name_iter = topic_names_.find(writer); //TODO find reader too?
@@ -1346,8 +1346,8 @@ namespace OpenDDS {
 
           } else {
             ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match_continue ")
-            ACE_TEXT("failed to find writer topic name required to run consistency check!\n")));
+              ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match_continue ")
+              ACE_TEXT("failed to find writer topic name required to run consistency check!\n")));
             return;
           }
 

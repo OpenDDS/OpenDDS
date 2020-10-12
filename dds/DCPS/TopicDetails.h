@@ -10,8 +10,8 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/XTypes/TypeObject.h"
-#include "dds/DCPS/XTypes/TypeAssignability.h"
+#include "XTypes/TypeObject.h"
+#include "XTypes/TypeAssignability.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -113,7 +113,8 @@ namespace OpenDDS {
       // Remote (assumes type_ids != TK_NONE)
       void add_pub_sub_xtype(const DCPS::RepoId& remote_guid,
                        const XTypes::TypeIdentifier& local_type_id,
-                       const XTypes::TypeIdentifier& remote_type_id) {
+                       const XTypes::TypeIdentifier& remote_type_id)
+      {
 
         RepoId participant_id = remote_guid;
         participant_id.entityId = ENTITYID_PARTICIPANT;
@@ -123,7 +124,6 @@ namespace OpenDDS {
         RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
         bool inconsistent_before;
         if (remote_topic_iter == remote_topics_.end()) {
-          // Insert.
           remote_topic_iter = remote_topics_.insert(std::make_pair(participant_id, RemoteTopic())).first;
           inconsistent_before = false;
         } else {
@@ -179,7 +179,8 @@ namespace OpenDDS {
       // Remote
       void add_pub_sub(const DCPS::RepoId& guid,
                        const OPENDDS_STRING& type_name,
-                       const XTypes::TypeIdentifier& type_id) {
+                       const XTypes::TypeIdentifier& type_id)
+      {
         // This function can be called before the local side of the
         // topic is initialized.  If this happens, the topic will
         // always be inconsistent meaning the inconsistent count
@@ -208,7 +209,7 @@ namespace OpenDDS {
         if (remote.type_id_.kind() == XTypes::TK_NONE) {
           remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
         } else { //deferring remaining checks until can check type_ids for both
-            if (DCPS::DCPS_debug_level) {
+          if (DCPS::DCPS_debug_level) {
               ACE_DEBUG((LM_WARNING,
                          ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
                          ACE_TEXT("defferring consistency check for Xtypes remote for topic %C\n"),
