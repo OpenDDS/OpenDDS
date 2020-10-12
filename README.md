@@ -47,7 +47,7 @@ details.
 - The OpenDDS Developer's Guide is freely downloadable at:
 http://download.objectcomputing.com/OpenDDS/
 
-- The TAO Developer's Guide book set may also be purchased from
+- The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide
 
 - A Doxygen for the latest release is available at
