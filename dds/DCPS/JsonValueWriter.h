@@ -89,7 +89,8 @@ std::string to_json(const T& sample)
 }
 
 template<typename T>
-std::string to_json(const ::DDS::TopicDescription_ptr topic, const T& sample, const DDS::SampleInfo& sample_info)
+std::string to_json(const DDS::TopicDescription_ptr topic,
+                    const T& sample, const DDS::SampleInfo& sample_info)
 {
   std::ostringstream str;
   JsonValueWriter jvw(str);
