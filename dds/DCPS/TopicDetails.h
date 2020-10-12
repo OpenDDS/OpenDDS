@@ -178,8 +178,7 @@ namespace OpenDDS {
 
       // Remote
       void add_pub_sub(const DCPS::RepoId& guid,
-                       const OPENDDS_STRING& type_name,
-                       const XTypes::TypeIdentifier& type_id)
+                       const OPENDDS_STRING& type_name)
       {
         // This function can be called before the local side of the
         // topic is initialized.  If this happens, the topic will
@@ -205,18 +204,7 @@ namespace OpenDDS {
         // Initialize.
         RemoteTopic& remote = remote_topic_iter->second;
         remote.data_type_name_ = type_name;
-        remote.type_id_= type_id;
-        if (remote.type_id_.kind() == XTypes::TK_NONE) {
-          remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
-        } else { //deferring remaining checks until can check type_ids for both
-          if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
-                       ACE_TEXT("defferring consistency check for Xtypes remote for topic %C\n"),
-                       name_.c_str()));
-          }
-          return;
-        }
+        remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
         if (topic_callbacks_ && !remote.inconsistent_) {
           remote.data_type_name_.clear();
         }
