@@ -30,11 +30,9 @@ void append(
   props.length(len + 1);
   props[len] = prop;
 }
-#endif
 
 void set_security_qos(DDS::DomainParticipantQos& participant_qos, unsigned secid)
 {
-#ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security()) {
     const std::string base_path = "file:../../security/";
     std::stringstream ss;
@@ -56,5 +54,5 @@ void set_security_qos(DDS::DomainParticipantQos& participant_qos, unsigned secid
     append(props, DDS::Security::Properties::AccessPermissions,
       (base_path + "permissions/permissions_" + base_name + "_signed.p7s").c_str());
   }
-#endif
 }
+#endif

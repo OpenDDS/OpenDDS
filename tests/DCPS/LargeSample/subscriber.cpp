@@ -87,7 +87,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DomainParticipant
     DDS::DomainParticipantQos participant_qos;
     dpf->get_default_participant_qos(participant_qos);
+#ifdef OPENDDS_SECURITY
     set_security_qos(participant_qos, security_id);
+#endif
     DDS::DomainParticipant_var participant =
       dpf->create_participant(domain,
                               participant_qos,
