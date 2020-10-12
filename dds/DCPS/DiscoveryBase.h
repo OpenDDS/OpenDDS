@@ -1233,16 +1233,17 @@ namespace OpenDDS {
           matching_data_buffer_.insert(std::make_pair(mp, md));
         }
         // Store an entry for the first request
-        TypeIdSeqNumberPair seq_num_pair = std::make_pair(type_info->minimal.typeid_with_size.type_id,
-                                                          md.rpc_sequence_number);
-        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, seq_num_pair));
+        const TypeIdOrigSeqNumber orig_req_data = {type_info->minimal.typeid_with_size.type_id,
+                                                   md.rpc_sequence_number,
+                                                   md.time_added_to_map};
+        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
 
         XTypes::TypeIdentifierSeq type_ids;
         if (type_info->minimal.dependent_typeid_count == -1 ||
             type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
           type_ids.append(type_info->minimal.typeid_with_size.type_id);
 
-          // Get the dependent TypeIdentifiers of the topic type
+          // Get dependencies of topic type
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
         } else {
           type_ids.length(type_info->minimal.dependent_typeid_count + 1);
@@ -1250,11 +1251,14 @@ namespace OpenDDS {
           for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
             type_ids[i] = type_info->minimal.dependent_typeids[i].type_id;
           }
-          // Get TypeObjects of the topic type and all of its dependent types
+          // Get TypeObjects of topic type and all of its dependencies
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         }
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
       }
+
+      // Cleanup internal data used by type lookup operations
+      virtual void cleanup_type_lookup_data(const XTypes::TypeIdentifier& ti) = 0;
 
       void
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
@@ -1268,6 +1272,17 @@ namespace OpenDDS {
             matching_data_buffer_.erase(iter++);
           } else {
             ++iter;
+          }
+        }
+
+        // Cleanup internal data used by getTypeDependencies
+        for (typename OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
+          if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {
+            const XTypes::TypeIdentifier& ti = it->second.type_id;
+            cleanup_type_lookup_data(ti);
+            orig_seq_numbers_.erase(it++);
+          } else {
+            ++it;
           }
         }
       }
@@ -1640,12 +1655,16 @@ namespace OpenDDS {
         GuidPrefix_t prefix_;
       };
 
-      typedef std::pair<XTypes::TypeIdentifier, SequenceNumber> TypeIdSeqNumberPair;
+      struct TypeIdOrigSeqNumber {
+        XTypes::TypeIdentifier type_id;
+        SequenceNumber seq_number; // Of the original request
+        MonotonicTimePoint time_started;
+      };
 
       // Map from the sequence number of the most recent request for a type to its TypeIdentifier
       // and the sequence number of the first request sent for that type. Every time a new request
       // is sent for a type, a new entry must be stored.
-      typedef OPENDDS_MAP(SequenceNumber, TypeIdSeqNumberPair) OrigSeqNumberMap;
+      typedef OPENDDS_MAP(SequenceNumber, TypeIdOrigSeqNumber) OrigSeqNumberMap;
       OrigSeqNumberMap orig_seq_numbers_;
 
 #ifdef OPENDDS_SECURITY

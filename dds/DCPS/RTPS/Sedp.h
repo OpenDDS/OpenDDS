@@ -769,6 +769,8 @@ private:
                                 const XTypes::TypeIdentifier& remote_ti,
                                 XTypes::OctetSeq32& cont_point) const;
 
+    void cleanup(const XTypes::TypeIdentifier& ti);
+
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
@@ -802,6 +804,8 @@ private:
   TypeLookupRequestReader_rch type_lookup_request_secure_reader_;
   TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
 #endif
+
+  void cleanup_type_lookup_data(const XTypes::TypeIdentifier& ti);
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;
