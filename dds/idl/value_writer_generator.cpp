@@ -56,8 +56,7 @@ namespace {
       be_global->impl_ << "value_writer.begin_sequence();\n";
       if (use_cxx11) {
           be_global->impl_ << "for (size_t ";
-      }
-      else {
+      } else {
           be_global->impl_ << "for (unsigned int ";
       }
       be_global->impl_ << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
