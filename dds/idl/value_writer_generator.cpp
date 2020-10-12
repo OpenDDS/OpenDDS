@@ -27,11 +27,8 @@ namespace {
     if (dim_idx < array->n_dims()) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ << "value_writer.begin_array();\n";
-      if (use_cxx11) {
-          be_global->impl_ << "for (size_t ";
-      } else {
-          be_global->impl_ << "for (unsigned int ";
-      }
+      be_global->impl_ << "for (";
+      be_global->impl_ << (use_cxx11 ? "size_t " : "unsigned int ");
       be_global->impl_ << idx << " = 0; " << idx << " != " << dim << "; ++" << idx << ") {\n";
       be_global->impl_ << "  value_writer.begin_element(" << idx << ");\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i");
@@ -54,11 +51,8 @@ namespace {
     if (c & CL_SEQUENCE) {
       AST_Sequence* sequence = dynamic_cast<AST_Sequence*>(actual);
       be_global->impl_ << "value_writer.begin_sequence();\n";
-      if (use_cxx11) {
-          be_global->impl_ << "for (size_t ";
-      } else {
-          be_global->impl_ << "for (unsigned int ";
-      }
+      be_global->impl_ << "for (";
+      be_global->impl_ << (use_cxx11 ? "size_t " : "unsigned int ");
       be_global->impl_ << idx << " = 0; " << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n";
       be_global->impl_ << "  value_writer.begin_element(" << idx << ");\n";
       generate_write(expression + "[" + idx + "]", false, sequence->base_type(), idx + "i");
