@@ -210,12 +210,12 @@ namespace OpenDDS {
           remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
         } else { //deferring remaining checks until can check type_ids for both
           if (DCPS::DCPS_debug_level) {
-              ACE_DEBUG((LM_WARNING,
-                         ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
-                         ACE_TEXT("defferring consistency check for Xtypes remote for topic %C\n"),
-                         name_.c_str()));
-            }
-            return;
+            ACE_DEBUG((LM_WARNING,
+                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
+                       ACE_TEXT("defferring consistency check for Xtypes remote for topic %C\n"),
+                       name_.c_str()));
+          }
+          return;
         }
         if (topic_callbacks_ && !remote.inconsistent_) {
           remote.data_type_name_.clear();
