@@ -1345,7 +1345,10 @@ namespace OpenDDS {
             }
 
           } else {
-            //something bad happened TODO what to do here?
+            ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match_continue ")
+            ACE_TEXT("failed to find writer topic name required to run consistency check!\n")));
+            return;
           }
 
           //call new add_pub_sub; if assignability is false then what; remove endpoint and other cleanup
