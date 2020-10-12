@@ -92,10 +92,10 @@ ReturnCode_t read_tryconstruct_struct(DataReader_var dr, T1 pdr, T2& data, const
       ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %s, received: %s\n", expected_value.c_str(), data[0].trim_string));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %s, received: %s\n", expected_value.c_str(), data[0].trim_string.in()));
       ret = RETCODE_ERROR;
     } else if (verbose) {
-        ACE_ERROR((LM_DEBUG, "reader: %s\n", data[0].trim_string));
+        ACE_ERROR((LM_DEBUG, "reader: %s\n", data[0].trim_string.in()));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
@@ -399,9 +399,10 @@ void write_trim64_struct(DataWriter_var dw)
 
 
 template<typename T>
-void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name, Topic_var& topic)
+void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name,
+  Topic_var& topic, const std::string& registered_type_name)
 {
-  ts->register_type(dp, "");
+  ts->register_type(dp, registered_type_name.c_str());
   CORBA::String_var type_name = ts->get_type_name();
   topic = dp->create_topic(topic_name, type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
@@ -434,6 +435,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool writer = false;
   bool reader = false;
   std::string type;
+  std::string registered_type_name = "";
 
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
@@ -445,9 +447,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       reader = true;
     } else if (arg == ACE_TEXT("--type")) {
       if (i + 1 < argc) {
-        type = argv[++i];
+        type = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
+        return 1;
+      }
+    } else if (arg == ACE_TEXT("--type_r")) {
+      if (i + 1 < argc) {
+        registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
@@ -463,37 +472,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Topic_var topic;
   if (type == "Property_1") {
     Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
-    get_topic(ts, dp, "Property_1_Topic", topic);
+    get_topic(ts, dp, "Property_1_Topic", topic, registered_type_name);
   } else if (type == "Property_2") {
     Property_2TypeSupport_var ts = new Property_2TypeSupportImpl;
-    get_topic(ts, dp, "Property_2_Topic", topic);
+    get_topic(ts, dp, "Property_2_Topic", topic, registered_type_name);
   } else if (type == "AppendableStruct") {
     AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
-    get_topic(ts, dp, "AppendableStruct_Topic", topic);
+    get_topic(ts, dp, "AppendableStruct_Topic", topic, registered_type_name);
   } else if (type == "AdditionalPrefixFieldStruct") {
     AdditionalPrefixFieldStructTypeSupport_var ts = new AdditionalPrefixFieldStructTypeSupportImpl;
-    get_topic(ts, dp, "AdditionalPrefixFieldStruct_Topic", topic);
+    get_topic(ts, dp, "AppendableStruct_Topic", topic, registered_type_name);
   } else if (type == "AdditionalPostfixFieldStruct") {
     AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
-    get_topic(ts, dp, "AdditionalPostfixFieldStruct_Topic", topic);
+    get_topic(ts, dp, "AppendableStruct_Topic", topic, registered_type_name);
   } else if (type == "MutableStruct") {
     MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
-    get_topic(ts, dp, "MutableStruct_Topic", topic);
+    get_topic(ts, dp, "MutableStruct_Topic", topic, registered_type_name);
   } else if (type == "ModifiedMutableStruct") {
     ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
-    get_topic(ts, dp, "ModifiedMutableStruct_Topic", topic);
+    get_topic(ts, dp, "MutableStruct_Topic", topic, registered_type_name);
   } else if (type == "MutableUnion") {
     MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
-    get_topic(ts, dp, "MutableUnion_Topic", topic);
+    get_topic(ts, dp, "MutableUnion_Topic", topic, registered_type_name);
   } else if (type == "ModifiedMutableUnion") {
     ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl;
-    get_topic(ts, dp, "ModifiedMutableUnion_Topic", topic);
+    get_topic(ts, dp, "MutableUnion_Topic", topic, registered_type_name);
   } else if (type == "Trim64Struct") {
     Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl;
-    get_topic(ts, dp, "Trim64Struct_Topic", topic);
-  } else if (type == "Trim64Struct") {
+    get_topic(ts, dp, "Tryconstruct_Topic", topic, registered_type_name);
+  } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
-    get_topic(ts, dp, "Trim20Struct_Topic", topic);
+    get_topic(ts, dp, "Tryconstruct_Topic", topic, registered_type_name);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
@@ -513,7 +522,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     failed = !check_inconsistent_topic_status(topic);
 
-    if (!failed) {
+    if (!failed && !expect_to_fail) {
       if (type == "Property_1") {
         write_property_1(dw);
       } else if (type == "Property_2") {
@@ -564,27 +573,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     failed = !check_inconsistent_topic_status(topic);
 
-    if (!failed) {
+    if (!failed && !expect_to_fail) {
       if (type == "Property_1") {
-        failed = !((read_property_1(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_property_1(dr) == RETCODE_OK);
       } else if (type == "Property_2") {
-        failed = !((read_property_2(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_property_2(dr) == RETCODE_OK);
       } else if (type == "AppendableStruct") {
-        failed = !((read_appendable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_appendable_struct(dr) == RETCODE_OK);
       } else if (type == "AdditionalPrefixFieldStruct") {
-        failed = !((read_additional_prefix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_additional_prefix_field_struct(dr) == RETCODE_OK);
       } else if (type == "AdditionalPostfixFieldStruct") {
-        failed = !((read_additional_postfix_field_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_additional_postfix_field_struct(dr) == RETCODE_OK);
       } else if (type == "MutableStruct") {
-        failed = !((read_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_mutable_struct(dr) == RETCODE_OK);
       } else if (type == "ModifiedMutableStruct") {
-        failed = !((read_modified_mutable_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_modified_mutable_struct(dr) == RETCODE_OK);
       } else if (type == "MutableUnion") {
-        failed = !((read_mutable_union(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_mutable_union(dr) == RETCODE_OK);
       } else if (type == "ModifiedMutableUnion") {
-        failed = !((read_modified_mutable_union(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_modified_mutable_union(dr) == RETCODE_OK);
       } else if (type == "Trim20Struct") {
-        failed = !((read_trim20_struct(dr) == RETCODE_OK) ^ expect_to_fail);
+        failed = !(read_trim20_struct(dr) == RETCODE_OK);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;
