@@ -67,7 +67,7 @@ ReturnCode_t read_i(DataReader_var dr, T1 pdr, T2& data)
   ReturnCode_t ret = ws->wait(active, max_wait);
 
   if (ret == RETCODE_TIMEOUT) {
-    ACE_DEBUG((LM_ERROR, "ERROR: reader timedout\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
   } else if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
   } else {
@@ -89,13 +89,13 @@ ReturnCode_t read_tryconstruct_struct(DataReader_var dr, T1 pdr, T2& data, const
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_DEBUG((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
-      ACE_DEBUG((LM_ERROR, "ERROR: reader: expected key value: %s, received: %s\n", expected_value, data[0].trim_string));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %s, received: %s\n", expected_value.c_str(), data[0].trim_string));
       ret = RETCODE_ERROR;
     } else if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "reader: %s\n", data[0].trim_string));
+        ACE_ERROR((LM_DEBUG, "reader: %s\n", data[0].trim_string));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
@@ -110,10 +110,10 @@ ReturnCode_t read_struct(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_DEBUG((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
     } else if (data[0].key != expected_key_value) {
-      ACE_DEBUG((LM_ERROR, "reader: expected key value: %d, received: %d\n", expected_key_value, data[0].key));
+      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", expected_key_value, data[0].key));
       ret = RETCODE_ERROR;
     } else if (verbose) {
       ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
@@ -132,33 +132,33 @@ ReturnCode_t read_union(DataReader_var dr, T1 pdr,
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_DEBUG((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
-    }
-
-    switch (data[0]._d()) {
-    case E_KEY:
-      if (data[0].key() != expected_value) {
-        ACE_DEBUG((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
-          expected_value, data[0].key()));
-        ret = RETCODE_ERROR;
+    } else {
+      switch (data[0]._d()) {
+      case E_KEY:
+        if (data[0].key() != expected_value) {
+          ACE_ERROR((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
+            expected_value, data[0].key()));
+          ret = RETCODE_ERROR;
+        }
+        if (verbose) {
+          ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key()));
+        }
+        break;
+      case E_ADDITIONAL_FIELD:
+        if (data[0].additional_field() != expected_value) {
+          ACE_ERROR((LM_ERROR, "reader: expected additional_field value: %d, received: %d\n",
+            expected_value, data[0].additional_field()));
+          ret = RETCODE_ERROR;
+        }
+        if (verbose) {
+          ACE_DEBUG((LM_DEBUG, "reader: union additional_field %d\n", data[0].additional_field()));
+        }
+        break;
+      default:
+        break;
       }
-      if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key()));
-      }
-      break;
-    case E_ADDITIONAL_FIELD:
-      if (data[0].additional_field() != expected_value) {
-        ACE_DEBUG((LM_ERROR, "reader: expected additional_field value: %d, received: %d\n",
-          expected_value, data[0].additional_field()));
-        ret = RETCODE_ERROR;
-      }
-      if (verbose) {
-        ACE_DEBUG((LM_DEBUG, "reader: union additional_field %d\n", data[0].additional_field()));
-      }
-      break;
-    default:
-      break;
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
@@ -433,7 +433,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   bool writer = false;
   bool reader = false;
-  ACE_TString type;
+  std::string type;
 
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
