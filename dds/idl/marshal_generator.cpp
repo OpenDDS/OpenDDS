@@ -532,8 +532,7 @@ namespace {
       serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
       serialized_size.endArgs();
 
-      const string code = "    serialized_size_delimiter(encoding, size);\n";
-      generate_dheader_code(code, !primitive, false);
+      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       be_global->impl_ << const_unwrap <<
         "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
@@ -597,12 +596,11 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         string("    serialized_size(encoding, total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
 
       be_global->impl_ << const_unwrap <<
         "  const CORBA::ULong length = " << get_length << ";\n";
@@ -671,11 +669,11 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
+
       if (!primitive) {
         be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
       }
@@ -876,8 +874,7 @@ namespace {
       serialized_size.addArg(sf.arg_.c_str(), sf.const_ref_);
       serialized_size.endArgs();
 
-      const string code = "    serialized_size_delimiter(encoding, size);\n";
-      generate_dheader_code(code, !primitive, false);
+      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       be_global->impl_ << sf.const_unwrap_ <<
         "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n"
@@ -939,12 +936,11 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         string("    serialized_size(encoding, total_size, ") + (use_cxx11 ? "wrap" : "seq") + ");\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
 
       be_global->impl_ << sf.const_unwrap_ <<
         "  const CORBA::ULong length = " << get_length << ";\n";
@@ -1010,11 +1006,10 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
 
       const string cxx_elem = scoped(sf.seq_->base_type()->name()),
         elem_underscores = dds_generator::scoped_helper(sf.seq_->base_type()->name(), "_");
@@ -1232,8 +1227,7 @@ namespace {
       serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
       serialized_size.endArgs();
 
-      const string code = "    serialized_size_delimiter(encoding, size);\n";
-      generate_dheader_code(code, !primitive, false);
+      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
@@ -1292,12 +1286,12 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         string("    serialized_size(encoding, total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
+
       be_global->impl_ << const_unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (elem_cls & CL_PRIMITIVE) {
@@ -1341,11 +1335,11 @@ namespace {
         "  bool discard_flag = false;\n"
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
+
       if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
         be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
@@ -1463,8 +1457,7 @@ namespace {
       serialized_size.addArg(af.arg_.c_str(), af.const_ref_);
       serialized_size.endArgs();
 
-      const string code = "    serialized_size_delimiter(encoding, size);\n";
-      generate_dheader_code(code, !primitive, false);
+      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       be_global->impl_ << af.const_unwrap_;
       if (af.as_cls_ & CL_ENUM) {
@@ -1523,12 +1516,11 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         string("    serialized_size(encoding, total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
 
       be_global->impl_ << af.const_unwrap_;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
@@ -1576,11 +1568,11 @@ namespace {
         "  bool discard_flag = false;\n"
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, !primitive);
+        "    }\n", !primitive);
+
       if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
         be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
@@ -2925,8 +2917,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "  size_t mutable_running_total = 0;\n";
     }
-    const string code = "    serialized_size_delimiter(encoding, size);\n";
-    generate_dheader_code(code, not_final, false);
+    generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
@@ -2967,12 +2958,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    const string code =
+    generate_dheader_code(
       "    serialized_size(encoding, total_size, stru);\n"
       "    if (!strm.write_delimiter(total_size)) {\n"
       "      return false;\n"
-      "    }\n";
-    generate_dheader_code(code, not_final);
+      "    }\n", not_final);
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
@@ -3049,11 +3039,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    const string code =
+    generate_dheader_code(
       "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"
-      "    }\n";
-    generate_dheader_code(code, not_final);
+      "    }\n", not_final);
+
     if (not_final) {
       be_global->impl_ <<
         "  const size_t start_pos = strm.pos();\n"
@@ -3719,8 +3709,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.addArg("uni", "const " + cxx + "&");
     serialized_size.endArgs();
 
-    const string code = "    serialized_size_delimiter(encoding, size);\n";
-    generate_dheader_code(code, not_final, false);
+    generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
     if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
@@ -3758,12 +3747,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    const string code =
+    generate_dheader_code(
       "    serialized_size(encoding, total_size, uni);\n"
       "    if (!strm.write_delimiter(total_size)) {\n"
       "      return false;\n"
-      "    }\n";
-    generate_dheader_code(code, not_final);
+      "    }\n", not_final);
 
     // EMHEADER for discriminator
     if (exten == extensibilitykind_mutable) {
@@ -3804,11 +3792,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    const string code =
+    generate_dheader_code(
       "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"
-      "    }\n";
-    generate_dheader_code(code, not_final);
+      "    }\n", not_final);
 
     if (exten == extensibilitykind_mutable) {
       // EMHEADER for discriminator
@@ -3890,8 +3877,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.endArgs();
 
     if (has_key) {
-      const string code = "    serialized_size_delimiter(encoding, size);\n";
-      generate_dheader_code(code, not_final, false);
+      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
       if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
@@ -3924,12 +3910,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         "    serialized_size(encoding, total_size, uni);\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, not_final);
+        "    }\n", not_final);
 
       // EMHEADER for discriminator
       if (exten == extensibilitykind_mutable) {
@@ -3968,11 +3953,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      const string code =
+      generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n";
-      generate_dheader_code(code, not_final);
+        "    }\n", not_final);
 
       if (exten == extensibilitykind_mutable) {
         // EMHEADER for discriminator

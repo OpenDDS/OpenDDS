@@ -29,10 +29,12 @@ typedef short ShortArray[15];
 typedef str64 str64Array[10];
 typedef str20 str20Array[10];
 typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
+
 //enum for use in struct, union, and sequence
 //due to issue 1900, enums in C++11 need an extra value beyond each case when used as a union discriminator
 enum EnumType {VALUE1, VALUE2, ValueExtra};
 enum EnumType2 {B1, B2, B3, B4, BExtra};
+
 //nested union for use in struct, union, and sequence
 union NestedUnion switch (EnumType) {
   case VALUE1: boolean u_b;
@@ -151,12 +153,14 @@ struct NestedStruct {
   @try_construct(USE_DEFAULT) str64 str64_ud;
   @try_construct(TRIM) str64 str64_t;
 };
+
 @mutable
 struct NestedStructTrim {
   @try_construct(DISCARD) str20 str20_d;
   @try_construct(USE_DEFAULT) str20 str20_ud;
   @try_construct(TRIM) str20 str20_t;
 };
+
 //struct
 typedef sequence <NestedStruct> StructSeqUnbound;
 typedef sequence <NestedStructTrim> StructSeqUnboundTrim;
@@ -204,6 +208,7 @@ struct NestedStruct2 {
   @try_construct(USE_DEFAULT) str64 str64_ud;
   @try_construct(TRIM) str64 str64_t;
 };
+
 //nested struct for use in struct, union, and sequence
 struct NestedStruct3 {
   @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
@@ -287,8 +292,6 @@ module TryCon {
     SeqShortSeqUnboundBound2 sssub_t;
     SeqShortSeqBoundUnbound2 sssbu_t;
     SeqShortSeqBoundBound2 sssbb_t;
-    // UnionSeqUnbound usu_t;
-    // UnionSeqBound2 usb_t;
   };
 
   @mutable
@@ -315,9 +318,8 @@ module TryCon {
     //unbounded so no trim
     SeqShortSeqBoundUnbound sssbu_t;
     @try_construct(TRIM) SeqShortSeqBoundBound sssbb_t;
-    // @try_construct(TRIM) UnionSeqUnbound usu_t;
-    // @try_construct(TRIM) UnionSeqBound usb_t;
   };
+
   @topic
   @mutable
   struct AnonSeqStruct {
@@ -337,6 +339,7 @@ module TryCon {
     sequence <ShortSeqBound2> AnonSeqShortSeqBoundUnbound;
     sequence <ShortSeqBound2, 3> AnonSeqShortSeqBoundBound;
   };
+
   @topic
   @mutable
   struct AnonSeqStructTrim {
@@ -356,6 +359,7 @@ module TryCon {
     @try_construct(TRIM) sequence <@try_construct(TRIM) ShortSeqBound> AnonSeqShortSeqBoundUnbound;
     @try_construct(TRIM) sequence <@try_construct(TRIM) ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
   };
+
   @topic
   @mutable
   struct AnonSeqStructDefault {
@@ -375,6 +379,7 @@ module TryCon {
     @try_construct(USE_DEFAULT) sequence <ShortSeqBound> AnonSeqShortSeqBoundUnbound;
     @try_construct(USE_DEFAULT) sequence <ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
   };
+
   @topic
   @mutable
   struct AnonArrStruct {
@@ -413,34 +418,42 @@ module TryCon {
     //sequence
     ShortSeqBound AnonArrShortSeqBound @try_construct(USE_DEFAULT) [3];
   };
+
   @mutable
   struct DiscardStructString1 {
     str64 str64_d;
   };
+
   @mutable
   struct DiscardStructString2 {
     str20 str20_d;
   };
+
   @mutable
   struct DiscardStructWString1 {
     wstr64 wstr64_d;
   };
+
   @mutable
   struct DiscardStructWString2 {
     wstr20 wstr20_d;
   };
+
   @mutable
   struct DiscardStructStruct1 {
     NestedStruct ns;
   };
+
   @mutable
   struct DiscardStructStruct2 {
     NestedStructTrim ns;
   };
+
   @mutable
   struct DiscardStructArray1 {
     str64Array sa;
   };
+
   @mutable
   struct DiscardStructArray2 {
     str20Array sa;
@@ -453,6 +466,7 @@ module TryCon {
   struct DiscardStructSequence1 {
     ss_64 ss64;
   };
+
   @mutable
   struct DiscardStructSequence2 {
     ss_20 ss20;
@@ -462,14 +476,17 @@ module TryCon {
   struct DiscardStructArrayAnon1 {
     str64 saa64[3];
   };
+
   @mutable
   struct DiscardStructArrayAnon2 {
     str20 saa20[3];
   };
+
   @mutable
   struct DiscardStructSequenceAnon1 {
     sequence <str64> ssa64;
   };
+
   @mutable
   struct DiscardStructSequenceAnon2 {
     sequence <str20> ssa20;
@@ -494,6 +511,7 @@ module TryCon {
     case 13: @try_construct(USE_DEFAULT) EnumType2 e_ud;
     default: @try_construct(TRIM) str64 def;
   };
+
   @topic
   @extensibility(MUTABLE)
   union DiscardUnion switch (@try_construct(DISCARD) short) {
@@ -504,6 +522,7 @@ module TryCon {
     case 12: @try_construct(DISCARD) EnumType e_d;
     default: @try_construct(TRIM) str20 def;
   };
+
   @topic
   @extensibility(MUTABLE)
   union TrimUnion switch (short) {
@@ -513,6 +532,7 @@ module TryCon {
     case 11: @try_construct(TRIM) StringSeqBound strs_t;
     default: @try_construct(TRIM) str20 def;
   };
+
   @topic
   @extensibility(MUTABLE)
   union DefaultUnion switch (@try_construct(USE_DEFAULT) short) {
@@ -523,6 +543,7 @@ module TryCon {
     case 13: @try_construct(USE_DEFAULT) EnumType e_ud;
     default: @try_construct(TRIM) str20 def;
   };
+
   @topic
   @extensibility(MUTABLE)
   union BaseDiscrimUnion switch (EnumType2) {
@@ -531,16 +552,19 @@ module TryCon {
     case B3: short s3;
     case B4: short s4;
   };
+
   @topic
   @extensibility(MUTABLE)
   union DiscardDiscrimUnion switch (@try_construct(DISCARD) EnumType) {
     case VALUE1: short s1;
     case VALUE2: short s2;
   };
+
   @topic
   @extensibility(MUTABLE)
   union DefaultDiscrimUnion switch (@try_construct(USE_DEFAULT) EnumType) {
     case VALUE1: short s1;
     case VALUE2: short s2;
   };
+
 };
