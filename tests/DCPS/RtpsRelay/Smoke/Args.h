@@ -17,11 +17,12 @@
 #include <cstdlib>
 
 extern bool check_lease_recovery;
+extern bool expect_unmatch;
 
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("l"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("le"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -29,9 +30,11 @@ parse_args(int argc, ACE_TCHAR *argv[])
     case 'l':
       check_lease_recovery = true;
       break;
+    case 'e':
+      expect_unmatch = true;
+      break;
     case '?':
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("usage: %s [-l]\n"), argv[0]), EXIT_FAILURE);
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("usage: %s [-le]\n"), argv[0]), EXIT_FAILURE);
     }
   }
 

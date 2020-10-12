@@ -57,6 +57,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 #endif
 
 bool check_lease_recovery = false;
+bool expect_unmatch = false;
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {

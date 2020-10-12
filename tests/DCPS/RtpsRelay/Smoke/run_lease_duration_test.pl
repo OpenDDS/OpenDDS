@@ -32,22 +32,20 @@ if ($test->flag('secure')) {
     $pub_sub_security_opts = " -DCPSSecurity 1";
 }
 
-my $pub_ini = " rtps_ld_60_sec.ini";
+my $pub_ini = " rtps_ld_60_sec.ini -e";
 my $sub_ini = " rtps_ld_5_sec.ini";
 
 if ($test->flag('reverse')) {
   $pub_ini = " rtps_ld_5_sec.ini";
-  $sub_ini = " rtps_ld_60_sec.ini";
+  $sub_ini = " rtps_ld_60_sec.ini -e";
 }
 
 $test->process("relay1a", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1a -StatisticsInterval 3" . $relay_security_opts);
 $test->process("relay1b", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1b -StatisticsInterval 3" . $relay_security_opts);
-#$test->process("reporter", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile reporter.ini -RunRelay 0 -ReportStatistics 1");
 $test->process("publisher", "publisher", "-l -ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-l -ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
 
 if ($test->flag('reverse')) {
-  #$test->start_process("reporter");
   $test->start_process("relay1a");
   sleep 3;
   $test->start_process("publisher");
@@ -57,7 +55,6 @@ if ($test->flag('reverse')) {
   sleep 6;
   $test->start_process("relay1b");
 } else {
-  #$test->start_process("reporter");
   $test->start_process("relay1a");
   sleep 3;
   $test->start_process("publisher");
@@ -71,6 +68,5 @@ if ($test->flag('reverse')) {
 sleep 30;
 
 $test->kill_process(1, "relay1b");
-#$test->kill_process(5, "reporter");
 
 exit $test->finish(15);

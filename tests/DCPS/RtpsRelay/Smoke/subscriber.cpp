@@ -57,6 +57,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 #endif
 
 bool check_lease_recovery = false;
+bool expect_unmatch = false;
 
 bool reliable = false;
 bool wait_for_acks = false;
@@ -187,9 +188,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-      if (matches.current_count == 0 && matches.total_count > 0 &&
-          (!check_lease_recovery || listener_servant->is_valid(check_lease_recovery))) {
-        break;
+      if (!expect_unmatch) {
+        if (matches.current_count == 0 && matches.total_count > 0) {
+          break;
+        }
+      } else {
+        if (matches.current_count == 1 && matches.total_count > 1) {
+          listener_servant->mark_rediscovered();
+        }
+        if (matches.current_count == 0 && matches.total_count > 1) {
+          break;
+        }
       }
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -198,7 +207,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    status = listener_servant->is_valid(check_lease_recovery) ? EXIT_SUCCESS : EXIT_FAILURE;
+    status = listener_servant->is_valid(check_lease_recovery, expect_unmatch) ? EXIT_SUCCESS : EXIT_FAILURE;
 
     ws->detach_condition(condition);
 
