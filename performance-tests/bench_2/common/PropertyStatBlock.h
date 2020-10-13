@@ -31,7 +31,7 @@ Bench_Common_Export SimpleStatBlock consolidate(const SimpleStatBlock& sb1, cons
 class Bench_Common_Export PropertyStatBlock {
 public:
   // Constructor for initializing / writing PropertyStatBlock
-  PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size);
+  PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size, bool timestamps = false);
 
   void update(double value);
   void finalize();
@@ -47,6 +47,7 @@ private:
   Builder::PropertyIndex var_x_sample_count_;
 
   std::vector<double> median_buffer_;
+  std::vector<Builder::TimeStamp> timestamp_buffer_;
   Builder::PropertyIndex median_sample_count_;
   Builder::PropertyIndex median_;
   Builder::PropertyIndex median_absolute_deviation_;

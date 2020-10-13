@@ -33,6 +33,7 @@
 #include <BenchTypeSupportImpl.h>
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
+#include "PropertyStatBlock.h"
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
@@ -94,10 +95,8 @@ public:
     return worker_id_;
   }
 
-  void write_report(ReportDataWriter_var report_writer_impl)
+  void create_worker_report(WorkerReport& report)
   {
-    Report report;
-    report.node_id = node_id_;
     report.worker_id = worker_id_;
     report.failed = (pid_ == ACE_INVALID_PID || exit_status_ != 0);
     report.details = "";
@@ -115,10 +114,6 @@ public:
         std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
         report.log = str.c_str();
       }
-    }
-    std::cout << "Writing report for worker " << worker_id_ << std::endl;
-    if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
-      std::cerr << "Write report failed" << std::endl;
     }
   }
 
@@ -182,8 +177,9 @@ using WorkerPtr = std::shared_ptr<Worker>;
 class WorkerManager : public ACE_Event_Handler {
 public:
 
-  explicit WorkerManager(ACE_Process_Manager& process_manager)
-  : process_manager_(process_manager)
+  explicit WorkerManager(const NodeId& node_id, ACE_Process_Manager& process_manager)
+  : node_id_(node_id)
+  , process_manager_(process_manager)
   {
     process_manager.register_handler(this);
     ACE_Reactor::instance()->register_handler(SIGINT, this);
@@ -200,14 +196,14 @@ public:
     timeout_ = value;
   }
 
-  bool add_worker(const NodeId& node_id, const WorkerConfig& config)
+  bool add_worker(const WorkerConfig& config)
   {
     std::lock_guard<std::mutex> guard(mutex_);
     if (all_workers_.count(config.worker_id)) {
       std::cerr << "Received the same worker id twice: " << config.worker_id << std::endl;
       return true;
     }
-    all_workers_[config.worker_id] = std::make_shared<Worker>(node_id, config);
+    all_workers_[config.worker_id] = std::make_shared<Worker>(node_id_, config);
     remaining_worker_count_++;
     return false;
   }
@@ -254,7 +250,31 @@ public:
     }
 
     // Wait For Them to Finish, Writing Reports As They Do
+    Report report{};
+    report.worker_reports.length(all_workers_.size());
+    const size_t max_stat_buffer_size = 3600; // one hour in seconds
+    auto cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
+    auto mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
+    CORBA::ULong pos = 0;
+    report.node_id = node_id_;
+
     bool running = true;
+
+    std::thread stat_collector([&](){
+
+      // TODO replace junk with real stats collection
+      size_t junk = 0;
+
+      while (running) {
+        // TODO replace junk with real stats collection
+        junk = junk + 3;
+        cpu_block->update(90.0 - ((junk / 3) % 80));
+        mem_block->update(20.0 + (junk * 2) % 60);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+      }
+    });
+
     while (running) {
       // Check to see if any workers are done and write their reports
       std::list<WorkerPtr> finished_workers;
@@ -264,7 +284,8 @@ public:
         running = remaining_worker_count_ != 0;
       }
       for (auto& i : finished_workers) {
-        i->write_report(report_writer_impl);
+        WorkerReport& worker_report = report.worker_reports[pos++];
+        i->create_worker_report(worker_report);
       }
 
       // Check to see if we have to stop prematurely
@@ -293,6 +314,15 @@ public:
       }
     }
     ACE_Reactor::instance()->cancel_timer(this);
+
+    stat_collector.join();
+    cpu_block->finalize();
+    mem_block->finalize();
+
+    std::cout << "Writing report for node " << node_id_ << std::endl;
+    if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
+      std::cerr << "Write report failed" << std::endl;
+    }
 
     DDS::Duration_t timeout = { 30, 0 };
     if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
@@ -349,6 +379,7 @@ private:
   size_t remaining_worker_count_ = 0;
   std::map<pid_t, WorkerId> pid_to_worker_id_;
   std::list<WorkerPtr> finished_workers_;
+  NodeId node_id_;
   ACE_Process_Manager& process_manager_;
   std::atomic_bool scenario_timedout_{false};
   std::atomic_bool sigint_{false};
@@ -690,7 +721,7 @@ int run_cycle(
 {
   NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
-  WorkerManager worker_manager(process_manager);
+  WorkerManager worker_manager(this_node_id, process_manager);
 
   // Wait for Status Publication with Test Controller and Write Status
   if (!write_status(name, this_node_id, AVAILABLE, status_writer_impl)) {
@@ -710,7 +741,7 @@ int run_cycle(
         WorkerId& id = configs[node].workers[config].worker_id;
         const WorkerId end = id + configs[node].workers[config].count;
         for (; id < end; id++) {
-          if (worker_manager.add_worker(this_node_id, configs[node].workers[config])) {
+          if (worker_manager.add_worker(configs[node].workers[config])) {
             return 1;
           }
         }
