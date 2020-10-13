@@ -23,12 +23,14 @@ namespace {
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
     if (dim_idx < array->n_dims()) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ <<
         indent << "value_writer.begin_array();\n" <<
-        indent << "for (size_t " << idx << " = 0; " << idx << " != " << dim << "; ++" << idx << ") {\n" <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        << idx << " != " << dim << "; ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_element(" << idx << ");\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
       be_global->impl_ <<
@@ -81,8 +83,8 @@ namespace {
     const std::string indent(level * 2, ' ');
     be_global->impl_ <<
       indent << "value_writer.begin_sequence();\n" <<
-      indent << "for (size_t " << idx << " = 0; " << idx << " != " << expression << "." << length_func << "();"
-      " ++" << idx << ") {\n" <<
+      indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+      << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
       indent << "  value_writer.begin_element(" << idx << ");\n";
     generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
     be_global->impl_ <<
