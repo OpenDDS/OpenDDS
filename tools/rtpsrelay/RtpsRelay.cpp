@@ -203,7 +203,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 #endif
 
-  const DDS::Duration_t one_minute = { 0, 0 };
+  const DDS::Duration_t one_minute = { 60, 0 };
 
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);

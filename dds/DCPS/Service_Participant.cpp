@@ -204,9 +204,7 @@ Service_Participant::Service_Participant()
     monitor_enabled_(false),
     shut_down_(false),
     shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT("")),
-    bit_autopurge_nowriter_samples_delay_({DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC}),
-    bit_autopurge_disposed_samples_delay_({DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC})
+    default_configuration_file_(ACE_TEXT(""))
 {
   initialize();
 }
@@ -783,6 +781,11 @@ Service_Participant::initialize()
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+
+  bit_autopurge_nowriter_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
+  bit_autopurge_nowriter_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
+  bit_autopurge_disposed_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
+  bit_autopurge_disposed_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
 }
 
 void
