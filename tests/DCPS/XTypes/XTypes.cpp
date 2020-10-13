@@ -425,12 +425,12 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
 }
 
 template<typename T>
-void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name,
+void get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_name,
   Topic_var& topic, const std::string& registered_type_name)
 {
   ts->register_type(dp, registered_type_name.c_str());
   CORBA::String_var type_name = (registered_type_name.empty() ? ts->get_type_name() : registered_type_name.c_str());
-  topic = dp->create_topic(topic_name, type_name,
+  topic = dp->create_topic(topic_name.c_str(), type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 }
 
@@ -496,49 +496,50 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool failed = false;
 
   Topic_var topic;
+  const std::string topic_name = registered_type_name + "_Topic";
 
   if (type == "Property_1") {
     Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
-    get_topic(ts, dp, "Property_1_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "Property_2") {
     Property_2TypeSupport_var ts = new Property_2TypeSupportImpl;
-    get_topic(ts, dp, "Property_2_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStruct") {
     AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
-    get_topic(ts, dp, "AppendableStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AdditionalPrefixFieldStruct") {
     AdditionalPrefixFieldStructTypeSupport_var ts = new AdditionalPrefixFieldStructTypeSupportImpl;
-    get_topic(ts, dp, "AppendableStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AdditionalPostfixFieldStruct") {
     AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
-    get_topic(ts, dp, "AppendableStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "MutableStruct") {
     MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
-    get_topic(ts, dp, "MutableStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedMutableStruct") {
     ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
-    get_topic(ts, dp, "MutableStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "MutableUnion") {
     MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
-    get_topic(ts, dp, "MutableUnion_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedMutableUnion") {
     ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl;
-    get_topic(ts, dp, "MutableUnion_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "Trim64Struct") {
     Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl;
-    get_topic(ts, dp, "Tryconstruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
-    get_topic(ts, dp, "Tryconstruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "FinalStruct") {
     FinalStructTypeSupport_var ts = new FinalStructTypeSupportImpl;
-    get_topic(ts, dp, "FinalStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedFinalStruct") {
     ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
-    get_topic(ts, dp, "FinalStruct_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructWithDependency") {
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
-    get_topic(ts, dp, "AppendableStructWithDependency_Topic", topic, registered_type_name);
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
