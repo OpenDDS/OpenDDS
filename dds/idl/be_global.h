@@ -219,6 +219,8 @@ public:
   bool is_plain(AST_Decl* node) const;
 
   TryConstructFailAction try_construct(AST_Decl* node) const;
+  TryConstructFailAction sequence_element_try_construct(AST_Sequence* node);
+  TryConstructFailAction array_element_try_construct(AST_Array* node);
   TryConstructFailAction union_discriminator_try_construct(AST_Union* node);
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;

@@ -64,6 +64,7 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
   data_writer_qos.reliability = data.reliability;
   data_writer_qos.destination_order = data.destination_order;
   // data_writer_qos.history not used.
+  data_writer_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
   // data_writer_qos.resource_limit not used.
   // data_writer_qos.transport_priority not used.
   data_writer_qos.lifespan = data.lifespan;
