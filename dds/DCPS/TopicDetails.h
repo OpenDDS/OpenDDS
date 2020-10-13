@@ -111,9 +111,9 @@ namespace OpenDDS {
       }
 
       // Remote (assumes type_ids != TK_NONE)
-      void add_pub_sub_xtype(const DCPS::RepoId& remote_guid,
-                       const XTypes::TypeIdentifier& local_type_id,
-                       const XTypes::TypeIdentifier& remote_type_id)
+      void add_pub_sub_xtypes(const DCPS::RepoId& remote_guid,
+                              const XTypes::TypeIdentifier& local_type_id,
+                              const XTypes::TypeIdentifier& remote_type_id)
       {
 
         RepoId participant_id = remote_guid;

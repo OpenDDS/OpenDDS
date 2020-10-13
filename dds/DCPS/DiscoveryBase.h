@@ -1324,14 +1324,14 @@ namespace OpenDDS {
         }
 
         // for Xtypes, check consistency
-        XTypes::TypeIdentifier writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
-        XTypes::TypeIdentifier reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
+        const XTypes::TypeIdentifier& writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
+        const XTypes::TypeIdentifier& reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
         if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
           //look up topic name
-          TopicNameMap::iterator name_iter = topic_names_.find(writer); //TODO find reader too?
+          const TopicNameMap::const_iterator name_iter = topic_names_.find(writer); //TODO find reader too?
           if (name_iter != topic_names_.end()) {
             //find TopicDetails instance in topics_
-            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator TDiter = topics_.find(name_iter->second);
+            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(name_iter->second);
             if (TDiter != topics_.end()) {
               if (!reader_local || !writer_local) { //skip for writer and reader both local
                 if (!reader_local) {
