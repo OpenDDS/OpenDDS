@@ -1326,22 +1326,29 @@ namespace OpenDDS {
         // for Xtypes, check consistency
         const XTypes::TypeIdentifier& writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
         const XTypes::TypeIdentifier& reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
-        if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
+        if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE && (!reader_local || !writer_local)) {
           //look up topic name
+          OPENDDS_STRING topic_name;
           if (dpi != discovered_publications_.end()) {
-            OPENDDS_STRING topic_name = get_topic_name(dpi->second);
-            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
-            if (td_iter != topics_.end()) {
-              if (!reader_local || !writer_local) { //skip for writer and reader both local
-                if (!reader_local) {
-                  td_iter->second.add_pub_sub_xtypes(reader, writer_type_id, reader_type_id);
-                }
-
-                if (!writer_local) {
-                  td_iter->second.add_pub_sub_xtypes(writer, reader_type_id, writer_type_id);
-                }
-              }
+            topic_name = get_topic_name(dpi->second);
+          } else if (dsi != discovered_subscriptions_.end()) {
+            topic_name = get_topic_name(dsi->second);
+          } else {
+            //topic name not found print
+            return;
+          }
+          std::cout << "topic name = " << topic_name << std::endl;
+          typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
+          if (td_iter != topics_.end()) {
+            if (!reader_local) {
+              td_iter->second.add_pub_sub_xtypes(reader, writer_type_id, reader_type_id);
             }
+
+            if (!writer_local) {
+              td_iter->second.add_pub_sub_xtypes(writer, reader_type_id, writer_type_id);
+            }
+          } else {
+            std::cout << "didn't find topic" << std::endl;
           }
         }
 
