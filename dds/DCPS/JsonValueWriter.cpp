@@ -7,6 +7,8 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include "JsonValueWriter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -189,26 +191,26 @@ void JsonValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
 
 void JsonValueWriter::write_char8(ACE_CDR::Char value)
 {
-  // TODO; Escape.
+  // TODO: Escape.
   out_ << '"' << value << '"';
 }
 
 void JsonValueWriter::write_char16(ACE_CDR::WChar value)
 {
-  // TODO; Escape.
+  // TODO: Escape.
   // TODO: Encode.
   out_ << '"' << value << '"';
 }
 
 void JsonValueWriter::write_string(const ACE_CDR::Char* value)
 {
-  // TODO; Escape.
+  // TODO: Escape.
   out_ << '"' << value << '"';
 }
 
 void JsonValueWriter::write_wstring(const ACE_CDR::WChar* value)
 {
-  // TODO; Escape.
+  // TODO: Escape.
   // TODO: Encode.
   out_ << '"' << value << '"';
 }
@@ -216,7 +218,7 @@ void JsonValueWriter::write_wstring(const ACE_CDR::WChar* value)
 void JsonValueWriter::write_enum(const char* name,
                                  ACE_CDR::Long /*value*/)
 {
-  // TODO; Escape.
+  // TODO: Escape.
   out_ << '"' << name << '"';
 }
 
@@ -224,3 +226,5 @@ void JsonValueWriter::write_enum(const char* name,
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif
