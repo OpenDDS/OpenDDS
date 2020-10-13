@@ -26,11 +26,22 @@ if ($verbose) {
 my %params = (
   "FirstTest"                             => {reader_type => "Property_1", writer_type => "Property_1", expect_to_fail => ""},
   "SecondTest"                            => {reader_type => "Property_2", writer_type => "Property_2", expect_to_fail => ""},
+  "AppendablePass"                        => {reader_type => "AppendableStruct", writer_type => "AppendableStruct", expect_to_fail => "", reg_type => "AppendableStructT"},
+  "AdditionalPrefixFieldStruct"           => {reader_type => "AdditionalPrefixFieldStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => "", reg_type => "AdditionalPrefixFieldStructT"},
+  "ModifiedMutableStruct"                 => {reader_type => "ModifiedMutableStruct", writer_type => "ModifiedMutableStruct", expect_to_fail => "", reg_type => "ModifiedMutableStructT"},
+  "MutableStruct"                         => {reader_type => "MutableStruct", writer_type => "MutableStruct", expect_to_fail => "", reg_type => "MutableStructT"},
+  "MutableUnion"                          => {reader_type => "MutableUnion", writer_type => "MutableUnion", expect_to_fail => "", reg_type => "MutableUnionT"},
+  "ModifiedMutableUnion"                  => {reader_type => "ModifiedMutableUnion", writer_type => "ModifiedMutableUnion", expect_to_fail => "", reg_type => "ModifiedMutableUnionT"},
 );
+
 
 sub run_test {
   my $v = $_[0];
   my $test_name_param = $_[1];
+
+  if ($v->{reg_type}) {
+  push(@common_args, "--type_r $v->{reg_type}");
+  }
 
   my @reader_args = ("-ORBLogFile publisher_$test_name_param.log --reader --type $v->{reader_type} $v->{expect_to_fail}");
   push(@reader_args, @common_args);
@@ -46,7 +57,7 @@ sub run_test {
 if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test ($v, $k);
-    sleep 5;
+    sleep 3;
   }
 } else {
   run_test ($params{$test_name}, $test_name);

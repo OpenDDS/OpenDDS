@@ -102,3 +102,21 @@ struct Trim20Struct {
   @try_construct(TRIM) str20 trim_string;
 };
 
+// @final
+
+@topic
+@final
+@OpenDDS::data_representation(XCDR2)
+struct FinalStruct {
+  short x;
+  short y;
+  short z;
+};
+
+@topic
+@final
+@OpenDDS::data_representation(XCDR2)
+struct ModifiedFinalStruct {
+  short x;
+  short y;
+};

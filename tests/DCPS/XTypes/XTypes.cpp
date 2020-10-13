@@ -41,7 +41,7 @@ const std::string STRING_26 = "abcdefghijklmnopqrstuvwxyz";
 const std::string STRING_20 = "abcdefghijklmnopqrst";
 
 template<typename T1>
-ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected_additional_field_value)
+ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue expected_additional_field_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if (data[0].additional_field != expected_additional_field_value) {
@@ -53,7 +53,7 @@ ReturnCode_t check_additional_field_value(T1 data, AdditionalFieldValue expected
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_i(DataReader_var dr, T1 pdr, T2& data)
+ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -84,7 +84,7 @@ ReturnCode_t read_i(DataReader_var dr, T1 pdr, T2& data)
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_tryconstruct_struct(DataReader_var dr, T1 pdr, T2& data, const std::string& expected_value)
+ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data, const std::string& expected_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
@@ -92,10 +92,10 @@ ReturnCode_t read_tryconstruct_struct(DataReader_var dr, T1 pdr, T2& data, const
       ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %s, received: %s\n", expected_value.c_str(), data[0].trim_string.in()));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n", expected_value.c_str(), data[0].trim_string.in()));
       ret = RETCODE_ERROR;
     } else if (verbose) {
-        ACE_ERROR((LM_DEBUG, "reader: %s\n", data[0].trim_string.in()));
+        ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
@@ -105,7 +105,7 @@ ReturnCode_t read_tryconstruct_struct(DataReader_var dr, T1 pdr, T2& data, const
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_struct(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_key_value)
+ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data, KeyValue expected_key_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
@@ -126,7 +126,7 @@ ReturnCode_t read_struct(DataReader_var dr, T1 pdr, T2& data, KeyValue expected_
 }
 
 template<typename T1, typename T2, typename T3>
-ReturnCode_t read_union(DataReader_var dr, T1 pdr,
+ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr,
   T2& data, T3 expected_value)
 {
   ReturnCode_t ret = RETCODE_OK;
@@ -167,7 +167,7 @@ ReturnCode_t read_union(DataReader_var dr, T1 pdr,
   return ret;
 }
 
-ReturnCode_t read_property_1(DataReader_var dr)
+ReturnCode_t read_property_1(const DataReader_var& dr)
 {
   Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
   ::Property_1Seq data;
@@ -175,7 +175,7 @@ ReturnCode_t read_property_1(DataReader_var dr)
 }
 
 
-ReturnCode_t read_property_2(DataReader_var dr)
+ReturnCode_t read_property_2(const DataReader_var& dr)
 {
   Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
   ::Property_2Seq data;
@@ -183,7 +183,7 @@ ReturnCode_t read_property_2(DataReader_var dr)
 }
 
 
-ReturnCode_t read_appendable_struct(DataReader_var dr)
+ReturnCode_t read_appendable_struct(const DataReader_var& dr)
 {
   AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
   ::AppendableStructSeq data;
@@ -191,7 +191,7 @@ ReturnCode_t read_appendable_struct(DataReader_var dr)
 }
 
 
-ReturnCode_t read_additional_prefix_field_struct(DataReader_var dr)
+ReturnCode_t read_additional_prefix_field_struct(const DataReader_var& dr)
 {
   AdditionalPrefixFieldStructDataReader_var pdr = AdditionalPrefixFieldStructDataReader::_narrow(dr);
   ::AdditionalPrefixFieldStructSeq data;
@@ -204,7 +204,7 @@ ReturnCode_t read_additional_prefix_field_struct(DataReader_var dr)
 }
 
 
-ReturnCode_t read_additional_postfix_field_struct(DataReader_var dr)
+ReturnCode_t read_additional_postfix_field_struct(const DataReader_var& dr)
 {
   AdditionalPostfixFieldStructDataReader_var pdr = AdditionalPostfixFieldStructDataReader::_narrow(dr);
   ::AdditionalPostfixFieldStructSeq data;
@@ -216,7 +216,7 @@ ReturnCode_t read_additional_postfix_field_struct(DataReader_var dr)
   return ret;
 }
 
-ReturnCode_t read_mutable_struct(DataReader_var dr)
+ReturnCode_t read_mutable_struct(const DataReader_var& dr)
 {
   MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
   ::MutableStructSeq data;
@@ -228,7 +228,7 @@ ReturnCode_t read_mutable_struct(DataReader_var dr)
   return ret;
 }
 
-ReturnCode_t read_modified_mutable_struct(DataReader_var dr)
+ReturnCode_t read_modified_mutable_struct(const DataReader_var& dr)
 {
   ModifiedMutableStructDataReader_var pdr = ModifiedMutableStructDataReader::_narrow(dr);
   ::ModifiedMutableStructSeq data;
@@ -240,21 +240,21 @@ ReturnCode_t read_modified_mutable_struct(DataReader_var dr)
   return ret;
 }
 
-ReturnCode_t read_mutable_union(DataReader_var dr)
+ReturnCode_t read_mutable_union(const DataReader_var& dr)
 {
   MutableUnionDataReader_var pdr = MutableUnionDataReader::_narrow(dr);
   ::MutableUnionSeq data;
   return read_union(dr, pdr, data, MUTABLE_UNION_KEY);
 }
 
-ReturnCode_t read_modified_mutable_union(DataReader_var dr)
+ReturnCode_t read_modified_mutable_union(const DataReader_var& dr)
 {
   ModifiedMutableUnionDataReader_var pdr = ModifiedMutableUnionDataReader::_narrow(dr);
   ::ModifiedMutableUnionSeq data;
   return read_union(dr, pdr, data, MODIFIED_MUTABLE_UNION_AF);
 }
 
-ReturnCode_t read_trim20_struct(DataReader_var dr)
+ReturnCode_t read_trim20_struct(const DataReader_var& dr)
 {
   Trim20StructDataReader_var pdr = Trim20StructDataReader::_narrow(dr);
   ::Trim20StructSeq data;
@@ -262,7 +262,7 @@ ReturnCode_t read_trim20_struct(DataReader_var dr)
 }
 
 
-void write_property_1(DataWriter_var dw)
+void write_property_1(const DataWriter_var& dw)
 {
   Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
 
@@ -276,7 +276,7 @@ void write_property_1(DataWriter_var dw)
 }
 
 
-void write_property_2(DataWriter_var dw)
+void write_property_2(const DataWriter_var& dw)
 {
   Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw);
 
@@ -290,7 +290,7 @@ void write_property_2(DataWriter_var dw)
 }
 
 
-void write_appendable_struct(DataWriter_var dw)
+void write_appendable_struct(const DataWriter_var& dw)
 {
   AppendableStructDataWriter_var typed_dw = AppendableStructDataWriter::_narrow(dw);
 
@@ -303,7 +303,7 @@ void write_appendable_struct(DataWriter_var dw)
 }
 
 
-void write_additional_prefix_field_struct(DataWriter_var dw)
+void write_additional_prefix_field_struct(const DataWriter_var& dw)
 {
   AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
 
@@ -317,7 +317,7 @@ void write_additional_prefix_field_struct(DataWriter_var dw)
 }
 
 
-void write_additional_postfix_field_struct(DataWriter_var dw)
+void write_additional_postfix_field_struct(const DataWriter_var& dw)
 {
   AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
 
@@ -331,7 +331,7 @@ void write_additional_postfix_field_struct(DataWriter_var dw)
 }
 
 
-void write_mutable_struct(DataWriter_var dw)
+void write_mutable_struct(const DataWriter_var& dw)
 {
   MutableStructDataWriter_var typed_dw = MutableStructDataWriter::_narrow(dw);
 
@@ -345,7 +345,7 @@ void write_mutable_struct(DataWriter_var dw)
 }
 
 
-void write_modified_mutable_struct(DataWriter_var dw)
+void write_modified_mutable_struct(const DataWriter_var& dw)
 {
   ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
 
@@ -359,7 +359,7 @@ void write_modified_mutable_struct(DataWriter_var dw)
 }
 
 
-void write_mutable_union(DataWriter_var dw)
+void write_mutable_union(const DataWriter_var& dw)
 {
   MutableUnionDataWriter_var typed_dw = MutableUnionDataWriter::_narrow(dw);
 
@@ -372,7 +372,7 @@ void write_mutable_union(DataWriter_var dw)
 }
 
 
-void write_modified_mutable_union(DataWriter_var dw)
+void write_modified_mutable_union(const DataWriter_var& dw)
 {
   ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
 
@@ -385,7 +385,7 @@ void write_modified_mutable_union(DataWriter_var dw)
 }
 
 
-void write_trim64_struct(DataWriter_var dw)
+void write_trim64_struct(const DataWriter_var& dw)
 {
   Trim64StructDataWriter_var typed_dw = Trim64StructDataWriter::_narrow(dw);
 
@@ -403,7 +403,7 @@ void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name,
   Topic_var& topic, const std::string& registered_type_name)
 {
   ts->register_type(dp, registered_type_name.c_str());
-  CORBA::String_var type_name = ts->get_type_name();
+  CORBA::String_var type_name = (registered_type_name.empty() ? ts->get_type_name() : registered_type_name.c_str());
   topic = dp->create_topic(topic_name, type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 }
@@ -470,6 +470,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool failed = false;
 
   Topic_var topic;
+
   if (type == "Property_1") {
     Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
     get_topic(ts, dp, "Property_1_Topic", topic, registered_type_name);
@@ -503,6 +504,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
     get_topic(ts, dp, "Tryconstruct_Topic", topic, registered_type_name);
+  } else if (type == "FinalStruct") {
+    FinalStructTypeSupport_var ts = new FinalStructTypeSupportImpl;
+    get_topic(ts, dp, "FinalStruct_Topic", topic, registered_type_name);
+  } else if (type == "ModifiedFinalStruct") {
+    ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
+    get_topic(ts, dp, "FinalStruct_Topic", topic, registered_type_name);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
