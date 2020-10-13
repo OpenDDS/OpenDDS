@@ -1807,7 +1807,7 @@ DomainParticipantImpl::enable()
 }
 
 RepoId
-DomainParticipantImpl::get_id()
+DomainParticipantImpl::get_id() const
 {
   return dp_id_;
 }

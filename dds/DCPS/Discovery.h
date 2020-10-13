@@ -71,10 +71,6 @@ public:
 
   virtual void fini_bit(DCPS::DomainParticipantImpl* participant) = 0;
 
-  virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
-                                    const char* bit_topic_name,
-                                    const DDS::BuiltinTopicKey_t& key) const = 0;
-
   RepoKey key() const { return this->key_; }
 
   class OpenDDS_Dcps_Export Config

@@ -11,8 +11,10 @@
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
+#include "ValueWriter.h"
+#include "ReceivedDataElementList.h"
 
-#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -51,17 +53,24 @@ public:
 
   struct OpenDDS_Dcps_Export Sample
   {
-    DDS::InstanceHandle_t instance_;
-    DDS::InstanceStateKind instance_state_;
-    DDS::Time_t timestamp_;
-    SequenceNumber seq_n_;
-    const void* data_;
-    static DDS::InstanceStateKind to_instance_state(char message_id);
-    Sample(DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t);
-    explicit Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i = 0);
-    explicit Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i = 0, DDS::InstanceStateKind instance_state = 0);
-    Sample(DDS::InstanceHandle_t i, DDS::InstanceStateKind instance_state,
-      const DDS::Time_t& t, const SequenceNumber& sn, const void* data);
+    DDS::InstanceHandle_t instance;
+    DDS::InstanceStateKind instance_state;
+    DDS::Time_t timestamp;
+    SequenceNumber sequence_number;
+    const void* data;
+    const ValueWriterDispatcher& data_dispatcher;
+
+    Sample(DDS::InstanceHandle_t instance,
+           DDS::InstanceStateKind instance_state,
+           const DDS::Time_t& timestamp,
+           const SequenceNumber& sequence_number,
+           const void* data,
+           const ValueWriterDispatcher& data_dispatcher);
+
+    Sample(DDS::InstanceHandle_t instance,
+           DDS::InstanceStateKind instance_state,
+           const ReceivedDataElement& rde,
+           const ValueWriterDispatcher& data_dispatcher);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed
@@ -90,6 +99,9 @@ protected:
 };
 
 typedef RcHandle<Observer> Observer_rch;
+
+OpenDDS_Dcps_Export void
+vwrite(ValueWriter& vw, const Observer::Sample& sample);
 
 } // namespace DCPS
 } // namespace OpenDDS

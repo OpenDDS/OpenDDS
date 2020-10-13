@@ -248,10 +248,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::ParticipantBuiltinTopicData data;
           participant->get_discovered_participant_data(data, handles[i]);
 
-          OpenDDS::DCPS::RepoId id =
-            disc->bit_key_to_repo_id(part_svt,
-                                     OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                     data.key);
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
           if (part_svt->id_to_handle (id) != handles[i])
           {
@@ -360,10 +357,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           OpenDDS::DCPS::Discovery_rch disc =
             TheServiceParticipant->get_discovery(participant->get_domain_id());
-          OpenDDS::DCPS::RepoId id =
-            disc->bit_key_to_repo_id(part_svt,
-                                     OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
-                                     data.key);
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
           if (part_svt->id_to_handle (id) != handles[i])
           {

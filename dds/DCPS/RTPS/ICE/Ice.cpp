@@ -269,6 +269,9 @@ ServerReflexiveStateMachine::success_response(const STUN::Message& message)
   message_.class_ = STUN::INDICATION;
   if (server_reflexive_address == server_reflexive_address_) {
     return SRSM_None;
+  } else if (server_reflexive_address_ == ACE_INET_Addr()) {
+    server_reflexive_address_ = server_reflexive_address;
+    return SRSM_Set;
   } else {
     server_reflexive_address_ = server_reflexive_address;
     return SRSM_Change;
