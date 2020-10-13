@@ -57,7 +57,7 @@ sub run_test {
 if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test ($v, $k);
-    sleep 3;
+    sleep 10;
   }
 } else {
   run_test ($params{$test_name}, $test_name);

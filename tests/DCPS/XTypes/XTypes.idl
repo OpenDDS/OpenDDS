@@ -13,6 +13,27 @@ struct Property_2 {
   string value;
 };
 
+// Final structues
+
+@topic
+@final
+@OpenDDS::data_representation(XCDR2)
+struct FinalStruct {
+  short x;
+  short y;
+  short z;
+};
+
+@topic
+@final
+@OpenDDS::data_representation(XCDR2)
+struct ModifiedFinalStruct {
+  short x;
+  short y;
+};
+
+// Appendable structues
+
 @topic
 @appendable
 @OpenDDS::data_representation(XCDR2)
@@ -36,6 +57,8 @@ struct AdditionalPrefixFieldStruct {
   @key long key;
 };
 
+// Mutable structues
+
 @topic
 @mutable
 @OpenDDS::data_representation(XCDR2)
@@ -51,7 +74,6 @@ struct MutableStruct {
   @id(1) @key long key;
   @id(2) long additional_field;
 };
-
 
 // Unions
 
@@ -83,7 +105,7 @@ case E_ADDITIONAL_FIELD:
   @id(12) long additional_field;
 };
 
-// Try Construct
+// Tryconstruct
 
 typedef string<20> str20;
 typedef string<64> str64;
@@ -102,21 +124,18 @@ struct Trim20Struct {
   @try_construct(TRIM) str20 trim_string;
 };
 
-// @final
+// Dependencies
 
-@topic
-@final
+@appendable
 @OpenDDS::data_representation(XCDR2)
-struct FinalStruct {
-  short x;
-  short y;
-  short z;
+struct NestedStruct {
+  long additional_field;
 };
 
 @topic
-@final
+@appendable
 @OpenDDS::data_representation(XCDR2)
-struct ModifiedFinalStruct {
-  short x;
-  short y;
+struct AppendableStructWithDependency {
+  @key long key;
+  NestedStruct additional_nested_struct;
 };

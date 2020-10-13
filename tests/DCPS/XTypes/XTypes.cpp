@@ -34,7 +34,8 @@ enum AdditionalFieldValue
   ADDITIONAL_POSTFIX_FIELD_STRUCT_AF,
   MUTABLE_STRUCT_AF,
   MODIFIED_MUTABLE_STRUCT_AF,
-  MODIFIED_MUTABLE_UNION_AF
+  MODIFIED_MUTABLE_UNION_AF,
+  NESTED_STRUCT_AF
 };
 
 const std::string STRING_26 = "abcdefghijklmnopqrstuvwxyz";
@@ -262,6 +263,14 @@ ReturnCode_t read_trim20_struct(const DataReader_var& dr)
 }
 
 
+ReturnCode_t read_appendable_struct_with_dependency(const DataReader_var& dr)
+{
+  AppendableStructWithDependencyDataReader_var pdr = AppendableStructWithDependencyDataReader::_narrow(dr);
+  ::AppendableStructWithDependencySeq data;
+  return read_struct(dr, pdr, data, APPENDABLE_STRUCT_KEY);
+}
+
+
 void write_property_1(const DataWriter_var& dw)
 {
   Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
@@ -364,7 +373,11 @@ void write_mutable_union(const DataWriter_var& dw)
   MutableUnionDataWriter_var typed_dw = MutableUnionDataWriter::_narrow(dw);
 
   MutableUnion mu;
-  mu.key(MUTABLE_UNION_KEY);
+  if (expect_to_fail) {
+    mu.octet_field(1);
+  } else {
+    mu.key(MUTABLE_UNION_KEY);
+  }
   typed_dw->write(mu, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: MutableUnion\n"));
@@ -397,6 +410,19 @@ void write_trim64_struct(const DataWriter_var& dw)
   }
 }
 
+
+void write_appendable_struct_with_dependency(const DataWriter_var& dw)
+{
+  AppendableStructWithDependencyDataWriter_var typed_dw = AppendableStructWithDependencyDataWriter::_narrow(dw);
+
+  AppendableStructWithDependency as;
+  as.key = APPENDABLE_STRUCT_KEY;
+  as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
+  typed_dw->write(as, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: AppendableStructWithDependency\n"));
+  }
+}
 
 template<typename T>
 void get_topic(T ts, const DomainParticipant_var dp, const char* topic_name,
@@ -510,6 +536,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "ModifiedFinalStruct") {
     ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
     get_topic(ts, dp, "FinalStruct_Topic", topic, registered_type_name);
+  } else if (type == "AppendableStructWithDependency") {
+    AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
+    get_topic(ts, dp, "AppendableStructWithDependency_Topic", topic, registered_type_name);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
     return 1;
@@ -548,10 +577,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         write_mutable_union(dw);
       } else if (type == "ModifiedMutableUnion") {
         write_modified_mutable_union(dw);
-      } else if (type == "ModifiedMutableUnion") {
-        write_modified_mutable_union(dw);
       } else if (type == "Trim64Struct") {
         write_trim64_struct(dw);
+      } else if (type == "AppendableStructWithDependency") {
+        write_appendable_struct_with_dependency(dw);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;
@@ -601,6 +630,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         failed = !(read_modified_mutable_union(dr) == RETCODE_OK);
       } else if (type == "Trim20Struct") {
         failed = !(read_trim20_struct(dr) == RETCODE_OK);
+      } else if (type == "AppendableStructWithDependency") {
+        failed = !(read_appendable_struct_with_dependency(dr) == RETCODE_OK);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
         failed = true;
