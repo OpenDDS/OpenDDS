@@ -106,7 +106,7 @@ TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLin
 }
 
 void
-TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING name)
+TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name)
 {
   if (is_shut_down_ || this->reactor_task_.in()) {
     return;

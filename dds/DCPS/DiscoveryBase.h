@@ -87,7 +87,7 @@ namespace OpenDDS {
     }
 
     struct DcpsUpcalls : ACE_Task_Base {
-      inline bool has_timeout() {
+      bool has_timeout() {
         return interval > TimeDuration(0);
       }
 
@@ -133,24 +133,20 @@ namespace OpenDDS {
           reader_done_ = true;
           cnd_.signal();
           while (!writer_done_) {
-            do {
-              cnd_.wait(&expire);
+            cnd_.wait(&expire);
 
-              MonotonicTimePoint now = MonotonicTimePoint::now();
-              if (has_timeout() && now.value() > expire) {
-                expire = now.value() + interval.value();
-                if (status) {
-                  if (DCPS_debug_level > 4) {
-                    ACE_DEBUG((LM_DEBUG,
-                              "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
-                  }
-                  {
-                    ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
-                    status->map[key] = now;
-                  }
+            const MonotonicTimePoint now = MonotonicTimePoint::now();
+            if (has_timeout() && now.value() > expire) {
+              expire = now.value() + interval.value();
+              if (status) {
+                if (DCPS_debug_level > 4) {
+                  ACE_DEBUG((LM_DEBUG,
+                            "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                 }
+                ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
+                status->map[key] = now;
               }
-            } while (!writer_done_ && has_timeout());
+            }
           }
         }
         dwr_->association_complete(reader_);

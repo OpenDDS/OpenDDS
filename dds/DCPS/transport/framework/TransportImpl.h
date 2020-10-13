@@ -115,7 +115,7 @@ public:
 
   /// Create the reactor task using sync send or optionally async send
   /// by parameter on supported Windows platforms only.
-  void create_reactor_task(bool useAsyncSend = false, const OPENDDS_STRING name = "");
+  void create_reactor_task(bool useAsyncSend = false, const OPENDDS_STRING& name = "");
 
   /// Diagnostic aid.
   void dump();
