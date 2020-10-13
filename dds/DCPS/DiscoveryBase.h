@@ -1332,14 +1332,14 @@ namespace OpenDDS {
           if (name_iter != topic_names_.end()) {
             //find TopicDetails instance in topics_
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(name_iter->second);
-            if (TDiter != topics_.end()) {
+            if (td_iter != topics_.end()) {
               if (!reader_local || !writer_local) { //skip for writer and reader both local
                 if (!reader_local) {
-                  TDiter->second.add_pub_sub_xtype(reader, writer_type_id, reader_type_id);
+                  td_iter->second.add_pub_sub_xtypes(reader, writer_type_id, reader_type_id);
                 }
 
                 if (!writer_local) {
-                  TDiter->second.add_pub_sub_xtype(writer, reader_type_id, writer_type_id);
+                  td_iter->second.add_pub_sub_xtypes(writer, reader_type_id, writer_type_id);
                 }
               }
             }
