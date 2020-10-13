@@ -1328,10 +1328,9 @@ namespace OpenDDS {
         const XTypes::TypeIdentifier& reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
         if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
           //look up topic name
-          const TopicNameMap::const_iterator name_iter = topic_names_.find(writer); //TODO find reader too?
-          if (name_iter != topic_names_.end()) {
-            //find TopicDetails instance in topics_
-            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(name_iter->second);
+          if (dpi != discovered_publications_.end()) {
+            OPENDDS_STRING topic_name = get_topic_name(dpi->second);
+            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
             if (td_iter != topics_.end()) {
               if (!reader_local || !writer_local) { //skip for writer and reader both local
                 if (!reader_local) {
@@ -1343,17 +1342,10 @@ namespace OpenDDS {
                 }
               }
             }
-
-          } else {
-            ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match_continue ")
-              ACE_TEXT("failed to find writer topic name required to run consistency check!\n")));
-            return;
           }
-
-          //call new add_pub_sub; if assignability is false then what; remove endpoint and other cleanup
-
         }
+
+
 
         if (writer_local) {
           call_writer = lpi->second.matched_endpoints_.insert(reader).second;
