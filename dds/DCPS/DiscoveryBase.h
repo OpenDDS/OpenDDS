@@ -1278,8 +1278,7 @@ namespace OpenDDS {
         // Cleanup internal data used by getTypeDependencies
         for (typename OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
           if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {
-            const XTypes::TypeIdentifier& ti = it->second.type_id;
-            cleanup_type_lookup_data(ti);
+            cleanup_type_lookup_data(it->second.type_id);
             orig_seq_numbers_.erase(it++);
           } else {
             ++it;
@@ -1290,7 +1289,6 @@ namespace OpenDDS {
       void
       match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {

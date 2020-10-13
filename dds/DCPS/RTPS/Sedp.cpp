@@ -3860,19 +3860,14 @@ void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& gui
 
 void Sedp::TypeLookupReplyReader::cleanup(const XTypes::TypeIdentifier& ti)
 {
-  bool done = false;
-  for (DependenciesMap::iterator outer = dependencies_.begin(); outer != dependencies_.end(); ++outer) {
-    for (RemoteDependencies::iterator inner = outer->second.begin(); inner != outer->second.end(); ++inner) {
-      if (inner->first == ti) {
-        outer->second.erase(inner);
-        done = true;
-        break;
+  for (DependenciesMap::iterator it = dependencies_.begin(); it != dependencies_.end(); ++it) {
+    if (it->second.find(ti) != it->second.end()) {
+      it->second.erase(ti);
+      if (it->second.empty()) {
+        dependencies_.erase(it);
       }
+      return;
     }
-    if (outer->second.empty()) {
-      dependencies_.erase(outer);
-    }
-    if (done) return;
   }
 }
 
@@ -3895,8 +3890,9 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, DDS::RETCODE_ERROR);
   const OrigSeqNumberMap::const_iterator seq_num_it = sedp_.orig_seq_numbers_.find(seq_num);
   if (seq_num_it == sedp_.orig_seq_numbers_.end()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-      ACE_TEXT("could not find entry associated with the reply\n")));
+    ACE_DEBUG((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+               ACE_TEXT("could not find entry associated with the reply\n")));
     return DDS::RETCODE_ERROR;
   }
 
