@@ -599,7 +599,7 @@ private:
       DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,
       const DCPS::RepoId& participant_id,
-      const CORBA::ULong tl_kind);
+      CORBA::ULong tl_kind);
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestWriter> TypeLookupRequestWriter_rch;

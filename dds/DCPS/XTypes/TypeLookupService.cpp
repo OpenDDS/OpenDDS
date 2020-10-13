@@ -55,7 +55,7 @@ bool TypeLookupService::get_type_dependencies(const TypeIdentifier& type_id,
 void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
-  std::set<TypeIdentifier> tmp;
+  OPENDDS_SET(TypeIdentifier) tmp;
   for (size_t i = 0; i < type_ids.length(); ++i) {
     const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_ids[i]);
     if (it != type_dependencies_map_.end()) {

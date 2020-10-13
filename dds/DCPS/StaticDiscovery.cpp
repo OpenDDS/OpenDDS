@@ -554,6 +554,11 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
   }
 }
 
+void StaticEndpointManager::cleanup_type_lookup_data(const XTypes::TypeIdentifier& /*ti*/)
+{
+  // Do nothing.
+}
+
 #ifndef DDS_HAS_MINIMUM_BIT
 OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*
 StaticEndpointManager::pub_bit()

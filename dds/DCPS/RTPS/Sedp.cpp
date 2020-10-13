@@ -3701,7 +3701,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdenti
   DCPS::SequenceNumber& sequence,
   const DCPS::SequenceNumber& rpc_sequence,
   const DCPS::RepoId& participant_id,
-  const CORBA::ULong tl_kind)
+  CORBA::ULong tl_kind)
 {
   if (tl_kind != XTypes::TypeLookup_getTypes_HashId &&
       tl_kind != XTypes::TypeLookup_getDependencies_HashId) {
@@ -3909,7 +3909,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
   }
 
   if (XTypes::TypeLookup_getTypes_HashId == type_lookup_reply._cxx_return.kind) {
-    DCPS::SequenceNumber key_seq_num = seq_num_it->second.seq_number;
+    const DCPS::SequenceNumber key_seq_num = seq_num_it->second.seq_number;
 
     // Cleanup data
     const GuidPrefixWrapper guid_pref(sample.header_.publication_id_.guidPrefix);
