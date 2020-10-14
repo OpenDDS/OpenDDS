@@ -496,7 +496,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool failed = false;
 
   Topic_var topic;
-  const std::string topic_name = registered_type_name + "_Topic";
+  const std::string topic_name =
+    registered_type_name.empty() ? registered_type_name + "_Topic" : type + "_Topic";
 
   if (type == "Property_1") {
     Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
