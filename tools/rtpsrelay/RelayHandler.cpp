@@ -478,7 +478,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           std::memcpy(encoded_buffer.get_buffer(), msg->rd_ptr(), msg->length());
 
           if (!crypto_->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle_, remote_crypto_handle, ex)) {
-            HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message %C message from %C could not be verified [%d.%d]: \"%C\"\n"), name_.c_str(), guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
+            HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l WARNING: VerticalHandler::parse_message %C message from %C could not be verified [%d.%d]: \"%C\"\n"), name_.c_str(), guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
             return false;
           }
 
