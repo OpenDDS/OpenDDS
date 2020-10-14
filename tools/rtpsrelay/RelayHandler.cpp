@@ -462,7 +462,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 
           DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid(), src_guid);
           if (remote_crypto_handle == DDS::HANDLE_NIL) {
-            HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message %C no crypto handle for message from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
+            HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l WARNING: VerticalHandler::parse_message %C no crypto handle for message from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
             return false;
           }
 
