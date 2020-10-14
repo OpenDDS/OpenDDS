@@ -434,8 +434,6 @@ module OpenDDS {
     // sequence template.
     #pragma DCPS_SUPPORT_ZERO_COPY_READ
 
-    typedef octet OctetGuidArray16[16];
-
     // OpenDDS extension built-in topic for participant
     // network location/connection details.
     typedef unsigned long ParticipantLocation;
@@ -479,7 +477,7 @@ module OpenDDS {
     // status monitoring.
     BUILT_IN_TOPIC_TYPE
     struct InternalThreadBuiltinTopicData {
-            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
             string thread_id;
             DDS::Time_t timestamp;
     };
