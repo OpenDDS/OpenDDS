@@ -1341,7 +1341,6 @@ namespace OpenDDS {
           typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
           if (td_iter != topics_.end()) {
             if (!reader_local) {
-
               td_iter->second.add_pub_sub_xtypes(reader, writer_type_id, reader_type_id, type_lookup_service_);
             }
 
