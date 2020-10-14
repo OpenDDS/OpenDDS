@@ -439,6 +439,17 @@ private:
 
     DDS::Subscriber_var get_builtin_subscriber() const;
 
+    // Return instance_name field in RPC type lookup request for a given RepoId
+    // (as per chapter 7.6.3.3.4 of XTypes spec)
+    OPENDDS_STRING get_instance_name(const DCPS::RepoId& id) const
+    {
+      const DCPS::RepoId participant = make_id(id, ENTITYID_PARTICIPANT);
+      return OPENDDS_STRING("dds.builtin.TOS.") +
+        DCPS::to_hex_dds_string(&participant.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
+        DCPS::to_hex_dds_string(&participant.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
+        DCPS::to_dds_string(unsigned(participant.entityId.entityKind), true);
+    }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
@@ -598,7 +609,6 @@ private:
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,
-                                               //      const DCPS::RepoId& participant_id,
       CORBA::ULong tl_kind);
   };
 
@@ -732,7 +742,9 @@ private:
   public:
     TypeLookupRequestReader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Reader(sub_id, sedp)
-    {}
+    {
+      instance_name_ = get_instance_name(sub_id);
+    }
 
     virtual ~TypeLookupRequestReader();
 
@@ -752,6 +764,9 @@ private:
       XTypes::TypeLookup_Reply& reply);
 
     void gen_continuation_point(XTypes::OctetSeq32& cont_point) const;
+
+    // The instance name of the local participant
+    OPENDDS_STRING instance_name_;
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
@@ -769,7 +784,7 @@ private:
                                 const XTypes::TypeIdentifier& remote_ti,
                                 XTypes::OctetSeq32& cont_point) const;
 
-    void cleanup(const XTypes::TypeIdentifier& ti);
+    void cleanup(const DCPS::GuidPrefix_t& guid_prefix, const XTypes::TypeIdentifier& ti);
 
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
@@ -820,7 +835,8 @@ private:
   TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
 #endif
 
-  void cleanup_type_lookup_data(const XTypes::TypeIdentifier& ti);
+  void cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
+                                const XTypes::TypeIdentifier& ti);
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;

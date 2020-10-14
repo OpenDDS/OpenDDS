@@ -3270,7 +3270,6 @@ bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
     remote_reader,
     sequence,
     type_lookup_service_sequence_number_,
-                                          //    participant_id_,
     send_get_types ? XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId) == DDS::RETCODE_OK;
 }
 
@@ -3651,7 +3650,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   if (id != DCPS::END_HISTORIC_SAMPLES &&
       (reader == GUID_UNKNOWN ||
-      sequence == DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())) {
+       sequence == DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())) {
     sequence = seq_++;
   }
 
@@ -3700,7 +3699,6 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdenti
   const DCPS::RepoId& reader,
   DCPS::SequenceNumber& sequence,
   const DCPS::SequenceNumber& rpc_sequence,
-                                                        //  const DCPS::RepoId& participant_id,
   CORBA::ULong tl_kind)
 {
   if (tl_kind != XTypes::TypeLookup_getTypes_HashId &&
@@ -3712,14 +3710,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdenti
   type_lookup_request.header.request_id.writer_guid = get_repo_id();
   type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
-
-  // As per chapter 7.6.3.3.4 of XTypes spec.
-  const DCPS::RepoId remote_participant = make_id(reader, ENTITYID_PARTICIPANT);
-  const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") +
-    DCPS::to_hex_dds_string(&remote_participant.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
-    DCPS::to_hex_dds_string(&remote_participant.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
-    DCPS::to_dds_string(unsigned(remote_participant.entityId.entityKind), true);
-  type_lookup_request.header.instance_name = instance_name.c_str();
+  type_lookup_request.header.instance_name = get_instance_name(reader).c_str();
   type_lookup_request.data.kind = tl_kind;
 
   if (tl_kind == XTypes::TypeLookup_getTypes_HashId) {
@@ -3788,11 +3779,16 @@ Sedp::TypeLookupRequestReader::process_type_lookup_request(DCPS::Serializer& ser
   XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   XTypes::TypeLookup_Request type_lookup_request;
-
   if (!(ser >> type_lookup_request)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_type_lookup_request - ")
                ACE_TEXT("failed to deserialize type lookup request\n")));
     return DDS::RETCODE_ERROR;
+  }
+
+  if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupRequestReader::process_type_lookup_request - ")
+               ACE_TEXT("received request with wrong instance name\n")));
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
   switch (type_lookup_request.data.kind) {
@@ -3856,16 +3852,16 @@ void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& gui
   }
 }
 
-void Sedp::TypeLookupReplyReader::cleanup(const XTypes::TypeIdentifier& ti)
+void Sedp::TypeLookupReplyReader::cleanup(const DCPS::GuidPrefix_t& guid_prefix,
+                                          const XTypes::TypeIdentifier& type_id)
 {
-  for (DependenciesMap::iterator it = dependencies_.begin(); it != dependencies_.end(); ++it) {
-    if (it->second.find(ti) != it->second.end()) {
-      it->second.erase(ti);
-      if (it->second.empty()) {
-        dependencies_.erase(it);
-      }
-      return;
-    }
+  const DependenciesMap::iterator it = dependencies_.find(guid_prefix);
+  if (it != dependencies_.end() && it->second.find(type_id) != it->second.end()) {
+    it->second.erase(type_id);
+  }
+
+  if (it->second.empty()) {
+    dependencies_.erase(it);
   }
 }
 
@@ -3890,7 +3886,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
   if (seq_num_it == sedp_.orig_seq_numbers_.end()) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-               ACE_TEXT("could not find entry associated with the reply\n")));
+               ACE_TEXT("could not find request corresponding to the reply\n")));
     return DDS::RETCODE_ERROR;
   }
 
@@ -3910,15 +3906,7 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     const DCPS::SequenceNumber key_seq_num = seq_num_it->second.seq_number;
 
     // Cleanup data
-    const GuidPrefixWrapper guid_pref(sample.header_.publication_id_.guidPrefix);
-    const XTypes::TypeIdentifier& type_id = seq_num_it->second.type_id;
-    DependenciesMap::iterator it = dependencies_.find(guid_pref);
-    if (it != dependencies_.end() && it->second.find(type_id) != it->second.end()) {
-      it->second.erase(type_id);
-      if (it->second.empty()) {
-        dependencies_.erase(guid_pref);
-      }
-    }
+    cleanup(sample.header_.publication_id_.guidPrefix, seq_num_it->second.type_id);
     sedp_.orig_seq_numbers_.erase(seq_num);
 
     if (DDS::RETCODE_OK == retcode) {
@@ -3995,12 +3983,15 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
   return DDS::RETCODE_OK;
 }
 
-void Sedp::cleanup_type_lookup_data(const XTypes::TypeIdentifier& ti)
+void Sedp::cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
+                                    const XTypes::TypeIdentifier& ti)
 {
 #ifdef OPENDDS_SECURITY
-  type_lookup_reply_secure_reader_->cleanup(ti);
+  // Only one of these has the data and does cleanup
+  type_lookup_reply_secure_reader_->cleanup(guid_prefix, ti);
+  type_lookup_reply_reader_->cleanup(guid_prefix, ti);
 #else
-  type_lookup_reply_reader_->cleanup(ti);
+  type_lookup_reply_reader_->cleanup(guid_prefix, ti);
 #endif
 }
 
