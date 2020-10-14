@@ -792,6 +792,21 @@ private:
     // and all dependencies received for that type so far.
     typedef OPENDDS_MAP(XTypes::TypeIdentifier, ContinuationPair) RemoteDependencies;
 
+    // NOTE(sonndinh): We can later replace this with GUID_t as the key of DependenciesMap.
+    struct GuidPrefixWrapper {
+      GuidPrefixWrapper(const GuidPrefix_t& prefix)
+      {
+        std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
+      }
+
+      bool operator<(const GuidPrefixWrapper& other) const
+      {
+        return std::memcmp(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t)) < 0;
+      }
+
+      GuidPrefix_t prefix_;
+    };
+
     // Map from each remote participant to the data stored for its types.
     typedef OPENDDS_MAP(GuidPrefixWrapper, RemoteDependencies) DependenciesMap;
     DependenciesMap dependencies_;

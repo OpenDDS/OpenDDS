@@ -132,7 +132,7 @@ public:
 
   bool operator<(const unique_ptr& other) const
   {
-    return *ptr_ < *other.ptr_;
+    return ptr_ < other.ptr_;
   }
 
 private:

@@ -1565,13 +1565,7 @@ DataWriterImpl::enable()
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_lookup_service->add_type_objects_to_cache(*typesupport);
 
-  // Populate local type dependencies cache
-  XTypes::TypeIdentifierWithSizeSeq dependencies_with_size;
-  typesupport->get_dependencies(typesupport->getMinimalTypeMap(),
-                                typesupport->getMinimalTypeIdentifier(),
-                                dependencies_with_size);
-  type_lookup_service->add_type_dependencies(typesupport->getMinimalTypeIdentifier(),
-                                             dependencies_with_size);
+  typesupport->populate_dependencies(type_lookup_service);
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,

@@ -1639,20 +1639,6 @@ namespace OpenDDS {
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
       XTypes::TypeLookupService_rch type_lookup_service_;
 
-      struct GuidPrefixWrapper {
-        GuidPrefixWrapper(const GuidPrefix_t& prefix)
-        {
-          std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
-        }
-
-        bool operator<(const GuidPrefixWrapper& other) const
-        {
-          return std::memcmp(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t)) < 0;
-        }
-
-        GuidPrefix_t prefix_;
-      };
-
       struct TypeIdOrigSeqNumber {
         XTypes::TypeIdentifier type_id;
         SequenceNumber seq_number; // Of the original request

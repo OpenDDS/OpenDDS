@@ -267,7 +267,11 @@ namespace XTypes {
 
     bool operator<(const TypeObjectHashId& other) const
     {
-      return (kind < other.kind) && (hash < other.hash);
+      if (kind < other.kind) return true;
+      if (other.kind < kind) return false;
+      if (std::memcmp(hash, other.hash, sizeof hash) < 0) return true;
+      if (std::memcmp(other.hash, hash, sizeof hash) < 0) return false;
+      return false;
     }
   };
 
@@ -404,8 +408,8 @@ namespace XTypes {
       if (other.header < header) return false;
       if (bound < other.bound) return true;
       if (other.bound < bound) return false;
-      if (element_identifier < other.element_identifier) return true;
-      if (other.element_identifier < element_identifier) return false;
+      if (*element_identifier < *other.element_identifier) return true;
+      if (*other.element_identifier < *element_identifier) return false;
       return false;
     }
 
@@ -432,8 +436,8 @@ namespace XTypes {
       if (other.header < header) return false;
       if (bound < other.bound) return true;
       if (other.bound < bound) return false;
-      if (element_identifier < other.element_identifier) return true;
-      if (other.element_identifier < element_identifier) return false;
+      if (*element_identifier < *other.element_identifier) return true;
+      if (*other.element_identifier < *element_identifier) return false;
       return false;
     }
   };
@@ -459,8 +463,8 @@ namespace XTypes {
       if (other.header < header) return false;
       if (array_bound_seq < other.array_bound_seq) return true;
       if (other.array_bound_seq < array_bound_seq) return false;
-      if (element_identifier < other.element_identifier) return true;
-      if (other.element_identifier < element_identifier) return false;
+      if (*element_identifier < *other.element_identifier) return true;
+      if (*other.element_identifier < *element_identifier) return false;
       return false;
     }
   };
@@ -486,8 +490,8 @@ namespace XTypes {
       if (other.header < header) return false;
       if (array_bound_seq < other.array_bound_seq) return true;
       if (other.array_bound_seq < array_bound_seq) return false;
-      if (element_identifier < other.element_identifier) return true;
-      if (other.element_identifier < element_identifier) return false;
+      if (*element_identifier < *other.element_identifier) return true;
+      if (*other.element_identifier < *element_identifier) return false;
       return false;
     }
   };
@@ -519,12 +523,12 @@ namespace XTypes {
       if (other.header < header) return false;
       if (bound < other.bound) return true;
       if (other.bound < bound) return false;
-      if (element_identifier < other.element_identifier) return true;
-      if (other.element_identifier < element_identifier) return false;
+      if (*element_identifier < *other.element_identifier) return true;
+      if (*other.element_identifier < *element_identifier) return false;
       if (key_flags < other.key_flags) return true;
       if (other.key_flags < key_flags) return false;
-      if (key_identifier < other.key_identifier) return true;
-      if (other.key_identifier < key_identifier) return false;
+      if (*key_identifier < *other.key_identifier) return true;
+      if (*other.key_identifier < *key_identifier) return false;
       return false;
     }
   };
@@ -556,12 +560,12 @@ namespace XTypes {
       if (other.header < header) return false;
       if (bound < other.bound) return true;
       if (other.bound < bound) return false;
-      if (element_identifier < other.element_identifier) return true;
-      if (other.element_identifier < element_identifier) return false;
+      if (*element_identifier < *other.element_identifier) return true;
+      if (*other.element_identifier < *element_identifier) return false;
       if (key_flags < other.key_flags) return true;
       if (other.key_flags < key_flags) return false;
-      if (key_identifier < other.key_identifier) return true;
-      if (other.key_identifier < key_identifier) return false;
+      if (*key_identifier < *other.key_identifier) return true;
+      if (*other.key_identifier < *key_identifier) return false;
       return false;
     }
   };
@@ -584,9 +588,13 @@ namespace XTypes {
 
     bool operator<(const StronglyConnectedComponentId& other) const
     {
-      return (sc_component_id < other.sc_component_id)
-        && (scc_length < other.scc_length)
-        && (scc_index < other.scc_index);
+      if (sc_component_id < other.sc_component_id) return true;
+      if (other.sc_component_id < sc_component_id) return false;
+      if (scc_length < other.scc_length) return true;
+      if (other.scc_length < scc_length) return false;
+      if (scc_index < other.scc_index) return true;
+      if (other.scc_index < scc_index) return false;
+      return false;
     }
   };
 
@@ -723,7 +731,7 @@ namespace XTypes {
         return sc_component_id() < other.sc_component_id();
       case EK_COMPLETE:
       case EK_MINIMAL:
-        return memcmp(equivalence_hash(), other.equivalence_hash(), sizeof equivalence_hash()) < 0;
+        return std::memcmp(equivalence_hash(), other.equivalence_hash(), sizeof equivalence_hash()) < 0;
       case TI_STRING8_SMALL:
       case TI_STRING16_SMALL:
         return string_sdefn() < other.string_sdefn();

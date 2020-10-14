@@ -3831,17 +3831,14 @@ DDS::ReturnCode_t
 Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
   XTypes::TypeLookup_Reply& reply)
 {
-  // Send all dependencies of the requested types
+  // Send all dependencies (may be empty) of the requested types
   sedp_.type_lookup_service_->get_type_dependencies(request.data.getTypeDependencies.type_ids,
     reply._cxx_return.getTypeDependencies.result.dependent_typeids);
-  if (reply._cxx_return.getTypeDependencies.result.dependent_typeids.length() > 0) {
-    reply._cxx_return.kind = XTypes::TypeLookup_getDependencies_HashId;
-    reply._cxx_return.getTypeDependencies.return_code = DDS::RETCODE_OK;
-    gen_continuation_point(reply._cxx_return.getTypeDependencies.result.continuation_point);
-    reply.header.related_request_id = request.header.request_id;
-    return DDS::RETCODE_OK;
-  }
-  return DDS::RETCODE_NO_DATA;
+  reply._cxx_return.kind = XTypes::TypeLookup_getDependencies_HashId;
+  reply._cxx_return.getTypeDependencies.return_code = DDS::RETCODE_OK;
+  gen_continuation_point(reply._cxx_return.getTypeDependencies.result.continuation_point);
+  reply.header.related_request_id = request.header.request_id;
+  return DDS::RETCODE_OK;
 }
 
 void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& guid_prefix,

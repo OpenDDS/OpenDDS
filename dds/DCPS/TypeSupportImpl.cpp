@@ -70,13 +70,13 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   type_info.complete.dependent_typeid_count = 0;
 }
 
-void TypeSupportImpl::get_dependencies(const XTypes::TypeMap& type_map,
-                                       const XTypes::TypeIdentifier& type_id,
-                                       XTypes::TypeIdentifierWithSizeSeq& deps_with_size) const
+void TypeSupportImpl::populate_dependencies(const XTypes::TypeLookupService_rch& tls) const
 {
   OPENDDS_SET(XTypes::TypeIdentifier) dependencies;
-  XTypes::compute_dependencies(type_map, type_id, dependencies);
+  const XTypes::TypeMap& type_map = getMinimalTypeMap();
+  XTypes::compute_dependencies(type_map, getMinimalTypeIdentifier(), dependencies);
 
+  XTypes::TypeIdentifierWithSizeSeq deps_with_size;
   OPENDDS_SET(XTypes::TypeIdentifier)::const_iterator it = dependencies.begin();
   for (; it != dependencies.end(); ++it) {
     XTypes::TypeMap::const_iterator iter = type_map.find(*it);
@@ -85,10 +85,12 @@ void TypeSupportImpl::get_dependencies(const XTypes::TypeMap& type_map,
       XTypes::TypeIdentifierWithSize tmp = {*it, static_cast<ACE_CDR::ULong>(tobj_size)};
       deps_with_size.append(tmp);
     } else if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TypeSupportImpl::get_dependencies, ")
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TypeSupportImpl::populate_dependencies, ")
                  ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
     }
   }
+
+  tls->add_type_dependencies(getMinimalTypeIdentifier(), deps_with_size);
 }
 
 }
