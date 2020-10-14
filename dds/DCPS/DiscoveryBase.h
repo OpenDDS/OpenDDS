@@ -1836,6 +1836,9 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
+        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = TheServiceParticipant->bit_autopurge_disposed_samples_delay();
+
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
