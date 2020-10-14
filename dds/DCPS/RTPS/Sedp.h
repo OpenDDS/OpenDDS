@@ -598,7 +598,7 @@ private:
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,
-      const DCPS::RepoId& participant_id,
+                                               //      const DCPS::RepoId& participant_id,
       CORBA::ULong tl_kind);
   };
 

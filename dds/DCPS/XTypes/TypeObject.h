@@ -402,17 +402,7 @@ namespace XTypes {
       , element_identifier(a_element_identifier)
     {}
 
-    bool operator<(const PlainSequenceSElemDefn& other) const
-    {
-      if (header < other.header) return true;
-      if (other.header < header) return false;
-      if (bound < other.bound) return true;
-      if (other.bound < bound) return false;
-      if (*element_identifier < *other.element_identifier) return true;
-      if (*other.element_identifier < *element_identifier) return false;
-      return false;
-    }
-
+    bool operator<(const PlainSequenceSElemDefn& other) const;
   };
 
   struct PlainSequenceLElemDefn {
@@ -430,16 +420,7 @@ namespace XTypes {
       , element_identifier(a_element_identifier)
     {}
 
-    bool operator<(const PlainSequenceLElemDefn& other) const
-    {
-      if (header < other.header) return true;
-      if (other.header < header) return false;
-      if (bound < other.bound) return true;
-      if (other.bound < bound) return false;
-      if (*element_identifier < *other.element_identifier) return true;
-      if (*other.element_identifier < *element_identifier) return false;
-      return false;
-    }
+    bool operator<(const PlainSequenceLElemDefn& other) const;
   };
 
   struct PlainArraySElemDefn {
@@ -457,16 +438,7 @@ namespace XTypes {
       , element_identifier(a_element_identifier)
     {}
 
-    bool operator<(const PlainArraySElemDefn& other) const
-    {
-      if (header < other.header) return true;
-      if (other.header < header) return false;
-      if (array_bound_seq < other.array_bound_seq) return true;
-      if (other.array_bound_seq < array_bound_seq) return false;
-      if (*element_identifier < *other.element_identifier) return true;
-      if (*other.element_identifier < *element_identifier) return false;
-      return false;
-    }
+    bool operator<(const PlainArraySElemDefn& other) const;
   };
 
   struct PlainArrayLElemDefn {
@@ -484,16 +456,7 @@ namespace XTypes {
       , element_identifier(a_element_identifier)
     {}
 
-    bool operator<(const PlainArrayLElemDefn& other) const
-    {
-      if (header < other.header) return true;
-      if (other.header < header) return false;
-      if (array_bound_seq < other.array_bound_seq) return true;
-      if (other.array_bound_seq < array_bound_seq) return false;
-      if (*element_identifier < *other.element_identifier) return true;
-      if (*other.element_identifier < *element_identifier) return false;
-      return false;
-    }
+    bool operator<(const PlainArrayLElemDefn& other) const;
   };
 
   struct PlainMapSTypeDefn {
@@ -517,20 +480,7 @@ namespace XTypes {
       , key_identifier(a_key_identifier)
     {}
 
-    bool operator<(const PlainMapSTypeDefn& other) const
-    {
-      if (header < other.header) return true;
-      if (other.header < header) return false;
-      if (bound < other.bound) return true;
-      if (other.bound < bound) return false;
-      if (*element_identifier < *other.element_identifier) return true;
-      if (*other.element_identifier < *element_identifier) return false;
-      if (key_flags < other.key_flags) return true;
-      if (other.key_flags < key_flags) return false;
-      if (*key_identifier < *other.key_identifier) return true;
-      if (*other.key_identifier < *key_identifier) return false;
-      return false;
-    }
+    bool operator<(const PlainMapSTypeDefn& other) const;
   };
 
   struct PlainMapLTypeDefn {
@@ -554,20 +504,7 @@ namespace XTypes {
       , key_identifier(a_key_identifier)
     {}
 
-    bool operator<(const PlainMapLTypeDefn& other) const
-    {
-      if (header < other.header) return true;
-      if (other.header < header) return false;
-      if (bound < other.bound) return true;
-      if (other.bound < bound) return false;
-      if (*element_identifier < *other.element_identifier) return true;
-      if (*other.element_identifier < *element_identifier) return false;
-      if (key_flags < other.key_flags) return true;
-      if (other.key_flags < key_flags) return false;
-      if (*key_identifier < *other.key_identifier) return true;
-      if (*other.key_identifier < *key_identifier) return false;
-      return false;
-    }
+    bool operator<(const PlainMapLTypeDefn& other) const;
   };
 
   // Used for Types that have cyclic dependencies with other types
@@ -785,6 +722,81 @@ namespace XTypes {
   };
 
   typedef Sequence<TypeIdentifier> TypeIdentifierSeq;
+
+  // Operators less-than of member types of TypeIdentifier
+  inline bool PlainSequenceSElemDefn::operator<(const PlainSequenceSElemDefn& other) const
+  {
+    if (header < other.header) return true;
+    if (other.header < header) return false;
+    if (bound < other.bound) return true;
+    if (other.bound < bound) return false;
+    if (*element_identifier < *other.element_identifier) return true;
+    if (*other.element_identifier < *element_identifier) return false;
+    return false;
+  }
+
+  inline bool PlainSequenceLElemDefn::operator<(const PlainSequenceLElemDefn& other) const
+  {
+    if (header < other.header) return true;
+    if (other.header < header) return false;
+    if (bound < other.bound) return true;
+    if (other.bound < bound) return false;
+    if (*element_identifier < *other.element_identifier) return true;
+    if (*other.element_identifier < *element_identifier) return false;
+    return false;
+  }
+
+  inline bool PlainArraySElemDefn::operator<(const PlainArraySElemDefn& other) const
+  {
+    if (header < other.header) return true;
+    if (other.header < header) return false;
+    if (array_bound_seq < other.array_bound_seq) return true;
+    if (other.array_bound_seq < array_bound_seq) return false;
+    if (*element_identifier < *other.element_identifier) return true;
+    if (*other.element_identifier < *element_identifier) return false;
+    return false;
+  }
+
+  inline bool PlainArrayLElemDefn::operator<(const PlainArrayLElemDefn& other) const
+  {
+    if (header < other.header) return true;
+    if (other.header < header) return false;
+    if (array_bound_seq < other.array_bound_seq) return true;
+    if (other.array_bound_seq < array_bound_seq) return false;
+    if (*element_identifier < *other.element_identifier) return true;
+    if (*other.element_identifier < *element_identifier) return false;
+    return false;
+  }
+
+  inline bool PlainMapSTypeDefn::operator<(const PlainMapSTypeDefn& other) const
+  {
+    if (header < other.header) return true;
+    if (other.header < header) return false;
+    if (bound < other.bound) return true;
+    if (other.bound < bound) return false;
+    if (*element_identifier < *other.element_identifier) return true;
+    if (*other.element_identifier < *element_identifier) return false;
+    if (key_flags < other.key_flags) return true;
+    if (other.key_flags < key_flags) return false;
+    if (*key_identifier < *other.key_identifier) return true;
+    if (*other.key_identifier < *key_identifier) return false;
+    return false;
+  }
+
+  inline bool PlainMapLTypeDefn::operator<(const PlainMapLTypeDefn& other) const
+  {
+    if (header < other.header) return true;
+    if (other.header < header) return false;
+    if (bound < other.bound) return true;
+    if (other.bound < bound) return false;
+    if (*element_identifier < *other.element_identifier) return true;
+    if (*other.element_identifier < *element_identifier) return false;
+    if (key_flags < other.key_flags) return true;
+    if (other.key_flags < key_flags) return false;
+    if (*key_identifier < *other.key_identifier) return true;
+    if (*other.key_identifier < *key_identifier) return false;
+    return false;
+  }
 
   // --- Annotation usage: -----------------------------------------------
 

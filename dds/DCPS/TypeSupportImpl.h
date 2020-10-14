@@ -25,6 +25,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 
 namespace OpenDDS {
+namespace XTypes{
+class TypeLookupService;
+}
+
 namespace DCPS {
 
 class MetaStruct;
@@ -98,7 +102,8 @@ public:
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
-  void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
+  //  void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
+  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
 private:
   virtual const char* default_type_name() const = 0;

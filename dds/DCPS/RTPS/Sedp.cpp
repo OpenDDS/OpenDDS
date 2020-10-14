@@ -3270,7 +3270,7 @@ bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
     remote_reader,
     sequence,
     type_lookup_service_sequence_number_,
-    participant_id_,
+                                          //    participant_id_,
     send_get_types ? XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId) == DDS::RETCODE_OK;
 }
 
@@ -3700,7 +3700,7 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdenti
   const DCPS::RepoId& reader,
   DCPS::SequenceNumber& sequence,
   const DCPS::SequenceNumber& rpc_sequence,
-  const DCPS::RepoId& participant_id,
+                                                        //  const DCPS::RepoId& participant_id,
   CORBA::ULong tl_kind)
 {
   if (tl_kind != XTypes::TypeLookup_getTypes_HashId &&
@@ -3714,10 +3714,11 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdenti
   type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
 
   // As per chapter 7.6.3.3.4 of XTypes spec.
+  const DCPS::RepoId remote_participant = make_id(reader, ENTITYID_PARTICIPANT);
   const OPENDDS_STRING instance_name = OPENDDS_STRING("dds.builtin.TOS.") +
-    DCPS::to_hex_dds_string(&participant_id.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
-    DCPS::to_hex_dds_string(&participant_id.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
-    DCPS::to_dds_string(unsigned(participant_id.entityId.entityKind), true);
+    DCPS::to_hex_dds_string(&remote_participant.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
+    DCPS::to_hex_dds_string(&remote_participant.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
+    DCPS::to_dds_string(unsigned(remote_participant.entityId.entityKind), true);
   type_lookup_request.header.instance_name = instance_name.c_str();
   type_lookup_request.data.kind = tl_kind;
 

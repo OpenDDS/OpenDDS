@@ -10,7 +10,7 @@
 #include "TypeSupportImpl.h"
 
 #include "Registered_Data_Types.h"
-#include "XTypes/TypeObject.h"
+#include "XTypes/TypeLookupService.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -70,7 +70,7 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   type_info.complete.dependent_typeid_count = 0;
 }
 
-void TypeSupportImpl::populate_dependencies(const XTypes::TypeLookupService_rch& tls) const
+void TypeSupportImpl::populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const
 {
   OPENDDS_SET(XTypes::TypeIdentifier) dependencies;
   const XTypes::TypeMap& type_map = getMinimalTypeMap();
