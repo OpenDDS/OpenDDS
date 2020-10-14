@@ -113,7 +113,8 @@ namespace OpenDDS {
       // Remote (assumes type_ids != TK_NONE)
       void add_pub_sub_xtypes(const DCPS::RepoId& remote_guid,
                               const XTypes::TypeIdentifier& local_type_id,
-                              const XTypes::TypeIdentifier& remote_type_id)
+                              const XTypes::TypeIdentifier& remote_type_id,
+                              const XTypes::TypeLookupService_rch& type_service_rch)
       {
 
         RepoId participant_id = remote_guid;
@@ -134,7 +135,7 @@ namespace OpenDDS {
         RemoteTopic& remote = remote_topic_iter->second;
         remote.data_type_name_.clear();
         remote.type_id_= remote_type_id;
-        XTypes::TypeAssignability ta(make_rch<XTypes::TypeLookupService>());
+        XTypes::TypeAssignability ta(type_service_rch);
         remote.inconsistent_ = topic_callbacks_ && !ta.assignable(local_type_id, remote.type_id_);
 
         //TODO from this point on could be made a helper function to be shared with add_pub_sub() to improve code maintenance
