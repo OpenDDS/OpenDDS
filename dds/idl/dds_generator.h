@@ -852,7 +852,8 @@ bool generateSwitchForUnion(AST_Union* u, const char* switchExpr, CommonFn commo
 }
 
 inline
-std::string insert_cxx11_accessor_parens(const std::string& full_var_name_, bool is_union_member)
+std::string insert_cxx11_accessor_parens(
+  const std::string& full_var_name_, bool is_union_member = false)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   if (!use_cxx11 || is_union_member || full_var_name_.empty()) {
@@ -892,6 +893,18 @@ inline AST_Field* get_struct_field(AST_Structure* struct_node, size_t index)
   AST_Field** field_ptrptr;
   struct_node->field(field_ptrptr, index);
   return field_ptrptr ? *field_ptrptr : 0;
+}
+
+inline bool struct_has_explicit_keys(AST_Structure* node)
+{
+  for (size_t i = 0; i < node->nfields(); ++i) {
+    bool marked_as_key = false;
+    be_global->check_key(get_struct_field(node, i), marked_as_key);
+    if (marked_as_key) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -985,13 +998,7 @@ public:
   {
     // Check for implied keys rule for non-topic type cases
     if (node && type == FieldFilter_NestedKeyOnly) {
-      for (size_t i = 0; i < node_->nfields(); ++i) {
-        bool marked_as_key = false;
-        be_global->check_key(get_struct_field(node, i), marked_as_key);
-        if (marked_as_key) {
-          just_keys_ = true;
-        }
-      }
+      just_keys_ = struct_has_explicit_keys(node);
     }
   }
 
