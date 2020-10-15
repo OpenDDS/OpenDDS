@@ -15,8 +15,7 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 bool verbose = false;
 bool expect_to_fail = false;
 
-enum KeyValue
-{
+enum KeyValue {
   PROPERTY_1_KEY,
   PROPERTY_2_KEY,
   APPENDABLE_STRUCT_KEY,
@@ -28,8 +27,7 @@ enum KeyValue
   MODIFIED_MUTABLE_UNION_KEY
 };
 
-enum AdditionalFieldValue
-{
+enum AdditionalFieldValue {
   ADDITIONAL_PREFIX_FIELD_STRUCT_AF,
   ADDITIONAL_POSTFIX_FIELD_STRUCT_AF,
   MUTABLE_STRUCT_AF,
@@ -96,7 +94,7 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
       ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n", expected_value.c_str(), data[0].trim_string.in()));
       ret = RETCODE_ERROR;
     } else if (verbose) {
-        ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
+      ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
@@ -497,7 +495,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Topic_var topic;
   const std::string topic_name =
-    registered_type_name.empty() ? registered_type_name + "_Topic" : type + "_Topic";
+    !registered_type_name.empty() ? registered_type_name + "_Topic" : type + "_Topic";
 
   if (type == "Property_1") {
     Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
@@ -583,9 +581,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         write_trim64_struct(dw);
       } else if (type == "AppendableStructWithDependency") {
         write_appendable_struct_with_dependency(dw);
-      } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
-        failed = true;
       }
     }
 
@@ -634,9 +629,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         failed = !(read_trim20_struct(dr) == RETCODE_OK);
       } else if (type == "AppendableStructWithDependency") {
         failed = !(read_appendable_struct_with_dependency(dr) == RETCODE_OK);
-      } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
-        failed = true;
       }
     }
 

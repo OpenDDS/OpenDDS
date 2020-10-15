@@ -17,7 +17,6 @@ struct Property_2 {
 
 @topic
 @final
-@OpenDDS::data_representation(XCDR2)
 struct FinalStruct {
   short x;
   short y;
@@ -26,7 +25,6 @@ struct FinalStruct {
 
 @topic
 @final
-@OpenDDS::data_representation(XCDR2)
 struct ModifiedFinalStruct {
   short x;
   short y;
@@ -36,14 +34,12 @@ struct ModifiedFinalStruct {
 
 @topic
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct AppendableStruct {
   @key long key;
 };
 
 @topic
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct AdditionalPostfixFieldStruct {
   @key long key;
   long additional_field;
@@ -51,7 +47,6 @@ struct AdditionalPostfixFieldStruct {
 
 @topic
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct AdditionalPrefixFieldStruct {
   long additional_field;
   @key long key;
@@ -61,18 +56,16 @@ struct AdditionalPrefixFieldStruct {
 
 @topic
 @mutable
-@OpenDDS::data_representation(XCDR2)
-struct ModifiedMutableStruct {
-  @id(2) long additional_field;
+struct MutableStruct {
   @id(1) @key long key;
+  @id(2) long additional_field;
 };
 
 @topic
 @mutable
-@OpenDDS::data_representation(XCDR2)
-struct MutableStruct {
-  @id(1) @key long key;
+struct ModifiedMutableStruct {
   @id(2) long additional_field;
+  @id(1) @key long key;
 };
 
 // Unions
@@ -85,7 +78,6 @@ enum UnionDisc {
 
 @topic
 @mutable
-@OpenDDS::data_representation(XCDR2)
 union MutableUnion switch (UnionDisc) {
 case E_KEY:
   @id(6) long key;
@@ -97,7 +89,6 @@ case E_ADDITIONAL_FIELD:
 
 @topic
 @mutable
-@OpenDDS::data_representation(XCDR2)
 union ModifiedMutableUnion switch (UnionDisc) {
 case E_KEY:
   @id(6) long key;
@@ -112,14 +103,12 @@ typedef string<64> str64;
 
 @topic
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct Trim64Struct {
   @try_construct(TRIM) str64 trim_string;
 };
 
 @topic
 @mutable
-@OpenDDS::data_representation(XCDR2)
 struct Trim20Struct {
   @try_construct(TRIM) str20 trim_string;
 };
@@ -127,14 +116,12 @@ struct Trim20Struct {
 // Dependencies
 
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct NestedStruct {
   long additional_field;
 };
 
 @topic
 @appendable
-@OpenDDS::data_representation(XCDR2)
 struct AppendableStructWithDependency {
   @key long key;
   NestedStruct additional_nested_struct;
