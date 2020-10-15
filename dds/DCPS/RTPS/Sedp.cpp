@@ -3786,9 +3786,7 @@ Sedp::TypeLookupRequestReader::process_type_lookup_request(DCPS::Serializer& ser
   }
 
   if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupRequestReader::process_type_lookup_request - ")
-               ACE_TEXT("received request with wrong instance name\n")));
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    return DDS::RETCODE_OK;
   }
 
   switch (type_lookup_request.data.kind) {

@@ -269,8 +269,9 @@ namespace XTypes {
     {
       if (kind < other.kind) return true;
       if (other.kind < kind) return false;
-      if (std::memcmp(hash, other.hash, sizeof hash) < 0) return true;
-      if (std::memcmp(other.hash, hash, sizeof hash) < 0) return false;
+      int ret = std::memcmp(hash, other.hash, sizeof hash);
+      if (ret < 0) return true;
+      if (ret > 0) return false;
       return false;
     }
   };
