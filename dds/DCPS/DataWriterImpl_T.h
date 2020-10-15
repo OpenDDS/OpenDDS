@@ -27,8 +27,9 @@ class
   OpenDDS_Dcps_Export
 #endif
 DataWriterImpl_T
-: public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataWriterType>,
-  public virtual OpenDDS::DCPS::DataWriterImpl
+: public virtual LocalObject<typename DDSTraits<MessageType>::DataWriterType>
+, public virtual DataWriterImpl
+, public ValueWriterDispatcher
 {
 public:
   typedef DDSTraits<MessageType> TraitsType;
@@ -216,14 +217,11 @@ public:
 
     Message_Block_Ptr marshalled(
       dds_marshal(instance_data, OpenDDS::DCPS::FULL_MARSHALING));
-    if (!marshalled) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %CDataWriterImpl::write_w_timestamp: "
-        "failed to serialize sample\n",
-        TraitsType::type_name()));
-      return DDS::RETCODE_ERROR;
-    }
-    return OpenDDS::DCPS::DataWriterImpl::write(
-      move(marshalled), handle, source_timestamp, filter_out._retn());
+    return OpenDDS::DCPS::DataWriterImpl::write(move(marshalled),
+                                                handle,
+                                                source_timestamp,
+                                                filter_out._retn(),
+                                                &instance_data);
   }
 
   virtual DDS::ReturnCode_t
@@ -307,6 +305,13 @@ public:
     }
 
     return DDS::RETCODE_OK;
+  }
+
+  const ValueWriterDispatcher* get_value_writer_dispatcher() const { return this; }
+
+  void write(ValueWriter& value_writer, const void* data) const
+  {
+    vwrite(value_writer, *static_cast<const MessageType*>(data));
   }
 
   /**

@@ -122,7 +122,7 @@ int ignore ()
   case IGNORE_PUBLICATION:
     {
       ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::OpenDDS::DCPS::RepoId ignore_id = datawriter_servant->get_publication_id ();
+      ::OpenDDS::DCPS::RepoId ignore_id = datawriter_servant->get_repo_id();
 
       std::stringstream participantBuffer;
       participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
@@ -156,7 +156,7 @@ int ignore ()
   case IGNORE_SUBSCRIPTION:
     {
       ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::OpenDDS::DCPS::RepoId ignore_id = datareader_servant->get_subscription_id ();
+      ::OpenDDS::DCPS::RepoId ignore_id = datareader_servant->get_repo_id ();
 
       std::stringstream participantBuffer;
       participantBuffer << ::OpenDDS::DCPS::to_string(part_id);

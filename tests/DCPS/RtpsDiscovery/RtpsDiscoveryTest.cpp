@@ -165,10 +165,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
       ++num_valid;
-      OpenDDS::DCPS::RepoId repo_id =
-        disc->bit_key_to_repo_id(dp_impl,
-                                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                 data[i].key);
+      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
 
       OpenDDS::DCPS::GuidConverter converter(repo_id);
       ACE_DEBUG((LM_DEBUG,
@@ -412,18 +409,16 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
-      OpenDDS::DCPS::RepoId repo_id =
-        disc->bit_key_to_repo_id(subscriber_impl,
-                                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                 data[i].participant_key);
+      OpenDDS::DCPS::RepoId publication_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
+      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
 
       OpenDDS::DCPS::GuidConverter converter(repo_id);
 
       ACE_DEBUG((LM_DEBUG,
-                 "%P Read Publication BIT with key: %x %x %x and handle %d\n"
+                 "%P Read Publication BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 data[i].key.value[0], data[i].key.value[1],
-                 data[i].key.value[2], infos[i].instance_handle,
+                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(publication_repo_id)).c_str(),
+                 infos[i].instance_handle,
                  OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
 
@@ -542,18 +537,16 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
-      OpenDDS::DCPS::RepoId repo_id =
-        disc->bit_key_to_repo_id(publisher_impl,
-                                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                 data[i].participant_key);
+      OpenDDS::DCPS::RepoId subscription_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
+      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
 
       OpenDDS::DCPS::GuidConverter converter(repo_id);
 
       ACE_DEBUG((LM_DEBUG,
-                 "%P Read Subscription BIT with key: %x %x %x and handle %d\n"
+                 "%P Read Subscription BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 data[i].key.value[0], data[i].key.value[1],
-                 data[i].key.value[2], infos[i].instance_handle,
+                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(subscription_repo_id)).c_str(),
+                 infos[i].instance_handle,
                  OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
       if (repo_id == subscriber_repo_id) {
@@ -652,10 +645,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
           false);
       }
 
-      OpenDDS::DCPS::RepoId repo_id = disc->bit_key_to_repo_id(
-          dp_impl,
-          OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-          data.key);
+      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
       if (dp_impl->id_to_handle(repo_id) != part_handles[0]) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P discovered participant ")
                                     ACE_TEXT("BIT key could not be converted ")

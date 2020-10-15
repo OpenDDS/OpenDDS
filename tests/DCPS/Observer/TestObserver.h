@@ -32,10 +32,14 @@ public:
   virtual void on_disassociated(DDS::DataWriter_ptr w, const OpenDDS::DCPS::GUID_t& readerId);
   virtual void on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::GUID_t& writerId);
 
-  virtual void on_sample_sent(DDS::DataWriter_ptr w, const Sample& s);
-  virtual void on_sample_received(DDS::DataReader_ptr r, const Sample& s);
-  virtual void on_sample_read(DDS::DataReader_ptr r, const Sample& s);
-  virtual void on_sample_taken(DDS::DataReader_ptr r, const Sample& s);
+  virtual void on_sample_sent(DDS::DataWriter_ptr w,
+                              const Sample& s);
+  virtual void on_sample_received(DDS::DataReader_ptr r,
+                                  const Sample& s);
+  virtual void on_sample_read(DDS::DataReader_ptr r,
+                              const Sample& s);
+  virtual void on_sample_taken(DDS::DataReader_ptr r,
+                               const Sample& s);
 
   enum Check { c_SENT = 1, c_W_G1_G2 = 2, c_R_ALL = 3 };
 
@@ -52,7 +56,6 @@ public:
 private:
   static std::string to_str(DDS::DataWriter_ptr w);
   static std::string to_str(DDS::DataReader_ptr w);
-  static std::string to_str(const Sample& s);
   static std::string to_str(const OpenDDS::DCPS::GUID_t& guid);
 
   template<typename Qos>

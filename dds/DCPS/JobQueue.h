@@ -9,6 +9,11 @@
 #define OPENDDS_DCPS_JOB_QUEUE_H
 
 #include "RcEventHandler.h"
+#include "PoolAllocator.h"
+
+#include <ace/Reactor.h>
+#include <ace/Thread_Mutex.h>
+#include <ace/Reverse_Lock_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

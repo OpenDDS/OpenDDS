@@ -247,19 +247,6 @@ namespace OpenDDS {
         type_lookup_service_ = type_lookup_service;
       }
 
-      RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                const DDS::BuiltinTopicKey_t& key)
-      {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_PUBLICATION_TOPIC)) {
-          return pub_key_to_id_[key];
-        }
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_SUBSCRIPTION_TOPIC)) {
-          return sub_key_to_id_[key];
-        }
-        return RepoId();
-      }
-
       void purge_dead_topic(const OPENDDS_STRING& topic_name) {
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         topic_names_.erase(top_it->second.topic_id());
@@ -732,9 +719,6 @@ namespace OpenDDS {
         DDS::SubscriberQos subscriber_qos_;
         ContentFilterProperty_t filterProperties;
       };
-
-      typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, RepoId,
-                              BuiltinTopicKeyLess) BitKeyMap;
 
       typedef OPENDDS_MAP_CMP(RepoId, LocalPublication,
                               GUID_tKeyLessThan) LocalPublicationMap;
@@ -1500,13 +1484,11 @@ namespace OpenDDS {
 
       void remove_from_bit(const DiscoveredPublication& pub)
       {
-        pub_key_to_id_.erase(get_key(pub));
         remove_from_bit_i(pub);
       }
 
       void remove_from_bit(const DiscoveredSubscription& sub)
       {
-        sub_key_to_id_.erase(get_key(sub));
         remove_from_bit_i(sub);
       }
 
@@ -1530,23 +1512,6 @@ namespace OpenDDS {
         if (td == topics_.end()) return false;
 
         return td->second.has_dcps_key();
-      }
-
-      void
-      increment_key(DDS::BuiltinTopicKey_t& key)
-      {
-        for (int idx = 0; idx < 3; ++idx) {
-          CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
-          if (ukey == 0xFFFFFFFF) {
-            key.value[idx] = 0;
-          } else {
-            ++ukey;
-            key.value[idx] = ukey;
-            return;
-          }
-        }
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::increment_key - ")
-                   ACE_TEXT("ran out of builtin topic keys\n")));
       }
 
 #ifdef OPENDDS_SECURITY
@@ -1598,7 +1563,6 @@ namespace OpenDDS {
 
       ACE_Thread_Mutex& lock_;
       RepoId participant_id_;
-      BitKeyMap pub_key_to_id_, sub_key_to_id_;
       RepoIdSet ignored_guids_;
       unsigned int publication_counter_, subscription_counter_, topic_counter_;
       LocalPublicationMap local_publications_;
@@ -1609,7 +1573,6 @@ namespace OpenDDS {
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
       OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) relay_only_readers_;
-      DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
       XTypes::TypeLookupService_rch type_lookup_service_;
 
 
@@ -1647,20 +1610,6 @@ namespace OpenDDS {
       { }
 
       virtual ~LocalParticipant() { }
-
-      RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                      const DDS::BuiltinTopicKey_t& key)
-      {
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_PARTICIPANT_TOPIC)) {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, key.value, sizeof(DDS::BuiltinTopicKeyValue));
-          guid.entityId = ENTITYID_PARTICIPANT;
-          return guid;
-
-        } else {
-          return endpoint_manager().bit_key_to_repo_id(bit_topic_name, key);
-        }
-      }
 
       void ignore_domain_participant(const RepoId& ignoreId)
       {
@@ -1895,9 +1844,7 @@ namespace OpenDDS {
         , extended_builtin_endpoints_(0)
 #endif
         {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
-          guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+          const RepoId guid = make_guid(p.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
           std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;
@@ -2164,14 +2111,6 @@ namespace OpenDDS {
       virtual void fini_bit(DomainParticipantImpl* participant)
       {
         get_part(participant->get_domain_id(), participant->get_id())->fini_bit();
-      }
-
-      virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
-                                                       const char* bit_topic_name,
-                                                       const DDS::BuiltinTopicKey_t& key) const
-      {
-        return get_part(participant->get_domain_id(), participant->get_id())
-          ->bit_key_to_repo_id(bit_topic_name, key);
       }
 
       virtual bool attach_participant(DDS::DomainId_t /*domainId*/,

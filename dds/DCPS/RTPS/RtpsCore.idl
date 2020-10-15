@@ -58,6 +58,7 @@ module OpenDDS {
     };
 
     /* Type used to hold sequence numbers. */
+    @final
     struct SequenceNumber_t {
       long high;
       unsigned long low;

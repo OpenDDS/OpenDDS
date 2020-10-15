@@ -334,10 +334,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , publication_agent_info_listener_(*this)
   , subscription_agent_info_listener_(*this)
 #endif // OPENDDS_SECURITY
-{
-  pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
-  sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
-}
+{}
 
 DDS::ReturnCode_t
 Sedp::init(const RepoId& guid,
@@ -806,17 +803,17 @@ Sedp::multicast_group() const
 void
 Sedp::assign_bit_key(DiscoveredPublication& pub)
 {
-  increment_key(pub_bit_key_);
-  pub_key_to_id_[pub_bit_key_] = pub.writer_data_.writerProxy.remoteWriterGuid;
-  pub.writer_data_.ddsPublicationData.key = pub_bit_key_;
+  const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(pub.writer_data_.writerProxy.remoteWriterGuid);
+  pub.writer_data_.ddsPublicationData.key = key;
+  pub.writer_data_.ddsPublicationData.participant_key = repo_id_to_bit_key(make_id(pub.writer_data_.writerProxy.remoteWriterGuid, ENTITYID_PARTICIPANT));
 }
 
 void
 Sedp::assign_bit_key(DiscoveredSubscription& sub)
 {
-  increment_key(sub_bit_key_);
-  sub_key_to_id_[sub_bit_key_] = sub.reader_data_.readerProxy.remoteReaderGuid;
-  sub.reader_data_.ddsSubscriptionData.key = sub_bit_key_;
+  const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(sub.reader_data_.readerProxy.remoteReaderGuid);
+  sub.reader_data_.ddsSubscriptionData.key = key;
+  sub.reader_data_.ddsSubscriptionData.participant_key = repo_id_to_bit_key(make_id(sub.reader_data_.readerProxy.remoteReaderGuid, ENTITYID_PARTICIPANT));
 }
 
 void
@@ -2308,8 +2305,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         // Upsert the remote topic.
         td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in());
 
-        std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
-                    guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
         assign_bit_key(pub);
         wdata_copy = pub.writer_data_;
       }
@@ -2641,8 +2636,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         // Upsert the remote topic.
         td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in());
 
-        std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
-                    guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
         assign_bit_key(sub);
         rdata_copy = sub.reader_data_;
       }
@@ -3793,10 +3786,10 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
                                                          XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
-    type_lookup_reply.data.getTypes.result.types);
-  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
-    type_lookup_reply.data.getTypes.return_code = DDS::RETCODE_OK;
-    type_lookup_reply.data.kind = XTypes::TypeLookup_getTypes_HashId;
+    type_lookup_reply._cxx_return.getType.result.types);
+  if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
+    type_lookup_reply._cxx_return.getType.return_code = DDS::RETCODE_OK;
+    type_lookup_reply._cxx_return.kind = XTypes::TypeLookup_getTypes_HashId;
     type_lookup_reply.header.related_request_id = type_lookup_request.header.request_id;
     return DDS::RETCODE_OK;
   }
@@ -3813,8 +3806,8 @@ Sedp::TypeLookupReplyReader::process_tl_reply(DCPS::Serializer& ser)
     return DDS::RETCODE_ERROR;
   }
 
-  if (type_lookup_reply.data.getTypes.result.types.length() > 0) {
-    sedp_.type_lookup_service_->add_type_objects_to_cache(type_lookup_reply.data.getTypes.result.types);
+  if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
+    sedp_.type_lookup_service_->add_type_objects_to_cache(type_lookup_reply._cxx_return.getType.result.types);
     DCPS::SequenceNumber rpc_sequence;
     rpc_sequence.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
       type_lookup_reply.header.related_request_id.sequence_number.low);
