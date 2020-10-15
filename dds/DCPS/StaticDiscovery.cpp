@@ -555,7 +555,8 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
 }
 
 void StaticEndpointManager::cleanup_type_lookup_data(const GuidPrefix_t& /*guid_prefix*/,
-                                                     const XTypes::TypeIdentifier& /*ti*/)
+                                                     const XTypes::TypeIdentifier& /*ti*/,
+                                                     bool /*secure*/)
 {
   // Do nothing.
 }

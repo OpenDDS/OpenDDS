@@ -1237,6 +1237,12 @@ namespace OpenDDS {
         std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
         orig_req_data.type_id = type_info->minimal.typeid_with_size.type_id;
         orig_req_data.seq_number = md.rpc_sequence_number;
+        orig_req_data.secure = false;
+#ifdef OPENDDS_SECURITY
+        if (is_security_enabled() && is_discovery_protected) {
+          orig_req_data.secure = true;
+        }
+#endif
         orig_req_data.time_started = md.time_added_to_map;
         orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
 
@@ -1261,7 +1267,8 @@ namespace OpenDDS {
 
       // Cleanup internal data used by type lookup operations
       virtual void cleanup_type_lookup_data(const GuidPrefix_t& guid_prefix,
-                                            const XTypes::TypeIdentifier& ti) = 0;
+                                            const XTypes::TypeIdentifier& ti,
+                                            bool secure) = 0;
 
       void
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
@@ -1281,7 +1288,7 @@ namespace OpenDDS {
         // Cleanup internal data used by getTypeDependencies
         for (typename OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
           if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {
-            cleanup_type_lookup_data(it->second.participant, it->second.type_id);
+            cleanup_type_lookup_data(it->second.participant, it->second.type_id, it->second.secure);
             orig_seq_numbers_.erase(it++);
           } else {
             ++it;
@@ -1646,6 +1653,7 @@ namespace OpenDDS {
         GuidPrefix_t participant; // Prefix of remote participant
         XTypes::TypeIdentifier type_id; // Remote type
         SequenceNumber seq_number; // Of the original request
+        bool secure; // Communicate via secure endpoints or not
         MonotonicTimePoint time_started;
       };
 

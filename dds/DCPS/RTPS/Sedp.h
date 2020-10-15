@@ -836,7 +836,8 @@ private:
 #endif
 
   void cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
-                                const XTypes::TypeIdentifier& ti);
+                                const XTypes::TypeIdentifier& ti,
+                                bool secure);
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;

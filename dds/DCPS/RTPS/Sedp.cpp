@@ -3984,13 +3984,17 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
 }
 
 void Sedp::cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
-                                    const XTypes::TypeIdentifier& ti)
+                                    const XTypes::TypeIdentifier& ti,
+                                    bool secure)
 {
 #ifdef OPENDDS_SECURITY
-  // Only one of these has the data and does cleanup
-  type_lookup_reply_secure_reader_->cleanup(guid_prefix, ti);
-  type_lookup_reply_reader_->cleanup(guid_prefix, ti);
+  if (secure) {
+    type_lookup_reply_secure_reader_->cleanup(guid_prefix, ti);
+  } else {
+    type_lookup_reply_reader_->cleanup(guid_prefix, ti);
+  }
 #else
+  ACE_UNUSED_ARG(secure);
   type_lookup_reply_reader_->cleanup(guid_prefix, ti);
 #endif
 }
