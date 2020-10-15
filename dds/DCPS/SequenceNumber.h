@@ -47,14 +47,14 @@ public:
     } else {
       ++this->low_;
     }
-    return *this ;
+    return *this;
   }
 
   /// Post-increment.
   SequenceNumber operator++(int) {
     SequenceNumber value(*this);
     ++*this;
-    return value ;
+    return value;
   }
 
   SequenceNumber previous() const {
@@ -70,7 +70,7 @@ public:
     } else {
       --retVal.low_;
     }
-    return retVal ;
+    return retVal;
   }
 
   void setValue(Value value) {
@@ -101,11 +101,11 @@ public:
   /// Derive a full suite of logical operations.
   bool operator==(const SequenceNumber& rvalue) const {
     return (this->high_ == rvalue.high_) &&
-           (this->low_ == rvalue.low_) ;
+           (this->low_ == rvalue.low_);
   }
   bool operator!=(const SequenceNumber& rvalue) const {
     return (this->high_ != rvalue.high_) ||
-           (this->low_ != rvalue.low_) ;
+           (this->low_ != rvalue.low_);
   }
   bool operator>=(const SequenceNumber& rvalue) const {
     return !(*this  < rvalue);

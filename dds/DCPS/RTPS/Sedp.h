@@ -162,8 +162,9 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
-  bool send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
-                                const DCPS::RepoId& reader, bool is_discovery_protected);
+  bool send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
+                                const DCPS::RepoId& reader,
+                                bool is_discovery_protected, bool send_get_types);
 
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
@@ -438,6 +439,17 @@ private:
 
     DDS::Subscriber_var get_builtin_subscriber() const;
 
+    // Return instance_name field in RPC type lookup request for a given RepoId
+    // (as per chapter 7.6.3.3.4 of XTypes spec)
+    OPENDDS_STRING get_instance_name(const DCPS::RepoId& id) const
+    {
+      const DCPS::RepoId participant = make_id(id, ENTITYID_PARTICIPANT);
+      return OPENDDS_STRING("dds.builtin.TOS.") +
+        DCPS::to_hex_dds_string(&participant.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
+        DCPS::to_hex_dds_string(&participant.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
+        DCPS::to_dds_string(unsigned(participant.entityId.entityKind), true);
+    }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
@@ -593,15 +605,14 @@ private:
 
     virtual ~TypeLookupRequestWriter();
 
-    DDS::ReturnCode_t send_type_lookup_request(XTypes::TypeIdentifierSeq& type_ids,
+    DDS::ReturnCode_t send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
       DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,
-      const DCPS::RepoId& participant_id);
+      CORBA::ULong tl_kind);
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestWriter> TypeLookupRequestWriter_rch;
-
   TypeLookupRequestWriter_rch type_lookup_request_writer_;
 
   class TypeLookupReplyWriter : public Writer {
@@ -612,17 +623,15 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t send_tl_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
+    DDS::ReturnCode_t send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
       const DCPS::RepoId& reader);
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
-
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
 
 #ifdef OPENDDS_SECURITY
   TypeLookupRequestWriter_rch type_lookup_request_secure_writer_;
-
   TypeLookupReplyWriter_rch type_lookup_reply_secure_writer_;
 #endif
 
@@ -733,7 +742,9 @@ private:
   public:
     TypeLookupRequestReader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Reader(sub_id, sedp)
-    {}
+    {
+      instance_name_ = get_instance_name(sub_id);
+    }
 
     virtual ~TypeLookupRequestReader();
 
@@ -743,14 +754,23 @@ private:
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    DDS::ReturnCode_t process_tl_request(DCPS::Serializer& ser,
+    DDS::ReturnCode_t process_type_lookup_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
 
     DDS::ReturnCode_t process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
       XTypes::TypeLookup_Reply& type_lookup_reply);
+
+    DDS::ReturnCode_t process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
+      XTypes::TypeLookup_Reply& reply);
+
+    void gen_continuation_point(XTypes::OctetSeq32& cont_point) const;
+
+    // The instance name of the local participant
+    OPENDDS_STRING instance_name_;
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestReader> TypeLookupRequestReader_rch;
+  TypeLookupRequestReader_rch type_lookup_request_reader_;
 
   class TypeLookupReplyReader : public Reader {
   public:
@@ -760,26 +780,64 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
+    void get_continuation_point(const GuidPrefix_t& guid_prefix,
+                                const XTypes::TypeIdentifier& remote_ti,
+                                XTypes::OctetSeq32& cont_point) const;
+
+    void cleanup(const DCPS::GuidPrefix_t& guid_prefix, const XTypes::TypeIdentifier& ti);
+
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
       const DCPS::EntityId_t& entity_id,
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    DDS::ReturnCode_t process_tl_reply(DCPS::Serializer& ser);
+    DDS::ReturnCode_t process_type_lookup_reply(const DCPS::ReceivedDataSample&,
+                                                DCPS::Serializer& ser,
+                                                bool is_discovery_protected);
+    DDS::ReturnCode_t process_get_types_reply(const XTypes::TypeLookup_Reply&);
+    DDS::ReturnCode_t process_get_dependencies_reply(const DCPS::ReceivedDataSample&,
+                                                     const XTypes::TypeLookup_Reply&,
+                                                     const DCPS::SequenceNumber&,
+                                                     bool is_discovery_protected);
+
+    typedef std::pair<XTypes::OctetSeq32, XTypes::TypeIdentifierSeq> ContinuationPair;
+
+    // Map from each remote type to the most recent continuation_point
+    // and all dependencies received for that type so far.
+    typedef OPENDDS_MAP(XTypes::TypeIdentifier, ContinuationPair) RemoteDependencies;
+
+    // NOTE(sonndinh): We can later replace this with GUID_t as the key of DependenciesMap.
+    struct GuidPrefixWrapper {
+      GuidPrefixWrapper(const GuidPrefix_t& prefix)
+      {
+        std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
+      }
+
+      bool operator<(const GuidPrefixWrapper& other) const
+      {
+        return std::memcmp(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t)) < 0;
+      }
+
+      GuidPrefix_t prefix_;
+    };
+
+    // Map from each remote participant to the data stored for its types.
+    typedef OPENDDS_MAP(GuidPrefixWrapper, RemoteDependencies) DependenciesMap;
+    DependenciesMap dependencies_;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
-
-  TypeLookupRequestReader_rch type_lookup_request_reader_;
-
   TypeLookupReplyReader_rch type_lookup_reply_reader_;
 
 #ifdef OPENDDS_SECURITY
   TypeLookupRequestReader_rch type_lookup_request_secure_reader_;
-
   TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
 #endif
+
+  void cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
+                                const XTypes::TypeIdentifier& ti,
+                                bool secure);
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;
