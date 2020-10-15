@@ -153,6 +153,7 @@ namespace OpenDDS {
         {
         }
 
+        RepoIdSet matched_endpoints_;
         DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
         XTypes::TypeInformation type_info_;
@@ -163,6 +164,9 @@ namespace OpenDDS {
         ICE::AgentInfo ice_agent_info_;
 #endif
 
+        const char* get_topic_name() const {
+          return reader_data_.ddsSubscriptionData.topic_name;
+        }
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredSubscription,
@@ -188,6 +192,7 @@ namespace OpenDDS {
         {
         }
 
+        RepoIdSet matched_endpoints_;
         DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
         XTypes::TypeInformation type_info_;
@@ -198,6 +203,9 @@ namespace OpenDDS {
         ICE::AgentInfo ice_agent_info_;
 #endif
 
+        const char* get_topic_name() const {
+          return writer_data_.ddsPublicationData.topic_name;
+        }
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredPublication,
@@ -275,9 +283,9 @@ namespace OpenDDS {
             discovered_publications_.find(to_ignore);
           if (iter != discovered_publications_.end()) {
             // clean up tracking info
-            OPENDDS_STRING topic_name = get_topic_name(iter->second);
+            const OPENDDS_STRING topic_name = iter->second.get_topic_name();
             TopicDetails& td = topics_[topic_name];
-            td.remove_pub_sub(iter->first);
+            td.remove_discovered_publication(to_ignore);
             remove_from_bit(iter->second);
             discovered_publications_.erase(iter);
             // break associations
@@ -293,9 +301,9 @@ namespace OpenDDS {
             discovered_subscriptions_.find(to_ignore);
           if (iter != discovered_subscriptions_.end()) {
             // clean up tracking info
-            OPENDDS_STRING topic_name = get_topic_name(iter->second);
+            const OPENDDS_STRING topic_name = iter->second.get_topic_name();
             TopicDetails& td = topics_[topic_name];
-            td.remove_pub_sub(iter->first);
+            td.remove_discovered_publication(to_ignore);
             remove_from_bit(iter->second);
             discovered_subscriptions_.erase(iter);
             // break associations
@@ -313,11 +321,23 @@ namespace OpenDDS {
             ignored_topics_.insert(iter->second);
             // Remove all publications and subscriptions on this topic
             TopicDetails& td = topics_[iter->second];
-            RepoIdSet ids = td.endpoints();
-            for (RepoIdSet::iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
-              match_endpoints(*ep, td, true /*remove*/);
-              td.remove_pub_sub(*ep);
-              if (shutting_down()) { return; }
+            {
+              const RepoIdSet ids = td.discovered_publications();
+              for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
+                match_endpoints(*ep, td, true /*remove*/);
+                td.remove_discovered_publication(*ep);
+                // TODO: Do we need to remove from discovered_subscriptions?
+                if (shutting_down()) { return; }
+              }
+            }
+            {
+              const RepoIdSet ids = td.discovered_subscriptions();
+              for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
+                match_endpoints(*ep, td, true /*remove*/);
+                td.remove_discovered_subscription(*ep);
+                // TODO: Do we need to remove from discovered_publications?
+                if (shutting_down()) { return; }
+              }
             }
             if (td.is_dead()) {
               purge_dead_topic(iter->second);
@@ -398,11 +418,11 @@ namespace OpenDDS {
       virtual bool update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos) = 0;
 
       RepoId add_publication(const RepoId& topicId,
-                                   DataWriterCallbacks* publication,
-                                   const DDS::DataWriterQos& qos,
-                                   const TransportLocatorSeq& transInfo,
-                                   const DDS::PublisherQos& publisherQos,
-                                   const XTypes::TypeInformation& type_info)
+                             DataWriterCallbacks* publication,
+                             const DDS::DataWriterQos& qos,
+                             const TransportLocatorSeq& transInfo,
+                             const DDS::PublisherQos& publisherQos,
+                             const XTypes::TypeInformation& type_info)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
 
@@ -474,7 +494,7 @@ namespace OpenDDS {
 #endif
 
         TopicDetails& td = topics_[topic_name];
-        td.add_pub_sub(rid);
+        td.add_local_publication(rid);
 
         if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
           return RepoId();
@@ -505,7 +525,7 @@ namespace OpenDDS {
               topics_.find(topic_name);
             if (top_it != topics_.end()) {
               match_endpoints(publicationId, top_it->second, true /*remove*/);
-              top_it->second.remove_pub_sub(publicationId);
+              top_it->second.remove_local_publication(publicationId);
               // Local, no need to check for dead topic.
             }
           } else {
@@ -619,7 +639,7 @@ namespace OpenDDS {
 #endif
 
         TopicDetails& td = topics_[topic_name];
-        td.add_pub_sub(rid);
+        td.add_local_subscription(rid);
 
         if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
           return RepoId();
@@ -650,7 +670,7 @@ namespace OpenDDS {
               topics_.find(topic_name);
             if (top_it != topics_.end()) {
               match_endpoints(subscriptionId, top_it->second, true /*remove*/);
-              top_it->second.remove_pub_sub(subscriptionId);
+              top_it->second.remove_local_subscription(subscriptionId);
               // Local, no need to check for dead topic.
             }
           } else {
@@ -748,12 +768,6 @@ namespace OpenDDS {
 
       typedef typename OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, GUID_tKeyLessThan) TopicNameMap;
 
-      static const char* get_topic_name(const DiscoveredPublication& pub) {
-        return pub.writer_data_.ddsPublicationData.topic_name;
-      }
-      static const char* get_topic_name(const DiscoveredSubscription& sub) {
-        return sub.reader_data_.ddsSubscriptionData.topic_name;
-      }
       static DDS::BuiltinTopicKey_t get_key(const DiscoveredPublication& pub) {
         return pub.writer_data_.ddsPublicationData.key;
       }
@@ -822,15 +836,36 @@ namespace OpenDDS {
                                             bool /*is_discovery_protected*/)
       { return true; }
 
+      // TODO: This is perhaps too generic since the context probably has the details this function computes.
       void match_endpoints(RepoId repoId, const TopicDetails& td,
                            bool remove = false)
       {
         const bool reader = GuidConverter(repoId).isReader();
         // Copy the endpoint set - lock can be released in match()
-        RepoIdSet endpoints_copy = td.endpoints();
+        RepoIdSet local_endpoints;
+        RepoIdSet discovered_endpoints;
+        if (reader) {
+          local_endpoints = td.local_publications();
+          discovered_endpoints = td.discovered_publications();
+        } else {
+          local_endpoints = td.local_subscriptions();
+          discovered_endpoints = td.discovered_subscriptions();
+        }
 
-        for (RepoIdSet::const_iterator iter = endpoints_copy.begin();
-             iter != endpoints_copy.end(); ++iter) {
+        for (RepoIdSet::const_iterator iter = local_endpoints.begin();
+             iter != local_endpoints.end(); ++iter) {
+          // check to make sure it's a Reader/Writer or Writer/Reader match
+          if (GuidConverter(*iter).isReader() != reader) {
+            if (remove) {
+              remove_assoc(*iter, repoId);
+            } else {
+              match(reader ? *iter : repoId, reader ? repoId : *iter);
+            }
+          }
+        }
+
+        for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
+             iter != discovered_endpoints.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
           if (GuidConverter(*iter).isReader() != reader) {
             if (remove) {
@@ -850,6 +885,9 @@ namespace OpenDDS {
           const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
           if (lsi != local_subscriptions_.end()) {
             lsi->second.matched_endpoints_.erase(removing);
+            const DiscoveredPublicationIter dpi = discovered_publications_.find(removing);
+            OPENDDS_ASSERT(dpi != discovered_publications_.end());
+            dpi->second.matched_endpoints_.erase(remove_from);
             WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = removing;
@@ -867,6 +905,9 @@ namespace OpenDDS {
           const LocalPublicationIter lpi = local_publications_.find(remove_from);
           if (lpi != local_publications_.end()) {
             lpi->second.matched_endpoints_.erase(removing);
+            const DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(removing);
+            OPENDDS_ASSERT(dsi != discovered_subscriptions_.end());
+            dsi->second.matched_endpoints_.erase(remove_from);
             ReaderIdSeq reader_seq(1);
             reader_seq.length(1);
             reader_seq[0] = removing;
@@ -973,6 +1014,28 @@ namespace OpenDDS {
       void
       match(const RepoId& writer, const RepoId& reader)
       {
+        /*
+          Jeremy and Clayton
+
+          I think the flow should be:
+          1. Get type information if necessary.
+          2. Check for consistency.
+          3. Check for compatible QoS.
+
+          Consequently, all of the code up to the call to match_continue should be moved to the first part of match_continue.
+          The first part of match continue should be the consistency check that was being done in TopicDetails for non-xtypes or the new consistency check for extypes.
+          You will probably need to resurrect the counter that was in TopicDetails.
+
+          If all of the data used for computing consistency is immutable, i.e.,
+            - the topic name
+            - the type name
+            - the type identifiers
+            - etc.
+          Then you are done.
+          Otherwise, we have to think about cases where a local/discovered changes in a way that alters consistency.
+          If we do have to support this, then it will have to be in future work.
+         */
+
         // 0. For discovered endpoints, we'll have the QoS info in the form of the
         // publication or subscription BIT data which doesn't use the same structures
         // for QoS.  In those cases we can copy the individual QoS policies to temp
@@ -1199,10 +1262,12 @@ namespace OpenDDS {
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
             lpi->second.remote_expectant_opendds_associations_.erase(reader);
+            dsi->second.matched_endpoints_.erase(writer);
           }
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
             lsi->second.remote_expectant_opendds_associations_.erase(writer);
+            dpi->second.matched_endpoints_.erase(reader);
           }
           if (writer_local && !reader_local) {
             remove_assoc_i(writer, lpi->second, reader);
@@ -1273,6 +1338,9 @@ namespace OpenDDS {
       void
       match_continue(const RepoId& writer, const RepoId& reader)
       {
+        // TODO: Add the consistency check here.
+        // TODO: Move the QoS checking stuff here.
+
         bool call_writer = false, call_reader = false, writer_local = false, reader_local = false;
 
         DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(reader);
@@ -1323,44 +1391,23 @@ namespace OpenDDS {
           reader_local = true;
         }
 
+        // TODO:  Move to first part of method.
         // for Xtypes, check consistency
         const XTypes::TypeIdentifier& writer_type_id = writer_type_info.minimal.typeid_with_size.type_id;
         const XTypes::TypeIdentifier& reader_type_id = reader_type_info.minimal.typeid_with_size.type_id;
         if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE && (!reader_local || !writer_local)) {
-          //look up topic name
-          OPENDDS_STRING topic_name;
-          if (dpi != discovered_publications_.end()) {
-            topic_name = get_topic_name(dpi->second);
-          } else if (dsi != discovered_subscriptions_.end()) {
-            topic_name = get_topic_name(dsi->second);
-          } else {
-            //topic name not found print
-            return;
-          }
-          std::cout << "topic name = " << topic_name << std::endl;
-          typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
-          if (td_iter != topics_.end()) {
-            if (!reader_local) {
-              td_iter->second.add_pub_sub_xtypes(reader, writer_type_id, reader_type_id, type_lookup_service_);
-            }
 
-            if (!writer_local) {
-              td_iter->second.add_pub_sub_xtypes(writer, reader_type_id, writer_type_id, type_lookup_service_);
-            }
-          } else {
-            std::cout << "didn't find topic" << std::endl;
-          }
         }
-
-
 
         if (writer_local) {
           call_writer = lpi->second.matched_endpoints_.insert(reader).second;
           dwr = lpi->second.publication_;
+          dsi->second.matched_endpoints_.insert(writer);
         }
         if (reader_local) {
           call_reader = lsi->second.matched_endpoints_.insert(writer).second;
           drr = lsi->second.subscription_;
+          dpi->second.matched_endpoints_.insert(reader);
         }
 
         if (writer_local && !reader_local) {
