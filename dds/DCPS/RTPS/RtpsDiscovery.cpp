@@ -127,7 +127,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         config->spdp_local_address(TheServiceParticipant->default_address());
         ACE_TCHAR buff[256];
         TheServiceParticipant->default_address().addr_to_string(&(buff[0]), 256);
-        OPENDDS_STRING addr_str(&(buff[0]));
+        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(&(buff[0])));
         config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
       }
 
