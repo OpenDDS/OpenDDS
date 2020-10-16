@@ -2189,15 +2189,17 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
 
-    // A new address set always starts a new bundle
-    meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-    meta_submessage_bundle_addrs.push_back(addr_it->first);
-
+    // Prepare the set of addresses.
+    AddrSet addrs = addr_it->first;
 #ifdef OPENDDS_SECURITY
     if (local_crypto_handle() != DDS::HANDLE_NIL) {
-      meta_submessage_bundle_addrs.back().erase(BUNDLING_PLACEHOLDER);
+      addrs.erase(BUNDLING_PLACEHOLDER);
     }
 #endif
+
+    // A new address set always starts a new bundle
+    meta_submessage_bundles.push_back(MetaSubmessageIterVec());
+    meta_submessage_bundle_addrs.push_back(addrs);
 
     prev_dst = GUID_UNKNOWN;
 
@@ -2210,7 +2212,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           // going
           if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-            meta_submessage_bundle_addrs.push_back(addr_it->first);
+            meta_submessage_bundle_addrs.push_back(addrs);
           }
         }
         // Attempt to add the submessage meta_submessage to the bundle
@@ -2250,7 +2252,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
         // difference into the next bundle, reset prev_dst, and keep going
         if (!result) {
           meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-          meta_submessage_bundle_addrs.push_back(addr_it->first);
+          meta_submessage_bundle_addrs.push_back(addrs);
           prev_dst = GUID_UNKNOWN;
         }
         meta_submessage_bundles.back().push_back(*resp_it);
