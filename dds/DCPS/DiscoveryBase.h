@@ -1062,15 +1062,6 @@ namespace OpenDDS {
             (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
           if (!writer_local && reader_local) {
             if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
-              XTypes::TypeIdentifierSeq type_ids;
-              type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-              md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
-              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-              if (md_it != matching_data_buffer_.end()) {
-                md_it->second = md;
-              } else {
-                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-              }
               bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
               is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
@@ -1080,20 +1071,11 @@ namespace OpenDDS {
             }
           } else if (!reader_local && writer_local) {
             if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
-              XTypes::TypeIdentifierSeq type_ids;
-              type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-              md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
-              MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-              if (md_it != matching_data_buffer_.end()) {
-                md_it->second = md;
-              } else {
-                matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-              }
               bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
               is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
-              save_matching_data_and_get_typeobjects(writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
+              save_matching_data_and_get_typeobjects(reader_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
               return;
             }
           }
