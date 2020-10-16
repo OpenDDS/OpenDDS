@@ -23,9 +23,6 @@ TEST(TestFinal, flags_match)
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_union_final_xtag>()]
             .minimal.union_type.union_flags, IS_FINAL);
 
-  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_enum_final_xtag>()]
-            .minimal.enumerated_type.enum_flags, IS_FINAL);
-
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_struct_final_nested_xtag>()]
             .minimal.struct_type.struct_flags , IS_FINAL | IS_NESTED);
 
@@ -43,9 +40,6 @@ TEST(TestAppendable, flags_match)
 
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_union_appendable_xtag>()]
             .minimal.union_type.union_flags, IS_APPENDABLE);
-
-  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_enum_appendable_xtag>()]
-            .minimal.enumerated_type.enum_flags, IS_APPENDABLE);
 
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_struct_appendable_nested_xtag>()]
             .minimal.struct_type.struct_flags , IS_APPENDABLE | IS_NESTED);
@@ -83,9 +77,6 @@ TEST(TestDefault, flags_match)
 
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_union_default_xtag>()]
             .minimal.union_type.union_flags, IS_APPENDABLE);
-
-  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_enum_default_xtag>()]
-            .minimal.enumerated_type.enum_flags, IS_APPENDABLE);
 
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_struct_default_nested_xtag>()]
             .minimal.struct_type.struct_flags , IS_APPENDABLE | IS_NESTED);
