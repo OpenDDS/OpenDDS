@@ -1239,8 +1239,6 @@ namespace OpenDDS {
         }
 
         // check consistency
-        const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
-        const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
         bool consistent = false;
 
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
@@ -1252,6 +1250,8 @@ namespace OpenDDS {
           }
           return;
         } else {
+          const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
+          const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
           if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
             XTypes::TypeAssignability ta(type_lookup_service_);
             consistent = ta.assignable(writer_type_id, reader_type_id);
