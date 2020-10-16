@@ -881,8 +881,9 @@ namespace OpenDDS {
           if (lsi != local_subscriptions_.end()) {
             lsi->second.matched_endpoints_.erase(removing);
             const DiscoveredPublicationIter dpi = discovered_publications_.find(removing);
-            OPENDDS_ASSERT(dpi != discovered_publications_.end());
-            dpi->second.matched_endpoints_.erase(remove_from);
+            if (dpi != discovered_publications_.end()) {
+              dpi->second.matched_endpoints_.erase(remove_from);
+            }
             WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = removing;
@@ -901,8 +902,9 @@ namespace OpenDDS {
           if (lpi != local_publications_.end()) {
             lpi->second.matched_endpoints_.erase(removing);
             const DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(removing);
-            OPENDDS_ASSERT(dsi != discovered_subscriptions_.end());
-            dsi->second.matched_endpoints_.erase(remove_from);
+            if (dsi != discovered_subscriptions_.end()) {
+              dsi->second.matched_endpoints_.erase(remove_from);
+            }
             ReaderIdSeq reader_seq(1);
             reader_seq.length(1);
             reader_seq[0] = removing;
@@ -1166,6 +1168,8 @@ namespace OpenDDS {
           wTls = &lpi->second.trans_info_;
           already_matched = lpi->second.matched_endpoints_.count(reader);
           writer_type_info = &lpi->second.type_info_;
+          topic_name = topic_names_[lpi->second.topic_id_];
+
         } else if ((dpi = discovered_publications_.find(writer))
                    != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
@@ -1235,7 +1239,6 @@ namespace OpenDDS {
           subQos = &tempSubQos;
           cfProp = &dsi->second.reader_data_.contentFilterProperty;
           reader_type_info = &dsi->second.type_info_;
-          topic_name = dsi->second.get_topic_name();
         } else {
           return; // Possible and ok, since lock is released
         }
@@ -1350,12 +1353,16 @@ namespace OpenDDS {
           if (writer_local) {
             call_writer = lpi->second.matched_endpoints_.insert(reader).second;
             dwr = lpi->second.publication_;
-            dsi->second.matched_endpoints_.insert(writer);
+            if (!reader_local) {
+              dsi->second.matched_endpoints_.insert(writer);
+            }
           }
           if (reader_local) {
             call_reader = lsi->second.matched_endpoints_.insert(writer).second;
             drr = lsi->second.subscription_;
-            dpi->second.matched_endpoints_.insert(reader);
+            if (!writer_local) {
+              dpi->second.matched_endpoints_.insert(reader);
+            }
           }
 
           if (writer_local && !reader_local) {
