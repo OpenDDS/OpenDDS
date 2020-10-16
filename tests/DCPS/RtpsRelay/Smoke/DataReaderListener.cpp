@@ -51,6 +51,13 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
       if (si.valid_data) {
+
+        if (rediscovered_) {
+          rediscovery_data_ = true;
+        } else {
+          initial_discovery_data_ = true;
+        }
+
         if (!counts_.insert(message.count).second) {
           std::cout << "ERROR: Repeat ";
           valid_ = false;
@@ -149,8 +156,19 @@ void DataReaderListenerImpl::on_sample_lost(
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
 
-bool DataReaderListenerImpl::is_valid() const
+void DataReaderListenerImpl::mark_rediscovered()
 {
+  rediscovered_ = true;
+}
+
+bool DataReaderListenerImpl::is_valid(bool check_lease_recovery, bool expect_unmatch) const
+{
+  if (check_lease_recovery) {
+    return valid_ && initial_discovery_data_ &&
+      ( (expect_unmatch && rediscovery_data_) ||
+        (!expect_unmatch && *(counts_.begin()) == 0 && *(counts_.rbegin()) == 29));
+  }
+
   CORBA::Long expected = 0;
   Counts::const_iterator count = counts_.begin();
   bool valid_count = true;

@@ -1471,12 +1471,6 @@ Sedp::MsgParticipantData::execute()
 
   proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
   sedp->associated_participants_.insert(proto.remote_id_);
-
-#ifdef OPENDDS_SECURITY
-  if (sedp->is_security_enabled()) {
-    sedp->send_builtin_crypto_tokens(data_);
-  }
-#endif
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3152,12 +3146,12 @@ Sedp::association_complete(const RepoId& localId,
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::association_complete %C\n",
         OPENDDS_STRING(DCPS::GuidConverter(remoteId)).c_str()));
     }
-    if (associated_volatile_readers_.insert(remoteId).second &&
-        (spdp_.remote_is_requester(remoteId) || pending_volatile_readers_.count(remoteId) != 0)) {
+    if (associated_volatile_readers_.insert(remoteId).second) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::association_complete calling send_participant_crypto_token\n"));
       }
       spdp_.send_participant_crypto_tokens(remoteId);
+      send_builtin_crypto_tokens(spdp_.get_participant_data(remoteId));
       send_cached_crypto_tokens(remoteId);
       pending_volatile_readers_.erase(remoteId);
     }
