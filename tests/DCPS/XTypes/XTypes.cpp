@@ -44,7 +44,7 @@ ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue e
 {
   ReturnCode_t ret = RETCODE_OK;
   if (data[0].additional_field != expected_additional_field_value) {
-    ACE_DEBUG((LM_DEBUG, "reader: expected key value: %d, received: %d\n", expected_additional_field_value, data[0].additional_field));
+    ACE_DEBUG((LM_DEBUG, "reader: expected additional field value: %d, received: %d\n", expected_additional_field_value, data[0].additional_field));
     ret = RETCODE_ERROR;
   }
 

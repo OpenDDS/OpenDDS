@@ -48,12 +48,12 @@ sub run_test {
   }
 
 
-  my @reader_args = ("-ORBLogFile publisher_$test_name_param.log --reader --type $v->{reader_type}");
+  my @reader_args = ("-ORBLogFile subscriber_$test_name_param.log --reader --type $v->{reader_type}");
   push(@reader_args, @common_args);
   $test->process("reader_$test_name_param", 'XTypes', join(' ', @reader_args));
   $test->start_process("reader_$test_name_param");
 
-  my @writer_args = ("-ORBLogFile subscriber_$test_name_param.log --writer --type $v->{writer_type}");
+  my @writer_args = ("-ORBLogFile publisher_$test_name_param.log --writer --type $v->{writer_type}");
   push(@writer_args, @common_args);
   $test->process("writer_$test_name_param", 'XTypes', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
