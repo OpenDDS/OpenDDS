@@ -28,6 +28,7 @@ namespace OpenDDS {
         : topic_id_()
         , has_dcps_key_(false)
         , topic_callbacks_(0)
+        , inconsistent_topic_count_(0)
       {}
 
       void init(const OPENDDS_STRING& name,
@@ -123,6 +124,12 @@ namespace OpenDDS {
         return discovered_subscriptions_;
       }
 
+      void increment_inconsistent()
+      {
+          ++inconsistent_topic_count_;
+          topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+      }
+
       const OPENDDS_STRING local_data_type_name() const { return local_data_type_name_; }
       const DDS::TopicQos local_qos() const { return local_qos_; }
       const DCPS::RepoId& topic_id() const { return topic_id_; }
@@ -150,6 +157,7 @@ namespace OpenDDS {
       RepoIdSet local_subscriptions_;
       RepoIdSet discovered_publications_;
       RepoIdSet discovered_subscriptions_;
+      int inconsistent_topic_count_;
     };
 
   } // namespace DCPS

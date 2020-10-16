@@ -167,6 +167,10 @@ namespace OpenDDS {
         const char* get_topic_name() const {
           return reader_data_.ddsSubscriptionData.topic_name;
         }
+
+        const char* get_type_name() const {
+          return reader_data_.ddsSubscriptionData.type_name;
+        }
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredSubscription,
@@ -205,6 +209,10 @@ namespace OpenDDS {
 
         const char* get_topic_name() const {
           return writer_data_.ddsPublicationData.topic_name;
+        }
+
+        const char* get_type_name() const {
+          return writer_data_.ddsPublicationData.type_name;
         }
       };
 
@@ -1169,6 +1177,7 @@ namespace OpenDDS {
         const DDS::PublisherQos* pubQos = 0;
         TransportLocatorSeq* wTls = 0;
         XTypes::TypeInformation* writer_type_info = 0;
+        OPENDDS_STRING topic_name;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
         DiscoveredPublicationIter dpi;
@@ -1184,6 +1193,7 @@ namespace OpenDDS {
                    != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           writer_type_info = &dpi->second.type_info_;
+          topic_name = dpi->second.get_topic_name();
         } else {
           return; // Possible and ok, since lock is released
         }
@@ -1248,8 +1258,56 @@ namespace OpenDDS {
           subQos = &tempSubQos;
           cfProp = &dsi->second.reader_data_.contentFilterProperty;
           reader_type_info = &dsi->second.type_info_;
+          topic_name = dsi->second.get_topic_name();
         } else {
           return; // Possible and ok, since lock is released
+        }
+
+        // check consistency
+        const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
+        const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
+        bool consistent = false;
+
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
+        if (td_iter == topics_.end()) {
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_ERROR,
+                      ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
+                      ACE_TEXT("Didn't find topic for consistency check\n")));
+          }
+          return;
+        } else {
+          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
+            XTypes::TypeAssignability ta(type_lookup_service_);
+            consistent = ta.assignable(writer_type_id, reader_type_id);
+          } else {
+            //check remote and local type names match
+            OPENDDS_STRING writer_type_name;
+            OPENDDS_STRING reader_type_name;
+            if (writer_local) { //local local
+              writer_type_name = td_iter->second.local_data_type_name();
+            } else {
+              writer_type_name = dpi->second.get_type_name();
+            }
+            if (reader_local) {
+              reader_type_name = td_iter->second.local_data_type_name();
+            } else {
+              reader_type_name = dsi->second.get_type_name();
+            }
+            consistent = writer_type_name == reader_type_name;
+          }
+
+          if (!consistent) {
+            td_iter->second.increment_inconsistent();
+          } else {
+            if (DCPS::DCPS_debug_level) {
+              ACE_DEBUG((LM_WARNING,
+                        ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
+                        ACE_TEXT("topic %C does not match data types\n"),
+                        topic_name.c_str()));
+            }
+            return;
+          }
         }
 
         // This is really part of step 1, but we're doing it here just in case we
@@ -1312,14 +1370,6 @@ namespace OpenDDS {
           dwQos, drQos, pubQos, subQos)) {
 
           bool call_writer = false, call_reader = false;
-
-          // TODO:  Move to first part of method.
-          // for Xtypes, check consistency
-          const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
-          const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
-          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE && (!reader_local || !writer_local)) {
-
-          }
 
           if (writer_local) {
             call_writer = lpi->second.matched_endpoints_.insert(reader).second;
