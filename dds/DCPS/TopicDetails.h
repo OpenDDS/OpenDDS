@@ -11,7 +11,6 @@
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/Definitions.h"
 #include "XTypes/TypeObject.h"
-#include "XTypes/TypeAssignability.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
