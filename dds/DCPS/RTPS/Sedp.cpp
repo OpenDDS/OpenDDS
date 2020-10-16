@@ -5647,7 +5647,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
   }
 
   for (DCPS::RepoIdSet::const_iterator it = lpub.matched_endpoints_.begin(),
-         end = lpub.matched_endpoints_.end(); it != end; ++it) {
+       end = lpub.matched_endpoints_.end(); it != end; ++it) {
     DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(*it);
     OPENDDS_ASSERT(dsi != discovered_subscriptions_.end());
     if (dsi->second.have_ice_agent_info_) {
@@ -5670,7 +5670,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
   }
 
   for (DCPS::RepoIdSet::const_iterator it = lsub.matched_endpoints_.begin(),
-         end = lsub.matched_endpoints_.end(); it != end; ++it) {
+       end = lsub.matched_endpoints_.end(); it != end; ++it) {
     DiscoveredPublicationIter dpi = discovered_publications_.find(*it);
     OPENDDS_ASSERT(dpi != discovered_publications_.end());
     if (dpi->second.have_ice_agent_info_) {
@@ -5691,7 +5691,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
   }
 
   for (DCPS::RepoIdSet::const_iterator it = dpub.matched_endpoints_.begin(),
-         end = dpub.matched_endpoints_.end(); it != end; ++it) {
+       end = dpub.matched_endpoints_.end(); it != end; ++it) {
     LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
     OPENDDS_ASSERT(lsi != local_subscriptions_.end());
     ICE::Endpoint* endpoint = lsi->second.subscription_->get_ice_endpoint();
@@ -5713,7 +5713,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
   }
 
   for (DCPS::RepoIdSet::const_iterator it = dsub.matched_endpoints_.begin(),
-         end = dsub.matched_endpoints_.end(); it != end; ++it) {
+       end = dsub.matched_endpoints_.end(); it != end; ++it) {
     LocalPublicationIter lpi = local_publications_.find(*it);
     OPENDDS_ASSERT(lpi != local_publications_.end());
     ICE::Endpoint* endpoint = lpi->second.publication_->get_ice_endpoint();
@@ -5732,7 +5732,7 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub)
 {
 #ifdef OPENDDS_SECURITY
   for (DCPS::RepoIdSet::const_iterator it = dpub.matched_endpoints_.begin(),
-         end = dpub.matched_endpoints_.end(); it != end; ++it) {
+       end = dpub.matched_endpoints_.end(); it != end; ++it) {
     LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
     OPENDDS_ASSERT(lsi != local_subscriptions_.end());
     ICE::Endpoint* endpoint = lsi->second.subscription_->get_ice_endpoint();
@@ -5751,7 +5751,7 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub)
 {
 #ifdef OPENDDS_SECURITY
   for (DCPS::RepoIdSet::const_iterator it = dsub.matched_endpoints_.begin(),
-         end = dsub.matched_endpoints_.end(); it != end; ++it) {
+       end = dsub.matched_endpoints_.end(); it != end; ++it) {
     LocalPublicationIter lpi = local_publications_.find(*it);
     OPENDDS_ASSERT(lpi != local_publications_.end());
     ICE::Endpoint* endpoint = lpi->second.publication_->get_ice_endpoint();

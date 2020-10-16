@@ -166,11 +166,13 @@ namespace OpenDDS {
         ICE::AgentInfo ice_agent_info_;
 #endif
 
-        const char* get_topic_name() const {
+        const char* get_topic_name() const
+        {
           return reader_data_.ddsSubscriptionData.topic_name;
         }
 
-        const char* get_type_name() const {
+        const char* get_type_name() const
+        {
           return reader_data_.ddsSubscriptionData.type_name;
         }
       };
@@ -209,11 +211,13 @@ namespace OpenDDS {
         ICE::AgentInfo ice_agent_info_;
 #endif
 
-        const char* get_topic_name() const {
+        const char* get_topic_name() const
+        {
           return writer_data_.ddsPublicationData.topic_name;
         }
 
-        const char* get_type_name() const {
+        const char* get_type_name() const
+        {
           return writer_data_.ddsPublicationData.type_name;
         }
       };
@@ -1001,28 +1005,6 @@ namespace OpenDDS {
       void
       match(const RepoId& writer, const RepoId& reader)
       {
-        /*
-          Jeremy and Clayton
-
-          I think the flow should be:
-          1. Get type information if necessary.
-          2. Check for consistency.
-          3. Check for compatible QoS.
-
-          Consequently, all of the code up to the call to match_continue should be moved to the first part of match_continue.
-          The first part of match continue should be the consistency check that was being done in TopicDetails for non-xtypes or the new consistency check for extypes.
-          You will probably need to resurrect the counter that was in TopicDetails.
-
-          If all of the data used for computing consistency is immutable, i.e.,
-            - the topic name
-            - the type name
-            - the type identifiers
-            - etc.
-          Then you are done.
-          Otherwise, we have to think about cases where a local/discovered changes in a way that alters consistency.
-          If we do have to support this, then it will have to be in future work.
-         */
-
         // 1. collect type info about the writer, which may be local or discovered
         XTypes::TypeInformation* writer_type_info = 0;
 
@@ -1126,7 +1108,7 @@ namespace OpenDDS {
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         MatchingDataIter it;
-        for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
+        for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {
             RepoId reader = it->second.reader;
             RepoId writer = it->second.writer;
@@ -1139,8 +1121,6 @@ namespace OpenDDS {
       void
       match_continue(const RepoId& writer, const RepoId& reader)
       {
-        // TODO: Add the consistency check here.
-
         // 0. For discovered endpoints, we'll have the QoS info in the form of the
         // publication or subscription BIT data which doesn't use the same structures
         // for QoS.  In those cases we can copy the individual QoS policies to temp
@@ -1248,11 +1228,9 @@ namespace OpenDDS {
 
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
         if (td_iter == topics_.end()) {
-          if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_ERROR,
-                      ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
-                      ACE_TEXT("Didn't find topic for consistency check\n")));
-          }
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
+                    ACE_TEXT("Didn't find topic for consistency check\n")));
           return;
         } else {
           const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
@@ -1408,7 +1386,8 @@ namespace OpenDDS {
           if (call_writer) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
+                ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
+                OPENDDS_STRING(GuidConverter(reader)).c_str()));
             }
             DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
             if (call_reader) {
@@ -1422,7 +1401,8 @@ namespace OpenDDS {
           } else if (call_reader) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("adding reader %C association for writer %C\n"), OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
+                ACE_TEXT("adding reader %C association for writer %C\n"),
+                OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
             }
             drr->add_association(reader, wa, !writer_active);
           }
@@ -1432,7 +1412,8 @@ namespace OpenDDS {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("calling writer %C association_complete for %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
+                ACE_TEXT("calling writer %C association_complete for %C\n"),
+                OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
             }
             dwr->association_complete(reader);
           }
