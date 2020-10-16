@@ -125,6 +125,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
+        ACE_TCHAR buff[256];
+        TheServiceParticipant->default_address().addr_to_string(&(buff[0]), 256);
+        OPENDDS_STRING addr_str(&(buff[0]));
+        config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
       }
 
       DCPS::ValueMap values;
