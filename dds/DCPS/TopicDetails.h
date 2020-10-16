@@ -125,8 +125,8 @@ namespace OpenDDS {
 
       void increment_inconsistent()
       {
-          ++inconsistent_topic_count_;
-          topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+        ++inconsistent_topic_count_;
+        topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
       }
 
       const OPENDDS_STRING local_data_type_name() const { return local_data_type_name_; }
