@@ -30,10 +30,18 @@ public:
   const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
   void add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj);
 
-  // For Type Lookup Service request / reply
+  // For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types) const;
-  void add_type_objects_to_cache(TypeIdentifierTypeObjectPairSeq& types);
+  void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
+
+  // For TypeLookup_getTypeDependencies
+  bool get_type_dependencies(const TypeIdentifier& type_id,
+    TypeIdentifierWithSizeSeq& dependencies) const;
+  void get_type_dependencies(const TypeIdentifierSeq& type_ids,
+    TypeIdentifierWithSizeSeq& dependencies) const;
+  void add_type_dependencies(const TypeIdentifier& type_id,
+    const TypeIdentifierWithSizeSeq& dependencies);
 
   // For adding local endpoint types
   void add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport);
@@ -43,6 +51,11 @@ public:
 private:
   // Only minimal Type Objects for now
   TypeMap minimal_type_map_;
+
+  // For dependencies of local types
+  typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
+  TypeIdentifierWithSizeSeqMap type_dependencies_map_;
+
   TypeObject to_empty_;
 };
 

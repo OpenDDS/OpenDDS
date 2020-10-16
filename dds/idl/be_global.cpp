@@ -859,6 +859,20 @@ TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
   return value;
 }
 
+TryConstructFailAction BE_GlobalData::sequence_element_try_construct(AST_Sequence* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->sequence_element_value(node);
+}
+
+TryConstructFailAction BE_GlobalData::array_element_try_construct(AST_Array* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->array_element_value(node);
+}
+
 TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Union* node)
 {
   TryConstructAnnotation* try_construct_annotation =

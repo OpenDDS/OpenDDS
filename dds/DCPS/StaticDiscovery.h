@@ -196,6 +196,10 @@ public:
   virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
   virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
+  void cleanup_type_lookup_data(const GuidPrefix_t& prefix,
+                                const XTypes::TypeIdentifier& ti,
+                                bool secure);
+
 #ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();

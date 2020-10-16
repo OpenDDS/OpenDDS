@@ -242,6 +242,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
   sample.key = 1;
+  sample.nest.value = B;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_filtering_test: write failed: " << retcode_to_string(ret) << endl;
@@ -366,6 +367,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
+  sample.nest.value = A;
   for (CORBA::Long i = 0; i < 6; i++) {
     sample.key = i;
     if (mdw->register_instance(sample) == HANDLE_NIL) {
@@ -559,6 +561,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
   sample.key = 3;
+  sample.nest.value = A;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
   if (!waitForSample(dr)) return false;
@@ -710,6 +713,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   Message sample;
   sample.key = 0;
   sample.iteration = 0;
+  sample.nest.value = A;
   ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: write failed: "

@@ -6,6 +6,8 @@
 #include <ast_annotation_appl.h>
 #include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
+#include <ast_sequence.h>
+#include <ast_array.h>
 #include <ast_union.h>
 #include <utl_string.h>
 
@@ -402,6 +404,20 @@ std::string TryConstructAnnotation::definition() const
 std::string TryConstructAnnotation::name() const
 {
   return "try_construct";
+}
+
+TryConstructFailAction TryConstructAnnotation::sequence_element_value(AST_Sequence* node) const
+{
+  AST_Annotation_Appl* appl = node->base_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::array_element_value(AST_Array* node) const
+{
+  AST_Annotation_Appl* appl = node->base_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
 }
 
 TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) const

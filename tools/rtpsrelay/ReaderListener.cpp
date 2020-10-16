@@ -4,10 +4,10 @@ namespace RtpsRelay {
 
 ReaderListener::ReaderListener(AssociationTable& association_table,
                                SpdpHandler& spdp_handler,
-                               DomainStatisticsWriter& stats_writer)
+                               DomainStatisticsReporter& stats_reporter)
   : association_table_(association_table)
   , spdp_handler_(spdp_handler)
-  , stats_writer_(stats_writer)
+  , stats_reporter_(stats_reporter)
 {}
 
 void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
@@ -44,14 +44,14 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
           to_after.erase(to);
         }
         spdp_handler_.replay(from, to_after);
-        stats_writer_.total_readers(association_table_.reader_count());
+        stats_reporter_.total_readers(association_table_.reader_count(), OpenDDS::DCPS::MonotonicTimePoint::now());
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l ReaderListener::on_data_available remove global reader %C\n"), guid_to_string(guid_to_repoid(data[idx].guid())).c_str()));
       association_table_.remove(data[idx]);
-      stats_writer_.total_readers(association_table_.reader_count());
+      stats_reporter_.total_readers(association_table_.reader_count(), OpenDDS::DCPS::MonotonicTimePoint::now());
       break;
     }
   }
