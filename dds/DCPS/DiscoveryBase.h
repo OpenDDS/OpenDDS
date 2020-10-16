@@ -1299,11 +1299,10 @@ namespace OpenDDS {
 
           if (!consistent) {
             td_iter->second.increment_inconsistent();
-          } else {
             if (DCPS::DCPS_debug_level) {
               ACE_DEBUG((LM_WARNING,
                         ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
-                        ACE_TEXT("topic %C does not match data types\n"),
+                        ACE_TEXT("topic %C does not match data types (inconsistent)\n"),
                         topic_name.c_str()));
             }
             return;
