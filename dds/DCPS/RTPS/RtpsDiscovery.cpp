@@ -126,8 +126,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
         ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-        TheServiceParticipant->default_address().addr_to_string(static_cast<char*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const char*>(buff)));
+        TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
+        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
         config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
       }
 
