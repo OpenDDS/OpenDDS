@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # Script that wraps around generate_doxygen.pl to generate OpenDDS Doxygen
 # documentation with ACE/TAO documentation built-in.

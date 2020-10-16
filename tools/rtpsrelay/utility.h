@@ -71,6 +71,23 @@ inline void assign(GUID_t& guid, const OpenDDS::DCPS::RepoId& a_guid)
   assign(guid.entityId(), a_guid.entityId);
 }
 
+inline RtpsRelay::Duration_t time_diff_to_duration(const OpenDDS::DCPS::TimeDuration& d)
+{
+  Duration_t duration;
+  const auto x = d.to_dds_duration();
+  duration.sec(x.sec);
+  duration.nanosec(x.nanosec);
+  return duration;
+}
+
+inline bool operator<(const Duration_t& x, const Duration_t& y)
+{
+  if (x.sec() != y.sec()) {
+    return x.sec() < y.sec();
+  }
+  return x.nanosec() < y.nanosec();
+}
+
 }
 
 #endif // RTPSRELAY_UTILITY_H_

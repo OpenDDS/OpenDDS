@@ -31,7 +31,7 @@ void
 DWPeriodicMonitorImpl::report() {
   if (!CORBA::is_nil(this->dw_per_writer_.in())) {
     DataWriterPeriodicReport report;
-    report.dw_id   = dw_->get_publication_id();
+    report.dw_id   = dw_->get_repo_id();
     //report.data_dropped_count = dw_->
     //report.data_delivered_count  = dw_->
     //report.control_dropped_count  = dw_->

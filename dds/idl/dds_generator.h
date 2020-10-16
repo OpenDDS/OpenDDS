@@ -186,7 +186,7 @@ struct Function {
   std::string preamble_;
   bool extra_newline_;
 
-  Function(const char* name, const char* returntype,
+  Function(const std::string& name, const std::string returntype,
            const char* template_args = 0)
     : has_arg_(false)
     , extra_newline_(true)
@@ -505,6 +505,23 @@ std::ostream& operator<<(std::ostream& o,
   }
 }
 
+inline std::string bounded_arg(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  std::ostringstream arg;
+  const Classification cls = classify(type);
+  if (cls & CL_STRING) {
+    AST_String* const str = dynamic_cast<AST_String*>(type);
+    arg << str->max_size()->ev()->u.ulval;
+  } else if (cls & CL_SEQUENCE) {
+    AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
+    arg << seq->max_size()->ev()->u.ulval;
+  }
+  return arg.str();
+}
+
+std::string type_to_default(AST_Type* type, const std::string& name, bool is_anonymous = false, bool is_union = false);
+
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
                           size_t& n_labels, bool& has_default)
@@ -572,48 +589,96 @@ void generateCaseBody(
         && br->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(br->file_name().c_str());
     }
+
     std::string rhs;
-    if (br_cls & CL_STRING) {
-      if (use_cxx11) {
-        brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
-          + "string";
-        rhs = "tmp";
-      } else {
-        const std::string nmspace =
-          lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
-        brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
-          + "String_var";
-        rhs = "tmp.out()";
-      }
-    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
-      rhs = "IDL::DistinctType<" + brType + ", " +
-        dds_generator::scoped_helper(branch->field_type()->name(), "_")
+    const bool is_face = lmap == BE_GlobalData::LANGMAP_FACE_CXX;
+    const bool is_wide = br_cls & CL_WIDE;
+    const bool is_bound_string = (br_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED);
+    const std::string bound_string_suffix = (is_bound_string && !is_face) ? ".c_str()" : "";
+
+    if (is_bound_string) {
+      const std::string to_type = is_face ? is_wide ? "ACE_InputCDR::to_wstring" : "ACE_InputCDR::to_string"
+        : is_wide ? "Serializer::ToBoundedString<wchar_t>" : "Serializer::ToBoundedString<char>";
+      const std::string face_suffix = is_face ? ".out()" : "";
+      brType = is_face ? is_wide ? "FACE::WString_var" : "FACE::String_var"
+        : is_wide ? "OPENDDS_WSTRING" : "OPENDDS_STRING";
+      rhs = to_type + "(tmp" + face_suffix + ", " + bounded_arg(br) + ")";
+    } else if (br_cls & CL_STRING) {
+      const std::string nmspace = is_face ? "FACE::" : "CORBA::";
+      brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"
+        : nmspace + (is_wide ? "W" : "") + "String_var";
+      rhs = use_cxx11 ? "tmp" : "tmp.out()";
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
+      rhs = "IDL::DistinctType<" + brType + ", "
+        + dds_generator::scoped_helper(branch->field_type()->name(), "_")
         + "_tag>(tmp)";
-    } else if (br_cls & CL_ARRAY) {
+    } else if (br_cls & CL_ARRAY) { //array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
-    } else {
+    } else { // anything else
       rhs = getWrapper("tmp", br, WD_INPUT);
     }
     be_global->impl_ <<
       "    " << brType << " tmp;\n" << forany <<
       "    if (strm >> " << rhs << ") {\n"
-      "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+      "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp" + bound_string_suffix + ");\n") <<
       "      uni._d(disc);\n"
       "      return true;\n"
-      "    }\n"
-      "    return false;\n";
+      "    }\n";
+
+    if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
+      be_global->impl_ <<
+        "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
+        "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+        "        return true;\n";
+    } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
+                (br_cls & (CL_STRING | CL_SEQUENCE))) {
+      if (is_bound_string) {
+        const std::string check_not_empty = "!tmp.empty()";
+        const std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
+        const std::string inout = use_cxx11 ? "" : ".inout()";
+        const std::string strtype = br_cls & CL_WIDE ? "std::wstring" : "std::string";
+        be_global->impl_ <<
+          "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
+                    << bounded_arg(br) << " < " << get_length << ")) {\n"
+          "          " << strtype << " s = tmp;\n"
+          "          s.resize(" << bounded_arg(br) << ");\n"
+          "          uni." << name << "(s.c_str());\n"
+          "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "          return true;\n"
+          "        } else {\n"
+          "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "          return false;\n"
+          "        }\n";
+      } else if (br_cls & CL_SEQUENCE) {
+        be_global->impl_ <<
+          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "          return false;\n"
+          "        }\n"
+          "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+          "        uni._d(disc);\n"
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "        return true;\n";
+      }
+    } else {
+      //discard/default
+      be_global->impl_ <<
+        "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "        return false;\n  ";
+    }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
-    std::string intro;
     if (commonFn2) {
-      const ACE_CDR::ULong id = be_global->get_id(branch, auto_id, member_id);
-      be_global->impl_ <<
-        commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false) <<
+      std::string intro;
+      const unsigned id = be_global->get_id(branch, auto_id, member_id);
+      const std::string expr = commonFn2(name + (parens ? "()" : ""), branch->field_type(), "uni", intro, "", false);
+      be_global->impl_ << intro <<
+        expr <<
         "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
         "      return false;\n"
         "    }\n";
     }
+    std::string intro;
     std::string expr = commonFn(
       name + (parens ? "()" : ""), branch->field_type(),
       std::string(namePrefix) + "uni", intro, uni, printing);
@@ -748,7 +813,7 @@ inline
 std::string insert_cxx11_accessor_parens(
               const std::string& full_var_name_, bool is_union_member) {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  if (!use_cxx11 || is_union_member) return full_var_name_;
+  if (!use_cxx11 || is_union_member || full_var_name_.empty()) return full_var_name_;
 
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;

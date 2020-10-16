@@ -247,6 +247,19 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   /// Returns true if the sample has a complete serialized payload.
   bool valid_data() const;
 
+  DDS::InstanceStateKind instance_state() const
+  {
+    switch (message_id_) {
+    case UNREGISTER_INSTANCE:
+      return DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+    case DISPOSE_INSTANCE:
+    case DISPOSE_UNREGISTER_INSTANCE:
+      return DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+    default:
+      return DDS::ALIVE_INSTANCE_STATE;
+    }
+  }
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t serialized_size_;

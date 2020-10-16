@@ -158,6 +158,7 @@ public:
 #endif
       /* Falls through. */
     case PARTIAL_MOD_QOS:
+      qos_data.pub_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
       qos_data.pub_qos.partition.name.length(1);
       qos_data.pub_qos.partition.name[0] = "Hello";
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE

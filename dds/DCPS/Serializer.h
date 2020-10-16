@@ -665,6 +665,16 @@ public:
    */
   bool write_delimiter(size_t size);
 
+  enum ConstructionStatus {
+    ConstructionSuccessful,
+    ElementConstructionFailure,
+    BoundConstructionFailure
+  };
+
+  ConstructionStatus get_construction_status() const;
+
+  void set_construction_status(ConstructionStatus cs);
+
   template <typename T>
   bool peek(T& t)
   {
@@ -739,6 +749,9 @@ private:
 
   /// Indicates the current state of the stream abstraction.
   bool good_bit_;
+
+  ///  The way to judge whether tryconstruct trim is able to be properly done
+  ConstructionStatus construction_status_;
 
   /**
    * Number of bytes off of max alignment that the current_ block's rd_ptr()
