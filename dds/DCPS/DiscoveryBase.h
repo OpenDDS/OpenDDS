@@ -21,6 +21,8 @@
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
+#include "XTypes/TypeAssignability.h"
+
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/Ice.h"
