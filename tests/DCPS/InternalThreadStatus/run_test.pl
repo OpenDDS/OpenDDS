@@ -19,8 +19,8 @@ my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
 
-$test->{dcps_debug_level} = 10;
-$test->{dcps_transport_debug_level} = 10;
+$test->{dcps_debug_level} = 1;
+$test->{dcps_transport_debug_level} = 1;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 
