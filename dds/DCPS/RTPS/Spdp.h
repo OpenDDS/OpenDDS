@@ -108,9 +108,8 @@ public:
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
-  bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                        bool& send_our_tokens);
-  bool seen_crypto_tokens_from(const DCPS::RepoId& sender);
+  bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  void volatile_association_complete(const DCPS::RepoId& sender);
   DDS::OctetSeq local_participant_data_as_octets() const;
 #endif
 
@@ -134,7 +133,6 @@ public:
   void write_secure_updates();
   void write_secure_disposes();
   bool is_security_enabled() const { return security_enabled_; }
-  bool security_builtins_associated(const DCPS::RepoId& remoteParticipant) const;
 #endif
 
   bool is_expectant_opendds(const GUID_t& participant) const;
@@ -155,6 +153,7 @@ public:
 
   bool remote_is_requester(const DCPS::RepoId& guid) const;
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
+  ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
 
 #endif
 

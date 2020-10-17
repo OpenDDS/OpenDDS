@@ -568,6 +568,7 @@ module OpenDDS {
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
+      BuiltinEndpointSet_t associated_endpoints;
     };
 
     // top-level data type for SPDP
