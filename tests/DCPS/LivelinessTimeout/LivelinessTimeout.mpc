@@ -2,14 +2,13 @@ project(*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = publisher
   libpaths += ../FooType4
   libpaths += ../common
-  libs     +=  common DcpsFooType4
+  libs     += common DcpsFooType4
   after    += DcpsFooType4 common
 
   Source_Files {
-    common.cpp
-    publisher.cpp
-    Writer.cpp
+    Domain.cpp
     DataWriterListenerImpl.cpp
+    publisher.cpp
   }
 }
 
@@ -18,13 +17,13 @@ project(*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = subscriber
   libpaths += ../FooType4
   libpaths += ../common
-  libs     +=  common DcpsFooType4
+  libs     += common DcpsFooType4
   after    += DcpsFooType4 common
 
   Source_Files {
-    common.cpp
-    subscriber.cpp
+    Domain.cpp
     DataReaderListenerImpl.cpp
+    subscriber.cpp
   }
 }
 

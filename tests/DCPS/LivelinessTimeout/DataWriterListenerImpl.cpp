@@ -1,5 +1,4 @@
 #include "DataWriterListenerImpl.h"
-#include "common.h"
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/Service_Participant.h"

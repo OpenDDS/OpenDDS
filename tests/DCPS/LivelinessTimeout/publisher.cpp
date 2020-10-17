@@ -8,16 +8,15 @@
  */
 // ============================================================================
 
+#include "Domain.h"
+#include "DataWriterListenerImpl.h"
 
-#include "Writer.h"
 #include "../common/TestException.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "DataWriterListenerImpl.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -25,180 +24,71 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
 
-#include "common.h"
 #include <cmath>
 
-/// parse the command line arguments
-int parse_args(int argc, ACE_TCHAR *argv[])
+class Publisher
 {
-  u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
-  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
-  ACE_Arg_Shifter arg_shifter(argc, argv);
+public:
+  Publisher(int argc, ACE_TCHAR* argv[]);
+  int run();
+private:
+  Domain domain_;
+  DDS::DataWriterListener_var listener_;
+  DDS::DataWriter_var writer_;
+};
 
-  while (arg_shifter.is_anything_left ())
-  {
-    // options:
-    //  -l lease duration           defaults to 10
-    //  -x test duration in sec     defaults to 40
-    //  -z                          verbose transport debug
-
-    const ACE_TCHAR *currentArg = 0;
-
-    if  ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
-    {
-      LEASE_DURATION_SEC = ACE_OS::atoi(currentArg);
-      arg_shifter.consume_arg();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
-    {
-      TEST_DURATION_SEC.set(ACE_OS::atof(currentArg));
-      arg_shifter.consume_arg();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
-    {
-      TURN_ON_VERBOSE_DEBUG;
-      arg_shifter.consume_arg();
-    }
-    else
-    {
-      arg_shifter.ignore_arg ();
-    }
+Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publisher")
+{
+  DDS::Publisher_var pub = domain_.participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
+    DDS::PublisherListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (CORBA::is_nil(pub.in())) {
+    throw ACE_TEXT("(%P|%t) create_publisher failed.");
   }
-  // Indicates successful parsing of the command line
+
+  DDS::DataWriterQos qos;
+  pub->get_default_datawriter_qos(qos);
+  qos.liveliness.lease_duration.sec = domain_.lease_duration_sec_;
+  qos.liveliness.lease_duration.nanosec = 0;
+
+  listener_ = new DataWriterListenerImpl;
+  writer_ = pub->create_datawriter(domain_.topic_.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (CORBA::is_nil(writer_.in())) {
+    throw ACE_TEXT("(%P|%t) create_datawriter failed.");
+  }
+}
+
+int Publisher::run()
+{
+  ACE_OS::sleep(domain_.test_duration_sec_);
+  // check to see if the publisher worked
+  DataWriterListenerImpl* dwl = dynamic_cast<DataWriterListenerImpl*>(listener_.in());
+  if (!dwl) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. TEST_DURATION_SEC=%.1f\n"),
+      static_cast<float>(domain_.test_duration_sec_.sec()) + (static_cast<float>(domain_.test_duration_sec_.usec()) / 1e6f)));
+    return 1;
+  }
+  if (!dwl->valid()) {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. TEST_DURATION_SEC=%.1f\n"),
+      static_cast<float>(domain_.test_duration_sec_.sec()) + (static_cast<float>(domain_.test_duration_sec_.usec()) / 1e6f)));
+    return 1;
+  }
   return 0;
 }
 
-
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-
-  int status = 0;
-
-  try
-    {
-      ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-
-      // let the Service_Participant (in above line) strip out -DCPSxxx parameters
-      // and then get application specific parameters.
-      parse_args (argc, argv);
-
-
-      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
-
-      ::DDS::DomainParticipant_var dp =
-        dpf->create_participant(MY_DOMAIN,
-                                PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (dp.in ()))
-      {
-        ACE_ERROR ((LM_ERROR,
-                   ACE_TEXT("(%P|%t) create_participant failed.\n")));
-        return 1 ;
-      }
-
-      if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
-        {
-          ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("Failed to register the FooTypeSupport.")));
-          return 1;
-        }
-
-
-      ::DDS::TopicQos topic_qos;
-      dp->get_default_topic_qos(topic_qos);
-
-      ::DDS::Topic_var topic =
-        dp->create_topic (MY_TOPIC,
-                          MY_TYPE,
-                          TOPIC_QOS_DEFAULT,
-                          ::DDS::TopicListener::_nil(),
-                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (topic.in ())) {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) create_topic failed!\n")),
-                           1);
-      }
-
-      // Create the publisher
-      ::DDS::Publisher_var pub =
-        dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (pub.in ()))
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) create_publisher failed.\n")),
-                          1);
-      }
-
-      // Create the datawriters
-      ::DDS::DataWriterQos dw_qos;
-      pub->get_default_datawriter_qos (dw_qos);
-
-      dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
-      dw_qos.liveliness.lease_duration.nanosec = 0;
-
-      ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
-
-      ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
-                                  dw_qos,
-                                  dwl.in(),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil (dw.in ()))
-        {
-          ACE_ERROR ((LM_ERROR,
-                     ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-          return 1 ;
-        }
-
-      ACE_OS::sleep(TEST_DURATION_SEC);
-
-      // Clean up publisher objects
-      pub->delete_contained_entities() ;
-
-      dp->delete_publisher(pub.in ());
-
-      dp->delete_topic(topic.in ());
-      dpf->delete_participant(dp.in ());
-
-      TheServiceParticipant->shutdown ();
-
-      // check to see if the publisher worked
-      {
-        DataWriterListenerImpl* dwl_servant =
-          dynamic_cast<DataWriterListenerImpl*>(dwl.in());
-
-        if (!dwl_servant) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. TEST_DURATION_SEC=%.1f\n"),
-            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e6f)));
-          return 1;
-        }
-
-        if (!dwl_servant->valid()) {
-          ACE_ERROR ((LM_ERROR,
-            ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. TEST_DURATION_SEC=%.1f\n"),
-            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e6f)));
-          return 1;
-        }
-      }
-    }
-  catch (const TestException&)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
-      return 1;
-    }
-  catch (const CORBA::Exception& ex)
-    {
-      ex._tao_print_exception ("Exception caught in main.cpp:");
-      return 1;
-    }
-
-  return status;
+  try {
+    Publisher pub(argc, argv);
+    return pub.run();
+  } catch (const CORBA::Exception& ex) {
+    ex._tao_print_exception("Exception caught in main.cpp:");
+    return 1;
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Exception caught in main.cpp")));
+    return 1;
+  }
 }

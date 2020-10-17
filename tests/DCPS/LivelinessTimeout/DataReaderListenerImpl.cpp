@@ -1,7 +1,6 @@
 // -*- C++ -*-
 //
 #include "DataReaderListenerImpl.h"
-#include "common.h"
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
