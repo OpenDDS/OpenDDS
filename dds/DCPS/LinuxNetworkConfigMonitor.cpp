@@ -214,7 +214,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       }
 
       remove_interface(msg->ifi_index);
-      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & IFF_MULTICAST));
+      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK)));
     }
     break;
   case RTM_DELLINK:
