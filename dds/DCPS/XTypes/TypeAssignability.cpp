@@ -95,6 +95,10 @@ bool TypeAssignability::assignable(const TypeObject& ta,
 bool TypeAssignability::assignable(const TypeIdentifier& ta,
                                    const TypeIdentifier& tb) const
 {
+  if (ta == tb) {
+    return true;
+  }
+
   switch (ta.kind()) {
   case TK_BOOLEAN:
   case TK_BYTE:
