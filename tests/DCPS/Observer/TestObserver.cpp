@@ -143,6 +143,12 @@ void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::
   std::cout << "on_disassociated " << r_disassociated_ << to_str(r) << " from writer " << to_str(writerId) << std::endl;
 }
 
+#ifdef OPENDDS_SAFETY_PROFILE
+namespace OpenDDS { namespace DCPS {
+  const char* to_json(const Observer::Sample&) { return ""; }
+} }
+#endif
+
 // ========== ========== ========== ========== ========== ========== ==========
 // 3. Sample: sent, received, read, taken
 

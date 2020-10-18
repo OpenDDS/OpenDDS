@@ -9,7 +9,7 @@ namespace {
 
   TypeIdentifier makeString(bool wide, const StringSTypeDefn& string_sdefn)
   {
-    TypeIdentifier ti(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
+    TypeIdentifier ti(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
     ti.string_sdefn() = string_sdefn;
     return ti;
   }

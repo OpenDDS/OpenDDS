@@ -1565,6 +1565,8 @@ DataWriterImpl::enable()
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_lookup_service->add_type_objects_to_cache(*typesupport);
 
+  typesupport->populate_dependencies(type_lookup_service);
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
@@ -2354,7 +2356,7 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
                              elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
                              elt.get_header().cdr_encapsulation_, meta,
                              expression_params, typesupport->getExtensibility());
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
       //if the eval fails, the throws will do the logging
       //return false here so that the sample is not filtered
       return false;

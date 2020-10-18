@@ -15,7 +15,7 @@ unsigned char expected_data_field_element(int writer_id, int sample_id, int j);
 #ifdef OPENDDS_SECURITY
 void append(
   DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false);
-#endif
 void set_security_qos(DDS::DomainParticipantQos& participant_qos, unsigned secid);
+#endif
 
 #endif // LARGE_SAMPLE_COMMON_H

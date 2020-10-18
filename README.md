@@ -47,9 +47,6 @@ details.
 - The OpenDDS Developer's Guide is freely downloadable at:
 http://download.objectcomputing.com/OpenDDS/
 
-- The TAO Developer's Guide book set may also be purchased from
-https://objectcomputing.com/products/tao/tao-developers-guide
-
 - A Doxygen for the latest release is available at
 http://download.opendds.org/doxygen/.
 
@@ -117,6 +114,9 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
   * Can be manually downloaded from:
     * https://github.com/DOCGroup/ACE_TAO/releases
     * https://download.dre.vanderbilt.edu/
+
+The TAO Developer's Guide book can be requested for free from
+https://objectcomputing.com/products/tao/tao-developers-guide
 
 ### Perl
 

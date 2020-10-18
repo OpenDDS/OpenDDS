@@ -134,7 +134,8 @@ protected:
 
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
-  OPENDDS_DEQUE(CommandPtr) command_queue_;
+  typedef OPENDDS_VECTOR(CommandPtr) Queue;
+  Queue command_queue_;
   ReactorState state_;
 };
 

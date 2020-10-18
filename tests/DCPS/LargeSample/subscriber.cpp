@@ -87,7 +87,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DomainParticipant
     DDS::DomainParticipantQos participant_qos;
     dpf->get_default_participant_qos(participant_qos);
+#ifdef OPENDDS_SECURITY
     set_security_qos(participant_qos, security_id);
+#endif
     DDS::DomainParticipant_var participant =
       dpf->create_participant(domain,
                               participant_qos,
@@ -186,8 +188,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     if (show_data_loss && num_messages_expected) {
-      const unsigned int missed_msgs = (num_messages_expected - received);
-      const unsigned int percent = (missed_msgs * 100) / num_messages_expected;
+      const unsigned int missed_msgs = static_cast<unsigned int>(num_messages_expected - received);
+      const unsigned int percent = static_cast<unsigned int>((missed_msgs * 100) / num_messages_expected);
 
       std::cout << error
                 << "data loss == " << percent << "% (" << received << "/"
