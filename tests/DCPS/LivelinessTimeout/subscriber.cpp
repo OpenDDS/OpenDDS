@@ -42,12 +42,12 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subsc
 {
   DDS::Subscriber_var sub = domain_.participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
     DDS::SubscriberListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (CORBA::is_nil(sub.in())) {
+  if (!sub) {
     throw ACE_TEXT("(%P|%t) create_subscriber failed.");
   }
 
   DDS::TopicDescription_var td = domain_.participant_->lookup_topicdescription(Domain::TOPIC);
-  if (CORBA::is_nil(td.in())) {
+  if (!td) {
     throw ACE_TEXT("(%P|%t) lookup_topicdescription failed.\n");
   }
 

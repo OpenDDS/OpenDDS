@@ -43,7 +43,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
 {
   DDS::Publisher_var pub = domain_.participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
     DDS::PublisherListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (CORBA::is_nil(pub.in())) {
+  if (!pub) {
     throw ACE_TEXT("(%P|%t) create_publisher failed.");
   }
 
@@ -54,7 +54,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
 
   listener_ = new DataWriterListenerImpl;
   writer_ = pub->create_datawriter(domain_.topic_.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (CORBA::is_nil(writer_.in())) {
+  if (!writer_) {
     throw ACE_TEXT("(%P|%t) create_datawriter failed.");
   }
 }

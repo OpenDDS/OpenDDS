@@ -16,21 +16,21 @@ const char* Domain::TOPIC = "foo";
 const char* Domain::TOPIC_TYPE  = "foo";
 
 Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame)
-  : appName(app_mame)
+  : app_name_(app_mame)
   , lease_duration_sec_(1)
   , test_duration_sec_(40, 0)
   , threshold_liveliness_lost_(1000)
 {
   try {
     dpf_ = TheParticipantFactoryWithArgs(argc, argv);
-    if (CORBA::is_nil(dpf_.in())) {
+    if (!dpf_) {
       throw ACE_TEXT("(%P|%t) Domain Participant Factory not found.");
     }
     parse_args(argc, argv);
 
     participant_ = dpf_->create_participant(ID, PARTICIPANT_QOS_DEFAULT,
       DDS::DomainParticipantListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(participant_.in())) {
+    if (!participant_) {
       throw ACE_TEXT("(%P|%t) create_participant failed.");
     }
 
@@ -41,7 +41,7 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame)
 
     topic_ = participant_->create_topic(TOPIC, TOPIC_TYPE, TOPIC_QOS_DEFAULT,
       DDS::TopicListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(topic_.in())) {
+    if (!topic_) {
       throw ACE_TEXT("(%P|%t) create_topic failed.");
     }
   } catch (const CORBA::Exception& e) {
@@ -56,16 +56,16 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame)
 
 void Domain::cleanup()
 {
-  std::cout << appName << " cleanup" << std::endl;
-  if(!CORBA::is_nil(dpf_.in())){
-    if(!CORBA::is_nil(participant_.in())){
+  ACE_DEBUG((LM_INFO, ACE_TEXT("%C (%P) cleanup\n"), app_name_.c_str()));
+  if (dpf_) {
+    if (participant_) {
       participant_->delete_contained_entities();
       dpf_->delete_participant(participant_);
+      participant_ = 0;
     }
     TheServiceParticipant->shutdown();
+    dpf_ = 0;
   }
-  participant_ = 0;
-  dpf_ = 0;
 }
 
 void Domain::parse_args(int argc, ACE_TCHAR* argv[])

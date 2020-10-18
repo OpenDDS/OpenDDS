@@ -9,7 +9,7 @@
 #include <ace/SString.h>
 
 class Domain {
-  const std::string appName;
+  const std::string app_name_;
   DDS::DomainParticipantFactory_var dpf_;
 public:
   static const int ID = 111;
