@@ -15,24 +15,12 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 bool verbose = false;
 bool expect_to_fail = false;
 
-enum KeyValue {
-  PROPERTY_1_KEY,
-  PROPERTY_2_KEY,
-  APPENDABLE_STRUCT_KEY,
-  ADDITIONAL_PREFIX_FIELD_STRUCT_KEY,
-  ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY,
-  MUTABLE_STRUCT_KEY,
-  MODIFIED_MUTABLE_STRUCT_KEY,
-  MUTABLE_UNION_KEY,
-  MODIFIED_MUTABLE_UNION_KEY
-};
+int key_value = -1;
 
 enum AdditionalFieldValue {
-  ADDITIONAL_PREFIX_FIELD_STRUCT_AF,
-  ADDITIONAL_POSTFIX_FIELD_STRUCT_AF,
+  FINAL_STRUCT_AF,
+  APPENDABLE_STRUCT_AF,
   MUTABLE_STRUCT_AF,
-  MODIFIED_MUTABLE_STRUCT_AF,
-  MODIFIED_MUTABLE_UNION_AF,
   NESTED_STRUCT_AF
 };
 
@@ -104,15 +92,15 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data, KeyValue expected_key_value)
+ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
 {
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
       ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
       ret = RETCODE_ERROR;
-    } else if (data[0].key != expected_key_value) {
-      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", expected_key_value, data[0].key));
+    } else if (data[0].key != key_value) {
+      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key));
       ret = RETCODE_ERROR;
     } else if (verbose) {
       ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
@@ -124,9 +112,8 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data, KeyV
   return ret;
 }
 
-template<typename T1, typename T2, typename T3>
-ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr,
-  T2& data, T3 expected_value)
+template<typename T1, typename T2>
+ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
 {
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
@@ -136,9 +123,9 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr,
     } else {
       switch (data[0]._d()) {
       case E_KEY:
-        if (data[0].key() != expected_value) {
+        if (data[0].key() != key_value) {
           ACE_ERROR((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
-            expected_value, data[0].key()));
+            key_value, data[0].key()));
           ret = RETCODE_ERROR;
         }
         if (verbose) {
@@ -146,9 +133,9 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr,
         }
         break;
       case E_ADDITIONAL_FIELD:
-        if (data[0].additional_field() != expected_value) {
+        if (data[0].additional_field() != key_value) {
           ACE_ERROR((LM_ERROR, "reader: expected additional_field value: %d, received: %d\n",
-            expected_value, data[0].additional_field()));
+            key_value, data[0].additional_field()));
           ret = RETCODE_ERROR;
         }
         if (verbose) {
@@ -166,19 +153,27 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr,
   return ret;
 }
 
-ReturnCode_t read_property_1(const DataReader_var& dr)
+ReturnCode_t read_plain_cdr_struct(const DataReader_var& dr)
 {
-  Property_1DataReader_var pdr = Property_1DataReader::_narrow(dr);
-  ::Property_1Seq data;
-  return read_struct(dr, pdr, data, PROPERTY_1_KEY);
+  PlainCdrStructDataReader_var pdr = PlainCdrStructDataReader::_narrow(dr);
+  ::PlainCdrStructSeq data;
+  return read_struct(dr, pdr, data);
 }
 
 
-ReturnCode_t read_property_2(const DataReader_var& dr)
+ReturnCode_t read_final_struct(const DataReader_var& dr)
 {
-  Property_2DataReader_var pdr = Property_2DataReader::_narrow(dr);
-  ::Property_2Seq data;
-  return read_struct(dr, pdr, data, PROPERTY_2_KEY);
+  FinalStructDataReader_var pdr = FinalStructDataReader::_narrow(dr);
+  ::FinalStructSeq data;
+  return read_struct(dr, pdr, data);
+}
+
+
+ReturnCode_t read_modified_final_struct(const DataReader_var& dr)
+{
+  ModifiedFinalStructDataReader_var pdr = ModifiedFinalStructDataReader::_narrow(dr);
+  ::ModifiedFinalStructSeq data;
+  return read_struct(dr, pdr, data);
 }
 
 
@@ -186,7 +181,7 @@ ReturnCode_t read_appendable_struct(const DataReader_var& dr)
 {
   AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
   ::AppendableStructSeq data;
-  return read_struct(dr, pdr, data, APPENDABLE_STRUCT_KEY);
+  return read_struct(dr, pdr, data);
 }
 
 
@@ -195,10 +190,7 @@ ReturnCode_t read_additional_prefix_field_struct(const DataReader_var& dr)
   AdditionalPrefixFieldStructDataReader_var pdr = AdditionalPrefixFieldStructDataReader::_narrow(dr);
   ::AdditionalPrefixFieldStructSeq data;
   ReturnCode_t ret;
-  ret = read_struct(dr, pdr, data, ADDITIONAL_PREFIX_FIELD_STRUCT_KEY);
-  if (ret == RETCODE_OK) {
-    ret = check_additional_field_value(data, ADDITIONAL_PREFIX_FIELD_STRUCT_AF);
-  }
+  ret = read_struct(dr, pdr, data);
   return ret;
 }
 
@@ -208,10 +200,7 @@ ReturnCode_t read_additional_postfix_field_struct(const DataReader_var& dr)
   AdditionalPostfixFieldStructDataReader_var pdr = AdditionalPostfixFieldStructDataReader::_narrow(dr);
   ::AdditionalPostfixFieldStructSeq data;
   ReturnCode_t ret;
-  ret = read_struct(dr, pdr, data, ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY);
-  if (ret == RETCODE_OK) {
-    ret = check_additional_field_value(data, ADDITIONAL_POSTFIX_FIELD_STRUCT_AF);
-  }
+  ret = read_struct(dr, pdr, data);
   return ret;
 }
 
@@ -220,7 +209,7 @@ ReturnCode_t read_mutable_struct(const DataReader_var& dr)
   MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
   ::MutableStructSeq data;
   ReturnCode_t ret;
-  ret = read_struct(dr, pdr, data, MUTABLE_STRUCT_KEY);
+  ret = read_struct(dr, pdr, data);
   if (ret == RETCODE_OK) {
     ret = check_additional_field_value(data, MUTABLE_STRUCT_AF);
   }
@@ -232,10 +221,7 @@ ReturnCode_t read_modified_mutable_struct(const DataReader_var& dr)
   ModifiedMutableStructDataReader_var pdr = ModifiedMutableStructDataReader::_narrow(dr);
   ::ModifiedMutableStructSeq data;
   ReturnCode_t ret;
-  ret = read_struct(dr, pdr, data, MODIFIED_MUTABLE_STRUCT_KEY);
-  if (ret == RETCODE_OK) {
-    ret = check_additional_field_value(data, MODIFIED_MUTABLE_STRUCT_AF);
-  }
+  ret = read_struct(dr, pdr, data);
   return ret;
 }
 
@@ -243,14 +229,14 @@ ReturnCode_t read_mutable_union(const DataReader_var& dr)
 {
   MutableUnionDataReader_var pdr = MutableUnionDataReader::_narrow(dr);
   ::MutableUnionSeq data;
-  return read_union(dr, pdr, data, MUTABLE_UNION_KEY);
+  return read_union(dr, pdr, data);
 }
 
 ReturnCode_t read_modified_mutable_union(const DataReader_var& dr)
 {
   ModifiedMutableUnionDataReader_var pdr = ModifiedMutableUnionDataReader::_narrow(dr);
   ::ModifiedMutableUnionSeq data;
-  return read_union(dr, pdr, data, MODIFIED_MUTABLE_UNION_AF);
+  return read_union(dr, pdr, data);
 }
 
 ReturnCode_t read_trim20_struct(const DataReader_var& dr)
@@ -260,39 +246,51 @@ ReturnCode_t read_trim20_struct(const DataReader_var& dr)
   return read_tryconstruct_struct(dr, pdr, data, STRING_20);
 }
 
-
 ReturnCode_t read_appendable_struct_with_dependency(const DataReader_var& dr)
 {
   AppendableStructWithDependencyDataReader_var pdr = AppendableStructWithDependencyDataReader::_narrow(dr);
   ::AppendableStructWithDependencySeq data;
-  return read_struct(dr, pdr, data, APPENDABLE_STRUCT_KEY);
+  return read_struct(dr, pdr, data);
 }
 
 
-void write_property_1(const DataWriter_var& dw)
+void write_plain_cdr_struct(const DataWriter_var& dw)
 {
-  Property_1DataWriter_var pdw = Property_1DataWriter::_narrow(dw);
+  PlainCdrStructDataWriter_var pdw = PlainCdrStructDataWriter::_narrow(dw);
 
-  Property_1 p;
-  p.key = PROPERTY_1_KEY;
-  p.value = 1;
-  pdw->write(p, HANDLE_NIL);
+  PlainCdrStruct pcs;
+  pcs.key = key_value;
+  pcs.value = 1;
+  pdw->write(pcs, HANDLE_NIL);
   if (verbose) {
-    ACE_DEBUG((LM_DEBUG, "writer: Property_1\n"));
+    ACE_DEBUG((LM_DEBUG, "writer: PlainCdrStruct\n"));
   }
 }
 
 
-void write_property_2(const DataWriter_var& dw)
+void write_final_struct(const DataWriter_var& dw)
 {
-  Property_2DataWriter_var pdw2 = Property_2DataWriter::_narrow(dw);
+  FinalStructDataWriter_var pdw = FinalStructDataWriter::_narrow(dw);
 
-  Property_2 p2;
-  p2.key = PROPERTY_2_KEY;
-  p2.value = "Test";
-  pdw2->write(p2, HANDLE_NIL);
+  FinalStruct fs;
+  fs.key = key_value;
+  pdw->write(fs, HANDLE_NIL);
   if (verbose) {
-    ACE_DEBUG((LM_DEBUG, "writer: Property_2\n"));
+    ACE_DEBUG((LM_DEBUG, "writer: FinalStruct\n"));
+  }
+}
+
+
+void write_modified_final_struct(const DataWriter_var& dw)
+{
+  ModifiedFinalStructDataWriter_var pdw = ModifiedFinalStructDataWriter::_narrow(dw);
+
+  ModifiedFinalStruct mfs;
+  mfs.key = key_value;
+  mfs.additional_field = FINAL_STRUCT_AF;
+  pdw->write(mfs, HANDLE_NIL);
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: ModifiedFinalStruct\n"));
   }
 }
 
@@ -302,7 +300,7 @@ void write_appendable_struct(const DataWriter_var& dw)
   AppendableStructDataWriter_var typed_dw = AppendableStructDataWriter::_narrow(dw);
 
   AppendableStruct as;
-  as.key = APPENDABLE_STRUCT_KEY;
+  as.key = key_value;
   typed_dw->write(as, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AppendableStruct\n"));
@@ -315,8 +313,8 @@ void write_additional_prefix_field_struct(const DataWriter_var& dw)
   AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
 
   AdditionalPrefixFieldStruct apfs;
-  apfs.key = ADDITIONAL_PREFIX_FIELD_STRUCT_KEY;
-  apfs.additional_field = ADDITIONAL_PREFIX_FIELD_STRUCT_AF;
+  apfs.key = key_value;
+  apfs.additional_field = APPENDABLE_STRUCT_AF;
   typed_dw->write(apfs, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPrefixFieldStruct\n"));
@@ -329,8 +327,8 @@ void write_additional_postfix_field_struct(const DataWriter_var& dw)
   AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
 
   AdditionalPostfixFieldStruct apfs;
-  apfs.key = ADDITIONAL_POSTFIX_FIELD_STRUCT_KEY;
-  apfs.additional_field = ADDITIONAL_POSTFIX_FIELD_STRUCT_AF;
+  apfs.key = key_value;
+  apfs.additional_field = APPENDABLE_STRUCT_AF;
   typed_dw->write(apfs, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPostfixFieldStruct\n"));
@@ -343,7 +341,7 @@ void write_mutable_struct(const DataWriter_var& dw)
   MutableStructDataWriter_var typed_dw = MutableStructDataWriter::_narrow(dw);
 
   MutableStruct ms;
-  ms.key = MUTABLE_STRUCT_KEY;
+  ms.key = key_value;
   ms.additional_field = MUTABLE_STRUCT_AF;
   typed_dw->write(ms, HANDLE_NIL);
   if (verbose) {
@@ -357,8 +355,8 @@ void write_modified_mutable_struct(const DataWriter_var& dw)
   ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
 
   ModifiedMutableStruct ams;
-  ams.key = MODIFIED_MUTABLE_STRUCT_KEY;
-  ams.additional_field = MODIFIED_MUTABLE_STRUCT_AF;
+  ams.key = key_value;
+  ams.additional_field = MUTABLE_STRUCT_AF;
   typed_dw->write(ams, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableStruct\n"));
@@ -371,11 +369,7 @@ void write_mutable_union(const DataWriter_var& dw)
   MutableUnionDataWriter_var typed_dw = MutableUnionDataWriter::_narrow(dw);
 
   MutableUnion mu;
-  if (expect_to_fail) {
-    mu.octet_field(1);
-  } else {
-    mu.key(MUTABLE_UNION_KEY);
-  }
+  mu.key(key_value);
   typed_dw->write(mu, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: MutableUnion\n"));
@@ -387,9 +381,9 @@ void write_modified_mutable_union(const DataWriter_var& dw)
 {
   ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
 
-  ModifiedMutableUnion amu;
-  amu.additional_field(MODIFIED_MUTABLE_UNION_AF);
-  typed_dw->write(amu, HANDLE_NIL);
+  ModifiedMutableUnion mmu;
+  mmu.key(key_value);
+  typed_dw->write(mmu, HANDLE_NIL);
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableUnion\n"));
   }
@@ -414,7 +408,7 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
   AppendableStructWithDependencyDataWriter_var typed_dw = AppendableStructWithDependencyDataWriter::_narrow(dw);
 
   AppendableStructWithDependency as;
-  as.key = APPENDABLE_STRUCT_KEY;
+  as.key = key_value;
   as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
   typed_dw->write(as, HANDLE_NIL);
   if (verbose) {
@@ -483,6 +477,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument"));
         return 1;
       }
+    } else if (arg == ACE_TEXT("--key_val")) {
+      if (i + 1 < argc) {
+        key_value = ACE_OS::atoi(argv[++i]);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument"));
+        return 1;
+      }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_fail = true;
     } else {
@@ -497,11 +498,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const std::string topic_name =
     !registered_type_name.empty() ? registered_type_name + "_Topic" : type + "_Topic";
 
-  if (type == "Property_1") {
-    Property_1TypeSupport_var ts = new Property_1TypeSupportImpl;
+  if (type == "PlainCdrStruct") {
+    PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
-  } else if (type == "Property_2") {
-    Property_2TypeSupport_var ts = new Property_2TypeSupportImpl;
+  } else if (type == "FinalStruct") {
+    FinalStructTypeSupport_var ts = new FinalStructTypeSupportImpl;
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "ModifiedFinalStruct") {
+    ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStruct") {
     AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
@@ -530,12 +534,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
-  } else if (type == "FinalStruct") {
-    FinalStructTypeSupport_var ts = new FinalStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
-  } else if (type == "ModifiedFinalStruct") {
-    ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructWithDependency") {
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
@@ -559,10 +557,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     failed = !check_inconsistent_topic_status(topic);
 
     if (!failed && !expect_to_fail) {
-      if (type == "Property_1") {
-        write_property_1(dw);
-      } else if (type == "Property_2") {
-        write_property_2(dw);
+      if (type == "PlainCdrStruct") {
+        write_plain_cdr_struct(dw);
+      } else if (type == "FinalStruct") {
+        write_final_struct(dw);
+      } else if (type == "ModifiedFinalStruct") {
+        write_modified_final_struct(dw);
       } else if (type == "AppendableStruct") {
         write_appendable_struct(dw);
       } else if (type == "AdditionalPrefixFieldStruct") {
@@ -584,7 +584,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-    ACE_OS::sleep(ACE_Time_Value(0, 5000 * 1000));
+    ACE_OS::sleep(ACE_Time_Value(3, 0));
 
     if (failed) {
       ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
@@ -607,12 +607,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     failed = !check_inconsistent_topic_status(topic);
 
     if (!failed && !expect_to_fail) {
-      if (type == "Property_1") {
-        failed = !(read_property_1(dr) == RETCODE_OK);
-      } else if (type == "Property_2") {
-        failed = !(read_property_2(dr) == RETCODE_OK);
+      if (type == "PlainCdrStruct") {
+        failed = !(read_plain_cdr_struct(dr) == RETCODE_OK);
       } else if (type == "AppendableStruct") {
         failed = !(read_appendable_struct(dr) == RETCODE_OK);
+      } else if (type == "FinalStruct") {
+        failed = !(read_final_struct(dr) == RETCODE_OK);
+      } else if (type == "ModifiedFinalStruct") {
+        failed = !(read_modified_final_struct(dr) == RETCODE_OK);
       } else if (type == "AdditionalPrefixFieldStruct") {
         failed = !(read_additional_prefix_field_struct(dr) == RETCODE_OK);
       } else if (type == "AdditionalPostfixFieldStruct") {

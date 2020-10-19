@@ -24,37 +24,44 @@ if ($verbose) {
 }
 
 my %params = (
-  "FirstTest"                             => {reader_type => "Property_1", writer_type => "Property_1", expect_to_fail => 0},
-  "SecondTest"                            => {reader_type => "Property_2", writer_type => "Property_2", expect_to_fail => 0},
-  "AppendablePass"                        => {reader_type => "AppendableStruct", writer_type => "AppendableStruct", expect_to_fail => 0, reg_type => "AppendableStructT"},
-  "AdditionalPrefixFieldStruct"           => {reader_type => "AdditionalPrefixFieldStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => 0, reg_type => "AdditionalPrefixFieldStructT"},
-  "ModifiedMutableStruct"                 => {reader_type => "ModifiedMutableStruct", writer_type => "ModifiedMutableStruct", expect_to_fail => 0, reg_type => "ModifiedMutableStructT"},
-  "MutableStruct"                         => {reader_type => "MutableStruct", writer_type => "MutableStruct", expect_to_fail => 0, reg_type => "MutableStructT"},
-  "MutableUnion"                          => {reader_type => "MutableUnion", writer_type => "MutableUnion", expect_to_fail => 0, reg_type => "MutableUnionT"},
-  "ModifiedMutableUnion"                  => {reader_type => "ModifiedMutableUnion", writer_type => "ModifiedMutableUnion", expect_to_fail => 0, reg_type => "ModifiedMutableUnionT"},
+  "PlainCdr"           => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1},
+  "FinalStructPass"    => {reader_type => "FinalStruct", writer_type => "FinalStruct", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2},
+  "FinalStructFail"    => {reader_type => "FinalStruct", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3},
+  "AppendablePass"     => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "AppendableStructT", key_val => 4},
+  "AppendableFail"     => {reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => 1, reg_type => "AppendableStructT_F", key_val => 5},
+  "MutableStruct"      => {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct", expect_to_fail => 0, reg_type => "MutableStructT", key_val => 6},
+  "MutableUnion"       => {reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion", expect_to_fail => 0, reg_type => "MutableUnionT", key_val => 7},
+  "Tryconstruct"       => {reader_type => "Trim20Struct", writer_type => "Trim64Struct", expect_to_fail => 0, reg_type => "TryconstructT", key_val => 0},
+  "Dependency"         => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "DependencyT", key_val => 8},
 );
 
 
 sub run_test {
+  my @test_args;
+  push(@test_args, @common_args);
+
   my $v = $_[0];
   my $test_name_param = $_[1];
 
   if ($v->{reg_type}) {
-    push(@common_args, "--type_r $v->{reg_type}");
+    push(@test_args, "--type_r $v->{reg_type}");
   }
 
-  if ($v->{expect_to_fail}) {
-    push(@common_args, "--expect_to_fail");
+  if ($v->{expect_to_fail} > 0) {
+    push(@test_args, "--expect_to_fail");
   }
 
+  if ($v->{key_val} >= 0) {
+    push(@test_args, "--key_val $v->{key_val}");
+  }
 
   my @reader_args = ("-ORBLogFile subscriber_$test_name_param.log --reader --type $v->{reader_type}");
-  push(@reader_args, @common_args);
+  push(@reader_args, @test_args);
   $test->process("reader_$test_name_param", 'XTypes', join(' ', @reader_args));
   $test->start_process("reader_$test_name_param");
 
   my @writer_args = ("-ORBLogFile publisher_$test_name_param.log --writer --type $v->{writer_type}");
-  push(@writer_args, @common_args);
+  push(@writer_args, @test_args);
   $test->process("writer_$test_name_param", 'XTypes', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
 }
@@ -62,7 +69,6 @@ sub run_test {
 if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test ($v, $k);
-    sleep 10;
   }
 }
 else {

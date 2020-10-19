@@ -1,16 +1,9 @@
 #include <tao/OctetSeq.pidl>
 
 @topic
-struct Property_1 {
+struct PlainCdrStruct {
   @key long key;
   long value;
-};
-
-// TODO: remove if not needed
-@topic
-struct Property_2 {
-  @key long key;
-  string value;
 };
 
 // Final structues
@@ -18,16 +11,14 @@ struct Property_2 {
 @topic
 @final
 struct FinalStruct {
-  short x;
-  short y;
-  short z;
+  @key long key;
 };
 
 @topic
 @final
 struct ModifiedFinalStruct {
-  short x;
-  short y;
+  @key long key;
+  long additional_field;
 };
 
 // Appendable structues
