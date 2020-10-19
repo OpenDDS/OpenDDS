@@ -11,8 +11,8 @@
 #include <string>
 
 // Implementation skeleton constructor
-InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(OPENDDS_STRING id, callback_t callback) :
-  id_(id), callback_(callback), count_(0), done_(false)
+InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(OPENDDS_STRING id) :
+  id_(id), count_(0)
 {
 }
 
@@ -50,12 +50,6 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
     << "  time: " << thread_info.timestamp.sec << std::endl;
 
     ++count_;
-  }
-
-  if (!done_ && count_ >= 10) {
-    std::cout << id_ << " received " << count_ << " internal thread updates." << std::endl;
-    callback_();
-    done_ = true; // only call callback once.
   }
 }
 
@@ -105,4 +99,9 @@ void InternalThreadStatusListenerImpl::on_sample_lost(
 {
   std::cerr << "InternalThreadStatusListenerImpl::"
     << "on_sample_lost" << std::endl;
+}
+
+int InternalThreadStatusListenerImpl::get_count() const
+{
+  return count_;
 }

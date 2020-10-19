@@ -134,27 +134,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        EXIT_FAILURE);
     }
 
-    // Get the Built-In Subscriber for Built-In Topics
-    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
-
-    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
-    if (0 == pub_loc_dr) {
-      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
-                << " DataReader." << std::endl;
-      ACE_OS::exit(EXIT_FAILURE);
-    }
-
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Subscriber", reader_done_callback);
-    DDS::DataReaderListener_var listener_var(listener);
-
-    CORBA::Long retcode =
-      pub_loc_dr->set_listener(listener,
-                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (retcode != DDS::RETCODE_OK) {
-      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC << " failed." << std::endl;
-      ACE_OS::exit(EXIT_FAILURE);
-    }
-
     // Create DataReaders
     DDS::DataReaderListener_var dr_listener(new DataReaderListenerImpl("Subscriber", 10, reader_done_callback));
 
@@ -185,17 +164,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // wait for message reader
-    {
     ACE_Guard<ACE_Thread_Mutex> g(reader_done_lock);
     reader_done_cond.wait();
-    }
 
-    // wait for internal thread status reports
-    // use same condition
-    {
-    ACE_Guard<ACE_Thread_Mutex> g(reader_done_lock);
-    reader_done_cond.wait();
-    }
+    // give publsher time to receive acknowledgements
+    ACE_OS::sleep(3);
 
     // Clean-up!
     std::cerr << "subscriber deleting contained entities" << std::endl;

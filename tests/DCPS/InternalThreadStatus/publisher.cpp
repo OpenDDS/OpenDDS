@@ -36,15 +36,6 @@
 
 #include <iostream>
 
-ACE_Thread_Mutex lock;
-ACE_Condition_Thread_Mutex cond(lock);
-
-void done_callback()
-{
-  ACE_Guard<ACE_Thread_Mutex> g(lock);
-  cond.signal();
-}
-
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = EXIT_SUCCESS;
@@ -149,7 +140,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher", done_callback);
+    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher");
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
@@ -171,9 +162,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     message.subject_id = 1;
     message.text = "Testing...";
     message.count = 0;
+
     for (int i = 0; i < 10; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.count;
+
+      std::cout << "Publisher sending message " << i << std::endl;
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
@@ -183,15 +177,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is waiting for acknowledgments\n"));
-    DDS::Duration_t timeout = { 30, 0 };
+    DDS::Duration_t timeout = { 10, 0 };
     message_writer->wait_for_acknowledgments(timeout);
     // With static discovery, it's not an error for wait_for_acks to fail
     // since the peer process may have terminated before sending acks.
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is done\n"));
 
     // wait for internal thread status reports
-    ACE_Guard<ACE_Thread_Mutex> g(lock);
-    cond.wait();
+    ACE_OS::sleep(3);
+
+    int count = listener->get_count();
+    if (count < 3 ) {
+      // in 3 seconds with multiple threads, there should be more than 3 status reports.
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("ERROR: Publisher did not receive expected internal thread status reports.")));
+      return EXIT_FAILURE;
+    } else {
+      std::cout << "Publisher received " << count << " internal thread status messages." << std::endl;
+    }
 
     // Clean-up!
     std::cerr << "publisher deleting contained entities" << std::endl;
