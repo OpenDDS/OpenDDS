@@ -39,6 +39,7 @@ are mostly for shorthand.
 | `$SDK`       | The Android SDK (By default `$HOME/Android/Sdk`) |
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
+| `$SSL_ROOT`  | Install prefix for cross-compiled OpenSSL        |
 
 ## Requirements
 
@@ -124,7 +125,7 @@ location of the NDK and `%TOOLCHAIN%` is the desired location of the toolchain,
 run this command instead:
 
 ```bat
- %NDK%\prebuilt\windows-x86_64\bin\python.exe %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
+%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
 ```
 
 Once a toolchain is obtained, OpenDDS can be configured to cross compile for
@@ -162,14 +163,12 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
 - In addition to the Android toolchain, you will also need MSYS2 utilities in
   your `%PATH%`.
 
-- Make sure these commands in a new Visual Studio command prompt that is
+- Run these commands in a new Visual Studio command prompt that is
   different from where you configured the host tools.
 
 ```Batch
 configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a --host-tools=%HOST_DDS%
 set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
-ren %ACE_ROOT%\VERSION VERSION.txt
-ren %TAO_ROOT%\VERSION VERSION.txt
 make
 REM Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
@@ -235,8 +234,8 @@ Cross-compiling OpenSSL on Windows:
 2. `cd /c/your/location/of/OpenSSL-source`
 3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
 4. `PATH+=:$ANDROID_NDK_HOME/bin`
-5. `./Configure android-arm no-shared` (or replace -arm with a different platform, see OpenSSL's NOTES.ANDROID file)
-6. `make`
+5. `./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared` (or replace -arm with a different platform like android-arm64, see OpenSSL's NOTES.ANDROID file)
+6. `make install_sw`
 
 #### Xerces
 
@@ -247,7 +246,9 @@ the Android NDK's CMake toolchain.
 Xerces requires a supported "transcoder" library. For API levels greater than
 or equal to 28 one of these, GNU libiconv, is included with Android. Before 28
 any of the transcoders supported by Xerces would work theoretically but GNU
-libiconv was the one tested.
+libiconv was the one tested.  If GNU libiconv is used, build it as an archive
+library (--disable-shared) so that the users of Xerces (ACE and OpenDDS) don't
+need to be aware of it as an additional runtime dependency.
 
 Download [GNU libiconv](https://ftp.gnu.org/pub/gnu/libiconv) version 1.16
 source code and extract the archive.
@@ -258,7 +259,7 @@ Cross-compiling GNU libiconv on Windows:
 3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
 4. `PATH+=:$ANDROID_NDK_HOME/bin`
 5. `target=arm-linux-androideabi` (or select a different NDK target)
-6. `./configure --prefix=/c/your/location/of/installed-libiconv --host=$target CC=$target-clang CXX=$target-clang++ LD=$target-ld CFLAGS="-fPIE -fPIC" LDFLAGS=-pie`
+6. `./configure --disable-shared --prefix=/c/your/location/of/installed-libiconv --host=$target CC=$target-clang CXX=$target-clang++ LD=$target-ld CFLAGS="-fPIE -fPIC" LDFLAGS=-pie`
 7. `make && make install`
 
 Note that the directory given by `--prefix=` will be created by `make install`
@@ -301,7 +302,7 @@ Assuming the library is already setup and works for a desktop platform, then
 you should be able to run:
 
 ```Shell
-(source $DDS_ROOT/setenv.sh; mwc.pl -type gnuace . && PATH=$PATH:$TOOLCHAIN/bin make)
+(source $DDS_ROOT/setenv.sh; mwc.pl -type gnuace && PATH=$PATH:$TOOLCHAIN/bin make)
 ```
 
 The resulting native IDL library file must be included with the rest of the
