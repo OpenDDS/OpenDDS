@@ -234,7 +234,7 @@ Cross-compiling OpenSSL on Windows:
 2. `cd /c/your/location/of/OpenSSL-source`
 3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
 4. `PATH+=:$ANDROID_NDK_HOME/bin`
-5. `./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared` (or replace -arm with a different platform like android-arm64, see OpenSSL's NOTES.ANDROID file)
+5. `./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared` (or replace -arm with a different platform like -arm64, see OpenSSL's NOTES.ANDROID file)
 6. `make install_sw`
 
 #### Xerces
