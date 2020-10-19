@@ -214,7 +214,7 @@ struct GeneratorBase
           AST_Enum* e = AST_Enum::narrow_from_decl(the_union->disc_type());
           if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
             first_label << scoped(e->name()) << "::";
-            UTL_ScopedName * default_name = e->value_to_name(dv.u.enum_val);
+            UTL_ScopedName* default_name = e->value_to_name(dv.u.enum_val);
             //default_name can be null when there is not default branch
             if (default_name == 0) {
               default_name = e->value_to_name(0);
