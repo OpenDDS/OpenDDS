@@ -522,6 +522,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "ModifiedMutableStruct") {
     ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "ModifiedIdMutableStruct") {
+    ModifiedIdMutableStructTypeSupport_var ts = new ModifiedIdMutableStructTypeSupportImpl;
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "ModifiedTypeMutableStruct") {
+    ModifiedTypeMutableStructTypeSupport_var ts = new ModifiedTypeMutableStructTypeSupportImpl;
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "ModifiedNameMutableStruct") {
+    ModifiedNameMutableStructTypeSupport_var ts = new ModifiedNameMutableStructTypeSupportImpl;
+    get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "MutableUnion") {
     MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
@@ -545,12 +554,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructWithDependency") {
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
-  } else if (type == "ModifiedMutableStruct_IdDiscrepancy") {
-    ModifiedMutableStruct_IdDiscrepancyTypeSupport_var ts = new ModifiedMutableStruct_IdDiscrepancyTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
-  } else if (type == "ModifiedMutableStruct_TypeDiscrepancy") {
-    ModifiedMutableStruct_TypeDiscrepancyTypeSupport_var ts = new ModifiedMutableStruct_TypeDiscrepancyTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));

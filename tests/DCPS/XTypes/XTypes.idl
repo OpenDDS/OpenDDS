@@ -61,16 +61,23 @@ struct ModifiedMutableStruct {
 
 @topic
 @mutable
-struct ModifiedMutableStruct_IdDiscrepancy {
+struct ModifiedIdMutableStruct {
   @id(1) @key long key;
   @id(3) long additional_field;
 };
 
 @topic
 @mutable
-struct ModifiedMutableStruct_TypeDiscrepancy {
+struct ModifiedTypeMutableStruct {
   @id(1) @key long key;
   @id(2) string additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedNameMutableStruct {
+  @id(1) @key long key_modified;
+  @id(2) long additional_field_modified;
 };
 
 
