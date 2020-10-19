@@ -18,7 +18,7 @@ namespace {
 bool enum_union_test()
 {
   enumunion::UnionType u;
-  if (u._d() != enumunion::EnumType::A1) {
+  if (u._d() != enumunion::EnumType::A2) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("UnionType default _d = %d\n"),
                static_cast<int>(u._d())));
     return false;
