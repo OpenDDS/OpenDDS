@@ -59,12 +59,33 @@ struct ModifiedMutableStruct {
   @id(1) @key long key;
 };
 
+@topic
+@mutable
+struct ModifiedMutableStruct_IdDiscrepancy {
+  @id(1) @key long key;
+  @id(3) long additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedMutableStruct_TypeDiscrepancy {
+  @id(1) @key long key;
+  @id(2) string additional_field;
+};
+
+
 // Unions
 
 enum UnionDisc {
   E_KEY,
   E_OCTET_FIELD,
   E_ADDITIONAL_FIELD
+};
+
+enum ModifiedUnionDisc {
+  E_KEY_MODIFIED,
+  E_OCTET_FIELD_MODIFIED,
+  E_ADDITIONAL_FIELD_MODIFIED
 };
 
 @topic
@@ -86,6 +107,40 @@ case E_KEY:
 case E_ADDITIONAL_FIELD:
   @id(12) long additional_field;
 };
+
+@topic
+@mutable
+union ModifiedDiscMutableUnion switch (ModifiedUnionDisc) {
+case E_KEY_MODIFIED:
+  @id(6) long key;
+case E_OCTET_FIELD_MODIFIED:
+  @id(8) octet octet_field;
+case E_ADDITIONAL_FIELD_MODIFIED:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedTypeMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) string key;
+case E_OCTET_FIELD:
+  @id(8) string octet_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) string additional_field;
+};
+
+@topic
+@mutable
+union ModifiedNameMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_modified;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field_modified;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field_modified;
+};
+
 
 // Tryconstruct
 

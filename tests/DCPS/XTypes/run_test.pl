@@ -24,15 +24,20 @@ if ($verbose) {
 }
 
 my %params = (
-  "PlainCdr"           => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1},
-  "FinalStructPass"    => {reader_type => "FinalStruct", writer_type => "FinalStruct", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2},
-  "FinalStructFail"    => {reader_type => "FinalStruct", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3},
-  "AppendablePass"     => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "AppendableStructT", key_val => 4},
-  "AppendableFail"     => {reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => 1, reg_type => "AppendableStructT_F", key_val => 5},
-  "MutableStruct"      => {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct", expect_to_fail => 0, reg_type => "MutableStructT", key_val => 6},
-  "MutableUnion"       => {reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion", expect_to_fail => 0, reg_type => "MutableUnionT", key_val => 7},
-  "Tryconstruct"       => {reader_type => "Trim20Struct", writer_type => "Trim64Struct", expect_to_fail => 0, reg_type => "TryconstructT", key_val => 0},
-  "Dependency"         => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "DependencyT", key_val => 8},
+  "PlainCdr"                => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1},
+  "FinalStructMatch"        => {reader_type => "FinalStruct", writer_type => "FinalStruct", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2},
+  "FinalStructNoMatch"      => {reader_type => "FinalStruct", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3},
+  "AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "AppendableStructT", key_val => 4},
+  "AppendableNoMatch"       => {reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => 1, reg_type => "AppendableStructT_F", key_val => 5},
+  "MutableStruct"           => {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct", expect_to_fail => 0, reg_type => "MutableStructT", key_val => 6},
+  "MutableStructNoMatchId"  => {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct_IdDiscrepancy", expect_to_fail => 1, reg_type => "MutableStructT_NoMatchId", key_val => 7},
+  "MutableStructNoMatchType"=> {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct_TypeDiscrepancy", expect_to_fail => 1, reg_type => "MutableStructT_NoMatchType", key_val => 8},
+  "MutableUnion"            => {reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion", expect_to_fail => 0, reg_type => "MutableUnionT", key_val => 9},
+  "MutableUnionNoMatchDisc" => {reader_type => "MutableUnion", writer_type => "ModifiedDiscMutableUnion", expect_to_fail => 1, reg_type => "MutableUnionT_NoMatchDisc", key_val => 10},
+  "MutableUnionNoMatchType" => {reader_type => "MutableUnion", writer_type => "ModifiedTypeMutableUnion", expect_to_fail => 1, reg_type => "MutableUnionT_NoMatchType", key_val => 11},
+  "MutableUnionNoMatchName" => {reader_type => "MutableUnion", writer_type => "ModifiedNameMutableUnion", expect_to_fail => 1, reg_type => "MutableUnionT_NoMatchName", key_val => 12},
+  "Tryconstruct"            => {reader_type => "Trim20Struct", writer_type => "Trim64Struct", expect_to_fail => 0, reg_type => "TryconstructT", key_val => 0},
+  "Dependency"              => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "DependencyT", key_val => 13},
 );
 
 
