@@ -434,6 +434,20 @@ BE_GlobalData::parse_args(long& i, char** av)
           av[i + 1]));
         idl_global->parse_args_exit(1);
       }
+    } else if (!std::strcmp(av[i], "--default-data-representation")) {
+      default_data_representation_.set_all(false);
+      if (!std::strcmp(av[i + 1], "xcdr1")) {
+        default_data_representation_.xcdr1 = true;
+      } else if (!std::strcmp(av[i + 1], "xcdr2")) {
+        default_data_representation_.xcdr2 = true;
+      } else if (!std::strcmp(av[i + 1], "xml")) {
+        default_data_representation_.xml = true;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-data-representation: %C\n"),
+          av[i + 1]));
+        idl_global->parse_args_exit(1);
+      }
     } else {
       invalid_option(av[i]);
     }
