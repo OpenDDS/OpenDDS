@@ -73,6 +73,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_ncm_(true)
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , max_type_lookup_service_reply_period_(5, 0)
+  , use_xtypes_(true)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -586,6 +587,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
+        } else if (name == "UseXTypes") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->use_xtypes(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

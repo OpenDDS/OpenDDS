@@ -784,6 +784,7 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map)
 {
@@ -795,7 +796,11 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     param._d(PID_TOPIC_NAME);
     add_param(param_list, param);
   }
-  add_type_info_param(param_list, type_info);
+
+  if (use_xtypes) {
+    add_type_info_param(param_list, type_info);
+  }
+
   {
     Parameter param;
     param.string_data(writer_data.ddsPublicationData.type_name);
@@ -1126,6 +1131,7 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map)
 {
@@ -1136,7 +1142,11 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     param._d(PID_TOPIC_NAME);
     add_param(param_list, param);
   }
-  add_type_info_param(param_list, type_info);
+
+  if (use_xtypes) {
+    add_type_info_param(param_list, type_info);
+  }
+
   {
     Parameter param;
     param.string_data(reader_data.ddsSubscriptionData.type_name);
@@ -1531,10 +1541,11 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,               
                    const XTypes::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, type_info, map);
+  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
 
   to_param_list(wrapper.security_info, param_list);
   to_param_list(wrapper.data_tags, param_list);
@@ -1555,10 +1566,11 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,               
                    const XTypes::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, type_info, map);
+  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
 
   to_param_list(wrapper.security_info, param_list);
   to_param_list(wrapper.data_tags, param_list);
