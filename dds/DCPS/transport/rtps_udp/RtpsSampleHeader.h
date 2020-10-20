@@ -79,9 +79,9 @@ public:
   // TransportReceiveStrategy, these functions do the inverse of
   // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
-  static void populate_data_sample_submessages(RTPS::SubmessageSeq& subm,
-                                               const DataSampleElement& dsle,
-                                               bool requires_inline_qos);
+  static RepoId populate_data_sample_submessages(RTPS::SubmessageSeq& subm,
+                                                 const DataSampleElement& dsle,
+                                                 bool requires_inline_qos);
   static void populate_data_control_submessages(RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,
                                                 bool requires_inline_qos);

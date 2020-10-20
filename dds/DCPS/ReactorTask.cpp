@@ -147,23 +147,8 @@ OpenDDS::DCPS::ReactorTask::svc()
     }
   }
 
-  //TBD: Should the reactor continue running if there are some exceptions
-  //     are caught while handling events?
-//MJM: Put this in a loop with a state conditional and use the state to
-//MJM: indicate whether or not to terminate.  But I can think of no
-//MJM: reason to have anything in the conditional, so just expire.
-//MJM: Nevermind.
-  try {
-    // Tell the reactor to handle events.
-    reactor_->run_reactor_event_loop();
-  } catch (const std::exception& e) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",
-               e.what()));
-  } catch (...) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
-  }
+  // Tell the reactor to handle events.
+  reactor_->run_reactor_event_loop();
 
   return 0;
 }
