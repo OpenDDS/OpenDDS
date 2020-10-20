@@ -209,7 +209,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
     return false;
   }
 
-  const size_t last_index = num_ulongs - 1;
+  const CORBA::ULong last_index = num_ulongs - 1;
   for (CORBA::ULong i = 0; i < last_index; ++i) {
     if (snSet.bitmap[i]) {
       return true;
