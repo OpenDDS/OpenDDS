@@ -3,16 +3,6 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake)
 
-function(opendds_include_dirs_once)
-  get_directory_property(includes INCLUDE_DIRECTORIES)
-
-  foreach (i ${OPENDDS_INCLUDE_DIRS})
-    if (NOT "${i}" IN_LIST includes)
-      include_directories(${i})
-    endif()
-  endforeach()
-endfunction()
-
 macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   src_prefix
   idl_prefix
@@ -89,8 +79,6 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_TARGET_SOURCES")
   endif()
 
-  opendds_include_dirs_once()
-
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
     _idl_sources
@@ -141,16 +129,14 @@ macro(OPENDDS_TARGET_SOURCES target)
     if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
       list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
     endif()
+
+    if(NOT "${_opendds_options}" MATCHES "-Wb,export_include")
+      list(APPEND _opendds_options "-Wb,export_include=${_export_generated}")
+    endif()
   endif()
 
   if(NOT "${_tao_options}" MATCHES "-SS")
     list(APPEND _tao_options "-SS")
-  endif()
-
-  if (OPENDDS_DCPS_COMPILE_DEFS)
-    target_compile_definitions(${target}
-      PUBLIC
-        ${OPENDDS_DCPS_COMPILE_DEFS})
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
