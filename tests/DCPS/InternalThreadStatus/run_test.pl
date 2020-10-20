@@ -27,8 +27,9 @@ $test->{add_transport_config} = 0;
 $test->process("publisher", "publisher", "-DCPSThreadStatusInterval 1 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
 $test->process("subscriber", "subscriber", "-DCPSThreadStatusInterval 1 -ORBDebugLevel 1 -DCPSConfigFile rtps.ini");
 
-$test->start_process("publisher");
 $test->start_process("subscriber");
+sleep 1;
+$test->start_process("publisher");
 
 $test->stop_process(20, "subscriber");
 $test->stop_process(20, "publisher");

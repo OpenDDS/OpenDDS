@@ -120,20 +120,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    // Create DataReader
-    DDS::DataReader_var dw =
-      sub->create_datareader(topic.in(),
-                             qos,
-                             DDS::DataReaderListener::_nil(),
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(dw.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_datareader failed!\n")),
-                       EXIT_FAILURE);
-    }
-
     // Create DataReaders
     DDS::DataReaderListener_var dr_listener(new DataReaderListenerImpl("Subscriber", 10, reader_done_callback));
 
