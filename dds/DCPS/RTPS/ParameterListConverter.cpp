@@ -1541,7 +1541,7 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
-                   bool use_xtypes,               
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map)
 {
@@ -1566,7 +1566,7 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
-                   bool use_xtypes,               
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map)
 {
