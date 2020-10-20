@@ -179,6 +179,17 @@ DataWriterImpl::get_next_handle()
   return DDS::HANDLE_NIL;
 }
 
+DDS::Subscriber_var
+DataWriterImpl::get_builtin_subscriber() const
+{
+  RcHandle<DomainParticipantImpl> participant_servant = participant_servant_.lock();
+  if (participant_servant) {
+    return participant_servant->get_builtin_subscriber();
+  }
+
+  return DDS::Subscriber_var();
+}
+
 void
 DataWriterImpl::add_association(const RepoId& yourId,
                                 const ReaderAssociation& reader,
@@ -217,7 +228,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    GuidConverter converter(get_publication_id());
+    GuidConverter converter(get_repo_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
@@ -233,7 +244,12 @@ DataWriterImpl::add_association(const RepoId& yourId,
   data.remote_durable_ =
     (reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-  if (!associate(data, active)) {
+  if (associate(data, active)) {
+    const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
+    if (observer) {
+      observer->on_associated(this, data.remote_id_);
+    }
+  } else {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
@@ -590,6 +606,13 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
 {
   if (readers.length() == 0) {
     return;
+  }
+
+  const Observer_rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < readers.length(); ++i) {
+      observer->on_disassociated(this, readers[i]);
+    }
   }
 
   if (DCPS_debug_level >= 1) {
@@ -964,7 +987,6 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1008,6 +1030,11 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
     }
 
     qos_ = qos;
+
+    const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
+    if (observer) {
+      observer->on_qos_changed(this);
+    }
 
     return DDS::RETCODE_OK;
 
@@ -1558,6 +1585,13 @@ DataWriterImpl::enable()
 
 #endif
 
+  if (writer_enabled_result == DDS::RETCODE_OK) {
+    const Observer_rch observer = get_observer(Observer::e_ENABLED);
+    if (observer) {
+      observer->on_enabled(this);
+    }
+  }
+
   return writer_enabled_result;
 }
 
@@ -1816,7 +1850,8 @@ DDS::ReturnCode_t
 DataWriterImpl::write(Message_Block_Ptr data,
                       DDS::InstanceHandle_t handle,
                       const DDS::Time_t& source_timestamp,
-                      GUIDSeq* filter_out)
+                      GUIDSeq* filter_out,
+                      const void* real_data)
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
 
@@ -1900,8 +1935,14 @@ DataWriterImpl::write(Message_Block_Ptr data,
 
   } else {
     guard.release();
-
     this->send(list, transaction_id);
+  }
+
+  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
+  if (observer && real_data && vwd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vwd);
+    observer->on_sample_sent(this, s);
   }
 
   return DDS::RETCODE_OK;
@@ -2030,12 +2071,6 @@ void
 DataWriterImpl::unregister_all()
 {
   data_container_->unregister_all();
-}
-
-RepoId
-DataWriterImpl::get_publication_id()
-{
-  return publication_id_;
 }
 
 RepoId
@@ -2525,9 +2560,27 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 void
 DataWriterImpl::prepare_to_delete()
 {
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
+
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();
+
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+  // Trigger data to be persisted, i.e. made durable, if so
+  // configured. This needs be called before unregister_instances
+  // because unregister_instances may cause instance dispose.
+  if (!persist_data() && DCPS_debug_level >= 2) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::prepare_to_delete: ")
+      ACE_TEXT("failed to make data durable.\n")));
+  }
+#endif
+
+  // Unregister all registered instances prior to deletion.
+  unregister_instances(SystemTimePoint::now().to_dds_time());
 }
 
 PublicationInstance_rch
@@ -2679,20 +2732,11 @@ DataWriterImpl::persist_data()
 }
 #endif
 
-void
-DataWriterImpl::wait_control_pending()
+void DataWriterImpl::wait_pending()
 {
   if (!TransportRegistry::instance()->released()) {
-    OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
-    controlTracker.wait_messages_pending(caller_string);
-  }
-}
-
-void
-DataWriterImpl::wait_pending()
-{
-  if (!TransportRegistry::instance()->released()) {
-    data_container_->wait_pending();
+    data_container_->wait_pending(wait_pending_deadline_);
+    controlTracker.wait_messages_pending("DataWriterImpl::wait_pending", wait_pending_deadline_);
   }
 }
 
@@ -2769,9 +2813,12 @@ DataWriterImpl::get_ice_endpoint()
   return TransportClient::get_ice_endpoint();
 }
 
-int
-LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg)
+void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadline)
+{
+  wait_pending_deadline_ = deadline;
+}
+
+int LivenessTimer::handle_timeout(const ACE_Time_Value& tv, const void* arg)
 {
   DataWriterImpl_rch writer = this->writer_.lock();
   if (writer) {

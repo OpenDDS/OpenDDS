@@ -12,6 +12,8 @@
 #include "RtpsUdpReceiveStrategy.h"
 
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/DiscoveryBase.h"
 
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
@@ -52,15 +54,68 @@ ICE::Endpoint*
 RtpsUdpTransport::get_ice_endpoint()
 {
 #ifdef OPENDDS_SECURITY
-  return (config().use_ice_) ? &ice_endpoint_ : 0;
+  return (config().use_ice()) ? &ice_endpoint_ : 0;
 #else
   return 0;
+#endif
+}
+
+void
+RtpsUdpTransport::rtps_relay_only_now(bool flag)
+{
+  ACE_UNUSED_ARG(flag);
+
+#ifdef OPENDDS_SECURITY
+  if (flag) {
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  } else {
+    if (!config().use_rtps_relay()) {
+      relay_stun_task_->disable();
+    }
+  }
+#endif
+}
+
+void
+RtpsUdpTransport::use_rtps_relay_now(bool flag)
+{
+  ACE_UNUSED_ARG(flag);
+
+#ifdef OPENDDS_SECURITY
+  if (flag) {
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  } else {
+    if (!config().rtps_relay_only()) {
+      relay_stun_task_->disable();
+    }
+  }
+#endif
+}
+
+void
+RtpsUdpTransport::use_ice_now(bool after)
+{
+  ACE_UNUSED_ARG(after);
+
+#ifdef OPENDDS_SECURITY
+  const bool before = config().use_ice();
+  config().use_ice(after);
+
+  if (before && !after) {
+    stop_ice();
+  } else if (!before && after) {
+    start_ice();
+  }
 #endif
 }
 
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
+  std::memcpy(local_prefix_, local_prefix, sizeof(local_prefix_));
+#ifdef OPENDDS_SECURITY
+  relay_stun_task(DCPS::MonotonicTimePoint::now());
+#endif
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
@@ -68,11 +123,11 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   link->local_crypto_handle(local_crypto_handle_);
 #endif
 
-  if (config().use_ice_) {
+  if (config().use_ice()) {
     if (reactor()->remove_handler(unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                         ACE_TEXT("failed to unregister handler for unicast ")
                         ACE_TEXT("socket %d\n"),
                         unicast_socket_.get_handle()),
@@ -82,7 +137,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
     if (reactor()->remove_handler(ipv6_unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                         ACE_TEXT("failed to unregister handler for ipv6 unicast ")
                         ACE_TEXT("socket %d\n"),
                         ipv6_unicast_socket_.get_handle()),
@@ -124,6 +179,8 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
                                    const TransportClient_rch& client)
 {
+  bit_sub_ = client->get_builtin_subscriber();
+
   if (is_shut_down_) {
     return AcceptConnectResult();
   }
@@ -166,6 +223,8 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
                                   const TransportClient_rch& client)
 {
+  bit_sub_ = client->get_builtin_subscriber();
+
   GuardThreadType guard_links(links_lock_);
 
   if (is_shut_down_) {
@@ -409,6 +468,18 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
   if (unicast_socket_.get_local_addr(address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -437,6 +508,18 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    ipv6_unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
   if (ipv6_unicast_socket_.get_local_addr(address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -456,31 +539,18 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 
   create_reactor_task();
 
+  ACE_Reactor* reactor = reactor_task_->get_reactor();
+  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
+
 #ifdef OPENDDS_SECURITY
-  if (config.use_ice_) {
-    ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
-    if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
-                                    ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                        ACE_TEXT("failed to register handler for unicast ")
-                        ACE_TEXT("socket %d\n"),
-                        unicast_socket_.get_handle()),
-                       false);
-    }
-#ifdef ACE_HAS_IPV6
-    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), &ice_endpoint_,
-                                    ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                        ACE_TEXT("failed to register handler for ipv6 unicast ")
-                        ACE_TEXT("socket %d\n"),
-                        ipv6_unicast_socket_.get_handle()),
-                       false);
-    }
-#endif
+  if (config.use_ice()) {
+    start_ice();
+  }
+
+  relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
+
+  if (config.use_rtps_relay() || config.rtps_relay_only()) {
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   }
 #endif
 
@@ -505,17 +575,21 @@ void RtpsUdpTransport::client_stop(const RepoId& localId)
 void
 RtpsUdpTransport::shutdown_i()
 {
+#ifdef OPENDDS_SECURITY
+  if(config().use_ice()) {
+    stop_ice();
+  }
+
+  relay_stun_task_->disable_and_wait();
+#endif
+
+  job_queue_.reset();
+
   GuardThreadType guard_links(links_lock_);
   if (link_) {
     link_->transport_shutdown();
   }
   link_.reset();
-
-#ifdef OPENDDS_SECURITY
-  if(config().use_ice_) {
-    ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
-  }
-#endif
 }
 
 void
@@ -550,25 +624,27 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
   ACE_INET_Addr remote_address;
 
   bool stop;
-  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), stop);
+  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), transport, stop);
 
   return 0;
 }
 
 namespace {
   bool shouldWarn(int code) {
-    return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS || code == ENOMEM;
+    return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS || code == ENOMEM
+      || code == EADDRNOTAVAIL || code == ENETUNREACH;
   }
 
   ssize_t
-  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr)
+  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
   {
+    OPENDDS_ASSERT(addr != ACE_INET_Addr());
 #ifdef ACE_LACKS_SENDMSG
     char buffer[UDP_MAX_MESSAGE_SIZE];
     char *iter = buffer;
     for (int i = 0; i < n; ++i) {
       if (size_t(iter - buffer + iov[i].iov_len) > UDP_MAX_MESSAGE_SIZE) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
                    "message too large at index %d size %d\n", i, iov[i].iov_len));
         return -1;
       }
@@ -580,13 +656,22 @@ namespace {
     const ssize_t result = socket.send(iov, n, addr);
 #endif
     if (result < 0) {
-      ACE_TCHAR addr_buff[256] = {};
-      int err = errno;
-      addr.addr_to_string(addr_buff, 256);
+      const int err = errno;
+      if (err != ENETUNREACH || !network_is_unreachable) {
+        ACE_TCHAR addr_buff[256] = {};
+        addr.addr_to_string(addr_buff, 256);
+        errno = err;
+        const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+        ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
+                   "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+      }
+      if (err == ENETUNREACH) {
+        network_is_unreachable = true;
+      }
+      // Reset errno since the rest of framework expects it.
       errno = err;
-      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-      ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
-                 "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+    } else {
+      network_is_unreachable = false;
     }
     return result;
   }
@@ -658,8 +743,8 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
-  const ssize_t result = send_single_i(socket, iov, num_blocks, destination);
-  if (result < 0) {
+  const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
                "failed to send STUN message\n"));
@@ -670,6 +755,124 @@ ACE_INET_Addr
 RtpsUdpTransport::IceEndpoint::stun_server_address() const {
   return transport.config().stun_server_address();
 }
+
+void
+RtpsUdpTransport::start_ice()
+{
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::start_ice\n"));
+  }
+
+  ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
+
+  if (!link_) {
+    if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
+                                    ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::start_ice: ")
+                 ACE_TEXT("failed to register handler for unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 unicast_socket_.get_handle()));
+    }
+#ifdef ACE_HAS_IPV6
+    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), &ice_endpoint_,
+                                    ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::start_ice: ")
+                 ACE_TEXT("failed to register handler for ipv6 unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 ipv6_unicast_socket_.get_handle()));
+    }
+#endif
+  }
+}
+
+void
+RtpsUdpTransport::stop_ice()
+{
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::stop_ice\n"));
+  }
+
+  if (!link_) {
+    if (reactor()->remove_handler(unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::stop_ice: ")
+                 ACE_TEXT("failed to unregister handler for unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 unicast_socket_.get_handle()));
+    }
+#ifdef ACE_HAS_IPV6
+    if (reactor()->remove_handler(ipv6_unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("RtpsUdpTransport::stop_ice: ")
+                 ACE_TEXT("failed to unregister handler for ipv6 unicast ")
+                 ACE_TEXT("socket %d\n"),
+                 ipv6_unicast_socket_.get_handle()));
+    }
+#endif
+  }
+
+  ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
+}
+
+void
+RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
+{
+  if (!(config().use_rtps_relay() ||
+        config().rtps_relay_only())) {
+    return;
+  }
+
+  const ACE_INET_Addr stun_server_address = config().rtps_relay_address();
+
+  process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
+
+  if (stun_server_address != ACE_INET_Addr()) {
+    ice_endpoint_.send(stun_server_address, relay_srsm_.message());
+  }
+}
+
+void
+RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ConnectionRecord connection_record;
+  std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
+  connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+
+  switch (sc) {
+  case ICE::ServerReflexiveStateMachine::SRSM_None:
+    break;
+  case ICE::ServerReflexiveStateMachine::SRSM_Set:
+  case ICE::ServerReflexiveStateMachine::SRSM_Change:
+    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    deferred_connection_records_.push_back(std::make_pair(true, connection_record));
+    break;
+  case ICE::ServerReflexiveStateMachine::SRSM_Unset:
+    {
+      connection_record.address = to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+      deferred_connection_records_.push_back(std::make_pair(false, connection_record));
+      break;
+    }
+  }
+
+  if (!bit_sub_) {
+    return;
+  }
+
+  job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+  deferred_connection_records_.clear();
+
+#else
+  ACE_UNUSED_ARG(sc);
+#endif
+}
+
 #endif
 
 } // namespace DCPS

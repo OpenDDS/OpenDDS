@@ -272,15 +272,19 @@ bool test_no_fingerprint(int& status,
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  bool ipv6 = false;
+#ifdef OPENDDS_SECURITY
+    bool ipv6 = false;
+#endif
 
   ACE_Argv_Type_Converter atc(argc, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
   while (args.is_anything_left()) {
     const char* arg = nullptr;
     if ((arg = args.get_the_parameter("ipv6"))) {
-      ipv6 = ACE_OS::atoi(arg);
-      args.consume_arg();
+#ifdef OPENDDS_SECURITY
+        ipv6 = ACE_OS::atoi(arg);
+#endif
+        args.consume_arg();
     } else {
       args.ignore_arg();
     }
@@ -291,7 +295,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ACE_INET_Addr local(0, ipv6 ? "::" : "0.0.0.0", ipv6 ? AF_INET6 : AF_INET);
   ACE_SOCK_Dgram socket(local, ipv6 ? AF_INET6 : AF_INET);
 
-  ACE_INET_Addr remote(3478, ipv6 ? "::1" : "127.0.0.1");
+  ACE_INET_Addr remote(4444, ipv6 ? "::1" : "127.0.0.1");
 
   if (!test_success(status, socket, remote)) {
     std::cerr << "ERROR: test_success failed" << std::endl;

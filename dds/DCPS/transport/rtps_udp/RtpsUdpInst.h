@@ -99,16 +99,17 @@ public:
 
   /// Relay address and stun server address may change, these use a mutex
   ///{
+  void rtps_relay_only(bool flag);
+  bool rtps_relay_only() const;
+  void use_rtps_relay(bool flag);
+  bool use_rtps_relay() const;
   void rtps_relay_address(const ACE_INET_Addr& address);
   ACE_INET_Addr rtps_relay_address() const;
+  void use_ice(bool flag);
+  bool use_ice() const;
   void stun_server_address(const ACE_INET_Addr& address);
   ACE_INET_Addr stun_server_address() const;
   ///}
-
-  TimeDuration rtps_relay_beacon_period_;
-  bool use_rtps_relay_;
-  bool rtps_relay_only_;
-  bool use_ice_;
 
   void update_locators(const RepoId& remote_id,
                        const TransportLocatorSeq& locators);
@@ -133,33 +134,80 @@ private:
   ACE_INET_Addr ipv6_local_address_;
 #endif
 
+  mutable ACE_SYNCH_MUTEX config_lock_;
+  bool rtps_relay_only_;
+  bool use_rtps_relay_;
   ACE_INET_Addr rtps_relay_address_;
-  mutable ACE_SYNCH_MUTEX rtps_relay_config_lock_;
+  bool use_ice_;
   ACE_INET_Addr stun_server_address_;
-  mutable ACE_SYNCH_MUTEX stun_server_config_lock_;
 };
+
+inline void RtpsUdpInst::rtps_relay_only(bool flag)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+  rtps_relay_only_ = flag;
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpInst::rtps_relay_only is now %d\n", rtps_relay_only_));
+  }
+}
+
+inline bool RtpsUdpInst::rtps_relay_only() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+  return rtps_relay_only_;
+}
+
+inline void RtpsUdpInst::use_rtps_relay(bool flag)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+  use_rtps_relay_ = flag;
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpInst::use_rtps_relay is now %d\n", use_rtps_relay_));
+  }
+}
+
+inline bool RtpsUdpInst::use_rtps_relay() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+  return use_rtps_relay_;
+}
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_config_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
   rtps_relay_address_ = address;
 }
 
 inline ACE_INET_Addr RtpsUdpInst::rtps_relay_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_relay_config_lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, ACE_INET_Addr());
   return rtps_relay_address_;
+}
+
+inline void RtpsUdpInst::use_ice(bool flag)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+  use_ice_ = flag;
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpInst::use_ice is now %d\n", use_ice_));
+  }
+}
+
+inline bool RtpsUdpInst::use_ice() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+  return use_ice_;
 }
 
 inline void RtpsUdpInst::stun_server_address(const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, stun_server_config_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
   stun_server_address_ = address;
 }
 
 inline ACE_INET_Addr RtpsUdpInst::stun_server_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, stun_server_config_lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, ACE_INET_Addr());
   return stun_server_address_;
 }
 

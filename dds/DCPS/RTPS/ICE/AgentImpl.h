@@ -36,11 +36,6 @@ class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public DCPS::Sh
 public:
   AgentImpl();
 
-  Configuration& get_configuration()
-  {
-    return configuration_;
-  }
-
   void shutdown();
 
   void notify_shutdown();
@@ -111,7 +106,6 @@ private:
   FoundationList to_unfreeze_;
   bool unfreeze_;
   bool ncm_listener_added_;
-  Configuration configuration_;
   size_t remote_peer_reflexive_counter_;
   typedef std::map<Endpoint*, EndpointManagerPtr> EndpointManagerMapType;
   EndpointManagerMapType endpoint_managers_;

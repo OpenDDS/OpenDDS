@@ -17,6 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ConnectionRecords.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 
@@ -34,6 +35,13 @@ public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
   virtual ICE::Endpoint* get_ice_endpoint();
+  virtual void rtps_relay_only_now(bool flag);
+  virtual void use_rtps_relay_now(bool flag);
+  virtual void use_ice_now(bool flag);
+#ifdef OPENDDS_SECURITY
+  ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
+  void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+#endif
 
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
@@ -113,6 +121,9 @@ private:
   typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;
 
+  DDS::Subscriber_var bit_sub_;
+  GuidPrefix_t local_prefix_;
+
   /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same
   /// domain participant (same GUID prefix).  Use by a second participant
@@ -126,16 +137,25 @@ private:
 #endif
   TransportClient_wrch default_listener_;
 
+  DCPS::JobQueue_rch job_queue_;
+
 #if defined(OPENDDS_SECURITY)
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
 
 #ifdef OPENDDS_SECURITY
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ConnectionRecords deferred_connection_records_;
+#endif
+
   struct IceEndpoint : public ACE_Event_Handler, public ICE::Endpoint {
     RtpsUdpTransport& transport;
 
     IceEndpoint(RtpsUdpTransport& a_transport)
-      : transport(a_transport) {}
+      : transport(a_transport)
+      , network_is_unreachable_(false)
+    {}
 
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE fd) const;
     virtual int handle_input(ACE_HANDLE fd);
@@ -143,8 +163,18 @@ private:
     ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& address) const;
     virtual void send(const ACE_INET_Addr& address, const STUN::Message& message);
     virtual ACE_INET_Addr stun_server_address() const;
+
+    bool network_is_unreachable_;
   };
   IceEndpoint ice_endpoint_;
+  ICE::ServerReflexiveStateMachine relay_srsm_;
+  typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
+  RcHandle<Periodic> relay_stun_task_;
+  void relay_stun_task(const DCPS::MonotonicTimePoint& now);
+
+  void start_ice();
+  void stop_ice();
+
 #endif
 };
 

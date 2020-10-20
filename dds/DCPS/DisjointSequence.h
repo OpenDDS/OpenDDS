@@ -57,6 +57,8 @@ public:
 
   bool contains(SequenceNumber value) const;
 
+  bool contains_any(const SequenceRange& range) const;
+
   /// All insert() methods return true upon modifying the set and false if
   /// the set already contained the SequenceNumber(s) that were to be inserted.
   /// This is the general form of insert() whereby the caller receives a list of
@@ -82,6 +84,9 @@ public:
   bool insert(SequenceNumber value,
               CORBA::ULong num_bits,
               const CORBA::Long bits[]);
+
+  /// Insert the intersection of range and filter
+  bool insert_filtered(const SequenceRange& range, const DisjointSequence& filter);
 
   /// Inverse of insert(value, num_bits, bits).  Populates array of
   /// bitmap[length] with the bitmap of ranges above the cumulative_ack() value.
@@ -132,8 +137,11 @@ public:
   static bool fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
                                 CORBA::Long bitmap[], CORBA::ULong length,
                                 CORBA::ULong& num_bits);
-};
 
+  /// Return the number of CORBA::Longs required for the bitmap representation of
+  /// sequence numbers between low and high, inclusive (maximum 8 longs).
+  static CORBA::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

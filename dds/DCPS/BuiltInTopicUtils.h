@@ -36,6 +36,9 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE;
 
+OpenDDS_Dcps_Export extern const char* const BUILT_IN_CONNECTION_RECORD_TOPIC;
+OpenDDS_Dcps_Export extern const char* const BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE;
+
 /**
  * Returns true if the topic name and type pair matches one of the built-in
  * topic name and type pairs.
@@ -58,6 +61,9 @@ topicIsBIT(const char* name, const char* type)
   ) || (
     !ACE_OS::strcmp(name, BUILT_IN_PARTICIPANT_LOCATION_TOPIC) &&
     !ACE_OS::strcmp(type, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_CONNECTION_RECORD_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE)
   );
 }
 
@@ -154,14 +160,7 @@ bool
 BuiltinTopicKeyLess::operator()(const DDS::BuiltinTopicKey_t& lhs,
                                 const DDS::BuiltinTopicKey_t& rhs) const
 {
-  // N.B.  This assumes that the MS index is 2 and the LS index is 0.
-  return (lhs.value[2] < rhs.value[2])? true:
-         (lhs.value[2] > rhs.value[2])? false:
-         (lhs.value[1] < rhs.value[1])? true:
-         (lhs.value[1] > rhs.value[1])? false:
-         (lhs.value[0] < rhs.value[0])? true:
-         false;
-
+  return std::memcmp(lhs.value, rhs.value, sizeof(lhs.value)) < 0;
 }
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -205,12 +204,11 @@ keyFromSample<DDS::PublicationBuiltinTopicData>(
 #endif
 
 template<typename TopicType>
-inline
 DDS::BuiltinTopicKey_t keyFromSample(TopicType*)
 {
-  DDS::BuiltinTopicKey_t value;
-  value.value[0] = value.value[1] = value.value[2] = 0;
-  return value;
+  DDS::BuiltinTopicKey_t key;
+  std::memset(key.value, 0, sizeof(key.value));
+  return key;
 }
 
 } // namespace DCPS

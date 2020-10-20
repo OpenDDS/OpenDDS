@@ -183,6 +183,22 @@ OpenDDS_Dcps_Export inline GUID_t make_guid(
 OpenDDS_Dcps_Export
 void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result);
 
+OpenDDS_Dcps_Export inline DDS::BuiltinTopicKey_t
+repo_id_to_bit_key(const RepoId& guid)
+{
+  DDS::BuiltinTopicKey_t key;
+  std::memcpy(key.value, &guid, sizeof(key.value));
+  return key;
+}
+
+OpenDDS_Dcps_Export inline RepoId
+bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
+{
+  RepoId id;
+  std::memcpy(&id, key.value, sizeof(id));
+  return id;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

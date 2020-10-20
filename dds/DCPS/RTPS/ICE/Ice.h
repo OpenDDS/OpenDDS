@@ -71,6 +71,7 @@ public:
   virtual ~AgentInfoListener() {}
   virtual void update_agent_info(const DCPS::RepoId& a_local_guid,
                                  const AgentInfo& a_agent_info) = 0;
+  virtual void remove_agent_info(const DCPS::RepoId& a_local_guid) = 0;
 };
 
 class OpenDDS_Rtps_Export Configuration {
@@ -168,6 +169,8 @@ public:
     return change_password_period_;
   }
 
+  static Configuration* instance();
+
 private:
   // Mininum time between consecutive sends.
   // RFC 8445 Section 14.2
@@ -193,7 +196,6 @@ private:
 class OpenDDS_Rtps_Export Agent {
 public:
   virtual ~Agent() {}
-  virtual Configuration& get_configuration() = 0;
   virtual void add_endpoint(Endpoint* a_endpoint) = 0;
   virtual void remove_endpoint(Endpoint* a_endpoint) = 0;
   virtual AgentInfo get_local_agent_info(Endpoint* a_endpoint) const = 0;
@@ -223,6 +225,53 @@ public:
 
   static Agent* instance();
 };
+
+class OpenDDS_Rtps_Export ServerReflexiveStateMachine {
+public:
+  enum StateChange {
+    SRSM_None,
+    SRSM_Set,
+    SRSM_Unset,
+    SRSM_Change
+  };
+
+  ServerReflexiveStateMachine()
+    : indication_count_(0)
+  {}
+
+  // Return Unset if transitioning from a determined SRA to an undetermined SRA.
+  // Return None otherwise.
+  StateChange send(const ACE_INET_Addr& address,
+                   size_t indication_count_limit,
+                   const DCPS::GuidPrefix_t& guid_prefix);
+
+  // Return Set if transitioning from an undetermined SRA to a determined SRA.
+  // Return Change if transitioning from a determined SRA to a different SRA.
+  // Return None otherwise.
+  StateChange receive(const STUN::Message& message);
+
+  const STUN::Message& message() const { return message_; }
+  const ACE_INET_Addr& unset_stun_server_address() const { return unset_stun_server_address_; }
+  const ACE_INET_Addr& stun_server_address() const { return stun_server_address_; }
+
+  bool is_response(const STUN::Message& message) const
+  {
+    return message.transaction_id == message_.transaction_id;
+  }
+
+private:
+  StateChange start(const ACE_INET_Addr& address, const DCPS::GuidPrefix_t& guid_prefix);
+  StateChange stop();
+  StateChange next_send(size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
+  StateChange success_response(const STUN::Message& message);
+  StateChange error_response(const STUN::Message& message);
+
+  STUN::Message message_;
+  ACE_INET_Addr unset_stun_server_address_;
+  ACE_INET_Addr stun_server_address_;
+  ACE_INET_Addr server_reflexive_address_;
+  size_t indication_count_;
+ };
 
 } // namespace ICE
 } // namespace OpenDDS

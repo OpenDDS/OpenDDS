@@ -17,7 +17,7 @@ UdpDataLink::active() const
 }
 
 
-ACE_INLINE ReactorTask*
+ACE_INLINE ReactorTask_rch
 UdpDataLink::reactor_task()
 {
   return this->reactor_task_;

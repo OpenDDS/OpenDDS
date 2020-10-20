@@ -312,22 +312,6 @@ DisjointSequence::missing_sequence_ranges() const
   return missing;
 }
 
-OPENDDS_VECTOR(SequenceRange)
-DisjointSequence::present_sequence_ranges() const
-{
-  OPENDDS_VECTOR(SequenceRange) present;
-  std::copy(sequences_.begin(), sequences_.end(), std::back_inserter(present));
-  return present;
-}
-
-bool
-DisjointSequence::contains(SequenceNumber value) const
-{
-  RangeSet::const_iterator iter =
-    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
-  return iter != sequences_.end() && iter->first <= value;
-}
-
 void
 DisjointSequence::validate(const SequenceRange& range)
 {
@@ -348,6 +332,13 @@ DisjointSequence::dump() const
                this, iter->first.getValue(), iter->second.getValue()));
   }
 }
+
+CORBA::ULong
+DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high)
+{
+  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

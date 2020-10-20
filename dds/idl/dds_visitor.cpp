@@ -15,6 +15,7 @@
 #include "v8_generator.h"
 #include "rapidjson_generator.h"
 #include "langmap_generator.h"
+#include "value_writer_generator.h"
 #include "topic_keys.h"
 
 #include <ast_argument.h>
@@ -62,30 +63,20 @@ namespace {
   v8_generator v8_gen_;
   rapidjson_generator rj_gen_;
   langmap_generator lm_gen_;
+  value_writer_generator value_writer_generator_;
 
   template <typename T>
   void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
   {
     UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
-
     for (; !it.is_done(); it.next()) {
       AST_Decl* item = it.item();
-
       if (item->node_type() == nt) {
-        v.push_back(T::narrow_from_decl(item));
+        v.push_back(dynamic_cast<T*>(item));
       }
     }
   }
 
-  bool field_check_anon(AST_Field* f)
-  {
-    AST_Decl::NodeType nt = f->field_type()->node_type();
-    if (nt == AST_Decl::NT_array || nt == AST_Decl::NT_sequence) {
-      idl_global->err()->misc_error("field has an anonymous type.", f);
-      return false;
-    }
-    return true;
-  }
 } // namespace
 
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
@@ -94,6 +85,7 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   if (!be_global->no_default_gen()) {
     gen_target_.add_generator(&mar_gen_);
     gen_target_.add_generator(&key_gen_);
+    gen_target_.add_generator(&value_writer_generator_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
   }
@@ -316,10 +308,6 @@ dds_visitor::visit_structure(AST_Structure* node)
   const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-    if (!field_check_anon(*i)) {
-      error_ = true;
-      return -1;
-    }
     field_vec.push_back(*i);
   }
 
@@ -464,18 +452,12 @@ dds_visitor::visit_union(AST_Union* node)
   const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-    if (!field_check_anon(*i)) {
-      error_ = true;
-      return -1;
-    }
-
     AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
     if (!ub) {
       idl_global->err()->misc_error("expected union to only contain UnionBranches", ub);
       error_ = true;
       return -1;
     }
-
     branches.push_back(ub);
   }
 

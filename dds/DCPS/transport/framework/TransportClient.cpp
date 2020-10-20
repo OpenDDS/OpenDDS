@@ -188,6 +188,12 @@ TransportClient::populate_connection_info()
       }
     }
   }
+
+  if (conn_info_.length() == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportClient::populate_connection_info: ")
+               ACE_TEXT("No connection info\n")));
+  }
 }
 
 bool
@@ -311,7 +317,7 @@ TransportClient::associate(const AssociationData& data, bool active)
           if (res.success_) {
             if (res.link_.is_nil()) {
                 // In this case, it may be waiting for the TCP connection to be established.  Just wait without trying other transports.
-                pending_assoc_timer_->schedule_timer(this, iter->second);
+                pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
             } else {
               use_datalink_i(data.remote_id_, res.link_, guard);
               return true;
@@ -321,7 +327,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       }
     }
 
-    pending_assoc_timer_->schedule_timer(this, iter->second);
+    pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
   }
 
   return true;
@@ -571,7 +577,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   }
 
   iter->second->reset_client();
-  pending_assoc_timer_->cancel_timer(this, pend);
+  pending_assoc_timer_->cancel_timer(pend);
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
@@ -602,7 +608,7 @@ TransportClient::stop_associating()
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     it->second->reset_client();
-    pending_assoc_timer_->cancel_timer(this, it->second);
+    pending_assoc_timer_->cancel_timer(it->second);
     prev_pending_.insert(std::make_pair(it->first, it->second));
   }
   pending_.clear();
@@ -620,7 +626,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
       PendingMap::iterator iter = pending_.find(repos[i]);
       if (iter != pending_.end()) {
         iter->second->reset_client();
-        pending_assoc_timer_->cancel_timer(this, iter->second);
+        pending_assoc_timer_->cancel_timer(iter->second);
         prev_pending_.insert(std::make_pair(iter->first, iter->second));
         pending_.erase(iter);
       }
@@ -648,7 +654,7 @@ TransportClient::disassociate(const RepoId& peerId)
   PendingMap::iterator iter = pending_.find(peerId);
   if (iter != pending_.end()) {
     iter->second->reset_client();
-    pending_assoc_timer_->cancel_timer(this, iter->second);
+    pending_assoc_timer_->cancel_timer(iter->second);
     prev_pending_.insert(std::make_pair(iter->first, iter->second));
     pending_.erase(iter);
     return;

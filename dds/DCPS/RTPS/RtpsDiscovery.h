@@ -338,16 +338,6 @@ public:
     spdp_rtps_relay_address_ = address;
   }
 
-  DCPS::TimeDuration spdp_rtps_relay_beacon_period() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
-    return spdp_rtps_relay_beacon_period_;
-  }
-  void spdp_rtps_relay_beacon_period(const DCPS::TimeDuration& period) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    spdp_rtps_relay_beacon_period_ = period;
-  }
-
   DCPS::TimeDuration spdp_rtps_relay_send_period() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
@@ -368,17 +358,6 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     sedp_rtps_relay_address_ = address;
-  }
-
-  DCPS::TimeDuration sedp_rtps_relay_beacon_period() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
-    return sedp_rtps_relay_beacon_period_;
-  }
-  void sedp_rtps_relay_beacon_period(const DCPS::TimeDuration& period)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    sedp_rtps_relay_beacon_period_ = period;
   }
 
   bool use_rtps_relay() const
@@ -469,10 +448,8 @@ private:
   DCPS::TimeDuration auth_resend_period_;
   u_short max_spdp_sequence_msg_reset_check_;
   ACE_INET_Addr spdp_rtps_relay_address_;
-  DCPS::TimeDuration spdp_rtps_relay_beacon_period_;
   DCPS::TimeDuration spdp_rtps_relay_send_period_;
   ACE_INET_Addr sedp_rtps_relay_address_;
-  DCPS::TimeDuration sedp_rtps_relay_beacon_period_;
   bool use_rtps_relay_;
   bool rtps_relay_only_;
   ACE_INET_Addr sedp_stun_server_address_;
@@ -506,13 +483,20 @@ public:
     const DDS::DomainParticipantQos& qos);
 
 #if defined(OPENDDS_SECURITY)
+#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5)
+#    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
+#  else
+#    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION
+#  endif
+
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     const OpenDDS::DCPS::RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
-    DDS::Security::ParticipantCryptoHandle part_crypto);
+    DDS::Security::ParticipantCryptoHandle part_crypto)
+    OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION;
 #endif
 
   virtual bool supports_liveliness() const { return true; }
@@ -579,6 +563,15 @@ public:
 
   u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
+
+  bool rtps_relay_only() const { return config_->rtps_relay_only(); }
+  void rtps_relay_only_now(bool f);
+
+  bool use_rtps_relay() const { return config_->use_rtps_relay(); }
+  void use_rtps_relay_now(bool f);
+
+  bool use_ice() const { return config_->use_ice(); }
+  void use_ice_now(bool f);
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

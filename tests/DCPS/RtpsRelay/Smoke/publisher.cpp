@@ -29,8 +29,10 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include "Args.h"
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
+#include "../../common/ConnectionRecordLogger.h"
 
 #include <iostream>
 
@@ -54,6 +56,9 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 
 #endif
 
+bool check_lease_recovery = false;
+bool expect_unmatch = false;
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   DDS::DomainParticipantFactory_var dpf;
@@ -65,6 +70,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     {
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+      int status = EXIT_SUCCESS;
+      if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
+        return status;
+      }
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
@@ -93,6 +103,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
                          -1);
       }
+
+      OpenDDS::Test::install_connection_record_logger(participant);
 
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =
@@ -161,7 +173,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in());
+      Writer* writer = check_lease_recovery ? new Writer(dw.in(), 30, true) : new Writer(dw.in(), 10, false);
       std::cout << "Starting Writer" << std::endl;
       writer->start();
 

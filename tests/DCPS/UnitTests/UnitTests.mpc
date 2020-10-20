@@ -70,6 +70,14 @@ project(*RtpsDuration): dcps_rtpsexe, dcps_test {
   }
 }
 
+project(*RtpsSequenceNumberSet): dcps_rtpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    RtpsSequenceNumberSet.cpp
+  }
+}
+
 project(*GuidGenerator): dcps_rtpsexe, dcps_test {
   exename   = *
 

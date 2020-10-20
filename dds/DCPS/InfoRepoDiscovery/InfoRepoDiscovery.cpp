@@ -404,19 +404,6 @@ InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* /* participant */)
   // nothing to do for DCPSInfoRepo
 }
 
-RepoId
-InfoRepoDiscovery::bit_key_to_repo_id(DomainParticipantImpl* /*participant*/,
-                                      const char* /*bit_topic_name*/,
-                                      const DDS::BuiltinTopicKey_t& key) const
-{
-  RepoId id = RepoIdBuilder::create();
-  RepoIdBuilder builder(id);
-  builder.federationId(key.value[0]);
-  builder.participantId(key.value[1]);
-  builder.entityId(key.value[2]);
-  return id;
-}
-
 bool
 InfoRepoDiscovery::active()
 {

@@ -1,6 +1,8 @@
-#pragma DCPS_DATA_TYPE "Property"
-#pragma DCPS_DATA_KEY "Property key"
+#include <tao/OctetSeq.pidl>
+
+@topic
 struct Property {
-  long key;
+  @key long key;
   long value;
+  sequence<octet> extra;
 };

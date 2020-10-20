@@ -81,6 +81,41 @@ DisjointSequence::insert(const SequenceRange& range,
   return insert_i(range, &gaps);
 }
 
+ACE_INLINE bool
+DisjointSequence::insert_filtered(const SequenceRange& range, const DisjointSequence& filter)
+{
+  for (SequenceNumber i = range.first; i <= range.second; ++i) {
+    if (filter.contains(i) && !insert(i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+ACE_INLINE OPENDDS_VECTOR(SequenceRange)
+DisjointSequence::present_sequence_ranges() const
+{
+  OPENDDS_VECTOR(SequenceRange) present;
+  std::copy(sequences_.begin(), sequences_.end(), std::back_inserter(present));
+  return present;
+}
+
+ACE_INLINE bool
+DisjointSequence::contains(SequenceNumber value) const
+{
+  RangeSet::const_iterator iter =
+    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
+  return iter != sequences_.end() && iter->first <= value;
+}
+
+ACE_INLINE bool
+DisjointSequence::contains_any(const SequenceRange& range) const
+{
+  const SequenceRange search(0 /*ignored*/, range.first);
+  const RangeSet::const_iterator iter = sequences_.lower_bound(search);
+  return iter != sequences_.end() && iter->first <= range.second;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

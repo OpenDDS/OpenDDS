@@ -1,0 +1,13 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include <dds/DdsDcpsCore.idl>
+module SkipSerialize {
+  @topic struct Message {
+    DDS::OctetSeq serialized_data;
+  };
+};

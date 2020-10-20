@@ -183,6 +183,10 @@ public:
     DDS::Security::AccessControlListener_ptr listener,
     DDS::Security::SecurityException& ex);
 
+  virtual bool return_permissions_handle(
+    DDS::Security::PermissionsHandle handle,
+    DDS::Security::SecurityException& ex);
+
   virtual bool return_permissions_token(
     const DDS::Security::PermissionsToken& token,
     DDS::Security::SecurityException& ex);

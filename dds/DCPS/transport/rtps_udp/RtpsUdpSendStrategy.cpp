@@ -175,7 +175,7 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
-  if (result < 0) {
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -203,7 +203,7 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
-  if (result < 0) {
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -241,8 +241,9 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
-  const ACE_INET_Addr a = link_->config().rtps_relay_only_ ? link_->config().rtps_relay_address() : addr;
-  const ACE_SOCK_Dgram& socket = choose_send_socket(a);
+  OPENDDS_ASSERT(addr != ACE_INET_Addr());
+
+  const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
@@ -256,19 +257,25 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = socket.send(buffer, iter - buffer, a);
+  const ssize_t result = socket.send(buffer, iter - buffer, addr);
 #else
-  const ssize_t result = socket.send(iov, n, a);
+  const ssize_t result = socket.send(iov, n, addr);
 #endif
   if (result < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
-      a.addr_to_string(addr_buff, 256);
+      addr.addr_to_string(addr_buff, 256);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
                  "destination %s failed send: %m\n", addr_buff));
+      if (errno == EMSGSIZE) {
+        for (int i = 0; i < n; ++i) {
+          ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i: "
+              "iovec[%d].iov_len = %B\n", i, size_t(iov[i].iov_len)));
+        }
+      }
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;

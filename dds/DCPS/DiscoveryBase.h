@@ -38,8 +38,9 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
-    typedef DataReaderImpl_T<ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<ConnectionRecord> ConnectionRecordDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
     typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::DatareaderCryptoHandle, GUID_tKeyLessThan)
@@ -218,19 +219,6 @@ namespace OpenDDS {
       }
 
       virtual ~EndpointManager() { }
-
-      RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                const DDS::BuiltinTopicKey_t& key)
-      {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_PUBLICATION_TOPIC)) {
-          return pub_key_to_id_[key];
-        }
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_SUBSCRIPTION_TOPIC)) {
-          return sub_key_to_id_[key];
-        }
-        return RepoId();
-      }
 
       void purge_dead_topic(const OPENDDS_STRING& topic_name) {
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
@@ -701,9 +689,6 @@ namespace OpenDDS {
         DDS::SubscriberQos subscriber_qos_;
         ContentFilterProperty_t filterProperties;
       };
-
-      typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, RepoId,
-                              BuiltinTopicKeyLess) BitKeyMap;
 
       typedef OPENDDS_MAP_CMP(RepoId, LocalPublication,
                               GUID_tKeyLessThan) LocalPublicationMap;
@@ -1264,13 +1249,11 @@ namespace OpenDDS {
 
       void remove_from_bit(const DiscoveredPublication& pub)
       {
-        pub_key_to_id_.erase(get_key(pub));
         remove_from_bit_i(pub);
       }
 
       void remove_from_bit(const DiscoveredSubscription& sub)
       {
-        sub_key_to_id_.erase(get_key(sub));
         remove_from_bit_i(sub);
       }
 
@@ -1294,23 +1277,6 @@ namespace OpenDDS {
         if (td == topics_.end()) return false;
 
         return td->second.has_dcps_key();
-      }
-
-      void
-      increment_key(DDS::BuiltinTopicKey_t& key)
-      {
-        for (int idx = 0; idx < 3; ++idx) {
-          CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
-          if (ukey == 0xFFFFFFFF) {
-            key.value[idx] = 0;
-          } else {
-            ++ukey;
-            key.value[idx] = ukey;
-            return;
-          }
-        }
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::increment_key - ")
-                   ACE_TEXT("ran out of builtin topic keys\n")));
       }
 
 #ifdef OPENDDS_SECURITY
@@ -1362,7 +1328,6 @@ namespace OpenDDS {
 
       ACE_Thread_Mutex& lock_;
       RepoId participant_id_;
-      BitKeyMap pub_key_to_id_, sub_key_to_id_;
       RepoIdSet ignored_guids_;
       unsigned int publication_counter_, subscription_counter_, topic_counter_;
       LocalPublicationMap local_publications_;
@@ -1373,7 +1338,6 @@ namespace OpenDDS {
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
       OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) relay_only_readers_;
-      DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
 
 #ifdef OPENDDS_SECURITY
       DDS::Security::AccessControl_var access_control_;
@@ -1409,20 +1373,6 @@ namespace OpenDDS {
       { }
 
       virtual ~LocalParticipant() { }
-
-      RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                      const DDS::BuiltinTopicKey_t& key)
-      {
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_PARTICIPANT_TOPIC)) {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, key.value, sizeof(DDS::BuiltinTopicKeyValue));
-          guid.entityId = ENTITYID_PARTICIPANT;
-          return guid;
-
-        } else {
-          return endpoint_manager().bit_key_to_repo_id(bit_topic_name, key);
-        }
-      }
 
       void ignore_domain_participant(const RepoId& ignoreId)
       {
@@ -1597,6 +1547,8 @@ namespace OpenDDS {
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
+        , have_spdp_info_(false)
+        , have_sedp_info_(false)
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_HANDSHAKE)
@@ -1629,6 +1581,8 @@ namespace OpenDDS {
         , last_seq_(seq)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
+        , have_spdp_info_(false)
+        , have_sedp_info_(false)
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_HANDSHAKE)
@@ -1644,9 +1598,7 @@ namespace OpenDDS {
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
-          guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+          const RepoId guid = make_guid(p.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
           std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;
@@ -1687,8 +1639,11 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
         ACE_UINT16 seq_reset_count_;
-
 #ifdef OPENDDS_SECURITY
+        bool have_spdp_info_;
+        ICE::AgentInfo spdp_info_;
+        bool have_sedp_info_;
+        ICE::AgentInfo sedp_info_;
         bool have_auth_req_msg_;
         DDS::Security::ParticipantStatelessMessage auth_req_msg_;
         bool have_handshake_msg_;
@@ -1750,13 +1705,17 @@ namespace OpenDDS {
           if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
               (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
             {
+              const DDS::InstanceHandle_t bit_ih = iter->second.bit_ih_;
+              const DDS::InstanceHandle_t location_ih = iter->second.location_ih_;
+
               ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-              if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
-                bit->set_instance_state(iter->second.bit_ih_,
+              ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+              if (bit && bit_ih != DDS::HANDLE_NIL) {
+                bit->set_instance_state(bit_ih,
                                         DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
               }
-              if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
-                loc_bit->set_instance_state(iter->second.location_ih_,
+              if (loc_bit && location_ih != DDS::HANDLE_NIL) {
+                loc_bit->set_instance_state(location_ih,
                                             DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
               }
             }
@@ -1799,6 +1758,16 @@ namespace OpenDDS {
       DDS::DataReader_var d =
         bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
       return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+    }
+
+    DCPS::ConnectionRecordDataReaderImpl* connection_record_bit()
+    {
+      if (!bit_subscriber_.in())
+        return 0;
+
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+      return dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -1847,6 +1816,9 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
+        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = TheServiceParticipant->bit_autopurge_disposed_samples_delay();
+
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
@@ -1867,10 +1839,15 @@ namespace OpenDDS {
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
 
-    DDS::TopicDescription_var bit_part_loc_topic =
-      participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-    create_bit_dr(bit_part_loc_topic, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
-      sub, dr_qos);
+        DDS::TopicDescription_var bit_part_loc_topic =
+          participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+        create_bit_dr(bit_part_loc_topic, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+                      sub, dr_qos);
+
+        DDS::TopicDescription_var bit_connection_record_topic =
+          participant->lookup_topicdescription(BUILT_IN_CONNECTION_RECORD_TOPIC);
+        create_bit_dr(bit_connection_record_topic, BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE,
+                      sub, dr_qos);
 
         const DDS::ReturnCode_t ret = bit_subscriber->enable();
         if (ret != DDS::RETCODE_OK) {
@@ -1890,14 +1867,6 @@ namespace OpenDDS {
       virtual void fini_bit(DomainParticipantImpl* participant)
       {
         get_part(participant->get_domain_id(), participant->get_id())->fini_bit();
-      }
-
-      virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
-                                                       const char* bit_topic_name,
-                                                       const DDS::BuiltinTopicKey_t& key) const
-      {
-        return get_part(participant->get_domain_id(), participant->get_id())
-          ->bit_key_to_repo_id(bit_topic_name, key);
       }
 
       virtual bool attach_participant(DDS::DomainId_t /*domainId*/,
