@@ -44,20 +44,17 @@ namespace {
                                     AST_Type* discriminator,
                                     const std::vector<AST_UnionBranch*>& branches);
 
-  struct special_sequence
-  {
+  struct special_sequence {
     is_special_sequence check;
     gen_special_sequence gen;
   };
 
-  struct special_struct
-  {
+  struct special_struct {
     is_special_struct check;
     gen_special_struct gen;
   };
 
-  struct special_union
-  {
+  struct special_union {
     is_special_union check;
     gen_special_union gen;
   };
@@ -151,8 +148,6 @@ namespace {
   string streamCommon(const std::string& indent, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru = "", bool printing = false);
-
-  bool needs_nested_key_only(AST_Type* type);
 } /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
@@ -205,6 +200,239 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 }
 
 namespace {
+
+  /**
+   * Returns true for a type if NestedKeyOnly serialization and normal
+   * serialization is the same for that type.
+   */
+  bool needs_nested_key_only(AST_Type* type)
+  {
+    type = resolveActualType(type);
+    if (get_special_struct(scoped(type->name()))) {
+      return false;
+    }
+    const Classification type_class = classify(type);
+    if (type_class & CL_ARRAY) {
+      return needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
+    } else if (type_class & CL_SEQUENCE) {
+      return needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_STRUCTURE) {
+      AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
+      // TODO: Possible optimization: If everything in a struct was a key
+      // recursively, then we could return false.
+      if (struct_has_explicit_keys(struct_node)) {
+        return true;
+      }
+      const Fields fields(struct_node);
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        if (needs_nested_key_only((*i)->field_type())) {
+          return true;
+        }
+      }
+    } else if (type_class & CL_UNION) {
+      return be_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
+    }
+    return false;
+  }
+
+  bool needs_forany(AST_Type* type)
+  {
+    const Classification type_class = classify(resolveActualType(type));
+    return be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 &&
+      type_class & CL_ARRAY;
+  }
+
+  bool needs_distinct_type(AST_Type* type)
+  {
+    const Classification type_class = classify(resolveActualType(type));
+    return be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 &&
+      type_class & (CL_SEQUENCE | CL_ARRAY);
+  }
+
+  std::string valid_var_name(std::string s)
+  {
+    size_t i;
+    while ((i = s.find(".")) != std::string::npos) {
+      s[i] = '_';
+    }
+    if (s.size() > 2 && s.substr(s.size() - 2, 2) == "()") {
+      s.erase(s.size() - 2);
+    }
+    return s;
+  }
+
+  std::string strip_shift_op(const std::string& s)
+  {
+    std::string rv = s;
+    const size_t shift_len = 3;
+    if (rv.size() > shift_len) {
+      const std::string first3 = rv.substr(0, shift_len);
+      if (first3 == "<< " || first3 == ">> ") {
+        rv.erase(0, 3);
+      }
+    }
+    return rv;
+  }
+
+  std::string get_tag_name(UTL_ScopedName* name, bool nested_key_only)
+  {
+    return dds_generator::scoped_helper(name, "_") +
+      (nested_key_only ? "_nested_key_only" : "") + "_tag";
+  }
+
+  std::string get_tag_name(AST_Type* type, bool nested_key_only)
+  {
+    return get_tag_name(type->name(), nested_key_only);
+  }
+
+  /// Handling wrapping references in the wrapper types: NestedKeyOnly,
+  /// IDL::DistinctType, and *_forany.
+  struct Wrapper {
+    AST_Type* const type_;
+    const std::string type_name_;
+    const std::string to_wrap_;
+    const std::string fieldref_;
+    const std::string local_;
+    bool is_const_;
+    bool nested_key_only_;
+    /* bool distinct_type_; */
+    /* bool forany_; */
+    bool dot_access_;
+
+    Wrapper(AST_Type* type, const std::string& type_name,
+      const std::string& to_wrap, bool is_const = true)
+      : type_(type)
+      , type_name_(type_name)
+      , to_wrap_(strip_shift_op(to_wrap))
+      , is_const_(is_const)
+      , nested_key_only_(false)
+      /* , distinct_type_(false) */
+      /* , forany_(false) */
+      , dot_access_(false)
+      , done_(false)
+    {
+    }
+
+    Wrapper(AST_Type* type, const std::string& type_name,
+      const std::string& fieldref, const std::string& local, bool is_const = true)
+      : type_(type)
+      , type_name_(type_name)
+      , fieldref_(strip_shift_op(fieldref))
+      , local_(local)
+      , is_const_(is_const)
+      , nested_key_only_(false)
+      /* , distinct_type_(false) */
+      /* , forany_(false) */
+      , dot_access_(false)
+      , done_(false)
+    {
+    }
+
+    void done(Intro* intro = 0)
+    {
+      ACE_ASSERT(!done_);
+
+      const std::string const_str = is_const_ ? "const " : "";
+      nested_key_only_ = nested_key_only_ && needs_nested_key_only(type_);
+      wrapped_type_name_ = type_name_;
+      if (to_wrap_.size()) {
+        ref_ = to_wrap_;
+      } else {
+        ref_ = fieldref_;
+        if (local_.size()) {
+          if (dot_access_) {
+            ref_ += '.';
+          }
+          ref_ += local_;
+        }
+      }
+
+      if (needs_forany(type_)) {
+        const std::string var_name = valid_var_name(to_wrap_) + "_forany";
+        const std::string forany_type = type_name_ + "_forany";
+        wrapped_type_name_ = type_name_ + "_forany";
+        if (intro) {
+          std::cout << forany_type + " " + var_name +
+            "(const_cast<" + type_name_ + "_slice*>(" + ref_ + "));\n";
+          intro->insert(forany_type + " " + var_name +
+            "(const_cast<" + type_name_ + "_slice*>(" + ref_ + "));");
+        }
+        ref_ = var_name;
+      }
+
+      if (nested_key_only_) {
+        wrapped_type_name_ =
+          std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
+        value_access_post_ += ".value";
+        const std::string nko_arg = "(" + ref_ + ")";
+        if (is_const_) {
+          ref_ = wrapped_type_name_ + nko_arg;
+        } else {
+          ref_ = valid_var_name(ref_) + "_nested_key_only";
+          if (intro) {
+            std::cout << wrapped_type_name_ + " " + ref_ + nko_arg + ";\n";
+            intro->insert(wrapped_type_name_ + " " + ref_ + nko_arg + ";");
+          }
+        }
+      }
+
+      if (needs_distinct_type(type_)) {
+        wrapped_type_name_ =
+          std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
+          ", " + get_tag_name(type_, nested_key_only_) + ">";
+        value_access_pre_ = "(*" + value_access_pre_;
+        value_access_post_ = value_access_post_ + ".val_)";
+        const std::string idt_arg = "(" + ref_ + ")";
+        if (is_const_) {
+          ref_ = wrapped_type_name_ + idt_arg;
+        } else {
+          ref_ = valid_var_name(ref_) + "_distinct_type";
+          if (intro) {
+            std::cout << wrapped_type_name_ + " " + ref_ + idt_arg + ";\n";
+            intro->insert(wrapped_type_name_ + " " + ref_ + idt_arg + ";");
+          }
+        }
+      }
+
+      wrapped_type_name_ = const_str + wrapped_type_name_ + "&";
+      done_ = true;
+    }
+
+    std::string ref()
+    {
+      ACE_ASSERT(done_);
+      return ref_;
+    }
+
+    std::string wrapped_type_name()
+    {
+      ACE_ASSERT(done_);
+      return wrapped_type_name_;
+    }
+
+    std::string get_var_name(const std::string& var_name)
+    {
+      return var_name.size() ? var_name : to_wrap_;
+    }
+
+    /* std::string param(const std::string& var_name = "") */
+    /* { */
+    /*   return wrapped_type_name() + "& " + get_var_name(var_name); */
+    /* } */
+
+    std::string value_access(const std::string& var_name = "")
+    {
+      return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+    }
+
+  private:
+    bool done_;
+    std::string wrapped_type_name_;
+    std::string ref_;
+    std::string value_access_pre_;
+    std::string value_access_post_;
+  };
 
   string getSizeExprPrimitive(AST_Type* type,
     const string& count_expr = "count", const string& size_expr = "size",
@@ -540,16 +768,13 @@ namespace {
     const string get_buffer = value_access + (use_cxx11 ? ".data()" : ".get_buffer()");
     string const_cxx = cxx, unwrap, const_unwrap;
     if (use_cxx11) {
-      std::string underscores = dds_generator::scoped_helper(tdname, "_");
-      if (nested_key_only) {
-        underscores = "NestedKeyOnly_" + underscores;
-      }
+      const std::string tag_name = get_tag_name(tdname, nested_key_only);
       be_global->header_ <<
-        "struct " << underscores << "_tag {};\n\n";
+        "struct " << tag_name << " {};\n\n";
       unwrap = "  " + cxx + "& seq = wrap;\n  ACE_UNUSED_ARG(seq);\n";
       const_unwrap = "  const " + cxx + "& seq = wrap;\n  ACE_UNUSED_ARG(seq);\n";
-      const_cxx = "IDL::DistinctType<const " + cxx + ", " + underscores + "_tag>";
-      cxx = "IDL::DistinctType<" + cxx + ", " + underscores + "_tag>";
+      const_cxx = "IDL::DistinctType<const " + cxx + ", " + tag_name + ">";
+      cxx = "IDL::DistinctType<" + cxx + ", " + tag_name + ">";
     } else {
       if (nested_key_only) {
         const_cxx = "const NestedKeyOnly<const " + actual_cpp_name + ">";
@@ -1237,26 +1462,13 @@ namespace {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    std::string cxx = scoped(name);
-    std::string const_cxx = cxx, unwrap, const_unwrap;
-    std::string underscores = dds_generator::scoped_helper(name, "_");
-    std::string value_access = "arr";
+    Wrapper base_wrapper(arr, scoped(name), "arr");
+    base_wrapper.nested_key_only_ = nested_key_only;
     if (use_cxx11) {
-      be_global->header_ <<
-        "struct " << underscores << "_tag {};\n\n";
-      unwrap = "  " + cxx + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
-      const_unwrap = "  const " + cxx + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
-      const_cxx = "IDL::DistinctType<const " + cxx + ", " + underscores + "_tag>";
-      cxx = "IDL::DistinctType<" + cxx + ", " + underscores + "_tag>";
-    } else {
-      const_cxx = "const " + cxx + "_forany&";
-      cxx += "_forany&";
-    }
-    if (nested_key_only) {
-      cxx = "NestedKeyOnly<" + cxx + ">";
-      const_cxx = "NestedKeyOnly<" + const_cxx + ">";
-      underscores = "NestedKeyOnly_" + underscores;
-      value_access = value_access + ".value";
+      be_global->header_ << "struct " << get_tag_name(name, nested_key_only) << " {};\n\n";
+    /*   base_wrapper.distinct_type_ = true; */
+    /* } else { */
+    /*   base_wrapper.forany_ = true; */
     }
 
     AST_Type* elem = resolveActualType(arr->base_type());
@@ -1274,30 +1486,30 @@ namespace {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     if (!nested_key_only) {
+      Wrapper wrapper(base_wrapper);
+      wrapper.is_const_ = false;
+      wrapper.done();
       Function set_default("set_default", "void");
-      set_default.addArg("stru", cxx);
+      set_default.addArg("arr", wrapper.wrapped_type_name());
       set_default.endArgs();
       string indent = "  ";
-      string var_name = "stru";
-      if (use_cxx11) {
-        be_global->impl_ << "  " << scoped(arr->name()) + "& arr = stru;\n";
-        var_name = "arr";
-      }
       NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-      be_global->impl_ << "    " << type_to_default(elem, var_name + nfl.index_);
+      be_global->impl_ <<
+        indent << type_to_default(elem, wrapper.value_access() + nfl.index_);
     }
     {
+      Wrapper wrapper(base_wrapper);
+      wrapper.done();
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
-      serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
+      serialized_size.addArg("arr", wrapper.wrapped_type_name());
       serialized_size.endArgs();
 
       std::vector<string> code;
       code.push_back("serialized_size_delimiter(encoding, size);");
       generate_dheader_code(code, !primitive, false);
 
-      be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
           "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
@@ -1319,9 +1531,10 @@ namespace {
             indent << "OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
-            be_global->impl_ << "size += " << value_access << nfl.index_ << ".size()";
+            be_global->impl_ << "size += " << wrapper.value_access() << nfl.index_ << ".size()";
           } else {
-            be_global->impl_ << "size += ACE_OS::strlen(" << value_access << nfl.index_ << ".in())";
+            be_global->impl_ << "size += ACE_OS::strlen(" << wrapper.value_access()
+              << nfl.index_ << ".in())";
           }
           be_global->impl_ << ((elem_cls & CL_WIDE)
             ? " * OpenDDS::DCPS::char16_cdr_size;\n"
@@ -1329,7 +1542,7 @@ namespace {
         } else if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           be_global->impl_ <<
             indent << cxx_elem << "_var tmp_var = " << cxx_elem
-            << "_dup(" << value_access << nfl.index_ << ");\n" <<
+            << "_dup(" << wrapper.value_access() << nfl.index_ << ");\n" <<
             indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
             indent << "serialized_size(encoding, size, tmp);\n";
         } else { // Struct, Sequence, Union, C++11 Array
@@ -1341,34 +1554,36 @@ namespace {
           }
           be_global->impl_ <<
             indent << "serialized_size(encoding, size, "
-              << pre << value_access << nfl.index_ << post << ");\n";
+              << pre << wrapper.value_access() << nfl.index_ << post << ");\n";
         }
       }
     }
     {
+      Wrapper wrapper(base_wrapper);
+      wrapper.done();
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
-      insertion.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
+      insertion.addArg("arr", wrapper.wrapped_type_name());
       insertion.endArgs();
 
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
-      code.push_back(string("serialized_size(strm.encoding(), total_size, ") + (use_cxx11 ? "wrap" : "arr") + ");");
+      code.push_back(
+        "serialized_size(strm.encoding(), total_size, " + wrapper.value_access() + ");");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
       generate_dheader_code(code, !primitive);
-      be_global->impl_ << const_unwrap;
-      const std::string accessor = use_cxx11 ? ".data()" : ".in()";
+      const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".in()");
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)
-          << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
+          << "_array(" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         {
           string indent = "  ";
@@ -1376,7 +1591,7 @@ namespace {
           if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
             be_global->impl_ <<
               indent << cxx_elem << "_var tmp_var = " << cxx_elem
-              << "_dup(" << value_access << nfl.index_ << ");\n" <<
+              << "_dup(" << wrapper.value_access() << nfl.index_ << ");\n" <<
               indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
               streamAndCheck("<< tmp", indent.size());
           } else {
@@ -1387,17 +1602,20 @@ namespace {
                 dds_generator::scoped_helper(arr->base_type()->name(), "_") + "_tag>(";
               suffix += ')';
             }
-            be_global->impl_ <<
-              streamAndCheck("<< " + pre + value_access + nfl.index_ + suffix , indent.size());
+            be_global->impl_ << streamAndCheck(
+              "<< " + pre + wrapper.value_access() + nfl.index_ + suffix, indent.size());
           }
         }
         be_global->impl_ << "  return true;\n";
       }
     }
     {
+      Wrapper wrapper(base_wrapper);
+      wrapper.is_const_ = false;
+      wrapper.done();
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
-      extraction.addArg(use_cxx11 ? "wrap" : "arr", cxx);
+      extraction.addArg("arr", wrapper.wrapped_type_name());
       extraction.endArgs();
       be_global->impl_ <<
         "  bool discard_flag = false;\n"
@@ -1412,15 +1630,14 @@ namespace {
         be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
       }
 
-      be_global->impl_ << unwrap;
-      const std::string accessor = use_cxx11 ? ".data()" : ".out()";
+      const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".out()");
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
         be_global->impl_ <<
           "  return strm.read_" << getSerializerName(elem)
-          << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
+          << "_array(" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         string indent = "  ";
         string suffix = "";
@@ -1436,29 +1653,33 @@ namespace {
           Intro intro;
           be_global->impl_ <<
             "    if (!" <<
-              streamCommon("", "", arr->base_type(), string(">> ") + value_access + nfl.index_, false, intro) <<
-              ") {\n";
+            streamCommon("", "", arr->base_type(),
+              string(">> ") + wrapper.value_access() + nfl.index_, false, intro)
+            << ") {\n";
         }
         if (try_construct == tryconstructfailaction_use_default) {
           if (elem_cls & CL_ARRAY) {
             be_global->impl_ <<
-              "      " << type_to_default(elem, value_access + nfl.index_) <<
+              "      " << type_to_default(elem, wrapper.value_access() + nfl.index_) <<
               "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           } else {
             be_global->impl_ <<
-              "      " << type_to_default(elem, value_access + nfl.index_ + suffix) <<
+              "      " << type_to_default(elem, wrapper.value_access() + nfl.index_ + suffix) <<
               "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           }
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
                    (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING) {
-            string check_not_empty = use_cxx11 ? "!" + value_access + nfl.index_ + ".empty()" : value_access + nfl.index_ + ".in()";
-            string get_length = use_cxx11 ? value_access + nfl.index_ + ".length()" : "ACE_OS::strlen(" + value_access + nfl.index_ + ".in())";
+            const std::string element_access = wrapper.value_access() + nfl.index_;
+            const std::string check_not_empty =
+              use_cxx11 ? "!" + element_access + ".empty()" : element_access + ".in()";
+            const std::string get_length =
+              use_cxx11 ? element_access + ".length()" : "ACE_OS::strlen(" + element_access + ".in())";
             string inout = use_cxx11 ? "" : ".inout()";
             be_global->impl_ <<
               "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
               bounded_arg(elem) << " < " << get_length << ")) {\n"
-              "          " << value_access << nfl.index_ << inout <<
+              "          " << element_access << inout <<
               (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ");\n") : ("[" + bounded_arg(elem) + "] = 0;\n")) <<
               "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
               "        }";
@@ -1480,7 +1701,8 @@ namespace {
           const string typedefname = scoped(arr->base_type()->name());
           be_global->impl_ <<
             indent << "} else {\n" <<
-            indent << "  " << typedefname << "_copy(" << value_access << nfl.index_ << ", tmp.in());\n";
+            indent << "  " << typedefname << "_copy(" <<
+              wrapper.value_access() << nfl.index_ << ", tmp.in());\n";
         }
         be_global->impl_ << "    }\n";
       }
@@ -1527,8 +1749,8 @@ namespace {
       NestedForLoops nfl("CORBA::ULong", "i", af.arr_, indent);
       be_global->impl_ << "    " << type_to_default(elem, var_name + nfl.index_);
     }
-    {
 
+    {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
@@ -1739,163 +1961,6 @@ namespace {
         "  return true;\n";
     }
   }
-
-  /**
-   * Returns true for a type if NestedKeyOnly serialization and normal
-   * serialization is the same for that type.
-   */
-  bool needs_nested_key_only(AST_Type* type)
-  {
-    type = resolveActualType(type);
-    if (get_special_struct(scoped(type->name()))) {
-      return false;
-    }
-    const Classification type_class = classify(type);
-    if (type_class & CL_ARRAY) {
-      return needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
-    } else if (type_class & CL_SEQUENCE) {
-      return needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
-    } else if (type_class & CL_STRUCTURE) {
-      AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
-      /// TODO: Possible optimization: If everything in a struct was a key
-      /// recursively, then we could return false.
-      if (struct_has_explicit_keys(struct_node)) {
-        return true;
-      }
-      const Fields fields(struct_node);
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (needs_nested_key_only((*i)->field_type())) {
-          return true;
-        }
-      }
-    } else if (type_class & CL_UNION) {
-      return be_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
-    }
-    return false;
-  }
-
-  std::string valid_var_name(std::string s)
-  {
-    size_t i;
-    while ((i = s.find(".")) != std::string::npos) {
-      s[i] = '_';
-    }
-    if (s.size() > 2 && s.substr(s.size() - 2, 2) == "()") {
-      s.erase(s.size() - 2);
-    }
-    return s;
-  }
-
-  std::string strip_shift_op(const std::string& s)
-  {
-    std::string rv = s;
-    const size_t shift_len = 3;
-    if (rv.size() > shift_len) {
-      const std::string first3 = rv.substr(0, shift_len);
-      if (first3 == "<< " || first3 == ">> ") {
-        rv.erase(0, 3);
-      }
-    }
-    return rv;
-  }
-
-  struct Wrapper {
-    AST_Type* const type_;
-    const std::string type_name_;
-    Intro& intro_;
-    const std::string to_wrap_;
-    const std::string fieldref_;
-    const std::string local_;
-    const bool is_const_;
-    const char* const const_str_;
-    bool nested_key_only_;
-    bool distinct_type_;
-    bool forany_;
-    bool dot_access_;
-
-    Wrapper(AST_Type* type, const std::string& type_name, Intro& intro,
-      const std::string& to_wrap, bool is_const = true)
-      : type_(type)
-      , type_name_(type_name)
-      , intro_(intro)
-      , to_wrap_(strip_shift_op(to_wrap))
-      , is_const_(is_const)
-      , const_str_(is_const ? "const " : "")
-      , nested_key_only_(false)
-      , distinct_type_(false)
-      , forany_(false)
-      , dot_access_(false)
-    {
-    }
-
-    Wrapper(AST_Type* type, const std::string& type_name, Intro& intro,
-      const std::string& fieldref, const std::string& local, bool is_const = true)
-      : type_(type)
-      , type_name_(type_name)
-      , intro_(intro)
-      , fieldref_(strip_shift_op(fieldref))
-      , local_(local)
-      , is_const_(is_const)
-      , const_str_(is_const ? "const " : "")
-      , nested_key_only_(false)
-      , distinct_type_(false)
-      , forany_(false)
-      , dot_access_(false)
-    {
-    }
-
-    std::string get_value()
-    {
-      std::string distinct_tag_name_suffix = "_tag";
-      std::string wrapper_type_name = type_name_;
-      std::string value;
-      if (to_wrap_.size()) {
-        value = to_wrap_;
-      } else {
-        value = fieldref_;
-        if (local_.size()) {
-          if (dot_access_) {
-            value += '.';
-          }
-          value += local_;
-        }
-      }
-
-      if (nested_key_only_ && needs_nested_key_only(type_)) {
-        wrapper_type_name = std::string("NestedKeyOnly<") + const_str_ + wrapper_type_name + ">";
-        distinct_tag_name_suffix = "_nested_key_only" + distinct_tag_name_suffix;
-        const std::string nko_arg = "(" + value + ")";
-        if (is_const_) {
-          value = wrapper_type_name + nko_arg;
-        } else {
-          value = valid_var_name(value) + "_nested_key_only";
-          intro_.insert(wrapper_type_name + " " + value + nko_arg + ";");
-        }
-      } else {
-        nested_key_only_ = false;
-      }
-
-      if (distinct_type_) {
-        const std::string tag = valid_var_name(value) + distinct_tag_name_suffix;
-        wrapper_type_name =
-          std::string("IDL::DistinctType<") + const_str_ + wrapper_type_name + ", " + tag + ">";
-        value = wrapper_type_name + "(" + value + ")";
-      }
-
-      if (forany_) {
-        const std::string var_name = valid_var_name(to_wrap_) + "_forany";
-        if (nested_key_only_) {
-          value += ".value";
-        }
-        intro_.insert(type_name_ + "_forany " + var_name +
-          "(const_cast<" + type_name_ + "_slice*>(" + value + "));");
-        value = var_name;
-      }
-
-      return value;
-    }
-  };
 
   // This function looks through the fields of a struct for the key
   // specified and returns the AST_Type associated with that key.
@@ -2299,15 +2364,16 @@ namespace {
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
-      Wrapper wrapper(type, scoped(type->name()), intro,
+      Wrapper wrapper(type, scoped(type->name()),
         prefix + "." + insert_cxx11_accessor_parens(name, is_union_member));
       wrapper.nested_key_only_ = wrap_nested_key_only;
-      if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
-        wrapper.forany_ = true;
-      } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) {
-        wrapper.distinct_type_ = true;
-      }
-      return indent + "serialized_size(encoding, size, " + wrapper.get_value() + ");\n";
+      /* if (!use_cxx11 && (fld_cls & CL_ARRAY)) { */
+      /*   wrapper.forany_ = true; */
+      /* } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) { */
+      /*   wrapper.distinct_type_ = true; */
+      /* } */
+      wrapper.done(&intro);
+      return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
   }
 
@@ -2319,15 +2385,16 @@ namespace {
     if (!af.anonymous()) {
       return false;
     }
-    Wrapper wrapper(af.type_, af.name_.c_str(), intro,
+    Wrapper wrapper(af.type_, af.name_.c_str(),
       prefix + "." + insert_cxx11_accessor_parens(af.name_));
     wrapper.nested_key_only_ = wrap_nested_key_only;
-    if (!af.cxx11()) {
-      wrapper.forany_ = true;
-    } else if (af.cls_ & CL_ARRAY) {
-      wrapper.distinct_type_ = true;
-    }
-    expr += indent + "serialized_size(encoding, size, " + wrapper.get_value() + ");\n";
+    /* if (!af.cxx11()) { */
+    /*   wrapper.forany_ = true; */
+    /* } else if (af.cls_ & CL_ARRAY) { */
+    /*   wrapper.distinct_type_ = true; */
+    /* } */
+    wrapper.done(&intro);
+    expr += indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     return true;
   }
 
@@ -2377,16 +2444,17 @@ namespace {
           return "(strm " + shift + ' ' + getWrapper(args, actual_type, WD_OUTPUT) + ')';
         }
       }
-      Wrapper wrapper(type, scoped(type->name()), intro, fieldref, local, dir == WD_OUTPUT);
+      Wrapper wrapper(type, scoped(type->name()), fieldref, local, dir == WD_OUTPUT);
       wrapper.nested_key_only_ = wrap_nested_key_only;
-      if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
-        wrapper.forany_ = true;
-      } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) {
-        wrapper.distinct_type_ = true;
-      } else {
-        wrapper.dot_access_ = true;
-      }
-      return "(strm " + shift + " " + wrapper.get_value() + ")";
+      /* if (!use_cxx11 && (fld_cls & CL_ARRAY)) { */
+      /*   wrapper.forany_ = true; */
+      /* } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) { */
+      /*   wrapper.distinct_type_ = true; */
+      /* } else { */
+      /*   wrapper.dot_access_ = true; */
+      /* } */
+      wrapper.done(&intro);
+      return "(strm " + shift + " " + wrapper.ref() + ")";
     }
   }
 
@@ -3497,13 +3565,23 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     Function set_default("set_default", "void");
     set_default.addArg("stru", cxx + "&");
     set_default.endArgs();
+    std::ostringstream contents;
+    Intro intro;
+    printf("gen_struct set_default\n");
     for (size_t i = 0; i < fields.size(); ++i) {
-      string field_name = string("stru.") + fields[i]->local_name()->get_string();
+      AST_Field* const field = fields[i];
+      AST_Type* const type = field->field_type();
+      string field_name = string("stru.") + field->local_name()->get_string();
       if (use_cxx11) {
         field_name += "()";
       }
-      be_global->impl_ << "  " << type_to_default(fields[i]->field_type(), field_name, fields[i]->field_type()->anonymous());
+      Wrapper wrapper(type, scoped(type->name()), field_name, false);
+      wrapper.done(&intro);
+      contents << "/* " << type << " " << wrapper.ref() << " */\n";
+      contents << type_to_default(type, wrapper.ref(), type->anonymous());
     }
+    intro.join(be_global->impl_, "  ");
+    be_global->impl_ << contents.str();
   }
 
   const special_struct* special_struct_ptr = get_special_struct(cxx);
