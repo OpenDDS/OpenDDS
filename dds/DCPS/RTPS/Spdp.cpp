@@ -633,11 +633,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
 
         // The remote needs to see our SPDP before attempting authentication.
-        if (from_relay) {
-          tport_->write_i(guid, SpdpTransport::SEND_TO_RELAY);
-        } else {
-          tport_->write_i(guid, SpdpTransport::SEND_TO_LOCAL);
-        }
+        tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
 
         attempt_authentication(iter, true);
 
@@ -1522,9 +1518,6 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     purge_handshake_deadlines(iter);
   }
 
-  // TODO: Does a secure remote always send a participant token?
-  // If not, then the following call needs to be copied somewhere else.
-
   sedp_.associate(iter->second.pdata_);
 
   return true;
@@ -1731,6 +1724,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
 
   // notify Sedp of association
   // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
+
+  if (iter->second.crypto_tokens_.length() == 0) {
+    sedp_.associate(iter->second.pdata_);
+  }
 
   sedp_.generate_remote_crypto_handles(iter->second.pdata_);
   sedp_.associate_volatile(iter->second.pdata_);

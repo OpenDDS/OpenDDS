@@ -984,12 +984,12 @@ void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
 
 #endif // OPENDDS_SECURITY
 
-void Sedp::disassociate_helper(BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
+void Sedp::disassociate_helper(BuiltinEndpointSet_t& associated_endpoints, const CORBA::ULong flags,
                                const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
 {
-  if (avail & flags) {
+  if (associated_endpoints & flags) {
     client.disassociate(make_id(id, ent));
-    avail &= ~flags;
+    associated_endpoints &= ~flags;
   }
 }
 
@@ -1091,8 +1091,6 @@ void Sedp::associate_secure_reader_to_writer(const RepoId& remote_writer)
   using namespace DDS::Security;
 
   ParticipantData_t& pdata = spdp_.get_participant_data(remote_writer);
-
-  using namespace DDS::Security;
 
   DCPS::AssociationData peer;
   create_association_data_proto(peer, pdata);
@@ -4717,7 +4715,7 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
     return false;
   }
 
-  if (is_secure(w_iter->first)) {
+  if (DCPS::GuidConverter(msg.source_endpoint_guid).isBuiltinDomainEntity()) {
     associate_secure_reader_to_writer(w_iter->first);
   }
 
@@ -4778,7 +4776,7 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
     return false;
   }
 
-  if (is_secure(r_iter->first)) {
+  if (DCPS::GuidConverter(msg.source_endpoint_guid).isBuiltinDomainEntity()) {
     associate_secure_writer_to_reader(r_iter->first);
   }
 
