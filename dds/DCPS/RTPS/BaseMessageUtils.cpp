@@ -210,7 +210,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
   }
 
   const CORBA::ULong last_index = num_ulongs - 1;
-  for (CORBA::ULong i = 0; i < last_index; ++i) {
+  for (size_t i = 0; i < last_index; ++i) {
     if (snSet.bitmap[i]) {
       return true;
     }
