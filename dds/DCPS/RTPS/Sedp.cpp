@@ -989,7 +989,7 @@ void Sedp::disassociate_helper(BuiltinEndpointSet_t& avail, const CORBA::ULong f
 {
   if (avail & flags) {
     client.disassociate(make_id(id, ent));
-    avail ^= flags;
+    avail &= ~flags;
   }
 }
 
