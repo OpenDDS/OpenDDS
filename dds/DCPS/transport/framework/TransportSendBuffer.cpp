@@ -132,6 +132,7 @@ SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
     }
   }
 
+  destinations_.erase(buffer_iter->first);
   buffers_.erase(buffer_iter);
 }
 
@@ -162,6 +163,7 @@ SingleSendBuffer::remove_i(BufferMap::iterator buffer_iter, BufferVec& removed)
     }
   }
 
+  destinations_.erase(buffer_iter->first);
   buffers_.erase(buffer_iter);
 }
 
