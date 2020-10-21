@@ -13,7 +13,7 @@ using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 bool verbose = false;
-bool expect_to_fail = false;
+bool expect_to_match = true;
 
 int key_value = -1;
 
@@ -436,7 +436,7 @@ bool check_inconsistent_topic_status(Topic_var topic)
   if (retcode != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
     return false;
-  } else if (status.total_count != (expect_to_fail ? 1 : 0)) {
+  } else if (status.total_count != (expect_to_match ? 0 : 1)) {
     ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
     return false;
   }
@@ -485,11 +485,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1;
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
-      expect_to_fail = true;
+      expect_to_match = false;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
     }
+  }
+
+  if (!(writer ^ reader)) {
+    ACE_ERROR((LM_ERROR, "ERROR: Invalid endpoint arguments\n"));
+    return 1;
   }
 
   bool failed = false;
@@ -574,7 +579,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     failed = !check_inconsistent_topic_status(topic);
 
-    if (!failed && !expect_to_fail) {
+    if (failed) {
+      ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
+    } else if (expect_to_match) {
       if (type == "PlainCdrStruct") {
         write_plain_cdr_struct(dw);
       } else if (type == "FinalStruct") {
@@ -604,9 +611,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     ACE_OS::sleep(ACE_Time_Value(3, 0));
 
-    if (failed) {
-      ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
-    }
   } else if (reader) {
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
 
@@ -624,7 +628,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     failed = !check_inconsistent_topic_status(topic);
 
-    if (!failed && !expect_to_fail) {
+    if (failed) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %s\n", type.c_str()));
+    } else if (expect_to_match) {
       if (type == "PlainCdrStruct") {
         failed = !(read_plain_cdr_struct(dr) == RETCODE_OK);
       } else if (type == "AppendableStruct") {
@@ -650,10 +656,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (type == "AppendableStructWithDependency") {
         failed = !(read_appendable_struct_with_dependency(dr) == RETCODE_OK);
       }
-    }
-
-    if (failed) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %s\n", type.c_str()));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
