@@ -289,6 +289,23 @@ namespace {
     return rv;
   }
 
+  const char* get_shift_op(const std::string& s)
+  {
+    const char* const out = "<< ";
+    const char* const in = ">> ";
+    const size_t shift_len = 3;
+    if (s.size() > shift_len) {
+      const std::string first3 = s.substr(0, shift_len);
+      if (first3 == in) {
+        return in;
+      }
+      if (first3 == out) {
+        return out;
+      }
+    }
+    return "";
+  }
+
   std::string get_tag_name(UTL_ScopedName* name, bool nested_key_only)
   {
     return dds_generator::scoped_helper(name, "_") +
@@ -306,6 +323,7 @@ namespace {
     AST_Type* const type_;
     const std::string type_name_;
     const std::string to_wrap_;
+    const char* const shift_op_;
     const std::string fieldref_;
     const std::string local_;
     bool is_const_;
@@ -316,6 +334,7 @@ namespace {
       : type_(type)
       , type_name_(type_name)
       , to_wrap_(strip_shift_op(to_wrap))
+      , shift_op_(get_shift_op(to_wrap))
       , is_const_(is_const)
       , nested_key_only_(false)
       , done_(false)
@@ -326,6 +345,7 @@ namespace {
       const std::string& fieldref, const std::string& local, bool is_const = true)
       : type_(type)
       , type_name_(type_name)
+      , shift_op_("")
       , fieldref_(strip_shift_op(fieldref))
       , local_(local)
       , is_const_(is_const)
@@ -349,15 +369,12 @@ namespace {
       } else {
         ref_ = fieldref_;
         if (local_.size()) {
-          if (!forany) {
-            ref_ += '.';
-          }
-          ref_ += local_;
+          ref_ += '.' + local_;
         }
       }
 
       if (forany) {
-        const std::string var_name = valid_var_name(to_wrap_) + "_forany";
+        const std::string var_name = valid_var_name(ref_) + "_forany";
         const std::string forany_type = type_name_ + "_forany";
         wrapped_type_name_ = type_name_ + "_forany";
         if (intro) {
@@ -405,26 +422,31 @@ namespace {
       done_ = true;
     }
 
-    std::string ref()
+    std::string ref() const
     {
       ACE_ASSERT(done_);
       return ref_;
     }
 
-    std::string wrapped_type_name()
+    std::string wrapped_type_name() const
     {
       ACE_ASSERT(done_);
       return wrapped_type_name_;
     }
 
-    std::string get_var_name(const std::string& var_name)
+    std::string get_var_name(const std::string& var_name) const
     {
       return var_name.size() ? var_name : to_wrap_;
     }
 
-    std::string value_access(const std::string& var_name = "")
+    std::string value_access(const std::string& var_name = "") const
     {
       return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+    }
+
+    std::string stream() const
+    {
+      return shift_op_ + ref();
     }
 
   private:
@@ -690,7 +712,7 @@ namespace {
       if (cls & CL_BOUNDED) {
         AST_Type* elem = resolveActualType(seq->base_type());
         const string args = string("tempvar[0]") + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
-        be_global->impl_ << "        strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ";\n";
+        be_global->impl_ << "        strm >> " << getWrapper(args, elem, WD_INPUT) << ";\n";
       } else {
         const string getbuffer =
           (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
@@ -1036,7 +1058,7 @@ namespace {
         } else if (elem_cls & CL_STRING) {
           if (elem_cls & CL_BOUNDED) {
             const string args = value_access + "[i]" + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
-            be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
+            be_global->impl_ << "    if (!(strm >> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
           } else {
             const string getbuffer =
               (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
@@ -1385,7 +1407,7 @@ namespace {
         } else if (sf.as_cls_ & CL_STRING) {
           if (sf.as_cls_ & CL_BOUNDED) {
             const string args = string("seq[i]") + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(sf.as_act_);
-            be_global->impl_ << "    if (!(strm " << ">> " << getWrapper(args, sf.as_act_, WD_INPUT) << ")) {\n";
+            be_global->impl_ << "    if (!(strm >> " << getWrapper(args, sf.as_act_, WD_INPUT) << ")) {\n";
           } else {
             const string getbuffer =
               (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
@@ -2370,20 +2392,21 @@ namespace {
     }
   }
 
-  bool findSizeAnonymous(
-    const std::string& indent, AST_Field* field, const string& prefix,
-    bool wrap_nested_key_only, Intro& intro, string& expr)
+  std::string generate_field_serialized_size(
+    const std::string& indent, AST_Field* field, const std::string& prefix,
+    bool wrap_nested_key_only, Intro& intro)
   {
     FieldInfo af(*field);
-    if (!af.anonymous()) {
-      return false;
+    if (af.anonymous()) {
+      Wrapper wrapper(af.type_, af.scoped_type_,
+        prefix + "." + insert_cxx11_accessor_parens(af.name_));
+      wrapper.nested_key_only_ = wrap_nested_key_only;
+      wrapper.done(&intro);
+      return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
-    Wrapper wrapper(af.type_, af.name_.c_str(),
-      prefix + "." + insert_cxx11_accessor_parens(af.name_));
-    wrapper.nested_key_only_ = wrap_nested_key_only;
-    wrapper.done(&intro);
-    expr += indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
-    return true;
+    return findSizeCommon(
+      indent, field->local_name()->get_string(), field->field_type(), prefix,
+      wrap_nested_key_only, intro);
   }
 
   // common to both fields (in structs) and branches (in unions)
@@ -2428,7 +2451,7 @@ namespace {
           local += ".in()";
         }
         if ((fld_cls & CL_BOUNDED) && !printing) {
-          const string args = (fieldref + local).substr(3) + ", " + bounded_arg(actual_type);
+          const string args = (fieldref + '.' + local).substr(3) + ", " + bounded_arg(actual_type);
           return "(strm " + shift + ' ' + getWrapper(args, actual_type, WD_OUTPUT) + ')';
         }
       }
@@ -2439,34 +2462,21 @@ namespace {
     }
   }
 
-  bool streamAnonymous(
-    AST_Field* field, const string& shift, const std::string& cpp_type,
-    bool wrap_nested_key_only, Intro& intro, string& expr)
+  std::string generate_field_stream(
+    const std::string& indent, AST_Field* field, const std::string& prefix,
+    bool wrap_nested_key_only, Intro& intro)
   {
-    /* TODO(iguessthislldo)
     FieldInfo af(*field);
-    if (!af.anonymous()) {
-      return false;
+    if (af.anonymous()) {
+      Wrapper wrapper(af.type_, af.scoped_type_,
+        prefix + "." + insert_cxx11_accessor_parens(af.name_));
+      wrapper.nested_key_only_ = wrap_nested_key_only;
+      wrapper.done(&intro);
+      return "(strm " + wrapper.stream() + ")";
     }
-    string local = insert_cxx11_accessor_parens(af.name_, false);
-    if (af.cxx11()) {
-      expr += "(strm " + shift + " " + ((shift == "<<") ? af.const_ref_ : af.ref_)
-        + wrap_in_nested_key_only(af.scoped_type_, cpp_type + "." + local, wrap_nested_key_only) + ")";
-    } else {
-      string fieldref = cpp_type + ((af.cls_ & CL_ARRAY) ? '_' : '.');
-      if (af.cls_ & CL_ARRAY) {
-        fieldref = getArrayForany(
-          intro, cpp_type.c_str(), af.name_.c_str(), af.scoped_type_, wrap_nested_key_only);
-        local = "";
-      }
-      expr += "(strm " + shift + " " +
-        wrap_in_nested_key_only(
-          af.type_, af.scoped_type_, fieldref + local, wrap_nested_key_only, output, intro) +
-        ')';
-    }
-    */
-    expr += "true";
-    return true;
+    return streamCommon(
+      indent, field->local_name()->get_string(), field->field_type(), prefix,
+      wrap_nested_key_only, intro);
   }
 
   bool isBinaryProperty_t(const string& cxx)
@@ -3199,12 +3209,8 @@ namespace {
           expr +=
             "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
         }
-        if (!findSizeAnonymous(indent, field, "stru" + value_access,
-            wrap_nested_key_only, intro, expr)) {
-          expr += findSizeCommon(
-            indent, field_name, field->field_type(), "stru" + value_access,
-            wrap_nested_key_only, intro);
-        }
+        expr += generate_field_serialized_size(
+          indent, field, "stru" + value_access, wrap_nested_key_only, intro);
         if (!cond.empty()) {
           expr += "  }\n";
         }
@@ -3239,7 +3245,6 @@ namespace {
       Intro intro = rtpsCustom.intro_;
       const std::string indent = "  ";
       if (is_mutable) {
-        string expr;
         const std::string mutable_indent = indent + "  ";
         mutable_fields <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
@@ -3253,29 +3258,18 @@ namespace {
           bool is_key = false;
           be_global->check_key(field, is_key);
 
-          mutable_fields << "\n";
-          expr = "";
-          if (!findSizeAnonymous(mutable_indent, field, "stru" + value_access,
-              wrap_nested_key_only, intro, expr)) {
-            expr += findSizeCommon(
-              mutable_indent, field_name, field->field_type(), "stru" + value_access,
-              wrap_nested_key_only, intro);
-          }
-          mutable_fields << expr << "\n";
-          expr = "";
-          mutable_fields <<
+          mutable_fields
+            << generate_field_serialized_size(
+              mutable_indent, field, "stru" + value_access, wrap_nested_key_only, intro)
+            << "\n"
             "    if (!strm.write_parameter_id("
               << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
             "      return false;\n"
             "    }\n"
             "    size = 0;\n"
-            "    if (!";
-          if (!streamAnonymous(field, "<<", "stru" + value_access,  wrap_nested_key_only, intro, expr)) {
-            expr += streamCommon(
-              mutable_indent, field_name, field->field_type(),
-              "<< stru" + value_access, wrap_nested_key_only, intro, cpp_name);
-          }
-          mutable_fields << expr << ") {\n"
+            "    if (!" << generate_field_stream(
+              mutable_indent, field, "<< stru" + value_access, wrap_nested_key_only, intro)
+            << ") {\n"
             "    return false;\n"
             "  }\n";
         }
@@ -3297,12 +3291,8 @@ namespace {
         if (!cond.empty()) {
           expr += "(!(" + cond + ") || ";
         }
-        if (!streamAnonymous(field, "<<", "stru" + value_access,
-            wrap_nested_key_only, intro, expr)) {
-          expr += streamCommon(
-            indent, field_name, field->field_type(), "<< stru" + value_access,
-            wrap_nested_key_only, intro, cpp_name);
-        }
+        expr += generate_field_stream(
+          indent, field, "<< stru" + value_access, wrap_nested_key_only, intro);
         if (!cond.empty()) {
           expr += ")";
         }
@@ -3380,13 +3370,8 @@ namespace {
             string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
             "      case " << id << ": {\n"
-            "        if (!";
-          expr = "";
-          if (!streamAnonymous(field, ">>",  "stru" + value_access, wrap_nested_key_only, intro, expr)) {
-            expr += streamCommon(indent, field->local_name()->get_string(), field->field_type(),
-              ">> stru" + value_access, wrap_nested_key_only, intro, cpp_name);
-          }
-          cases << expr << ") {\n";
+            "        if (!" << generate_field_stream(
+            indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
           AST_Type* field_type = resolveActualType(field->field_type());
           Classification fld_cls = classify(field_type);
 
@@ -3500,12 +3485,8 @@ namespace {
         } else if (is_appendable) {
           expr += "  if (!";
         }
-        if (!streamAnonymous(field, ">>",  "stru" + value_access,
-            wrap_nested_key_only, intro, expr)) {
-          expr += streamCommon(
-            indent, field_name, field->field_type(), ">> stru" + value_access,
-            wrap_nested_key_only, intro, cpp_name);
-        }
+        expr += generate_field_stream(
+          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
         if (is_appendable) {
           expr += ") {\n"
             "    return false;\n"
