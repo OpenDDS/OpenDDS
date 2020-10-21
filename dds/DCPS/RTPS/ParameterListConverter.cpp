@@ -963,6 +963,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredWriterData& writer_data,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
   // Collect the rtps_udp locators before appending them to allLocators
@@ -1112,7 +1113,9 @@ bool from_param_list(const ParameterList& param_list,
         // ignore
         break;
       case PID_XTYPES_TYPE_INFORMATION:
-        extract_type_info_param(param, type_info);
+        if (use_xtypes) {
+          extract_type_info_param(param, type_info);
+        }
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -1316,6 +1319,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
   // Collect the rtps_udp locators before appending them to allLocators
@@ -1460,7 +1464,9 @@ bool from_param_list(const ParameterList& param_list,
         // ignore
         break;
       case PID_XTYPES_TYPE_INFORMATION:
-        extract_type_info_param(param, type_info);
+        if (use_xtypes) {
+          extract_type_info_param(param, type_info);
+        }
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -1555,9 +1561,10 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredPublication_SecurityWrapper& wrapper,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, type_info) &&
+  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
                from_param_list(param_list, wrapper.security_info) &&
                from_param_list(param_list, wrapper.data_tags);
 
@@ -1580,9 +1587,10 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, type_info) &&
+  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
                from_param_list(param_list, wrapper.security_info) &&
                from_param_list(param_list, wrapper.data_tags);
 

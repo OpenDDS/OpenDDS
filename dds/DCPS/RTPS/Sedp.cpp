@@ -4181,7 +4181,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     DCPS::RcHandle<MsgDiscoveredPublication> msg = make_rch<MsgDiscoveredPublication>(rchandle_from(&sedp_), id);
     DiscoveredPublication& wdata = msg->data();
-    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, wdata.type_info_)) {
+    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4218,7 +4218,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     DCPS::RcHandle<MsgDiscoveredPublicationSecure> msg = make_rch<MsgDiscoveredPublicationSecure>(rchandle_from(&sedp_), id);
     DiscoveredPublication_SecurityWrapper& wdata_secure = msg->data();
 
-    if (!ParameterListConverter::from_param_list(data, wdata_secure, wdata_secure.type_info)) {
+    if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4252,7 +4252,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     DCPS::RcHandle<MsgDiscoveredSubscription> msg = make_rch<MsgDiscoveredSubscription>(rchandle_from(&sedp_), id);
     DiscoveredSubscription& rdata = msg->data();
-    if (!ParameterListConverter::from_param_list(data, rdata.reader_data_, rdata.type_info_)) {
+    if (!ParameterListConverter::from_param_list(data, rdata.reader_data_, sedp_.use_xtypes_, rdata.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4292,7 +4292,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     DCPS::RcHandle<MsgDiscoveredSubscriptionSecure> msg = make_rch<MsgDiscoveredSubscriptionSecure>(rchandle_from(&sedp_), id);
     DiscoveredSubscription_SecurityWrapper& rdata_secure = msg->data();
 
-    if (!ParameterListConverter::from_param_list(data, rdata_secure, rdata_secure.type_info)) {
+    if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")

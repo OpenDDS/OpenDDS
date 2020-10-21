@@ -119,6 +119,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredWriterData& writer_data,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 // OpenDDS::DCPS::DiscoveredReaderData
@@ -133,6 +134,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 #ifdef OPENDDS_SECURITY
@@ -168,6 +170,7 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredPublication_SecurityWrapper& wrapper,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 // DiscoveredSubscription_SecurityWrapper
@@ -182,6 +185,7 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 // Extensions for ICE
