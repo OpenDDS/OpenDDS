@@ -172,6 +172,7 @@ jobs:
       maximumCpuCount: true
   - script: |
       perl "%ACE_ROOT%/bin/mwc.pl" -type vs2017 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
+    condition: ne(variables['BuildConfiguration'], 'Debug')
     displayName: Generate Messenger sln files
   - task: VSBuild@1
     displayName: Build Messenger Test
@@ -179,15 +180,14 @@ jobs:
       solution: $(DDS_ROOT)\tests\DCPS\Messenger\Messenger.sln
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
+    condition: ne(variables['BuildConfiguration'], 'Debug')
   - task: VSBuild@1
     displayName: Build Messenger Example
     inputs:
       solution: $(DDS_ROOT)\DevGuideExamples\DCPS\Messenger\Messenger.sln
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
-  - script: |
-      perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
-    displayName: Compile and run CMake tests
+    condition: ne(variables['BuildConfiguration'], 'Debug')
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd tests\DCPS\Messenger
@@ -198,6 +198,9 @@ jobs:
       cd DevGuideExamples\DCPS\Messenger
       perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
     displayName: Run Examples DCPS Messenger
+  - script: |
+      perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
+    displayName: Compile and run CMake tests
 
 - job: Linux
   timeoutInMinutes: 120
