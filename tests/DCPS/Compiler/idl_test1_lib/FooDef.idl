@@ -6,13 +6,14 @@ const unsigned long tao_version = __TAO_IDL;
 #ifdef __OPENDDS_IDL  // need to hide this from tao_idl
 const unsigned long dds_version = __OPENDDS_IDL;
 #endif
+
 module enumunion {
 
   enum EnumType {A1, A2, A3};
 
   union UnionType switch (EnumType) {
-    case A1: boolean b;
     case A2: short s;
+    case A1: boolean b;
     case A3: string str;
   };
 };
