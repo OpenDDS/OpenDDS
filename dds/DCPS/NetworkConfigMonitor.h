@@ -92,6 +92,17 @@ struct NetworkInterfaceIndex {
   const int index_;
 };
 
+struct NetworkInterfaceName {
+  explicit NetworkInterfaceName(const OPENDDS_STRING& name) : name_(name) {}
+
+  bool operator()(const NetworkInterface& nic)
+  {
+    return name_ == nic.name();
+  }
+
+  const OPENDDS_STRING name_;
+};
+
 class NetworkConfigListener : public virtual RcObject {
 public:
   virtual void add_interface(const NetworkInterface& interface)
@@ -134,8 +145,14 @@ public:
 protected:
   void add_interface(const NetworkInterface& nic);
   void remove_interface(int index);
+  void remove_interface(const OPENDDS_STRING& name);
+  void publish_remove_interface(const NetworkInterface& nic);
   void add_address(int index, const ACE_INET_Addr& address);
+  void add_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address);
+  void publish_add_address(const NetworkInterface& nic, const ACE_INET_Addr& address);
   void remove_address(int index, const ACE_INET_Addr& address);
+  void remove_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address);
+  void publish_remove_address(const NetworkInterface& nic, const ACE_INET_Addr& address);
 
 private:
   typedef OPENDDS_SET(NetworkConfigListener_wrch) Listeners;

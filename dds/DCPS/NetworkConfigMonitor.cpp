@@ -157,10 +157,32 @@ void NetworkConfigMonitor::remove_interface(int index)
     }
   }
 
-  if (!publish) {
-    return;
+  if (publish) {
+    publish_remove_interface(nic);
+  }
+}
+
+void NetworkConfigMonitor::remove_interface(const OPENDDS_STRING& name)
+{
+  NetworkInterface nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (pos != network_interfaces_.end()) {
+      nic = *pos;
+      network_interfaces_.erase(pos);
+      publish = true;
+    }
   }
 
+  if (publish) {
+    publish_remove_interface(nic);
+  }
+}
+
+void NetworkConfigMonitor::publish_remove_interface(const NetworkInterface& nic)
+{
   Listeners listeners;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
@@ -190,10 +212,33 @@ void NetworkConfigMonitor::add_address(int index, const ACE_INET_Addr& address)
     }
   }
 
-  if (!publish) {
-    return;
+  if (publish) {
+    publish_add_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::add_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address)
+{
+  NetworkInterface nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (nic_pos != network_interfaces_.end()) {
+      if (nic_pos->add_address(address)) {
+        nic = *nic_pos;
+        publish = true;
+      }
+    }
   }
 
+  if (publish) {
+    publish_add_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::publish_add_address(const NetworkInterface& nic, const ACE_INET_Addr& address)
+{
   Listeners listeners;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
@@ -223,10 +268,33 @@ void NetworkConfigMonitor::remove_address(int index, const ACE_INET_Addr& addres
     }
   }
 
-  if (!publish) {
-    return;
+  if (publish) {
+    publish_remove_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::remove_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address)
+{
+  NetworkInterface nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (nic_pos != network_interfaces_.end()) {
+      if (nic_pos->remove_address(address)) {
+        nic = *nic_pos;
+        publish = true;
+      }
+    }
   }
 
+  if (publish) {
+    publish_remove_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::publish_remove_address(const NetworkInterface& nic, const ACE_INET_Addr& address)
+{
   Listeners listeners;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
