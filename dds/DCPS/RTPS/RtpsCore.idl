@@ -568,7 +568,6 @@ module OpenDDS {
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
-      BuiltinEndpointSet_t associated_endpoints;
     };
 
     // top-level data type for SPDP
@@ -576,6 +575,7 @@ module OpenDDS {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
+      BuiltinEndpointSet_t associated_endpoints;
     };
 
     /* Type used to hold data exchanged between Participants.

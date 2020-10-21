@@ -101,6 +101,8 @@ public:
   void associate_preauth(Security::SPDPdiscoveredParticipantData& pdata);
   void associate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
   void rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& pdata,
+                                  const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr);
   void generate_remote_crypto_handles(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_reader_to_writer(const DCPS::RepoId& remote_writer);
   void associate_secure_writer_to_reader(const DCPS::RepoId& remote_reader);
@@ -204,21 +206,6 @@ private:
   protected:
     DCPS::WeakRcHandle<Sedp> sedp_;
     const DCPS::MessageId id_;
-  };
-
-  class MsgParticipantData : public MsgBase {
-  public:
-    MsgParticipantData(const DCPS::WeakRcHandle<Sedp>& sedp,
-                       DCPS::MessageId id,
-                       const ParticipantData_t& data)
-      : MsgBase(sedp, id)
-      , data_(data)
-    {}
-
-    void execute();
-
-  private:
-    const ParticipantData_t data_;
   };
 
   class MsgDiscoveredPublication : public MsgBase {

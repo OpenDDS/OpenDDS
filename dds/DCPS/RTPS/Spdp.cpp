@@ -550,6 +550,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
+  pdata.associated_endpoints =
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
   const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
 
@@ -728,6 +730,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
           sedp_.update_locators(pdata);
         }
+        pdata.associated_endpoints = iter->second.pdata_.associated_endpoints;
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
 
@@ -1519,6 +1522,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
 
   sedp_.associate(iter->second.pdata_);
+  sedp_.associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
 
   return true;
 }
@@ -1725,8 +1729,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   // notify Sedp of association
   // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
 
+
   if (iter->second.crypto_tokens_.length() == 0) {
     sedp_.associate(iter->second.pdata_);
+    sedp_.associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
   }
 
   sedp_.generate_remote_crypto_handles(iter->second.pdata_);
@@ -1975,12 +1981,12 @@ Spdp::build_local_pdata(
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
       qos_.property,
       {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
-      0 // associated_endpoints_
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    }
+    },
+    0 // associated_endpoints_
   };
 
   return pdata;
