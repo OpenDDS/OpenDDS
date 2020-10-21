@@ -390,6 +390,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
   uint64_t total_missing_data_count = 0;
   Builder::TimeStamp max_discovery_time_delta = ZERO;
 
+  Bench::SimpleStatBlock consolidated_discovery_delta_stats;
   Bench::SimpleStatBlock consolidated_latency_stats;
   Bench::SimpleStatBlock consolidated_jitter_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
@@ -419,6 +420,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
 
           const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
 
+          Bench::ConstPropertyStatBlock dr_discovery_delta(dr_report.properties, "discovery_delta");
           Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
           Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
@@ -467,6 +469,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
             total_missing_data_count += missing_data_count_prop->value.ull_prop();
           }
 
+          consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dr_discovery_delta.to_simple_stat_block());
           consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
           consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
@@ -493,7 +496,11 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
     "Total Undermatched Readers: " << total_undermatched_readers <<
     (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
     "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
-  result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+  //result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+
+  result_out << std::endl;
+
+  consolidated_discovery_delta_stats.pretty_print(result_out, "discovery time delta");
 
   result_out << std::endl;
 

@@ -195,11 +195,17 @@ WorkerDataReaderListener::on_subscription_matched(
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
+    } else if (static_cast<size_t>(status.current_count) > match_count_) {
+      if (datareader_) {
+        discovery_delta_stat_block_->update(Builder::to_seconds_double(Builder::get_hr_time() - enable_time_->value.time_prop()));
+      }
     }
   } else {
     if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datareader_) {
-        last_discovery_time_->value.time_prop(Builder::get_hr_time());
+        auto now = Builder::get_hr_time();
+        last_discovery_time_->value.time_prop(now);
+        discovery_delta_stat_block_->update(Builder::to_seconds_double(now - enable_time_->value.time_prop()));
       }
     }
   }
@@ -227,6 +233,8 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
   history_depth_ = datareader_->get_qos().history.depth;
   reliable_ = datareader_->get_qos().reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
+  enable_time_ =
+    get_property(datareader_->get_report().properties, "enable_time", Builder::PVK_TIME);
   last_discovery_time_ =
     get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
 
@@ -253,6 +261,8 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
     get_property(global_properties, "default_stat_median_buffer_size", Builder::PVK_ULL);
   size_t buffer_size = buffer_size_prop ? static_cast<size_t>(buffer_size_prop->value.ull_prop()) : DEFAULT_STAT_BLOCK_BUFFER_SIZE;
 
+  discovery_delta_stat_block_ =
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "discovery_delta", buffer_size);
   latency_stat_block_ =
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", buffer_size);
   jitter_stat_block_ =
@@ -362,6 +372,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     duplicate_data_details_->value.string_prop(duplicate_data_details.str().c_str());
     missing_data_count_->value.ull_prop(missing_data_count);
     missing_data_details_->value.string_prop(missing_data_details.str().c_str());
+
+    discovery_delta_stat_block_->finalize();
 
     latency_stat_block_->finalize();
     jitter_stat_block_->finalize();
