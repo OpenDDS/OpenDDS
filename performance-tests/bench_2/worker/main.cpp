@@ -229,7 +229,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   set_global_properties(config.properties);
 
-  Bench::WorkerReport worker_report;
+  Bench::WorkerReport worker_report{};
   Builder::ProcessReport& process_report = worker_report.process_report;
 
   const size_t THREAD_POOL_SIZE = 4;
@@ -475,10 +475,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
         Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+
         const Builder::TimeStamp dw_enable_time =
           get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
         const Builder::TimeStamp dw_last_discovery_time =
           get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+
         if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
           auto delta = dw_last_discovery_time - dw_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {

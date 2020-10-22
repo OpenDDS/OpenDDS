@@ -2,7 +2,6 @@
 
 #include "DataHandler.h"
 #include "DataReaderListener.h"
-#include "BenchTypeSupportImpl.h"
 #include "PropertyStatBlock.h"
 
 #include "dds/DCPS/DisjointSequence.h"

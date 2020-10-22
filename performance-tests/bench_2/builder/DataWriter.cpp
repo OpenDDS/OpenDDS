@@ -95,14 +95,15 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   last_discovery_time_->value.time_prop(Builder::ZERO);
 
   create_time_->value.time_prop(get_hr_time());
-  datawriter_ = publisher_->create_datawriter(topic_, qos, listener_, listener_status_mask_);
-  if (CORBA::is_nil(datawriter_.in())) {
-    throw std::runtime_error("datawriter creation failed");
-  }
 
   DDS::PublisherQos publisher_qos;
   if (publisher_->get_qos(publisher_qos) == DDS::RETCODE_OK && publisher_qos.entity_factory.autoenable_created_entities == true) {
     enable_time_->value.time_prop(create_time_->value.time_prop());
+  }
+
+  datawriter_ = publisher_->create_datawriter(topic_, qos, listener_, listener_status_mask_);
+  if (CORBA::is_nil(datawriter_.in())) {
+    throw std::runtime_error("datawriter creation failed");
   }
 
   if (!transport_config_name_.empty()) {

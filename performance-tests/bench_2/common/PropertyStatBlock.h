@@ -8,6 +8,8 @@
 
 namespace Bench {
 
+const size_t DEFAULT_STAT_BLOCK_BUFFER_SIZE = 1000;
+
 struct Bench_Common_Export SimpleStatBlock {
   SimpleStatBlock();
 

@@ -476,6 +476,15 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
           consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
         }
       }
+      for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
+        for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
+
+          const Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+
+          Bench::ConstPropertyStatBlock dw_discovery_delta(dw_report.properties, "discovery_delta");
+          consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dw_discovery_delta.to_simple_stat_block());
+        }
+      }
     }
   }
 

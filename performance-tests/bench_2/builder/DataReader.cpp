@@ -84,14 +84,15 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   last_discovery_time_->value.time_prop(Builder::ZERO);
 
   create_time_->value.time_prop(get_hr_time());
-  datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
-  if (CORBA::is_nil(datareader_.in())) {
-    throw std::runtime_error("datareader creation failed");
-  }
 
   DDS::SubscriberQos subscriber_qos;
   if (subscriber_->get_qos(subscriber_qos) == DDS::RETCODE_OK && subscriber_qos.entity_factory.autoenable_created_entities == true) {
     enable_time_->value.time_prop(create_time_->value.time_prop());
+  }
+
+  datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
+  if (CORBA::is_nil(datareader_.in())) {
+    throw std::runtime_error("datareader creation failed");
   }
 
   if (!transport_config_name_.empty()) {

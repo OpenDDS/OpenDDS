@@ -1,11 +1,10 @@
 #include "WorkerDataReaderListener.h"
+
 #include "Utils.h"
 
 #include <cmath>
 
 namespace Bench {
-
-const size_t DEFAULT_STAT_BLOCK_BUFFER_SIZE = 1000;
 
 WorkerDataReaderListener::WorkerDataReaderListener()
 {
@@ -85,7 +84,6 @@ WorkerDataReaderListener::on_liveliness_changed(
 void
 WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
-  //std::cout << "WorkerDataReaderListener::on_data_available" << std::endl;
   if (reader != data_dr_.in()) {
     data_dr_ = DataDataReader::_narrow(reader);
   }
@@ -186,11 +184,9 @@ WorkerDataReaderListener::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/,
   const DDS::SubscriptionMatchedStatus& status)
 {
-  //std::cout << "WorkerDataReaderListener::on_subscription_matched" << std::endl;
   std::unique_lock<std::mutex> lock(mutex_);
   if (expected_match_count_ != 0) {
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
-      //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
       expected_match_cv.notify_all();
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
