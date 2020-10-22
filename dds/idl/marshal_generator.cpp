@@ -254,7 +254,7 @@ namespace {
   {
     // Replace invalid characters with underscores
     size_t i;
-    for (const char* c = "<>()[]*.:"; *c; ++c) {
+    for (const char* c = "<>()[]*.: "; *c; ++c) {
       while ((i = s.find(*c)) != std::string::npos) {
         s[i] = '_';
       }
@@ -405,8 +405,7 @@ namespace {
       if (needs_distinct_type(type_)) {
         wrapped_type_name_ =
           std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
-          ", " + get_tag_name(wrapped_type_name_, nested_key_only_) + ">";
-
+          ", " + get_tag_name(type_name_, nested_key_only_) + ">";
         value_access_pre_ += "(*";
         value_access_post_ = ".val_)" + value_access_post_;
         const std::string idt_arg = "(" + ref_ + ")";

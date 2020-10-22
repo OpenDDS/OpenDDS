@@ -565,12 +565,14 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
 }
 
 struct Intro {
-  typedef std::set<std::string> Lines;
-  Lines lines;
+  typedef std::set<std::string> LineSet;
+  LineSet line_set;
+  typedef std::vector<std::string> LineVec;
+  LineVec line_vec;
 
   void join(std::ostream& os, const std::string& indent)
   {
-    for (Lines::iterator i = lines.begin(); i != lines.end(); ++i)
+    for (LineVec::iterator i = line_vec.begin(); i != line_vec.end(); ++i)
     {
       os << indent << *i << '\n';
     }
@@ -578,12 +580,16 @@ struct Intro {
 
   void insert(const std::string& line)
   {
-    lines.insert(line);
+    if (line_set.insert(line).second) {
+      line_vec.push_back(line);
+    }
   }
 
   void insert(const Intro& other)
   {
-    lines.insert(other.lines.begin(), other.lines.end());
+    for (LineVec::const_iterator i = other.line_vec.begin(); i != other.line_vec.end(); ++i) {
+      insert(*i);
+    }
   }
 };
 
