@@ -428,15 +428,15 @@ BE_GlobalData::parse_args(long& i, char** av)
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-extensibility\n")));
         idl_global->parse_args_exit(1);
       }
-      if (!std::strcmp(av[i + 1], "final")) {
+      if (!std::strcmp(av[++i], "final")) {
         default_extensibility_ = extensibilitykind_final;
-      } else if (!std::strcmp(av[i + 1], "appendable")) {
+      } else if (!std::strcmp(av[i], "appendable")) {
         default_extensibility_ = extensibilitykind_appendable;
-      } else if (!std::strcmp(av[i + 1], "mutable")) {
+      } else if (!std::strcmp(av[i], "mutable")) {
         default_extensibility_ = extensibilitykind_mutable;
       } else {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i + 1]));
+          ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
     } else if (!std::strcmp(av[i], "--default-autoid")) {
@@ -444,13 +444,13 @@ BE_GlobalData::parse_args(long& i, char** av)
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
         idl_global->parse_args_exit(1);
       }
-      if (!std::strcmp(av[i + 1], "sequential")) {
+      if (!std::strcmp(av[++i], "sequential")) {
         root_default_autoid_ = autoidkind_sequential;
-      } else if (!std::strcmp(av[i + 1], "hash")) {
+      } else if (!std::strcmp(av[i], "hash")) {
         root_default_autoid_ = autoidkind_hash;
       } else {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("Invalid argument to --default-autoid: %C\n"), av[i + 1]));
+          ACE_TEXT("Invalid argument to --default-autoid: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
     } else if (!std::strcmp(av[i], "--default-try-construct")) {
@@ -458,15 +458,15 @@ BE_GlobalData::parse_args(long& i, char** av)
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-try-construct\n")));
         idl_global->parse_args_exit(1);
       }
-      if (!std::strcmp(av[i + 1], "discard")) {
+      if (!std::strcmp(av[++i], "discard")) {
         default_try_construct_ = tryconstructfailaction_discard;
-      } else if (!std::strcmp(av[i + 1], "use-default")) {
+      } else if (!std::strcmp(av[i], "use-default")) {
         default_try_construct_ = tryconstructfailaction_use_default;
-      } else if (!std::strcmp(av[i + 1], "trim")) {
+      } else if (!std::strcmp(av[i], "trim")) {
         default_try_construct_ = tryconstructfailaction_trim;
       } else {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("Invalid argument to --default-try-construct: %C\n"), av[i + 1]));
+          ACE_TEXT("Invalid argument to --default-try-construct: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
     } else {
