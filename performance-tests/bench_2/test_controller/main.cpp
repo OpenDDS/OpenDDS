@@ -35,7 +35,7 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
-int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
+int handle_reports(const Bench::NodeController::ReportSeq& nc_reports, const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -324,7 +324,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
       std::cout << scenario_start;
 
-      std::vector<Bench::WorkerReport> reports = scenario_manager.execute(allocated_scenario);
+      std::vector<Bench::WorkerReport> worker_reports;
+      Bench::NodeController::ReportSeq nc_reports;
+      scenario_manager.execute(allocated_scenario, worker_reports, nc_reports);
 
       std::ofstream result_file(result_path);
       if (!result_file.is_open()) {
@@ -346,7 +348,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << std::endl
           << "Ended at " << iso8601() << std::endl
           << std::endl;
-        result = handle_reports(reports, ss);
+        result = handle_reports(nc_reports, worker_reports, ss);
         scenario_end = ss.str();
       }
       result_file << scenario_end;
@@ -354,9 +356,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       std::cout << "Wrote results to " << result_path << std::endl;
 
-      if (reports.size() != allocated_scenario.expected_reports) {
-        result_file << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
-        std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+      if (worker_reports.size() != allocated_scenario.expected_reports) {
+        result_file << "ERROR: Only received " << worker_reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+        std::cerr << "ERROR: Only received " << worker_reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
         result = EXIT_FAILURE;
       }
     }
@@ -370,10 +372,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   return result;
 };
 
-int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
+int handle_reports(const Bench::NodeController::ReportSeq& nc_reports, const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
 {
   int result = EXIT_SUCCESS;
   using Builder::ZERO;
+
+  Bench::SimpleStatBlock consolidated_cpu_percent_stats;
+  Bench::SimpleStatBlock consolidated_mem_percent_stats;
+
+  for (CORBA::ULong n = 0; n < nc_reports.length(); ++n) {
+    const Bench::NodeController::Report& nc_report = nc_reports[n];
+
+    Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
+    Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
+
+    consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
+    consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
+  }
 
   Builder::TimeStamp max_construction_time = ZERO;
   Builder::TimeStamp max_enable_time = ZERO;
@@ -487,6 +502,14 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
       }
     }
   }
+
+  result_out << std::endl;
+
+  consolidated_cpu_percent_stats.pretty_print(result_out, "perecnt cpu utilization");
+
+  result_out << std::endl;
+
+  consolidated_mem_percent_stats.pretty_print(result_out, "percent memory utilization");
 
   result_out << std::endl;
 

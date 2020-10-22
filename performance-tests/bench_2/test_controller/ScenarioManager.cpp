@@ -316,8 +316,11 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   return allocated_scenario;
 }
 
-std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allocated_scenario)
+void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& allocated_scenario, std::vector<Bench::WorkerReport>& worker_reports, NodeController::ReportSeq& nc_reports)
 {
+  worker_reports.clear();
+  nc_reports.length(0);
+
   using namespace std::chrono;
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(allocated_scenario, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
@@ -441,6 +444,9 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
           ss << std::endl;
           std::cerr << ss.str() << std::flush;
         }
+        reports[r].worker_reports.length(0);
+        nc_reports.length(nc_reports.length() + 1);
+        nc_reports[nc_reports.length() - 1] = reports[r];
       }
     }
     {
@@ -463,5 +469,5 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   dds_entities_.report_reader_impl_->delete_readcondition(read_condition);
   wait_set->detach_condition(guard_condition);
 
-  return parsed_reports;
+  worker_reports = parsed_reports;
 }
