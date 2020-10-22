@@ -189,6 +189,9 @@ jobs:
       configuration: $(BuildConfiguration)
     condition: ne(variables['BuildConfiguration'], 'Debug')
   - script: |
+      del /s/q *.obj *.idb
+    displayName: Remove unused build outputs
+  - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd tests\DCPS\Messenger
       perl run_test.pl rtps -ExeSubDir %SUBDIR_FOR_MESSENGER%
