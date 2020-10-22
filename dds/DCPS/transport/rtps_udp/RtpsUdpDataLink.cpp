@@ -3212,6 +3212,7 @@ RtpsUdpDataLink::RtpsWriter::send_nackfrag_replies_i(DisjointSequence& gaps,
 SequenceNumber
 RtpsUdpDataLink::RtpsWriter::expected_max_sn(const ReaderInfo_rch& reader) const
 {
+  ACE_UNUSED_ARG(reader);
 #ifdef OPENDDS_SECURITY
   if (is_pvs_writer_) {
     return reader->max_pvs_sn_;
@@ -3240,7 +3241,7 @@ RtpsUdpDataLink::RtpsWriter::snris_erase(RtpsUdpDataLink::SNRIS& snris,
                                          const SequenceNumber& sn,
                                          const ReaderInfo_rch& reader)
 {
-  SNRIS::const_iterator pos = snris.find(sn);
+  SNRIS::iterator pos = snris.find(sn);
   if (pos != snris.end()) {
     pos->second->readers.erase(reader);
     if (pos->second->readers.empty()) {
@@ -3253,6 +3254,7 @@ void
 RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader,
                                                 SequenceNumber previous_max_sn)
 {
+  ACE_UNUSED_ARG(reader);
 #ifdef OPENDDS_SECURITY
   if (is_pvs_writer_ && reader != GUID_UNKNOWN) {
     const ReaderInfoMap::iterator iter = remote_readers_.find(reader);
@@ -3264,8 +3266,8 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader,
 #endif
 
   // All readers that have acked previous_max_sn are now lagging.
-  SNRIS::const_iterator leading_pos = leading_readers_.find(previous_max_sn);
-  SNRIS::const_iterator lagging_pos = lagging_readers_.find(previous_max_sn);
+  SNRIS::iterator leading_pos = leading_readers_.find(previous_max_sn);
+  SNRIS::iterator lagging_pos = lagging_readers_.find(previous_max_sn);
   if (leading_pos != leading_readers_.end()) {
     if (lagging_pos != lagging_readers_.end()) {
       lagging_pos->second->readers.insert(leading_pos->second->readers.begin(), leading_pos->second->readers.end());
