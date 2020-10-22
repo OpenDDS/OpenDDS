@@ -393,8 +393,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant not found");
   }
 
-  TimeDuration delta_time;
-  if (!validate_date_time(grant->validity, delta_time, ex)) {
+  time_t expiration;
+  if (!validate_date_time(grant->validity, expiration, ex)) {
     return false;
   }
 
@@ -402,10 +402,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!local_rp_timer_.is_scheduled()) {
-    if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
-      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
-    }
+  if (!local_rp_timer_.start_timer(expiration, permissions_handle)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
   }
 
   return true;
@@ -461,8 +459,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
   }
 
-  TimeDuration delta_time;
-  if (!validate_date_time(grant->validity, delta_time, ex)) {
+  time_t expiration;
+  if (!validate_date_time(grant->validity, expiration, ex)) {
     return false;
   }
 
@@ -470,10 +468,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!local_rp_timer_.is_scheduled()) {
-    if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
-      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-    }
+  if (!local_rp_timer_.start_timer(expiration, permissions_handle)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
   }
 
   return true;
@@ -532,8 +528,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: grant not found");
   }
 
-  TimeDuration delta_time;
-  if (!validate_date_time(grant->validity, delta_time, ex)) {
+  time_t expiration;
+  if (!validate_date_time(grant->validity, expiration, ex)) {
     return false;
   }
 
@@ -739,8 +735,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant not found");
   }
 
-  TimeDuration delta_time;
-  if (!validate_date_time(grant->validity, delta_time, ex)) {
+  time_t expiration;
+  if (!validate_date_time(grant->validity, expiration, ex)) {
     return false;
   }
 
@@ -750,7 +746,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!remote_rp_timer_.is_scheduled() && !remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
+  if (!remote_rp_timer_.start_timer(expiration, permissions_handle)) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
   }
 
@@ -802,8 +798,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant not found");
   }
 
-  TimeDuration delta_time;
-  if (!validate_date_time(grant->validity, delta_time, ex)) {
+  time_t expiration;
+  if (!validate_date_time(grant->validity, expiration, ex)) {
     return false;
   }
 
@@ -813,7 +809,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!remote_rp_timer_.is_scheduled() && !remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
+  if (!remote_rp_timer_.start_timer(expiration, permissions_handle)) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
   }
 
@@ -906,8 +902,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: grant not found");
   }
 
-  TimeDuration delta_time;
-  if (!validate_date_time(grant->validity, delta_time, ex)) {
+  time_t expiration;
+  if (!validate_date_time(grant->validity, expiration, ex)) {
     return false;
   }
 
@@ -1389,7 +1385,7 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
 bool AccessControlBuiltInImpl::validate_date_time(
   const Permissions::Validity_t& validity,
-  TimeDuration& delta_time,
+  time_t& expiration,
   DDS::Security::SecurityException& ex)
 {
   time_t after_time = 0, cur_utc_time = 0;
@@ -1423,7 +1419,7 @@ bool AccessControlBuiltInImpl::validate_date_time(
     return false;
   }
 
-  delta_time = TimeDuration(after_time - cur_utc_time);
+  expiration = after_time;
   return true;
 }
 
@@ -1641,43 +1637,51 @@ void AccessControlBuiltInImpl::parse_class_id(
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)
   : impl_(impl)
-  , scheduled_(false)
-  , timer_id_(0)
 { }
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 {
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (scheduled_ && reactor) {
+  if (!entry_map_.empty() && reactor) {
     reactor->cancel_timer(this);
-    scheduled_ = false;
+    // TODO: Empty the map.
   }
+}
+
+namespace {
+  // Some platforms cannot schedule timers far enough into the future
+  // to accomodate expiration times so the scheduling interval is
+  // capped at an hour.
+  const TimeDuration MAX_DURATION = TimeDuration(3600, 0);
 }
 
 bool
 AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
-  const TimeDuration& length, ::DDS::Security::PermissionsHandle pm_handle)
+  const time_t& expiration, ::DDS::Security::PermissionsHandle pm_handle)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
-  ::DDS::Security::PermissionsHandle *eh_params_ptr =
-      new ::DDS::Security::PermissionsHandle(pm_handle);
+  const time_t current_date_time = time(0);
+  tm* current_time_tm = gmtime(&current_date_time);
+  const time_t cur_utc_time = mktime(current_time_tm);
+  const TimeDuration duration = std::min(TimeDuration(expiration - cur_utc_time), MAX_DURATION);
+
+  Entry* entry = new Entry(pm_handle, expiration);
 
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
   if (reactor) {
-    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length.value());
+    const long timer_id = reactor->schedule_timer(this, entry, duration.value());
 
-    if (timer_id_ != -1) {
-      scheduled_ = true;
-      delete eh_params_ptr;
+    if (timer_id != -1) {
+      entry_map_[pm_handle] = entry;
       return true;
     }
 
   }
 
-  delete eh_params_ptr;
+  delete entry;
   return false;
 }
 
@@ -1687,31 +1691,54 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, -1);
 
-  const DDS::Security::PermissionsHandle* pm_handle =
-    static_cast<const DDS::Security::PermissionsHandle*>(arg);
+  const Entry* entry = static_cast<const Entry*>(arg);
 
-  scheduled_ = false;
+  const time_t current_date_time = time(0);
+  tm* current_time_tm = gmtime(&current_date_time);
+  const time_t cur_utc_time = mktime(current_time_tm);
 
-  ACPermsMap::iterator iter = impl_.local_ac_perms_.find(*pm_handle);
+  if (cur_utc_time < entry->expiration) {
+    // Reschedule.
+    const TimeDuration duration = std::min(TimeDuration(entry->expiration - cur_utc_time), MAX_DURATION);
 
-  if (iter == impl_.local_ac_perms_.end()) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
-      ACE_TEXT("pm_handle %d not found!\n"), *pm_handle));
-    return -1;
-  }
+    ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  impl_.local_ac_perms_.erase(iter);
+    if (reactor) {
+      const long timer_id = reactor->schedule_timer(this, entry, duration.value());
 
-  // If a listener exists, call on_revoke_permissions
-  if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
-      ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
-    return -1;
-  }
+      if (timer_id != -1) {
+        return true;
+      }
 
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-      "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: Completed...\n")));
+    }
+
+  } else {
+    // Expired.
+    const ::DDS::Security::PermissionsHandle pm_handle = entry->handle;
+    entry_map_.erase(pm_handle);
+    delete entry;
+
+    ACPermsMap::iterator iter = impl_.local_ac_perms_.find(pm_handle);
+
+    if (iter == impl_.local_ac_perms_.end()) {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+                 ACE_TEXT("pm_handle %d not found!\n"), pm_handle));
+      return -1;
+    }
+
+    impl_.local_ac_perms_.erase(iter);
+
+    // If a listener exists, call on_revoke_permissions
+    if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, pm_handle)) {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+                 ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), pm_handle));
+      return -1;
+    }
+
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+                                    "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: Completed...\n")));
+    }
   }
 
   return 0;

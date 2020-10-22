@@ -1602,7 +1602,9 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_.rekey_volatile(iter->second.pdata_);
+    sedp_.disassociate_volatile(iter->second.pdata_);
+    //sedp_.rekey_volatile(iter->second.pdata_);
+    sedp_.associate_volatile(iter->second.pdata_);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -1726,9 +1728,9 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  // notify Sedp of association
-  // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
-
+  // notify Sedp of association Sedp may call
+  // has_discovered_participant, which is the participant must be
+  // added before these calls to associate.
 
   if (iter->second.crypto_tokens_.length() == 0) {
     sedp_.associate(iter->second.pdata_);
@@ -3576,15 +3578,6 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 #endif
     }
   }
-}
-
-bool Spdp::remote_is_requester(const DCPS::RepoId& guid) const
-{
-  DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
-  if (iter != participants_.end()) {
-    return iter->second.is_requester_;
-  }
-  return false;
 }
 
 const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) const

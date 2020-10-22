@@ -151,7 +151,6 @@ public:
                                const ParticipantData_t& pdata,
                                const DCPS::RepoId& guid);
 
-  bool remote_is_requester(const DCPS::RepoId& guid) const;
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
 
