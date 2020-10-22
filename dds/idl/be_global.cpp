@@ -424,11 +424,10 @@ BE_GlobalData::parse_args(long& i, char** av)
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       warn_about_dcps_data_type_ = false;
     } else if (!std::strcmp(av[i], "--default-extensibility")) {
-      if (av[i + 1] == nullptr) {
+      if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-extensibility\n")));
         idl_global->parse_args_exit(1);
-      }
-      if (!std::strcmp(av[++i], "final")) {
+      } else if (!std::strcmp(av[i], "final")) {
         default_extensibility_ = extensibilitykind_final;
       } else if (!std::strcmp(av[i], "appendable")) {
         default_extensibility_ = extensibilitykind_appendable;
@@ -440,11 +439,10 @@ BE_GlobalData::parse_args(long& i, char** av)
         idl_global->parse_args_exit(1);
       }
     } else if (!std::strcmp(av[i], "--default-autoid")) {
-      if (av[i + 1] == nullptr) {
+      if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
         idl_global->parse_args_exit(1);
-      }
-      if (!std::strcmp(av[++i], "sequential")) {
+      } else if (!std::strcmp(av[i], "sequential")) {
         root_default_autoid_ = autoidkind_sequential;
       } else if (!std::strcmp(av[i], "hash")) {
         root_default_autoid_ = autoidkind_hash;
@@ -454,11 +452,10 @@ BE_GlobalData::parse_args(long& i, char** av)
         idl_global->parse_args_exit(1);
       }
     } else if (!std::strcmp(av[i], "--default-try-construct")) {
-      if (av[i + 1] == nullptr) {
+      if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-try-construct\n")));
         idl_global->parse_args_exit(1);
-      }
-      if (!std::strcmp(av[++i], "discard")) {
+      } else if (!std::strcmp(av[i], "discard")) {
         default_try_construct_ = tryconstructfailaction_discard;
       } else if (!std::strcmp(av[i], "use-default")) {
         default_try_construct_ = tryconstructfailaction_use_default;
