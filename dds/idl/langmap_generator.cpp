@@ -233,9 +233,10 @@ struct GeneratorBase
               prefix += "::";
             }
             first_label << prefix;
-            UTL_ScopedName* default_name = e->value_to_name(dv.u.enum_val);
-            //default_name can be null when there is not default branch
-            if (default_name == 0) {
+            UTL_ScopedName* default_name;
+            if (dv.u.enum_val < e->member_count()) {
+              default_name = e->value_to_name(dv.u.enum_val);
+            } else {
               const Fields fields(the_union);
               AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*(fields.begin()));
               AST_Expression::AST_ExprValue* ev = ub->label(0)->label_val()->ev();
