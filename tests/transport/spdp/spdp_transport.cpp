@@ -356,7 +356,8 @@ bool run_test()
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    }
+    },
+    0
   };
 
   if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {

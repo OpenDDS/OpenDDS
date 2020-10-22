@@ -126,11 +126,11 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
-    if (security_debug.encdec_error) {
+    if (security_debug.encdec_warn) {
       ACE_TCHAR addr_buff[256] = {};
       remote.addr_to_string(addr_buff, 256);
       GuidConverter gc(peer);
-      ACE_ERROR((LM_ERROR, "(%P|%t) {encdec_error} RtpsUdpReceiveStrategy::receive_bytes - "
+      ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %s %C secure RTPS processing failed: %C\n", addr_buff, OPENDDS_STRING(gc).c_str(), msg));
     }
     stop = true;

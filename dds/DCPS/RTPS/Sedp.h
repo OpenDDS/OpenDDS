@@ -98,21 +98,21 @@ public:
 #endif
   const ACE_INET_Addr& multicast_group() const;
 
-  void associate(const ParticipantData_t& pdata);
+  void associate(ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
-  void associate_preauth(const Security::SPDPdiscoveredParticipantData& pdata);
-  void associate_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
-  void rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
-  void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
-  void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
-  void disassociate_security_builtins(BuiltinEndpointSet_t local_avail, DDS::Security::ExtendedBuiltinEndpointSet_t extended_local_avail,
-                                      BuiltinEndpointSet_t avail, DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
-                                      const DCPS::RepoId& part);
+  void associate_preauth(Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
+  void disassociate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& pdata,
+                                  const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr);
+  void generate_remote_crypto_handles(const Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_reader_to_writer(const DCPS::RepoId& remote_writer);
+  void associate_secure_writer_to_reader(const DCPS::RepoId& remote_reader);
+  void disassociate_security_builtins(ParticipantData_t& pdata);
   void remove_remote_crypto_handle(const DCPS::RepoId& participant, const EntityId_t& entity);
 
-  /// Create and send keys the first time
-  void send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& pdata);
+  void send_builtin_crypto_tokens(const DCPS::RepoId& remoteId);
 
   /// Create and send keys for individual endpoints.
   void send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant,
@@ -121,7 +121,7 @@ public:
   void resend_user_crypto_tokens(const DCPS::RepoId& remote_participant);
 #endif
 
-  bool disassociate(const ParticipantData_t& pdata);
+  bool disassociate(ParticipantData_t& pdata);
 
   void update_locators(const ParticipantData_t& pdata);
 
@@ -211,21 +211,6 @@ private:
   protected:
     DCPS::WeakRcHandle<Sedp> sedp_;
     const DCPS::MessageId id_;
-  };
-
-  class MsgParticipantData : public MsgBase {
-  public:
-    MsgParticipantData(const DCPS::WeakRcHandle<Sedp>& sedp,
-                       DCPS::MessageId id,
-                       const ParticipantData_t& data)
-      : MsgBase(sedp, id)
-      , data_(data)
-    {}
-
-    void execute();
-
-  private:
-    const ParticipantData_t data_;
   };
 
   class MsgDiscoveredPublication : public MsgBase {
@@ -1061,35 +1046,10 @@ protected:
     const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer,
     const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader);
 
-  bool handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                       bool& send_our_tokens);
-  bool handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                       bool& send_our_tokens);
-
-  void send_cached_crypto_tokens(const DCPS::RepoId& remote_participant);
+  bool handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  bool handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
   DDS::DomainId_t get_domain_id() const;
-
-  DCPS::RepoIdSet associated_volatile_readers_;
-
-  struct RemoteWriter {
-    DCPS::RepoId local_reader, remote_writer;
-    DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
-  };
-  typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
-  typedef OPENDDS_MAP_CMP(
-    DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
-  RemoteWriterVectors datareader_crypto_tokens_;
-
-  struct RemoteReader {
-    DCPS::RepoId local_writer, remote_reader;
-    DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
-  };
-  typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
-  typedef OPENDDS_MAP_CMP(
-    DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
-  RemoteReaderVectors datawriter_crypto_tokens_;
-  DCPS::RepoIdSet pending_volatile_readers_;
 
   struct PublicationAgentInfoListener : public ICE::AgentInfoListener
   {
@@ -1125,7 +1085,7 @@ protected:
   void stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub);
   void stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub);
 
-  void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
+  void disassociate_helper(BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
                            const DCPS::RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client);
   void replay_durable_data_for(const DCPS::RepoId& remote_sub_id);
 };
