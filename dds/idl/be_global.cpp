@@ -347,14 +347,18 @@ BE_GlobalData::parse_args(long& i, char** av)
 
   switch (av[i][1]) {
   case 'o':
-    idl_global->append_idl_flag(av[i + 1]);
-    if (ACE_OS::mkdir(av[i + 1]) != 0 && errno != EEXIST) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("IDL: unable to create directory %C")
-        ACE_TEXT(" specified by -o option\n"), av[i + 1]));
+    if (av[++i] == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for -o\n")));
       idl_global->parse_args_exit(1);
     } else {
-      output_dir_ = av[++i];
+      idl_global->append_idl_flag(av[i]);
+      if (ACE_OS::mkdir(av[i]) != 0 && errno != EEXIST) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: unable to create directory %C")
+          ACE_TEXT(" specified by -o option\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      } else {
+        output_dir_ = av[i];
+      }
     }
     break;
 
