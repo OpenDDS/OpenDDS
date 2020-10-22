@@ -210,6 +210,7 @@ public:
 
   ExtensibilityKind extensibility(AST_Decl* node) const;
   AutoidKind autoid(AST_Decl* node) const;
+  AutoidKind autoid(UTL_Scope* scope) const;
   bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
   bool hashid(AST_Decl* node, std::string& value) const;
   bool is_optional(AST_Decl* node) const;
@@ -248,6 +249,8 @@ private:
   bool warn_about_dcps_data_type_;
   ExtensibilityKind default_extensibility_;
   OpenDDS::DataRepresentation default_data_representation_;
+  AutoidKind root_default_autoid_;
+  TryConstructFailAction default_try_construct_;
 
   bool is_default_nested(UTL_Scope* scope);
 
