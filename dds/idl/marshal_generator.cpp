@@ -254,7 +254,7 @@ namespace {
   {
     // Replace invalid characters with underscores
     size_t i;
-    for (const char* c = "<>()[]*."; *c; ++c) {
+    for (const char* c = "<>()[]*.:"; *c; ++c) {
       while ((i = s.find(*c)) != std::string::npos) {
         s[i] = '_';
       }
@@ -276,13 +276,16 @@ namespace {
     return s;
   }
 
+  const char* const shift_out = "<< ";
+  const char* const shift_in = ">> ";
+
   std::string strip_shift_op(const std::string& s)
   {
     std::string rv = s;
     const size_t shift_len = 3;
     if (rv.size() > shift_len) {
       const std::string first3 = rv.substr(0, shift_len);
-      if (first3 == "<< " || first3 == ">> ") {
+      if (first3 == shift_out || first3 == shift_in) {
         rv.erase(0, 3);
       }
     }
@@ -291,34 +294,31 @@ namespace {
 
   const char* get_shift_op(const std::string& s)
   {
-    const char* const out = "<< ";
-    const char* const in = ">> ";
     const size_t shift_len = 3;
     if (s.size() > shift_len) {
       const std::string first3 = s.substr(0, shift_len);
-      if (first3 == in) {
-        return in;
+      if (first3 == shift_in) {
+        return shift_in;
       }
-      if (first3 == out) {
-        return out;
+      if (first3 == shift_out) {
+        return shift_out;
       }
     }
     return "";
   }
 
+  std::string get_tag_name(const std::string& base_name, bool nested_key_only)
+  {
+    return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
+  }
+
   std::string get_tag_name(UTL_ScopedName* name, bool nested_key_only)
   {
-    return dds_generator::scoped_helper(name, "_") +
-      (nested_key_only ? "_nested_key_only" : "") + "_tag";
+    return get_tag_name(dds_generator::scoped_helper(name, "_"), nested_key_only);
   }
 
-  std::string get_tag_name(AST_Type* type, bool nested_key_only)
-  {
-    return get_tag_name(type->name(), nested_key_only);
-  }
-
-  /// Handling wrapping references in the wrapper types: NestedKeyOnly,
-  /// IDL::DistinctType, and *_forany.
+  /// Handling wrapping and unwrapping references in the wrapper types:
+  /// NestedKeyOnly, IDL::DistinctType, and *_forany.
   struct Wrapper {
     AST_Type* const type_;
     const std::string type_name_;
@@ -358,6 +358,9 @@ namespace {
     {
       ACE_ASSERT(!done_);
 
+      if (is_const_ && !std::strcmp(shift_op_, shift_in)) {
+        is_const_ = false;
+      }
       const std::string const_str = is_const_ ? "const " : "";
       const bool forany = needs_forany(type_);
       nested_key_only_ = nested_key_only_ && needs_nested_key_only(type_);
@@ -402,7 +405,7 @@ namespace {
       if (needs_distinct_type(type_)) {
         wrapped_type_name_ =
           std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
-          ", " + get_tag_name(type_, nested_key_only_) + ">";
+          ", " + get_tag_name(wrapped_type_name_, nested_key_only_) + ">";
 
         value_access_pre_ += "(*";
         value_access_post_ = ".val_)" + value_access_post_;
@@ -1591,7 +1594,7 @@ namespace {
         "  ACE_UNUSED_ARG(encoding);\n";
       std::vector<string> code;
       code.push_back(
-        "serialized_size(strm.encoding(), total_size, " + wrapper.value_access() + ");");
+        "serialized_size(strm.encoding(), total_size, arr);");
       code.push_back("if (!strm.write_delimiter(total_size)) {");
       code.push_back("  return false;");
       code.push_back("}");
@@ -1923,9 +1926,11 @@ namespace {
             << indent <<  "if (!(strm >> fa)) {\n";
         } else {
           Intro intro;
-          be_global->impl_ << "    if (!"
-            << streamCommon("", "", af.as_base_, string(">> ") + "arr" + nfl.index_, false, intro)
-            << ") {\n";
+          const std::string stream = streamCommon("", "", af.as_base_,
+            ">> arr" + nfl.index_, false, intro);
+          intro.join(be_global->impl_, indent);
+          be_global->impl_ <<
+            "    if (!" << stream << ") {\n";
         }
         if (try_construct == tryconstructfailaction_use_default) {
           if (af.as_cls_ & CL_ARRAY) {
@@ -3330,7 +3335,7 @@ namespace {
       if (is_mutable) {
         be_global->impl_ <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
-          "    set_default(stru);\n"
+          "    set_default(stru" << (wrap_nested_key_only ? ".value" : "") << ");\n"
           "\n"
           "    unsigned member_id;\n"
           "    size_t field_size;\n"
@@ -3536,7 +3541,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (use_cxx11) {
         field_name += "()";
       }
-      contents << type_to_default(type, field_name, type->anonymous());
+      contents << "  " << type_to_default(type, field_name, type->anonymous());
     }
     intro.join(be_global->impl_, "  ");
     be_global->impl_ << contents.str();
