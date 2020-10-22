@@ -1645,7 +1645,9 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 
   if (!entry_map_.empty() && reactor) {
     reactor->cancel_timer(this);
-    // TODO: Empty the map.
+    for (EntryMap::const_iterator pos = entry_map_.begin(), limit = entry_map_.end(); pos != limit; ++pos) {
+      delete pos->second;
+    }
   }
 }
 

@@ -1603,7 +1603,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     }
 
     sedp_.disassociate_volatile(iter->second.pdata_);
-    //sedp_.rekey_volatile(iter->second.pdata_);
     sedp_.associate_volatile(iter->second.pdata_);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
