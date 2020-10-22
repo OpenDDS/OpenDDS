@@ -112,12 +112,14 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredWriterData& writer_data,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 // OpenDDS::DCPS::DiscoveredReaderData
@@ -125,12 +127,14 @@ bool from_param_list(const ParameterList& param_list,
 OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 #ifdef OPENDDS_SECURITY
@@ -159,12 +163,14 @@ bool from_param_list(const ParameterList& param_list,
 OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredPublication_SecurityWrapper& wrapper,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 // DiscoveredSubscription_SecurityWrapper
@@ -172,12 +178,14 @@ bool from_param_list(const ParameterList& param_list,
 OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,
                    const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
                      XTypes::TypeInformation& type_info);
 
 // Extensions for ICE
