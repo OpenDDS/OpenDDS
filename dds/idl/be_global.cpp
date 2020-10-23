@@ -810,10 +810,10 @@ AutoidKind BE_GlobalData::autoid(AST_Decl* node) const
   if (autoid_annotation->node_value_exists(node, value)) {
     return value;
   }
-  return autoid(node->defined_in());
+  return scoped_autoid(node->defined_in());
 }
 
-AutoidKind BE_GlobalData::autoid(UTL_Scope* scope) const
+AutoidKind BE_GlobalData::scoped_autoid(UTL_Scope* scope) const
 {
   AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
   AutoidAnnotation* autoid_annotation = dynamic_cast<AutoidAnnotation*>(
@@ -823,7 +823,7 @@ AutoidKind BE_GlobalData::autoid(UTL_Scope* scope) const
     if (autoid_annotation->node_value_exists(module, value)) {
       return value;
     }
-    return autoid(module->defined_in());
+    return scoped_autoid(module->defined_in());
   }
   return root_default_autoid_;
 }

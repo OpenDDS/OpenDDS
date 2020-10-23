@@ -210,7 +210,6 @@ public:
 
   ExtensibilityKind extensibility(AST_Decl* node) const;
   AutoidKind autoid(AST_Decl* node) const;
-  AutoidKind autoid(UTL_Scope* scope) const;
   bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
   bool hashid(AST_Decl* node, std::string& value) const;
   bool is_optional(AST_Decl* node) const;
@@ -251,10 +250,10 @@ private:
   OpenDDS::DataRepresentation default_data_representation_;
   AutoidKind root_default_autoid_;
   TryConstructFailAction default_try_construct_;
+  std::set<std::string> platforms_;
 
   bool is_default_nested(UTL_Scope* scope);
-
-  std::set<std::string> platforms_;
+  AutoidKind scoped_autoid(UTL_Scope* scope) const;
 };
 
 class BE_Comment_Guard {
