@@ -19,6 +19,8 @@
 #include <cctype>
 #include <map>
 
+#define OPENDDS_IDL_STR(X) #X
+
 using std::string;
 using namespace AstTypeClassification;
 
@@ -3400,6 +3402,131 @@ namespace {
       return false;
     }
   }
+
+  void gen_union_key_serializers(AST_Union* node, FieldFilter kind)
+  {
+    const string cxx = scoped(node->name()); // name as a C++ class
+    AST_Type* const discriminator = node->disc_type();
+    const Classification disc_cls = classify(discriminator);
+    const bool has_key = be_global->union_discriminator_is_key(node);
+    const string key_only_wrap_out = getWrapper("uni.value._d()", discriminator, WD_OUTPUT);
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    const bool not_final = exten != extensibilitykind_final;
+    const string wrapper = kind == FieldFilter_KeyOnly ? "KeyOnly"
+      : kind == FieldFilter_NestedKeyOnly ? "NestedKeyOnly"
+      : "<<error from " __FILE__ ":" OPENDDS_IDL_STR(__LINE__) ">>";
+
+    {
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("uni", "const " + wrapper + "<const " + cxx + ">");
+      serialized_size.endArgs();
+
+      if (has_key) {
+        generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
+
+        if (exten == extensibilitykind_mutable) {
+          be_global->impl_ <<
+            "  size_t mutable_running_total = 0;\n"
+            "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+        }
+
+        if (disc_cls & CL_ENUM) {
+          be_global->impl_ <<
+            "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
+        } else {
+          be_global->impl_ <<
+            "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
+        }
+
+        if (exten == extensibilitykind_mutable) {
+          be_global->impl_ <<
+            "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+        }
+      }
+    }
+
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("uni", wrapper + "<const " + cxx + ">");
+      insertion.endArgs();
+
+      if (has_key) {
+        be_global->impl_ <<
+          "  const Encoding& encoding = strm.encoding();\n"
+          "  ACE_UNUSED_ARG(encoding);\n";
+        generate_dheader_code(
+          "    serialized_size(encoding, total_size, uni);\n"
+          "    if (!strm.write_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n", not_final);
+
+        // EMHEADER for discriminator
+        if (exten == extensibilitykind_mutable) {
+          be_global->impl_ <<
+            "  size_t size = 0;\n";
+
+          if (disc_cls & CL_ENUM) {
+            be_global->impl_ <<
+              "  primitive_serialized_size_ulong(encoding, size);\n";
+          } else {
+            be_global->impl_ <<
+              "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
+          }
+
+          be_global->impl_ <<
+            "  if (!strm.write_parameter_id(0, size)) {\n"
+            "    return false;\n"
+            "  }\n"
+            "  size = 0;\n";
+        }
+
+        be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
+      }
+
+      be_global->impl_
+        << "  return true;\n";
+    }
+
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("uni", wrapper + "<" + cxx + ">");
+      extraction.endArgs();
+
+      if (has_key) {
+        // DHEADER
+        be_global->impl_ <<
+          "  const Encoding& encoding = strm.encoding();\n"
+          "  ACE_UNUSED_ARG(encoding);\n";
+        generate_dheader_code(
+          "    if (!strm.read_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n", not_final);
+
+        if (exten == extensibilitykind_mutable) {
+          // EMHEADER for discriminator
+          be_global->impl_ <<
+            "  unsigned member_id;\n"
+            "  size_t field_size;\n"
+            "  bool must_understand = false;\n"
+            "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+            "    return false;\n"
+            "  }\n";
+        }
+
+        be_global->impl_
+          << "  " << scoped(discriminator->name()) << " disc;\n"
+          << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
+          << "  uni.value._d(disc);\n";
+      }
+
+      be_global->impl_
+        << "  return true;\n";
+    }
+  }
 }
 
 bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
@@ -3622,128 +3749,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  const bool has_key = be_global->union_discriminator_is_key(node);
-  const bool is_topic_type = be_global->is_topic_type(node);
-
-  if (!is_topic_type) {
-    if (has_key) {
-      idl_global->err()->misc_warning(
-        "Union has @key on its discriminator, "
-        "but it's not a topic type, ignoring it...", node);
-    }
-    return true;
-  }
-
-  const string key_only_wrap_out = getWrapper("uni.value._d()", discriminator, WD_OUTPUT);
-
-  {
-    Function serialized_size("serialized_size", "void");
-    serialized_size.addArg("encoding", "const Encoding&");
-    serialized_size.addArg("size", "size_t&");
-    serialized_size.addArg("uni", "const KeyOnly<const " + cxx + ">");
-    serialized_size.endArgs();
-
-    if (has_key) {
-      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
-
-      if (exten == extensibilitykind_mutable) {
-        be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n"
-          "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
-      }
-
-      if (disc_cls & CL_ENUM) {
-        be_global->impl_ <<
-          "  OpenDDS::DCPS::primitive_serialized_size_ulong(encoding, size);\n";
-      } else {
-        be_global->impl_ <<
-          "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
-      }
-
-      if (exten == extensibilitykind_mutable) {
-        be_global->impl_ <<
-          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
-      }
-    }
-  }
-
-  {
-    Function insertion("operator<<", "bool");
-    insertion.addArg("strm", "Serializer&");
-    insertion.addArg("uni", "KeyOnly<const " + cxx + ">");
-    insertion.endArgs();
-
-    if (has_key) {
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n"
-        "  ACE_UNUSED_ARG(encoding);\n";
-      generate_dheader_code(
-        "    serialized_size(encoding, total_size, uni);\n"
-        "    if (!strm.write_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n", not_final);
-
-      // EMHEADER for discriminator
-      if (exten == extensibilitykind_mutable) {
-        be_global->impl_ <<
-          "  size_t size = 0;\n";
-
-        if (disc_cls & CL_ENUM) {
-          be_global->impl_ <<
-            "  primitive_serialized_size_ulong(encoding, size);\n";
-        } else {
-          be_global->impl_ <<
-            "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
-        }
-
-        be_global->impl_ <<
-          "  if (!strm.write_parameter_id(0, size)) {\n"
-          "    return false;\n"
-          "  }\n"
-          "  size = 0;\n";
-      }
-
-      be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
-    }
-
-    be_global->impl_ << "  return true;\n";
-  }
-
-  {
-    Function extraction("operator>>", "bool");
-    extraction.addArg("strm", "Serializer&");
-    extraction.addArg("uni", "KeyOnly<" + cxx + ">");
-    extraction.endArgs();
-
-    if (has_key) {
-      // DHEADER
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n"
-        "  ACE_UNUSED_ARG(encoding);\n";
-      generate_dheader_code(
-        "    if (!strm.read_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n", not_final);
-
-      if (exten == extensibilitykind_mutable) {
-        // EMHEADER for discriminator
-        be_global->impl_ <<
-          "  unsigned member_id;\n"
-          "  size_t field_size;\n"
-          "  bool must_understand = false;\n"
-          "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
-          "    return false;\n"
-          "  }\n";
-      }
-
-      be_global->impl_
-        << "  " << scoped(discriminator->name()) << " disc;\n"
-        << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
-        << "  uni.value._d(disc);\n";
-    }
-
-    be_global->impl_ << "  return true;\n";
-  }
+  gen_union_key_serializers(node, FieldFilter_NestedKeyOnly);
+  gen_union_key_serializers(node, FieldFilter_KeyOnly);
 
   TopicKeys keys(node);
   return generate_marshal_traits(node, cxx, exten, keys);
