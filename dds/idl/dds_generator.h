@@ -884,7 +884,7 @@ enum FieldFilter {
   FieldFilter_KeyOnly
 };
 
-inline AST_Field* get_struct_field(AST_Structure* struct_node, size_t index)
+inline AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
 {
   if (!struct_node || index >= struct_node->nfields()) {
     return 0;
@@ -896,7 +896,7 @@ inline AST_Field* get_struct_field(AST_Structure* struct_node, size_t index)
 
 inline bool struct_has_explicit_keys(AST_Structure* node)
 {
-  for (size_t i = 0; i < node->nfields(); ++i) {
+  for (unsigned i = 0; i < node->nfields(); ++i) {
     bool marked_as_key = false;
     be_global->check_key(get_struct_field(node, i), marked_as_key);
     if (marked_as_key) {
