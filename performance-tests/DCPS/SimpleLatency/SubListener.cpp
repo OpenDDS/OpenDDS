@@ -44,7 +44,7 @@ PubDataReaderListenerImpl::~PubDataReaderListenerImpl ()
 void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 {
     CORBA::Long seqnum;
-
+    bool valid = false;
     if (use_zero_copy_)
     {
       ::CORBA::Long max_read_samples = 1;
@@ -58,6 +58,8 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
                               ::DDS::ANY_INSTANCE_STATE);
 
       seqnum = message[0].seqnum;
+      valid = si[0].valid_data;
+
       this->dr_servant_->return_loan(message, si);
     }
     else
@@ -69,6 +71,11 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
       this->dr_servant_->take_next_sample(message, si) ;
 
       seqnum = message.seqnum;
+      valid = si.valid_data;
+    }
+
+    if (!valid) {
+      return;
     }
 
     if (seqnum == 0)

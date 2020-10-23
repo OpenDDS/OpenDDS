@@ -132,6 +132,7 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 {
     CORBA::Long sequence_number;
     DDS::ReturnCode_t status;
+    bool valid = false;
 
     if (use_zero_copy_)
     {
@@ -148,6 +149,7 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
       timer_.stop();
 
       sequence_number = messageZC[0].seqnum;
+      valid = siZC[0].valid_data;
       status = this->dr_servant_->return_loan(messageZC, siZC);
     }
     else
@@ -159,6 +161,11 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
       timer_.stop();
 
       sequence_number = message.seqnum;
+      valid = si.valid_data;
+    }
+
+    if (!valid) {
+      return;
     }
 
     if (status == DDS::RETCODE_OK) {
