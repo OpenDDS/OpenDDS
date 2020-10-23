@@ -2538,6 +2538,8 @@ namespace {
       }
     }
 
+    be_global->add_include("dds/DCPS/TypeSupportImpl.h");
+
     be_global->header_ <<
       "template <>\n"
       "struct" << export_string << " MarshalTraits<" << cxx << "> {\n"
