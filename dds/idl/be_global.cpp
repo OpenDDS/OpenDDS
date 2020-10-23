@@ -59,6 +59,8 @@ BE_GlobalData::BE_GlobalData()
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
+  , root_default_autoid_(autoidkind_sequential)
+  , default_try_construct_(tryconstructfailaction_discard)
 {
   default_data_representation_.set_all(true);
 
@@ -345,14 +347,18 @@ BE_GlobalData::parse_args(long& i, char** av)
 
   switch (av[i][1]) {
   case 'o':
-    idl_global->append_idl_flag(av[i + 1]);
-    if (ACE_OS::mkdir(av[i + 1]) != 0 && errno != EEXIST) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("IDL: unable to create directory %C")
-        ACE_TEXT(" specified by -o option\n"), av[i + 1]));
+    if (av[++i] == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for -o\n")));
       idl_global->parse_args_exit(1);
     } else {
-      output_dir_ = av[++i];
+      idl_global->append_idl_flag(av[i]);
+      if (ACE_OS::mkdir(av[i]) != 0 && errno != EEXIST) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: unable to create directory %C")
+          ACE_TEXT(" specified by -o option\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      } else {
+        output_dir_ = av[i];
+      }
     }
     break;
 
@@ -422,16 +428,46 @@ BE_GlobalData::parse_args(long& i, char** av)
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       warn_about_dcps_data_type_ = false;
     } else if (!std::strcmp(av[i], "--default-extensibility")) {
-      if (!std::strcmp(av[i + 1], "final")) {
+      if (av[++i] == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-extensibility\n")));
+        idl_global->parse_args_exit(1);
+      } else if (!std::strcmp(av[i], "final")) {
         default_extensibility_ = extensibilitykind_final;
-      } else if (!std::strcmp(av[i + 1], "appendable")) {
+      } else if (!std::strcmp(av[i], "appendable")) {
         default_extensibility_ = extensibilitykind_appendable;
-      } else if (!std::strcmp(av[i + 1], "mutable")) {
+      } else if (!std::strcmp(av[i], "mutable")) {
         default_extensibility_ = extensibilitykind_mutable;
       } else {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("Invalid argument to --default-extensibility: %C\n"),
-          av[i + 1]));
+          ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      }
+    } else if (!std::strcmp(av[i], "--default-autoid")) {
+      if (av[++i] == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
+        idl_global->parse_args_exit(1);
+      } else if (!std::strcmp(av[i], "sequential")) {
+        root_default_autoid_ = autoidkind_sequential;
+      } else if (!std::strcmp(av[i], "hash")) {
+        root_default_autoid_ = autoidkind_hash;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-autoid: %C\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      }
+    } else if (!std::strcmp(av[i], "--default-try-construct")) {
+      if (av[++i] == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-try-construct\n")));
+        idl_global->parse_args_exit(1);
+      } else if (!std::strcmp(av[i], "discard")) {
+        default_try_construct_ = tryconstructfailaction_discard;
+      } else if (!std::strcmp(av[i], "use-default")) {
+        default_try_construct_ = tryconstructfailaction_use_default;
+      } else if (!std::strcmp(av[i], "trim")) {
+        default_try_construct_ = tryconstructfailaction_trim;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-try-construct: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
     } else {
@@ -768,12 +804,28 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
 
 AutoidKind BE_GlobalData::autoid(AST_Decl* node) const
 {
-  AutoidAnnotation* autoid_annotation =
-    dynamic_cast<AutoidAnnotation*>(
-      builtin_annotations_["::@autoid"]);
-  AutoidKind value = autoid_annotation->absent_value;
-  autoid_annotation->node_value_exists(node, value);
-  return value;
+  AutoidAnnotation* autoid_annotation = dynamic_cast<AutoidAnnotation*>(
+    builtin_annotations_["::@autoid"]);
+  AutoidKind value;
+  if (autoid_annotation->node_value_exists(node, value)) {
+    return value;
+  }
+  return scoped_autoid(node->defined_in());
+}
+
+AutoidKind BE_GlobalData::scoped_autoid(UTL_Scope* scope) const
+{
+  AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
+  AutoidAnnotation* autoid_annotation = dynamic_cast<AutoidAnnotation*>(
+    builtin_annotations_["::@autoid"]);
+  if (module) {
+    AutoidKind value;
+    if (autoid_annotation->node_value_exists(module, value)) {
+      return value;
+    }
+    return scoped_autoid(module->defined_in());
+  }
+  return root_default_autoid_;
 }
 
 bool BE_GlobalData::id(AST_Decl* node, ACE_CDR::ULong& value) const
@@ -854,8 +906,10 @@ TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
   TryConstructAnnotation* try_construct_annotation =
     dynamic_cast<TryConstructAnnotation*>(
       builtin_annotations_["::@try_construct"]);
-  TryConstructFailAction value = try_construct_annotation->absent_value;
-  try_construct_annotation->node_value_exists(node, value);
+  TryConstructFailAction value;
+  if (!try_construct_annotation->node_value_exists(node, value)) {
+    value = default_try_construct_;
+  }
   return value;
 }
 

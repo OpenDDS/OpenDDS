@@ -248,10 +248,12 @@ private:
   bool warn_about_dcps_data_type_;
   ExtensibilityKind default_extensibility_;
   OpenDDS::DataRepresentation default_data_representation_;
+  AutoidKind root_default_autoid_;
+  TryConstructFailAction default_try_construct_;
+  std::set<std::string> platforms_;
 
   bool is_default_nested(UTL_Scope* scope);
-
-  std::set<std::string> platforms_;
+  AutoidKind scoped_autoid(UTL_Scope* scope) const;
 };
 
 class BE_Comment_Guard {
