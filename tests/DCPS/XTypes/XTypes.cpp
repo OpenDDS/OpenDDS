@@ -492,8 +492,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  if (!(writer ^ reader)) {
-    ACE_ERROR((LM_ERROR, "ERROR: Invalid endpoint arguments\n"));
+  if (writer == reader) {
+    ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader: writer %d, reader %d\n", writer, reader));
     return 1;
   }
 
@@ -657,9 +657,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         failed = !(read_appendable_struct_with_dependency(dr) == RETCODE_OK);
       }
     }
-  } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Must pass either --writer or --reader\n"));
-    failed = true;
   }
 
   topic = 0;
