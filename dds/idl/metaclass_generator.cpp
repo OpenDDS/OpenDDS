@@ -216,7 +216,7 @@ namespace {
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
+          "      if (!ser.skip(len)) {\n"
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' contents could not be skipped\");\n"
           "      }\n";
@@ -610,7 +610,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         std::size_t sz = 0;
         to_cxx_type(af.as_act_, sz);
         be_global->impl_ <<
-          "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << sz << ");\n";
+          "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
       }
     }
   }
@@ -680,7 +680,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
     std::size_t sz = 0;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
-      "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
+      "  return ser.skip(" << len << ", " << sz << ");\n";
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
@@ -688,7 +688,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
         "    if (!(ser >> strlength)) return false;\n"
-        "    if (!ser.skip(static_cast<ACE_UINT16>(strlength))) return false;\n";
+        "    if (!ser.skip(strlength)) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       std::string pre, post;
       if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
@@ -721,7 +721,7 @@ func(const std::string&, const std::string&, AST_Type* br_type, const std::strin
     ss <<
       "    ACE_CDR::ULong len;\n"
       "    if (!(ser >> len)) return false;\n"
-      "    if (!ser.skip(static_cast<ACE_UINT16>(len))) return false;\n";
+      "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     std::size_t sz = 0;
     to_cxx_type(br_type, sz);

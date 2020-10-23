@@ -1504,7 +1504,7 @@ namespace OpenDDS {
         } else {
           type_ids.length(type_info->minimal.dependent_typeid_count + 1);
           type_ids[0] = type_info->minimal.typeid_with_size.type_id;
-          for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
+          for (unsigned i = 1; i <= (unsigned)type_info->minimal.dependent_typeid_count; ++i) {
             type_ids[i] = type_info->minimal.dependent_typeids[i - 1].type_id;
           }
           // Get TypeObjects of topic type and all of its dependencies

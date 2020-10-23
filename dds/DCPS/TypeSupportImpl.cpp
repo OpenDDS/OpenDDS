@@ -61,8 +61,8 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   } else {
     const TypeObject& minTypeObject = pos->second;
     type_info.minimal.typeid_with_size.type_id = minTypeId;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size =
-      serialized_size(get_typeobject_encoding(), minTypeObject);
+    const size_t sz = serialized_size(get_typeobject_encoding(), minTypeObject);
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = static_cast<unsigned>(sz);
   }
 
   type_info.minimal.dependent_typeid_count = 0;

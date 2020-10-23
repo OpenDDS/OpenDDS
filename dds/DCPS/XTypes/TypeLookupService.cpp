@@ -56,24 +56,24 @@ void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
   OPENDDS_SET(TypeIdentifier) tmp;
-  for (size_t i = 0; i < type_ids.length(); ++i) {
+  for (unsigned i = 0; i < type_ids.length(); ++i) {
     const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_ids[i]);
     if (it != type_dependencies_map_.end()) {
-      for (size_t j = 0; j < it->second.length(); ++j) {
+      for (unsigned j = 0; j < it->second.length(); ++j) {
         tmp.insert(it->second[j].type_id);
       }
     }
   }
 
   // All dependent TypeIdentifiers are expected to have an entry in the TypeObject cache.
-  dependencies.length(tmp.size());
+  dependencies.length(static_cast<unsigned>(tmp.size()));
   std::set<TypeIdentifier>::const_iterator iter = tmp.begin();
-  size_t i = 0;
-  for (; iter != tmp.end(); ++i, ++iter) {
+  for (unsigned i = 0; iter != tmp.end(); ++i, ++iter) {
     const TypeMap::const_iterator tobj_it = minimal_type_map_.find(*iter);
     if (tobj_it != minimal_type_map_.end()) {
       dependencies[i].type_id = *iter;
-      dependencies[i].typeobject_serialized_size = DCPS::serialized_size(get_typeobject_encoding(), tobj_it->second);
+      const size_t sz = DCPS::serialized_size(get_typeobject_encoding(), tobj_it->second);
+      dependencies[i].typeobject_serialized_size = static_cast<unsigned>(sz);
     }
   }
 }
