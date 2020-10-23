@@ -135,9 +135,7 @@ string to_macro(const char* fn)
   msec += ACE_OS::getpid() + (size_t) ACE_OS::thr_self();
 
   unsigned int seed = static_cast<unsigned int>(msec);
-#ifdef max
-#undef max
-#endif
+
   if (ret[ret.size() - 1] != '_') ret += '_';
   
   static const char alphanum[] =
