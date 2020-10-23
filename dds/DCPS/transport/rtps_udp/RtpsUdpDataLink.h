@@ -312,6 +312,7 @@ private:
     void swap_durable_data(OPENDDS_MAP(SequenceNumber, TransportQueueElement*)& dd);
     void expire_durable_data();
     bool expecting_durable_data() const;
+    bool handshake_done() const { return cur_cumulative_ack_ != SequenceNumber::ZERO(); }
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
   };
 
@@ -351,8 +352,6 @@ private:
   class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
-    // Request an acknack with non-final heartbeats from these readers to complete association.
-    ReaderInfoSet preassociation_readers_;
     // These readers have sent a non-final acknack that will be answered with a final heartbeat.
     ReaderInfoSet readers_expecting_heartbeat_;
     // These readers have not acked everything they are supposed to have acked.
@@ -396,6 +395,7 @@ private:
     static void snris_erase(RtpsUdpDataLink::SNRIS& snris, const SequenceNumber& sn, const ReaderInfo_rch& reader);
     void make_leader_lagger(const RepoId& reader, SequenceNumber previous_max_sn);
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber& previous_acked_sn);
+    bool is_lagging(const ReaderInfo_rch& reader) const;
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
@@ -408,7 +408,7 @@ private:
     RemoveResult remove_sample(const DataSampleElement* sample);
     void remove_all_msgs();
 
-    bool add_reader(const RepoId& id, const ReaderInfo_rch& info);
+    bool add_reader(const ReaderInfo_rch& reader);
     bool has_reader(const RepoId& id) const;
     bool remove_reader(const RepoId& id);
     size_t reader_count() const;

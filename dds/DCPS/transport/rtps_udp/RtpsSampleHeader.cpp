@@ -346,7 +346,7 @@ namespace {
   }
 }
 
-DCPS::RepoId
+void
 RtpsSampleHeader::populate_data_sample_submessages(
   RTPS::SubmessageSeq& subm,
   const DataSampleElement& dsle,
@@ -358,14 +358,14 @@ RtpsSampleHeader::populate_data_sample_submessages(
   add_timestamp(subm, flags, dsle.get_header());
   CORBA::ULong i = subm.length();
 
-  DCPS::RepoId readerId = GUID_UNKNOWN;
+  EntityId_t readerId = ENTITYID_UNKNOWN;
   if (dsle.get_num_subs() == 1) {
-    readerId = dsle.get_sub_id(0);
+    readerId = dsle.get_sub_id(0).entityId;
     InfoDestinationSubmessage idest;
     idest.smHeader.submessageId = INFO_DST;
     idest.smHeader.flags = flags;
     idest.smHeader.submessageLength = INFO_DST_SZ;
-    std::memcpy(idest.guidPrefix, readerId.guidPrefix,
+    std::memcpy(idest.guidPrefix, dsle.get_sub_id(0).guidPrefix,
                 sizeof(GuidPrefix_t));
     subm.length(i + 1);
     subm[i++].info_dst_sm(idest);
@@ -391,7 +391,7 @@ RtpsSampleHeader::populate_data_sample_submessages(
     {DATA, flags, 0},
     0,
     DATA_OCTETS_TO_IQOS,
-    readerId.entityId,
+    readerId,
     dsle.get_pub_id().entityId,
     {dsle.get_header().sequence_.getHigh(), dsle.get_header().sequence_.getLow()},
     ParameterList()
@@ -421,8 +421,6 @@ RtpsSampleHeader::populate_data_sample_submessages(
 
   subm.length(i + 1);
   subm[i].data_sm(data);
-
-  return readerId;
 }
 
 namespace {
