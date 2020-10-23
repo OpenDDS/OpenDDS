@@ -25,6 +25,8 @@ public:
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
                  const char* repoid);
+
+  static bool generate_struct_deserialization(AST_Structure* node, FieldFilter field_type);
 };
 
 #endif

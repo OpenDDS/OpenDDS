@@ -202,8 +202,8 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 namespace {
 
   /**
-   * Returns true for a type if NestedKeyOnly serialization and normal
-   * serialization is the same for that type.
+   * Returns true for a type if nested key serialization is different from
+   * normal serialization.
    */
   bool needs_nested_key_only(AST_Type* type)
   {
@@ -2610,7 +2610,7 @@ namespace {
     return true;
   }
 
-  bool generate_struct_serialization(AST_Structure* node, FieldFilter field_type)
+  bool generate_struct_serialization_functions(AST_Structure* node, FieldFilter field_type)
   {
     const std::string actual_cpp_name = scoped(node->name());
     std::string cpp_name = actual_cpp_name;
@@ -2634,12 +2634,9 @@ namespace {
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
 
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
     const ExtensibilityKind exten = be_global->extensibility(node);
     const bool not_final = exten != extensibilitykind_final;
     const bool is_mutable = exten == extensibilitykind_mutable;
-    const bool is_appendable = exten == extensibilitykind_appendable;
 
     {
       Function serialized_size("serialized_size", "void");
@@ -2772,215 +2769,250 @@ namespace {
       be_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
     }
 
-    // TODO(iguessthislldo) Pull this out for metaclass_generator
-    {
-      Function extraction("operator>>", "bool");
-      extraction.addArg("strm", "Serializer&");
-      extraction.addArg("stru", cpp_name + "&");
-      extraction.endArgs();
-      Intro intro;
-      string expr;
-      const std::string indent = "  ";
+    return marshal_generator::generate_struct_deserialization(node, field_type);
+  }
 
+} // anonymous namespace
+
+bool marshal_generator::generate_struct_deserialization(
+  AST_Structure* node, FieldFilter field_type)
+{
+  const std::string actual_cpp_name = scoped(node->name());
+  std::string cpp_name = actual_cpp_name;
+  std::string const_cpp_name;
+  switch (field_type) {
+  case FieldFilter_All:
+    const_cpp_name = "const " + actual_cpp_name + "&";
+    break;
+  case FieldFilter_NestedKeyOnly:
+    cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
+    const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
+    break;
+  case FieldFilter_KeyOnly:
+    cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
+    const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
+    break;
+  }
+  const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
+  const bool wrap_nested_key_only = field_type != FieldFilter_All;
+  const Fields fields(node, field_type);
+  const Fields::Iterator fields_end = fields.end();
+  RtpsFieldCustomizer rtpsCustom(cpp_name);
+
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+
+  const ExtensibilityKind exten = be_global->extensibility(node);
+  const bool not_final = exten != extensibilitykind_final;
+  const bool is_mutable = exten == extensibilitykind_mutable;
+  const bool is_appendable = exten == extensibilitykind_appendable;
+
+  {
+    Function extraction("operator>>", "bool");
+    extraction.addArg("strm", "Serializer&");
+    extraction.addArg("stru", cpp_name + "&");
+    extraction.endArgs();
+    Intro intro;
+    string expr;
+    const std::string indent = "  ";
+
+    be_global->impl_ <<
+      "  const Encoding& encoding = strm.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n"
+      "\n";
+    std::vector<string> code;
+    code.push_back("if (!strm.read_delimiter(total_size)) {");
+    code.push_back("  return false;");
+    code.push_back("}");
+    generate_dheader_code(code, not_final);
+    if (not_final) {
       be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n"
-        "  ACE_UNUSED_ARG(encoding);\n"
+        "  const size_t end_of_struct = strm.pos() + total_size;\n"
         "\n";
-      std::vector<string> code;
-      code.push_back("if (!strm.read_delimiter(total_size)) {");
-      code.push_back("  return false;");
-      code.push_back("}");
-      generate_dheader_code(code, not_final);
-      if (not_final) {
-        be_global->impl_ <<
-          "  const size_t end_of_struct = strm.pos() + total_size;\n"
-          "\n";
-      }
+    }
 
-      if (is_mutable) {
-        be_global->impl_ <<
-          "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
-          "    set_default(stru" << (wrap_nested_key_only ? ".value" : "") << ");\n"
-          "\n"
-          "    unsigned member_id;\n"
-          "    size_t field_size;\n"
-          "    while (true) {\n";
+    if (is_mutable) {
+      be_global->impl_ <<
+        "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
+        "    set_default(stru" << (wrap_nested_key_only ? ".value" : "") << ");\n"
+        "\n"
+        "    unsigned member_id;\n"
+        "    size_t field_size;\n"
+        "    while (true) {\n";
 
-        /*
-         * Get the Member ID and see if we're done. In XCDR1 we use a special
-         * member ID to stop the loop. We don't have a PID marking the end in
-         * XCDR2 parameter lists, but we have the size, so we need to stop
-         * after we hit the offset marked by the delimiter, but before trying
-         * to read a non-existent member id.
-         */
-        be_global->impl_ <<
-          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "            strm.pos() >= end_of_struct) {\n"
-          "        return true;\n"
-          "      }\n"
-          "      bool must_understand = false;\n"
-          "      if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
-          "        return false;\n"
-          "      }\n"
-          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 &&\n"
-          "            member_id == Serializer::pid_list_end) {\n"
-          "        return true;\n"
-          "      }\n"
-          "      const size_t end_of_field = strm.pos() + field_size;\n"
-          "      ACE_UNUSED_ARG(end_of_field);\n"
-          "\n";
+      /*
+       * Get the Member ID and see if we're done. In XCDR1 we use a special
+       * member ID to stop the loop. We don't have a PID marking the end in
+       * XCDR2 parameter lists, but we have the size, so we need to stop
+       * after we hit the offset marked by the delimiter, but before trying
+       * to read a non-existent member id.
+       */
+      be_global->impl_ <<
+        "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
+        "            strm.pos() >= end_of_struct) {\n"
+        "        return true;\n"
+        "      }\n"
+        "      bool must_understand = false;\n"
+        "      if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "        return false;\n"
+        "      }\n"
+        "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 &&\n"
+        "            member_id == Serializer::pid_list_end) {\n"
+        "        return true;\n"
+        "      }\n"
+        "      const size_t end_of_field = strm.pos() + field_size;\n"
+        "      ACE_UNUSED_ARG(end_of_field);\n"
+        "\n";
 
-        std::ostringstream cases;
-        const AutoidKind auto_id = be_global->autoid(node);
-        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-          AST_Field* const field = *i;
-          ACE_CDR::ULong default_id = i.pos();
-          const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
-          string field_name =
-            string("stru") + value_access + "." + field->local_name()->get_string();
-          cases <<
-            "      case " << id << ": {\n"
-            "        if (!" << generate_field_stream(
-            indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
-          AST_Type* field_type = resolveActualType(field->field_type());
-          Classification fld_cls = classify(field_type);
-
-          if (use_cxx11) {
-            field_name += "()";
-          }
-          const TryConstructFailAction try_construct = be_global->try_construct(field);
-          if (try_construct == tryconstructfailaction_use_default) {
-            cases <<
-              "          " << type_to_default(field_type, field_name, field->field_type()->anonymous()) <<
-              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-            if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
-          } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
-                     ((fld_cls & CL_STRING) || (fld_cls & CL_SEQUENCE))) {
-            if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
-              const std::string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
-              const std::string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
-              const std::string inout = use_cxx11 ? "" : ".inout()";
-              cases <<
-                "        if (strm.good_bit() && " << check_not_empty << " && ("
-                         << bounded_arg(field_type) << " < " << get_length << ")) {\n"
-                "          " << field_name << inout;
-              if (use_cxx11) {
-                cases <<
-                  ".resize(" << bounded_arg(field_type) <<  ");\n";
-              } else {
-                cases <<
-                  "[" << bounded_arg(field_type) << "] = 0;\n";
-              }
-              cases <<
-                "        } else {\n"
-                "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-                "          return false;\n"
-                "        }\n";
-            } else if (fld_cls & CL_SEQUENCE) {
-              cases <<
-                "          if (strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
-                "            return false;\n"
-                "          }\n"
-                "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-                "          strm.skip(end_of_field - strm.pos());\n";
-            }
-
-          } else { //discard/default
-            cases <<
-              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-            if (!(fld_cls & CL_STRING)) {
-              cases <<
-                "          strm.skip(end_of_field - strm.pos());\n";
-            }
-            cases <<
-              "          return false;\n";
-          }
-          cases <<
-            "        }\n"
-            "        break;\n"
-            "      }\n";
-        }
-        intro.join(be_global->impl_, indent);
-        be_global->impl_ <<
-          "      switch (member_id) {\n"
-          << cases.str() <<
-          "      default:\n"
-          "        if (must_understand) {\n"
-          "          if (DCPS_debug_level >= 8) {\n"
-          "            ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
-                         << cpp_name << "\\n\"), member_id));\n" <<
-          "          }\n"
-          "          return false;\n"
-          "        }\n"
-          "        strm.skip(field_size);\n"
-          "        break;\n"
-          "      }\n"
-          "    }\n"
-          "    return false;\n"
-          "  }\n"
-          "\n";
-      }
-
-      expr = "";
+      std::ostringstream cases;
+      const AutoidKind auto_id = be_global->autoid(node);
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
-        if (i.pos() && exten != extensibilitykind_appendable) {
-          expr += "\n    && ";
+        ACE_CDR::ULong default_id = i.pos();
+        const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
+        string field_name =
+          string("stru") + value_access + "." + field->local_name()->get_string();
+        cases <<
+          "      case " << id << ": {\n"
+          "        if (!" << generate_field_stream(
+          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
+        AST_Type* field_type = resolveActualType(field->field_type());
+        Classification fld_cls = classify(field_type);
+
+        if (use_cxx11) {
+          field_name += "()";
         }
-        // TODO (sonndinh): Integrate with try-construct for when the stream
-        // ends before some fields on the reader side get their values.
-        if (is_appendable) {
-          expr +=
-            "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-            "      strm.pos() >= end_of_struct) {\n"
-            "    return true;\n"
-            "  }\n";
-        }
-        const string field_name = field->local_name()->get_string();
-        const string cond = rtpsCustom.getConditional(field_name);
-        if (!cond.empty()) {
-          string prefix = rtpsCustom.preFieldRead(field_name);
-          if (is_appendable) {
-            if (!prefix.empty()) {
-              prefix = prefix.substr(0, prefix.length() - 8);
-              expr +=
-                "  if (!" + prefix + ") {\n"
-                "    return false;\n"
-                "  }\n";
+        const TryConstructFailAction try_construct = be_global->try_construct(field);
+        if (try_construct == tryconstructfailaction_use_default) {
+          cases <<
+            "          " << type_to_default(field_type, field_name, field->field_type()->anonymous()) <<
+            "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
+        } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
+                   ((fld_cls & CL_STRING) || (fld_cls & CL_SEQUENCE))) {
+          if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
+            const std::string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
+            const std::string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
+            const std::string inout = use_cxx11 ? "" : ".inout()";
+            cases <<
+              "        if (strm.good_bit() && " << check_not_empty << " && ("
+                       << bounded_arg(field_type) << " < " << get_length << ")) {\n"
+              "          " << field_name << inout;
+            if (use_cxx11) {
+              cases <<
+                ".resize(" << bounded_arg(field_type) <<  ");\n";
+            } else {
+              cases <<
+                "[" << bounded_arg(field_type) << "] = 0;\n";
             }
-            expr += "  if ((" + cond + ") && !";
-          } else {
-            expr += prefix + "(!(" + cond + ") || ";
+            cases <<
+              "        } else {\n"
+              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+              "          return false;\n"
+              "        }\n";
+          } else if (fld_cls & CL_SEQUENCE) {
+            cases <<
+              "          if (strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+              "            return false;\n"
+              "          }\n"
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "          strm.skip(end_of_field - strm.pos());\n";
           }
-        } else if (is_appendable) {
-          expr += "  if (!";
+
+        } else { //discard/default
+          cases <<
+            "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          if (!(fld_cls & CL_STRING)) {
+            cases <<
+              "          strm.skip(end_of_field - strm.pos());\n";
+          }
+          cases <<
+            "          return false;\n";
         }
-        expr += generate_field_stream(
-          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
-        if (is_appendable) {
-          expr += ") {\n"
-            "    return false;\n"
-            "  }\n";
-        } else if (!cond.empty()) {
-          expr += ")";
-        }
+        cases <<
+          "        }\n"
+          "        break;\n"
+          "      }\n";
       }
       intro.join(be_global->impl_, indent);
+      be_global->impl_ <<
+        "      switch (member_id) {\n"
+        << cases.str() <<
+        "      default:\n"
+        "        if (must_understand) {\n"
+        "          if (DCPS_debug_level >= 8) {\n"
+        "            ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
+                       << cpp_name << "\\n\"), member_id));\n" <<
+        "          }\n"
+        "          return false;\n"
+        "        }\n"
+        "        strm.skip(field_size);\n"
+        "        break;\n"
+        "      }\n"
+        "    }\n"
+        "    return false;\n"
+        "  }\n"
+        "\n";
+    }
+
+    expr = "";
+    for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+      AST_Field* const field = *i;
+      if (i.pos() && exten != extensibilitykind_appendable) {
+        expr += "\n    && ";
+      }
+      // TODO (sonndinh): Integrate with try-construct for when the stream
+      // ends before some fields on the reader side get their values.
       if (is_appendable) {
         expr +=
           "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "      strm.pos() < end_of_struct) {\n"
-          "    strm.skip(end_of_struct - strm.pos());\n"
-          "  }\n"
-          "  return true;\n";
-        be_global->impl_ << expr;
-      } else {
-        be_global->impl_ << "  return " << expr << ";\n";
+          "      strm.pos() >= end_of_struct) {\n"
+          "    return true;\n"
+          "  }\n";
+      }
+      const string field_name = field->local_name()->get_string();
+      const string cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        string prefix = rtpsCustom.preFieldRead(field_name);
+        if (is_appendable) {
+          if (!prefix.empty()) {
+            prefix = prefix.substr(0, prefix.length() - 8);
+            expr +=
+              "  if (!" + prefix + ") {\n"
+              "    return false;\n"
+              "  }\n";
+          }
+          expr += "  if ((" + cond + ") && !";
+        } else {
+          expr += prefix + "(!(" + cond + ") || ";
+        }
+      } else if (is_appendable) {
+        expr += "  if (!";
+      }
+      expr += generate_field_stream(
+        indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
+      if (is_appendable) {
+        expr += ") {\n"
+          "    return false;\n"
+          "  }\n";
+      } else if (!cond.empty()) {
+        expr += ")";
       }
     }
-    return true;
+    intro.join(be_global->impl_, indent);
+    if (is_appendable) {
+      expr +=
+        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
+        "      strm.pos() < end_of_struct) {\n"
+        "    strm.skip(end_of_struct - strm.pos());\n"
+        "  }\n"
+        "  return true;\n";
+      be_global->impl_ << expr;
+    } else {
+      be_global->impl_ << "  return " << expr << ";\n";
+    }
   }
-} // anonymous namespace
+  return true;
+}
 
 bool marshal_generator::gen_struct(AST_Structure* node,
                                    UTL_ScopedName* name,
@@ -3029,8 +3061,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
   }
 
-  if (!generate_struct_serialization(node, FieldFilter_All) ||
-      !generate_struct_serialization(node, FieldFilter_NestedKeyOnly)) {
+  if (!generate_struct_serialization_functions(node, FieldFilter_All) ||
+      !generate_struct_serialization_functions(node, FieldFilter_NestedKeyOnly)) {
     return false;
   }
 
@@ -3092,7 +3124,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     keys = TopicKeys(node);
     info = 0; // Annotations Override DCPS_DATA_TYPE
 
-    if (!generate_struct_serialization(node, FieldFilter_KeyOnly)) {
+    if (!generate_struct_serialization_functions(node, FieldFilter_KeyOnly)) {
       return false;
     }
   }
