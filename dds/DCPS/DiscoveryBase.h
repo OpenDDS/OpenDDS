@@ -21,6 +21,8 @@
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
+#include "XTypes/TypeAssignability.h"
+
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/Ice.h"
@@ -153,6 +155,7 @@ namespace OpenDDS {
         {
         }
 
+        RepoIdSet matched_endpoints_;
         DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
         XTypes::TypeInformation type_info_;
@@ -163,6 +166,15 @@ namespace OpenDDS {
         ICE::AgentInfo ice_agent_info_;
 #endif
 
+        const char* get_topic_name() const
+        {
+          return reader_data_.ddsSubscriptionData.topic_name;
+        }
+
+        const char* get_type_name() const
+        {
+          return reader_data_.ddsSubscriptionData.type_name;
+        }
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredSubscription,
@@ -188,6 +200,7 @@ namespace OpenDDS {
         {
         }
 
+        RepoIdSet matched_endpoints_;
         DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
         XTypes::TypeInformation type_info_;
@@ -198,6 +211,15 @@ namespace OpenDDS {
         ICE::AgentInfo ice_agent_info_;
 #endif
 
+        const char* get_topic_name() const
+        {
+          return writer_data_.ddsPublicationData.topic_name;
+        }
+
+        const char* get_type_name() const
+        {
+          return writer_data_.ddsPublicationData.type_name;
+        }
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredPublication,
@@ -210,6 +232,7 @@ namespace OpenDDS {
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
         : max_type_lookup_service_reply_period_(0)
+        , use_xtypes_(true)
         , type_lookup_service_sequence_number_(0)
         , lock_(lock)
         , participant_id_(participant_id)
@@ -247,19 +270,6 @@ namespace OpenDDS {
         type_lookup_service_ = type_lookup_service;
       }
 
-      RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                const DDS::BuiltinTopicKey_t& key)
-      {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_PUBLICATION_TOPIC)) {
-          return pub_key_to_id_[key];
-        }
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_SUBSCRIPTION_TOPIC)) {
-          return sub_key_to_id_[key];
-        }
-        return RepoId();
-      }
-
       void purge_dead_topic(const OPENDDS_STRING& topic_name) {
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         topic_names_.erase(top_it->second.topic_id());
@@ -275,9 +285,9 @@ namespace OpenDDS {
             discovered_publications_.find(to_ignore);
           if (iter != discovered_publications_.end()) {
             // clean up tracking info
-            OPENDDS_STRING topic_name = get_topic_name(iter->second);
+            const OPENDDS_STRING topic_name = iter->second.get_topic_name();
             TopicDetails& td = topics_[topic_name];
-            td.remove_pub_sub(iter->first);
+            td.remove_discovered_publication(to_ignore);
             remove_from_bit(iter->second);
             discovered_publications_.erase(iter);
             // break associations
@@ -293,9 +303,9 @@ namespace OpenDDS {
             discovered_subscriptions_.find(to_ignore);
           if (iter != discovered_subscriptions_.end()) {
             // clean up tracking info
-            OPENDDS_STRING topic_name = get_topic_name(iter->second);
+            const OPENDDS_STRING topic_name = iter->second.get_topic_name();
             TopicDetails& td = topics_[topic_name];
-            td.remove_pub_sub(iter->first);
+            td.remove_discovered_publication(to_ignore);
             remove_from_bit(iter->second);
             discovered_subscriptions_.erase(iter);
             // break associations
@@ -313,11 +323,23 @@ namespace OpenDDS {
             ignored_topics_.insert(iter->second);
             // Remove all publications and subscriptions on this topic
             TopicDetails& td = topics_[iter->second];
-            RepoIdSet ids = td.endpoints();
-            for (RepoIdSet::iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
-              match_endpoints(*ep, td, true /*remove*/);
-              td.remove_pub_sub(*ep);
-              if (shutting_down()) { return; }
+            {
+              const RepoIdSet ids = td.discovered_publications();
+              for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
+                match_endpoints(*ep, td, true /*remove*/);
+                td.remove_discovered_publication(*ep);
+                // TODO: Do we need to remove from discovered_subscriptions?
+                if (shutting_down()) { return; }
+              }
+            }
+            {
+              const RepoIdSet ids = td.discovered_subscriptions();
+              for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
+                match_endpoints(*ep, td, true /*remove*/);
+                td.remove_discovered_subscription(*ep);
+                // TODO: Do we need to remove from discovered_publications?
+                if (shutting_down()) { return; }
+              }
             }
             if (td.is_dead()) {
               purge_dead_topic(iter->second);
@@ -398,11 +420,11 @@ namespace OpenDDS {
       virtual bool update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos) = 0;
 
       RepoId add_publication(const RepoId& topicId,
-                                   DataWriterCallbacks* publication,
-                                   const DDS::DataWriterQos& qos,
-                                   const TransportLocatorSeq& transInfo,
-                                   const DDS::PublisherQos& publisherQos,
-                                   const XTypes::TypeInformation& type_info)
+                             DataWriterCallbacks* publication,
+                             const DDS::DataWriterQos& qos,
+                             const TransportLocatorSeq& transInfo,
+                             const DDS::PublisherQos& publisherQos,
+                             const XTypes::TypeInformation& type_info)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
 
@@ -474,7 +496,7 @@ namespace OpenDDS {
 #endif
 
         TopicDetails& td = topics_[topic_name];
-        td.add_pub_sub(rid);
+        td.add_local_publication(rid);
 
         if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
           return RepoId();
@@ -505,7 +527,7 @@ namespace OpenDDS {
               topics_.find(topic_name);
             if (top_it != topics_.end()) {
               match_endpoints(publicationId, top_it->second, true /*remove*/);
-              top_it->second.remove_pub_sub(publicationId);
+              top_it->second.remove_local_publication(publicationId);
               // Local, no need to check for dead topic.
             }
           } else {
@@ -619,7 +641,7 @@ namespace OpenDDS {
 #endif
 
         TopicDetails& td = topics_[topic_name];
-        td.add_pub_sub(rid);
+        td.add_local_subscription(rid);
 
         if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
           return RepoId();
@@ -650,7 +672,7 @@ namespace OpenDDS {
               topics_.find(topic_name);
             if (top_it != topics_.end()) {
               match_endpoints(subscriptionId, top_it->second, true /*remove*/);
-              top_it->second.remove_pub_sub(subscriptionId);
+              top_it->second.remove_local_subscription(subscriptionId);
               // Local, no need to check for dead topic.
             }
           } else {
@@ -733,9 +755,6 @@ namespace OpenDDS {
         ContentFilterProperty_t filterProperties;
       };
 
-      typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, RepoId,
-                              BuiltinTopicKeyLess) BitKeyMap;
-
       typedef OPENDDS_MAP_CMP(RepoId, LocalPublication,
                               GUID_tKeyLessThan) LocalPublicationMap;
       typedef typename LocalPublicationMap::iterator LocalPublicationIter;
@@ -748,12 +767,6 @@ namespace OpenDDS {
 
       typedef typename OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, GUID_tKeyLessThan) TopicNameMap;
 
-      static const char* get_topic_name(const DiscoveredPublication& pub) {
-        return pub.writer_data_.ddsPublicationData.topic_name;
-      }
-      static const char* get_topic_name(const DiscoveredSubscription& sub) {
-        return sub.reader_data_.ddsSubscriptionData.topic_name;
-      }
       static DDS::BuiltinTopicKey_t get_key(const DiscoveredPublication& pub) {
         return pub.writer_data_.ddsPublicationData.key;
       }
@@ -817,20 +830,42 @@ namespace OpenDDS {
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
-      virtual bool send_type_lookup_request(XTypes::TypeIdentifierSeq& /*type_ids*/,
+      virtual bool send_type_lookup_request(const XTypes::TypeIdentifierSeq& /*type_ids*/,
                                             const DCPS::RepoId& /*endpoint*/,
-                                            bool /*is_discovery_protected*/)
+                                            bool /*is_discovery_protected*/,
+                                            bool /*send_get_types*/)
       { return true; }
 
+      // TODO: This is perhaps too generic since the context probably has the details this function computes.
       void match_endpoints(RepoId repoId, const TopicDetails& td,
                            bool remove = false)
       {
         const bool reader = GuidConverter(repoId).isReader();
         // Copy the endpoint set - lock can be released in match()
-        RepoIdSet endpoints_copy = td.endpoints();
+        RepoIdSet local_endpoints;
+        RepoIdSet discovered_endpoints;
+        if (reader) {
+          local_endpoints = td.local_publications();
+          discovered_endpoints = td.discovered_publications();
+        } else {
+          local_endpoints = td.local_subscriptions();
+          discovered_endpoints = td.discovered_subscriptions();
+        }
 
-        for (RepoIdSet::const_iterator iter = endpoints_copy.begin();
-             iter != endpoints_copy.end(); ++iter) {
+        for (RepoIdSet::const_iterator iter = local_endpoints.begin();
+             iter != local_endpoints.end(); ++iter) {
+          // check to make sure it's a Reader/Writer or Writer/Reader match
+          if (GuidConverter(*iter).isReader() != reader) {
+            if (remove) {
+              remove_assoc(*iter, repoId);
+            } else {
+              match(reader ? *iter : repoId, reader ? repoId : *iter);
+            }
+          }
+        }
+
+        for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
+             iter != discovered_endpoints.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
           if (GuidConverter(*iter).isReader() != reader) {
             if (remove) {
@@ -850,6 +885,10 @@ namespace OpenDDS {
           const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
           if (lsi != local_subscriptions_.end()) {
             lsi->second.matched_endpoints_.erase(removing);
+            const DiscoveredPublicationIter dpi = discovered_publications_.find(removing);
+            if (dpi != discovered_publications_.end()) {
+              dpi->second.matched_endpoints_.erase(remove_from);
+            }
             WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = removing;
@@ -867,6 +906,10 @@ namespace OpenDDS {
           const LocalPublicationIter lpi = local_publications_.find(remove_from);
           if (lpi != local_publications_.end()) {
             lpi->second.matched_endpoints_.erase(removing);
+            const DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(removing);
+            if (dsi != discovered_subscriptions_.end()) {
+              dsi->second.matched_endpoints_.erase(remove_from);
+            }
             ReaderIdSeq reader_seq(1);
             reader_seq.length(1);
             reader_seq[0] = removing;
@@ -928,15 +971,6 @@ namespace OpenDDS {
         RepoId writer;
         RepoId reader;
         SequenceNumber rpc_sequence_number;
-        DDS::DataWriterQos dwQos;
-        DDS::PublisherQos pubQos;
-        DDS::DataReaderQos drQos;
-        DDS::SubscriberQos subQos;
-        TransportLocatorSeq wTls;
-        TransportLocatorSeq rTls;
-        XTypes::TypeInformation reader_type_info;
-        XTypes::TypeInformation writer_type_info;
-        ContentFilterProperty_t cfProp;
         MonotonicTimePoint time_added_to_map;
       };
 
@@ -968,10 +1002,126 @@ namespace OpenDDS {
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
-
+      bool use_xtypes_;
 
       void
       match(const RepoId& writer, const RepoId& reader)
+      {
+        // 1. collect type info about the writer, which may be local or discovered
+        XTypes::TypeInformation* writer_type_info = 0;
+
+        const LocalPublicationIter lpi = local_publications_.find(writer);
+        DiscoveredPublicationIter dpi;
+        bool writer_local = false, already_matched = false;
+        if (lpi != local_publications_.end()) {
+          writer_local = true;
+          writer_type_info = &lpi->second.type_info_;
+        } else if ((dpi = discovered_publications_.find(writer))
+                   != discovered_publications_.end()) {
+          writer_type_info = &dpi->second.type_info_;
+        } else {
+          return; // Possible and ok, since lock is released
+        }
+
+        // 2. collect type info about the reader, which may be local or discovered
+        XTypes::TypeInformation* reader_type_info = 0;
+
+        const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+        DiscoveredSubscriptionIter dsi;
+        bool reader_local = false;
+        if (lsi != local_subscriptions_.end()) {
+          reader_local = true;
+          reader_type_info = &lsi->second.type_info_;
+        } else if ((dsi = discovered_subscriptions_.find(reader))
+                   != discovered_subscriptions_.end()) {
+          reader_type_info = &dsi->second.type_info_;
+        } else {
+          return; // Possible and ok, since lock is released
+        }
+
+        MatchingData md;
+
+        // if the type object is not in cache, send RPC request
+        md.writer = writer;
+        md.reader = reader;
+        md.time_added_to_map = MonotonicTimePoint::now();
+
+        if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
+            (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+          if (!writer_local && reader_local) {
+            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
+              bool is_discovery_protected = false;
+#ifdef OPENDDS_SECURITY
+              is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
+#endif
+              save_matching_data_and_get_typeobjects(writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
+              return;
+            }
+          } else if (!reader_local && writer_local) {
+            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
+              bool is_discovery_protected = false;
+#ifdef OPENDDS_SECURITY
+              is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+#endif
+              save_matching_data_and_get_typeobjects(reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
+              return;
+            }
+          }
+
+          MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
+          if (md_it != matching_data_buffer_.end()) {
+            md_it->second = md;
+          } else {
+            matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+          }
+        }
+
+        match_continue(writer, reader);
+      }
+
+      void
+      remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
+      {
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        const MonotonicTimePoint now = MonotonicTimePoint::now();
+
+        MatchingDataIter end_iter = matching_data_buffer_.end();
+        for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
+          if (now - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
+            matching_data_buffer_.erase(iter++);
+          } else {
+            ++iter;
+          }
+        }
+
+        // Clean up internal data used by getTypeDependencies
+        for (typename OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
+          if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {
+            cleanup_type_lookup_data(it->second.participant, it->second.type_id, it->second.secure);
+            orig_seq_numbers_.erase(it++);
+          } else {
+            ++it;
+          }
+        }
+      }
+
+      void
+      match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
+      {
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        MatchingDataIter it;
+        for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
+          if (it->second.rpc_sequence_number == rpc_sequence_number) {
+            RepoId reader = it->second.reader;
+            RepoId writer = it->second.writer;
+            matching_data_buffer_.erase(MatchingPair(writer, reader));
+            return match_continue(writer, reader);
+          }
+        }
+      }
+
+      void
+      match_continue(const RepoId& writer, const RepoId& reader)
       {
         // 0. For discovered endpoints, we'll have the QoS info in the form of the
         // publication or subscription BIT data which doesn't use the same structures
@@ -988,6 +1138,7 @@ namespace OpenDDS {
         const DDS::PublisherQos* pubQos = 0;
         TransportLocatorSeq* wTls = 0;
         XTypes::TypeInformation* writer_type_info = 0;
+        OPENDDS_STRING topic_name;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
         DiscoveredPublicationIter dpi;
@@ -999,10 +1150,13 @@ namespace OpenDDS {
           wTls = &lpi->second.trans_info_;
           already_matched = lpi->second.matched_endpoints_.count(reader);
           writer_type_info = &lpi->second.type_info_;
+          topic_name = topic_names_[lpi->second.topic_id_];
+
         } else if ((dpi = discovered_publications_.find(writer))
                    != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           writer_type_info = &dpi->second.type_info_;
+          topic_name = dpi->second.get_topic_name();
         } else {
           return; // Possible and ok, since lock is released
         }
@@ -1071,6 +1225,50 @@ namespace OpenDDS {
           return; // Possible and ok, since lock is released
         }
 
+        // check consistency
+        bool consistent = false;
+
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
+        if (td_iter == topics_.end()) {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
+                    ACE_TEXT("Didn't find topic for consistency check\n")));
+          return;
+        } else {
+          const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
+          const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
+          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
+            XTypes::TypeAssignability ta(type_lookup_service_);
+            consistent = ta.assignable(writer_type_id, reader_type_id);
+          } else {
+            //check remote and local type names match
+            OPENDDS_STRING writer_type_name;
+            OPENDDS_STRING reader_type_name;
+            if (writer_local) { //local local
+              writer_type_name = td_iter->second.local_data_type_name();
+            } else {
+              writer_type_name = dpi->second.get_type_name();
+            }
+            if (reader_local) {
+              reader_type_name = td_iter->second.local_data_type_name();
+            } else {
+              reader_type_name = dsi->second.get_type_name();
+            }
+            consistent = writer_type_name == reader_type_name;
+          }
+
+          if (!consistent) {
+            td_iter->second.increment_inconsistent();
+            if (DCPS::DCPS_debug_level) {
+              ACE_DEBUG((LM_WARNING,
+                        ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
+                        ACE_TEXT("topic %C does not match data types (inconsistent)\n"),
+                        topic_name.c_str()));
+            }
+            return;
+          }
+        }
+
         // This is really part of step 1, but we're doing it here just in case we
         // are in the discovered/discovered match and we don't need the QoS data.
         if (!writer_local) {
@@ -1128,81 +1326,109 @@ namespace OpenDDS {
         IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
 
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
-                                dwQos, drQos, pubQos, subQos)) {
-          MatchingData md;
+          dwQos, drQos, pubQos, subQos)) {
 
-          // if the type object is not in cache, send RPC request
-          md.dwQos = *dwQos;
-          md.pubQos = *pubQos;
-          md.drQos = *drQos;
-          md.subQos = *subQos;
-          md.wTls = *wTls;
-          md.rTls = *rTls;
-          md.writer_type_info = *writer_type_info;
-          md.reader_type_info = *reader_type_info;
-          md.cfProp = *cfProp;
-          md.writer = writer;
-          md.reader = reader;
-          md.time_added_to_map = MonotonicTimePoint::now();
+          bool call_writer = false, call_reader = false;
 
-          if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
-              (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+          if (writer_local) {
+            call_writer = lpi->second.matched_endpoints_.insert(reader).second;
+            dwr = lpi->second.publication_;
+            if (!reader_local) {
+              dsi->second.matched_endpoints_.insert(writer);
+            }
+          }
+          if (reader_local) {
+            call_reader = lsi->second.matched_endpoints_.insert(writer).second;
+            drr = lsi->second.subscription_;
             if (!writer_local) {
-              if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
-                XTypes::TypeIdentifierSeq type_ids;
-                type_ids.append(writer_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
-                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-                if (md_it != matching_data_buffer_.end()) {
-                  md_it->second = md;
-                } else {
-                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-                }
-                bool is_discovery_protected = false;
-#ifdef OPENDDS_SECURITY
-                is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
-#endif
-                send_type_lookup_request(type_ids, writer, is_discovery_protected);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                return;
-              }
-            } else if (!reader_local) {
-              if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
-                XTypes::TypeIdentifierSeq type_ids;
-                type_ids.append(reader_type_info->minimal.typeid_with_size.type_id);
-                md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
-                MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-                if (md_it != matching_data_buffer_.end()) {
-                  md_it->second = md;
-                } else {
-                  matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
-                }
-                bool is_discovery_protected = false;
-#ifdef OPENDDS_SECURITY
-                is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
-#endif
-                send_type_lookup_request(type_ids, reader, is_discovery_protected);
-                type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
-                return;
-              }
+              dpi->second.matched_endpoints_.insert(reader);
             }
           }
 
-          MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-          if (md_it != matching_data_buffer_.end()) {
-            md_it->second = md;
-          } else {
-            matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
+          if (writer_local && !reader_local) {
+            add_assoc_i(writer, lpi->second, reader, dsi->second);
           }
-          match_continue(writer, reader);
+          if (reader_local && !writer_local) {
+            add_assoc_i(reader, lsi->second, writer, dpi->second);
+          }
+
+          if (!call_writer && !call_reader) {
+            return; // nothing more to do
+          }
+
+#ifdef OPENDDS_SECURITY
+          if (is_security_enabled()) {
+            match_continue_security_enabled(writer, reader, call_writer, call_reader);
+          }
+#endif
+
+          // Copy reader and writer association data prior to releasing lock
+          DDS::OctetSeq octet_seq_type_info_reader;
+          XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
+          const ReaderAssociation ra = {
+            add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
+  #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+            cfProp->filterClassName, cfProp->filterExpression,
+  #else
+            "", "",
+  #endif
+            cfProp->expressionParameters,
+            octet_seq_type_info_reader
+          };
+
+          DDS::OctetSeq octet_seq_type_info_writer;
+          XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
+          const WriterAssociation wa = {
+            add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos,
+            octet_seq_type_info_writer
+          };
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+          static const bool writer_active = true;
+
+          if (call_writer) {
+            if (DCPS_debug_level > 3) {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
+                ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
+                OPENDDS_STRING(GuidConverter(reader)).c_str()));
+            }
+            DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
+            if (call_reader) {
+              thr.activate();
+            }
+            dwr->add_association(writer, ra, writer_active);
+            if (call_reader) {
+              thr.writer_done();
+            }
+
+          } else if (call_reader) {
+            if (DCPS_debug_level > 3) {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
+                ACE_TEXT("adding reader %C association for writer %C\n"),
+                OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
+            }
+            drr->add_association(reader, wa, !writer_active);
+          }
+
+          // change this if 'writer_active' (above) changes
+          if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
+            if (DCPS_debug_level > 3) {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
+                ACE_TEXT("calling writer %C association_complete for %C\n"),
+                OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
+            }
+            dwr->association_complete(reader);
+          }
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
             lpi->second.remote_expectant_opendds_associations_.erase(reader);
+            dsi->second.matched_endpoints_.erase(writer);
           }
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
             lsi->second.remote_expectant_opendds_associations_.erase(writer);
+            dpi->second.matched_endpoints_.erase(reader);
           }
           if (writer_local && !reader_local) {
             remove_assoc_i(writer, lpi->second, reader);
@@ -1223,7 +1449,6 @@ namespace OpenDDS {
             writer_seq[0] = writer;
             drr->remove_associations(writer_seq, false /*notify_lost*/);
           }
-
         } else { // something was incompatible
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           if (writer_local && writerStatus.count_since_last_send) {
@@ -1243,168 +1468,55 @@ namespace OpenDDS {
         }
       }
 
-      void
-      remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
+      void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
+                                                  MatchingData& md, const MatchingPair& mp,
+                                                  const RepoId& remote_id,
+                                                  bool is_discovery_protected)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-        MatchingDataIter end_iter = matching_data_buffer_.end();
-
-        for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
-          if (MonotonicTimePoint::now() - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
-            matching_data_buffer_.erase(iter++);
-          } else {
-            ++iter;
-          }
+        md.rpc_sequence_number = ++type_lookup_service_sequence_number_;
+        MatchingDataIter md_it = matching_data_buffer_.find(mp);
+        if (md_it != matching_data_buffer_.end()) {
+          md_it->second = md;
+        } else {
+          matching_data_buffer_.insert(std::make_pair(mp, md));
         }
-      }
-
-      void
-      match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
-      {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-        MatchingDataIter it;
-        for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); it++) {
-          if (it->second.rpc_sequence_number == rpc_sequence_number) {
-            return match_continue(it->second.writer, it->second.reader);
-          }
-        }
-      }
-
-      void
-      match_continue(const RepoId& writer, const RepoId& reader)
-      {
-        bool call_writer = false, call_reader = false, writer_local = false, reader_local = false;
-
-        DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(reader);
-        DiscoveredPublicationIter dpi = discovered_publications_.find(writer);
-
-        DDS::DataWriterQos dwQos;
-        DDS::PublisherQos pubQos;
-        DDS::DataReaderQos drQos;
-        DDS::SubscriberQos subQos;
-        TransportLocatorSeq wTls;
-        TransportLocatorSeq rTls;
-        XTypes::TypeInformation reader_type_info;
-        XTypes::TypeInformation writer_type_info;
-        ContentFilterProperty_t cfProp;
-        DataWriterCallbacks* dwr = 0;
-        DataReaderCallbacks* drr = 0;
-
-        {
-          MatchingDataIter md = matching_data_buffer_.find(MatchingPair(writer, reader));
-          if (md != matching_data_buffer_.end()) {
-            dwQos = md->second.dwQos;
-            pubQos = md->second.pubQos;
-            drQos = md->second.drQos;
-            subQos = md->second.subQos;
-            wTls = md->second.wTls;
-            rTls = md->second.rTls;
-            writer_type_info = md->second.writer_type_info;
-            reader_type_info = md->second.reader_type_info;
-            cfProp = md->second.cfProp;
-            matching_data_buffer_.erase(MatchingPair(writer, reader));
-          } else {
-            if (DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("match_continue failed\n")));
-            }
-            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-            ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-            return;
-          }
-        }
-
-        const LocalPublicationIter lpi = local_publications_.find(writer);
-        if (lpi != local_publications_.end()) {
-          writer_local = true;
-        }
-        const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-        if (lsi != local_subscriptions_.end()) {
-          reader_local = true;
-        }
-
-        if (writer_local) {
-          call_writer = lpi->second.matched_endpoints_.insert(reader).second;
-          dwr = lpi->second.publication_;
-        }
-        if (reader_local) {
-          call_reader = lsi->second.matched_endpoints_.insert(writer).second;
-          drr = lsi->second.subscription_;
-        }
-
-        if (writer_local && !reader_local) {
-          add_assoc_i(writer, lpi->second, reader, dsi->second);
-        }
-        if (reader_local && !writer_local) {
-          add_assoc_i(reader, lsi->second, writer, dpi->second);
-        }
-
-        if (!call_writer && !call_reader) {
-          return; // nothing more to do
-        }
-
+        // Store an entry for the first request
+        TypeIdOrigSeqNumber orig_req_data;
+        std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
+        orig_req_data.type_id = type_info->minimal.typeid_with_size.type_id;
+        orig_req_data.seq_number = md.rpc_sequence_number;
+        orig_req_data.secure = false;
 #ifdef OPENDDS_SECURITY
-        if (is_security_enabled()) {
-          match_continue_security_enabled(writer, reader, call_writer, call_reader);
+        if (is_security_enabled() && is_discovery_protected) {
+          orig_req_data.secure = true;
         }
 #endif
+        orig_req_data.time_started = md.time_added_to_map;
+        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
 
-        // Copy reader and writer association data prior to releasing lock
-        DDS::OctetSeq octet_seq_type_info_reader;
-        XTypes::serialize_type_info(reader_type_info, octet_seq_type_info_reader);
-        const ReaderAssociation ra = {
-          add_security_info(rTls, writer, reader), reader, subQos, drQos,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-          cfProp.filterClassName, cfProp.filterExpression,
-#else
-          "", "",
-#endif
-          cfProp.expressionParameters,
-          octet_seq_type_info_reader
-        };
+        XTypes::TypeIdentifierSeq type_ids;
+        if (type_info->minimal.dependent_typeid_count == -1 ||
+            type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
+          type_ids.append(type_info->minimal.typeid_with_size.type_id);
 
-        DDS::OctetSeq octet_seq_type_info_writer;
-        XTypes::serialize_type_info(writer_type_info, octet_seq_type_info_writer);
-        const WriterAssociation wa = {
-          add_security_info(wTls, writer, reader), writer, pubQos, dwQos,
-          octet_seq_type_info_writer
-        };
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-        static const bool writer_active = true;
-
-        if (call_writer) {
-          if (DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-              ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
+          // Get dependencies of topic type
+          send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
+        } else {
+          type_ids.length(type_info->minimal.dependent_typeid_count + 1);
+          type_ids[0] = type_info->minimal.typeid_with_size.type_id;
+          for (size_t i = 1; i <= (size_t)type_info->minimal.dependent_typeid_count; ++i) {
+            type_ids[i] = type_info->minimal.dependent_typeids[i - 1].type_id;
           }
-          DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
-          if (call_reader) {
-            thr.activate();
-          }
-          dwr->add_association(writer, ra, writer_active);
-          if (call_reader) {
-            thr.writer_done();
-          }
-
-        } else if (call_reader) {
-          if (DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-              ACE_TEXT("adding reader %C association for writer %C\n"), OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
-          }
-          drr->add_association(reader, wa, !writer_active);
+          // Get TypeObjects of topic type and all of its dependencies
+          send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         }
-
-        // change this if 'writer_active' (above) changes
-        if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
-          if (DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-              ACE_TEXT("calling writer %C association_complete for %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
-          }
-          dwr->association_complete(reader);
-        }
+        type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
       }
+
+      // Cleanup internal data used by type lookup operations
+      virtual void cleanup_type_lookup_data(const GuidPrefix_t& guid_prefix,
+                                            const XTypes::TypeIdentifier& ti,
+                                            bool secure) = 0;
 
 #ifdef OPENDDS_SECURITY
       void match_continue_security_enabled(const RepoId& writer, const RepoId& reader, bool call_writer, bool call_reader)
@@ -1500,13 +1612,11 @@ namespace OpenDDS {
 
       void remove_from_bit(const DiscoveredPublication& pub)
       {
-        pub_key_to_id_.erase(get_key(pub));
         remove_from_bit_i(pub);
       }
 
       void remove_from_bit(const DiscoveredSubscription& sub)
       {
-        sub_key_to_id_.erase(get_key(sub));
         remove_from_bit_i(sub);
       }
 
@@ -1530,23 +1640,6 @@ namespace OpenDDS {
         if (td == topics_.end()) return false;
 
         return td->second.has_dcps_key();
-      }
-
-      void
-      increment_key(DDS::BuiltinTopicKey_t& key)
-      {
-        for (int idx = 0; idx < 3; ++idx) {
-          CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
-          if (ukey == 0xFFFFFFFF) {
-            key.value[idx] = 0;
-          } else {
-            ++ukey;
-            key.value[idx] = ukey;
-            return;
-          }
-        }
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::increment_key - ")
-                   ACE_TEXT("ran out of builtin topic keys\n")));
       }
 
 #ifdef OPENDDS_SECURITY
@@ -1598,7 +1691,6 @@ namespace OpenDDS {
 
       ACE_Thread_Mutex& lock_;
       RepoId participant_id_;
-      BitKeyMap pub_key_to_id_, sub_key_to_id_;
       RepoIdSet ignored_guids_;
       unsigned int publication_counter_, subscription_counter_, topic_counter_;
       LocalPublicationMap local_publications_;
@@ -1609,9 +1701,21 @@ namespace OpenDDS {
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
       OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) relay_only_readers_;
-      DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
       XTypes::TypeLookupService_rch type_lookup_service_;
 
+      struct TypeIdOrigSeqNumber {
+        GuidPrefix_t participant; // Prefix of remote participant
+        XTypes::TypeIdentifier type_id; // Remote type
+        SequenceNumber seq_number; // Of the original request
+        bool secure; // Communicate via secure endpoints or not
+        MonotonicTimePoint time_started;
+      };
+
+      // Map from the sequence number of the most recent request for a type to its TypeIdentifier
+      // and the sequence number of the first request sent for that type. Every time a new request
+      // is sent for a type, a new entry must be stored.
+      typedef OPENDDS_MAP(SequenceNumber, TypeIdOrigSeqNumber) OrigSeqNumberMap;
+      OrigSeqNumberMap orig_seq_numbers_;
 
 #ifdef OPENDDS_SECURITY
       DDS::Security::AccessControl_var access_control_;
@@ -1647,20 +1751,6 @@ namespace OpenDDS {
       { }
 
       virtual ~LocalParticipant() { }
-
-      RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                      const DDS::BuiltinTopicKey_t& key)
-      {
-        if (0 == std::strcmp(bit_topic_name, BUILT_IN_PARTICIPANT_TOPIC)) {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, key.value, sizeof(DDS::BuiltinTopicKeyValue));
-          guid.entityId = ENTITYID_PARTICIPANT;
-          return guid;
-
-        } else {
-          return endpoint_manager().bit_key_to_repo_id(bit_topic_name, key);
-        }
-      }
 
       void ignore_domain_participant(const RepoId& ignoreId)
       {
@@ -1895,9 +1985,7 @@ namespace OpenDDS {
         , extended_builtin_endpoints_(0)
 #endif
         {
-          RepoId guid;
-          std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
-          guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+          const RepoId guid = make_guid(p.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
           std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;
@@ -2116,6 +2204,9 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
+        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = TheServiceParticipant->bit_autopurge_disposed_samples_delay();
+
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
@@ -2164,14 +2255,6 @@ namespace OpenDDS {
       virtual void fini_bit(DomainParticipantImpl* participant)
       {
         get_part(participant->get_domain_id(), participant->get_id())->fini_bit();
-      }
-
-      virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
-                                                       const char* bit_topic_name,
-                                                       const DDS::BuiltinTopicKey_t& key) const
-      {
-        return get_part(participant->get_domain_id(), participant->get_id())
-          ->bit_key_to_repo_id(bit_topic_name, key);
       }
 
       virtual bool attach_participant(DDS::DomainId_t /*domainId*/,

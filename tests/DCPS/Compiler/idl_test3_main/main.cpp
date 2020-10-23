@@ -22,8 +22,8 @@ const Encoding aligned_encoding(Encoding::KIND_XCDR1);
 void initialize_enums(Xyz::AStruct& stru)
 {
   stru.f8 = Xyz::redx;
-  for (ACE_INT16 i = 0; i < 5; ++i) stru.f15[i] = Xyz::redx;
-  for (ACE_INT16 i = 0; i < 7; ++i) for (ACE_INT16 j = 0; j < 5; ++j) stru.f55[i][j] = Xyz::redx;
+  for (int i = 0; i < 5; ++i) stru.f15[i] = Xyz::redx;
+  for (int i = 0; i < 7; ++i) for (int j = 0; j < 5; ++j) stru.f55[i][j] = Xyz::redx;
 }
 
 template<typename FOO>
@@ -566,7 +566,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //  AStructSeq theStructSeq; //+4 = 911
   //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
   initialize_enums(my_foo.thestruct);
-  for (ACE_INT16 k = 0; k < 3; ++k) {
+  for (int k = 0; k < 3; ++k) {
     initialize_enums(my_foo.structArray[k]);
   }
 

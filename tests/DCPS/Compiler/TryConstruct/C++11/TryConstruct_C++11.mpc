@@ -1,9 +1,11 @@
-project(Compiler_*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
+project(Compiler*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
   exename = *
+  idlflags += -I..
+
   Source_Files {
     TryConstruct.cpp
   }
   TypeSupport_Files {
-    TryConstruct.idl
+    ../TryConstruct.idl
   }
 }

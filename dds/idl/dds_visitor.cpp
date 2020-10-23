@@ -15,6 +15,7 @@
 #include "v8_generator.h"
 #include "rapidjson_generator.h"
 #include "langmap_generator.h"
+#include "value_writer_generator.h"
 #include "topic_keys.h"
 #include "typeobject_generator.h"
 
@@ -64,6 +65,7 @@ namespace {
   rapidjson_generator rj_gen_;
   langmap_generator lm_gen_;
   typeobject_generator to_gen_;
+  value_writer_generator value_writer_generator_;
 
 } // namespace
 
@@ -73,6 +75,7 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   if (!be_global->no_default_gen()) {
     gen_target_.add_generator(&mar_gen_);
     gen_target_.add_generator(&key_gen_);
+    gen_target_.add_generator(&value_writer_generator_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
     if (!be_global->suppress_xtypes() && !java_ts_only) {

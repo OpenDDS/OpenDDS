@@ -228,14 +228,10 @@ TEST(StructandSeq, USE_DEFAULT)
   sent.ns.sssub_ud.length(1);
   sent.ns.sssbu_ud.length(1);
   sent.ns.sssbb_ud.length(1);
-  // sent.ns.usu_ud.length(1);
-  // sent.ns.usb_ud.length(1);
   sent.ns.ns_ud.str64_d = "HELLO";
   sent.ns.ns_ud.str64_ud = "WORLD";
   sent.ns.ns_ud.str64_t = "GOODBYE";
-  // sent.ns.nu_ud._d(VALUE1);
-  // sent.ns.nu_ud.u_b(false);
-  for (ACE_INT16 i = 0; i < 10; i++) sent.ns.sa_mud[i] = 0;
+  for (ACE_INT16 i = 0; i < 10; ++i) sent.ns.sa_mud[i] = 0;
   sent.ns.e_ud = VALUE1;
   sent.ns.by_ud = 0x00;
   sent.ns.bo_ud = false;
@@ -246,32 +242,10 @@ TEST(StructandSeq, USE_DEFAULT)
   expected.ns.str20_ud = "";
   expected.ns.str20_t = "";
   expected.ns.wstr64_ud = L"";
-  expected.ns.psu_ud.length(0);
-  expected.ns.psb_ud.length(0);
-  expected.ns.upsu_ud.length(0);
-  expected.ns.upsb_ud.length(0);
-  expected.ns.esu_ud.length(0);
-  expected.ns.esb_ud.length(0);
-  expected.ns.strsu_ud.length(0);
-  expected.ns.strsb_ud.length(0);
-  expected.ns.wstrsu_ud.length(0);
-  expected.ns.wstrsb_ud.length(0);
-  expected.ns.ssu_ud.length(0);
-  expected.ns.ssb_ud.length(0);
-  expected.ns.sasu_ud.length(0);
-  expected.ns.sasb_ud.length(0);
-  expected.ns.sssuu_ud.length(0);
-  expected.ns.sssub_ud.length(0);
-  expected.ns.sssbu_ud.length(0);
-  expected.ns.sssbb_ud.length(0);
-  // expected.ns.usu_ud.length(0);
-  // expected.ns.usb_ud.length(0);
   expected.ns.ns_ud.str64_d = "";
   expected.ns.ns_ud.str64_ud = "";
   expected.ns.ns_ud.str64_t = "";
-  // expected.ns.nu_ud._d(VALUE1);
-  // expected.ns.nu_ud.u_b(false);
-  for (ACE_INT16 i = 0; i < 10; i++) expected.ns.sa_mud[i] = 0;
+  for (ACE_INT16 i = 0; i < 10; ++i) expected.ns.sa_mud[i] = 0;
   expected.ns.e_ud = VALUE1;
   expected.ns.by_ud = 0x00;
   expected.ns.bo_ud = false;
@@ -313,14 +287,10 @@ TEST(StructandSeq, USE_DEFAULT)
     EXPECT_EQ(actual.ns.sssub_ud.length(), expected.ns.sssub_ud.length());
     EXPECT_EQ(actual.ns.sssbu_ud.length(), expected.ns.sssbu_ud.length());
     EXPECT_EQ(actual.ns.sssbb_ud.length(), expected.ns.sssbb_ud.length());
-    // EXPECT_EQ(actual.ns.usu_ud.length(), expected.ns.usu_ud.length());
-    // EXPECT_EQ(actual.ns.usb_ud.length(), expected.ns.usb_ud.length());
     EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_d.in(), expected.ns.ns_ud.str64_d.in()));
     EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_ud.in(), expected.ns.ns_ud.str64_ud.in()));
     EXPECT_FALSE(strcmp(actual.ns.ns_ud.str64_t.in(), expected.ns.ns_ud.str64_t.in()));
-    // EXPECT_EQ(actual.ns.nu_ud._d(), expected.ns.nu_ud._d());
-    // EXPECT_EQ(actual.ns.nu_ud.u_b(), expected.ns.nu_ud.u_b());
-    for (ACE_INT16 i = 0; i < 10; i++) {
+    for (ACE_INT16 i = 0; i < 10; ++i) {
       EXPECT_EQ(actual.ns.sa_mud[i], expected.ns.sa_mud[i]);
     }
     EXPECT_EQ(actual.ns.e_ud, expected.ns.e_ud);
@@ -337,103 +307,93 @@ TEST(StructandSeq, TRIM)
   sent.str64_t = "abcdefghijklmnopqrstuvwxyz";
   sent.wstr64_t = L"abcdefghijklmnopqrstuvwxyz";
   sent.psu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.psu_t[i] = 1;
   }
   sent.psb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.psb_t[i] = 1;
   }
   sent.upsu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.upsu_t[i] = 1;
   }
   sent.upsb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.upsb_t[i] = 1;
   }
   sent.esu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.esu_t[i] = VALUE1;
   }
   sent.esb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.esb_t[i] = VALUE1;
   }
   sent.strsu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.strsu_t[i] = "HELLOWORLD";
   }
   sent.strsb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.strsb_t[i] = "HELLOWORLD";
   }
   sent.wstrsu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.wstrsu_t[i] = L"☺";
   }
   sent.wstrsb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.wstrsb_t[i] = L"☺";
   }
   sent.ssu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.ssu_t[i].str64_t = "abcdefghijklmnopqrstuvwxyz";
   }
   sent.ssb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.ssb_t[i].str64_t = "abcdefghijklmnopqrstuvwxyz";
   }
   sent.sasu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     for (ACE_INT16 j = 0; j < 10; j++) {
       sent.sasu_t[i][j] = 1;
     }
   }
   sent.sasb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     for (ACE_INT16 j = 0; j < 10; j++) {
       sent.sasb_t[i][j] = 1;
     }
   }
   sent.sssuu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.sssuu_t[i].length(3);
     sent.sssuu_t[i][0] = 1;
     sent.sssuu_t[i][1] = 1;
     sent.sssuu_t[i][2] = 1;
   }
   sent.sssub_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.sssub_t[i].length(3);
     sent.sssub_t[i][0] = 1;
     sent.sssub_t[i][1] = 1;
     sent.sssub_t[i][2] = 1;
   }
   sent.sssbu_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.sssbu_t[i].length(3);
     sent.sssbu_t[i][0] = 1;
     sent.sssbu_t[i][1] = 1;
     sent.sssbu_t[i][2] = 1;
   }
   sent.sssbb_t.length(3);
-  for (ACE_INT16 i = 0; i < 3; i++) {
+  for (ACE_INT16 i = 0; i < 3; ++i) {
     sent.sssbb_t[i].length(3);
     sent.sssbb_t[i][0] = 1;
     sent.sssbb_t[i][1] = 1;
     sent.sssbb_t[i][2] = 1;
   }
-  // sent.usu_t.length(3);
-  // for (ACE_INT16 i = 0; i < 3; i++) {
-  //   sent.usu_t[i]._d(VALUE1);
-  //   sent.usu_t[i].u_b(false);
-  // }
-  // sent.usb_t.length(3);
-  // for (ACE_INT16 i = 0; i < 3; i++) {
-  //   sent.usb_t[i]._d(VALUE1);
-  //   sent.usb_t[i].u_b(false);
-  // }
   TryCon::TrimStruct2 expected;
   expected.str20_t = "abcdefghijklmnopqrst";
   expected.wstr20_t = L"abcdefghijklmnopqrst";
@@ -461,8 +421,6 @@ TEST(StructandSeq, TRIM)
   expected.sssbu_t[0].length(2);
   expected.sssbb_t.length(2);
   expected.sssbb_t[0].length(2);
-  // expected.usu_t.length(3);
-  // expected.usb_t.length(2);
   TryCon::TrimStruct2 actual;
 
   {
@@ -503,8 +461,6 @@ TEST(StructandSeq, TRIM)
     EXPECT_EQ(actual.sssbu_t[0].length(), expected.sssbu_t[0].length());
     EXPECT_EQ(actual.sssbb_t.length(), expected.sssbb_t.length());
     EXPECT_EQ(actual.sssbb_t[0].length(), expected.sssbb_t[0].length());
-    // EXPECT_EQ(actual.usu_t.length(), expected.usu_t.length());
-    // EXPECT_EQ(actual.usb_t.length(), expected.usb_t.length());
   }
 }
 
@@ -513,109 +469,109 @@ TEST(AnonSequence, Trim)
   {
     TryCon::AnonSeqStruct sent;
     sent.AnonEnumSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonEnumSeqBound[i] = VALUE1;
     }
     sent.AnonShortSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonShortSeqBound[0] = 5;
     }
     sent.AnonUnsignedShortSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonUnsignedShortSeqBound[i] = i;
     }
     sent.AnonStringSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonStringSeqBound[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.AnonWideStringSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonWideStringSeqBound[i] = L"abcdefghijklmnopqrstuvwxyz";
     }
     sent.AnonShortArraySeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       for (ACE_INT16 j = 0; j < 2; j++) {
         sent.AnonShortArraySeqBound[i][j] = j;
       }
     }
     ShortSeqUnbound ssu;
     ssu.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       ssu[i] = i;
     }
     ShortSeqBound2 ssb;
     ssu.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       ssu[i] = i;
     }
     sent.AnonShortSeqUnboundUnbound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonShortSeqUnboundUnbound[i] = ssu;
     }
     sent.AnonSeqShortSeqUnboundBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonSeqShortSeqUnboundBound[i] = ssu;
     }
     sent.AnonSeqShortSeqBoundUnbound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonSeqShortSeqBoundUnbound[i] = ssb;
     }
     sent.AnonSeqShortSeqBoundBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonSeqShortSeqBoundBound[i] = ssb;
     }
 
     TryCon::AnonSeqStructTrim expected;
     expected.AnonEnumSeqBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonEnumSeqBound[i] = VALUE1;
     }
     expected.AnonShortSeqBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonShortSeqBound[0] = 5;
     }
     expected.AnonUnsignedShortSeqBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonUnsignedShortSeqBound[i] = i;
     }
     expected.AnonStringSeqBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonStringSeqBound[i] = "abcdefghijklmnopqrst";
     }
     expected.AnonWideStringSeqBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonWideStringSeqBound[i] = L"abcdefghijklmnopqrst";
     }
     expected.AnonShortArraySeqBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       for (ACE_INT16 j = 0; j < 2; j++) {
         expected.AnonShortArraySeqBound[i][j] = j;
       }
     }
     ShortSeqUnbound ssu_2;
     ssu.length(3);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       ssu[i] = i;
     }
     ShortSeqBound ssb_2;
     ssu.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       ssu[i] = i;
     }
     expected.AnonShortSeqUnboundUnbound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonShortSeqUnboundUnbound[i] = ssu_2;
     }
     expected.AnonSeqShortSeqUnboundBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonSeqShortSeqUnboundBound[i] = ssu_2;
     }
     expected.AnonSeqShortSeqBoundUnbound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonSeqShortSeqBoundUnbound[i] = ssb_2;
     }
     expected.AnonSeqShortSeqBoundBound.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       expected.AnonSeqShortSeqBoundBound[i] = ssb_2;
     }
 
@@ -652,69 +608,61 @@ TEST(AnonSequence, USE_DEFAULT)
   {
     TryCon::AnonSeqStruct sent;
     sent.AnonEnumSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonEnumSeqBound[i] = VALUE1;
     }
     sent.AnonShortSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonShortSeqBound[0] = 5;
     }
     sent.AnonUnsignedShortSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonUnsignedShortSeqBound[i] = i;
     }
     sent.AnonStringSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonStringSeqBound[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.AnonWideStringSeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonWideStringSeqBound[i] = L"abcdefghijklmnopqrstuvwxyz";
     }
     sent.AnonShortArraySeqBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       for (ACE_INT16 j = 0; j < 2; j++) {
         sent.AnonShortArraySeqBound[i][j] = j;
       }
     }
     ShortSeqUnbound ssu;
     ssu.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       ssu[i] = i;
     }
     ShortSeqBound2 ssb;
     ssu.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       ssu[i] = i;
     }
     sent.AnonShortSeqUnboundUnbound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonShortSeqUnboundUnbound[i] = ssu;
     }
     sent.AnonSeqShortSeqUnboundBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonSeqShortSeqUnboundBound[i] = ssu;
     }
     sent.AnonSeqShortSeqBoundUnbound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonSeqShortSeqBoundUnbound[i] = ssb;
     }
     sent.AnonSeqShortSeqBoundBound.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonSeqShortSeqBoundBound[i] = ssb;
     }
 
     TryCon::AnonSeqStructDefault expected;
-    expected.AnonEnumSeqBound.length(0);
-    expected.AnonShortSeqBound.length(0);
-    expected.AnonUnsignedShortSeqBound.length(0);
-    expected.AnonStringSeqBound.length(0);
-    expected.AnonWideStringSeqBound.length(0);
-    expected.AnonShortArraySeqBound.length(0);
     expected.AnonShortSeqUnboundUnbound.length(3);
-    expected.AnonSeqShortSeqUnboundBound.length(0);
     expected.AnonSeqShortSeqBoundUnbound.length(3);
-    expected.AnonSeqShortSeqBoundBound.length(0);
 
     TryCon::AnonSeqStructDefault actual;
 
@@ -748,39 +696,39 @@ TEST(AnonArray, TRIM)
 {
   {
     TryCon::AnonArrStruct sent;
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonStringArr[i] = "abcdefghijklmnopqrstuvwxyz";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonWideStringArr[i] = L"abcdefghijklmnopqrstuvwxyz";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       for (ACE_INT16 j = 0; j < 10; j++) {
         sent.AnonArrayArr[i][j] = "abcdefghijklmnopqrstuvwxyz";
       }
     }
     ShortSeqBound2 temp_seq;
     temp_seq.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = i;
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonArrShortSeqBound[i] = temp_seq;
     }
 
     TryCon::AnonArrStructTrim expected;
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonStringArr[i] = "abcdefghijklmnopqrst";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonWideStringArr[i] = L"abcdefghijklmnopqrst";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       for (ACE_INT16 j = 0; j < 10; j++) {
         expected.AnonArrayArr[i][j] = "abcdefghijklmnopqrst";
       }
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonArrShortSeqBound[i].length(2);
     }
     TryCon::AnonArrStructTrim actual;
@@ -798,9 +746,8 @@ TEST(AnonArray, TRIM)
         EXPECT_TRUE(serializer >> actual);
       }
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       ASSERT_STREQ(actual.AnonStringArr[i].in(), expected.AnonStringArr[i].in());
-      //EXPECT_EQ(actual.AnonStringArr[i].length(), expected.AnonStringArr[i].length());
       ASSERT_STREQ(actual.AnonWideStringArr[i].in(), expected.AnonWideStringArr[i].in());
       for (ACE_INT16 j = 0; j < 10; j++) {
         ASSERT_STREQ(actual.AnonArrayArr[i][j].in(), expected.AnonArrayArr[i][j].in());
@@ -814,40 +761,37 @@ TEST(AnonArray, USE_DEFAULT)
 {
   {
     TryCon::AnonArrStruct sent;
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonStringArr[i] = "abcdefghijklmnopqrstuvwxyz";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonWideStringArr[i] = L"abcdefghijklmnopqrstuvwxyz";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       for (ACE_INT16 j = 0; j < 10; j++) {
         sent.AnonArrayArr[i][j] = "abcdefghijklmnopqrstuvwxyz";
       }
     }
     ShortSeqBound2 temp_seq;
     temp_seq.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = i;
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       sent.AnonArrShortSeqBound[i] = temp_seq;
     }
 
     TryCon::AnonArrStructUseDefault expected;
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonStringArr[i] = "";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       expected.AnonWideStringArr[i] = L"";
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       for (ACE_INT16 j = 0; j < 10; j++) {
         expected.AnonArrayArr[i][j] = "";
       }
-    }
-    for (ACE_INT16 i = 0; i < 3; i++) {
-      expected.AnonArrShortSeqBound[i].length(0);
     }
     TryCon::AnonArrStructUseDefault actual;
 
@@ -864,9 +808,8 @@ TEST(AnonArray, USE_DEFAULT)
         EXPECT_TRUE(serializer >> actual);
       }
     }
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       ASSERT_STREQ(actual.AnonStringArr[i].in(), expected.AnonStringArr[i].in());
-      //EXPECT_EQ(actual.AnonStringArr[i].length(), expected.AnonStringArr[i].length());
       ASSERT_STREQ(actual.AnonWideStringArr[i].in(), expected.AnonWideStringArr[i].in());
       for (ACE_INT16 j = 0; j < 10; j++) {
         ASSERT_STREQ(actual.AnonArrayArr[i][j].in(), expected.AnonArrayArr[i][j].in());
@@ -942,7 +885,7 @@ TEST(Union, DISCARD)
     sent._d(9);
     StringSeqBound2 temp_seq;
     temp_seq.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.strs_d(temp_seq);
@@ -964,7 +907,7 @@ TEST(Union, DISCARD)
   {
     TryCon::BaseUnion sent;
     sent._d(12);
-    sent.e_d(B3);
+    sent.e_d(BExtra);
     TryCon::DiscardUnion actual;
     {
       Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
@@ -982,8 +925,8 @@ TEST(Union, DISCARD)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(B3);
-    sent.s3(5);
+    sent._d(BExtra);
+    sent.s4(5);
     TryCon::DiscardDiscrimUnion actual;
     {
       Message_Block_Ptr data(new ACE_Message_Block(serialized_size(xcdr2, sent)));
@@ -1053,14 +996,14 @@ TEST(Union, USE_DEFAULT)
     TryCon::BaseUnion sent;
     sent._d(7);
     str64Array temp_arr;
-    for (ACE_INT16 i = 0; i < 10; i++) {
+    for (ACE_INT16 i = 0; i < 10; ++i) {
       temp_arr[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.stra_ud(temp_arr);
     TryCon::DefaultUnion expected;
     expected._d(7);
     str64Array temp_arr2;
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_arr2[i] = "";
     }
     expected.stra_ud(temp_arr2);
@@ -1085,14 +1028,13 @@ TEST(Union, USE_DEFAULT)
     sent._d(10);
     StringSeqBound2 temp_seq;
     temp_seq.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.strs_ud(temp_seq);
     TryCon::DefaultUnion expected;
     expected._d(10);
     StringSeqBound temp_seq2;
-    temp_seq2.length(0);
     expected.strs_ud(temp_seq2);
     TryCon::DefaultUnion actual;
     {
@@ -1113,7 +1055,7 @@ TEST(Union, USE_DEFAULT)
   {
     TryCon::BaseUnion sent;
     sent._d(13);
-    sent.e_ud(B3);
+    sent.e_ud(BExtra);
     TryCon::DefaultUnion expected;
     expected._d(13);
     expected.e_ud(VALUE1);
@@ -1135,8 +1077,8 @@ TEST(Union, USE_DEFAULT)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(B3);
-    sent.s3(5);
+    sent._d(BExtra);
+    sent.s4(5);
     TryCon::DefaultDiscrimUnion expected;
     expected._d(VALUE1);
     expected.s1(0);
@@ -1211,14 +1153,14 @@ TEST(Union, TRIM)
     TryCon::BaseUnion sent;
     sent._d(8);
     str64Array temp_arr;
-    for (ACE_INT16 i = 0; i < 10; i++) {
+    for (ACE_INT16 i = 0; i < 10; ++i) {
       temp_arr[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.stra_t(temp_arr);
     TryCon::TrimUnion expected;
     expected._d(8);
     str64Array temp_arr2;
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_arr2[i] = "abcdefghijklmnopqrst";
     }
     expected.stra_t(temp_arr2);
@@ -1243,7 +1185,7 @@ TEST(Union, TRIM)
     sent._d(11);
     StringSeqBound2 temp_seq;
     temp_seq.length(3);
-    for (ACE_INT16 i = 0; i < 3; i++) {
+    for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     sent.strs_t(temp_seq);
@@ -1251,7 +1193,7 @@ TEST(Union, TRIM)
     expected._d(11);
     StringSeqBound temp_seq2;
     temp_seq2.length(2);
-    for (ACE_INT16 i = 0; i < 2; i++) {
+    for (ACE_INT16 i = 0; i < 2; ++i) {
       temp_seq2[i] = "abcdefghijklmnopqrstuvwxyz";
     }
     expected.strs_t(temp_seq2);

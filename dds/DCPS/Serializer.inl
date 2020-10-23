@@ -1315,7 +1315,7 @@ ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_string x)
 {
   const size_t length = s.read_string(const_cast<char*&>(x.val_));
-  if ((x.bound_ != 0) && (length > x.bound_)) {
+  if (s.good_bit() && (x.bound_ != 0) && (length > x.bound_)) {
     s.set_construction_status(Serializer::BoundConstructionFailure);
     return false;
   }
@@ -1326,7 +1326,7 @@ ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
 {
   const size_t length = s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
-  if ((x.bound_ != 0) && (length > x.bound_)) {
+  if (s.good_bit() && (x.bound_ != 0) && (length > x.bound_)) {
     s.set_construction_status(Serializer::BoundConstructionFailure);
     return false;
   }
@@ -1603,6 +1603,18 @@ void serialized_size_list_end_parameter_id(
     }
     size += running_size;
   }
+}
+
+ACE_INLINE
+Serializer::ConstructionStatus Serializer::get_construction_status() const
+{
+  return construction_status_;
+}
+
+ACE_INLINE
+void Serializer::set_construction_status(Serializer::ConstructionStatus cs)
+{
+  construction_status_ = cs;
 }
 
 } // namespace DCPS

@@ -426,6 +426,13 @@ public:
 #endif
   NetworkConfigMonitor_rch network_config_monitor();
 
+
+  DDS::Duration_t bit_autopurge_nowriter_samples_delay() const;
+  void bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration);
+
+  DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
+  void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
+
 private:
 
   /// Initialize default qos.
@@ -721,6 +728,9 @@ private:
 
   NetworkConfigMonitor_rch network_config_monitor_;
   mutable ACE_Thread_Mutex network_config_monitor_lock_;
+
+  DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
+  DDS::Duration_t bit_autopurge_disposed_samples_delay_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

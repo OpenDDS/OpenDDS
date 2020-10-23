@@ -180,6 +180,20 @@ private:
   };
 };
 
+class MessageHolder : public RcObject {
+public:
+  virtual const void* get() const = 0;
+};
+
+template <typename T>
+class MessageHolder_T : public MessageHolder {
+public:
+  MessageHolder_T(const T& v) : v_(v) {}
+  const void* get() const { return &v_; }
+private:
+  T v_;
+};
+
 /**
 * @class DataReaderImpl
 *
@@ -367,8 +381,6 @@ public:
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
-  RepoId get_subscription_id() const;
-
   bool have_sample_states(DDS::SampleStateMask sample_states) const;
   bool have_view_states(DDS::ViewStateMask view_states) const;
   bool have_instance_states(DDS::InstanceStateMask instance_states) const;
@@ -384,11 +396,11 @@ public:
                                         const DDS::StringSeq& params) = 0;
 #endif
 
-  virtual void dds_demarshal(const ReceivedDataSample& sample,
-                             SubscriptionInstance_rch& instance,
-                             bool& is_new_instance,
-                             bool& filtered,
-                             MarshalingType marshaling_type)= 0;
+  virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
+                                                SubscriptionInstance_rch& instance,
+                                                bool& is_new_instance,
+                                                bool& filtered,
+                                                MarshalingType marshaling_type)= 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   SubscriptionInstance_rch& instance);
@@ -566,6 +578,8 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
+  const RepoId& get_repo_id() const { return this->subscription_id_; }
+
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
@@ -581,6 +595,8 @@ protected:
 
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
+
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   void sample_info(DDS::SampleInfo & sample_info,
                    const ReceivedDataElement *ptr);
@@ -689,8 +705,6 @@ private:
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
 #endif
-
-  const RepoId& get_repo_id() const { return this->subscription_id_; }
 
   DDS::Subscriber_var get_builtin_subscriber() const
   {

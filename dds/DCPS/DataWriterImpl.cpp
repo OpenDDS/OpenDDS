@@ -228,7 +228,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    GuidConverter converter(get_publication_id());
+    GuidConverter converter(get_repo_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
@@ -1565,6 +1565,8 @@ DataWriterImpl::enable()
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_lookup_service->add_type_objects_to_cache(*typesupport);
 
+  typesupport->populate_dependencies(type_lookup_service);
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
@@ -1879,7 +1881,8 @@ DDS::ReturnCode_t
 DataWriterImpl::write(Message_Block_Ptr data,
                       DDS::InstanceHandle_t handle,
                       const DDS::Time_t& source_timestamp,
-                      GUIDSeq* filter_out)
+                      GUIDSeq* filter_out,
+                      const void* real_data)
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
 
@@ -1966,9 +1969,10 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->send(list, transaction_id);
   }
 
+  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
-  if (observer) {
-    Observer::Sample s(handle, *element, source_timestamp);
+  if (observer && real_data && vwd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vwd);
     observer->on_sample_sent(this, s);
   }
 
@@ -2098,12 +2102,6 @@ void
 DataWriterImpl::unregister_all()
 {
   data_container_->unregister_all();
-}
-
-RepoId
-DataWriterImpl::get_publication_id()
-{
-  return publication_id_;
 }
 
 RepoId
@@ -2358,7 +2356,7 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
                              elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
                              elt.get_header().cdr_encapsulation_, meta,
                              expression_params, typesupport->getExtensibility());
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
       //if the eval fails, the throws will do the logging
       //return false here so that the sample is not filtered
       return false;

@@ -2294,8 +2294,8 @@ bool operator>>(Serializer& strm, XTypes::CompleteBitflag& stru)
 
   const size_t start_pos = strm.pos();
 
-  const bool ret = (strm << stru.common)
-    && (strm << stru.detail);
+  const bool ret = (strm >> stru.common)
+    && (strm >> stru.detail);
 
   if (ret && strm.pos() - start_pos < total_size) {
     strm.skip(total_size - strm.pos() + start_pos);

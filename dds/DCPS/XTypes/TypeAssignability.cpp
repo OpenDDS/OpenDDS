@@ -95,6 +95,10 @@ bool TypeAssignability::assignable(const TypeObject& ta,
 bool TypeAssignability::assignable(const TypeIdentifier& ta,
                                    const TypeIdentifier& tb) const
 {
+  if (ta == tb) {
+    return true;
+  }
+
   switch (ta.kind()) {
   case TK_BOOLEAN:
   case TK_BYTE:
@@ -1065,12 +1069,9 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
     return false;
   }
 
-  // T1.bit_bound and T2.bit_bound are in the same equivalence set (DDSXTY14-34)
-  const BitBound ta_bit_bound = ta.enumerated_type.header.common.bit_bound;
-  const BitBound tb_bit_bound = tb.enumerated_type.header.common.bit_bound;
-  if (((ta_bit_bound >= 1 && ta_bit_bound <= 8) && !(tb_bit_bound >= 1 && tb_bit_bound <= 8)) ||
-      ((ta_bit_bound >= 9 && ta_bit_bound <= 16) && !(tb_bit_bound >= 9 && tb_bit_bound <= 16)) ||
-      ((ta_bit_bound >= 17 && ta_bit_bound <= 32) && !(tb_bit_bound >= 17 && tb_bit_bound <= 32))) {
+  // T1.bit_bound and T2.bit_bound must be equal (DDSXTY14-34)
+  if (ta.enumerated_type.header.common.bit_bound !=
+      tb.enumerated_type.header.common.bit_bound) {
     return false;
   }
 

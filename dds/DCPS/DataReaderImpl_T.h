@@ -31,8 +31,9 @@ namespace OpenDDS {
     OpenDDS_Dcps_Export
 #endif
   DataReaderImpl_T
-    : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>,
-      public virtual OpenDDS::DCPS::DataReaderImpl
+    : public virtual LocalObject<typename DDSTraits<MessageType>::DataReaderType>
+    , public virtual DataReaderImpl
+    , public ValueWriterDispatcher
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
@@ -64,6 +65,8 @@ namespace OpenDDS {
         : MessageType(other)
       {
       }
+
+      const MessageType* message() const { return this; }
     };
 
     struct MessageTypeMemoryBlock {
@@ -110,6 +113,13 @@ namespace OpenDDS {
                    this->get_n_chunks ()));
 
       return DDS::RETCODE_OK;
+    }
+
+    virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return this; }
+
+    void write(ValueWriter& value_writer, const void* data) const
+    {
+      vwrite(value_writer, *static_cast<const MessageType*>(data));
     }
 
     virtual DDS::ReturnCode_t read (
@@ -251,8 +261,9 @@ namespace OpenDDS {
           ptr->instance_state_->sample_info(sample_info, item);
           item->sample_state_ = DDS::READ_SAMPLE_STATE;
 
-          if (observer) {
-            Observer::Sample s(*item, sample_info.instance_handle, sample_info.instance_state);
+          const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+          if (observer && item->registered_data_ && vwd) {
+            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, *item, *vwd);
             observer->on_sample_read(this, s);
           }
 
@@ -314,8 +325,9 @@ namespace OpenDDS {
           ptr->instance_state_->sample_info(sample_info, item);
           item->sample_state_ = DDS::READ_SAMPLE_STATE;
 
-          if (observer) {
-            Observer::Sample s(*item, sample_info.instance_handle, sample_info.instance_state);
+          const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+          if (observer && item->registered_data_ && vwd) {
+            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, *item, *vwd);
             observer->on_sample_taken(this, s);
           }
 
@@ -957,19 +969,21 @@ namespace OpenDDS {
     bool ser_ret = true;
     MessageType data;
     if (sample.header_.key_fields_only_) {
-      ser_ret = (ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data));
+      ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data);
     } else {
-      ser_ret = (ser >> data);
+      ser_ret = ser >> data;
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                  ACE_TEXT("object construction failure, dropping sample.\n"),
-                  TraitsType::type_name()));
+        if (DCPS_debug_level > 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                     ACE_TEXT("object construction failure, dropping sample.\n"),
+                     TraitsType::type_name()));
+        }
       } else {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                  ACE_TEXT("deserialization failed.\n"),
-                  TraitsType::type_name()));
+                   ACE_TEXT("deserialization failed.\n"),
+                   TraitsType::type_name()));
       }
       return;
     }
@@ -1021,22 +1035,23 @@ namespace OpenDDS {
 
 protected:
 
-  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                             OpenDDS::DCPS::SubscriptionInstance_rch& instance,
-                             bool& just_registered,
-                             bool& filtered,
-                             OpenDDS::DCPS::MarshalingType marshaling_type)
+  virtual RcHandle<MessageHolder> dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                                OpenDDS::DCPS::SubscriptionInstance_rch& instance,
+                                                bool& just_registered,
+                                                bool& filtered,
+                                                OpenDDS::DCPS::MarshalingType marshaling_type)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
+    RcHandle<MessageHolder> message_holder;
 
     if (marshal_skip_serialize_) {
       if (!MarshalTraitsType::from_message_block(*data, *sample.sample_)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
                    ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
-        return;
+        return message_holder;
       }
       store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
-      return;
+      return message_holder;
     }
     const bool encapsulated = sample.header_.cdr_encapsulation_;
 
@@ -1052,11 +1067,11 @@ protected:
           ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
           ACE_TEXT("deserialization of encapsulation header failed.\n"),
           TraitsType::type_name()));
-        return;
+        return message_holder;
       }
       Encoding encoding;
       if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
-        return;
+        return message_holder;
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
@@ -1068,7 +1083,7 @@ protected:
             TraitsType::type_name(),
             Encoding::kind_to_string(encoding.kind()).c_str()));
         }
-        return;
+        return message_holder;
       }
       if (DCPS_debug_level >= 8) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
@@ -1086,21 +1101,24 @@ protected:
 
     bool ser_ret = true;
     if (key_only_marshaling) {
-      ser_ret = (ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data));
+      ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
-      ser_ret = (ser >> *data);
+      ser_ret = ser >> *data;
+      message_holder = make_rch<MessageHolder_T<MessageType> >(*data);
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("object construction failure, dropping sample.\n"),
-                  TraitsType::type_name()));
+        if (DCPS_debug_level > 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                     ACE_TEXT("object construction failure, dropping sample.\n"),
+                     TraitsType::type_name()));
+        }
       } else {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("deserialization failed, dropping sample.\n"),
-                  TraitsType::type_name()));
+                   ACE_TEXT("deserialization failed, dropping sample.\n"),
+                   TraitsType::type_name()));
       }
-      return;
+      return message_holder;
     }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1118,17 +1136,20 @@ protected:
           TraitsType::type_name(),
           to_string(static_cast<MessageId>(sample.header_.message_id_))));
         filtered = true;
-        return;
+        message_holder.reset();
+        return message_holder;
       }
       const MessageType& type = static_cast<MessageType&>(*data);
       if (!content_filtered_topic_->filter(type, sample_only_has_key_fields)) {
         filtered = true;
-        return;
+        message_holder.reset();
+        return message_holder;
       }
     }
 #endif
 
     store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
+    return message_holder;
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -1240,8 +1261,9 @@ private:
               ) {
             results.insert_sample(item, inst, ++i);
 
-            if (observer) {
-              Observer::Sample s(*item, handle, instance_states);
+            const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+            if (observer && item->registered_data_ && vwd) {
+              Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
               observer->on_sample_read(this, s);
             }
           }
@@ -1252,10 +1274,11 @@ private:
   } else {
     const RakeData item = group_coherent_ordered_data_.get_data();
     results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
-    if (observer) {
+    const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+    if (observer && item.rde_->registered_data_ && vwd) {
       typename InstanceMap::iterator i = instance_map_.begin();
       const DDS::InstanceHandle_t handle = (i != instance_map_.end()) ? i->second : DDS::HANDLE_NIL;
-      Observer::Sample s(*(item.rde_), handle, instance_states);
+      Observer::Sample s(handle, item.si_->instance_state_->instance_state(), *item.rde_, *vwd);
       observer->on_sample_read(this, s);
     }
   }
@@ -1331,8 +1354,9 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
               ) {
             results.insert_sample(item, inst, ++i);
 
-            if (observer) {
-              Observer::Sample s(*item, handle, instance_states);
+            const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+            if (observer && item->registered_data_ && vwd) {
+              Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
               observer->on_sample_taken(this, s);
             }
           }
@@ -1395,8 +1419,9 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
 #endif
           ) {
         results.insert_sample(item, inst, ++i);
-        if (observer) {
-          Observer::Sample s(*item, a_handle, instance_states);
+        const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+        if (observer && item->registered_data_ && vwd) {
+          Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item, *vwd);
           observer->on_sample_read(this, s);
         }
       }
@@ -1412,7 +1437,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
       msg += state_obj->instance_state_string();
       msg += " while the validity mask is " + InstanceState::instance_state_mask_string(instance_states);
     }
-    const GuidConverter conv(get_subscription_id());
+    const GuidConverter conv(get_repo_id());
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
                ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
                OPENDDS_STRING(conv).c_str(), msg.c_str()));
@@ -1466,8 +1491,9 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
 #endif
           ) {
         results.insert_sample(item, inst, ++i);
-        if (observer) {
-          Observer::Sample s(*item, a_handle, instance_states);
+        const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+        if (observer && item->registered_data_ && vwd) {
+          Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item, *vwd);
           observer->on_sample_taken(this, s);
         }
       }
@@ -1702,7 +1728,7 @@ void store_instance_data(
                     ACE_TEXT("(%P|%t) ")
                     ACE_TEXT("%CDataReaderImpl::")
                     ACE_TEXT("store_instance_data, ")
-                    ACE_TEXT("insert handle failed. \n"), TraitsType::type_name()));
+                    ACE_TEXT("insert handle failed, ret = %d.\n"), TraitsType::type_name(), ret));
         return;
       }
     }

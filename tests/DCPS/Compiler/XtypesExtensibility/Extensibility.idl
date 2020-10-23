@@ -40,16 +40,6 @@ module extensibility {
   };
 
   @extensibility(FINAL)
-  enum enum_final {
-   A1, A2, A3
-  };
-
-  @extensibility(APPENDABLE)
-  enum enum_appendable {
-   B1, B2, B3
-  };
-
-  @extensibility(FINAL)
   struct struct_final_nested {
    string member;
   };
@@ -91,10 +81,6 @@ module extensibility {
   union union_default switch(long) {
    case 0: long A;
    case 1: short B;
-  };
-
-  enum enum_default {
-   C1, C2, C3
   };
 
   struct struct_default_nested {

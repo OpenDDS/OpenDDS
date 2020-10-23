@@ -795,6 +795,10 @@ Service_Participant::initialize()
   initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
   initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
 
+  bit_autopurge_nowriter_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
+  bit_autopurge_nowriter_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
+  bit_autopurge_disposed_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
+  bit_autopurge_disposed_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
 }
 
 void
@@ -2768,6 +2772,30 @@ NetworkConfigModifier* Service_Participant::network_config_modifier()
   return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
 }
 #endif
+
+DDS::Duration_t
+Service_Participant::bit_autopurge_nowriter_samples_delay() const
+{
+  return bit_autopurge_nowriter_samples_delay_;
+}
+
+void
+Service_Participant::bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration)
+{
+  bit_autopurge_nowriter_samples_delay_ = duration;
+}
+
+DDS::Duration_t
+Service_Participant::bit_autopurge_disposed_samples_delay() const
+{
+  return bit_autopurge_disposed_samples_delay_;
+}
+
+void
+Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
+{
+  bit_autopurge_disposed_samples_delay_ = duration;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

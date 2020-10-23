@@ -17,59 +17,55 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-DDS::InstanceStateKind Observer::Sample::to_instance_state(char message_id)
-{
-  switch (message_id) {
-  case UNREGISTER_INSTANCE:
-    return DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
-  case DISPOSE_INSTANCE:
-  case DISPOSE_UNREGISTER_INSTANCE:
-    return DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
-  default:
-    return DDS::ALIVE_INSTANCE_STATE;
-  }
-}
-
-Observer::Sample::Sample(DDS::InstanceHandle_t i, const DataSampleElement& e, const DDS::Time_t& t)
-  : instance_(i)
-  , instance_state_(to_instance_state(e.get_header().message_id_))
-  , timestamp_(t)
-  , seq_n_(e.get_header().sequence_)
-  , data_(e.get_sample())
+Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
+                         DDS::InstanceStateKind a_instance_state,
+                         const DDS::Time_t& a_timestamp,
+                         const SequenceNumber& a_sequence_number,
+                         const void* a_data,
+                         const ValueWriterDispatcher& a_data_dispatcher)
+  : instance(a_instance)
+  , instance_state(a_instance_state)
+  , timestamp(a_timestamp)
+  , sequence_number(a_sequence_number)
+  , data(a_data)
+  , data_dispatcher(a_data_dispatcher)
 {}
 
-Observer::Sample::Sample(const ReceivedDataSample& s, DDS::InstanceHandle_t i)
-  : instance_(i)
-  , instance_state_(to_instance_state(s.header_.message_id_))
-  , seq_n_(s.header_.sequence_)
-  , data_(s.sample_.get())
-{
-  timestamp_.sec = s.header_.source_timestamp_sec_;
-  timestamp_.nanosec = s.header_.source_timestamp_nanosec_;
-}
-
-Observer::Sample::Sample(const ReceivedDataElement& s, DDS::InstanceHandle_t i, DDS::InstanceStateKind instance_state)
-  : instance_(i)
-  , instance_state_(to_instance_state(instance_state))
-  , timestamp_(s.source_timestamp_)
-  , seq_n_(s.sequence_)
-  , data_(s.registered_data_)
-{}
-
-Observer::Sample::Sample(
-  DDS::InstanceHandle_t i,
-  DDS::InstanceStateKind instance_state,
-  const DDS::Time_t& t,
-  const SequenceNumber& sn,
-  const void* data)
-  : instance_(i)
-  , instance_state_(instance_state)
-  , timestamp_(t)
-  , seq_n_(sn)
-  , data_(data)
+Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
+                         DDS::InstanceStateKind a_instance_state,
+                         const ReceivedDataElement& a_rde,
+                         const ValueWriterDispatcher& a_data_dispatcher)
+  : instance(a_instance)
+  , instance_state(a_instance_state)
+  , timestamp(a_rde.source_timestamp_)
+  , sequence_number(a_rde.sequence_)
+  , data(a_rde.registered_data_)
+  , data_dispatcher(a_data_dispatcher)
 {}
 
 Observer::~Observer() {}
+
+void
+vwrite(ValueWriter& vw, const Observer::Sample& sample)
+{
+  vw.begin_struct();
+  vw.begin_field("instance");
+  vw.write_int32(sample.instance);
+  vw.end_field();
+  vw.begin_field("instance_state");
+  vw.write_uint32(sample.instance_state);
+  vw.end_field();
+  vw.begin_field("timestamp");
+  vwrite(vw, sample.timestamp);
+  vw.end_field();
+  vw.begin_field("sequence_number");
+  vw.write_int64(sample.sequence_number.getValue());
+  vw.end_field();
+  vw.begin_field("data");
+  sample.data_dispatcher.write(vw, sample.data);
+  vw.end_field();
+  vw.end_struct();
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

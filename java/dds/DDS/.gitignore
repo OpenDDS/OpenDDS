@@ -263,6 +263,8 @@
 /NOT_READ_SAMPLE_STATE.java
 /OctetSeqHelper.java
 /OctetSeqHolder.java
+/OctetArray16Helper.java
+/OctetArray16Holder.java
 /OFFERED_DEADLINE_MISSED_STATUS.java
 /OFFERED_INCOMPATIBLE_QOS_STATUS.java
 /OfferedDeadlineMissedStatus.java

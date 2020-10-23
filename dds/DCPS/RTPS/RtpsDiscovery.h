@@ -437,6 +437,17 @@ public:
     max_type_lookup_service_reply_period_ = x;
   }
 
+  bool use_xtypes() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_;
+  }
+  void use_xtypes(bool use_xtypes)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    use_xtypes_ = use_xtypes;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -468,6 +479,7 @@ private:
   bool use_ncm_;
   size_t sedp_max_message_size_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
+  bool use_xtypes_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -584,6 +596,9 @@ public:
 
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
+
+  bool use_xtypes() const { return config_->use_xtypes(); }
+  void use_xtypes(bool xt) { config_->use_xtypes(xt); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

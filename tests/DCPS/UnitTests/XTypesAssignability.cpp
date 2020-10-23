@@ -9,7 +9,7 @@ namespace {
 
   TypeIdentifier makeString(bool wide, const StringSTypeDefn& string_sdefn)
   {
-    TypeIdentifier ti(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
+    TypeIdentifier ti(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
     ti.string_sdefn() = string_sdefn;
     return ti;
   }
@@ -511,7 +511,7 @@ protected:
     enum_a_.enum_flags = IS_APPENDABLE;
     enum_b_.enum_flags = enum_a_.enum_flags;
     enum_a_.header.common.bit_bound = 10;
-    enum_b_.header.common.bit_bound = 13;
+    enum_b_.header.common.bit_bound = 10;
 
     MinimalEnumeratedLiteral l1_a, l2_a;
     l1_a.common.value = 3;
@@ -563,16 +563,8 @@ TEST_F(EnumTypeTest, NotAssignable)
   TypeAssignability test(make_rch<TypeLookupService>());
 
   // Different bit_bounds
-  enum_a_.header.common.bit_bound = 3;
+  enum_a_.header.common.bit_bound = 7;
   enum_b_.header.common.bit_bound = 23;
-  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
-                               TypeObject(MinimalTypeObject(enum_b_))));
-  enum_a_.header.common.bit_bound = 11;
-  enum_b_.header.common.bit_bound = 7;
-  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
-                               TypeObject(MinimalTypeObject(enum_b_))));
-  enum_a_.header.common.bit_bound = 20;
-  enum_a_.header.common.bit_bound = 15;
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
                                TypeObject(MinimalTypeObject(enum_b_))));
 
@@ -2278,7 +2270,7 @@ void expect_true_alias_to_alias()
   literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
                                               MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
-                               MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
+                               MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(5))),
                                literal_seq);
   get_equivalence_hash(hash);
   ali_a.body.common.related_type = make(EK_MINIMAL, hash);

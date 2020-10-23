@@ -968,14 +968,7 @@ MonitorDataStorage::update<DDS::ParticipantBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::Discovery_rch disc =
-    TheServiceParticipant->get_discovery(participant->get_domain_id());
-  OpenDDS::DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
-  OpenDDS::DCPS::RepoId id =
-    disc->bit_key_to_repo_id(dpi,
-                             OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                             data.key);
+  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
   OpenDDS::DCPS::GuidConverter converter(id);
   ACE_DEBUG((LM_DEBUG,
@@ -1052,14 +1045,7 @@ MonitorDataStorage::update<DDS::TopicBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::Discovery_rch disc =
-    TheServiceParticipant->get_discovery(participant->get_domain_id());
-  OpenDDS::DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
-  OpenDDS::DCPS::RepoId id =
-    disc->bit_key_to_repo_id(dpi,
-                             OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
-                             data.key);
+  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
@@ -1145,14 +1131,7 @@ MonitorDataStorage::update<DDS::PublicationBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::Discovery_rch disc =
-    TheServiceParticipant->get_discovery(participant->get_domain_id());
-  OpenDDS::DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
-  OpenDDS::DCPS::RepoId id =
-    disc->bit_key_to_repo_id(dpi,
-                             OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
-                             data.key);
+  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
@@ -1236,14 +1215,7 @@ MonitorDataStorage::update<DDS::SubscriptionBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::Discovery_rch disc =
-    TheServiceParticipant->get_discovery(participant->get_domain_id());
-  OpenDDS::DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
-  OpenDDS::DCPS::RepoId id =
-    disc->bit_key_to_repo_id(dpi,
-                             OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-                             data.key);
+  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
