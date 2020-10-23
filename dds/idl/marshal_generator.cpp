@@ -2716,7 +2716,7 @@ namespace {
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       generate_dheader_code(
-        "    serialized_size(encoding, total_size, stru" + value_access + "\n"
+        "    serialized_size(encoding, total_size, stru" + value_access + ");\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
         "    }\n", not_final);

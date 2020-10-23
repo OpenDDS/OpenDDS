@@ -585,8 +585,7 @@ struct Intro {
 
   void join(std::ostream& os, const std::string& indent)
   {
-    for (LineVec::iterator i = line_vec.begin(); i != line_vec.end(); ++i)
-    {
+    for (LineVec::iterator i = line_vec.begin(); i != line_vec.end(); ++i) {
       os << indent << *i << '\n';
     }
   }
@@ -994,7 +993,7 @@ public:
 
   explicit Fields(AST_Structure* node = 0, FieldFilter type = FieldFilter_All)
   : node_(node)
-  , just_keys_(type == FieldFilter_KeyOnly) // FieldType_NestedKeyOnly case is checked below
+  , just_keys_(type == FieldFilter_KeyOnly)
   {
     // Check for implied keys rule for non-topic type cases
     if (node && type == FieldFilter_NestedKeyOnly) {
