@@ -169,7 +169,7 @@ namespace OpenDDS {
 
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
-        MonotonicTimePoint now = MonotonicTimePoint::now();
+        const MonotonicTimePoint now = MonotonicTimePoint::now();
         if (has_timeout() && now.value() > expire) {
           expire = now.value() + interval.value();
           if (status) {
@@ -177,10 +177,9 @@ namespace OpenDDS {
               ACE_DEBUG((LM_DEBUG,
                         "%T (%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
             }
-            {
-              ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status->lock);
-              status->map[key] = now;
-            }
+
+            ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status->lock);
+            status->map[key] = now;
           }
         }
       }
