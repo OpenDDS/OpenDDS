@@ -13,8 +13,7 @@
 
 using namespace OpenDDS::DCPS;
 
-int checkVal(const TAO::String_Manager& lhs, const TAO::String_Manager& rhs,
-             const char* name)
+int checkVal(const char* lhs, const char* rhs, const char* name)
 {
   if (std::strcmp(lhs, rhs)) {
     std::cout << "ERROR: target's " << name << " " << lhs << " != "
@@ -22,6 +21,12 @@ int checkVal(const TAO::String_Manager& lhs, const TAO::String_Manager& rhs,
     return 1;
   }
   return 0;
+}
+
+int checkVal(const TAO::String_Manager& lhs, const TAO::String_Manager& rhs,
+             const char* name)
+{
+  return checkVal(lhs.in(), rhs.in(), name);
 }
 
 int checkVal(const float& lhs, const float& rhs, const char* name)
