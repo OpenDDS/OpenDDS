@@ -630,7 +630,7 @@ bool runOverrunTest()
       chain->release();
       return false;
     }
-    ACE_CDR::Float flt = 3.14;
+    ACE_CDR::Float flt = 3.14f;
     if (!(s1 << flt)) {
       std::cerr << "runOverrunTest: 1st insert float using "
                 << encodings[i].to_string() << " failed" << std::endl;

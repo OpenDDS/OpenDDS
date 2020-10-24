@@ -74,7 +74,7 @@ int check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, 
   Value val = ms.getValue(ser, rhs_name.c_str());
   if (val.type_ == type) {
     std::string ser_name = std::string("Serialized ") + name;
-    if (checkVal(rhs, val.*ptrmbr, ser_name.c_str())) return 1;
+    if (checkVal(T2(rhs), val.*ptrmbr, ser_name.c_str())) return 1;
   } else {
     std::cout << "ERROR: Serialized type of " << name
               << " does not match. expected " << type
@@ -100,7 +100,7 @@ int run_test(int, ACE_TCHAR*[])
   Source src;
   src.rhs_a.s = "hello";
   src.rhs_a.l = 42;
-  src.rhs_a.w = L'☺';
+  src.rhs_a.w = L'\x263a';
   src.rhs_a.c = 'j';
   src.rhs_sa[0] = 23;
   src.rhs_sa[1] = -16536;

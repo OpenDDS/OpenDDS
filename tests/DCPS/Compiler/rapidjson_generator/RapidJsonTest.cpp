@@ -40,7 +40,9 @@ TEST(RapidJsonTest, ParseTest)
   ASSERT_GT(sample.bt.f, 0.00141 - 1e-6);
   ASSERT_LT(sample.bt.d, -0.00000141 + 1e-9);
   ASSERT_GT(sample.bt.d, -0.00000141 - 1e-9);
-  ASSERT_EQ(sample.bt.ld, 1e34);
+  ACE_CDR::LongDouble ld;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, 1e34l);
+  ASSERT_TRUE(sample.bt.ld == ld);
   ASSERT_EQ(sample.bt.b, false);
   ASSERT_EQ(sample.bt.c, '\r');
   ASSERT_EQ(std::string(sample.bt.str.in()), "The most JSON of rapids");

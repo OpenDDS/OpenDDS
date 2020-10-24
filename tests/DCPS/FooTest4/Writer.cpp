@@ -65,7 +65,7 @@ Writer::start()
                      foo.x, foo.y, foo.key);
       OpenDDS::DCPS::ReceivedDataSample sample(0);
 
-      sample.header_.message_length_ = foo_size;
+      sample.header_.message_length_ = static_cast<unsigned>(foo_size);
       sample.header_.message_id_ = OpenDDS::DCPS::SAMPLE_DATA;
       sample.header_.sequence_ = seq.getValue();
 
