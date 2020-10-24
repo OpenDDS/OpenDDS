@@ -2278,7 +2278,7 @@ namespace {
     size_t* size,
     string* expr, Intro* intro)
   {
-    if (keys) {
+    if (keys && keys->root_type() != TopicKeys::InvalidType) {
       const TopicKeys::Iterator finished = keys->end();
       for (TopicKeys::Iterator i = keys->begin(); i != finished; ++i) {
         string key_access = i.path();
@@ -2397,6 +2397,7 @@ namespace {
     const Fields fields(node);
     const Fields::Iterator fields_end = fields.end();
     const std::string name = scoped(node->name());
+    const ExtensibilityKind exten = be_global->extensibility(node);
 
     be_global->header_ <<
       "  static SerializedSizeBound " << function_prefix <<
@@ -2411,7 +2412,8 @@ namespace {
       if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
         size_t size = 0;
         if (key_only) {
-          if (!iterate_over_keys("", encoding_unaligned_cdr, node, name, info, &keys,
+          idl_max_serialized_size_dheader(encoding, exten, size);
+          if (!iterate_over_keys("", encoding, node, name, info, &keys,
                 idl_max_serialized_size_iteration, &size, 0, 0)) {
             return false;
           }
@@ -2770,7 +2772,7 @@ namespace {
       string expr;
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
-        if (i.pos()) expr += "\n    && ";
+        if (expr.size()) expr += "\n    && ";
         const string field_name = field->local_name()->get_string(),
           cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
@@ -2784,6 +2786,9 @@ namespace {
       }
 
       intro.join(be_global->impl_, indent);
+      if (expr.empty()) {
+        expr = "true";
+      }
       be_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
     }
 
@@ -2974,7 +2979,7 @@ bool marshal_generator::generate_struct_deserialization(
     expr = "";
     for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
       AST_Field* const field = *i;
-      if (i.pos() && exten != extensibilitykind_appendable) {
+      if (expr.size() && exten != extensibilitykind_appendable) {
         expr += "\n    && ";
       }
       // TODO (sonndinh): Integrate with try-construct for when the stream
@@ -3024,6 +3029,8 @@ bool marshal_generator::generate_struct_deserialization(
         "  }\n"
         "  return true;\n";
       be_global->impl_ << expr;
+    } else if (expr.empty()) {
+      be_global->impl_ << "  return true;\n";
     } else {
       be_global->impl_ << "  return " << expr << ";\n";
     }

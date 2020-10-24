@@ -923,7 +923,8 @@ public:
     , pos_(pos)
     , just_keys_(just_keys)
     {
-      check();
+      for (; check() && just_keys_ && !be_global->is_key(**this); ++pos_) {
+      }
     }
 
     bool valid() const
