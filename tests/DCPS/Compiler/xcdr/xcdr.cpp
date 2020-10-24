@@ -7,6 +7,7 @@
 
 #include <string>
 #include <cstring>
+#include <vector>
 
 using namespace OpenDDS::DCPS;
 
@@ -54,6 +55,14 @@ template <typename Type>
 void set_values_union(Type& value, UnionDisc disc)
 {
   set_base_values_union(value, disc);
+}
+
+template <typename Type, size_t length>
+void expect_arrays_are_equal(const Type (&a)[length], const Type (&b)[length])
+{
+  for (size_t i = 0; i < length; ++i) {
+    EXPECT_EQ(a[i], b[i]);
+  }
 }
 
 template<typename TypeA, typename TypeB>
@@ -105,6 +114,8 @@ template<typename TypeA, typename TypeB>
   return ::testing::AssertionSuccess();
 }
 
+typedef std::vector<char> DataVec;
+
 struct DataView {
   template <size_t array_size>
   DataView(const unsigned char (&array)[array_size])
@@ -123,6 +134,20 @@ struct DataView {
   : data(reinterpret_cast<const char*>(array))
   , size(array_size)
   {
+  }
+
+  DataView(const DataVec& data_vec)
+  : data(&data_vec[0])
+  , size(data_vec.size())
+  {
+  }
+
+  void copy_to(DataVec& data_vec)
+  {
+    data_vec.reserve(data_vec.size() + size);
+    for (size_t i = 0; i < size; ++i) {
+      data_vec.push_back(data[i]);
+    }
   }
 
   const char* const data;
@@ -200,8 +225,8 @@ void deserialize_compare(
 }
 
 template<typename TypeA, typename TypeB>
-void amalgam_serializer_test(
-  const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
+void amalgam_serializer_test_base(
+  const Encoding& encoding, const DataView& expected_cdr, const TypeA& value, TypeB& result)
 {
   ACE_Message_Block buffer(1024);
 
@@ -212,12 +237,19 @@ void amalgam_serializer_test(
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
 
-  // Deserialize and Compare C++ Values
+  // Deserialize
   {
     Serializer serializer(&buffer, encoding);
     ASSERT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(assert_values, value, result);
   }
+}
+
+template<typename TypeA, typename TypeB>
+void amalgam_serializer_test(
+  const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
+{
+  amalgam_serializer_test_base(encoding, expected_cdr, value, result);
+  EXPECT_PRED_FORMAT2(assert_values, value, result);
 }
 
 template<typename TypeA, typename TypeB>
@@ -1841,6 +1873,167 @@ TEST(MixedExtenTests, NestingMutableStructLE)
 {
   test_little_endian<NestingMutableStruct, NestingMutableStructXcdr2BE>();
 }
+
+// KeyOnly Serialization ======================================================
+
+template <typename Type>
+void build_expected(DataVec& /* expected */, bool /* key_only */)
+{
+  ASSERT_TRUE(false);
+}
+
+template <typename Type>
+void not_key_only_test()
+{
+  DataVec expected;
+  build_expected<Type>(expected, false);
+  serializer_test<Type>(xcdr1, expected);
+};
+
+template <typename Type>
+void key_only_test()
+{
+  DataVec expected;
+  build_expected<Type>(expected, true);
+  Type value;
+  NestedKeyOnly<const Type> wrapped_value(value);
+  set_values(value);
+  Type result;
+  NestedKeyOnly<Type> wrapped_result(result);
+  amalgam_serializer_test_base<NestedKeyOnly<const Type>, NestedKeyOnly<Type>>(
+    xcdr1, expected, wrapped_value, wrapped_result);
+  EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+}
+
+template<typename Type>
+void key_only_set_base_values(Type& value)
+{
+  value.long_value = 0x7fffffff;
+  value.long_array_value[0] = 1;
+  value.long_array_value[1] = 2;
+  /* TODO(iguessthislldo): See IDL Def
+  value.long_seq_value.length(1);
+  value.long_seq_value[1] = 3;
+  */
+  value.string_value = "STRINGY";
+  value.extra_value = 2020;
+}
+
+template<>
+void set_values(BasicUnkeyedStruct& value)
+{
+  key_only_set_base_values(value);
+}
+
+template<>
+void set_values(BasicKeyedStruct& value)
+{
+  key_only_set_base_values(value);
+}
+
+template<typename TypeA, typename TypeB>
+void key_only_expect_values_equal_base_keys(const TypeA& a, const TypeB& b)
+{
+  EXPECT_EQ(a.long_value, b.long_value);
+  expect_arrays_are_equal(a.long_array_value, b.long_array_value);
+  /* TODO(iguessthislldo): See IDL Def
+  EXPECT_EQ(a.long_seq_value, b.long_seq_value);
+  */
+  EXPECT_STREQ(a.string_value, b.string_value);
+}
+
+template<typename TypeA, typename TypeB>
+void key_only_expect_values_equal_base(const TypeA& a, const TypeB& b)
+{
+  key_only_expect_values_equal_base_keys(a, b);
+  EXPECT_EQ(a.extra_value, b.extra_value);
+}
+
+template<>
+void expect_values_equal(const BasicUnkeyedStruct& a, const BasicUnkeyedStruct& b)
+{
+  key_only_expect_values_equal_base(a, b);
+}
+
+template<>
+void expect_values_equal(
+  const NestedKeyOnly<const BasicUnkeyedStruct>& a,
+  const NestedKeyOnly<BasicUnkeyedStruct>& b)
+{
+  expect_values_equal(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(const BasicKeyedStruct& a, const BasicKeyedStruct& b)
+{
+  key_only_expect_values_equal_base(a, b);
+}
+
+template<>
+void expect_values_equal(
+  const NestedKeyOnly<const BasicKeyedStruct>& a,
+  const NestedKeyOnly<BasicKeyedStruct>& b)
+{
+  key_only_expect_values_equal_base_keys(a.value, b.value);
+}
+
+const unsigned char key_only_keys_expected_base[] = {
+  // long_value
+  0x7f, 0xff, 0xff, 0xff,
+  // long_array_value
+  0x00, 0x00, 0x00, 0x01,
+  0x00, 0x00, 0x00, 0x02,
+  /* TODO(iguessthislldo): See IDL Def
+  // long_array_value
+  0x00, 0x00, 0x00, 0x01,
+  0x00, 0x00, 0x00, 0x03,
+  */
+  // string_value
+  0x00, 0x00, 0x00, 0x08,
+  'S', 'T', 'R', 'I', 'N', 'G', 'Y', '\0'
+};
+
+const unsigned char key_only_non_keys_expected_base[] = {
+  // extra_value
+  0x00, 0x00, 0x07, 0xe4
+};
+
+template <>
+void build_expected<BasicKeyedStruct>(DataVec& expected, bool key_only)
+{
+  DataView(key_only_keys_expected_base).copy_to(expected);
+  if (!key_only) {
+    DataView(key_only_non_keys_expected_base).copy_to(expected);
+  }
+}
+
+template <>
+void build_expected<BasicUnkeyedStruct>(DataVec& expected, bool /*key_only*/)
+{
+  build_expected<BasicKeyedStruct>(expected, false);
+}
+
+TEST(KeyOnly, BasicUnkeyedStruct_not_key_only)
+{
+  not_key_only_test<BasicUnkeyedStruct>();
+}
+
+TEST(KeyOnly, BasicUnkeyedStruct_key_only)
+{
+  key_only_test<BasicUnkeyedStruct>();
+}
+
+TEST(KeyOnly, BasicKeyedStruct_not_key_only)
+{
+  not_key_only_test<BasicKeyedStruct>();
+}
+
+TEST(KeyOnly, BasicKeyedStruct_key_only)
+{
+  key_only_test<BasicKeyedStruct>();
+}
+
+// ----------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
