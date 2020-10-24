@@ -23,6 +23,11 @@ public class BuiltinTopicUtils {
     public static final String BUILT_IN_PARTICIPANT_LOCATION_TOPIC = "OpenDDSParticipantLocation";
     public static final String BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE = "PARTICIPANT_LOCATION_BUILT_IN_TOPIC_TYPE";
 
+    public static final String BUILT_IN_CONNECTION_RECORD_TOPIC = "OpenDDSConnectionRecord";
+    public static final String BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE = "PARTICIPANT_LOCATION_BUILT_IN_TOPIC_TYPE";
+
+    public static final String BUILT_IN_INTERNAL_THREAD_TOPIC = "OpenDDSInternalThread";
+    public static final String BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE = "INTERNAL_THREAD_BUILT_IN_TOPIC_TYPE";
     //
 
     private BuiltinTopicUtils() {}

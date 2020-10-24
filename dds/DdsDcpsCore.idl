@@ -428,6 +428,7 @@ module DDS {
 };
 
 module OpenDDS {
+
   module DCPS {
     // Make the IDL compiler produce include of zero-copy read info
     // sequence template.
@@ -472,7 +473,17 @@ module OpenDDS {
             BUILT_IN_TOPIC_KEY string protocol;
     };
 
+    // OpenDDS extension built-in topic for thread
+    // status monitoring.
+    BUILT_IN_TOPIC_TYPE
+    struct InternalThreadBuiltinTopicData {
+            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
+            string thread_id;
+            DDS::Time_t timestamp;
+    };
+
   };// End of module DCPS
+
 }; // End of module OpenDDS
 
 #undef BUILT_IN_TOPIC_TYPE

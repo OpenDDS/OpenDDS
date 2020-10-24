@@ -40,6 +40,7 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<InternalThreadBuiltinTopicData> InternalThreadBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<ConnectionRecord> ConnectionRecordDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
@@ -86,6 +87,10 @@ namespace OpenDDS {
     }
 
     struct DcpsUpcalls : ACE_Task_Base {
+      bool has_timeout() {
+        return interval > TimeDuration(0);
+      }
+
       DcpsUpcalls(DataReaderCallbacks* drr,
                   const RepoId& reader,
                   const WriterAssociation& wa,
@@ -93,17 +98,55 @@ namespace OpenDDS {
                   DataWriterCallbacks* dwr)
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
-      {}
+        , interval(TimeDuration(0))
+        , status(0)
+        , tid(0)
+      {
+        interval = TheServiceParticipant->get_thread_status_interval();
+        status = TheServiceParticipant->get_thread_statuses();
+#ifdef ACE_HAS_MAC_OSX
+        uint64_t osx_tid;
+        if (!pthread_threadid_np(NULL, &osx_tid)) {
+          tid = static_cast<unsigned long>(osx_tid);
+        } else {
+          tid = 0;
+          ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
+        }
+#else
+        tid = ACE_OS::thr_self();
+#endif /* ACE_HAS_MAC_OSX */
+
+        key = to_dds_string(tid) + " (DcpsUpcalls)";
+      }
 
       int svc()
       {
+        ACE_Time_Value expire;
+
+        if (has_timeout()) {
+          expire = MonotonicTimePoint::now().value() + interval.value();
+        }
+
         drr_->add_association(reader_, wa_, active_);
         {
           ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);
           reader_done_ = true;
           cnd_.signal();
           while (!writer_done_) {
-            cnd_.wait();
+            cnd_.wait(&expire);
+
+            const MonotonicTimePoint now = MonotonicTimePoint::now();
+            if (has_timeout() && now.value() > expire) {
+              expire = now.value() + interval.value();
+              if (status) {
+                if (DCPS_debug_level > 4) {
+                  ACE_DEBUG((LM_DEBUG,
+                            "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+                }
+                ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
+                status->map[key] = now;
+              }
+            }
           }
         }
         dwr_->association_complete(reader_);
@@ -117,7 +160,28 @@ namespace OpenDDS {
           writer_done_ = true;
           cnd_.signal();
         }
-        wait();
+
+        ACE_Time_Value expire;
+
+        if (has_timeout()) {
+          expire = MonotonicTimePoint::now().value() + interval.value();
+        }
+
+        wait(); // ACE_Task_Base::wait does not accept a timeout
+
+        const MonotonicTimePoint now = MonotonicTimePoint::now();
+        if (has_timeout() && now.value() > expire) {
+          expire = now.value() + interval.value();
+          if (status) {
+            if (DCPS_debug_level > 4) {
+              ACE_DEBUG((LM_DEBUG,
+                        "%T (%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
+            }
+
+            ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status->lock);
+            status->map[key] = now;
+          }
+        }
       }
 
       DataReaderCallbacks* const drr_;
@@ -128,6 +192,12 @@ namespace OpenDDS {
       bool reader_done_, writer_done_;
       ACE_Thread_Mutex mtx_;
       ACE_Condition_Thread_Mutex cnd_;
+
+      // thread reporting
+      TimeDuration interval;
+      ThreadStatus* status;
+      unsigned long tid;
+      OPENDDS_STRING key;
     };
 
     template <typename DiscoveredParticipantData_>
@@ -1763,6 +1833,16 @@ namespace OpenDDS {
         bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
       return dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
     }
+
+    DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
+    {
+      if (!bit_subscriber_.in())
+        return 0;
+
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+      return dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
+    }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       mutable ACE_Thread_Mutex lock_;
@@ -1841,6 +1921,11 @@ namespace OpenDDS {
         DDS::TopicDescription_var bit_connection_record_topic =
           participant->lookup_topicdescription(BUILT_IN_CONNECTION_RECORD_TOPIC);
         create_bit_dr(bit_connection_record_topic, BUILT_IN_CONNECTION_RECORD_TOPIC_TYPE,
+                      sub, dr_qos);
+
+        DDS::TopicDescription_var bit_internal_thread_topic =
+          participant->lookup_topicdescription(BUILT_IN_INTERNAL_THREAD_TOPIC);
+        create_bit_dr(bit_internal_thread_topic, BUILT_IN_INTERNAL_THREAD_TOPIC_TYPE,
                       sub, dr_qos);
 
         const DDS::ReturnCode_t ret = bit_subscriber->enable();
