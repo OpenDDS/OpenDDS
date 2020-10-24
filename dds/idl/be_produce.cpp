@@ -137,7 +137,6 @@ string to_macro(const char* fn)
   unsigned int seed = static_cast<unsigned int>(msec);
 
   if (ret[ret.size() - 1] != '_') ret += '_';
-  
   static const char alphanum[] =
     "0123456789"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
