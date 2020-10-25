@@ -1570,9 +1570,9 @@ namespace {
     } else if (fld_cls & CL_STRUCTURE) {
       const ExtensibilityKind exten = be_global->extensibility(type);
       if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
-        /**
-         * This is a workaround for not properly implementing
-         * max_serialized_size for XCDR.
+        /*
+         * TODO(iguessthislldo): This is a workaround for not properly
+         * implementing serialized_size_bound for XCDR. See XTYPE-83.
          */
         bounded = false;
       } else {
@@ -1598,9 +1598,9 @@ namespace {
     } else if (fld_cls & CL_UNION) {
       const ExtensibilityKind exten = be_global->extensibility(type);
       if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
-        /**
-         * This is a workaround for not properly implementing
-         * max_serialized_size for XCDR.
+        /*
+         * TODO(iguessthislldo): This is a workaround for not properly
+         * implementing serialized_size_bound for XCDR. See XTYPE-83.
          */
         bounded = false;
       } else {
@@ -2356,6 +2356,15 @@ namespace {
   bool is_bounded_topic_struct(AST_Type* type, Encoding encoding, bool key_only,
     TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
+    /*
+     * TODO(iguessthislldo): This is a workaround for not properly implementing
+     * serialized_size_bound for XCDR. See XTYPE-83.
+     */
+    const ExtensibilityKind exten = be_global->extensibility(type);
+    if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+      return false;
+    }
+
     bool bounded = true;
     if (key_only) {
       if (info) {
@@ -2475,9 +2484,11 @@ namespace {
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
-      // TODO(iguessthislldo): This is the same workaround for
-      // idl_max_serialized_size as in is_bounded_type
-      if (exten == extensibilitykind_final) {
+      /*
+       * TODO(iguessthislldo): This is a workaround for not properly implementing
+       * serialized_size_bound for Mutable. See XTYPE-83.
+       */
+      if (exten == extensibilitykind_final || encoding == encoding_unaligned_cdr) {
         size_t size = 0;
         if (has_key) {
           idl_max_serialized_size(encoding, size, node->disc_type());
