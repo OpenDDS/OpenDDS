@@ -288,13 +288,17 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
 {
   EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
     MarshalTraits<Type>::serialized_size_bound(encoding), bound);
+
   /*
-   * TODO(iguessthislldo): Assuming key only size is bounded to 0 if the type
-   * as normal is bounded for now. Maybe add keys to types? If so also check
-   * key only serialization.
+   * TODO(iguessthislldo): This is a workaround for not properly implementing
+   * serialized_size_bound for XCDR. See XTYPE-83.
    */
+  const bool not_final = MarshalTraits<Type>::extensibility() != FINAL;
+  const bool xcdr = encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE;
+  const SerializedSizeBound expected_key_only_bound = not_final && xcdr ?
+    SerializedSizeBound() : SerializedSizeBound(0);
   EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
-    MarshalTraits<Type>::key_only_serialized_size_bound(encoding), 0);
+    MarshalTraits<Type>::key_only_serialized_size_bound(encoding), expected_key_only_bound);
 
   Type value;
   set_values(value);
