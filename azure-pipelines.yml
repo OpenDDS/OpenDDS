@@ -160,13 +160,13 @@ jobs:
     displayName: Run configure script
   - script: |
       for /d %%x in (tests\googletest\build\*) do @if not %%x==tests\googletest\build\install del /s/q %%x
-      del /s/q ACE_TAO/ACE/protocols ACE_TAO/ACE/contrib ACE_TAO/ACE/examples
-      del /s/q ACE_TAO/ACE/tests ACE_TAO/ACE/netsvcs ACE_TAO/ACE/websvcs
-      del /s/q ACE_TAO/ACE/ASNMP ACE_TAO/ACE/performance-tests
-      del /s/q ACE_TAO/ACE/tests ACE_TAO/ACE/Kokyu ACE_TAO/TAO/interop-tests
-      del /s/q ACE_TAO/TAO/DevGuideExamples ACE_TAO/TAO/examples
-      del /s/q ACE_TAO/TAO/orbsvcs/tests ACE_TAO/TAO/orbsvcs/performance-tests
-      del /s/q ACE_TAO/TAO/orbsvcs/examples
+      del /s/q ACE_TAO\ACE\protocols ACE_TAO\ACE\contrib ACE_TAO\ACE\examples
+      del /s/q ACE_TAO\ACE\tests ACE_TAO\ACE\netsvcs ACE_TAO\ACE\websvcs
+      del /s/q ACE_TAO\ACE\ASNMP ACE_TAO\ACE\performance-tests
+      del /s/q ACE_TAO\ACE\tests ACE_TAO\ACE\Kokyu ACE_TAO\TAO\interop-tests
+      del /s/q ACE_TAO\TAO\DevGuideExamples ACE_TAO\TAO\examples
+      del /s/q ACE_TAO\TAO\orbsvcs\tests ACE_TAO\TAO\orbsvcs\performance-tests
+      del /s/q ACE_TAO\TAO\orbsvcs\examples
     displayName: Remove unused files from external repos
   - task: BatchScript@1
     displayName: Setenv from configure script
