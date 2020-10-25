@@ -2741,7 +2741,8 @@ namespace {
         const std::string mutable_indent = indent + "  ";
         mutable_fields <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
-          "    size_t size = 0;\n";
+          "    size_t size = 0;\n"
+          "    ACE_UNUSED_ARG(size);\n";
         const AutoidKind auto_id = be_global->autoid(node);
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
@@ -2962,20 +2963,34 @@ bool marshal_generator::generate_struct_deserialization(
           "      }\n";
       }
       intro.join(be_global->impl_, indent);
+      const string switch_cases = cases.str();
+      string sw_indent = "        ";
+      if (switch_cases.empty()) {
+        sw_indent = "      ";
+      } else {
+        be_global->impl_ <<
+          "      switch (member_id) {\n"
+          << switch_cases <<
+          "      default:\n";
+      }
+
       be_global->impl_ <<
-        "      switch (member_id) {\n"
-        << cases.str() <<
-        "      default:\n"
-        "        if (must_understand) {\n"
-        "          if (DCPS_debug_level >= 8) {\n"
-        "            ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
-                       << cpp_name << "\\n\"), member_id));\n" <<
-        "          }\n"
-        "          return false;\n"
-        "        }\n"
-        "        strm.skip(field_size);\n"
-        "        break;\n"
-        "      }\n"
+        sw_indent << "if (must_understand) {\n" <<
+        sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
+        sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
+        << cpp_name << "\\n\"), member_id));\n" <<
+        sw_indent << "  }\n" <<
+        sw_indent << "  return false;\n" <<
+        sw_indent << "}\n" <<
+        sw_indent << "strm.skip(field_size);\n";
+
+      if (!switch_cases.empty()) {
+        be_global->impl_ <<
+          "        break;\n"
+          "      }\n";
+      }
+
+      be_global->impl_ <<
         "    }\n"
         "    return false;\n"
         "  }\n"
