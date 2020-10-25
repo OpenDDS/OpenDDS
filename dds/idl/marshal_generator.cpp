@@ -10,6 +10,7 @@
 #include "dds_generator.h"
 #include "field_info.h"
 #include "topic_keys.h"
+#include "be_util.h"
 
 #include <utl_identifier.h>
 
@@ -258,24 +259,15 @@ namespace {
     return s.substr(i, cxx.size()) == cxx;
   }
 
-  bool valid_var_char(char c)
-  {
-    for (const char* invalid = "<>()[]*.: "; *invalid; ++invalid) {
-      if (c == *invalid) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   std::string valid_var_name(const std::string& str)
   {
+    const std::string invalid_chars("<>()[]*.: ");
     // Replace invalid characters with a single underscore
     std::string s;
     char last_char = '\0';
     for (size_t i = 0; i < str.size(); ++i) {
-      char c = str[i];
-      if (valid_var_char(c)) {
+      const char c = str[i];
+      if (invalid_chars.find(c) == std::string::npos) {
         s.push_back(c);
         last_char = c;
       } else if (last_char != '_') {
@@ -484,7 +476,7 @@ namespace {
     {
       const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
       const std::string value = value_access();
-      return use_cxx11 ?  "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+      return use_cxx11 ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
     }
 
     std::string seq_get_buffer() const
@@ -1099,7 +1091,6 @@ namespace {
           "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
 
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          // TODO(iguessthislldo): Replace this with Wrapper
           const string typedefname = scoped(seq->base_type()->name());
           be_global->impl_ <<
             "      " << typedefname << "_var tmp = " << typedefname
@@ -1142,7 +1133,7 @@ namespace {
               use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
             const std::string get_length =
               use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
-            string inout = use_cxx11 ? "" : ".inout()";
+            const string inout = use_cxx11 ? "" : ".inout()";
             be_global->impl_ <<
               "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && (" <<
               bounded_arg(elem) << " < " << get_length << ")) {\n"
@@ -1157,7 +1148,7 @@ namespace {
               "      }\n";
           } else if (elem_cls & CL_SEQUENCE) {
             be_global->impl_ <<
-              "      if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
+              "      if (strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n";
             skip_to_end_sequence("          ", "i", "length", named_as, use_cxx11, elem_cls, seq);
             be_global->impl_ <<
               "        return false;\n"
@@ -1385,7 +1376,6 @@ namespace {
         Intro intro;
         std::string stream;
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          // TODO(iguessthislldo): Replace this with Wrapper
           const string typedefname = scoped(arr->base_type()->name());
           intro.insert(typedefname + "_var tmp = " + typedefname + "_alloc();");
           intro.insert(typedefname + "_forany fa = tmp.inout();");
@@ -1410,7 +1400,7 @@ namespace {
               use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
             const std::string get_length =
               use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
-            string inout = use_cxx11 ? "" : ".inout()";
+            const string inout = use_cxx11 ? "" : ".inout()";
             be_global->impl_ <<
               indent << "if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " <<
                 check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
@@ -1474,7 +1464,7 @@ namespace {
   // specified and returns the AST_Type associated with that key.
   // Because the key name can contain indexed arrays and nested
   // structures, things can get interesting.
-  AST_Type* find_type(AST_Structure* struct_node, const string& key)
+  AST_Type* find_type_i(AST_Structure* struct_node, const string& key)
   {
     string key_base = key;   // the field we are looking for here
     string key_rem;          // the sub-field we will look for recursively
@@ -1545,10 +1535,23 @@ namespace {
         }
 
         // find type of nested struct field
-        return find_type(sub_struct, key_rem);
+        return find_type_i(sub_struct, key_rem);
       }
     }
     throw string("Field not found.");
+  }
+
+  AST_Type* find_type(AST_Structure* struct_node, const string& key)
+  {
+    try {
+      return find_type_i(struct_node, key);
+    } catch (const string& error) {
+      const std::string struct_name = scoped(struct_node->name());
+      be_util::misc_error_and_abort(
+        "Invalid key specification for " + struct_name + " (" + key + "): " + error,
+        struct_node);
+    }
+    return 0;
   }
 
   bool is_bounded_type(AST_Type* type, Encoding encoding)
@@ -2304,15 +2307,7 @@ namespace {
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(node, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << struct_name
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
-        fn(indent, encoding, key_name, field_type, size, expr, intro);
+        fn(indent, encoding, key_name, find_type(node, key_name), size, expr, intro);
       }
     }
 
@@ -2368,7 +2363,7 @@ namespace {
         AST_Structure* const struct_type = dynamic_cast<AST_Structure*>(type);
         for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
           const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          AST_Type* field_type = find_type(struct_type, key_name);
+          AST_Type* const field_type = find_type(struct_type, key_name);
           if (!is_bounded_type(field_type, encoding)) {
             bounded = false;
             break;
@@ -3204,14 +3199,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(node, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
+        AST_Type* const field_type = find_type(node, key_name);
         if (first) {
           first = false;
         } else {
@@ -3238,14 +3226,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(node, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
+        AST_Type* const field_type = find_type(node, key_name);
         if (first) {
           first = false;
         } else {

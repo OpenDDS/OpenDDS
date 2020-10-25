@@ -897,9 +897,7 @@ inline AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
 inline bool struct_has_explicit_keys(AST_Structure* node)
 {
   for (unsigned i = 0; i < node->nfields(); ++i) {
-    bool marked_as_key = false;
-    be_global->check_key(get_struct_field(node, i), marked_as_key);
-    if (marked_as_key) {
+    if (be_global->is_key(get_struct_field(node, i))) {
       return true;
     }
   }
@@ -923,8 +921,7 @@ public:
     , pos_(pos)
     , just_keys_(just_keys)
     {
-      for (; check() && just_keys_ && !be_global->is_key(**this); ++pos_) {
-      }
+      validate_pos();
     }
 
     bool valid() const
@@ -942,6 +939,12 @@ public:
       return true;
     }
 
+    void validate_pos()
+    {
+      for (; check() && just_keys_ && !be_global->is_key(**this); ++pos_) {
+      }
+    }
+
     unsigned pos() const
     {
       return pos_;
@@ -949,18 +952,8 @@ public:
 
     Iterator& operator++() // Prefix
     {
-      while (true) {
-        ++pos_;
-        if (check() && just_keys_) {
-          bool marked_as_key = false;
-          be_global->check_key(**this, marked_as_key);
-          if (marked_as_key) {
-            break;
-          }
-        } else {
-          break;
-        }
-      }
+      ++pos_;
+      validate_pos();
       return *this;
     }
 
