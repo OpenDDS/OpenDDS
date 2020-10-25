@@ -210,33 +210,46 @@ namespace {
    */
   bool needs_nested_key_only(AST_Type* type)
   {
+    static std::vector<AST_Type*> type_stack;
     type = resolveActualType(type);
-    if (get_special_struct(scoped(type->name()))) {
-      return false;
-    }
-    const Classification type_class = classify(type);
-    if (type_class & CL_ARRAY) {
-      return needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
-    } else if (type_class & CL_SEQUENCE) {
-      return needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
-    } else if (type_class & CL_STRUCTURE) {
-      AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
-      // TODO(iguessthislldo): Possible optimization: If everything in a struct
-      // was a key recursively, then we could return false.
-      if (struct_has_explicit_keys(struct_node)) {
+    // Check if we have encountered the same type recursively
+    for (size_t i = 0; i < type_stack.size(); ++i) {
+      if (type == type_stack[i]) {
         return true;
       }
-      const Fields fields(struct_node);
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (needs_nested_key_only((*i)->field_type())) {
-          return true;
-        }
-      }
-    } else if (type_class & CL_UNION) {
-      return be_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
     }
-    return false;
+    type_stack.push_back(type);
+    bool result = false;
+    if (get_special_struct(scoped(type->name()))) {
+      result = false;
+    } else {
+      const Classification type_class = classify(type);
+      if (type_class & CL_ARRAY) {
+        result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
+      } else if (type_class & CL_SEQUENCE) {
+        result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+      } else if (type_class & CL_STRUCTURE) {
+        AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
+        // TODO(iguessthislldo): Possible optimization: If everything in a struct
+        // was a key recursively, then we could return false.
+        if (struct_has_explicit_keys(struct_node)) {
+          result = true;
+        } else {
+          const Fields fields(struct_node);
+          const Fields::Iterator fields_end = fields.end();
+          for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+            if (needs_nested_key_only((*i)->field_type())) {
+              result = true;
+              break;
+            }
+          }
+        }
+      } else if (type_class & CL_UNION) {
+        result = be_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
+      }
+    }
+    type_stack.pop_back();
+    return result;
   }
 
   bool needs_forany(AST_Type* type)
@@ -261,8 +274,8 @@ namespace {
 
   std::string valid_var_name(const std::string& str)
   {
-    const std::string invalid_chars("<>()[]*.: ");
     // Replace invalid characters with a single underscore
+    const std::string invalid_chars("<>()[]*.: ");
     std::string s;
     char last_char = '\0';
     for (size_t i = 0; i < str.size(); ++i) {
@@ -1559,7 +1572,7 @@ namespace {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
     type = resolveActualType(type);
-    for (unsigned int i = 0; i < type_stack.size(); i++) {
+    for (size_t i = 0; i < type_stack.size(); ++i) {
       // If we encounter the same type recursively, then we are unbounded
       if (type == type_stack[i]) return false;
     }
