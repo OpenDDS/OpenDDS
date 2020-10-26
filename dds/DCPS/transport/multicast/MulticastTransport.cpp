@@ -347,7 +347,7 @@ MulticastTransport::configure_i(MulticastInst& config)
                      false);
   }
 
-  this->create_reactor_task(config.async_send_);
+  this->create_reactor_task(config.async_send_, "MulticastTransport" + config.name());
 
   return true;
 }

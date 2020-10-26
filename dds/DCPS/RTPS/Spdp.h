@@ -237,7 +237,8 @@ private:
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch& reactor_task);
+    void open(const DCPS::ReactorTask_rch&);
+
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
@@ -302,6 +303,9 @@ private:
     void send_directed(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> directed_sender_;
     DCPS::RepoId previous_directed_guid_;
+    DCPS::ThreadStatus* thread_status_;
+    void thread_status_task(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
 #ifdef OPENDDS_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
