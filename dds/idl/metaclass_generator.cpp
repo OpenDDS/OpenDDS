@@ -655,12 +655,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
   if (arr) {
     elem = arr->base_type();
-    size_t n_elems = 1;
-    for (size_t i = 0; i < arr->n_dims(); ++i) {
-      n_elems *= arr->dims()[i]->ev()->u.ulval;
-    }
     std::ostringstream strstream;
-    strstream << n_elems;
+    strstream << array_element_count(arr);
     len = strstream.str();
   } else { // Sequence
     elem = seq->base_type();

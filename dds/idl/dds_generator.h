@@ -532,7 +532,8 @@ inline std::string bounded_arg(AST_Type* type)
   return arg.str();
 }
 
-std::string type_to_default(AST_Type* type, const std::string& name, bool is_anonymous = false, bool is_union = false);
+std::string type_to_default(const std::string& indent, AST_Type* type,
+  const std::string& name, bool is_anonymous = false, bool is_union = false);
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
@@ -669,7 +670,7 @@ void generateCaseBody(
 
     if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
       be_global->impl_ <<
-        "        " << type_to_default(br, "uni." + name, branch->anonymous(), true) <<
+        type_to_default("        ", br, "uni." + name, branch->anonymous(), true) <<
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
@@ -884,7 +885,8 @@ enum FieldFilter {
   FieldFilter_KeyOnly
 };
 
-inline AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
+inline
+AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
 {
   if (!struct_node || index >= struct_node->nfields()) {
     return 0;
@@ -894,7 +896,8 @@ inline AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
   return field_ptrptr ? *field_ptrptr : 0;
 }
 
-inline bool struct_has_explicit_keys(AST_Structure* node)
+inline
+bool struct_has_explicit_keys(AST_Structure* node)
 {
   for (unsigned i = 0; i < node->nfields(); ++i) {
     if (be_global->is_key(get_struct_field(node, i))) {
@@ -916,10 +919,10 @@ public:
     typedef AST_Field*& reference;
     typedef std::input_iterator_tag iterator_category;
 
-    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0, bool just_keys = false)
+    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0, bool explicit_keys_only = false)
     : node_(node)
     , pos_(pos)
-    , just_keys_(just_keys)
+    , explicit_keys_only_(explicit_keys_only)
     {
       validate_pos();
     }
@@ -932,8 +935,7 @@ public:
     bool check()
     {
       if (!valid()) {
-        node_ = 0;
-        pos_ = 0;
+        *this = Iterator();
         return false;
       }
       return true;
@@ -941,7 +943,7 @@ public:
 
     void validate_pos()
     {
-      for (; check() && just_keys_ && !be_global->is_key(**this); ++pos_) {
+      for (; check() && explicit_keys_only_ && !be_global->is_key(**this); ++pos_) {
       }
     }
 
@@ -971,7 +973,9 @@ public:
 
     bool operator==(const Iterator& other) const
     {
-      return node_ == other.node_ && pos_ == other.pos_;
+      return node_ == other.node_
+        && pos_ == other.pos_
+        && explicit_keys_only_ == other.explicit_keys_only_;
     }
 
     bool operator!=(const Iterator& other) const
@@ -982,17 +986,19 @@ public:
   private:
     AST_Structure* node_;
     unsigned pos_;
-    bool just_keys_;
+    bool explicit_keys_only_;
   };
 
-  explicit Fields(AST_Structure* node = 0, FieldFilter type = FieldFilter_All)
+  explicit Fields(AST_Structure* node = 0, FieldFilter filter = FieldFilter_All)
   : node_(node)
-  , just_keys_(type == FieldFilter_KeyOnly)
+  , explicit_keys_only_(explicit_keys_only(node, filter))
   {
-    // Check for implied keys rule for non-topic type cases
-    if (node && type == FieldFilter_NestedKeyOnly) {
-      just_keys_ = struct_has_explicit_keys(node);
-    }
+  }
+
+  static bool explicit_keys_only(AST_Structure* node, FieldFilter filter)
+  {
+    return filter == FieldFilter_KeyOnly ||
+      (filter == FieldFilter_NestedKeyOnly && node && struct_has_explicit_keys(node));
   }
 
   AST_Structure* node() const
@@ -1002,7 +1008,7 @@ public:
 
   Iterator begin() const
   {
-    return Iterator(node_, 0, just_keys_);
+    return Iterator(node_, 0, explicit_keys_only_);
   }
 
   Iterator end() const
@@ -1017,8 +1023,18 @@ public:
   }
 
 private:
-  AST_Structure* node_;
-  bool just_keys_;
+  AST_Structure* const node_;
+  const bool explicit_keys_only_;
 };
+
+inline
+size_t array_element_count(AST_Array* arr)
+{
+  size_t count = 1;
+  for (size_t i = 0; i < arr->n_dims(); ++i) {
+    count *= arr->dims()[i]->ev()->u.ulval;
+  }
+  return count;
+}
 
 #endif
