@@ -750,7 +750,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           sedp_->update_locators(pdata);
         }
         pdata.associated_endpoints = iter->second.pdata_.associated_endpoints;
+#ifdef OPENDDS_SECURITY
         pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
+#endif
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
 
