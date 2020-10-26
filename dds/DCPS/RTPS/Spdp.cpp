@@ -3518,7 +3518,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         DCPS::InternalThreadBuiltinTopicData data;
         ACE_OS::memcpy(&(data.guid), &(guid), 16);
         data.thread_id = i->first.c_str();
-        data.timestamp.sec = t.value().sec();
+        data.timestamp.sec = static_cast<CORBA::Long>(t.value().sec());
         data.timestamp.nanosec = t.value().usec() * 1000;
 
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);

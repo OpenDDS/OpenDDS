@@ -11,8 +11,13 @@ public:
 
   template<typename Qos>
   static void change_qos(Qos& qos, const std::string& data) {
+#if __cplusplus >= 199707L
     qos.user_data.value.length(data.length());
     for (std::string::size_type i = 0; i < data.length(); ++i) {
+#else
+    qos.user_data.value.length(static_cast<CORBA::ULong> (data.length()));
+    for (CORBA::ULong i = 0; i < data.length(); ++i) {
+#endif
       qos.user_data.value[i] = data[i];
     }
   }
