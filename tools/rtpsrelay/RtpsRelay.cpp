@@ -455,7 +455,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ParticipantStatisticsReporter::config = &config;
   ParticipantStatisticsReporter::writer = participant_statistics_writer;
-  ParticipantStatisticsReporter::topic_name = participant_statistics_writer->get_topic()->get_name();
+  const auto t = participant_statistics_writer->get_topic();
+  ParticipantStatisticsReporter::topic_name = t->get_name();
 
   // Configure ports and addresses.
   auto port_horizontal = nic_horizontal.get_port_number();

@@ -18,8 +18,9 @@ public:
     : config_(config)
     , last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , writer_(writer)
-    , topic_name_(writer->get_topic()->get_name())
   {
+    DDS::Topic_var topic = writer_->get_topic();
+    topic_name_ = topic->get_name();
     relay_statistics_.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
   }
 
@@ -96,7 +97,7 @@ private:
     relay_statistics_.processing_time(time_diff_to_duration(processing_time_));
 
     if (config_.log_relay_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_, OpenDDS::DCPS::to_json(relay_statistics_).c_str()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(relay_statistics_).c_str()));
     }
 
     if (config_.publish_relay_statistics()) {
@@ -128,7 +129,7 @@ private:
   RelayStatistics relay_statistics_;
   OpenDDS::DCPS::TimeDuration processing_time_;
   RelayStatisticsDataWriter_var writer_;
-  const char* const topic_name_;
+  CORBA::String_var topic_name_;
 };
 
 }

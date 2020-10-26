@@ -15,7 +15,7 @@ class ParticipantStatisticsReporter {
 public:
   static const Config* config;
   static ParticipantStatisticsDataWriter_var writer;
-  static const char* topic_name;
+  static CORBA::String_var topic_name;
 
   ParticipantStatisticsReporter() {}
 
@@ -58,7 +58,7 @@ public:
     participant_statistics_.interval(time_diff_to_duration(d));
 
     if (config->log_relay_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name, OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
     }
 
     if (config->publish_relay_statistics()) {
