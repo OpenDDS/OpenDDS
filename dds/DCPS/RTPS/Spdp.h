@@ -299,6 +299,9 @@ private:
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpMulti> local_sender_;
+    void send_directed(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> directed_sender_;
+    DCPS::RepoId previous_directed_guid_;
 #ifdef OPENDDS_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;

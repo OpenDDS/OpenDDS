@@ -584,6 +584,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         pdata.leaseDuration.seconds));
     }
 
+    if (participants_.empty() && tport_->directed_sender_) {
+      tport_->directed_sender_->schedule(TimeDuration::zero_value);
+    }
+
     // add a new participant
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, now, seq)));
     iter = p.first;
@@ -2016,6 +2020,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   , lease_duration_(outer_->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
+  , previous_directed_guid_(GUID_UNKNOWN)
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
 {
@@ -2164,6 +2169,10 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
   local_sender_->enable(outer_->config_->resend_period());
 
+  if (outer_->config_->periodic_directed_spdp()) {
+    directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
+  }
+
 #ifdef OPENDDS_SECURITY
   handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
   handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
@@ -2287,6 +2296,9 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (local_sender_) {
     local_sender_->disable_and_wait();
   }
+  if (directed_sender_) {
+    directed_sender_->cancel_and_wait();
+  }
 
   ACE_Reactor* reactor = reactor_task->get_reactor();
   const ACE_Reactor_Mask mask =
@@ -2319,6 +2331,10 @@ Spdp::SpdpTransport::write(WriteFlags flags)
 void
 Spdp::SpdpTransport::write_i(WriteFlags flags)
 {
+  if (!outer_->config_->undirected_spdp()) {
+    return;
+  }
+
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
      outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
@@ -3471,6 +3487,24 @@ void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
   write(SEND_TO_LOCAL);
   outer_->remove_expired_participants();
+}
+
+void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+
+  if (outer_->participants_.empty()) {
+    return;
+  }
+
+  DiscoveredParticipantConstIter pos = outer_->participants_.upper_bound(previous_directed_guid_);
+  if (pos == outer_->participants_.end()) {
+    pos = outer_->participants_.begin();
+  }
+
+  write_i(pos->first, SEND_TO_LOCAL | SEND_TO_RELAY);
+  previous_directed_guid_ = pos->first;
+  directed_sender_->schedule(outer_->config_->resend_period() * (1.0 / outer_->participants_.size()));
 }
 
 #ifdef OPENDDS_SECURITY
