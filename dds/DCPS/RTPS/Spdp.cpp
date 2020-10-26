@@ -1545,8 +1545,8 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     purge_handshake_deadlines(iter);
   }
 
-  sedp_.associate(iter->second.pdata_);
-  sedp_.associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
+  sedp_->associate(iter->second.pdata_);
+  sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
 
   return true;
 }
@@ -1626,8 +1626,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_.disassociate_volatile(iter->second.pdata_);
-    sedp_.associate_volatile(iter->second.pdata_);
+    sedp_->disassociate_volatile(iter->second.pdata_);
+    sedp_->associate_volatile(iter->second.pdata_);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -1756,11 +1756,11 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   // added before these calls to associate.
 
   if (iter->second.crypto_tokens_.length() == 0) {
-    sedp_.associate(iter->second.pdata_);
-    sedp_.associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
+    sedp_->associate(iter->second.pdata_);
+    sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
   }
 
-  sedp_.generate_remote_crypto_handles(iter->second.pdata_);
+  sedp_->generate_remote_crypto_handles(iter->second.pdata_);
 
   iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2006,7 +2006,7 @@ Spdp::build_local_pdata(
       , nonEmptyList /*defaultUnicastLocatorList*/
       , {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
       , qos_.property
-      {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
+      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
 #ifdef OPENDDS_SECURITY
       , available_extended_builtin_endpoints_
 #endif
