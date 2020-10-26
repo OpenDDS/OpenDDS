@@ -215,18 +215,14 @@ bool DataReaderListenerImpl::data_consistent() const
                   << writer->second.size() << std::endl;
         valid_and_done = false;
         if (writer->second.size() < samples_per_writer_) {
-#if __cplusplus >= 199707L
             for (size_t sample = 0; sample < samples_per_writer_; ++sample) {
-#else
-            for (int sample = 0; sample < samples_per_writer_; ++sample) {
-#endif
               std::cerr
-              << (writer->second.count(sample) ? "           Got" : "ERROR: Missing")
+              << (writer->second.count(static_cast<int>(sample)) ? "           Got" : "ERROR: Missing")
               << " process " << process->first
               << " writer " << writer->first
               << " sample " << sample
               << " expected data length " << expected_data_field_length(
-                data_field_length_offset_, sample, writer->first)
+                data_field_length_offset_, static_cast<int>(sample), writer->first)
               << std::endl;
           }
         }
