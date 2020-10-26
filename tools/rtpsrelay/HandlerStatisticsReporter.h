@@ -2,6 +2,7 @@
 #define RTPSRELAY_HANDLER_STATISTICS_REPORTER_H_
 
 #include "Config.h"
+#include "RelayStatisticsReporter.h"
 #include "utility.h"
 
 #include "lib/QosIndex.h"
@@ -15,47 +16,51 @@ class HandlerStatisticsReporter {
 public:
   HandlerStatisticsReporter(const Config& config,
                             const std::string& name,
-                            HandlerStatisticsDataWriter_var writer)
+                            HandlerStatisticsDataWriter_var writer,
+                            RelayStatisticsReporter& relay_statistics_reporter)
     : config_(config)
     , last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , writer_(writer)
+    , topic_name_(writer->get_topic()->get_name())
+    , relay_statistics_reporter_(relay_statistics_reporter)
   {
     handler_statistics_.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
     handler_statistics_.name(name);
   }
 
-  void input_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void input_message(size_t byte_count,
+                     const OpenDDS::DCPS::TimeDuration& time,
+                     const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    relay_statistics_reporter_.input_message(byte_count, time, now);
     handler_statistics_.bytes_in() += byte_count;
     ++handler_statistics_.messages_in();
+    processing_time_ += time;
     report(now);
   }
 
   void output_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    relay_statistics_reporter_.output_message(byte_count, now);
     handler_statistics_.bytes_out() += byte_count;
     ++handler_statistics_.messages_out();
     report(now);
   }
 
+  void dropped_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.dropped_message(byte_count, now);
+    handler_statistics_.bytes_dropped() += byte_count;
+    ++handler_statistics_.messages_dropped();
+    report(now);
+  }
+
   void max_fan_out(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    relay_statistics_reporter_.max_fan_out(value, now);
     handler_statistics_.max_fan_out() = std::max(handler_statistics_.max_fan_out(), static_cast<uint32_t>(value));
     report(now);
   }
-
-  void max_queue_size(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    handler_statistics_.max_queue_size() = std::max(handler_statistics_.max_queue_size(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
-  void max_queue_latency(const OpenDDS::DCPS::TimeDuration& latency, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    handler_statistics_.max_queue_latency() = std::max(handler_statistics_.max_queue_latency(), time_diff_to_duration(latency));
-    report(now);
-  }
-
 
   void local_active_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
@@ -65,13 +70,36 @@ public:
 
   void error(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    relay_statistics_reporter_.error(now);
     ++handler_statistics_.error_count();
     report(now);
   }
 
-  void governor(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void new_address(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    ++handler_statistics_.governor_count();
+    relay_statistics_reporter_.new_address(now);
+    ++handler_statistics_.new_address_count();
+    report(now);
+  }
+
+  void expired_address(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.expired_address(now);
+    ++handler_statistics_.expired_address_count();
+    report(now);
+  }
+
+  void claim(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.claim(now);
+    ++handler_statistics_.claim_count();
+    report(now);
+  }
+
+  void disclaim(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.disclaim(now);
+    ++handler_statistics_.disclaim_count();
     report(now);
   }
 
@@ -85,15 +113,16 @@ private:
     }
 
     handler_statistics_.interval(time_diff_to_duration(d));
+    handler_statistics_.processing_time(time_diff_to_duration(processing_time_));
 
     if (config_.log_relay_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l INFO: HandlerStatisticsReporter::report %C\n"), OpenDDS::DCPS::to_json(handler_statistics_).c_str()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_, OpenDDS::DCPS::to_json(handler_statistics_).c_str()));
     }
 
     if (config_.publish_relay_statistics()) {
       const auto ret = writer_->write(handler_statistics_, DDS::HANDLE_NIL);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: HandlerStatisticsReporter::report %C failed to write handler statistics\n"), handler_statistics_.name().c_str()));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: HandlerStatisticsReporter::report %C failed to write handler statistics\n"), handler_statistics_.name().c_str()));
       }
     }
 
@@ -103,19 +132,25 @@ private:
     handler_statistics_.bytes_in(0);
     handler_statistics_.messages_out(0);
     handler_statistics_.bytes_out(0);
+    handler_statistics_.messages_dropped(0);
+    handler_statistics_.bytes_dropped(0);
     handler_statistics_.max_fan_out(0);
-    handler_statistics_.max_queue_size(0);
-    handler_statistics_.max_queue_latency().sec(0);
-    handler_statistics_.max_queue_latency().nanosec(0);
     // Don't reset local_active_participant_count.
     handler_statistics_.error_count(0);
-    handler_statistics_.governor_count(0);
+    handler_statistics_.new_address_count(0);
+    handler_statistics_.expired_address_count(0);
+    handler_statistics_.claim_count(0);
+    handler_statistics_.disclaim_count(0);
+    processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 
   const Config& config_;
   OpenDDS::DCPS::MonotonicTimePoint last_report_;
   HandlerStatistics handler_statistics_;
+  OpenDDS::DCPS::TimeDuration processing_time_;
   HandlerStatisticsDataWriter_var writer_;
+  const char* const topic_name_;
+  RelayStatisticsReporter& relay_statistics_reporter_;
 };
 
 }

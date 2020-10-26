@@ -18,6 +18,7 @@ public:
     : config_(config)
     , last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , writer_(writer)
+    , topic_name_(writer_->get_topic()->get_name())
   {
     domain_statistics_.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
   }
@@ -75,20 +76,17 @@ private:
   void report(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     const auto d = now - last_report_;
-    if (d < config_.statistics_interval()) {
-      return;
-    }
 
     domain_statistics_.interval(time_diff_to_duration(d));
 
     if (config_.log_relay_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l INFO: DomainStatisticsReporter::report %C\n"), OpenDDS::DCPS::to_json(domain_statistics_).c_str()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_, OpenDDS::DCPS::to_json(domain_statistics_).c_str()));
     }
 
     if (config_.publish_relay_statistics()) {
       const auto ret = writer_->write(domain_statistics_, DDS::HANDLE_NIL);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: DomainStatisticsReporter::report failed to write statistics\n")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DomainStatisticsReporter::report failed to write statistics\n")));
       }
     }
 
@@ -99,6 +97,7 @@ private:
   OpenDDS::DCPS::MonotonicTimePoint last_report_;
   DomainStatistics domain_statistics_;
   DomainStatisticsDataWriter_var writer_;
+  const char* const topic_name_;
 };
 
 }
