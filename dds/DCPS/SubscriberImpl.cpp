@@ -12,6 +12,7 @@
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
+#include "BuiltInTopicUtils.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
 #include "DataReaderImpl.h"
@@ -844,8 +845,8 @@ SubscriberImpl::is_clean() const
   const bool sub_is_clean = datareader_map_.empty();
 
   if (!sub_is_clean && !TheTransientKludge->is_enabled()) {
-    // Four BIT datareaders.
-    return datareader_map_.size() == 4;
+    // BIT datareaders.
+    return datareader_map_.size() == NUMBER_OF_BUILT_IN_TOPICS;
   }
 
   return sub_is_clean;
