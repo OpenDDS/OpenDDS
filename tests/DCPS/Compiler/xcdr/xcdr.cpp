@@ -1571,13 +1571,13 @@ void expect_values_equal(const MixedMutableStruct& a,
 {
   expect_values_equal(a.struct_nested, b.struct_nested);
   EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
     EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
   }
   EXPECT_EQ(a.union_nested._d(), b.union_nested._d());
   EXPECT_STREQ(a.union_nested.string_field(), b.union_nested.string_field());
   EXPECT_EQ(a.sequence_field2.length(), b.sequence_field2.length());
-  for (size_t i = 0; i < a.sequence_field2.length(); ++i) {
+  for (unsigned i = 0; i < a.sequence_field2.length(); ++i) {
     EXPECT_STREQ(a.sequence_field2[i], b.sequence_field2[i]);
   }
 }
@@ -1668,7 +1668,7 @@ void expect_values_equal(const NestingFinalStruct& a,
   EXPECT_STREQ(a.string_field, b.string_field);
   expect_values_equal_base(a.appendable_nested, b.appendable_nested);
   EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
     EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
   }
   expect_values_equal_base(a.mutable_nested, b.mutable_nested);
@@ -1719,7 +1719,7 @@ void set_values(NestingAppendableStruct& value)
   value.string_field = "hello world";
   set_values(value.mutable_nested);
   value.sequence_field.length(3);
-  for (size_t i = 0; i < value.sequence_field.length(); ++i) {
+  for (unsigned i = 0; i < value.sequence_field.length(); ++i) {
     value.sequence_field[i] = 0x7fffffff;
   }
   set_values(value.final_nested);
@@ -1732,7 +1732,7 @@ void expect_values_equal(const NestingAppendableStruct& a,
   EXPECT_STREQ(a.string_field, b.string_field);
   expect_values_equal_base(a.mutable_nested, b.mutable_nested);
   EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
     EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
   }
   expect_values_equal_base(a.final_nested, b.final_nested);
@@ -1783,7 +1783,7 @@ void set_values(NestingMutableStruct& value)
   value.string_field = "hello world";
   set_values(value.appendable_nested);
   value.sequence_field.length(7);
-  for (size_t i = 0; i < value.sequence_field.length(); ++i) {
+  for (unsigned i = 0; i < value.sequence_field.length(); ++i) {
     value.sequence_field[i] = 0x7f;
   }
   set_values(value.final_nested);
@@ -1796,7 +1796,7 @@ void expect_values_equal(const NestingMutableStruct& a,
   EXPECT_STREQ(a.string_field, b.string_field);
   expect_values_equal_base(a.appendable_nested, b.appendable_nested);
   EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (size_t i = 0; i < a.sequence_field.length(); ++i) {
+  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
     EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
   }
   expect_values_equal_base(a.final_nested, b.final_nested);

@@ -11,8 +11,8 @@ public:
 
   template<typename Qos>
   static void change_qos(Qos& qos, const std::string& data) {
-    qos.user_data.value.length(data.length());
-    for (std::string::size_type i = 0; i < data.length(); ++i) {
+    qos.user_data.value.length(unsigned(data.size()));
+    for (unsigned i = 0; i < data.size(); ++i) {
       qos.user_data.value[i] = data[i];
     }
   }

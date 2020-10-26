@@ -3928,7 +3928,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
   const XTypes::TypeIdentifier remote_ti = sedp_.orig_seq_numbers_[seq_num].type_id;
   const GuidPrefixWrapper guid_pref(remote_id.guidPrefix);
   XTypes::TypeIdentifierSeq& deps = dependencies_[guid_pref][remote_ti].second;
-  for (size_t i = 0; i < data.dependent_typeids.length(); ++i) {
+  for (unsigned i = 0; i < data.dependent_typeids.length(); ++i) {
     const XTypes::TypeIdentifier& ti = data.dependent_typeids[i].type_id;
     // Optimization - only store TypeIdentifiers for which TypeObjects haven't
     // already been in the type objects cache yet

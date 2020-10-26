@@ -311,7 +311,7 @@ void Test::dr_to_qos(const Dri& dri, DDS::DataRepresentationQosPolicy& qos)
 {
   const Dri::size_type count = dri.size();
   if (count) {
-    qos.value.length(count);
+    qos.value.length(static_cast<unsigned>(count));
     for (CORBA::ULong i = 0; i != count; ++i) {
       qos.value[i] = dri[i];
     }

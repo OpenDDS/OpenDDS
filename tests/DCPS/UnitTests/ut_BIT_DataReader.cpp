@@ -26,7 +26,7 @@ namespace {
   namespace Factory {
     ParticipantBuiltinTopicData bit_data() {
       ParticipantBuiltinTopicData result;
-      result.key.value[0] = ++key_val;
+      result.key.value[0] = static_cast<unsigned char>(++key_val);
       result.key.value[1] = 0;
       result.key.value[2] = 0;
       return result;

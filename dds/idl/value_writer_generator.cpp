@@ -71,8 +71,9 @@ namespace {
       return "boolean";
     case AST_PredefinedType::PT_octet:
       return "byte";
+    default:
+      return "";
     }
-    return "";
   }
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,

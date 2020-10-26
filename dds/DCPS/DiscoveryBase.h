@@ -232,8 +232,8 @@ namespace OpenDDS {
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
         : max_type_lookup_service_reply_period_(0)
-        , use_xtypes_(true)
         , type_lookup_service_sequence_number_(0)
+        , use_xtypes_(true)
         , lock_(lock)
         , participant_id_(participant_id)
         , publication_counter_(0)
@@ -1012,7 +1012,7 @@ namespace OpenDDS {
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
         DiscoveredPublicationIter dpi;
-        bool writer_local = false, already_matched = false;
+        bool writer_local = false;
         if (lpi != local_publications_.end()) {
           writer_local = true;
           writer_type_info = &lpi->second.type_info_;
