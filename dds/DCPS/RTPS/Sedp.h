@@ -1087,6 +1087,12 @@ protected:
 
   void disassociate_helper(BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
                            const DCPS::RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client);
+
+#ifdef OPENDDS_SECURITY
+  void disassociate_helper_extended(DDS::Security::ExtendedBuiltinEndpointSet_t & extended_avail, const CORBA::ULong flags,
+                                    const DCPS::RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client);
+#endif
+
   void replay_durable_data_for(const DCPS::RepoId& remote_sub_id);
 };
 
