@@ -62,9 +62,9 @@ bool NetworkConfigModifier::open()
       if (addr->sin_addr.s_addr != INADDR_ANY) {
         address.set((u_short) 0, addr->sin_addr.s_addr, 0);
 
-        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST)));
+        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK))));
 
-        p.first->second.addresses.insert(address);
+        p.first->second.add_address(address);
       }
     }
 # if defined (ACE_HAS_IPV6)
@@ -75,9 +75,9 @@ bool NetworkConfigModifier::open()
       if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
         address.set(reinterpret_cast<struct sockaddr_in *> (addr), sizeof(sockaddr_in6));
 
-        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST)));
+        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK))));
 
-        p.first->second.addresses.insert(address);
+        p.first->second.add_address(address);
       }
     }
 # endif /* ACE_HAS_IPV6 */
@@ -130,7 +130,7 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 
     if (p_if->ifa_addr->sa_family == AF_INET || p_if->ifa_addr->sa_family == AF_INET6) {
       if (name == p_if->ifa_name) {
-        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
+        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK));
         break;
       }
 
@@ -146,44 +146,6 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
   }
 
   validate_interfaces_index();
-}
-
-void NetworkConfigModifier::remove_interface(const OPENDDS_STRING &name)
-{
-  int index = get_index(name);
-  if (index != -1) {
-    NetworkConfigMonitor::remove_interface(index);
-  }
-  else {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::remove_interface. Interface '%C' not found.\n"), name.c_str()));
-    }
-  }
-}
-
-void NetworkConfigModifier::add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address)
-{
-  int index = get_index(name);
-  if (index != -1) {
-    NetworkConfigMonitor::add_address(index, address);
-  }
-  else {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::add_address. Interface '%C' not found.\n"), name.c_str()));
-    }
-  }
-}
-
-void NetworkConfigModifier::remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address)
-{
-  int index = get_index(name);
-  if (index != -1) {
-    NetworkConfigMonitor::remove_address(index, address);
-  } else {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::remove_address. Interface '%C' not found.\n"), name.c_str()));
-    }
-  }
 }
 
 void NetworkConfigModifier::validate_interfaces_index()
@@ -217,7 +179,7 @@ void NetworkConfigModifier::validate_interfaces_index()
 
     if (p_if->ifa_addr->sa_family == AF_INET || p_if->ifa_addr->sa_family == AF_INET6) {
       const OPENDDS_STRING name(p_if->ifa_name);
-      NetworkInterfaces nics = get();
+      NetworkInterfaces nics = get_interfaces();
       NetworkInterfaces::iterator nic_pos = std::find_if(nics.begin(), nics.end(), NetworkInterfaceName(name));
       if (nic_pos != nics.end()) {
         nic_pos->index(count);
@@ -227,19 +189,6 @@ void NetworkConfigModifier::validate_interfaces_index()
   }
 
   ::freeifaddrs (p_ifa);
-}
-
-int NetworkConfigModifier::get_index(const OPENDDS_STRING& name)
-{
-  int index = -1;
-
-  NetworkInterfaces nics = get();
-  NetworkInterfaces::iterator nic_pos = std::find_if(nics.begin(), nics.end(), NetworkInterfaceName(name));
-  if (nic_pos != nics.end()) {
-    index = nic_pos->index();
-  }
-
-  return index;
 }
 
 } // DCPS

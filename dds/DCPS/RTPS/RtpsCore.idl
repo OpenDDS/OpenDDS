@@ -575,6 +575,7 @@ module OpenDDS {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
+      BuiltinEndpointSet_t associated_endpoints;
     };
 
     /* Type used to hold data exchanged between Participants.
