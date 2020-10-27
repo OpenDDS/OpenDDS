@@ -3831,7 +3831,7 @@ Spdp::use_ice_now(bool f)
 
       if (sedp_endpoint && pos->second.have_sedp_info_) {
         start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints,
-                  pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
+                  pos->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints, pos->second.sedp_info_);
       }
     }
   } else {

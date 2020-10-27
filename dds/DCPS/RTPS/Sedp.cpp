@@ -1132,7 +1132,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       avail_extended & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) == 0) {
     DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
     peer.remote_data_ = add_security_info(
       peer.remote_data_, peer.remote_id_, type_lookup_reply_secure_writer_->get_repo_id());
     type_lookup_reply_secure_writer_->assoc(peer);
@@ -1142,7 +1142,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       avail_extended & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) == 0) {
     DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+    peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     peer.remote_data_ = add_security_info(
       peer.remote_data_, peer.remote_id_, type_lookup_reply_secure_reader_->get_repo_id());
     type_lookup_reply_secure_reader_->assoc(peer);
