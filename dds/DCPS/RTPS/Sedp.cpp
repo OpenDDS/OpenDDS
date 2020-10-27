@@ -742,7 +742,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
       ok = acl->get_datawriter_sec_attributes(perm_handle, "TypeLookupServiceRequestSecure",
-        default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
           ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'TypeLookupServiceRequestSecure'. ")
@@ -758,7 +758,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "TypeLookupServiceRequestSecure",
-        default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
           ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'TypeLookupServiceRequestSecure'. ")
@@ -779,7 +779,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
       ok = acl->get_datawriter_sec_attributes(perm_handle, "TypeLookupServiceReplySecure",
-        default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
           ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'TypeLookupServiceReplySecure'. ")
@@ -795,7 +795,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "TypeLookupServiceReplySecure",
-        default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
           ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'TypeLookupServiceReplySecure'. ")
@@ -1147,7 +1147,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, peer.remote_id_, participant_message_secure_reader_->get_repo_id());
+      peer.remote_data_, peer.remote_id_, participant_message_secure_reader_->get_repo_id());
     participant_message_secure_reader_->assoc(peer);
     pdata.associated_endpoints |= BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
   }
@@ -1157,7 +1157,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, peer.remote_id_, dcps_participant_secure_reader_->get_repo_id());
+      peer.remote_data_, peer.remote_id_, dcps_participant_secure_reader_->get_repo_id());
     dcps_participant_secure_reader_->assoc(peer);
     pdata.associated_endpoints |= SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
   }
@@ -1167,7 +1167,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, peer.remote_id_, publications_secure_reader_->get_repo_id());
+      peer.remote_data_, peer.remote_id_, publications_secure_reader_->get_repo_id());
     publications_secure_reader_->assoc(peer);
     pdata.associated_endpoints |= SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
   }
@@ -1177,7 +1177,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, peer.remote_id_, subscriptions_secure_reader_->get_repo_id());
+      peer.remote_data_, peer.remote_id_, subscriptions_secure_reader_->get_repo_id());
     subscriptions_secure_reader_->assoc(peer);
     pdata.associated_endpoints |= SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
   }
@@ -1232,7 +1232,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       peer.remote_reliable_ = false;
     }
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, participant_message_secure_writer_->get_repo_id(), peer.remote_id_);
+      peer.remote_data_, participant_message_secure_writer_->get_repo_id(), peer.remote_id_);
     participant_message_secure_writer_->assoc(peer);
     pdata.associated_endpoints |= BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
   }
@@ -1242,7 +1242,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, dcps_participant_secure_writer_->get_repo_id(), peer.remote_id_);
+      peer.remote_data_, dcps_participant_secure_writer_->get_repo_id(), peer.remote_id_);
     dcps_participant_secure_writer_->assoc(peer);
     pdata.associated_endpoints |= SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER;
   }
@@ -1253,7 +1253,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, publications_secure_writer_->get_repo_id(), peer.remote_id_);
+      peer.remote_data_, publications_secure_writer_->get_repo_id(), peer.remote_id_);
     publications_secure_writer_->assoc(peer);
     pdata.associated_endpoints |= SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
   }
@@ -1264,7 +1264,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     peer.remote_data_ = add_security_info(
-                                          peer.remote_data_, subscriptions_secure_writer_->get_repo_id(), peer.remote_id_);
+      peer.remote_data_, subscriptions_secure_writer_->get_repo_id(), peer.remote_id_);
     subscriptions_secure_writer_->assoc(peer);
     pdata.associated_endpoints |= SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
   }
@@ -4965,7 +4965,7 @@ Sedp::write_publication_data_secure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -4975,7 +4975,7 @@ Sedp::write_publication_data_secure(
       ai_map["DATA"] = lp.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -4988,7 +4988,7 @@ Sedp::write_publication_data_secure(
       result = publications_secure_writer_->write_parameter_list(plist, effective_reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data_secure - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
@@ -5058,7 +5058,7 @@ Sedp::write_subscription_data_unsecure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -5077,7 +5077,7 @@ Sedp::write_subscription_data_unsecure(
       ai_map["DATA"] = ls.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -5088,7 +5088,7 @@ Sedp::write_subscription_data_unsecure(
       result = subscriptions_writer_->write_parameter_list(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_unsecure - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
@@ -5119,7 +5119,7 @@ Sedp::write_subscription_data_secure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -5129,7 +5129,7 @@ Sedp::write_subscription_data_secure(
       ai_map["DATA"] = ls.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -5142,7 +5142,7 @@ Sedp::write_subscription_data_secure(
       result = subscriptions_secure_writer_->write_parameter_list(plist, effective_reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_secure - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;

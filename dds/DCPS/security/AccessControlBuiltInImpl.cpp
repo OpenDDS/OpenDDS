@@ -1492,7 +1492,9 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
 
       if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 ||
           std::strcmp(topic_name, "DCPSPublicationsSecure") == 0 ||
-          std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
+          std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0 ||
+          std::strcmp(topic_name, "TypeLookupServiceRequestSecure") == 0 ||
+          std::strcmp(topic_name, "TypeLookupServiceReplySecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
         attributes.base.is_liveliness_protected = false;
@@ -1563,7 +1565,7 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
     }
   }
 
-  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: Invalid topic name");
+  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_sec_attributes: Invalid topic name");
   return false;
 }
 
