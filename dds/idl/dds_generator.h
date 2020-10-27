@@ -935,7 +935,9 @@ public:
     bool check()
     {
       if (!valid()) {
-        *this = Iterator();
+        if (node_) {
+          *this = Iterator();
+        }
         return false;
       }
       return true;

@@ -117,6 +117,12 @@ template<typename TypeA, typename TypeB>
 typedef std::vector<char> DataVec;
 
 struct DataView {
+  DataView()
+  : data(0)
+  , size(0)
+  {
+  }
+
   template <size_t array_size>
   DataView(const unsigned char (&array)[array_size])
   : data(reinterpret_cast<const char*>(&array[0]))
@@ -150,8 +156,8 @@ struct DataView {
     }
   }
 
-  const char* const data;
-  const size_t size;
+  const char* data;
+  size_t size;
 };
 
 bool operator==(const DataView& a, const DataView& b)
@@ -1891,7 +1897,7 @@ void not_key_only_test()
 {
   DataVec expected;
   build_expected<Type>(expected, false);
-  serializer_test<Type>(xcdr1, expected);
+  serializer_test<Type>(xcdr2, expected);
 };
 
 template <typename Type>
@@ -1905,8 +1911,23 @@ void key_only_test()
   Type result;
   NestedKeyOnly<Type> wrapped_result(result);
   amalgam_serializer_test_base<NestedKeyOnly<const Type>, NestedKeyOnly<Type> >(
-    xcdr1, expected, wrapped_value, wrapped_result);
+    xcdr2, expected, wrapped_value, wrapped_result);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+}
+
+void serialize(size_t value, unsigned char* bytes)
+{
+  if (ENDIAN_BIG == ENDIAN_NATIVE) {
+    bytes[0] = static_cast<unsigned char>(value);
+    bytes[1] = static_cast<unsigned char>(value >>= 8);
+    bytes[2] = static_cast<unsigned char>(value >>= 8);
+    bytes[3] = static_cast<unsigned char>(value >> 8);
+  } else {
+    bytes[3] = static_cast<unsigned char>(value);
+    bytes[2] = static_cast<unsigned char>(value >>= 8);
+    bytes[1] = static_cast<unsigned char>(value >>= 8);
+    bytes[0] = static_cast<unsigned char>(value >> 8);
+  }
 }
 
 template<typename Type>
@@ -2005,10 +2026,16 @@ const unsigned char key_only_non_keys_expected_base[] = {
 template <>
 void build_expected<BasicKeyedStruct>(DataVec& expected, bool key_only)
 {
-  DataView(key_only_keys_expected_base).copy_to(expected);
+  DataView keys(key_only_keys_expected_base);
+  DataView non_keys;
   if (!key_only) {
-    DataView(key_only_non_keys_expected_base).copy_to(expected);
+    non_keys = DataView(key_only_non_keys_expected_base);
   }
+  unsigned char delimiter[4];
+  serialize(keys.size + non_keys.size, &delimiter[0]);
+  DataView(delimiter).copy_to(expected);
+  keys.copy_to(expected);
+  non_keys.copy_to(expected);
 }
 
 template <>

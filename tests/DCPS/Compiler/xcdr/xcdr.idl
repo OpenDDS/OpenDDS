@@ -285,21 +285,24 @@ struct NestingMutableStruct {
   KEY sequence<TYPE> NAME ## _seq_value; \
   */
 
-@final
+@topic
+@appendable
 struct BasicUnkeyedStruct {
   COMMON_FIELDS(, long, long)
   string string_value;
   long extra_value;
 };
 
-@final
+@topic
+@appendable
 struct BasicKeyedStruct {
   COMMON_FIELDS(@key, long, long)
   @key string string_value;
   long extra_value;
 };
 
-@final
+@topic
+@appendable
 union UnkeyedUnion switch (long) {
 case 0:
   char short_value;
@@ -307,7 +310,8 @@ default:
   long default_value;
 };
 
-@final
+@topic
+@appendable
 union KeyedUnion switch (@key long) {
 case 0:
   char short_value;
@@ -315,7 +319,8 @@ default:
   long default_value;
 };
 
-@final
+@topic
+@appendable
 struct ComplexUnkeyedStruct {
   COMMON_FIELDS(, BasicUnkeyedStruct, unkeyed_struct)
   COMMON_FIELDS(, BasicKeyedStruct, keyed_struct)
@@ -324,7 +329,8 @@ struct ComplexUnkeyedStruct {
   long extra_value;
 };
 
-@final
+@topic
+@appendable
 struct ComplexKeyedStruct {
   COMMON_FIELDS(@key, BasicUnkeyedStruct, unkeyed_struct)
   COMMON_FIELDS(@key, BasicKeyedStruct, keyed_struct)

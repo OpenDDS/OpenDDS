@@ -349,6 +349,8 @@ namespace {
     const std::string local_;
     bool is_const_;
     bool nested_key_only_;
+    bool classic_array_copy_;
+    std::string classic_array_copy_var_;
 
     Wrapper(AST_Type* type, const std::string& type_name,
       const std::string& to_wrap, bool is_const = true)
@@ -358,6 +360,7 @@ namespace {
       , shift_op_(get_shift_op(to_wrap))
       , is_const_(is_const)
       , nested_key_only_(false)
+      , classic_array_copy_(false)
       , done_(false)
     {
     }
@@ -371,6 +374,7 @@ namespace {
       , local_(local)
       , is_const_(is_const)
       , nested_key_only_(false)
+      , classic_array_copy_(false)
       , done_(false)
     {
     }
@@ -400,7 +404,7 @@ namespace {
         is_const_ = false;
       }
       const std::string const_str = is_const_ ? "const " : "";
-      const bool forany = needs_forany(type_);
+      const bool forany = classic_array_copy_ || needs_forany(type_);
       nested_key_only_ = nested_key_only_ && needs_nested_key_only(type_);
       wrapped_type_name_ = type_name_;
       bool by_ref = true;
@@ -415,12 +419,25 @@ namespace {
       }
 
       if (forany) {
-        const std::string var_name = valid_var_name(ref_) + "_forany";
         const std::string forany_type = type_name_ + "_forany";
-        wrapped_type_name_ = type_name_ + "_forany";
+        if (classic_array_copy_) {
+          const std::string var_name = valid_var_name(ref_) + "_tmp_var";
+          classic_array_copy_var_ = var_name;
+          if (intro) {
+            intro->insert(type_name_ + "_var " + var_name + "= " + type_name_ + "_alloc();");
+          }
+          ref_ = var_name;
+        }
+        const std::string var_name = valid_var_name(ref_) + "_forany";
+        wrapped_type_name_ = forany_type;
         if (intro) {
-          intro->insert(forany_type + " " + var_name +
-            "(const_cast<" + type_name_ + "_slice*>(" + ref_ + "));");
+          std::string line = forany_type + " " + var_name;
+          if (classic_array_copy_) {
+            line += " = " + ref_ + ".inout();";
+          } else {
+            line += "(const_cast<" + type_name_ + "_slice*>(" + ref_ + "));";
+          }
+          intro->insert(line);
         }
         ref_ = var_name;
       }
@@ -506,6 +523,11 @@ namespace {
     std::string stream() const
     {
       return shift_op_ + ref();
+    }
+
+    std::string classic_array_copy() const
+    {
+      return type_name_ + "_copy(" + to_wrap_ + ", " + classic_array_copy_var_ + ".in());";
     }
 
   private:
@@ -749,48 +771,45 @@ namespace {
     }
   }
 
-  // TODO(iguessthislldo): Convert to Wrapper
   void skip_to_end_sequence(const std::string indent,
-    std::string start, std::string end, std::string tempvar, bool use_cxx11, Classification cls, AST_Sequence* seq)
+    std::string start, std::string end, std::string seq_type_name,
+    bool use_cxx11, Classification cls, AST_Sequence* seq)
   {
-    std::string seq_resize_func = use_cxx11 ? "resize" : "length";
+    const std::string seq_resize_func = use_cxx11 ? "resize" : "length";
+    std::string tempvar = "tempvar";
     be_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
       indent << "  strm.skip(end_of_seq - strm.pos());\n" <<
       indent << "} else {\n" <<
-      indent << "  " << tempvar << " tempvar;\n" <<
-      indent << "  tempvar." << seq_resize_func << "(1);\n" <<
+      indent << "  " << seq_type_name << " " << tempvar << ";\n" <<
+      indent << "  " << tempvar << "." << seq_resize_func << "(1);\n" <<
       indent << "  for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n";
-    if (!use_cxx11 && (cls & CL_ARRAY)) {
-      const string typedefname = scoped(seq->base_type()->name());
-      be_global->impl_ <<
-        indent << "    " << typedefname << "_var tmp = " << typedefname << "_alloc();\n" <<
-        indent << "    " << typedefname << "_forany fa = tmp.inout();\n" <<
-        indent << "    strm >> fa;\n";
-    } else if (cls & CL_STRING) {
+
+    std::string stream_to = tempvar + "[0]";
+    if (cls & CL_STRING) {
       if (cls & CL_BOUNDED) {
         AST_Type* elem = resolveActualType(seq->base_type());
-        const string args = string("tempvar[0]") + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
-        be_global->impl_ <<
-          indent << "   strm >> " << getWrapper(args, elem, WD_INPUT) << ";\n";
+        const string args = stream_to + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
+        stream_to = getWrapper(args, elem, WD_INPUT);
       } else {
         const string getbuffer =
           (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
           ? ".get_buffer()" : "";
-        be_global->impl_ <<
-          indent << "    strm >> tempvar" + getbuffer + "[0];\n";
+        stream_to = tempvar + getbuffer + "[0];\n";
       }
-    } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE))) {
-      const string typedefname = scoped(seq->base_type()->name());
-      const string elem_underscores = dds_generator::scoped_helper(seq->base_type()->name(), "_");
-      be_global->impl_ <<
-        indent << "    strm >> IDL::DistinctType<" << typedefname << ", "  <<
-          elem_underscores << "_tag>(tempvar[0]);\n";
     } else {
-      be_global->impl_ <<
-        indent << "    strm >> tempvar[0];\n";
+      Intro intro;
+      const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
+      Wrapper wrapper(seq->base_type(), scoped(seq->base_type()->name()),
+        classic_array_copy ? tempvar : stream_to, false);
+      wrapper.classic_array_copy_ = classic_array_copy;
+      wrapper.done(&intro);
+      stream_to = wrapper.ref();
+      intro.join(be_global->impl_, indent + "    ");
     }
+
     be_global->impl_ <<
+      indent << "    strm >> " << stream_to << ";\n" <<
       indent << "  }\n" <<
       indent << "}\n";
   }
@@ -1107,42 +1126,43 @@ namespace {
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
 
+        Intro intro;
+        std::string stream_to;
+        std::string classic_array_copy;
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          const string typedefname = scoped(seq->base_type()->name());
-          be_global->impl_ <<
-            "      " << typedefname << "_var tmp = " << typedefname
-            << "_alloc();\n"
-            "      " << typedefname << "_forany fa = tmp.inout();\n"
-            << "    if (!(strm >> fa)) {\n";
+          Wrapper classic_array_wrapper(
+            seq->base_type(), scoped(seq->base_type()->name()), elem_access);
+          classic_array_wrapper.classic_array_copy_ = true;
+          classic_array_wrapper.done(&intro);
+          classic_array_copy = classic_array_wrapper.classic_array_copy();
+          stream_to = classic_array_wrapper.ref();
         } else if (elem_cls & CL_STRING) {
           if (elem_cls & CL_BOUNDED) {
             const string args = elem_access + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
-            be_global->impl_ <<
-              "    if (!(strm >> " << getWrapper(args, elem, WD_INPUT) << ")) {\n";
+            stream_to = getWrapper(args, elem, WD_INPUT);
           } else {
             const string getbuffer =
               (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
               ? ".get_buffer()" : "";
-            be_global->impl_ <<
-              "    if (!(strm >> " << value_access << getbuffer << "[i])) {\n";
+            stream_to = value_access + getbuffer + "[i]";
           }
         } else {
           Wrapper elem_wrapper(elem, cxx_elem, value_access + "[i]", false);
           elem_wrapper.nested_key_only_ = nested_key_only;
-          Intro intro;
           elem_wrapper.done(&intro);
-          const std::string indent = "    ";
-          intro.join(be_global->impl_, indent);
-          be_global->impl_ <<
-            indent << " if (!(strm >> " << elem_wrapper.ref() << ")) {\n";
+          stream_to = elem_wrapper.ref();
         }
+        const std::string indent = "    ";
+        intro.join(be_global->impl_, indent);
+        be_global->impl_ <<
+          indent << " if (!(strm >> " << stream_to << ")) {\n";
 
         const std::string seq_resize_func = use_cxx11 ? "resize" : "length";
 
         if (try_construct == tryconstructfailaction_use_default) {
           be_global->impl_ <<
             type_to_default("        ", elem, elem_access) <<
-            "           strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+            "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
                    (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING){
@@ -1182,9 +1202,9 @@ namespace {
         }
         be_global->impl_ <<
           "    }\n";
-        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+        if (classic_array_copy.size()) {
           be_global->impl_ <<
-            "    " << scoped(seq->base_type()->name()) << "_copy(" << elem_access << ", tmp.in());\n";
+            "    " << classic_array_copy << "\n";
         }
         be_global->impl_ << "  }\n";
       }
@@ -1379,11 +1399,14 @@ namespace {
 
         Intro intro;
         std::string stream;
+        std::string classic_array_copy;
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          const string typedefname = scoped(arr->base_type()->name());
-          intro.insert(typedefname + "_var tmp = " + typedefname + "_alloc();");
-          intro.insert(typedefname + "_forany fa = tmp.inout();");
-          stream = "(strm >> fa)";
+          Wrapper classic_array_wrapper(
+            arr->base_type(), scoped(arr->base_type()->name()), wrapper.value_access() + nfl.index_);
+          classic_array_wrapper.classic_array_copy_ = true;
+          classic_array_wrapper.done(&intro);
+          classic_array_copy = classic_array_wrapper.classic_array_copy();
+          stream = "(strm >> " + classic_array_wrapper.ref() + ")";
         } else {
           stream = streamCommon(
             indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
@@ -1406,7 +1429,7 @@ namespace {
               use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
             const string inout = use_cxx11 ? "" : ".inout()";
             be_global->impl_ <<
-              indent << "if ( && " <<
+              indent << "if (" << construct_bound_fail << " && " <<
                 check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
               indent << "  " << wrapper.value_access() + nfl.index_ << inout <<
                 (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ")") : ("[" + bounded_arg(elem) + "] = 0")) << ";\n" <<
@@ -1428,12 +1451,10 @@ namespace {
           //discard/default
           skip_to_end_array(indent);
         }
-        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          const string typedefname = scoped(arr->base_type()->name());
+        if (classic_array_copy.size()) {
           be_global->impl_ <<
             indent << "} else {\n" <<
-            indent << "  " << typedefname << "_copy(" <<
-            wrapper.value_access() << nfl.index_ << ", tmp.in());\n";
+            indent << "  " << classic_array_copy << "\n";
         }
         indent.erase(0, 2);
         be_global->impl_ <<
@@ -2728,7 +2749,7 @@ namespace {
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       generate_dheader_code(
-        "    serialized_size(encoding, total_size, stru" + value_access + ");\n"
+        "    serialized_size(encoding, total_size, stru);\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
         "    }\n", not_final);
