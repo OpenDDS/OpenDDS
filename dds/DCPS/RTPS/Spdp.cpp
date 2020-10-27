@@ -1761,6 +1761,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   sedp_->generate_remote_crypto_handles(iter->second.pdata_);
+  sedp_->associate_volatile(iter->second.pdata_);
 
   iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
