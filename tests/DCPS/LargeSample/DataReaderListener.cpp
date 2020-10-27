@@ -215,8 +215,8 @@ bool DataReaderListenerImpl::data_consistent() const
                   << writer->second.size() << std::endl;
         valid_and_done = false;
         if (writer->second.size() < samples_per_writer_) {
-            for (size_t sample = 0; sample < samples_per_writer_; ++sample) {
-              std::cerr
+          for (size_t sample = 0; sample < samples_per_writer_; ++sample) {
+            std::cerr
               << (writer->second.count(static_cast<int>(sample)) ? "           Got" : "ERROR: Missing")
               << " process " << process->first
               << " writer " << writer->first
