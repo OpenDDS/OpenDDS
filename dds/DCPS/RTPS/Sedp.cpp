@@ -2409,6 +2409,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
     DCPS::DiscoveredWriterData wdata_copy;
 
 #ifdef OPENDDS_SECURITY
+    if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
+      return;
+    }
+
     if (iter != discovered_publications_.end()) {
       DiscoveredPublication& dpub = iter->second;
       if (!dpub.have_ice_agent_info_ && have_ice_agent_info) {
@@ -2660,12 +2664,6 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-#ifdef OPENDDS_SECURITY
-  if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
-    return;
-  }
-#endif
-
   if (!spdp_.has_discovered_participant(guid_participant)) {
     deferred_publications_[guid] = std::make_pair(message_id, dpub);
     return;
@@ -2735,6 +2733,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     DCPS::DiscoveredReaderData rdata_copy;
 
 #ifdef OPENDDS_SECURITY
+    if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
+      return;
+    }
+
     if (iter != discovered_subscriptions_.end()) {
       DiscoveredSubscription& dsub = iter->second;
       if (!dsub.have_ice_agent_info_ && have_ice_agent_info) {
@@ -3033,12 +3035,6 @@ Sedp::data_received(DCPS::MessageId message_id,
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
-
-#ifdef OPENDDS_SECURITY
-  if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
-    return;
-  }
-#endif
 
   if (!spdp_.has_discovered_participant(guid_participant)) {
     deferred_subscriptions_[guid] = std::make_pair(message_id, dsub);
