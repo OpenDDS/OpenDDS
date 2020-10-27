@@ -736,6 +736,80 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_reader_security_attribs_[dps_reader] = dr_sec_attr;
     }
 
+    // Type Lookup Service Request
+    {
+      PropertySeq reader_props, writer_props;
+
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "TypeLookupServiceRequestSecure",
+        default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'TypeLookupServiceRequestSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
+      type_lookup_request_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId ps_writer = type_lookup_request_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[ps_writer] = h;
+      local_writer_security_attribs_[ps_writer] = dw_sec_attr;
+
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "TypeLookupServiceRequestSecure",
+        default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'TypeLookupServiceRequestSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
+      type_lookup_request_secure_reader_->set_crypto_handles(crypto_handle, h);
+      const RepoId ps_reader = type_lookup_request_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[ps_reader] = h;
+      local_reader_security_attribs_[ps_reader] = dr_sec_attr;
+    }
+
+    // Type Lookup Service Reply
+    {
+      PropertySeq reader_props, writer_props;
+
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "TypeLookupServiceReplySecure",
+        default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'TypeLookupServiceReplySecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
+      type_lookup_reply_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId ps_writer = type_lookup_reply_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[ps_writer] = h;
+      local_writer_security_attribs_[ps_writer] = dw_sec_attr;
+
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "TypeLookupServiceReplySecure",
+        default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'TypeLookupServiceReplySecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
+      type_lookup_reply_secure_reader_->set_crypto_handles(crypto_handle, h);
+      const RepoId ps_reader = type_lookup_reply_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[ps_reader] = h;
+      local_reader_security_attribs_[ps_reader] = dr_sec_attr;
+    }
+
   } else {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
       ACE_TEXT("Failure calling get_participant_sec_attributes. ")
