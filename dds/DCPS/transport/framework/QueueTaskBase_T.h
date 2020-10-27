@@ -111,7 +111,7 @@ public:
     DBG_ENTRY("QueueTaskBase","svc");
 
     this->thr_id_ = ACE_OS::thr_self();
-    unsigned long tid = 0;
+    ACE_thread_t tid = 0;
 #ifdef ACE_HAS_MAC_OSX
       uint64_t osx_tid;
       if (!pthread_threadid_np(NULL, &osx_tid)) {

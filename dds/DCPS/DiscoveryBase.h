@@ -88,7 +88,7 @@ namespace OpenDDS {
 
     struct DcpsUpcalls : ACE_Task_Base {
       bool has_timeout() {
-        return interval > TimeDuration(0);
+        return interval_ > TimeDuration(0);
       }
 
       DcpsUpcalls(DataReaderCallbacks* drr,
@@ -98,12 +98,12 @@ namespace OpenDDS {
                   DataWriterCallbacks* dwr)
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
-        , interval(TimeDuration(0))
-        , status(0)
-        , tid(0)
+        , interval_(TimeDuration(0))
+        , status_(0)
+        , tid_(0)
       {
-        interval = TheServiceParticipant->get_thread_status_interval();
-        status = TheServiceParticipant->get_thread_statuses();
+        interval_ = TheServiceParticipant->get_thread_status_interval();
+        status_ = TheServiceParticipant->get_thread_statuses();
 #ifdef ACE_HAS_MAC_OSX
         uint64_t osx_tid;
         if (!pthread_threadid_np(NULL, &osx_tid)) {
@@ -113,10 +113,10 @@ namespace OpenDDS {
           ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
         }
 #else
-        tid = ACE_OS::thr_self();
+        tid_ = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
 
-        key = to_dds_string(tid) + " (DcpsUpcalls)";
+        key_ = to_dds_string(tid_) + " (DcpsUpcalls)";
       }
 
       int svc()
@@ -124,7 +124,7 @@ namespace OpenDDS {
         ACE_Time_Value expire;
 
         if (has_timeout()) {
-          expire = MonotonicTimePoint::now().value() + interval.value();
+          expire = MonotonicTimePoint::now().value() + interval_.value();
         }
 
         drr_->add_association(reader_, wa_, active_);
@@ -137,14 +137,14 @@ namespace OpenDDS {
 
             const MonotonicTimePoint now = MonotonicTimePoint::now();
             if (has_timeout() && now.value() > expire) {
-              expire = now.value() + interval.value();
-              if (status) {
+              expire = now.value() + interval_.value();
+              if (status_) {
                 if (DCPS_debug_level > 4) {
                   ACE_DEBUG((LM_DEBUG,
                             "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                 }
-                ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
-                status->map[key] = now;
+                ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
+                status_->map[key_] = now;
               }
             }
           }
@@ -164,22 +164,21 @@ namespace OpenDDS {
         ACE_Time_Value expire;
 
         if (has_timeout()) {
-          expire = MonotonicTimePoint::now().value() + interval.value();
+          expire = MonotonicTimePoint::now().value() + interval_.value();
         }
 
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
         const MonotonicTimePoint now = MonotonicTimePoint::now();
         if (has_timeout() && now.value() > expire) {
-          expire = now.value() + interval.value();
-          if (status) {
+          expire = now.value() + interval_.value();
+          if (status_) {
             if (DCPS_debug_level > 4) {
               ACE_DEBUG((LM_DEBUG,
                         "%T (%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
             }
-
-            ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status->lock);
-            status->map[key] = now;
+            ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock);
+            status_->map[key_] = now;
           }
         }
       }
@@ -194,10 +193,10 @@ namespace OpenDDS {
       ACE_Condition_Thread_Mutex cnd_;
 
       // thread reporting
-      TimeDuration interval;
-      ThreadStatus* status;
-      unsigned long tid;
-      OPENDDS_STRING key;
+      TimeDuration interval_;
+      ThreadStatus* status_;
+      ACE_thread_t tid_;
+      OPENDDS_STRING key_;
     };
 
     template <typename DiscoveredParticipantData_>

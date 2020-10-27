@@ -164,7 +164,7 @@ OpenDDS::DCPS::ReactorTask::svc()
     if (timeout_ == TimeDuration(0)) {
      reactor_->run_reactor_event_loop();
     } else {
-      unsigned long tid = 0;
+      ACE_thread_t tid = 0;
 #ifdef ACE_HAS_MAC_OSX
       uint64_t osx_tid;
       if (!pthread_threadid_np(NULL, &osx_tid)) {
