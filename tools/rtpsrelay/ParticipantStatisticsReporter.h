@@ -15,6 +15,7 @@ class ParticipantStatisticsReporter {
 public:
   static const Config* config;
   static ParticipantStatisticsDataWriter_var writer;
+  static CORBA::String_var topic_name;
 
   ParticipantStatisticsReporter() {}
 
@@ -57,13 +58,13 @@ public:
     participant_statistics_.interval(time_diff_to_duration(d));
 
     if (config->log_relay_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l INFO: ParticipantStatisticsReporter::report %C\n"), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
     }
 
     if (config->publish_relay_statistics()) {
       const auto ret = writer->write(participant_statistics_, DDS::HANDLE_NIL);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: writing participant %C statistics\n"), guid_to_string(guid_to_repoid(participant_statistics_.guid())).c_str()));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: writing participant %C statistics\n"), guid_to_string(guid_to_repoid(participant_statistics_.guid())).c_str()));
       }
     }
 
