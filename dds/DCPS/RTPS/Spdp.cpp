@@ -584,8 +584,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         pdata.leaseDuration.seconds));
     }
 
-    if (participants_.empty() && tport_->directed_sender_) {
-      tport_->directed_sender_->schedule(TimeDuration::zero_value);
+    if (tport_->directed_sender_) {
+      if (tport_->directed_guids_.empty()) {
+        tport_->directed_sender_->schedule(TimeDuration::zero_value);
+      }
+      tport_->directed_guids_.push_back(guid);
     }
 
     // add a new participant
@@ -2020,7 +2023,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   , lease_duration_(outer_->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
-  , previous_directed_guid_(GUID_UNKNOWN)
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
 {
@@ -3518,18 +3520,20 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
 
-  if (outer_->participants_.empty()) {
-    return;
-  }
+  while (!directed_guids_.empty()) {
+    const DCPS::RepoId id = directed_guids_.front();
+    directed_guids_.pop_front();
 
-  DiscoveredParticipantConstIter pos = outer_->participants_.upper_bound(previous_directed_guid_);
-  if (pos == outer_->participants_.end()) {
-    pos = outer_->participants_.begin();
-  }
+    DiscoveredParticipantConstIter pos = outer_->participants_.find(id);
+    if (pos == outer_->participants_.end()) {
+      continue;
+    }
 
-  write_i(pos->first, SEND_TO_LOCAL | SEND_TO_RELAY);
-  previous_directed_guid_ = pos->first;
-  directed_sender_->schedule(outer_->config_->resend_period() * (1.0 / outer_->participants_.size()));
+    write_i(id, SEND_TO_LOCAL | SEND_TO_RELAY);
+    directed_guids_.push_back(id);
+    directed_sender_->schedule(outer_->config_->resend_period() * (1.0 / directed_guids_.size()));
+    break;
+  }
 }
 
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*now*/)
