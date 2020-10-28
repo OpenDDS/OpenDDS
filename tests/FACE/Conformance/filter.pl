@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -p
+#!/usr/bin/perl -p
 s/Assertion/Assertn/g if /DEBUG:/;
 s/APEX_ERROR/APEX_ERR/g;
 s/TAOLIB_ERROR=ACELIB_ERROR/TAOLIB_ERR=ACELIB_ERR/g;

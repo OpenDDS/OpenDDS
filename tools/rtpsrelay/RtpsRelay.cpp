@@ -392,7 +392,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = zero_seconds;
   reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = zero_seconds;
 
-  auto participant_entry_writer_var = relay_publisher->create_datawriter(participant_entry_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var participant_entry_writer_var = relay_publisher->create_datawriter(participant_entry_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!participant_entry_writer_var) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Participant Entry data writer\n")));
       return EXIT_FAILURE;
@@ -405,7 +405,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Setup statistics publishing.
-  auto handler_statistics_writer_var = relay_publisher->create_datawriter(handler_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var handler_statistics_writer_var = relay_publisher->create_datawriter(handler_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!handler_statistics_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Handler Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -417,7 +417,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  auto relay_statistics_writer_var = relay_publisher->create_datawriter(relay_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var relay_statistics_writer_var = relay_publisher->create_datawriter(relay_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_statistics_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -429,7 +429,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  auto domain_statistics_writer_var = relay_publisher->create_datawriter(domain_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var domain_statistics_writer_var = relay_publisher->create_datawriter(domain_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!domain_statistics_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Domain Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -455,7 +455,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ParticipantStatisticsReporter::config = &config;
   ParticipantStatisticsReporter::writer = participant_statistics_writer;
-  const auto t = participant_statistics_writer->get_topic();
+  DDS::Topic_var t = participant_statistics_writer->get_topic();
   ParticipantStatisticsReporter::topic_name = t->get_name();
 
   // Configure ports and addresses.
