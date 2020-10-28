@@ -27,7 +27,7 @@ author = 'Object Computing, Inc.'
 # Get Version
 with open('../VERSION.txt') as f:
     version_txt = f.read()
-m = re.search(r'version (.*),', version_txt)
+m = re.search(r'version (\S+)', version_txt)
 if m:
     release = version = m[1]
 else:
