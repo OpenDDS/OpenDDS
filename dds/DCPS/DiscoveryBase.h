@@ -107,9 +107,9 @@ namespace OpenDDS {
 #ifdef ACE_HAS_MAC_OSX
         uint64_t osx_tid;
         if (!pthread_threadid_np(NULL, &osx_tid)) {
-          tid = static_cast<unsigned long>(osx_tid);
+          tid_ = static_cast<unsigned long>(osx_tid);
         } else {
-          tid = 0;
+          tid_ = 0;
           ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
         }
 #else
@@ -195,7 +195,11 @@ namespace OpenDDS {
       // thread reporting
       TimeDuration interval_;
       ThreadStatus* status_;
+#ifdef ACE_HAS_MAC_OSX
+      unsigned long tid_;
+#else
       ACE_thread_t tid_;
+#endif
       OPENDDS_STRING key_;
     };
 
