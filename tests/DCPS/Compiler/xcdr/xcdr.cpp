@@ -149,7 +149,7 @@ struct DataView {
   }
 
   DataView(const DataVec& data_vec)
-  : data(&data_vec[0])
+  : data(data_vec.size() ? &data_vec[0] : 0)
   , size(data_vec.size())
   {
   }
@@ -1926,10 +1926,7 @@ void not_key_only_test()
   serializer_test<Type>(xcdr2, expected);
 };
 
-template <typename Type>
-void union_shim(Type&)
-{
-}
+bool expect_values_equal_key_only_compare = false;
 
 template <typename Type, typename Wrapper, typename ConstWrapper>
 void key_only_test(bool topic_type)
@@ -1943,11 +1940,12 @@ void key_only_test(bool topic_type)
   set_values<Type, Wrapper>(value);
   ConstWrapper wrapped_value(value);
   Type result = default_value;
-  union_shim(result);
   Wrapper wrapped_result(result);
   amalgam_serializer_test_base<ConstWrapper, Wrapper>(
     xcdr2, expected, wrapped_value, wrapped_result);
+  expect_values_equal_key_only_compare = true;
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+  expect_values_equal_key_only_compare = false;
 }
 
 void serialize_u32(DataVec& data_vec, size_t value)
@@ -2080,18 +2078,6 @@ void set_values<KeyedUnion, KeyOnly<KeyedUnion> >(KeyedUnion& value)
   key_only_union_set_base_values(value, FieldFilter_KeyOnly, true);
 }
 
-template <>
-void union_shim(UnkeyedUnion& value)
-{
-  value.default_value(0);
-}
-
-template <typename Type>
-void union_shim(KeyedUnion& value)
-{
-  value.default_value(0);
-}
-
 template<typename Type>
 void key_only_complex_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
@@ -2127,6 +2113,7 @@ void key_only_complex_set_base_values(Type& value,
     */
   }
 
+#if 0
   if (include_unkeyed) { // TODO(iguessthislldo): See IDL Def
     key_only_union_set_base_values(
       value.unkeyed_union_value, field_filter, false);
@@ -2140,6 +2127,7 @@ void key_only_complex_set_base_values(Type& value,
       value.unkeyed_union_seq_value[0], field_filter, false);
     */
   }
+#endif
 
   if (include_possible_keyed) {
     key_only_union_set_base_values(
@@ -2197,31 +2185,6 @@ template<>
 void set_values<ComplexKeyedStruct, KeyOnly<ComplexKeyedStruct> >(ComplexKeyedStruct& value)
 {
   key_only_complex_set_base_values(value, FieldFilter_KeyOnly, true);
-}
-
-template <typename Type>
-void conplex_struct_union_shim(Type& value)
-{
-  union_shim(value.unkeyed_union_value);
-  union_shim(value.unkeyed_union_array_value[0]);
-  union_shim(value.unkeyed_union_array_value[1]);
-  /* union_shim(value.unkeyed_union_seq_value[0]); */
-  union_shim(value.keyed_union_value);
-  union_shim(value.keyed_union_array_value[0]);
-  union_shim(value.keyed_union_array_value[1]);
-  /* union_shim(value.keyed_union_seq_value[0]); */
-}
-
-template <>
-void union_shim(ComplexUnkeyedStruct& value)
-{
-  conplex_struct_union_shim(value);
-}
-
-template <>
-void union_shim(ComplexKeyedStruct& value)
-{
-  conplex_struct_union_shim(value);
 }
 
 template<typename TypeA, typename TypeB>
@@ -2295,14 +2258,16 @@ void key_only_union_expect_values_equal_base_keys(const TypeA& a, const TypeB& b
 template<typename TypeA, typename TypeB>
 void key_only_union_expect_values_equal_base(const TypeA& a, const TypeB& b)
 {
-  key_only_union_expect_values_equal_base_keys(a, b);
-  EXPECT_EQ(a.default_value(), b.default_value());
+  /* key_only_union_expect_values_equal_base_keys(a, b); */
+  if (!expect_values_equal_key_only_compare) {
+    EXPECT_EQ(a.default_value(), b.default_value());
+  }
 }
 
 template<>
-void expect_values_equal(const UnkeyedUnion& a, const UnkeyedUnion& b)
+void expect_values_equal(const UnkeyedUnion& /*a*/, const UnkeyedUnion& /*b*/)
 {
-  key_only_union_expect_values_equal_base(a, b);
+  /* key_only_union_expect_values_equal_base(a, b); */
 }
 
 template<>
@@ -2364,9 +2329,11 @@ template<typename TypeA, typename TypeB>
 void key_only_complex_expect_values_equal_base(const TypeA& a, const TypeB& b)
 {
   key_only_complex_expect_values_equal_base_keys(a, b);
+  /*
   expect_values_equal(a.unkeyed_union_value, b.unkeyed_union_value);
   expect_values_equal(a.unkeyed_union_array_value[0], b.unkeyed_union_array_value[0]);
   expect_values_equal(a.unkeyed_union_array_value[1], b.unkeyed_union_array_value[1]);
+  */
   /* expect_values_equal(a.unkeyed_union_seq_value, b.unkeyed_union_seq_value); */
   EXPECT_EQ(a.extra_value, b.extra_value);
 }
@@ -2540,6 +2507,7 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
     // TODO(iguessthislldo): keyed_struct_seq_value would go here
   }
 
+  /*
   if (include_unkeyed) {
     build_expected_union(all_contents, nested_field_filter, false);
     {
@@ -2551,6 +2519,7 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
     }
     // TODO(iguessthislldo): unkeyed_union_seq_value would go here
   }
+  */
 
   if (include_possible_keyed) {
     build_expected_union(all_contents, nested_field_filter, true);
