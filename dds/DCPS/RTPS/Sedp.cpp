@@ -2258,7 +2258,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
 #ifdef OPENDDS_SECURITY
-  if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
+  if (message_id == DCPS::SAMPLE_DATA && should_drop_message(wdata.ddsPublicationData.topic_name)) {
     return;
   }
 #endif
@@ -2636,7 +2636,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
 #ifdef OPENDDS_SECURITY
-  if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
+  if (message_id == DCPS::SAMPLE_DATA && should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
 #endif
