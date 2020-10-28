@@ -288,7 +288,7 @@ StaticEndpointManager::association_complete(const RepoId& /*localId*/,
 }
 
 bool
-StaticEndpointManager::disassociate(const StaticDiscoveredParticipantData& /*pdata*/)
+StaticEndpointManager::disassociate(StaticDiscoveredParticipantData& /*pdata*/)
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::disassociate TODO\n")));
   // TODO

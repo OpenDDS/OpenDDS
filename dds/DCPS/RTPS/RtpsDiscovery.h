@@ -507,7 +507,7 @@ public:
     const DDS::DomainParticipantQos& qos);
 
 #if defined(OPENDDS_SECURITY)
-#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5)
+#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__
 #    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
 #  else
 #    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION

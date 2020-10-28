@@ -708,7 +708,7 @@ namespace OpenDDS {
       virtual void association_complete(const RepoId& localId,
                                         const RepoId& remoteId) = 0;
 
-      virtual bool disassociate(const DiscoveredParticipantData& pdata) = 0;
+      virtual bool disassociate(DiscoveredParticipantData& pdata) = 0;
 
     protected:
       struct LocalEndpoint {
@@ -1941,8 +1941,6 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
-        , security_builtins_associated_(false)
-        , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1976,8 +1974,6 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
-        , security_builtins_associated_(false)
-        , seen_some_crypto_tokens_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2043,8 +2039,6 @@ namespace OpenDDS {
         bool is_requester_;
         CORBA::LongLong auth_req_sequence_number_;
         CORBA::LongLong handshake_sequence_number_;
-        bool security_builtins_associated_;
-        bool seen_some_crypto_tokens_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;

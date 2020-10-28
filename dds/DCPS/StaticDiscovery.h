@@ -166,7 +166,7 @@ public:
   virtual void association_complete(const RepoId& /*localId*/,
                                     const RepoId& /*remoteId*/);
 
-  virtual bool disassociate(const StaticDiscoveredParticipantData& /*pdata*/);
+  virtual bool disassociate(StaticDiscoveredParticipantData& /*pdata*/);
 
   virtual DDS::ReturnCode_t add_publication_i(const RepoId& /*rid*/,
                                               LocalPublication& /*pub*/);

@@ -567,6 +567,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
+  pdata.associated_endpoints =
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
   const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
 
@@ -650,7 +652,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
         iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
+        // The remote needs to see our SPDP before attempting authentication.
+        tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
+
         attempt_authentication(iter, true);
+
         if (iter->second.auth_state_ == DCPS::AUTH_STATE_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
             if (DCPS::security_debug.auth_debug) {
@@ -743,6 +749,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
           sedp_->update_locators(pdata);
         }
+        pdata.associated_endpoints = iter->second.pdata_.associated_endpoints;
+#ifdef OPENDDS_SECURITY
+        pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
+#endif
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
 
@@ -1347,16 +1357,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       // Install the shared secret before sending the final so that
       // we are prepared to receive the crypto tokens from the
       // replier.
-      dp.seen_some_crypto_tokens_ = false;
-      // match_authenticated releases the lock which means (1) iter
-      // may become invalid and (2) The resend timer may fire and send
-      // the request again.  So, disable the resend.
-      dp.have_handshake_msg_ = false;
-      match_authenticated(src_participant, iter);
-      if (iter == participants_.end()) {
-        return;
-      }
 
+      // Send the final first because match_authenticated takes forever.
       if (send_handshake_message(src_participant, iter->second, reply) != DDS::RETCODE_OK) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: Spdp::handle_handshake_message() - ")
@@ -1370,6 +1372,14 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
+
+      // match_authenticated releases the lock which means iter may
+      // become invalid.
+      match_authenticated(src_participant, iter);
+      if (iter == participants_.end()) {
+        return;
+      }
+
       return;
     }
     case DDS::Security::VALIDATION_OK: {
@@ -1487,8 +1497,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 }
 
 bool
-Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                       bool& send_our_tokens)
+Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg)
 {
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
@@ -1531,32 +1540,29 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
-  send_our_tokens = !dp.is_requester_ && !dp.seen_some_crypto_tokens_;
-  dp.seen_some_crypto_tokens_ = true;
   if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_WAITING_FOR_TOKEN) {
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
   }
+
+  sedp_->associate(iter->second.pdata_);
+  sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
 
   return true;
 }
 
-bool Spdp::seen_crypto_tokens_from(const RepoId& sender)
+void Spdp::volatile_association_complete(const RepoId& sender)
 {
   const RepoId src_participant = make_id(sender.guidPrefix, ENTITYID_PARTICIPANT);
   const DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
-    return false;
+    return;
   }
   DiscoveredParticipant& dp = iter->second;
-  const bool send_our_tokens = !dp.is_requester_ && !dp.seen_some_crypto_tokens_;
-  dp.seen_some_crypto_tokens_ = true;
   if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_WAITING_FOR_TOKEN) {
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
   }
-
-  return send_our_tokens;
 }
 
 DDS::ReturnCode_t
@@ -1620,7 +1626,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_->rekey_volatile(iter->second.pdata_);
+    sedp_->disassociate_volatile(iter->second.pdata_);
+    sedp_->associate_volatile(iter->second.pdata_);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -1744,31 +1751,23 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  // notify Sedp of association
-  // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
+  // notify Sedp of association Sedp may call
+  // has_discovered_participant, which is the participant must be
+  // added before these calls to associate.
 
-  sedp_->associate(iter->second.pdata_);
+  if (iter->second.crypto_tokens_.length() == 0) {
+    sedp_->associate(iter->second.pdata_);
+    sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
+  }
+
+  sedp_->generate_remote_crypto_handles(iter->second.pdata_);
   sedp_->associate_volatile(iter->second.pdata_);
-  sedp_->associate_secure_writers_to_readers(iter->second.pdata_);
-  sedp_->associate_secure_readers_to_writers(iter->second.pdata_);
-  iter->second.security_builtins_associated_ = true;
 
   iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
   process_location_updates_i(iter);
 #endif
   return true;
-}
-
-bool Spdp::security_builtins_associated(const DCPS::RepoId& remoteParticipant) const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  if (!security_enabled_) {
-    return false;
-  }
-
-  const DiscoveredParticipantConstIter iter = participants_.find(remoteParticipant);
-  return iter == participants_.end() ? false : iter->second.security_builtins_associated_;
 }
 
 void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
@@ -2016,7 +2015,8 @@ Spdp::build_local_pdata(
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    }
+    },
+    0 // associated_endpoints_
   };
 
   return pdata;
@@ -3694,18 +3694,15 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   }
 }
 
-bool Spdp::remote_is_requester(const DCPS::RepoId& guid) const
-{
-  DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
-  if (iter != participants_.end()) {
-    return iter->second.is_requester_;
-  }
-  return false;
-}
-
 const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) const
 {
   DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
+  return iter->second.pdata_;
+}
+
+ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
+{
+  DiscoveredParticipantIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
   return iter->second.pdata_;
 }
 
@@ -3835,7 +3832,7 @@ Spdp::use_ice_now(bool f)
 
       if (sedp_endpoint && pos->second.have_sedp_info_) {
         start_ice(sedp_endpoint, pos->first, pos->second.pdata_.participantProxy.availableBuiltinEndpoints,
-                  pos->second.pdata_.participantProxy.availableBuiltinEndpoints, pos->second.sedp_info_);
+                  pos->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints, pos->second.sedp_info_);
       }
     }
   } else {
