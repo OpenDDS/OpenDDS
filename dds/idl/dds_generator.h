@@ -1030,10 +1030,10 @@ private:
 };
 
 inline
-size_t array_element_count(AST_Array* arr)
+ACE_CDR::ULong array_element_count(AST_Array* arr)
 {
-  size_t count = 1;
-  for (size_t i = 0; i < arr->n_dims(); ++i) {
+  ACE_CDR::ULong count = 1;
+  for (ACE_CDR::ULong i = 0; i < arr->n_dims(); ++i) {
     count *= arr->dims()[i]->ev()->u.ulval;
   }
   return count;

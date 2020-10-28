@@ -1262,7 +1262,7 @@ namespace {
     }
     const std::string cxx_elem =
       anonymous ? anonymous->scoped_elem_ : scoped(arr->base_type()->name());
-    const size_t n_elems = array_element_count(arr);
+    const ACE_CDR::ULong n_elems = array_element_count(arr);
 
     base_wrapper.generate_tag();
 
