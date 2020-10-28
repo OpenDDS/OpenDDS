@@ -3,18 +3,7 @@
 
 #include <iostream>
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/ostreamwrapper.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/prettywriter.h"
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+#include "dds/DCPS/RapidJsonWrapper.h"
 
 namespace Bench {
 
