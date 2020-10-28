@@ -45,7 +45,7 @@ void set_base_values_union(Type& value, UnionDisc disc)
   }
 }
 
-template <typename Type>
+template <typename Type, typename WrapperType = void>
 void set_values(Type& value)
 {
   set_base_values(value);
@@ -180,26 +180,40 @@ bool operator==(const DataView& a, const DataView& b)
   std::stringstream result;
   bool got_a = true;
   bool got_b = true;
-  bool diff = true;
   while (got_a || got_b) {
-    result.width(16);
-    result << std::left;
-    if (got_a && std::getline(astrm, a_line, '\n')) {
-      result << a_line;
+    std::stringstream line;
+    line.width(16);
+    line << std::left;
+    if (got_a) {
+      if (std::getline(astrm, a_line, '\n')) {
+        line << a_line;
+      } else {
+        got_a = false;
+        line << "(END OF LEFT)";
+      }
     } else {
-      got_a = false;
-      result << ' ';
+      line << ' ';
     }
-    if (got_b && std::getline(bstrm, b_line, '\n')) {
-      result << " " << b_line;
+    line << ' ';
+    line.width(16);
+    line << std::left;
+    if (got_b) {
+      if (std::getline(bstrm, b_line, '\n')) {
+        line << b_line;
+      } else {
+        got_b = false;
+        line << "(END OF RIGHT)";
+      }
     } else {
-      got_b = false;
+      line << ' ';
     }
-    if (diff && a_line != b_line) {
-      result << " <- Different Starting Here";
-      diff = false;
+    if ((got_a || got_b) && a_line != b_line) {
+      line << " <- This line is different";
     }
-    result << std::endl;
+    const std::string line_str = line.str();
+    if (line_str.find_first_not_of(" ") != std::string::npos) {
+      result << line_str << std::endl;
+    }
   }
   return ::testing::AssertionFailure()
     << a_expr << " (size " << a.size << ") isn't the same as "
@@ -1886,8 +1900,14 @@ TEST(MixedExtenTests, NestingMutableStructLE)
 
 // KeyOnly Serialization ======================================================
 
+enum FieldFilter {
+  FieldFilter_All,
+  FieldFilter_NestedKeyOnly,
+  FieldFilter_KeyOnly
+};
+
 template <typename Type>
-void build_expected(DataVec& /* expected */, bool /* key_only */)
+void build_expected(DataVec& /*expected*/, FieldFilter /*field_filter*/)
 {
   ASSERT_TRUE(false);
 }
@@ -1896,27 +1916,37 @@ template <typename Type>
 void not_key_only_test()
 {
   DataVec expected;
-  build_expected<Type>(expected, false);
+  build_expected<Type>(expected, FieldFilter_All);
   serializer_test<Type>(xcdr2, expected);
 };
 
 template <typename Type>
-void key_only_test()
+void union_shim(Type&)
 {
+}
+
+template <typename Type, typename Wrapper, typename ConstWrapper>
+void key_only_test(bool topic_type)
+{
+  Type default_value;
+  set_default(default_value);
   DataVec expected;
-  build_expected<Type>(expected, true);
-  Type value;
-  NestedKeyOnly<const Type> wrapped_value(value);
-  set_values(value);
-  Type result;
-  NestedKeyOnly<Type> wrapped_result(result);
-  amalgam_serializer_test_base<NestedKeyOnly<const Type>, NestedKeyOnly<Type> >(
+  build_expected<Type>(expected,
+    topic_type ? FieldFilter_KeyOnly : FieldFilter_NestedKeyOnly);
+  Type value = default_value;
+  set_values<Type, Wrapper>(value);
+  ConstWrapper wrapped_value(value);
+  Type result = default_value;
+  union_shim(result);
+  Wrapper wrapped_result(result);
+  amalgam_serializer_test_base<ConstWrapper, Wrapper>(
     xcdr2, expected, wrapped_value, wrapped_result);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
 }
 
-void serialize(size_t value, unsigned char* bytes)
+void serialize_u32(DataVec& data_vec, size_t value)
 {
+  unsigned char bytes[4];
   if (ENDIAN_BIG == ENDIAN_NATIVE) {
     bytes[0] = static_cast<unsigned char>(value);
     bytes[1] = static_cast<unsigned char>(value >>= 8);
@@ -1928,32 +1958,264 @@ void serialize(size_t value, unsigned char* bytes)
     bytes[1] = static_cast<unsigned char>(value >>= 8);
     bytes[0] = static_cast<unsigned char>(value >> 8);
   }
+  DataView(bytes).copy_to(data_vec);
 }
 
 template<typename Type>
-void key_only_set_base_values(Type& value)
+void key_only_set_base_values(Type& value,
+  FieldFilter field_filter, bool keyed)
 {
-  value.long_value = 0x7fffffff;
-  value.long_array_value[0] = 1;
-  value.long_array_value[1] = 2;
-  /* TODO(iguessthislldo): See IDL Def
-  value.long_seq_value.length(1);
-  value.long_seq_value[1] = 3;
-  */
-  value.string_value = "STRINGY";
-  value.extra_value = 2020;
+  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_unkeyed =
+    field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+
+  set_default(value);
+  if (include_possible_keyed) {
+    value.long_value = 0x7fffffff;
+    value.long_array_value[0] = 1;
+    value.long_array_value[1] = 2;
+    /* TODO(iguessthislldo): See IDL Def
+    value.long_seq_value.length(1);
+    value.long_seq_value[1] = 3;
+    */
+    value.string_value = "STRINGY";
+  }
+  if (include_unkeyed) {
+    value.extra_value = 2020;
+  }
 }
 
 template<>
 void set_values(BasicUnkeyedStruct& value)
 {
-  key_only_set_base_values(value);
+  key_only_set_base_values(value, FieldFilter_All, false);
 }
 
 template<>
 void set_values(BasicKeyedStruct& value)
 {
-  key_only_set_base_values(value);
+  key_only_set_base_values(value, FieldFilter_All, true);
+}
+
+template<>
+void set_values<BasicUnkeyedStruct, NestedKeyOnly<BasicUnkeyedStruct> >(BasicUnkeyedStruct& value)
+{
+  key_only_set_base_values(value, FieldFilter_NestedKeyOnly, false);
+}
+
+template<>
+void set_values<BasicKeyedStruct, NestedKeyOnly<BasicKeyedStruct> >(BasicKeyedStruct& value)
+{
+  key_only_set_base_values(value, FieldFilter_NestedKeyOnly, true);
+}
+
+template<>
+void set_values<BasicUnkeyedStruct, KeyOnly<BasicUnkeyedStruct> >(BasicUnkeyedStruct& value)
+{
+  key_only_set_base_values(value, FieldFilter_KeyOnly, false);
+}
+
+template<>
+void set_values<BasicKeyedStruct, KeyOnly<BasicKeyedStruct> >(BasicKeyedStruct& value)
+{
+  key_only_set_base_values(value, FieldFilter_KeyOnly, true);
+}
+
+template<typename Type>
+void key_only_union_set_base_values(Type& value,
+  FieldFilter field_filter, bool keyed)
+{
+  const bool include_possible_keyed = field_filter == FieldFilter_All || keyed;
+  const bool include_unkeyed = field_filter == FieldFilter_All;
+
+  if (include_unkeyed) {
+    value.default_value(0x74181);
+  } else {
+    value.default_value(0);
+  }
+  if (include_possible_keyed) {
+    value._d(0x7400);
+  }
+}
+
+template<>
+void set_values(UnkeyedUnion& value)
+{
+  key_only_union_set_base_values(value, FieldFilter_All, false);
+}
+
+template<>
+void set_values(KeyedUnion& value)
+{
+  key_only_union_set_base_values(value, FieldFilter_All, true);
+}
+
+template<>
+void set_values<UnkeyedUnion, NestedKeyOnly<UnkeyedUnion> >(UnkeyedUnion& value)
+{
+  key_only_union_set_base_values(value, FieldFilter_NestedKeyOnly, false);
+}
+
+template<>
+void set_values<KeyedUnion, NestedKeyOnly<KeyedUnion> >(KeyedUnion& value)
+{
+  key_only_union_set_base_values(value, FieldFilter_NestedKeyOnly, true);
+}
+
+template<>
+void set_values<UnkeyedUnion, KeyOnly<UnkeyedUnion> >(UnkeyedUnion& value)
+{
+  key_only_union_set_base_values(value, FieldFilter_KeyOnly, false);
+}
+
+template<>
+void set_values<KeyedUnion, KeyOnly<KeyedUnion> >(KeyedUnion& value)
+{
+  key_only_union_set_base_values(value, FieldFilter_KeyOnly, true);
+}
+
+template <>
+void union_shim(UnkeyedUnion& value)
+{
+  value.default_value(0);
+}
+
+template <typename Type>
+void union_shim(KeyedUnion& value)
+{
+  value.default_value(0);
+}
+
+template<typename Type>
+void key_only_complex_set_base_values(Type& value,
+  FieldFilter field_filter, bool keyed)
+{
+  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_unkeyed =
+    field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+
+  set_default(value);
+
+  if (include_possible_keyed) {
+    key_only_set_base_values(
+      value.unkeyed_struct_value, field_filter, false);
+    key_only_set_base_values(
+      value.unkeyed_struct_array_value[0], field_filter, false);
+    key_only_set_base_values(
+      value.unkeyed_struct_array_value[1], field_filter, false);
+    /* TODO(iguessthislldo): See IDL Def
+    value.unkeyed_struct_seq_value.length(1);
+    key_only_set_base_values(
+      value.unkeyed_struct_seq_value[0], field_filter, false);
+    */
+    key_only_set_base_values(
+      value.keyed_struct_value, field_filter, true);
+    key_only_set_base_values(
+      value.keyed_struct_array_value[0], field_filter, true);
+    key_only_set_base_values(
+      value.keyed_struct_array_value[1], field_filter, true);
+    /* TODO(iguessthislldo): See IDL Def
+    value.keyed_struct_seq_value.length(1);
+    key_only_set_base_values(
+      value.keyed_struct_seq_value[0], field_filter, true);
+    */
+  }
+
+  if (include_unkeyed) { // TODO(iguessthislldo): See IDL Def
+    key_only_union_set_base_values(
+      value.unkeyed_union_value, field_filter, false);
+    key_only_union_set_base_values(
+      value.unkeyed_union_array_value[0], field_filter, false);
+    key_only_union_set_base_values(
+      value.unkeyed_union_array_value[1], field_filter, false);
+    /* TODO(iguessthislldo): See IDL Def
+    value.unkeyed_union_seq_value.length(1);
+    key_only_union_set_base_values(
+      value.unkeyed_union_seq_value[0], field_filter, false);
+    */
+  }
+
+  if (include_possible_keyed) {
+    key_only_union_set_base_values(
+      value.keyed_union_value, field_filter, true);
+    key_only_union_set_base_values(
+      value.keyed_union_array_value[0], field_filter, true);
+    key_only_union_set_base_values(
+      value.keyed_union_array_value[1], field_filter, true);
+    /* TODO(iguessthislldo): See IDL Def
+    value.keyed_union_seq_value.length(1);
+    key_only_union_set_base_values(
+      value.keyed_union_seq_value[0], field_filter, true);
+    */
+  }
+
+  if (include_unkeyed) {
+    value.extra_value = 2020;
+  }
+}
+
+template<>
+void set_values(ComplexUnkeyedStruct& value)
+{
+  key_only_complex_set_base_values(value, FieldFilter_All, false);
+}
+
+template<>
+void set_values(ComplexKeyedStruct& value)
+{
+  key_only_complex_set_base_values(value, FieldFilter_All, true);
+}
+
+template<>
+void set_values<
+  ComplexUnkeyedStruct, NestedKeyOnly<ComplexUnkeyedStruct> >(ComplexUnkeyedStruct& value)
+{
+  key_only_complex_set_base_values(value, FieldFilter_NestedKeyOnly, false);
+}
+
+template<>
+void set_values<
+  ComplexKeyedStruct, NestedKeyOnly<ComplexKeyedStruct> >(ComplexKeyedStruct& value)
+{
+  key_only_complex_set_base_values(value, FieldFilter_NestedKeyOnly, true);
+}
+
+template<>
+void set_values<
+  ComplexUnkeyedStruct, KeyOnly<ComplexUnkeyedStruct> >(ComplexUnkeyedStruct& value)
+{
+  key_only_complex_set_base_values(value, FieldFilter_KeyOnly, false);
+}
+
+template<>
+void set_values<ComplexKeyedStruct, KeyOnly<ComplexKeyedStruct> >(ComplexKeyedStruct& value)
+{
+  key_only_complex_set_base_values(value, FieldFilter_KeyOnly, true);
+}
+
+template <typename Type>
+void conplex_struct_union_shim(Type& value)
+{
+  union_shim(value.unkeyed_union_value);
+  union_shim(value.unkeyed_union_array_value[0]);
+  union_shim(value.unkeyed_union_array_value[1]);
+  /* union_shim(value.unkeyed_union_seq_value[0]); */
+  union_shim(value.keyed_union_value);
+  union_shim(value.keyed_union_array_value[0]);
+  union_shim(value.keyed_union_array_value[1]);
+  /* union_shim(value.keyed_union_seq_value[0]); */
+}
+
+template <>
+void union_shim(ComplexUnkeyedStruct& value)
+{
+  conplex_struct_union_shim(value);
+}
+
+template <>
+void union_shim(ComplexKeyedStruct& value)
+{
+  conplex_struct_union_shim(value);
 }
 
 template<typename TypeA, typename TypeB>
@@ -1989,6 +2251,14 @@ void expect_values_equal(
 }
 
 template<>
+void expect_values_equal(
+  const KeyOnly<const BasicUnkeyedStruct>& a,
+  const KeyOnly<BasicUnkeyedStruct>& b)
+{
+  expect_values_equal(a.value, b.value);
+}
+
+template<>
 void expect_values_equal(const BasicKeyedStruct& a, const BasicKeyedStruct& b)
 {
   key_only_expect_values_equal_base(a, b);
@@ -2000,6 +2270,143 @@ void expect_values_equal(
   const NestedKeyOnly<BasicKeyedStruct>& b)
 {
   key_only_expect_values_equal_base_keys(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(
+  const KeyOnly<const BasicKeyedStruct>& a,
+  const KeyOnly<BasicKeyedStruct>& b)
+{
+  key_only_expect_values_equal_base_keys(a.value, b.value);
+}
+
+template<typename TypeA, typename TypeB>
+void key_only_union_expect_values_equal_base_keys(const TypeA& a, const TypeB& b)
+{
+  EXPECT_EQ(a._d(), b._d());
+}
+
+template<typename TypeA, typename TypeB>
+void key_only_union_expect_values_equal_base(const TypeA& a, const TypeB& b)
+{
+  key_only_union_expect_values_equal_base_keys(a, b);
+  EXPECT_EQ(a.default_value(), b.default_value());
+}
+
+template<>
+void expect_values_equal(const UnkeyedUnion& a, const UnkeyedUnion& b)
+{
+  key_only_union_expect_values_equal_base(a, b);
+}
+
+template<>
+void expect_values_equal(
+  const NestedKeyOnly<const UnkeyedUnion>& a,
+  const NestedKeyOnly<UnkeyedUnion>& b)
+{
+  expect_values_equal(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(
+  const KeyOnly<const UnkeyedUnion>& a,
+  const KeyOnly<UnkeyedUnion>& b)
+{
+  expect_values_equal(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(const KeyedUnion& a, const KeyedUnion& b)
+{
+  key_only_union_expect_values_equal_base(a, b);
+}
+
+template<>
+void expect_values_equal(
+  const NestedKeyOnly<const KeyedUnion>& a,
+  const NestedKeyOnly<KeyedUnion>& b)
+{
+  key_only_union_expect_values_equal_base_keys(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(
+  const KeyOnly<const KeyedUnion>& a,
+  const KeyOnly<KeyedUnion>& b)
+{
+  key_only_union_expect_values_equal_base_keys(a.value, b.value);
+}
+
+template<typename TypeA, typename TypeB>
+void key_only_complex_expect_values_equal_base_keys(const TypeA& a, const TypeB& b)
+{
+  expect_values_equal(a.unkeyed_struct_value, b.unkeyed_struct_value);
+  expect_values_equal(a.unkeyed_struct_array_value[0], b.unkeyed_struct_array_value[0]);
+  expect_values_equal(a.unkeyed_struct_array_value[1], b.unkeyed_struct_array_value[1]);
+  /* expect_values_equal(a.unkeyed_struct_seq_value, b.unkeyed_struct_seq_value); */
+  expect_values_equal(a.keyed_struct_value, b.keyed_struct_value);
+  expect_values_equal(a.keyed_struct_array_value[0], b.keyed_struct_array_value[0]);
+  expect_values_equal(a.keyed_struct_array_value[1], b.keyed_struct_array_value[1]);
+  /* expect_values_equal(a.keyed_struct_seq_value, b.keyed_struct_seq_value); */
+  expect_values_equal(a.keyed_union_value, b.keyed_union_value);
+  expect_values_equal(a.keyed_union_array_value[0], b.keyed_union_array_value[0]);
+  expect_values_equal(a.keyed_union_array_value[1], b.keyed_union_array_value[1]);
+  /* expect_values_equal(a.keyed_union_seq_value, b.keyed_union_seq_value); */
+}
+
+template<typename TypeA, typename TypeB>
+void key_only_complex_expect_values_equal_base(const TypeA& a, const TypeB& b)
+{
+  key_only_complex_expect_values_equal_base_keys(a, b);
+  expect_values_equal(a.unkeyed_union_value, b.unkeyed_union_value);
+  expect_values_equal(a.unkeyed_union_array_value[0], b.unkeyed_union_array_value[0]);
+  expect_values_equal(a.unkeyed_union_array_value[1], b.unkeyed_union_array_value[1]);
+  /* expect_values_equal(a.unkeyed_union_seq_value, b.unkeyed_union_seq_value); */
+  EXPECT_EQ(a.extra_value, b.extra_value);
+}
+
+template<>
+void expect_values_equal(const ComplexUnkeyedStruct& a, const ComplexUnkeyedStruct& b)
+{
+  key_only_complex_expect_values_equal_base(a, b);
+}
+
+template<>
+void expect_values_equal(
+  const NestedKeyOnly<const ComplexUnkeyedStruct>& a,
+  const NestedKeyOnly<ComplexUnkeyedStruct>& b)
+{
+  expect_values_equal(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(
+  const KeyOnly<const ComplexUnkeyedStruct>& a,
+  const KeyOnly<ComplexUnkeyedStruct>& b)
+{
+  expect_values_equal(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(const ComplexKeyedStruct& a, const ComplexKeyedStruct& b)
+{
+  key_only_complex_expect_values_equal_base(a, b);
+}
+
+template<>
+void expect_values_equal(
+  const NestedKeyOnly<const ComplexKeyedStruct>& a,
+  const NestedKeyOnly<ComplexKeyedStruct>& b)
+{
+  key_only_complex_expect_values_equal_base_keys(a.value, b.value);
+}
+
+template<>
+void expect_values_equal(
+  const KeyOnly<const ComplexKeyedStruct>& a,
+  const KeyOnly<ComplexKeyedStruct>& b)
+{
+  key_only_complex_expect_values_equal_base_keys(a.value, b.value);
 }
 
 const unsigned char key_only_keys_expected_base[] = {
@@ -2023,45 +2430,242 @@ const unsigned char key_only_non_keys_expected_base[] = {
   0x00, 0x00, 0x07, 0xe4
 };
 
-template <>
-void build_expected<BasicKeyedStruct>(DataVec& expected, bool key_only)
+void build_expected_basic_struct(
+  DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  DataView keys(key_only_keys_expected_base);
+  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_unkeyed =
+    field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+
+  DataView keys;
+  if (include_possible_keyed) {
+    keys = DataView(key_only_keys_expected_base);
+  }
   DataView non_keys;
-  if (!key_only) {
+  if (include_unkeyed ) {
     non_keys = DataView(key_only_non_keys_expected_base);
   }
-  unsigned char delimiter[4];
-  serialize(keys.size + non_keys.size, &delimiter[0]);
-  DataView(delimiter).copy_to(expected);
+  serialize_u32(expected, keys.size + non_keys.size);
   keys.copy_to(expected);
   non_keys.copy_to(expected);
 }
 
 template <>
-void build_expected<BasicUnkeyedStruct>(DataVec& expected, bool /*key_only*/)
+void build_expected<BasicUnkeyedStruct>(DataVec& expected, FieldFilter field_filter)
 {
-  build_expected<BasicKeyedStruct>(expected, false);
+  build_expected_basic_struct(expected, field_filter, false);
 }
 
-TEST(KeyOnly, BasicUnkeyedStruct_not_key_only)
+template <>
+void build_expected<BasicKeyedStruct>(DataVec& expected, FieldFilter field_filter)
+{
+  build_expected_basic_struct(expected, field_filter, true);
+}
+
+const unsigned char key_only_union_keys_expected_base[] = {
+  0x00, 0x00, 0x74, 0x00
+};
+
+const unsigned char key_only_union_non_keys_expected_base[] = {
+  0x00, 0x07, 0x41, 0x81
+};
+
+
+void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keyed)
+{
+  const bool include_possible_keyed = field_filter == FieldFilter_All || keyed;
+  const bool include_unkeyed = field_filter == FieldFilter_All;
+
+  DataView keys;
+  if (include_possible_keyed) {
+    keys = DataView(key_only_union_keys_expected_base);
+  }
+  DataView non_keys;
+  if (include_unkeyed) {
+    non_keys = DataView(key_only_union_non_keys_expected_base);
+  }
+  if (include_possible_keyed) {
+    serialize_u32(expected, keys.size + non_keys.size);
+  }
+  keys.copy_to(expected);
+  non_keys.copy_to(expected);
+}
+
+template <>
+void build_expected<UnkeyedUnion>(DataVec& expected, FieldFilter field_filter)
+{
+  build_expected_union(expected, field_filter, false);
+}
+
+template <>
+void build_expected<KeyedUnion>(DataVec& expected, FieldFilter field_filter)
+{
+  build_expected_union(expected, field_filter, true);
+}
+
+void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, bool keyed)
+{
+  DataVec all_contents;
+  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_unkeyed =
+    field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+  const FieldFilter nested_field_filter =
+    field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
+
+  if (include_possible_keyed) {
+    build_expected_basic_struct(all_contents, field_filter, false);
+    {
+      DataVec array_contents;
+      build_expected_basic_struct(array_contents, nested_field_filter, false);
+      build_expected_basic_struct(array_contents, nested_field_filter, false);
+      serialize_u32(all_contents, array_contents.size());
+      DataView(array_contents).copy_to(all_contents);
+    }
+    // TODO(iguessthislldo): unkeyed_struct_seq_value would go here
+
+    build_expected_basic_struct(all_contents, nested_field_filter, true);
+    {
+      DataVec array_contents;
+      build_expected_basic_struct(array_contents, nested_field_filter, true);
+      build_expected_basic_struct(array_contents, nested_field_filter, true);
+      serialize_u32(all_contents, array_contents.size());
+      DataView(array_contents).copy_to(all_contents);
+    }
+    // TODO(iguessthislldo): keyed_struct_seq_value would go here
+  }
+
+  if (include_unkeyed) {
+    build_expected_union(all_contents, nested_field_filter, false);
+    {
+      DataVec array_contents;
+      build_expected_union(array_contents, nested_field_filter, false);
+      build_expected_union(array_contents, nested_field_filter, false);
+      serialize_u32(all_contents, array_contents.size());
+      DataView(array_contents).copy_to(all_contents);
+    }
+    // TODO(iguessthislldo): unkeyed_union_seq_value would go here
+  }
+
+  if (include_possible_keyed) {
+    build_expected_union(all_contents, nested_field_filter, true);
+    {
+      DataVec array_contents;
+      build_expected_union(array_contents, nested_field_filter, true);
+      build_expected_union(array_contents, nested_field_filter, true);
+      serialize_u32(all_contents, array_contents.size());
+      DataView(array_contents).copy_to(all_contents);
+    }
+    // TODO(iguessthislldo): keyed_union_seq_value would go here
+  }
+
+  if (include_unkeyed) {
+    DataView(key_only_non_keys_expected_base).copy_to(all_contents);
+  }
+
+  serialize_u32(expected, all_contents.size());
+  DataView(all_contents).copy_to(expected);
+}
+
+template <>
+void build_expected<ComplexUnkeyedStruct>(DataVec& expected, FieldFilter field_filter)
+{
+  build_expected_complex_struct(expected, field_filter, false);
+}
+
+template <>
+void build_expected<ComplexKeyedStruct>(DataVec& expected, FieldFilter field_filter)
+{
+  build_expected_complex_struct(expected, field_filter, true);
+}
+
+TEST(KeyTests, normal_BasicUnkeyedStruct)
 {
   not_key_only_test<BasicUnkeyedStruct>();
 }
 
-TEST(KeyOnly, BasicUnkeyedStruct_key_only)
-{
-  key_only_test<BasicUnkeyedStruct>();
-}
-
-TEST(KeyOnly, BasicKeyedStruct_not_key_only)
+TEST(KeyTests, normal_BasicKeyedStruct)
 {
   not_key_only_test<BasicKeyedStruct>();
 }
 
-TEST(KeyOnly, BasicKeyedStruct_key_only)
+TEST(KeyTests, normal_UnkeyedUnion)
 {
-  key_only_test<BasicKeyedStruct>();
+  not_key_only_test<UnkeyedUnion>();
+}
+
+TEST(KeyTests, normal_KeyedUnion)
+{
+  not_key_only_test<KeyedUnion>();
+}
+
+TEST(KeyTests, normal_ComplexUnkeyedStruct)
+{
+  not_key_only_test<ComplexUnkeyedStruct>();
+}
+
+TEST(KeyTests, normal_ComplexKeyedStruct)
+{
+  not_key_only_test<ComplexKeyedStruct>();
+}
+
+TEST(KeyTests, NestedKeyOnly_BasicUnkeyedStruct)
+{
+  key_only_test<BasicUnkeyedStruct,
+    NestedKeyOnly<BasicUnkeyedStruct>, NestedKeyOnly<const BasicUnkeyedStruct> >(false);
+}
+
+TEST(KeyTests, NestedKeyOnly_BasicKeyedStruct)
+{
+  key_only_test<BasicKeyedStruct,
+    NestedKeyOnly<BasicKeyedStruct>, NestedKeyOnly<const BasicKeyedStruct> >(false);
+}
+
+TEST(KeyTests, NestedKeyOnly_UnkeyedUnion)
+{
+  key_only_test<UnkeyedUnion,
+    NestedKeyOnly<UnkeyedUnion>, NestedKeyOnly<const UnkeyedUnion> >(false);
+}
+
+TEST(KeyTests, NestedKeyOnly_KeyedUnion)
+{
+  key_only_test<KeyedUnion,
+    NestedKeyOnly<KeyedUnion>, NestedKeyOnly<const KeyedUnion> >(false);
+}
+
+TEST(KeyTests, NestedKeyOnly_ComplexUnkeyedStruct)
+{
+  key_only_test<ComplexUnkeyedStruct,
+    NestedKeyOnly<ComplexUnkeyedStruct>, NestedKeyOnly<const ComplexUnkeyedStruct> >(false);
+}
+
+TEST(KeyTests, NestedKeyOnly_ComplexKeyedStruct)
+{
+  key_only_test<ComplexKeyedStruct,
+    NestedKeyOnly<ComplexKeyedStruct>, NestedKeyOnly<const ComplexKeyedStruct> >(false);
+}
+
+TEST(KeyTests, KeyOnly_BasicUnkeyedStruct)
+{
+  key_only_test<BasicUnkeyedStruct,
+    KeyOnly<BasicUnkeyedStruct>, KeyOnly<const BasicUnkeyedStruct> >(true);
+}
+
+TEST(KeyTests, KeyOnly_BasicKeyedStruct)
+{
+  key_only_test<BasicKeyedStruct,
+    KeyOnly<BasicKeyedStruct>, KeyOnly<const BasicKeyedStruct> >(true);
+}
+
+TEST(KeyTests, KeyOnly_UnkeyedUnion)
+{
+  key_only_test<UnkeyedUnion,
+    KeyOnly<UnkeyedUnion>, KeyOnly<const UnkeyedUnion> >(true);
+}
+
+TEST(KeyTests, KeyOnly_KeyedUnion)
+{
+  key_only_test<KeyedUnion,
+    KeyOnly<KeyedUnion>, KeyOnly<const KeyedUnion> >(true);
 }
 
 // ----------------------------------------------------------------------------

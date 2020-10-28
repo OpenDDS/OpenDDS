@@ -277,18 +277,14 @@ struct NestingMutableStruct {
 
 // KeyOnly Serialization ======================================================
 
-#undef COMMON_FIELDS
-#define COMMON_FIELDS(KEY, TYPE, NAME) \
-  KEY TYPE NAME ## _value; \
-  KEY TYPE NAME ## _array_value[2]; \
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152 \
-  KEY sequence<TYPE> NAME ## _seq_value; \
-  */
-
 @topic
 @appendable
 struct BasicUnkeyedStruct {
-  COMMON_FIELDS(, long, long)
+  long long_value;
+  long long_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  sequence<long> long_seq_value;
+  */
   string string_value;
   long extra_value;
 };
@@ -296,7 +292,11 @@ struct BasicUnkeyedStruct {
 @topic
 @appendable
 struct BasicKeyedStruct {
-  COMMON_FIELDS(@key, long, long)
+  @key long long_value;
+  @key long long_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  @key sequence<long> long_seq_value;
+  */
   @key string string_value;
   long extra_value;
 };
@@ -322,20 +322,54 @@ default:
 @topic
 @appendable
 struct ComplexUnkeyedStruct {
-  COMMON_FIELDS(, BasicUnkeyedStruct, unkeyed_struct)
-  COMMON_FIELDS(, BasicKeyedStruct, keyed_struct)
-  COMMON_FIELDS(, UnkeyedUnion, unkeyed_union)
-  COMMON_FIELDS(, KeyedUnion, keyed_union)
+  BasicUnkeyedStruct unkeyed_struct_value;
+  BasicUnkeyedStruct unkeyed_struct_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  sequence<BasicUnkeyedStruct> unkeyed_struct_seq_value;
+  */
+  BasicKeyedStruct keyed_struct_value;
+  BasicKeyedStruct keyed_struct_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  sequence<BasicKeyedStruct> keyed_struct_seq_value;
+  */
+  UnkeyedUnion unkeyed_union_value;
+  UnkeyedUnion unkeyed_union_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  sequence<UnkeyedUnion> unkeyed_union_seq_value
+  */
+  KeyedUnion keyed_union_value;
+  KeyedUnion keyed_union_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  sequence<KeyedUnion> keyed_union_seq_value;
+  */
   long extra_value;
 };
 
 @topic
 @appendable
 struct ComplexKeyedStruct {
-  COMMON_FIELDS(@key, BasicUnkeyedStruct, unkeyed_struct)
-  COMMON_FIELDS(@key, BasicKeyedStruct, keyed_struct)
+  @key BasicUnkeyedStruct unkeyed_struct_value;
+  @key BasicUnkeyedStruct unkeyed_struct_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  @key sequence<BasicUnkeyedStruct> unkeyed_struct_seq_value;
+  */
+  @key BasicKeyedStruct keyed_struct_value;
+  @key BasicKeyedStruct keyed_struct_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  @key sequence<BasicKeyedStruct> keyed_struct_seq_value;
+  */
   // TODO(iguessthislldo): Mark as Key when supported. See XTYPE-147
-  COMMON_FIELDS(, UnkeyedUnion, unkeyed_union)
-  COMMON_FIELDS(@key, KeyedUnion, keyed_union)
+  UnkeyedUnion unkeyed_union_value;
+  // TODO(iguessthislldo): Mark as Key when supported. See XTYPE-147
+  UnkeyedUnion unkeyed_union_array_value[2];
+  // TODO(iguessthislldo): Mark as Key when supported. See XTYPE-147
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  sequence<UnkeyedUnion> unkeyed_union_seq_value
+  */
+  @key KeyedUnion keyed_union_value;
+  @key KeyedUnion keyed_union_array_value[2];
+  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
+  @key sequence<KeyedUnion> keyed_union_seq_value;
+  */
   long extra_value;
 };
