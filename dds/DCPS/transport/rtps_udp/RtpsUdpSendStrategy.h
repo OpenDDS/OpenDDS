@@ -19,6 +19,7 @@
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/INET_Addr.h"
+#include "ace/SOCK_Dgram.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -58,14 +59,29 @@ public:
                       RTPS::SubmessageSeq& submessages);
 #endif
 
+  // NOTE: The header and footer sizes are dependent on the built-in crypto plugin.
+  static const size_t MaxCryptoHeaderSize = 20;
+  static const size_t MaxCryptoFooterSize = 20;
+  static const size_t MaxSecurePrefixSize = RTPS::SMHDR_SZ + MaxCryptoHeaderSize;
+  static const size_t MaxSecureSuffixSize =
+    (RTPS::SM_ALIGN - 1) /* Max padding after submessage of variable length */ +
+    RTPS::SMHDR_SZ + MaxCryptoFooterSize;
+  static const size_t MaxSecureSubmessageLeadingSize = MaxSecurePrefixSize;
+  static const size_t MaxSecureSubmessageFollowingSize =
+    RTPS::SMHDR_SZ /* SEC_BODY */ + MaxSecureSuffixSize;
+  static const size_t MaxSecureSubmessageAdditionalSize =
+    MaxSecureSubmessageLeadingSize + MaxSecureSubmessageFollowingSize;
+  static const size_t MaxSecureFullMessageLeadingSize =
+    RTPS::SMHDR_SZ + RTPS::INFO_SRC_SZ + MaxSecurePrefixSize;
+  static const size_t MaxSecureFullMessageFollowingSize = MaxSecureSuffixSize;
+  static const size_t MaxSecureFullMessageAdditionalSize =
+    MaxSecureFullMessageLeadingSize + MaxSecureFullMessageFollowingSize;
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);
 
-  virtual size_t max_message_size() const
-  {
-    return UDP_MAX_MESSAGE_SIZE;
-  }
+  virtual size_t max_message_size() const;
 
   virtual void add_delayed_notification(TransportQueueElement* element);
 
@@ -73,6 +89,7 @@ private:
   bool marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
                        const OPENDDS_SET(ACE_INET_Addr)& addrs);
+  const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
   ssize_t send_single_i(const iovec iov[], int n,
                         const ACE_INET_Addr& addr);
 
@@ -114,6 +131,7 @@ private:
   const OPENDDS_SET(ACE_INET_Addr)* override_dest_;
   const ACE_INET_Addr* override_single_dest_;
 
+  const size_t max_message_size_;
   RTPS::Header rtps_header_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;

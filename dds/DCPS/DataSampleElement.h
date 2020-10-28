@@ -10,6 +10,7 @@
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "DataSampleHeader.h"
+#include "RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/RcHandle_T.h"

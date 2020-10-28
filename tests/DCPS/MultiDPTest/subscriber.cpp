@@ -163,6 +163,7 @@ void init_dcps_objects (int i)
   // Create the Datareaders
   ::DDS::DataReaderQos dr_qos;
   subscriber[i]->get_default_datareader_qos (dr_qos);
+  dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   ::DDS::TopicDescription_var description
     = participant[i]->lookup_topicdescription(topic_name[i]);

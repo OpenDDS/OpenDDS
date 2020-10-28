@@ -135,9 +135,15 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                             -13);
       }
 
+      DDS::PublisherQos pub_qos = PUBLISHER_QOS_DEFAULT;
+      if (!my_args.partition_.empty()) {
+        participant->get_default_publisher_qos(pub_qos);
+        my_args.partition_to_qos(pub_qos.partition);
+      }
+
       // Create Publisher
       DDS::Publisher_var pub =
-        participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+        participant->create_publisher(pub_qos,
                                       DDS::PublisherListener::_nil(),
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -238,12 +244,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   Args my_args;
-
-  int result = run_test(argc, argv, my_args);
-  if (result == my_args.expected_result_) {
-    return 0;
-  } else {
+  const int result = run_test(argc, argv, my_args);
+  if (result != my_args.expected_result_) {
     std::cerr << "Publisher exiting with unexpected result: " << result << std::endl;
-    return result == 0 ? -1 : result; // If unexpected result is zero (we expected a failure, but got a success), return -1 to signal error
+    return 1;
   }
+  return 0;
 }

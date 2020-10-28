@@ -44,8 +44,7 @@ UdpDataLink_rch
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
                             Priority priority, bool active)
 {
-  ReactorTask_rch rtask (reactor_task());
-  UdpDataLink_rch link(make_rch<UdpDataLink>(ref(*this), priority, rtask.in(), active));
+  UdpDataLink_rch link(make_rch<UdpDataLink>(ref(*this), priority, reactor_task(), active));
   // Configure link with transport configuration and reactor task:
 
   // Open logical connection:
@@ -153,13 +152,12 @@ UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
 bool
 UdpTransport::configure_i(UdpInst& config)
 {
-  create_reactor_task();
+  create_reactor_task(false, "UdpTransport" + config.name());
 
   // Override with DCPSDefaultAddress.
-  if (config.local_address() == ACE_INET_Addr () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-
-    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
+  if (config.local_address() == ACE_INET_Addr() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    config.local_address(TheServiceParticipant->default_address());
   }
 
   // Our "server side" data link is created here, similar to the acceptor_

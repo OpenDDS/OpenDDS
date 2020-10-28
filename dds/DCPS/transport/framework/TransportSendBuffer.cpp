@@ -86,6 +86,15 @@ SingleSendBuffer::release_acked(SequenceNumber seq) {
 }
 
 void
+SingleSendBuffer::remove_acked(SequenceNumber seq, BufferVec& removed) {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  BufferMap::iterator buffer_iter = buffers_.find(seq);
+  if (buffer_iter != buffers_.end()) {
+    remove_i(buffer_iter, removed);
+  }
+}
+
+void
 SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
 {
   BufferType& buffer(buffer_iter->second);
@@ -123,6 +132,38 @@ SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
     }
   }
 
+  destinations_.erase(buffer_iter->first);
+  buffers_.erase(buffer_iter);
+}
+
+void
+SingleSendBuffer::remove_i(BufferMap::iterator buffer_iter, BufferVec& removed)
+{
+  BufferType& buffer(buffer_iter->second);
+  if (Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SingleSendBuffer::release() - ")
+      ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
+      buffer.first, buffer.second
+    ));
+  }
+
+  if (buffer.first && buffer.second) {
+    // not a fragment
+    removed.push_back(buffer);
+  } else {
+    // data actually stored in fragments_
+    const FragmentMap::iterator fm_it = fragments_.find(buffer_iter->first);
+    if (fm_it != fragments_.end()) {
+      for (BufferMap::iterator bm_it = fm_it->second.begin();
+           bm_it != fm_it->second.end(); ++bm_it) {
+        removed.push_back(bm_it->second);
+      }
+      fragments_.erase(fm_it);
+    }
+  }
+
+  destinations_.erase(buffer_iter->first);
   buffers_.erase(buffer_iter);
 }
 
@@ -195,8 +236,9 @@ SingleSendBuffer::insert(SequenceNumber sequence,
                          TransportSendStrategy::QueueType* queue,
                          ACE_Message_Block* chain)
 {
+  BufferVec removed;
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  check_capacity_i();
+  check_capacity_i(removed);
 
   BufferType& buffer = buffers_[sequence];
   insert_buffer(buffer, queue, chain);
@@ -218,6 +260,13 @@ SingleSendBuffer::insert(SequenceNumber sequence,
         !DataSampleHeader::test_flag(HISTORIC_SAMPLE_FLAG, msg)) {
       destinations_[sequence] = subId;
     }
+  }
+  g.release();
+  for (size_t i = 0; i < removed.size(); ++i) {
+    RemoveAllVisitor visitor;
+    removed[i].first->accept_remove_visitor(visitor);
+    delete removed[i].first;
+    removed[i].second->release();
   }
 }
 
@@ -248,8 +297,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                   TransportSendStrategy::QueueType* queue,
                                   ACE_Message_Block* chain)
 {
+  BufferVec removed;
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  check_capacity_i();
+  check_capacity_i(removed);
 
   // Insert into buffers_ so that the overall capacity is maintained
   // The entry in buffers_ with two null pointers indicates that the
@@ -268,10 +318,17 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
       buffer.first, buffer.second
     ));
   }
+  g.release();
+  for (size_t i = 0; i < removed.size(); ++i) {
+    RemoveAllVisitor visitor;
+    removed[i].first->accept_remove_visitor(visitor);
+    delete removed[i].first;
+    removed[i].second->release();
+  }
 }
 
 void
-SingleSendBuffer::check_capacity_i()
+SingleSendBuffer::check_capacity_i(BufferVec& removed)
 {
   if (capacity_ == SingleSendBuffer::UNLIMITED) {
     return;
@@ -291,7 +348,7 @@ SingleSendBuffer::check_capacity_i()
     }
 
     destinations_.erase(it->first);
-    release_i(it);
+    remove_i(it, removed);
   }
 }
 

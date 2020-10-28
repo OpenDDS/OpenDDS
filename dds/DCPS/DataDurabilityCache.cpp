@@ -832,8 +832,11 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
                      sample_length);
       mb->wr_ptr(sample_length);
 
-      const DDS::ReturnCode_t ret = data_writer->write(move(mb), handle,
-        source_timestamp, 0 /* no content filtering */);
+      const DDS::ReturnCode_t ret = data_writer->write(move(mb),
+                                                       handle,
+                                                       source_timestamp,
+                                                       0 /* no content filtering */,
+                                                       0 /* no pointer to data */);
 
       if (ret != DDS::RETCODE_OK) {
         return false;

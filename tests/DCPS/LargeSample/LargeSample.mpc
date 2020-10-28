@@ -24,6 +24,7 @@ project(DDS*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   Source_Files {
     publisher.cpp
     Writer.cpp
+    common.cpp
   }
 }
 
@@ -38,5 +39,6 @@ project(DDS*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
+    common.cpp
   }
 }

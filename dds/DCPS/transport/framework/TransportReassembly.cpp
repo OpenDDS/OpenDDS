@@ -139,6 +139,10 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         }
       }
       return true;
+    } else if (fr.transport_seq_.first <= seqRange.first && fr.transport_seq_.second >= seqRange.second) {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+        "duplicate fragment range, dropping\n"));
+      return false;
     }
   }
 
@@ -153,7 +157,22 @@ bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
                                const RepoId& pub_id) const
 {
-  return fragments_.count(FragKey(pub_id, seq));
+  const FragInfoMap::const_iterator it = fragments_.find(FragKey(pub_id, seq));
+  return it != fragments_.end() && !it->second.complete_;
+}
+
+void
+TransportReassembly::clear_completed(const RepoId& pub_id)
+{
+  FragInfoMap::iterator begin = fragments_.lower_bound(FragKey(pub_id, SequenceNumber()));
+  const FragInfoMap::iterator end = fragments_.upper_bound(FragKey(pub_id, SequenceNumber(SequenceNumber::MAX_VALUE)));
+  while (begin != end) {
+    if (begin->second.complete_) {
+      fragments_.erase(begin++);
+    } else {
+      ++begin;
+    }
+  }
 }
 
 CORBA::ULong
@@ -163,8 +182,12 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
 {
   // length is number of (allocated) words in bitmap, max of 8
   // numBits is number of valid bits in the bitmap, <= length * 32, to account for partial words
-  const FragMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
-  if (iter == fragments_.end() || length == 0) {
+  if (length == 0) {
+    return 0;
+  }
+
+  const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
+  if (iter == fragments_.end() || iter->second.complete_) {
     // Nothing missing
     return 0;
   }
@@ -173,7 +196,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
   // low 32 bits of the 64-bit generalized sequence numbers in
   // FragRange::transport_seq_.
 
-  const OPENDDS_LIST(FragRange)& flist = iter->second;
+  const OPENDDS_LIST(FragRange)& flist = iter->second.range_list_;
   const SequenceNumber& first = flist.front().transport_seq_.first;
   const CORBA::ULong base = (first == 1)
     ? flist.front().transport_seq_.second.getLow() + 1
@@ -186,8 +209,15 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
                                         bitmap, length, numBits);
   } else if (flist.size() == 1) {
     // No gaps, but we know there is (at least 1) more_framents
-    DisjointSequence::fill_bitmap_range(0, 0,
-                                        bitmap, length, numBits);
+    if (iter->second.total_frags_ == 0) {
+      DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits);
+    } else {
+      const size_t rlimit = static_cast<size_t>(flist.back().transport_seq_.second.getValue() - 1);
+      const CORBA::ULong ulimit = static_cast<CORBA::ULong>(iter->second.total_frags_ - rlimit);
+      DisjointSequence::fill_bitmap_range(0,
+                                          ulimit,
+                                          bitmap, length, numBits);
+    }
     // NOTE: this could send a nack for fragments that are in flight
     // need to defer setting bitmap till heartbeat extending logic
     // in RtpsUdpDataLink::generate_nack_frags
@@ -210,24 +240,27 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
 
 bool
 TransportReassembly::reassemble(const SequenceRange& seqRange,
-                                ReceivedDataSample& data)
+                                ReceivedDataSample& data,
+                                ACE_UINT32 total_frags)
 {
-  return reassemble_i(seqRange, seqRange.first == 1, data);
+  return reassemble_i(seqRange, seqRange.first == 1, data, total_frags);
 }
 
 bool
 TransportReassembly::reassemble(const SequenceNumber& transportSeq,
                                 bool firstFrag,
-                                ReceivedDataSample& data)
+                                ReceivedDataSample& data,
+                                ACE_UINT32 total_frags)
 {
   return reassemble_i(SequenceRange(transportSeq, transportSeq),
-                      firstFrag, data);
+                      firstFrag, data, total_frags);
 }
 
 bool
 TransportReassembly::reassemble_i(const SequenceRange& seqRange,
                                   bool firstFrag,
-                                  ReceivedDataSample& data)
+                                  ReceivedDataSample& data,
+                                  ACE_UINT32 total_frags)
 {
   if (Transport_debug_level > 5) {
     GuidConverter conv(data.header_.publication_id_);
@@ -239,20 +272,26 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 
   const FragKey key(data.header_.publication_id_, data.header_.sequence_);
 
-  if (firstFrag) {
-    have_first_.insert(key);
-  }
-
-  FragMap::iterator iter = fragments_.find(key);
+  FragInfoMap::iterator iter = fragments_.find(key);
   if (iter == fragments_.end()) {
-    fragments_[key].push_back(FragRange(seqRange, data));
+    fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags);
     // since this is the first fragment we've seen, it can't possibly be done
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "stored first frag, returning false (incomplete)\n"));
     return false;
+  } else {
+    if (iter->second.complete_) {
+      return false;
+    }
+    if (firstFrag) {
+      iter->second.have_first_ = true;
+    }
+    if (iter->second.total_frags_ < total_frags) {
+      iter->second.total_frags_ = total_frags;
+    }
   }
 
-  if (!insert(iter->second, seqRange, data)) {
+  if (!insert(iter->second.range_list_, seqRange, data)) {
     // error condition, already logged by insert()
     return false;
   }
@@ -261,12 +300,12 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   // 1. we've seen the "first fragment" flag  [first frag is here]
   // 2. all fragments have been coalesced     [no gaps in the seq numbers]
   // 3. the "more fragments" flag is not set  [last frag is here]
-  if (have_first_.count(key)
-      && iter->second.size() == 1
-      && !iter->second.front().rec_ds_.header_.more_fragments_) {
-    swap(data, iter->second.front().rec_ds_);
-    fragments_.erase(iter);
-    have_first_.erase(key);
+  if (iter->second.have_first_
+      && iter->second.range_list_.size() == 1
+      && !iter->second.range_list_.front().rec_ds_.header_.more_fragments_) {
+    swap(data, iter->second.range_list_.front().rec_ds_);
+    iter->second.range_list_.clear();
+    iter->second.complete_ = true;
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "removed frag, returning %C\n", data.sample_ ? "true" : "false"));
     return data.sample_.get(); // could be false if we had data_unavailable()
@@ -284,10 +323,10 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
     "dropped %q-%q\n", dropped.first.getValue(), dropped.second.getValue()));
   typedef OPENDDS_LIST(FragRange)::iterator list_iterator;
 
-  for (FragMap::iterator iter = fragments_.begin(); iter != fragments_.end();
+  for (FragInfoMap::iterator iter = fragments_.begin(); iter != fragments_.end();
        ++iter) {
     const FragKey& key = iter->first;
-    OPENDDS_LIST(FragRange)& flist = iter->second;
+    OPENDDS_LIST(FragRange)& flist = iter->second.range_list_;
 
     ReceivedDataSample dummy(0);
     dummy.header_.sequence_ = key.data_sample_seq_;
@@ -295,8 +334,8 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
     // check if we should expand the front element (only if !have_first)
     const SequenceNumber::Value prev =
       flist.front().transport_seq_.first.getValue() - 1;
-    if (dropped.second.getValue() == prev && !have_first_.count(key)) {
-      have_first_.insert(key);
+    if (dropped.second.getValue() == prev && !iter->second.have_first_) {
+      iter->second.have_first_ = true;
       dummy.header_.more_fragments_ = true;
       insert(flist, dropped, dummy);
       continue;
@@ -335,7 +374,6 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
 {
   const FragKey key(pub_id, dataSampleSeq);
   fragments_.erase(key);
-  have_first_.erase(key);
 }
 
 }

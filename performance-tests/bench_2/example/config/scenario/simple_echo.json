@@ -1,0 +1,15 @@
+{
+  "name": "Simple Echo",
+  "desc": "This is a typical echo client / server combo",
+  "any_node": [
+    {
+      "config": "simple_echo_client_config.json",
+      "count": 1
+    },
+    {
+      "config": "simple_echo_server_config.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

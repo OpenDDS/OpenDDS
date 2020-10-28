@@ -8,27 +8,28 @@
 #ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/MonitorFactory.h"
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DomainParticipantFactoryImpl.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
-
-#include "ace/Task.h"
-#include "ace/Configuration.h"
-#include "ace/Time_Value.h"
-#include "ace/ARGV.h"
-#include "ace/Barrier.h"
-
+#include "Definitions.h"
+#include "MonitorFactory.h"
+#include "Discovery.h"
+#include "PoolAllocator.h"
+#include "DomainParticipantFactoryImpl.h"
+#include "ConfigUtils.h"
+#include "unique_ptr.h"
+#include "ReactorTask.h"
+#include "NetworkConfigMonitor.h"
+#include "NetworkConfigModifier.h"
 #include "Recorder.h"
 #include "Replayer.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Task.h>
+#include <ace/Configuration.h>
+#include <ace/Time_Value.h>
+#include <ace/ARGV.h>
+#include <ace/Barrier.h>
 
 #include <memory>
 
@@ -44,7 +45,6 @@ namespace DCPS {
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
-class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -86,6 +86,8 @@ public:
   ACE_Reactor* reactor();
 
   ACE_thread_t reactor_owner() const;
+
+  ReactorInterceptor_rch interceptor() const;
 
   void set_shutdown_listener(ShutdownListener* listener);
 
@@ -220,6 +222,8 @@ public:
   void set_default_discovery(const Discovery::RepoKey& defaultDiscovery);
   Discovery::RepoKey get_default_discovery();
 
+
+
   /// Convert domainId to repository key.
   Discovery::RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
 
@@ -262,8 +266,14 @@ public:
   bool  publisher_content_filter() const;
   //@}
 
-  /// Accessor for pending data timeout.
+  /// Accessors for pending data timeout.
+  //@{
   TimeDuration pending_timeout() const;
+  void pending_timeout(const TimeDuration& value);
+  //@}
+
+  /// Get a new pending timeout deadline
+  MonotonicTimePoint new_pending_timeout_deadline() const;
 
   /// Accessors for priority extremums for the current scheduler.
   //@{
@@ -316,7 +326,7 @@ public:
     bit_enabled_ = b;
   }
 
-  ACE_CString default_address() const;
+  const ACE_INET_Addr& default_address() const { return default_address_; }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
@@ -389,6 +399,14 @@ public:
   int load_configuration(ACE_Configuration_Heap& cf,
                          const ACE_TCHAR* filename);
 
+  /**
+   * Used by TransportRegistry to determine if a domain ID
+   * is part of a [DomainRange]
+   */
+  bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
+
+  bool get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
+
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
    * Configure the safety profile pool
@@ -403,7 +421,17 @@ public:
    */
   void default_configuration_file(const ACE_TCHAR* path);
 
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  NetworkConfigModifier* network_config_modifier();
+#endif
   NetworkConfigMonitor_rch network_config_monitor();
+
+
+  DDS::Duration_t bit_autopurge_nowriter_samples_delay() const;
+  void bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration);
+
+  DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
+  void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
 private:
 
@@ -446,11 +474,34 @@ private:
                                 const ACE_TCHAR* filename);
 
   /**
+   * Load the domain range template configuration
+   * prior to discovery and domain configuration
+   */
+  int load_domain_ranges(ACE_Configuration_Heap& cf);
+
+  /**
+   * Load the discovery template information
+   */
+  int load_discovery_templates(ACE_Configuration_Heap& cf);
+
+  /**
+   * Process the domain range template and activate the
+   * domain for the given domain ID
+   */
+  int configure_domain_range_instance(DDS::DomainId_t domainId);
+
+  /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
+
+  /**
+   * Create and load a discovery config from a discovery template
+   */
+  int configure_discovery_template(DDS::DomainId_t domainId,
+                                   const OPENDDS_STRING& discovery_name);
 
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
@@ -539,7 +590,7 @@ private:
   int bit_lookup_duration_msec_;
 
   /// The default network address to use.
-  ACE_CString default_address_;
+  ACE_INET_Addr default_address_;
 
   /// The configuration object that imports the configuration
   /// file.
@@ -550,7 +601,50 @@ private:
   /// not set, the default transport configuration is used.
   ACE_TString global_transport_config_;
 
+  // domain range template support
+  struct DomainRange
+  {
+    DDS::DomainId_t range_start;
+    DDS::DomainId_t range_end;
+    OPENDDS_STRING discovery_template_name;
+    OPENDDS_STRING transport_config_name;
+    ValueMap domain_info;
+
+    DomainRange() : range_start(-1), range_end(-1) {}
+  };
+
+  struct DiscoveryInfo
+  {
+    OPENDDS_STRING discovery_name;
+    ValueMap customizations;
+    ValueMap disc_info;
+  };
+
+  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
+
+  OPENDDS_VECTOR(DomainRange) domain_ranges_;
+
+  OPENDDS_VECTOR(DiscoveryInfo) discovery_infos_;
+
+  int parse_domain_range(const OPENDDS_STRING& range, int& start, int& end);
+
+  bool has_domain_range() const;
+
+  bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
+
+  bool process_customizations(DDS::DomainId_t id, const OPENDDS_STRING& discovery_name, ValueMap& customs);
+
+  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
+
+  bool is_discovery_template(const OPENDDS_STRING& name);
+
 public:
+  // thread status reporting
+  TimeDuration get_thread_status_interval();
+  void set_thread_status_interval(TimeDuration interval);
+
+  ThreadStatus* get_thread_statuses();
+
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
   MonitorFactory* monitor_factory_;
@@ -617,6 +711,11 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
+  /// Enable Internal Thread Status Monitoring
+  TimeDuration thread_status_interval_;
+
+  ThreadStatus thread_status_;
+
   /// Enable Monitor functionality
   bool monitor_enabled_;
 
@@ -638,6 +737,9 @@ private:
 
   NetworkConfigMonitor_rch network_config_monitor_;
   mutable ACE_Thread_Mutex network_config_monitor_lock_;
+
+  DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
+  DDS::Duration_t bit_autopurge_disposed_samples_delay_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

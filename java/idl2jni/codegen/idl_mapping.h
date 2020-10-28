@@ -45,7 +45,8 @@ public:
                          AST_Expression::ExprType udisc_type,
                          const AST_Union::DefaultValue &default_value, const char *repoid) = 0;
 
-  static std::string scoped_helper(UTL_ScopedName *sn, const char *sep);
+  static std::string scoped_helper(UTL_ScopedName *sn, const char *sep,
+                                   bool omit_local = false);
 };
 
 class composite_mapping : public idl_mapping {
@@ -120,7 +121,7 @@ public:
 
 class idl_mapping_jni : public idl_mapping {
 public:
-  static std::string scoped(UTL_ScopedName *name);
+  static std::string scoped(UTL_ScopedName *name, bool omit_local = false);
   static std::string type(AST_Type *decl);   //"jint", "jlong", etc.
   static std::string jvmSignature(AST_Type *decl);  //"I", "J", etc.
   static std::string jniFnName(AST_Type *decl);   //"Int", "Long", etc.

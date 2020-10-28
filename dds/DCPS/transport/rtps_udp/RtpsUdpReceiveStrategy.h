@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RTPS/ICE/Ice.h"
 #include "dds/DCPS/RcEventHandler.h"
 
 #include "ace/INET_Addr.h"
@@ -32,6 +33,7 @@ namespace ICE {
 
 namespace DCPS {
 
+class RtpsUdpTransport;
 class RtpsUdpDataLink;
 class ReceivedDataSample;
 
@@ -59,8 +61,8 @@ public:
   typedef std::pair<SequenceNumber, RTPS::FragmentNumberSet> SeqFragPair;
   typedef OPENDDS_VECTOR(SeqFragPair) FragmentInfo;
 
-  bool has_fragments(const SequenceRange& range, const RepoId& pub_id,
-                     FragmentInfo* frag_info = 0);
+  void clear_completed_fragments(const RepoId& pub_id);
+  bool has_fragments(const SequenceRange& range, const RepoId& pub_id, FragmentInfo* frag_info = 0);
 
   /// Prevent delivery of the currently in-progress data sample to the
   /// subscription sub_id.  Returns pointer to the in-progress data so
@@ -73,10 +75,13 @@ public:
                                       const ACE_SOCK_Dgram& socket,
                                       ACE_INET_Addr& remote_address,
                                       ICE::Endpoint* endpoint,
+                                      RtpsUdpTransport& tport,
                                       bool& stop);
 
 private:
   bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
+
+  const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE fd) const;
 
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
@@ -98,6 +103,7 @@ private:
   virtual bool check_header(const RtpsSampleHeader& header);
 
   virtual bool reassemble(ReceivedDataSample& data);
+  virtual bool reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh);
 
 #ifdef OPENDDS_SECURITY
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
@@ -118,6 +124,7 @@ private:
   RepoIdSet readers_withheld_, readers_selected_;
 
   SequenceRange frags_;
+  ACE_UINT32 total_frags_;
   TransportReassembly reassembly_;
 
   struct MessageReceiver {

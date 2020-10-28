@@ -820,8 +820,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getGroupAddress
   ACE_TCHAR buffer[1024];
   inst->group_address_.addr_to_string(buffer, 1024, 1);
   std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  jstring retStr = jni->NewStringUTF(addr_str.c_str());
-  return retStr;
+  return jni->NewStringUTF(addr_str.c_str());
 }
 
 // MulticastInst::setGroupAddress
@@ -1016,7 +1015,10 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return jni->NewStringUTF(inst->local_address_string().c_str());
+  ACE_TCHAR buffer[1024];
+  inst->local_address().addr_to_string(buffer, 1024, 1);
+  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
+  return jni->NewStringUTF(addr_str.c_str());
 }
 
 // RtpsUdpInst::setLocalAddress
@@ -1025,7 +1027,8 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setLocalAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  inst->local_address(jsm_val.c_str());
+  ACE_INET_Addr addr(jsm_val.c_str());
+  inst->local_address(addr);
 }
 
 // RtpsUdpInst::isUseMulticast
@@ -1050,7 +1053,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   ACE_TCHAR buffer[1024];
-  inst->multicast_group_address_.addr_to_string(buffer, 1024, 1);
+  inst->multicast_group_address().addr_to_string(buffer, 1024, 1);
   std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
   return jni->NewStringUTF(addr_str.c_str());
 }
@@ -1061,7 +1064,8 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setMulticastGroupAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  inst->multicast_group_address_.set(jsm_val.c_str());
+  ACE_INET_Addr addr(jsm_val.c_str());
+  inst->multicast_group_address(addr);
 }
 
 // RtpsUdpInst::getNakDepth

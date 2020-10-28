@@ -249,4 +249,4 @@ bool RakeResults<SampleSeq>::copy_to_user()
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* RAKERESULTS_H  */
+#endif // RAKERESULTS_T_CPP

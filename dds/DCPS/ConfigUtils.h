@@ -46,6 +46,26 @@ namespace DCPS {
     return true;
   }
 
+  /**
+   * Convert string s to value of double type T.
+   *
+   * Returns true for success, false for error
+   */
+  template <typename T>
+  bool convertToDouble(const OPENDDS_STRING& s, T& value)
+  {
+#ifdef OPENDDS_SAFETY_PROFILE
+    char* end;
+    const double conv = std::strtod(s.c_str(), &end);
+    if (end == s.c_str()) return false;
+    value = static_cast<T>(conv);
+#else
+    std::stringstream istr(s.c_str());
+    if (!(istr >> value) || (istr.peek() != EOF)) return false;
+#endif
+    return true;
+  }
+
 
   ///     Function that pulls all the values from the
   ///     specified ACE Configuration Section and places them in a

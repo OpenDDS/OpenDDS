@@ -170,13 +170,10 @@ void DataReaderImpl::init(
     topic_servant_ = a_topic;
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   CORBA::String_var topic_name = a_topic_desc->get_name();
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  is_bit_ = ACE_OS::strcmp(topic_name.in(), BUILT_IN_PARTICIPANT_TOPIC) == 0
-      || ACE_OS::strcmp(topic_name.in(), BUILT_IN_TOPIC_TOPIC) == 0
-      || ACE_OS::strcmp(topic_name.in(), BUILT_IN_SUBSCRIPTION_TOPIC) == 0
-      || ACE_OS::strcmp(topic_name.in(), BUILT_IN_PUBLICATION_TOPIC) == 0;
+  CORBA::String_var topic_type_name = a_topic_desc->get_type_name();
+  is_bit_ = topicIsBIT(topic_name, topic_type_name);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
@@ -262,13 +259,15 @@ DataReaderImpl::add_association(const RepoId& yourId,
           writer_id,
           info));
 
-      // Schedule timer if necessary
-      //   - only need to check reader qos - we know the writer must be >= reader
-      if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        info->waiting_for_end_historic_samples_ = true;
-      }
+    // Schedule timer if necessary
+    //   - only need to check reader qos - we know the writer must be >= reader
+    if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+      info->waiting_for_end_historic_samples_ = true;
+    }
 
-      this->statistics_.insert(
+    remove_association_sweeper_->cancel_timer(writer_id);
+
+    this->statistics_.insert(
         StatsMapType::value_type(
             writer_id,
             WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
@@ -321,7 +320,12 @@ DataReaderImpl::add_association(const RepoId& yourId,
   //is held here anyway
   guard.release();
 
-  if (!associate(data, active)) {
+  if (associate(data, active)) {
+    const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
+    if (observer) {
+      observer->on_associated(this, data.remote_id_);
+    }
+  } else {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
@@ -425,9 +429,9 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-      ACE_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-      if(!writers_.count(remote_id)){
+      if (!writers_.count(remote_id)) {
         return;
       }
       writers_[remote_id]->handle_ = handle;
@@ -461,6 +465,13 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
   if (writers.length() == 0) {
     return;
+  }
+
+  const Observer_rch observer = get_observer(Observer::e_DISASSOCIATED);
+  if (observer) {
+    for (CORBA::ULong i = 0; i < writers.length(); ++i) {
+      observer->on_disassociated(this, writers[i]);
+    }
   }
 
   if (DCPS_debug_level >= 1) {
@@ -690,6 +701,8 @@ DataReaderImpl::remove_all_associations()
                ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::remove_all_associations() - ")
                ACE_TEXT("caught exception from remove_associations.\n")));
   }
+
+  transport_stop();
 }
 
 void
@@ -884,9 +897,13 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
       }
     }
 
-
     qos_change(qos);
     qos_ = qos;
+
+    const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
+    if (observer) {
+      observer->on_qos_changed(this);
+    }
 
     return DDS::RETCODE_OK;
 
@@ -1278,19 +1295,24 @@ DataReaderImpl::enable()
     }
   }
 
+  DDS::ReturnCode_t return_value = DDS::RETCODE_OK;
   if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
-    DDS::ReturnCode_t return_value =
-        subscriber->reader_enabled(name.in(), this);
+    return_value = subscriber->reader_enabled(name.in(), this);
 
     if (this->monitor_) {
       this->monitor_->report();
     }
-
-    return return_value;
-  } else {
-    return DDS::RETCODE_OK;
   }
+
+  if (return_value == DDS::RETCODE_OK) {
+    const Observer_rch observer = get_observer(Observer::e_ENABLED);
+    if (observer) {
+      observer->on_enabled(this);
+    }
+  }
+
+  return return_value;
 }
 
 void
@@ -1372,6 +1394,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
+  RcHandle<MessageHolder> real_data;
+  SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
   case INSTANCE_REGISTRATION: {
@@ -1397,13 +1421,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     // This also adds to the sample container and makes any callbacks
     // and condition modifications.
 
-    SubscriptionInstance_rch instance;
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
       dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING);
     } else {
-      dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
+      real_data = dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
     }
 
     // Per sample logging
@@ -1637,6 +1660,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         sample.header_.message_id_));
     break;
   }
+
+  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+  const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+  if (observer && real_data && vwd) {
+    DDS::Time_t timestamp;
+    timestamp.sec = sample.header_.source_timestamp_sec_;
+    timestamp.nanosec = sample.header_.source_timestamp_nanosec_;
+    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vwd);
+    observer->on_sample_received(this, s);
+  }
 }
 
 RcHandle<EntityImpl>
@@ -1677,11 +1710,6 @@ RcHandle<SubscriberImpl>
 DataReaderImpl::get_subscriber_servant()
 {
   return subscriber_servant_.lock();
-}
-
-RepoId DataReaderImpl::get_subscription_id() const
-{
-  return subscription_id_;
 }
 
 bool DataReaderImpl::have_sample_states(
@@ -1869,7 +1897,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   if (local_timer_id != -1 && cancel) {
     if (DCPS_debug_level >= 5) {
-      GuidConverter converter(data_reader->get_subscription_id());
+      GuidConverter converter(data_reader->get_repo_id());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
@@ -1933,7 +1961,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   }
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter converter(data_reader->get_subscription_id());
+    GuidConverter converter(data_reader->get_repo_id());
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
@@ -2394,6 +2422,11 @@ DataReaderImpl::statistics_enabled(
 void
 DataReaderImpl::prepare_to_delete()
 {
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
+
   this->set_deleted(true);
   this->stop_associating();
   this->send_final_acks();
@@ -2425,10 +2458,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     return DDS::HANDLE_NIL;
 
   if (is_bit()) {
-    Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
-    CORBA::String_var topic = topic_servant_->get_name();
-
-    RepoId id = disc->bit_key_to_repo_id(participant.in(), topic, key);
+    const RepoId id = bit_key_to_repo_id(key);
     return participant->id_to_handle(id);
 
   } else {
@@ -3245,12 +3275,14 @@ void
 DataReaderImpl::update_locators(const RepoId& writerId,
                                 const TransportLocatorSeq& locators)
 {
-  ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
-  WriterMapType::const_iterator iter = writers_.find(writerId);
-
-  if (iter != writers_.end()) {
-    TransportClient::update_locators(writerId, locators);
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+    WriterMapType::const_iterator iter = writers_.find(writerId);
+    if (iter == writers_.end()) {
+      return;
+    }
   }
+  TransportClient::update_locators(writerId, locators);
 }
 
 ICE::Endpoint*

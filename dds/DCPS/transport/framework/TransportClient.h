@@ -80,6 +80,7 @@ public:
   void stop_associating();
   void stop_associating(const GUID_t* repos, CORBA::ULong length);
   void send_final_acks();
+  void transport_stop();
 
   // Discovery:
   void register_for_reader(const RepoId& participant,
@@ -132,6 +133,7 @@ public:
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
   virtual const RepoId& get_repo_id() const = 0;
+  virtual DDS::Subscriber_var get_builtin_subscriber() const { return DDS::Subscriber_var(); }
 
   void terminate_send_if_suspended();
 
@@ -179,18 +181,23 @@ private:
   typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
   struct PendingAssoc : RcEventHandler {
-    bool active_, removed_;
+    ACE_Thread_Mutex mutex_;
+    bool active_, scheduled_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
     TransportImpl::ConnectionAttribs attribs_;
+    WeakRcHandle<TransportClient> client_;
 
-    PendingAssoc()
+    explicit PendingAssoc(TransportClient* tc)
       : active_(false)
-      , removed_(false)
+      , scheduled_(false)
       , blob_index_(0)
+      , client_(RcHandle<TransportClient>(tc, inc_count()))
     {}
 
+    void reset_client();
+    bool safe_to_remove();
     bool initiate_connect(TransportClient* tc, Guard& guard);
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
@@ -198,6 +205,9 @@ private:
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
   typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PrevPendingMap;
+
+  void clean_prev_pending();
 
   class PendingAssocTimer : public ReactorInterceptor {
   public:
@@ -206,14 +216,14 @@ private:
       : ReactorInterceptor(reactor, owner)
     { }
 
-    void schedule_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
     {
       execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
     }
 
-    ReactorInterceptor::CommandPtr cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    ReactorInterceptor::CommandPtr cancel_timer(const PendingAssoc_rch& pend)
     {
-      return execute_or_enqueue(new CancelCommand(this, transport_client, pend));
+      return execute_or_enqueue(new CancelCommand(this, pend));
     }
 
     virtual bool reactor_is_shut_down() const
@@ -228,42 +238,47 @@ private:
     class CommandBase : public Command {
     public:
       CommandBase(PendingAssocTimer* timer,
-                  TransportClient* transport_client,
                   const PendingAssoc_rch& assoc)
         : timer_ (timer)
-        , transport_client_ (transport_client)
         , assoc_ (assoc)
       { }
     protected:
       PendingAssocTimer* timer_;
-      TransportClient* transport_client_;
       PendingAssoc_rch assoc_;
     };
     struct ScheduleCommand : public CommandBase {
       ScheduleCommand(PendingAssocTimer* timer,
-                      TransportClient* transport_client,
+                      TransportClient_rch transport_client,
                       const PendingAssoc_rch& assoc)
-        : CommandBase (timer, transport_client, assoc)
+        : CommandBase (timer, assoc)
+        , transport_client_ (transport_client)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
-          timer_->reactor()->schedule_timer(assoc_.in(),
-                                            transport_client_,
-                                            transport_client_->passive_connect_duration_.value());
+          TransportClient_rch client = transport_client_.lock();
+          if (client) {
+            ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+            assoc_->scheduled_ = true;
+            timer_->reactor()->schedule_timer(assoc_.in(),
+                                              client.in(),
+                                              client->passive_connect_duration_.value());
+          }
         }
       }
+      WeakRcHandle<TransportClient> transport_client_;
     };
     struct CancelCommand : public CommandBase {
       CancelCommand(PendingAssocTimer* timer,
-                    TransportClient* transport_client,
                     const PendingAssoc_rch& assoc)
-        : CommandBase (timer, transport_client, assoc)
+        : CommandBase (timer, assoc)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
+          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
           timer_->reactor()->cancel_timer(assoc_.in());
+          assoc_->scheduled_ = false;
         }
       }
     };
@@ -275,6 +290,7 @@ private:
   TransportConfig_rch config_;
   ImplsType impls_;
   PendingMap pending_;
+  PrevPendingMap prev_pending_;
   DataLinkSet links_;
 
   DataLinkIndex data_link_index_;

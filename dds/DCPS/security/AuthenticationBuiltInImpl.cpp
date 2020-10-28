@@ -53,6 +53,8 @@ const std::string Handshake_Request_Class_Ext("Req");
 const std::string Handshake_Reply_Class_Ext("Reply");
 const std::string Handshake_Final_Class_Ext("Final");
 
+const char* AuthenticationBuiltInImpl::PROPERTY_HANDSHAKE_DEBUG = "opendds.sec.auth.handshake_debug";
+
 struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
   SharedSecret(DDS::OctetSeq challenge1,
@@ -95,7 +97,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   LocalAuthCredentialData::shared_ptr credentials = DCPS::make_rch<LocalAuthCredentialData>();
-  if (! credentials->load_credentials(participant_qos.property.value, ex)) {
+  if (!credentials->load_credentials(participant_qos.property.value, ex)) {
     return result;
   }
 
@@ -105,12 +107,18 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       int err = SSL::make_adjusted_guid(candidate_participant_guid,
                                         adjusted_participant_guid,
                                         credentials->get_participant_cert());
-      if (! err) {
+      if (!err) {
         local_identity_handle = get_next_handle();
 
         LocalParticipantData::shared_ptr local_participant = DCPS::make_rch<LocalParticipantData>();
         local_participant->participant_guid = adjusted_participant_guid;
         local_participant->credentials = credentials;
+        for (unsigned i = 0; i < participant_qos.property.value.length(); ++i) {
+          if (std::strcmp(PROPERTY_HANDSHAKE_DEBUG,
+                          participant_qos.property.value[i].name.in()) == 0) {
+            local_participant->handshake_debug = true;
+          }
+        }
 
         {
           ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
@@ -124,11 +132,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       }
 
     } else {
-        set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
+      set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
     }
 
   } else {
-      set_security_error(ex, -1, 0, "local-credential-data failed validation");
+    set_security_error(ex, -1, 0, "local-credential-data failed validation");
   }
 
   return result;
@@ -223,86 +231,68 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::OpenDDS::DCPS::GUID_t & remote_participant_guid,
   ::DDS::Security::SecurityException & ex)
 {
-  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
-
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   LocalParticipantData::shared_ptr local_data = get_local_participant(local_identity_handle);
-  if (local_data) {
-    if (check_class_versions(remote_identity_token.class_id)) {
 
-      // Make sure that a remote_participant_guid has not already been assigned a
-      // remote-identity-handle before creating a new one.
-
-      RemoteParticipantMap::iterator begin = local_data->validated_remotes.begin(),
-                                     end = local_data->validated_remotes.end(),
-                                     found = std::find_if(begin, end,
-                                                          was_guid_validated(remote_participant_guid));
-      if (found != end) {
-        remote_identity_handle = found->first;
-        local_auth_request_token = found->second->local_auth_request;
-
-        if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
-          result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
-
-        } else {
-          result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
-        }
-
-      } else {
-
-        TokenReader remote_request(remote_auth_request_token);
-        if (remote_request.is_nil()) {
-
-          DDS::OctetSeq nonce;
-          int err = SSL::make_nonce_256(nonce);
-          if (! err) {
-            TokenWriter auth_req_wrapper(local_auth_request_token, build_class_id(Auth_Request_Class_Ext));
-
-            auth_req_wrapper.add_bin_property("future_challenge", nonce);
-
-          } else {
-            set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for future_challenge property");
-
-            result = DDS::Security::VALIDATION_FAILED;
-          }
-
-        } else {
-          local_auth_request_token = DDS::Security::Token();
-        }
-
-        if (result == DDS::Security::VALIDATION_OK) {
-
-          // Retain all of the data needed for a handshake with the remote participant
-          RemoteParticipantData::shared_ptr remote_participant = DCPS::make_rch<RemoteParticipantData>();
-          remote_participant->participant_guid = remote_participant_guid;
-          remote_participant->local_participant = local_identity_handle;
-          remote_participant->local_auth_request = local_auth_request_token;
-          remote_participant->remote_auth_request = remote_auth_request_token;
-
-          remote_identity_handle = get_next_handle();
-          local_data->validated_remotes[remote_identity_handle] = remote_participant;
-
-          if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
-            result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
-
-          } else {
-            result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
-          }
-        }
-      }
-
-    } else {
-      set_security_error(ex, -1, 0, "Remote class ID is not compatible");
-      result = DDS::Security::VALIDATION_FAILED;
-    }
-
-  } else {
+  if (!local_data) {
     set_security_error(ex, -1, 0, "Local participant ID not found");
-    result = DDS::Security::VALIDATION_FAILED;
+    return DDS::Security::VALIDATION_FAILED;
   }
 
-  return result;
+  if (!check_class_versions(remote_identity_token.class_id)) {
+    set_security_error(ex, -1, 0, "Remote class ID is not compatible");
+    return DDS::Security::VALIDATION_FAILED;
+  }
+
+  // Make sure that a remote_participant_guid has not already been assigned a
+  // remote-identity-handle before creating a new one.
+  RemoteParticipantMap::iterator begin = local_data->validated_remotes.begin(),
+    end = local_data->validated_remotes.end(),
+    found = std::find_if(begin, end,
+                         was_guid_validated(remote_participant_guid));
+
+  if (found == end) {
+    // Generate local token.
+    DDS::OctetSeq nonce;
+    int err = SSL::make_nonce_256(nonce);
+    if (err) {
+      set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for future_challenge property");
+      return DDS::Security::VALIDATION_FAILED;
+    }
+
+    TokenWriter auth_req_wrapper(local_auth_request_token, build_class_id(Auth_Request_Class_Ext));
+    auth_req_wrapper.add_bin_property("future_challenge", nonce);
+
+    // Retain all of the data needed for a handshake with the remote participant
+    RemoteParticipantData::shared_ptr remote_participant = DCPS::make_rch<RemoteParticipantData>();
+    remote_participant->participant_guid = remote_participant_guid;
+    remote_participant->local_participant = local_identity_handle;
+    remote_participant->local_auth_request = local_auth_request_token;
+
+    remote_identity_handle = get_next_handle();
+    found = local_data->validated_remotes.insert(std::make_pair(remote_identity_handle, remote_participant)).first;
+  }
+
+  // Update the remote token.
+  found->second->remote_auth_request = remote_auth_request_token;
+
+  // Set return values.
+  remote_identity_handle = found->first;
+
+  // Don't need to send the local token if we have a remote token.
+  TokenReader remote_request(remote_auth_request_token);
+  if (remote_request.is_nil()) {
+    local_auth_request_token = found->second->local_auth_request;
+  } else {
+    local_auth_request_token = DDS::Security::Token();
+  }
+
+  if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
+    return DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
+  } else {
+    return DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+  }
 }
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::begin_handshake_request(
@@ -332,10 +322,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     return DDS::Security::VALIDATION_FAILED;
   }
 
-  LocalParticipantData& local_data = *(handshake_data.first);
-  RemoteParticipantData& remote_data = *(handshake_data.second);
+  const LocalParticipantData& local_data = *handshake_data.first;
+  RemoteParticipantData& remote_data = *handshake_data.second;
 
-  const LocalAuthCredentialData& local_credential_data = *(local_data.credentials);
+  const LocalAuthCredentialData& local_credential_data = *local_data.credentials;
 
   SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman(new SSL::ECDH_PRIME_256_V1_CEUM));
 
@@ -363,7 +353,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
   message_out.add_bin_property("c.dsign_algo", local_credential_data.get_participant_cert().dsign_algo());
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
-  message_out.add_bin_property("hash_c1", hash_c1);
+  if (local_data.handshake_debug) {
+    message_out.add_bin_property("hash_c1", hash_c1);
+  }
 
   DDS::OctetSeq dhpub;
   diffie_hellman->pub_key(dhpub);
@@ -384,7 +376,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   } else {
     const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
     message_out.add_bin_property("challenge1", challenge_data);
-
   }
 
   remote_data.initiator_identity = initiator_identity_handle;
@@ -395,7 +386,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   remote_data.diffie_hellman = DCPS::move(diffie_hellman);
   remote_data.hash_c1 = hash_c1;
 
-  handshake_handle = get_next_handle();
+  if (handshake_handle == DDS::HANDLE_NIL) {
+    handshake_handle = get_next_handle();
+  }
+
   {
     ACE_Guard<ACE_Thread_Mutex> identity_data_guard(handshake_mutex_);
     handshake_data_[handshake_handle] = handshake_data;
@@ -623,16 +617,16 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   if (! handshake_data.first) {
     set_security_error(ex, -1, 0, "Unknown local participant");
-    return DDS::Security::VALIDATION_FAILED;
+    return Failure;
   }
 
   if (! handshake_data.second) {
     set_security_error(ex, -1, 0, "Unknown remote participant");
-    return DDS::Security::VALIDATION_FAILED;
+    return Failure;
   }
 
-  LocalParticipantData& local_data = *(handshake_data.first);
-  RemoteParticipantData& remote_data = *(handshake_data.second);
+  const LocalParticipantData& local_data = *handshake_data.first;
+  RemoteParticipantData& remote_data = *handshake_data.second;
 
   DDS::Security::HandshakeMessageToken message_data_in(request_token);
   TokenReader message_in(message_data_in);
@@ -731,12 +725,19 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
   message_out.add_bin_property("c.dsign_algo", local_credential_data.get_participant_cert().dsign_algo());
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
-  message_out.add_bin_property("hash_c2", hash_c2);
+
+  if (local_data.handshake_debug) {
+    message_out.add_bin_property("hash_c2", hash_c2);
+  }
 
   diffie_hellman->pub_key(dh2);
   message_out.add_bin_property("dh2", dh2);
-  message_out.add_bin_property("hash_c1", hash_c1);
-  message_out.add_bin_property("dh1", dh1);
+
+  if (local_data.handshake_debug) {
+    message_out.add_bin_property("hash_c1", hash_c1);
+    message_out.add_bin_property("dh1", dh1);
+  }
+
   message_out.add_bin_property("challenge1", challenge1);
 
   TokenReader initiator_local_auth_request(remote_data.local_auth_request);
@@ -780,7 +781,10 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   remote_data.hash_c1 = hash_c1;
   remote_data.hash_c2 = hash_c2;
 
-  handshake_handle = get_next_handle();
+  if (handshake_handle == DDS::HANDLE_NIL) {
+    handshake_handle = get_next_handle();
+  }
+
   {
     ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
     handshake_data_[handshake_handle] = handshake_data;
@@ -893,7 +897,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 {
   ::CORBA::Boolean results = false;
 
-  if (NULL == listener) {
+  if (!listener) {
     set_security_error(ex, -1, 0, "Null listener provided");
   } else {
     results = true;
@@ -991,9 +995,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::HandshakeHandle handshake_handle,
   DDS::Security::SecurityException & ex)
 {
-
-  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
   DDS::OctetSeq challenge1, hash_c2;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
@@ -1128,10 +1131,13 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   OpenDDS::Security::TokenWriter final_msg(handshake_message_out, build_class_id(Handshake_Final_Class_Ext));
 
-  final_msg.add_bin_property("hash_c1", remote_data.hash_c1);
-  final_msg.add_bin_property("hash_c2", hash_c2);
-  final_msg.add_bin_property("dh1", dh1);
-  final_msg.add_bin_property("dh2", dh2);
+  if (local_data.handshake_debug) {
+    final_msg.add_bin_property("hash_c1", remote_data.hash_c1);
+    final_msg.add_bin_property("hash_c2", hash_c2);
+    final_msg.add_bin_property("dh1", dh1);
+    final_msg.add_bin_property("dh2", dh2);
+  }
+
   final_msg.add_bin_property("challenge1", challenge1);
   final_msg.add_bin_property("challenge2", challenge2);
 
@@ -1182,8 +1188,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
   const DDS::Security::ValidationResult_t ValidationOkay = DDS::Security::VALIDATION_OK;
 
-  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
   HandshakeDataPair handshake_data = get_handshake_data(handshake_handle);
   if (!handshake_data.first || !handshake_data.second) {
@@ -1318,10 +1324,16 @@ AuthenticationBuiltInImpl::make_handshake_pair(DDS::Security::IdentityHandle h1,
   return HandshakeDataPair();
 }
 
-bool AuthenticationBuiltInImpl::is_handshake_initiator(const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote)
+bool AuthenticationBuiltInImpl::is_handshake_initiator(
+  const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote)
 {
   const unsigned char* local_ = reinterpret_cast<const unsigned char*>(&local);
   const unsigned char* remote_ = reinterpret_cast<const unsigned char*>(&remote);
+
+  using DCPS::SecurityDebug;
+  if (DCPS::security_debug.force_auth_role != SecurityDebug::FORCE_AUTH_ROLE_NORMAL) {
+    return DCPS::security_debug.force_auth_role == SecurityDebug::FORCE_AUTH_ROLE_LEADER;
+  }
 
   /* if remote > local, pending request; else pending handshake message */
   return std::lexicographical_compare(local_, local_ + sizeof(local),
@@ -1331,9 +1343,9 @@ bool AuthenticationBuiltInImpl::is_handshake_initiator(const OpenDDS::DCPS::GUID
 
 bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id)
 {
-  if (NULL == remote_class_id) {
+  if (!remote_class_id) {
     return false;
-    }
+  }
   bool class_matches = false;
 
   // Slow, but this is just for the stub
@@ -1362,13 +1374,12 @@ bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id
 
 std::string AuthenticationBuiltInImpl::build_class_id(const std::string& message_ext)
 {
-  std::stringstream class_id_stream;
-  class_id_stream << Auth_Plugin_Name
-    << ":" << Auth_Plugin_Major_Version
-    << "." << Auth_Plugin_Minor_Version
-    << "+" << message_ext;
+  std::string class_id_stream = Auth_Plugin_Name +
+    + ":" + Auth_Plugin_Major_Version
+    + "." + Auth_Plugin_Minor_Version
+    + "+" + message_ext;
 
-  return class_id_stream.str();
+  return class_id_stream;
 }
 
 std::string AuthenticationBuiltInImpl::get_extension(const char* class_id)

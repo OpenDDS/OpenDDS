@@ -4,7 +4,6 @@ project: idl2jni, dcps_test {
   idl2jniflags += -SS
 
   IDL_Files {
-    gendir = .
     $(TAO_ROOT)/tests/Hello/Test.idl
   }
 

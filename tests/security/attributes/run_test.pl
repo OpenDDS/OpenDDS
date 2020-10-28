@@ -33,6 +33,7 @@ my $sub_expect = "0";
 my $pub_timeout = "10";
 my $sub_timeout = "10";
 my $pub_extra_space = "0";
+my @partition;
 
 GetOptions(
   'scenario=s' => \$scenario,
@@ -50,7 +51,9 @@ GetOptions(
   'sub_expect=i' => \$sub_expect,
   'pub_timeout=i' => \$pub_timeout,
   'sub_timeout=i' => \$sub_timeout,
-  'pub_extra_space=i' => \$pub_extra_space);
+  'pub_extra_space=i' => \$pub_extra_space,
+  'partition=s' => \@partition,
+);
 
 # Handle scenarios first, since they are a special case
 if (!($scenario eq "")) {
@@ -278,9 +281,40 @@ if (!($scenario eq "")) {
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_ED");
     $pub_extra_space = "100000";
+  } elsif ($scenario eq "Partitions_DefaultQoS") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
+    @topic_names = ("OD_OL_RWA_OM_OD");
+  } elsif ($scenario eq "Partitions_Denied") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
+    @topic_names = ("OD_OL_RWA_OM_OD");
+    @partition = ("baz");
+    $pub_expect = "~15";
+    $sub_expect = "~25";
+  } elsif ($scenario eq "Partitions_Match") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
+    @topic_names = ("OD_OL_RWA_OM_OD");
+    @partition = ("foo", "bar");
+  } elsif ($scenario eq "Partitions_Reordered") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
+    @topic_names = ("OD_OL_RWA_OM_OD");
+    @partition = ("bar", "foo");
+  } elsif ($scenario eq "Partitions_Subset") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
+    @topic_names = ("OD_OL_RWA_OM_OD");
+    @partition = ("bar");
   } else {
     print "\nUnrecognized scenario '$scenario'. Skipping.\n";
-    exit -1;
+    exit 1;
   }
 } else { # Not using scenarios
 
@@ -371,6 +405,15 @@ foreach my $gov_file (@gov_files) {
 
         my $test = new PerlDDS::TestFramework();
 
+        # Suppress encdec_error in Full Message Scenarios
+        if ($scenario =~ /^FullMsg/) {
+          $test->{dcps_security_debug} = join(',', qw/
+            access_warn auth_warn auth_debug
+            encdec_warn encdec_debug
+            bookkeeping
+          /);
+        }
+
         $test->{dcps_debug_level} = 4;
         $test->{dcps_transport_debug_level} = 2;
         # will manually set -DCPSConfigFile
@@ -423,6 +466,11 @@ foreach my $gov_file (@gov_files) {
           $pub_opts .= " -ExtraSpace $pub_extra_space";
         }
 
+        for my $p (@partition) {
+          $pub_opts .= " -Partition $p";
+          $sub_opts .= " -Partition $p";
+        }
+
         #print "$gov_file $pub_perm_file $sub_perm_file\n";
 
         $test->process("publisher", "publisher", $pub_opts);
@@ -454,7 +502,7 @@ foreach my $gov_file (@gov_files) {
         #}
 
         if ($status != 0) {
-          $final_status = -1;
+          $final_status = 1;
         }
       }
     }

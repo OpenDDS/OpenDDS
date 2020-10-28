@@ -27,7 +27,6 @@ namespace OpenDDS {
 namespace ICE {
 
 class AgentImpl;
-struct Checklist;
 
 struct DeferredTriggeredCheck {
   ACE_INET_Addr local_address;
@@ -49,7 +48,7 @@ struct DeferredTriggeredCheck {
   {}
 };
 
-struct EndpointManager {
+struct EndpointManager : public DCPS::RcObject {
   AgentImpl* const agent_impl;
   Endpoint* const endpoint;
 
@@ -58,6 +57,12 @@ struct EndpointManager {
   const AgentInfo& agent_info() const
   {
     return agent_info_;
+  }
+
+  typedef std::set<std::string> FoundationSet;
+  const FoundationSet& foundations() const
+  {
+    return foundations_;
   }
 
   void add_agent_info_listener(const DCPS::RepoId& a_local_guid,
@@ -85,13 +90,13 @@ struct EndpointManager {
                const ACE_INET_Addr& a_remote_address,
                const STUN::Message& a_message);
 
-  void set_responsible_checklist(const STUN::TransactionId& a_transaction_id, Checklist* a_checklist)
+  void set_responsible_checklist(const STUN::TransactionId& a_transaction_id, ChecklistPtr a_checklist)
   {
     OPENDDS_ASSERT(!transaction_id_to_checklist_.count(a_transaction_id));
     transaction_id_to_checklist_[a_transaction_id] = a_checklist;
   }
 
-  void unset_responsible_checklist(const STUN::TransactionId& a_transaction_id, Checklist* a_checklist)
+  void unset_responsible_checklist(const STUN::TransactionId& a_transaction_id, ChecklistPtr a_checklist)
   {
     TransactionIdToChecklistType::iterator pos = transaction_id_to_checklist_.find(a_transaction_id);
     OPENDDS_ASSERT(pos != transaction_id_to_checklist_.end());
@@ -100,13 +105,13 @@ struct EndpointManager {
     transaction_id_to_checklist_.erase(pos);
   }
 
-  void set_responsible_checklist(const GuidPair& a_guid_pair, Checklist* a_checklist)
+  void set_responsible_checklist(const GuidPair& a_guid_pair, ChecklistPtr a_checklist)
   {
     OPENDDS_ASSERT(!guid_pair_to_checklist_.count(a_guid_pair));
     guid_pair_to_checklist_[a_guid_pair] = a_checklist;
   }
 
-  void unset_responsible_checklist(const GuidPair& a_guid_pair, Checklist* a_checklist)
+  void unset_responsible_checklist(const GuidPair& a_guid_pair, ChecklistPtr a_checklist)
   {
     GuidPairToChecklistType::iterator pos = guid_pair_to_checklist_.find(a_guid_pair);
     OPENDDS_ASSERT(pos != guid_pair_to_checklist_.end());
@@ -115,13 +120,13 @@ struct EndpointManager {
     guid_pair_to_checklist_.erase(pos);
   }
 
-  void set_responsible_checklist(const std::string& a_username, Checklist* a_checklist)
+  void set_responsible_checklist(const std::string& a_username, ChecklistPtr a_checklist)
   {
     OPENDDS_ASSERT(!username_to_checklist_.count(a_username));
     username_to_checklist_[a_username] = a_checklist;
   }
 
-  void unset_responsible_checklist(const std::string& a_username, Checklist* a_checklist)
+  void unset_responsible_checklist(const std::string& a_username, ChecklistPtr a_checklist)
   {
     UsernameToChecklistType::iterator pos = username_to_checklist_.find(a_username);
     OPENDDS_ASSERT(pos != username_to_checklist_.end());
@@ -130,33 +135,37 @@ struct EndpointManager {
     username_to_checklist_.erase(pos);
   }
 
+  void unfreeze();
+
   void unfreeze(const FoundationType& a_foundation);
 
   void compute_active_foundations(ActiveFoundationSet& a_active_foundations) const;
 
   void check_invariants() const;
 
-  void schedule_for_destruction();
-
   void ice_connect(const GuidSetType& guids, const ACE_INET_Addr& addr)
   {
     endpoint->ice_connect(guids, addr);
   }
 
-  void ice_disconnect(const GuidSetType& guids)
+  void ice_disconnect(const GuidSetType& guids, const ACE_INET_Addr& addr)
   {
-    endpoint->ice_disconnect(guids);
+    endpoint->ice_disconnect(guids, addr);
   }
 
   void network_change();
 
+  void send(const ACE_INET_Addr& address, const STUN::Message& message);
+
+  void purge();
+
 private:
-  bool scheduled_for_destruction_;
   AddressListType host_addresses_;          // Cached list of host addresses.
   ACE_INET_Addr server_reflexive_address_;  // Server-reflexive address (from STUN server).
   ACE_INET_Addr stun_server_address_;       // Address of the STUN server.
   ACE_UINT64 ice_tie_breaker_;
   AgentInfo agent_info_;
+  FoundationSet foundations_;
 
   // State variables for getting and maintaining the server reflexive address.
   bool requesting_;
@@ -169,15 +178,15 @@ private:
   DeferredTriggeredChecksType deferred_triggered_checks_;
 
   // Managed by checklists.
-  typedef std::map<std::string, Checklist*> UsernameToChecklistType;
+  typedef std::map<std::string, ChecklistPtr> UsernameToChecklistType;
   UsernameToChecklistType username_to_checklist_;
 
   // Managed by checklists.
-  typedef std::map<STUN::TransactionId, Checklist*> TransactionIdToChecklistType;
+  typedef std::map<STUN::TransactionId, ChecklistPtr> TransactionIdToChecklistType;
   TransactionIdToChecklistType transaction_id_to_checklist_;
 
   // Managed by checklists.
-  typedef std::map<GuidPair, Checklist*> GuidPairToChecklistType;
+  typedef std::map<GuidPair, ChecklistPtr> GuidPairToChecklistType;
   GuidPairToChecklistType guid_pair_to_checklist_;
 
   typedef std::map<DCPS::RepoId, AgentInfoListener*, DCPS::GUID_tKeyLessThan> AgentInfoListenersType;
@@ -200,7 +209,7 @@ private:
 
   bool error_response(const STUN::Message& a_message);
 
-  Checklist* create_checklist(const AgentInfo& a_remote_agent_info);
+  ChecklistPtr create_checklist(const AgentInfo& a_remote_agent_info);
 
   // STUN Message processing.
   STUN::Message make_unknown_attributes_error_response(const STUN::Message& a_message,
@@ -215,7 +224,9 @@ private:
                const ACE_INET_Addr& a_remote_address,
                const STUN::Message& a_message);
 
-  void indication(const STUN::Message& a_message);
+  void indication(const ACE_INET_Addr& a_local_address,
+                  const ACE_INET_Addr& a_remote_address,
+                  const STUN::Message& a_message);
 
   void success_response(const ACE_INET_Addr& a_local_address,
                         const ACE_INET_Addr& a_remote_address,
@@ -226,17 +237,21 @@ private:
                       const STUN::Message& a_message);
 
   struct ServerReflexiveTask : public Task {
-    EndpointManager* endpoint_manager;
-    ServerReflexiveTask(EndpointManager* a_endpoint_manager);
+    DCPS::WeakRcHandle<EndpointManager> endpoint_manager;
+    explicit ServerReflexiveTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager);
     void execute(const DCPS::MonotonicTimePoint& a_now);
-  } server_reflexive_task_;
+  };
+  DCPS::RcHandle<ServerReflexiveTask> server_reflexive_task_;
 
   struct ChangePasswordTask : public Task {
-    EndpointManager* endpoint_manager;
-    ChangePasswordTask(EndpointManager* a_endpoint_manager);
+    DCPS::WeakRcHandle<EndpointManager> endpoint_manager;
+    explicit ChangePasswordTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager);
     void execute(const DCPS::MonotonicTimePoint& a_now);
-  } change_password_task_;
+  };
+  DCPS::RcHandle<ChangePasswordTask> change_password_task_;
 };
+
+typedef DCPS::RcHandle<EndpointManager> EndpointManagerPtr;
 
 } // namespace ICE
 } // namespace OpenDDS

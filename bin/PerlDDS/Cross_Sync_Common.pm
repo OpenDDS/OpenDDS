@@ -53,6 +53,8 @@ sub allocate {
 
     bless ($self, $class);
 
+    print STDERR "PerlDDS::Cross_Sync_Common::allocate \$self->{TEST_INSTANCE} == '$self->{TEST_INSTANCE}'\n";
+
     if ($self->{TEST_INSTANCE} && ($self->_initialize () == 0)) {
         return $self;
     }

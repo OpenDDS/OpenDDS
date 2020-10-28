@@ -10,4 +10,7 @@
 /UnitTests_RepoIdSequence
 /UnitTests_RtpsFragmentation
 /UnitTests_RtpsDuration
+/UnitTests_RtpsSequenceNumberSet
 /UnitTests_TimeTSubtraction
+/UnitTests_MultiTask
+/UnitTests_DataSampleHeader

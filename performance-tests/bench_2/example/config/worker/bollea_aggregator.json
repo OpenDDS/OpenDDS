@@ -1,0 +1,185 @@
+{
+  "enable_time": { "sec": -1, "nsec": 0 },
+  "start_time": { "sec": -3, "nsec": 0 },
+  "stop_time": { "sec": -150, "nsec": 0 },
+  "destruction_time": { "sec": -1, "nsec": 0 },
+
+  "process": {
+    "config_sections": [
+      { "name": "common",
+        "properties": [
+          { "name": "DCPSSecurity",
+            "value": "0"
+          },
+          { "name": "DCPSDebugLevel",
+            "value": "0"
+          }
+        ]
+      }
+    ],
+    "discoveries": [
+      { "name": "bollea_agg_disc",
+        "type": "rtps",
+        "domain": 17
+      },
+      { "name": "bollea_test_disc",
+        "type": "rtps",
+        "domain": 27
+      }
+    ],
+    "instances": [
+      { "name": "bollea_agg_inst",
+        "type": "rtps_udp",
+        "domain": 17
+      },
+      { "name": "bollea_test_inst",
+        "type": "rtps_udp",
+        "domain": 27
+      }
+    ],
+    "participants": [
+      { "name": "participant_agg",
+        "domain": 17,
+        "transport_config_name": "bollea_agg_inst",
+
+        "qos": { "entity_factory": { "autoenable_created_entities": false } },
+        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
+
+        "topics": [
+          { "name": "topic_01",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_02",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_03",
+            "type_name": "Bench::Data"
+          }
+        ],
+        "subscribers": [
+          { "name": "subscriber_01",
+            "datareaders": [
+              { "name": "datareader_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_03",
+                "topic_name": "topic_03",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          }
+        ],
+        "publishers": [
+          { "name": "publisher_01",
+            "datawriters": [
+              { "name": "datawriter_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_03",
+                "topic_name": "topic_03",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          }
+        ]
+      },
+      { "name": "participant_test",
+        "domain": 27,
+        "transport_config_name": "bollea_test_inst",
+
+        "qos": { "entity_factory": { "autoenable_created_entities": false } },
+        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
+
+        "topics": [
+          { "name": "topic_04",
+            "type_name": "Bench::Data"
+          }
+        ],
+        "subscribers": [],
+        "publishers": [
+          { "name": "publisher_02",
+            "datawriters": [
+              { "name": "datawriter_04",
+                "topic_name": "topic_04",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "write_action_01",
+      "type": "write",
+      "writers": [ "datawriter_01" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 2372 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
+        }
+      ]
+    },
+    {
+      "name": "write_action_02",
+      "type": "write",
+      "writers": [ "datawriter_02" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 668 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 5.0 }
+        }
+      ]
+    },
+    {
+      "name": "write_action_03",
+      "type": "write",
+      "writers": [ "datawriter_03" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 696 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 15.0 }
+        }
+      ]
+    },
+    {
+      "name": "forward_action_01",
+      "type": "forward",
+      "readers": [ "datareader_01", "datareader_02", "datareader_03" ],
+      "writers": [ "datawriter_04" ]
+    }
+  ]
+}

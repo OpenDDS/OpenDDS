@@ -34,7 +34,7 @@ DWMonitorImpl::report() {
     report.dp_id = this->dw_->get_dp_id();
     DDS::Publisher_var pub = this->dw_->get_publisher();
     report.pub_handle = pub->get_instance_handle();
-    report.dw_id   = this->dw_->get_publication_id();
+    report.dw_id   = this->dw_->get_repo_id();
     DDS::Topic_var topic = this->dw_->get_topic();
     OpenDDS::DCPS::TopicImpl* ti = dynamic_cast<TopicImpl*>(topic.in());
     if (!ti) {

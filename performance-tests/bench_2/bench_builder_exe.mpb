@@ -1,0 +1,16 @@
+project: ../bench_builder_idl_lib, dcps_inforepodiscovery {
+  avoids += no_cxx11
+  after    += Bench_Builder
+  libs     += Bench_Builder
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+  includes += $(BENCH_BUILDER_ROOT)/builder
+
+  specific(gnuace) {
+    compile_flags += -Wno-pragmas
+  }
+
+  exename   = *
+}

@@ -1,0 +1,11 @@
+project: dcps_rtps_udp, dcps_rapidjson {
+  avoids += no_cxx11
+  after    += Bench_Common Bench_Idl Bench_Builder_Idl_Json Bench_Core_Idl_Json Bench_Builder Bench_Builder_Idl
+  libs     += Bench_Common Bench_Idl Bench_Builder_Idl_Json Bench_Core_Idl_Json Bench_Builder Bench_Builder_Idl
+  expand(BENCH_ROOT) {
+    $BENCH_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+  includes += $(BENCH_ROOT)/idl $(BENCH_ROOT)/common
+  exename   = *
+}

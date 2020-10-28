@@ -18,6 +18,7 @@
 #include "TransportConfig_rch.h"
 #include "TransportConfig.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ConfigUtils.h"
 #include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -93,12 +94,18 @@ public:
 
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
-  /// the TransportRegistry.  This is called by the Service_Participant
+  /// the TransportRegistry. This is called by the Service_Participant
   /// at initialization time. This function iterates each section in
   /// the configuration file, and creates TransportInst and
   /// TransportConfig objects and adds them to the registry.
   int load_transport_configuration(const OPENDDS_STRING& file_name,
                                    ACE_Configuration_Heap& cf);
+
+  /// For internal use by OpenDDS DCPS layer:
+  /// Process the transport_template configuration in the
+  /// ACE_Configuration_Heap object.
+  /// Called by the Service_Participant at initialization time.
+  int load_transport_templates(ACE_Configuration_Heap& cf);
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -110,6 +117,16 @@ public:
   void load_transport_lib(const OPENDDS_STRING& transport_type);
 
   bool released() const;
+
+  bool config_has_transport_template(const ACE_TString& config_name) const;
+
+  int create_transport_template_instance(DDS::DomainId_t domain, const ACE_TString& config_name);
+
+  OPENDDS_STRING get_transport_template_instance_name(DDS::DomainId_t id);
+
+  OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
+
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -136,6 +153,40 @@ private:
   bool released_;
 
   mutable LockType lock_;
+
+  // transport template support
+  static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
+  static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_PORT;
+
+  struct TransportTemplate
+  {
+    OPENDDS_STRING transport_template_name;
+    OPENDDS_STRING config_name;
+    bool instantiate_per_participant;
+    ValueMap customizations;
+    ValueMap transport_info;
+  };
+
+  OPENDDS_VECTOR(TransportTemplate) transport_templates_;
+
+  bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
+
+  bool process_customizations(const DDS::DomainId_t id, const TransportTemplate& tr_inst, ValueMap& customs);
+
+  bool has_transport_templates() const;
+
+  struct TransportEntry
+  {
+    ACE_TString transport_name;
+    ACE_TString config_name;
+    ValueMap transport_info;
+  };
+
+  OPENDDS_VECTOR(TransportEntry) transports_;
+
+  bool get_transport_info(const ACE_TString& config_name, TransportEntry& inst);
+
+  bool has_transports() const;
 };
 
 } // namespace DCPS

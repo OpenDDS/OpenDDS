@@ -26,16 +26,17 @@ namespace DCPS {
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
 LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
+  : interceptor_(interceptor)
 {
   reactor(interceptor->reactor());
 }
 
 bool LinuxNetworkConfigMonitor::open()
 {
-  // Listener to changes in links and IPV4 addresses.
+  // Listen to changes in links and IPV4 and IPV6 addresses.
   const pid_t pid = getpid();
   ACE_Netlink_Addr addr;
-  addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
+  addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n")));
     return false;
@@ -79,9 +80,9 @@ bool LinuxNetworkConfigMonitor::open()
 
   read_messages();
 
-  if (reactor()->register_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
-    return false;
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    interceptor->execute_or_enqueue(new RegisterHandler(this));
   }
 
   return true;
@@ -91,9 +92,10 @@ bool LinuxNetworkConfigMonitor::close()
 {
   bool retval = true;
 
-  if (reactor()->remove_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not unregister for input: %m\n")));
-    retval = false;
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new RemoveHandler(this));
+    command->wait();
   }
 
   if (socket_.close() != 0) {
@@ -156,8 +158,10 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       case AF_INET:
         address_length = 4;
         break;
+      case AF_INET6:
+        address_length = 16;
+        break;
       default:
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: unhandled address family: %d\n"), msg->ifa_family));
         return;
       }
       int rta_length = IFA_PAYLOAD(header);
@@ -184,8 +188,10 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       case AF_INET:
         address_length = 4;
         break;
+      case AF_INET6:
+        address_length = 16;
+        break;
       default:
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: unhandled address family: %d\n"), msg->ifa_family));
         return;
       }
       int rta_length = IFA_PAYLOAD(header);
@@ -219,7 +225,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       }
 
       remove_interface(msg->ifi_index);
-      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & IFF_MULTICAST));
+      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK)));
     }
     break;
   case RTM_DELLINK:

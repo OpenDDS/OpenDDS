@@ -1,4 +1,4 @@
-project: dcpslib, dcps_rtps, dds_openssl, ace_xml_utils {
+project: dcps_rtps, dds_openssl, ace_xml_utils {
   after += OpenDDS_Security
   libs  += OpenDDS_Security
   avoids += no_opendds_security

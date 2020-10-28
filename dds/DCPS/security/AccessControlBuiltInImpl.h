@@ -183,6 +183,10 @@ public:
     DDS::Security::AccessControlListener_ptr listener,
     DDS::Security::SecurityException& ex);
 
+  virtual bool return_permissions_handle(
+    DDS::Security::PermissionsHandle handle,
+    DDS::Security::SecurityException& ex);
+
   virtual bool return_permissions_token(
     const DDS::Security::PermissionsToken& token,
     DDS::Security::SecurityException& ex);
@@ -230,6 +234,7 @@ public:
     const DDS::Security::EndpointSecurityAttributes& attributes,
     DDS::Security::SecurityException& ex);
 
+  static bool pattern_match(const char* string, const char* pattern);
 
 private:
 
@@ -255,20 +260,27 @@ private:
   public:
     RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTimer();
-    bool start_timer(const DCPS::TimeDuration& length, DDS::Security::PermissionsHandle pm_handle);
+    bool start_timer(const time_t& expiration, DDS::Security::PermissionsHandle pm_handle);
     virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
-    bool is_scheduled() { return scheduled_; }
 
   protected:
     AccessControlBuiltInImpl& impl_;
 
-    const DCPS::TimeDuration& interval() const { return interval_; }
-
   private:
-    DCPS::TimeDuration interval_;
-    bool scheduled_;
-    long timer_id_;
-    ACE_Thread_Mutex lock_;
+    struct Entry {
+      DDS::Security::PermissionsHandle handle;
+      time_t expiration;
+
+      Entry() : handle(0), expiration(0) {}
+      Entry(DDS::Security::PermissionsHandle a_handle,
+            time_t a_expiration)
+        : handle(a_handle)
+        , expiration(a_expiration)
+      {}
+    };
+    typedef OPENDDS_MAP(DDS::Security::PermissionsHandle, Entry*) EntryMap;
+    EntryMap entry_map_;
+    mutable ACE_Thread_Mutex lock_;
   };
 
   RevokePermissionsTimer local_rp_timer_;
@@ -285,8 +297,8 @@ private:
 
   time_t convert_permissions_time(const std::string& timeString);
 
-  bool validate_date_time(ACPermsMap::iterator ac_iter,
-                          DCPS::TimeDuration& delta_time,
+  bool validate_date_time(const Permissions::Validity_t& validity,
+                          time_t& expiration,
                           DDS::Security::SecurityException& ex);
 
   bool get_sec_attributes(DDS::Security::PermissionsHandle permissions_handle,
@@ -296,18 +308,12 @@ private:
                           DDS::Security::EndpointSecurityAttributes& attributes,
                           DDS::Security::SecurityException& ex);
 
-  bool search_local_permissions(const char* topic_name,
-                                DDS::Security::DomainId_t domain_id,
-                                const DDS::PartitionQosPolicy& partition,
-                                Permissions::PublishSubscribe_t pub_or_sub,
-                                ACPermsMap::iterator ac_iter,
-                                DDS::Security::SecurityException& ex);
-
-  bool search_remote_permissions(const char* topic_name,
-                                 DDS::Security::DomainId_t domain_id,
-                                 ACPermsMap::iterator ac_iter,
-                                 Permissions::PublishSubscribe_t pub_or_sub,
-                                 DDS::Security::SecurityException& ex);
+  bool search_permissions(const char* topic_name,
+                          DDS::Security::DomainId_t domain_id,
+                          const DDS::PartitionQosPolicy& partition,
+                          Permissions::PublishSubscribe_t pub_or_sub,
+                          const Permissions::Grant& grant,
+                          DDS::Security::SecurityException& ex);
 
   void parse_class_id(const std::string& class_id,
                       std::string& plugin_class_name,

@@ -754,6 +754,8 @@ RecorderImpl::remove_all_associations()
 
   } catch (const CORBA::Exception&) {
   }
+
+  transport_stop();
 }
 
 void

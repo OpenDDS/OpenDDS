@@ -825,7 +825,7 @@ bool run_test()
   part1_writer.remote_durable_ = true;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
-  message_block_to_sequence (mb_locator, part1_writer.remote_data_[0].data);
+  message_block_to_sequence(mb_locator, part1_writer.remote_data_[0].data);
   if (!sdr2.associate(part1_writer, false /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataReader(reader2) could not associate with writer1\n"));
@@ -866,6 +866,9 @@ bool run_test()
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
     return false;
   }
+
+  reactor_wait();
+
   // this heartbeat isn't final, so reader needs to ack even if it has all data:
   if (!part1.send_hb(writer1.entityId, seq, seq, part2_addr)) {
     return false;
@@ -989,6 +992,8 @@ bool run_test()
   // cleanup
   sdw2.disassociate(reader1);
   sdr2.disassociate(writer1);
+  sdw2.transport_stop();
+  sdr2.transport_stop();
   return true;
 }
 

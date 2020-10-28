@@ -8,12 +8,13 @@
 #ifndef OPENDDS_SEC_BUILTIN_PLUGIN_LOADER_H
 #define OPENDDS_SEC_BUILTIN_PLUGIN_LOADER_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
+#include "DdsSecurity_Export.h"
 
-#include "ace/Global_Macros.h"
-#include "ace/Service_Config.h"
-#include "ace/Service_Object.h"
-#include "dds/Versioned_Namespace.h"
+#include <dds/Versioned_Namespace.h>
+
+#include <ace/Global_Macros.h>
+#include <ace/Service_Config.h>
+#include <ace/Service_Object.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -36,4 +37,4 @@ ACE_FACTORY_DECLARE(DdsSecurity, BuiltInPluginLoader)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* DCPS_RTPSUDPLOADER_H */
+#endif  /* OPENDDS_SEC_BUILTIN_PLUGIN_LOADER_H */

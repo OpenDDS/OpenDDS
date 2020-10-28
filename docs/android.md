@@ -1,26 +1,27 @@
 # OpenDDS and Android
 
-**How to build OpenDDS for Android and incorperate OpenDDS into Android apps.**
+**How to build OpenDDS for Android and incorporate OpenDDS into Android apps.**
 
-* [Variables](#variables)
-* [Requirements](#requirements)
-* [Building on Windows](#building-on-windows)
-* [Building OpenDDS for Android](#building-opendds-for-android)
-  * [Host Tools](#host-tools)
-  * [OpenDDS's Optional Dependencies](#openddss-optional-dependencies)
-    * [Java](#java)
-    * [OpenSSL](#openssl)
-    * [Xerces](#xerces)
-* [Cross-Compiling IDL Libraries](#cross-compiling-idl-libraries)
-  * [Java IDL Libraries](#java-idl-libraries)
-* [Using OpenDDS in a Android App](#using-opendds-in-a-android-app)
-  * [Adding the OpenDDS Native Libraries to the App](#adding-the-opendds-native-libraries-to-the-app)
-  * [Adding OpenDDS Java Libraries to the App](#adding-opendds-java-libraries-to-the-app)
-  * [Network Permissions and Availability](#network-permissions-and-availability)
-  * [OpenDDS Configuration Files](#opendds-configuration-files)
-  * [Multithreading](#multithreading)
-  * [Android Activity Lifecycle](#android-activity-lifecycle)
-* [Footnotes](#footnotes)
+- [OpenDDS and Android](#opendds-and-android)
+  - [Variables](#variables)
+  - [Requirements](#requirements)
+  - [Building on Windows](#building-on-windows)
+  - [Building OpenDDS for Android](#building-opendds-for-android)
+    - [Host Tools](#host-tools)
+    - [OpenDDS's Optional Dependencies](#openddss-optional-dependencies)
+      - [Java](#java)
+      - [OpenSSL](#openssl)
+      - [Xerces](#xerces)
+  - [Cross-Compiling IDL Libraries](#cross-compiling-idl-libraries)
+    - [Java IDL Libraries](#java-idl-libraries)
+  - [Using OpenDDS in a Android App](#using-opendds-in-a-android-app)
+    - [Adding the OpenDDS Native Libraries to the App](#adding-the-opendds-native-libraries-to-the-app)
+    - [Adding OpenDDS Java Libraries to the App](#adding-opendds-java-libraries-to-the-app)
+    - [Network Permissions and Availability](#network-permissions-and-availability)
+    - [OpenDDS Configuration Files](#opendds-configuration-files)
+    - [Multithreading](#multithreading)
+    - [Android Activity Lifecycle](#android-activity-lifecycle)
+  - [Footnotes](#footnotes)
 
 ## Variables
 
@@ -38,6 +39,7 @@ are mostly for shorthand.
 | `$SDK`       | The Android SDK (By default `$HOME/Android/Sdk`) |
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
+| `$SSL_ROOT`  | Install prefix for cross-compiled OpenSSL        |
 
 ## Requirements
 
@@ -79,7 +81,7 @@ software:
   - Building OpenDDS and its dependencies for Android requires various
     utilities that would normally come on a Unix system. This guide will use
     MSYS2, which supplies many of those utilities. Install MSYS2 from the
-    offical website at https://www.msys2.org and set it up.
+    official website at https://www.msys2.org and set it up.
   - Follow all the install/update steps from the msys2.org website.
 
 - [Strawberry Perl](http://strawberryperl.com/)
@@ -96,7 +98,7 @@ software:
 
 Finally all paths being passed to GNU make must not contain spaces because of a
 ACE's gnuace make scripts don't those paths handle correctly on Windows. This
-means the NDK, toolchain, MinGW, JDK, OpenDDS source, OpenDDS host tools, etc.
+means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc.
 must not contain any spaces in their paths.
 
 ## Building OpenDDS for Android
@@ -123,7 +125,7 @@ location of the NDK and `%TOOLCHAIN%` is the desired location of the toolchain,
 run this command instead:
 
 ```bat
- %NDK%\prebuilt\windows-x86_64\bin\python.exe %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
+%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
 ```
 
 Once a toolchain is obtained, OpenDDS can be configured to cross compile for
@@ -159,17 +161,14 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
   using Visual Studio must be passed to `configure`.
 
 - In addition to the Android toolchain, you will also need MSYS2 utilities in
-  your `%PATH%`. The default installation location of the MinGW utilities is
-  `C:\MinGW\msys\1.0\bin`.
+  your `%PATH%`.
 
-- Make sure these commands in a new Visual Studio command prompt that is
+- Run these commands in a new Visual Studio command prompt that is
   different from where you configured the host tools.
 
 ```Batch
 configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a --host-tools=%HOST_DDS%
 set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
-ren %ACE_ROOT%\VERSION VERSION.txt
-ren %TAO_ROOT%\VERSION VERSION.txt
 make
 REM Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
@@ -235,8 +234,8 @@ Cross-compiling OpenSSL on Windows:
 2. `cd /c/your/location/of/OpenSSL-source`
 3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
 4. `PATH+=:$ANDROID_NDK_HOME/bin`
-5. `./Configure android-arm no-shared` (or replace -arm with a different platform, see OpenSSL's NOTES.ANDROID file)
-6. `make`
+5. `./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared` (or replace -arm with a different platform like -arm64, see OpenSSL's NOTES.ANDROID file)
+6. `make install_sw`
 
 #### Xerces
 
@@ -247,7 +246,9 @@ the Android NDK's CMake toolchain.
 Xerces requires a supported "transcoder" library. For API levels greater than
 or equal to 28 one of these, GNU libiconv, is included with Android. Before 28
 any of the transcoders supported by Xerces would work theoretically but GNU
-libiconv was the one tested.
+libiconv was the one tested.  If GNU libiconv is used, build it as an archive
+library (--disable-shared) so that the users of Xerces (ACE and OpenDDS) don't
+need to be aware of it as an additional runtime dependency.
 
 Download [GNU libiconv](https://ftp.gnu.org/pub/gnu/libiconv) version 1.16
 source code and extract the archive.
@@ -258,7 +259,7 @@ Cross-compiling GNU libiconv on Windows:
 3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
 4. `PATH+=:$ANDROID_NDK_HOME/bin`
 5. `target=arm-linux-androideabi` (or select a different NDK target)
-6. `./configure --prefix=/c/your/location/of/installed-libiconv --host=$target CC=$target-clang CXX=$target-clang++ LD=$target-ld CFLAGS="-fPIE -fPIC" LDFLAGS=-pie`
+6. `./configure --disable-shared --prefix=/c/your/location/of/installed-libiconv --host=$target CC=$target-clang CXX=$target-clang++ LD=$target-ld CFLAGS="-fPIE -fPIC" LDFLAGS=-pie`
 7. `make && make install`
 
 Note that the directory given by `--prefix=` will be created by `make install`
@@ -272,9 +273,12 @@ A modified version of Xerces C++ hosted on
 has support for an external GNU libiconv.  Download this version using git or
 the GitHub web interface [ZIP archive](https://github.com/oci-labs/xerces-c/archive/android.zip).  Note that this is the `android` branch of the repository.
 
-Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2019").
+Start the Microsoft Visual Studio command prompt for C++ development (for
+example "x64 Native Tools Command Prompt for VS 2019").
 
-`cmake` and `ninja` should be on the PATH.  They can be installed as on option component in the Visual Studio installer (see "C++ CMake tools for Windows"), or downloaded separately.
+`cmake` and `ninja` should be on the PATH.  They can be installed as on option
+component in the Visual Studio installer (see "C++ CMake tools for Windows"),
+or downloaded separately.
 
 Set environment variables based on the NDK location and Android configuration selected:
 1. `set target=arm-linux-androideabi`
@@ -298,7 +302,7 @@ Assuming the library is already setup and works for a desktop platform, then
 you should be able to run:
 
 ```Shell
-(source $DDS_ROOT/setenv.sh; mwc.pl -type gnuace . && PATH=$PATH:$TOOLCHAIN/bin make)
+(source $DDS_ROOT/setenv.sh; mwc.pl -type gnuace && PATH=$PATH:$TOOLCHAIN/bin make)
 ```
 
 The resulting native IDL library file must be included with the rest of the
@@ -346,20 +350,20 @@ the basic list of library file for OpenDDS are as follows:
 
   - Core OpenDDS library and its dependencies:
 
-   - If not already included because of a separate C++ NDK project, you must
-     include the Clang C++ Standard Library. This is located at
-     `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
-     `$ABI_PREFIX` is an identifier for the architecture and can be found in the
-     [ABI/architecture table](#abi-table).
+    - If not already included because of a separate C++ NDK project, you must
+      include the Clang C++ Standard Library. This is located at
+      `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
+      `$ABI_PREFIX` is an identifier for the architecture and can be found in
+      the [ABI/architecture table](#abi-table).
 
-   - `$ACE_ROOT/lib/libACE.so`
-   - `$ACE_ROOT/lib/libTAO.so`
-   - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
-   - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
-   - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
-   - `$ACE_ROOT/lib/libTAO_PI.so`
+    - `$ACE_ROOT/lib/libACE.so`
+    - `$ACE_ROOT/lib/libTAO.so`
+    - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+    - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+    - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+    - `$ACE_ROOT/lib/libTAO_PI.so`
 
-   - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
+    - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
 
  - The following are the transport libraries, one for each transport type. You
    will need at least one of these, depending on the transport(s) you want to
@@ -438,15 +442,10 @@ are not already there:
 Failure to do so will result in ACE failing to access any sockets and OpenDDS
 will not be able to function.
 
-In addition to this if no networks are active when OpenDDS is initialized, then
-the result will similar. For now it will be up to the app developer to assess
-network availability before initializing OpenDDS. On Android this can be done
-using the
-[ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager),
-but the exact method for doing so will depend on the API level and the needs of
-the app.
-
-<!-- TODO: Changes in Networks or Loss of Network? -->
+Android builds of OpenDDS use the LinuxNetworkConfigMonitor to reconfigure
+OpenDDS connections automatically when the device switches from one network
+(cellular or wifi) to another. Apps that need to know when a network change
+occurs can register with the [ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager) for network callback events.
 
 ### OpenDDS Configuration Files
 
@@ -558,29 +557,101 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
 
 ### Android Activity Lifecycle
 
-The [Android Activity
-Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle)
-is something that affects all Android apps. In the case of OpenDDS, the
-interaction gets more complicated because of the intersection of the similar,
-but distinct process lifecycle. The process hosts the activity, but isn't
-guaranteed to be kept alive after `onStop()` is called. What makes this worse
-for NDK applications is that there doesn't seem to be a way to be warned of the
-killing of the process the way Java application can rely on `onDestroyed()`.
-For most applications of OpenDDS, this isn't a serious issue but it's not
-ideal.
+The [Android Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) is something that affects all Android apps. In the
+case of OpenDDS, the interaction gets more complicated because of the
+intersection of the similar, but distinct process lifecycle. The process hosts
+the activity, but isn't guaranteed to be kept alive after `onStop()` is called.
+What makes this worse for NDK applications is that there doesn't seem to be a
+way to be warned of the killing of the process the way Java application can
+rely on `onDestroyed()`. For most OpenDDS applications, this isn't a
+serious issue.
 
-An easy way to make sure participants are cleaned up is created participants in
-`onStart()` as might be expected, but always deleting them in `onStop()`, so
+An easy way to make sure participants are cleaned up is to create participants in
+`onStart()` as might be expected, and always delete them in `onStop()`, so
 that they may be created again in `onStart()`. The `DomainParticpantFactory`
 can be retrieved either in `onStart()` or more perhaps appropriately in
-[`Application.onStart()`](https://developer.android.com/reference/android/app/Application),
-given the singleton nature of both.
+[`Application.onStart()`](https://developer.android.com/reference/android/app/Application), given the singleton nature of both.
 
 This might not be ideal or efficient though, because deleting and recreating
 participants will happen every time the app loses focus, like during
-orientation changes. An alternative to this would be running OpenDDS within an
-[Android Sevice](https://developer.android.com/guide/components/services)
-separate from the main app, but this hasn't been fully explored yet.
+orientation changes. An alternative to this is to run OpenDDS within an
+[Android Sevice](https://developer.android.com/guide/components/services) separate from the main app with the service configured so that
+it does not stopped when the Application's `onStop()` is called. The service
+should be specified in `AndroidManifest.xml`.
+
+```XML
+    <service
+            android:name=".OpenDdsService"
+            android:exported="false"
+            android:stopWithTask="true">
+    </service>
+```
+
+OpenDDS service classes should extend `Service` and provide an `IBinder` for
+an application to use when it creates the `ServiceConnection`. For example,
+
+```Java
+public class MainActivity extends AppCompatActivity {
+    // ...
+    private OpenDdsService svc = null;
+
+    private ServiceConnection ddsServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            OpenDdsService.OpenDdsBinder binder = (OpenDdsService.OpenDdsBinder) service ;
+            svc = binder.getService();
+            // ...
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // ...
+        }
+    }
+    // ...
+}
+```
+
+```Java
+public class OpenDdsService extends Service {
+    // ...
+    private final IBinder binder = new OpenDdsBinder();
+
+    public class OpenDdsBinder extends Binder {
+        OpenDdsService getService() {
+            return OpenDdsService.this;
+        }
+
+        @Override
+        public void onCreate() {
+            // ...
+        }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            return START_NOT_STICKY;
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return binder;
+        }
+
+        @Override
+        public void onRebind(Intent intent) {
+            super.onRebind(intent);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            stopSelf();
+        }
+    }
+}
+```
+
+See Android's [Services overview](https://developer.android.com/guide/components/services) for more information.
 
 ## Footnotes
 

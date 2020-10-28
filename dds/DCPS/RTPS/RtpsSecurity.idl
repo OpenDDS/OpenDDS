@@ -27,6 +27,7 @@ module OpenDDS {
       DDS::Security::ParticipantBuiltinTopicDataSecure ddsParticipantDataSecure;
       OpenDDS::RTPS::ParticipantProxy_t participantProxy;
       OpenDDS::RTPS::Duration_t leaseDuration;
+      OpenDDS::RTPS::BuiltinEndpointSet_t associated_endpoints;
     };
   };
 };

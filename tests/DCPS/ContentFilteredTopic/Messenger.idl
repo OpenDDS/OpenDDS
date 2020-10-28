@@ -1,10 +1,7 @@
 module Messenger {
-
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message key"
-
+  @topic
   struct Message {
-    long key;
+    @key long key;
     unsigned long long ull;
   };
 };

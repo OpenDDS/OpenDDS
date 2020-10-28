@@ -19,9 +19,11 @@ const int num_instances_per_writer = 1;
 bool reliable = false;
 bool wait_for_acks = false;
 
-Writer::Writer(DDS::DataWriter_ptr writer)
-  : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0)
+Writer::Writer(DDS::DataWriter_ptr writer, size_t count, bool delay)
+  : writer_(DDS::DataWriter::_duplicate(writer))
+  , finished_instances_(0)
+  , count_(count)
+  , delay_(delay)
 {
 }
 
@@ -103,12 +105,15 @@ Writer::svc()
     message.text         = "Worst. Movie. Ever.";
     message.count        = 0;
 
-    for (int i = 0; i < 10; i++) {
+    for (size_t i = 0; i < count_; i++) {
       DDS::ReturnCode_t error;
       do {
         error = message_dw->write(message, handle);
       } while (error == DDS::RETCODE_TIMEOUT);
 
+      if (delay_) {
+        ACE_OS::sleep(1);
+      }
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")

@@ -12,6 +12,7 @@
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
+#include "BuiltInTopicUtils.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
 #include "DataReaderImpl.h"
@@ -268,7 +269,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
     if (rc != DDS::RETCODE_OK) {
       if (DCPS_debug_level) {
-        GuidConverter converter(dr_servant->get_subscription_id());
+        GuidConverter converter(dr_servant->get_repo_id());
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader(%C): ")
           ACE_TEXT("will return \"%C\" because datareader %s\n"),
           OPENDDS_STRING(converter).c_str(), retcode_to_string(rc),
@@ -328,7 +329,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                           ACE_TEXT("for unknown repo id not found.\n"),
                           topic_name.in()), ::DDS::RETCODE_ERROR);
       }
-      RepoId id = dr_servant->get_subscription_id();
+      RepoId id = dr_servant->get_repo_id();
       GuidConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
@@ -355,7 +356,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                       ::DDS::RETCODE_ERROR);
   }
 
-  RepoId subscription_id = dr_servant->get_subscription_id();
+  RepoId subscription_id = dr_servant->get_repo_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   this->dp_id_,
@@ -615,7 +616,7 @@ SubscriberImpl::set_qos(
           reader->set_subscriber_qos (qos);
           DDS::DataReaderQos qos;
           reader->get_qos(qos);
-          RepoId id = reader->get_subscription_id();
+          RepoId id = reader->get_repo_id();
           std::pair<DrIdToQosMap::iterator, bool> pair
             = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
 
@@ -844,8 +845,8 @@ SubscriberImpl::is_clean() const
   const bool sub_is_clean = datareader_map_.empty();
 
   if (!sub_is_clean && !TheTransientKludge->is_enabled()) {
-    // Four BIT datareaders.
-    return datareader_map_.size() == 4;
+    // BIT datareaders.
+    return datareader_map_.size() == NUMBER_OF_BUILT_IN_TOPICS;
   }
 
   return sub_is_clean;
@@ -944,7 +945,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   for (DataReaderMap::iterator iter = datareader_map_.begin();
        iter != datareader_map_.end();
        ++iter) {
-    subs.push_back(iter->second->get_subscription_id());
+    subs.push_back(iter->second->get_repo_id());
   }
 }
 

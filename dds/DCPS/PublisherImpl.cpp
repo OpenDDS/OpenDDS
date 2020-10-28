@@ -176,43 +176,29 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     return DDS::RETCODE_ERROR;
   }
 
-  // marks entity as deleted and stops future associating
-  dw_servant->prepare_to_delete();
-
   {
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
     if (dw_publisher.in() != this) {
-      RepoId id = dw_servant->get_publication_id();
+      RepoId id = dw_servant->get_repo_id();
       GuidConverter converter(id);
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
           ACE_TEXT("the data writer %C doesn't ")
-          ACE_TEXT("belong to this subscriber \n"),
+          ACE_TEXT("belong to this subscriber\n"),
           OPENDDS_STRING(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-  // Trigger data to be persisted, i.e. made durable, if so
-  // configured. This needs be called before unregister_instances
-  // because unregister_instances may cause instance dispose.
-  if (!dw_servant->persist_data() && DCPS_debug_level >= 2) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::delete_datawriter, ")
-        ACE_TEXT("failed to make data durable.\n")));
+  if (!dw_servant->get_deleted()) {
+    dw_servant->prepare_to_delete();
+    dw_servant->set_wait_pending_deadline(TheServiceParticipant->new_pending_timeout_deadline());
   }
-#endif
 
-  // Unregister all registered instances prior to deletion.
-  dw_servant->unregister_instances(SystemTimePoint::now().to_dds_time());
-
-  // Wait for any control messages to be transported during
+  // Wait for any data and control messages to be transported during
   // unregistering of instances.
   dw_servant->wait_pending();
-  dw_servant->wait_control_pending();
 
   RepoId publication_id  = GUID_UNKNOWN;
   {
@@ -221,7 +207,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
         this->pi_lock_,
         DDS::RETCODE_ERROR);
 
-    publication_id = dw_servant->get_publication_id();
+    publication_id = dw_servant->get_repo_id();
 
     PublicationMap::iterator it = publication_map_.find(publication_id);
 
@@ -328,11 +314,56 @@ PublisherImpl::lookup_datawriter(const char* topic_name)
   }
 }
 
-DDS::ReturnCode_t
-PublisherImpl::delete_contained_entities()
+bool PublisherImpl::prepare_to_delete_datawriters()
 {
-  // mark that the entity is being deleted
-  set_deleted(true);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, false);
+  bool result = true;
+  const DataWriterMap::iterator end = datawriter_map_.end();
+  for (DataWriterMap::iterator i = datawriter_map_.begin(); i != end; ++i) {
+    DataWriterImpl* const writer = dynamic_cast<DataWriterImpl*>(i->second.in());
+    if (writer) {
+      if (!writer->get_deleted()) {
+        writer->prepare_to_delete();
+      }
+    } else {
+      result = false;
+    }
+  }
+
+  return result;
+}
+
+bool PublisherImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadline)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, false);
+  bool result = true;
+  const DataWriterMap::iterator end = datawriter_map_.end();
+  for (DataWriterMap::iterator i = datawriter_map_.begin(); i != end; ++i) {
+    DataWriterImpl* const writer = dynamic_cast<DataWriterImpl*>(i->second.in());
+    if (writer) {
+      writer->set_wait_pending_deadline(deadline);
+    } else {
+      result = false;
+    }
+  }
+  return result;
+}
+
+DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
+{
+  // If the call isn't part of another delete, prepare the datawriters to be
+  // deleted and set the pending deadline on all the writers.
+  if (!get_deleted()) {
+    // mark that the entity is being deleted
+    set_deleted(true);
+
+    if (!prepare_to_delete_datawriters()) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (!set_wait_pending_deadline(TheServiceParticipant->new_pending_timeout_deadline())) {
+      return DDS::RETCODE_ERROR;
+    }
+  }
 
   while (true) {
     PublicationId pub_id = GUID_UNKNOWN;
@@ -348,7 +379,7 @@ PublisherImpl::delete_contained_entities()
         break;
       } else {
         a_datawriter = datawriter_map_.begin()->second;
-        pub_id = a_datawriter->get_publication_id();
+        pub_id = a_datawriter->get_repo_id();
       }
     }
 
@@ -362,7 +393,7 @@ PublisherImpl::delete_contained_entities()
           ACE_TEXT("delete_contained_entities: ")
           ACE_TEXT("failed to delete ")
           ACE_TEXT("datawriter %C.\n"),
-          OPENDDS_STRING(converter).c_str()),ret);
+          OPENDDS_STRING(converter).c_str()), ret);
     }
   }
 
@@ -401,7 +432,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
             ++iter) {
           DDS::DataWriterQos qos;
           iter->second->get_qos(qos);
-          RepoId id = iter->second->get_publication_id();
+          RepoId id = iter->second->get_repo_id();
           std::pair<DwIdToQosMap::iterator, bool> pair =
               idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
@@ -630,7 +661,7 @@ PublisherImpl::end_coherent_changes()
 
       std::pair<GroupCoherentSamples::iterator, bool> pair =
           group_samples.insert(GroupCoherentSamples::value_type(
-              it->second->get_publication_id(),
+              it->second->get_repo_id(),
               WriterCoherentSample(it->second->coherent_samples_,
                   it->second->sequence_number_)));
 
@@ -814,7 +845,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
 
   datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 
-  const RepoId publication_id = writer->get_publication_id();
+  const RepoId publication_id = writer->get_repo_id();
 
   std::pair<PublicationMap::iterator, bool> pair =
       publication_map_.insert(PublicationMap::value_type(publication_id, writer));

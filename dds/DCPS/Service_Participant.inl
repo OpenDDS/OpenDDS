@@ -314,6 +314,19 @@ Service_Participant::pending_timeout() const
 }
 
 ACE_INLINE
+void Service_Participant::pending_timeout(const TimeDuration& value)
+{
+  pending_timeout_ = value;
+}
+
+ACE_INLINE
+MonotonicTimePoint Service_Participant::new_pending_timeout_deadline() const
+{
+  return pending_timeout_.is_zero() ?
+    MonotonicTimePoint() : MonotonicTimePoint::now() + pending_timeout_;
+}
+
+ACE_INLINE
 int
 Service_Participant::priority_min() const
 {
@@ -346,13 +359,6 @@ bool
 Service_Participant::is_shut_down() const
 {
   return this->shut_down_;
-}
-
-ACE_INLINE
-ACE_CString
-Service_Participant::default_address() const
-{
-  return this->default_address_;
 }
 
 ACE_INLINE

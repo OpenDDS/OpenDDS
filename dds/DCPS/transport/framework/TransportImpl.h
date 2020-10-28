@@ -115,7 +115,7 @@ public:
 
   /// Create the reactor task using sync send or optionally async send
   /// by parameter on supported Windows platforms only.
-  void create_reactor_task(bool useAsyncSend = false);
+  void create_reactor_task(bool useAsyncSend = false, const OPENDDS_STRING& name = "");
 
   /// Diagnostic aid.
   void dump();
@@ -158,6 +158,9 @@ public:
   };
 
   virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual void rtps_relay_only_now(bool /*flag*/) {}
+  virtual void use_rtps_relay_now(bool /*flag*/) {}
+  virtual void use_ice_now(bool /*flag*/) {}
 
 protected:
   TransportImpl(TransportInst& config);
@@ -235,6 +238,8 @@ private:
   /// so there won't be any reserve_datalink() calls being made from
   /// any other threads while we perform this release.
   virtual void release_datalink(DataLink* link) = 0;
+
+  virtual void client_stop(const RepoId&) {}
 
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,

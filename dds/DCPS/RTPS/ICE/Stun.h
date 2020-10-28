@@ -11,6 +11,7 @@
 
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #include "dds/DCPS/RTPS/rtps_export.h"
 
@@ -18,6 +19,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <cstring>
 #include <map>
 #include <string>
 #include <vector>
@@ -67,6 +69,9 @@ enum AttributeType {
   FINGERPRINT        = 0x8028,
   ICE_CONTROLLED     = 0x8029,
   ICE_CONTROLLING    = 0x802A,
+
+  GUID_PREFIX        = 0xD000,
+
   LAST_ATTRIBUTE     = 0xFFFF
 };
 
@@ -82,6 +87,7 @@ struct OpenDDS_Rtps_Export Attribute {
     ACE_UINT32 fingerprint; // FINGERPRINT
     ACE_UINT32 priority; // PRIORITY
     ACE_UINT64 ice_tie_breaker; // ICE_CONTROLLED, ICE_CONTROLLING
+    unsigned char guid_prefix[sizeof(DCPS::GuidPrefix_t)]; // GUID_PREFIX
   };
   struct {
     ACE_UINT16 code;
@@ -131,17 +137,44 @@ OpenDDS_Rtps_Export
 Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker);
 
 OpenDDS_Rtps_Export
-bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
-
-OpenDDS_Rtps_Export
-bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
+Attribute make_guid_prefix(const DCPS::GuidPrefix_t& guid_prefix);
 
 struct OpenDDS_Rtps_Export TransactionId {
   ACE_UINT8 data[12];
+  TransactionId()
+  {
+    std::memset(data, 0, sizeof data);
+  }
   bool operator<(const TransactionId& other) const;
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
 };
+
+struct AttributeHolder {
+  Attribute& attribute;
+  const TransactionId& tid;
+
+  AttributeHolder(Attribute& a, const TransactionId& t)
+    : attribute(a)
+    , tid(t)
+  {}
+};
+
+struct ConstAttributeHolder {
+  const Attribute& attribute;
+  const TransactionId& tid;
+
+  ConstAttributeHolder(const Attribute& a, const TransactionId& t)
+    : attribute(a)
+    , tid(t)
+  {}
+};
+
+OpenDDS_Rtps_Export
+bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder);
+
+OpenDDS_Rtps_Export
+bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder);
 
 struct OpenDDS_Rtps_Export Message {
   typedef std::vector<Attribute> AttributesType;
@@ -202,6 +235,7 @@ struct OpenDDS_Rtps_Export Message {
   bool has_ice_controlled() const;
   bool has_ice_controlling() const;
   bool has_use_candidate() const;
+  bool get_guid_prefix(DCPS::GuidPrefix_t& guid_pefix) const;
 
   ACE_Message_Block* block;
   std::string password; // For integrity hashing.

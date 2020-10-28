@@ -5,12 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/security/BuiltInPluginLoader.h"
-#include "dds/DCPS/security/BuiltInSecurityPluginInst.h"
-#include "dds/DCPS/security/framework/SecurityConfig.h"
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
+#include "BuiltInPluginLoader.h"
 
-#include "dds/DCPS/RcHandle_T.h"
+#include "BuiltInSecurityPluginInst.h"
+#include "framework/SecurityConfig.h"
+#include "framework/SecurityRegistry.h"
+
+#include <dds/DCPS/RcHandle_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -22,19 +23,22 @@ static const std::string PLUGIN_NAME("BuiltIn");
 int
 BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  static bool initialized(false);
-
-  if (initialized) return 0;  // already initialized
-
-  SecurityPluginInst_rch plugin = DCPS::make_rch<BuiltInSecurityPluginInst>();
-  TheSecurityRegistry->register_plugin(PLUGIN_NAME, plugin);
+  SecurityPluginInst_rch plugin = TheSecurityRegistry->get_plugin_inst(
+    PLUGIN_NAME, false /* don't attempt to load the plugin */);
+  if (!plugin) {
+    plugin = DCPS::make_rch<BuiltInSecurityPluginInst>();
+    TheSecurityRegistry->register_plugin(PLUGIN_NAME, plugin);
+  }
 
   SecurityConfig_rch default_config =
     TheSecurityRegistry->create_config(SecurityRegistry::DEFAULT_CONFIG_NAME,
                                        plugin);
-  TheSecurityRegistry->default_config(default_config);
 
-  initialized = true;
+  if (TheSecurityRegistry->has_no_configs()) {
+    TheSecurityRegistry->default_config(default_config);
+  }
+
+  TheSecurityRegistry->builtin_config(default_config);
 
   return 0;
 }
