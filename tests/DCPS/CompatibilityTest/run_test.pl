@@ -55,7 +55,7 @@ sub run_compatibility_tests {
   my $test = new PerlDDS::TestFramework();
   $test->setup_discovery() unless $is_rtps_disc;
 
-  my $sub_time = 40;
+  my $sub_time = 10;
   my $pub_time = $sub_time;
   my $sub_parameters = "-l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -DCPSDebugLevel $level $DCPScfg -";
 
@@ -67,11 +67,9 @@ sub run_compatibility_tests {
 
   $test->start_process("subscriber");
 
-  sleep 3;
-
   $test->start_process("publisher");
 
-  my $result = $test->finish($sub_time + 20);
+  my $result = $test->finish($sub_time + 10);
 
   if ($result != 0) {
     print STDERR "ERROR: test returned $result \n";

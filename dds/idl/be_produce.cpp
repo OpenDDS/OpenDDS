@@ -135,21 +135,14 @@ string to_macro(const char* fn)
   msec += ACE_OS::getpid() + (size_t) ACE_OS::thr_self();
 
   unsigned int seed = static_cast<unsigned int>(msec);
-#ifdef max
-#undef max
-#endif
-  const float MAX_VAL = static_cast<float>(numeric_limits<char>::max());
-  const float coefficient = static_cast<float>(MAX_VAL / (RAND_MAX + 1.0f));
 
   if (ret[ret.size() - 1] != '_') ret += '_';
+  static const char alphanum[] =
+    "0123456789"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   for (unsigned int n = 0; n < NUM_CHARS; ++n) {
-    char r;
-    do {
-      r = static_cast<char>(coefficient * ACE_OS::rand_r(&seed));
-    } while (!isalnum(r));
-
-    ret += static_cast<char>(toupper(r));
+    ret += alphanum[ACE_OS::rand_r(&seed) % (sizeof(alphanum) - 1)];
   }
 
   return ret;

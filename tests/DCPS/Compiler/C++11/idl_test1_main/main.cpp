@@ -15,6 +15,23 @@ using OpenDDS::DCPS::SerializedSizeBound;
 
 const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
+bool enum_union_test()
+{
+  enumunion::UnionType u;
+  if (u._d() != enumunion::EnumType::A2) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("UnionType default _d = %d\n"),
+               static_cast<int>(u._d())));
+    return false;
+  }
+  enumunion::UnionType u2(u);
+  u = u2;
+  enumunion::UnionType u3(std::move(u));
+  u = std::move(u2);
+  swap(u3, u);
+
+  return true;
+}
+
 bool idl2cxx11_test()
 {
   Xyz::Foo f;
@@ -48,7 +65,7 @@ bool idl2cxx11_test()
 // this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  bool failed = !idl2cxx11_test();
+  bool failed = !idl2cxx11_test() || !enum_union_test();
   bool dump_buffer = false;
 
   if (argc > 1) dump_buffer = true;

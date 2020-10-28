@@ -22,7 +22,7 @@ using namespace DDS;
 using namespace OpenDDS::DCPS;
 
 namespace {
-  long key_val = 0;
+  CORBA::Octet key_val = 0;
   namespace Factory {
     ParticipantBuiltinTopicData bit_data() {
       ParticipantBuiltinTopicData result;

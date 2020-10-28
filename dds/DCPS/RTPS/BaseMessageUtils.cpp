@@ -220,7 +220,7 @@ DCPS::TimeDuration rtps_duration_to_time_duration(const Duration_t& rtps_duratio
 
 bool bitmapNonEmpty(const SequenceNumberSet& snSet)
 {
-  const size_t num_ulongs = (snSet.numBits + 31) / 32;
+  const CORBA::ULong num_ulongs = (snSet.numBits + 31) / 32;
 
   OPENDDS_ASSERT(num_ulongs <= snSet.bitmap.length());
 
@@ -228,7 +228,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
     return false;
   }
 
-  const size_t last_index = num_ulongs - 1;
+  const CORBA::ULong last_index = num_ulongs - 1;
   for (CORBA::ULong i = 0; i < last_index; ++i) {
     if (snSet.bitmap[i]) {
       return true;
@@ -236,7 +236,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
   }
 
   const CORBA::ULong mod = snSet.numBits % 32;
-  const CORBA::ULong mask = mod ? -(1u << (32 - mod)) : 0xFFFFFFFF;
+  const CORBA::ULong mask = mod ? (1 + ~(1u << (32 - mod))) : 0xFFFFFFFF;
   return (bool)(snSet.bitmap[last_index] & mask);
 }
 

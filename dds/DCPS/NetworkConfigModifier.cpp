@@ -62,7 +62,7 @@ bool NetworkConfigModifier::open()
       if (addr->sin_addr.s_addr != INADDR_ANY) {
         address.set((u_short) 0, addr->sin_addr.s_addr, 0);
 
-        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST)));
+        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK))));
 
         p.first->second.add_address(address);
       }
@@ -75,7 +75,7 @@ bool NetworkConfigModifier::open()
       if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
         address.set(reinterpret_cast<struct sockaddr_in *> (addr), sizeof(sockaddr_in6));
 
-        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST)));
+        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK))));
 
         p.first->second.add_address(address);
       }
@@ -130,7 +130,7 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 
     if (p_if->ifa_addr->sa_family == AF_INET || p_if->ifa_addr->sa_family == AF_INET6) {
       if (name == p_if->ifa_name) {
-        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
+        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK));
         break;
       }
 

@@ -221,9 +221,30 @@ struct GeneratorBase
       case AST_Expression::EV_enum:
         {
           AST_Enum* e = dynamic_cast<AST_Enum*>(the_union->disc_type());
-          if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-            first_label << scoped(e->name()) << "::"
-              << e->value_to_name(dv.u.enum_val)->last_component()->get_string();
+          if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ||
+              be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+            std::string prefix = scoped(e->name());
+            if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+              size_t pos = prefix.rfind("::");
+              if (pos == std::string::npos) {
+                prefix = "";
+              } else {
+                prefix = prefix.substr(0, pos) + "::";
+              }
+            } else {
+              prefix += "::";
+            }
+            first_label << prefix;
+            UTL_ScopedName* default_name;
+            if (dv.u.enum_val < e->member_count()) {
+              default_name = e->value_to_name(dv.u.enum_val);
+            } else {
+              const Fields fields(the_union);
+              AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*(fields.begin()));
+              AST_Expression::AST_ExprValue* ev = ub->label(0)->label_val()->ev();
+              default_name = e->value_to_name(ev->u.eval);
+            }
+            first_label << default_name->last_component()->get_string();
           } else {
             first_label << scoped(e->value_to_name(dv.u.enum_val));
           }

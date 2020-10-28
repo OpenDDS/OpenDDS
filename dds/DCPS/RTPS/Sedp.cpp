@@ -3339,6 +3339,13 @@ void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DEBUG: Sedp::association_complete local %C remote %C\n"),
+               DCPS::LogGuid(localId).c_str(),
+               DCPS::LogGuid(remoteId).c_str()));
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
   if (is_expectant_opendds(remoteId)) {
