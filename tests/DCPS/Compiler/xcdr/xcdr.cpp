@@ -45,10 +45,16 @@ void set_base_values_union(Type& value, UnionDisc disc)
   }
 }
 
-template <typename Type, typename WrapperType = void>
+template <typename Type>
 void set_values(Type& value)
 {
   set_base_values(value);
+}
+
+template <typename Type, typename WrapperType>
+void set_values(Type& /*value*/)
+{
+  ACE_ASSERT(false);
 }
 
 template <typename Type>
