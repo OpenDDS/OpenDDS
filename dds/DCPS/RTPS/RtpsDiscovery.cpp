@@ -72,6 +72,8 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_ice_(false)
   , use_ncm_(true)
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
+  , undirected_spdp_(true)
+  , periodic_directed_spdp_(false)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -574,6 +576,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                        ACE_TEXT("%C section has a Customization setting.\n"),
                        rtps_name.c_str()));
           }
+        } else if (name == "UndirectedSpdp") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for UndirectedSpdp in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->undirected_spdp(bool(smInt));
+        } else if (name == "PeriodicDirectedSpdp") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for PeriodicDirectedSpdp in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->periodic_directed_spdp(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
