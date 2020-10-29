@@ -1802,7 +1802,8 @@ namespace XTypes {
   template <typename T>
   void serialize_type_info(const TypeInformation& type_info, T& seq)
   {
-    seq.length(DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info));
+    const size_t sz = DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info);
+    seq.length(static_cast<unsigned>(sz));
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer << type_info)) {

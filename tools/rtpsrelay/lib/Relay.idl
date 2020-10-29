@@ -16,12 +16,14 @@ module RtpsRelay {
   typedef octet EntityKey_t[3];
 
   // Uniquely identify each entity within a participant.
+  @final
   struct EntityId_t {
     @key EntityKey_t entityKey;
     @key octet entityKind;
   };
 
   // The actual GUID itself.
+  @final
   struct GUID_t {
     @key GuidPrefix_t guidPrefix;
     @key EntityId_t entityId;

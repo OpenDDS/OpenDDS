@@ -151,13 +151,23 @@ jobs:
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
       if %BuildConfiguration%==Debug set OPT=--features=uses_wchar=1
       set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
-      if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC= # Debug64 Fills up Disk with Security
+      if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC=
       call configure -v --ace-github-latest --tests %SEC% %OPT%
       perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
     displayName: Run configure script
+  - script: |
+      for /d %%x in (tests\googletest\build\*) do @if not %%x==tests\googletest\build\install del /s/q %%x
+      del /s/q ACE_TAO\ACE\protocols ACE_TAO\ACE\contrib ACE_TAO\ACE\examples
+      del /s/q ACE_TAO\ACE\tests ACE_TAO\ACE\netsvcs ACE_TAO\ACE\websvcs
+      del /s/q ACE_TAO\ACE\ASNMP ACE_TAO\ACE\performance-tests
+      del /s/q ACE_TAO\ACE\tests ACE_TAO\ACE\Kokyu ACE_TAO\TAO\interop-tests
+      del /s/q ACE_TAO\TAO\DevGuideExamples ACE_TAO\TAO\examples
+      del /s/q ACE_TAO\TAO\orbsvcs\tests ACE_TAO\TAO\orbsvcs\performance-tests
+      del /s/q ACE_TAO\TAO\orbsvcs\examples
+    displayName: Remove unused files from external repos
   - task: BatchScript@1
     displayName: Setenv from configure script
     inputs:

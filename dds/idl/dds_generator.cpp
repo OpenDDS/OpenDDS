@@ -242,7 +242,7 @@ NestedForLoops::~NestedForLoops()
   }
 }
 
-string type_to_default_array(AST_Type* type, const string& name,
+string type_to_default_array(const std::string& indent, AST_Type* type, const string& name,
   bool is_anonymous, bool is_union, bool use_cxx11, Classification fld_cls)
 {
   string val;
@@ -269,43 +269,36 @@ string type_to_default_array(AST_Type* type, const string& name,
       index += 1;
     }
     string pre;
-    if (is_union) {
-      pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(tmp)";
-    } else {
-      pre = "IDL::DistinctType<" + n + ", " + v + "_tag>(" + name + ")";
-    }
-    val += "      set_default(" + pre + ");\n";
+    val += indent + "set_default(IDL::DistinctType<" + n + ", " + v + "_tag>(" +
+      (is_union ? "tmp" : name) + "));\n";
   } else {
     string n = scoped(type->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
     }
+    val = indent + n + "_forany " + temp + "(const_cast<"
+      + n + "_slice*>(" + (is_union ? "tmp": name) + "));\n";
+    val += indent + "set_default(" + temp + ");\n";
     if (is_union) {
-      val = "    " + n + "_forany " + temp + "(const_cast<"
-        + n + "_slice*>(tmp));\n";
-    } else {
-      val = "    " + n + "_forany " + temp + "(const_cast<"
-        + n + "_slice*>(" + name + "));\n";
-    }
-    val += "    set_default(" + temp + ");\n";
-    if (is_union) {
-      val += "    " + name + "(tmp);\n";
+      val += indent + name + "(tmp);\n";
     }
   }
   return val;
 }
 
-string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bool is_union)
+string type_to_default(const std::string& indent, AST_Type* type, const string& name,
+  bool is_anonymous, bool is_union)
 {
   AST_Type* actual_type = resolveActualType(type);
   Classification fld_cls = classify(actual_type);
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   string def_val;
   if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
-    return "set_default(" + name + (is_union ? "()" : "") + ");\n";
+    return indent + "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
-    return type_to_default_array(type, name, is_anonymous, is_union, use_cxx11, fld_cls);
+    return type_to_default_array(
+      indent, type, name, is_anonymous, is_union, use_cxx11, fld_cls);
   } else if (fld_cls & CL_ENUM) {
     // For now, simply return the first value of the enumeration.
     // Must be changed, if support for @default_literal is desired.
@@ -319,9 +312,10 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
   } else if (fld_cls & CL_SEQUENCE) {
     string seq_resize_func = (use_cxx11) ? "resize" : "length";
     if (is_union) {
-      return "tmp." + seq_resize_func + "(0);\n" + name + "(tmp);\n";
+      return indent + "tmp." + seq_resize_func + "(0);\n"
+        + indent + name + "(tmp);\n";
     } else {
-      return name + "." + seq_resize_func + "(0);\n";
+      return indent + name + "." + seq_resize_func + "(0);\n";
     }
   } else if (fld_cls & CL_STRING) {
     def_val = (fld_cls & CL_WIDE) ? "L\"\"" : "\"\"";
@@ -334,9 +328,11 @@ string type_to_default(AST_Type* type, const string& name, bool is_anonymous, bo
       def_val =  "0";
     }
   }
+  std::string pre = " = ";
+  std::string post;
   if (is_union) {
-    return name + "(" + def_val + ");\n";
-  } else {
-    return name + " = " + def_val + ";\n";
+    pre = "(";
+    post = ")";
   }
+  return indent + name + pre + def_val + post + ";\n";
 }

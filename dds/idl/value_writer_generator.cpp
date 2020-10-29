@@ -132,10 +132,12 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string& field_name,
+  std::string branch_helper(const std::string&,
+                            const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
-                            std::string&,
+                            bool,
+                            Intro&,
                             const std::string&,
                             bool)
   {

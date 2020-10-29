@@ -424,7 +424,7 @@ Serializer::length() const
 }
 
 ACE_INLINE bool
-Serializer::skip(ACE_CDR::UShort n, int size)
+Serializer::skip(size_t n, int size)
 {
   if (size > 1 && !align_r((std::min)(size_t(size), encoding().max_align()))) {
     return false;
@@ -815,6 +815,11 @@ bool Serializer::align_w(size_t al)
   return good_bit_;
 }
 
+ACE_INLINE unsigned char
+Serializer::offset(char* index, size_t start, size_t align)
+{
+  return static_cast<unsigned char>((ptrdiff_t(index) - start) % align);
+}
 
 ACE_INLINE void
 Serializer::align_cont_r()
@@ -826,8 +831,7 @@ Serializer::align_cont_r()
   current_ = current_->cont();
 
   if (current_ && max_align) {
-    align_rshift_ =
-      (ptrdiff_t(current_->rd_ptr()) - thisblock) % max_align;
+    align_rshift_ = offset(current_->rd_ptr(), thisblock, max_align);
   }
 }
 
@@ -841,8 +845,7 @@ Serializer::align_cont_w()
   current_ = current_->cont();
 
   if (current_ && max_align) {
-    align_wshift_ =
-      (ptrdiff_t(current_->wr_ptr()) - thisblock) % max_align;
+    align_wshift_ = offset(current_->wr_ptr(), thisblock, max_align);
   }
 }
 

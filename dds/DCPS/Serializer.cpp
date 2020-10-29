@@ -362,8 +362,8 @@ Serializer::reset_alignment()
 {
   const ptrdiff_t align = encoding().max_align();
   if (current_ && align) {
-    align_rshift_ = ptrdiff_t(current_->rd_ptr()) % align;
-    align_wshift_ = ptrdiff_t(current_->wr_ptr()) % align;
+    align_rshift_ = offset(current_->rd_ptr(), 0, align);
+    align_wshift_ = offset(current_->wr_ptr(), 0, align);
   }
 }
 
@@ -648,7 +648,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
     // Get Size
     const unsigned short lc = (emheader >> 28) & 0x7;
     if (lc < 4) {
-      size = 1 << lc;
+      size = size_t(1) << lc;
     } else {
       ACE_CDR::ULong next_int;
       if (lc == 4 ? !(*this >> next_int) : !peek(next_int)) {
@@ -695,7 +695,7 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
     if (!(*this << pid_id)) {
       return false;
     }
-    const ACE_CDR::UShort pid_size = long_pid ? 8 : size;
+    const ACE_CDR::UShort pid_size = long_pid ? 8 : ACE_CDR::UShort(size);
     if (!(*this << pid_size)) {
       return false;
     }

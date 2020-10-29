@@ -4,16 +4,16 @@
  */
 
 #include "langmap_generator.h"
+
 #include "field_info.h"
 #include "be_extern.h"
 
-#include "utl_identifier.h"
-
-#include "ace/Version.h"
-#include "ace/CDR_Base.h"
 #ifdef ACE_HAS_CDR_FIXED
-#include "ast_fixed.h"
+#  include <ast_fixed.h>
 #endif
+#include <utl_identifier.h>
+
+#include <ace/CDR_Base.h>
 
 #include <map>
 #include <iostream>
@@ -39,18 +39,26 @@ namespace {
   };
   std::map<Helper, std::string> helpers_;
 
-  std::string exporter() {
+  std::string exporter()
+  {
     return be_global->export_macro().empty() ? ""
       : be_global->export_macro().c_str() + std::string(" ");
   }
 
-  std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
-    AST_Array* const arr = dynamic_cast<AST_Array*>(type);
-    std::string ret;
-    for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
-      elems *= arr->dims()[dim]->ev()->u.ulval;
-      if (dim) ret += "[0]";
+  std::string array_zero_indices(AST_Array* arr)
+  {
+    std::string indices;
+    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) {
+      indices += "[0]";
     }
+    return indices;
+  }
+
+  std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems)
+  {
+    AST_Array* const arr = dynamic_cast<AST_Array*>(type);
+    std::string ret = array_zero_indices(arr);
+    elems *= array_element_count(arr);
     AST_Type* base = resolveActualType(arr->base_type());
     if (dynamic_cast<AST_Array*>(base)) {
       ret += "[0]" + array_dims(base, elems);
@@ -413,8 +421,8 @@ struct GeneratorBase
     }
   }
 
-  static std::string generateCopyCtor(const std::string& name, AST_Type* field_type,
-                                      const std::string&, std::string&,
+  static std::string generateCopyCtor(const std::string&, const std::string& name, AST_Type* field_type,
+                                      const std::string&, bool, Intro&,
                                       const std::string&, bool)
   {
     std::stringstream ss;
@@ -440,8 +448,8 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateAssign(const std::string& name, AST_Type* field_type,
-                                    const std::string&, std::string&,
+  static std::string generateAssign(const std::string&, const std::string& name, AST_Type* field_type,
+                                    const std::string&, bool, Intro&,
                                     const std::string&, bool)
   {
     std::stringstream ss;
@@ -467,8 +475,8 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateEqual(const std::string& name, AST_Type* field_type,
-                                   const std::string&, std::string&,
+  static std::string generateEqual(const std::string&, const std::string& name, AST_Type* field_type,
+                                   const std::string&, bool, Intro&,
                                    const std::string&, bool)
   {
     std::stringstream ss;
@@ -495,8 +503,8 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateReset(const std::string& name, AST_Type* field_type,
-                                   const std::string&, std::string&,
+  static std::string generateReset(const std::string&, const std::string& name, AST_Type* field_type,
+                                   const std::string&, bool, Intro&,
                                    const std::string&, bool)
   {
     std::stringstream ss;
@@ -649,13 +657,12 @@ struct GeneratorBase
       forany = HLP_ARR_FORANY;
 
     std::ostringstream bound, nofirst, total;
-    std::string zeros;
+    const std::string zeros = array_zero_indices(arr);
     for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
       const ACE_CDR::ULong extent = arr->dims()[dim]->ev()->u.ulval;
       bound << '[' << extent << ']';
       if (dim) {
         nofirst << '[' << extent << ']';
-        zeros += "[0]";
         total << " * ";
       }
       total << extent;
@@ -789,8 +796,7 @@ struct GeneratorBase
   virtual void gen_array_traits(UTL_ScopedName* tdname, AST_Array* arr)
   {
     const std::string nm = scoped(tdname);
-    std::string zeros;
-    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) zeros += "[0]";
+    const std::string zeros = array_zero_indices(arr);
     be_global->lang_header_ <<
       "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace TAO {\n"
       "template <>\n"
@@ -1596,36 +1602,36 @@ struct Cxx11Generator : GeneratorBase
     }
   }
 
-  static std::string union_copy(const std::string& name, AST_Type*,
-                                const std::string&, std::string&,
+  static std::string union_copy(const std::string&, const std::string& name, AST_Type*,
+                                const std::string&, bool, Intro&,
                                 const std::string&, bool)
   {
     return "    _" + name + " = rhs._" + name + ";\n";
   }
 
-  static std::string union_move(const std::string& name, AST_Type*,
-                                const std::string&, std::string&,
+  static std::string union_move(const std::string&, const std::string& name, AST_Type*,
+                                const std::string&, bool, Intro&,
                                 const std::string&, bool)
   {
     return "    _" + name + " = std::move(rhs._" + name + ");\n";
   }
 
-  static std::string union_assign(const std::string& name, AST_Type*,
-                                  const std::string&, std::string&,
+  static std::string union_assign(const std::string&, const std::string& name, AST_Type*,
+                                  const std::string&, bool, Intro&,
                                   const std::string&, bool)
   {
     return "    " + name + "(rhs._" + name + ");\n";
   }
 
-  static std::string union_move_assign(const std::string& name, AST_Type*,
-                                       const std::string&, std::string&,
+  static std::string union_move_assign(const std::string&, const std::string& name, AST_Type*,
+                                       const std::string&, bool, Intro&,
                                        const std::string&, bool)
   {
     return "    " + name + "(std::move(rhs._" + name + "));\n";
   }
 
-  static std::string union_activate(const std::string& name, AST_Type* type,
-                                    const std::string&, std::string&,
+  static std::string union_activate(const std::string&, const std::string& name, AST_Type* type,
+                                    const std::string&, bool, Intro&,
                                     const std::string&, bool)
   {
     AST_Type* actual_field_type = resolveActualType(type);
@@ -1637,8 +1643,8 @@ struct Cxx11Generator : GeneratorBase
     return "";
   }
 
-  static std::string union_reset(const std::string& name, AST_Type* type,
-                                 const std::string&, std::string&,
+  static std::string union_reset(const std::string&, const std::string& name, AST_Type* type,
+                                 const std::string&, bool, Intro&,
                                  const std::string&, bool)
   {
     AST_Type* actual_field_type = resolveActualType(type);

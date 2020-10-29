@@ -429,7 +429,7 @@ public:
   /// skipping the n * size bytes.
   /// This is used by the RTPS protocol to allow reading messages from
   /// future versions of the spec which may have additional optional fields.
-  bool skip(ACE_CDR::UShort n, int size = 1);
+  bool skip(size_t n, int size = 1);
 
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
 
@@ -738,6 +738,8 @@ private:
   /// Update alignment state when a cont() chain is followed during a write.
   void align_cont_w();
 
+  static unsigned char offset(char* index, size_t start, size_t align);
+
   /// Currently active message block in chain.
   ACE_Message_Block* current_;
 
@@ -772,9 +774,24 @@ private:
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];
 };
 
-template<typename T> struct KeyOnly {
-  explicit KeyOnly(T& mess) : t(mess) { }
-  T& t;
+template<typename Type>
+struct KeyOnly {
+  explicit KeyOnly(Type& value)
+  : value(value)
+  {
+  }
+
+  Type& value;
+};
+
+template<typename Type>
+struct NestedKeyOnly {
+  explicit NestedKeyOnly(Type& value)
+  : value(value)
+  {
+  }
+
+  Type& value;
 };
 
 namespace IDL {

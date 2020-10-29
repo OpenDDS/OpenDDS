@@ -216,7 +216,7 @@ namespace {
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
+          "      if (!ser.skip(len)) {\n"
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' contents could not be skipped\");\n"
           "      }\n";
@@ -610,7 +610,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         std::size_t sz = 0;
         to_cxx_type(af.as_act_, sz);
         be_global->impl_ <<
-          "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << sz << ");\n";
+          "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
       }
     }
   }
@@ -655,12 +655,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
   if (arr) {
     elem = arr->base_type();
-    size_t n_elems = 1;
-    for (size_t i = 0; i < arr->n_dims(); ++i) {
-      n_elems *= arr->dims()[i]->ev()->u.ulval;
-    }
     std::ostringstream strstream;
-    strstream << n_elems;
+    strstream << array_element_count(arr);
     len = strstream.str();
   } else { // Sequence
     elem = seq->base_type();
@@ -680,7 +676,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
     std::size_t sz = 0;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
-      "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
+      "  return ser.skip(" << len << ", " << sz << ");\n";
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
@@ -688,7 +684,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
         "    if (!(ser >> strlength)) return false;\n"
-        "    if (!ser.skip(static_cast<ACE_UINT16>(strlength))) return false;\n";
+        "    if (!ser.skip(strlength)) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       std::string pre, post;
       if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
@@ -711,8 +707,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 static std::string
-func(const std::string&, AST_Type* br_type, const std::string&,
-  std::string&, const std::string&, bool)
+func(const std::string&, const std::string&, AST_Type* br_type, const std::string&,
+  bool, Intro&, const std::string&, bool)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
@@ -721,7 +717,7 @@ func(const std::string&, AST_Type* br_type, const std::string&,
     ss <<
       "    ACE_CDR::ULong len;\n"
       "    if (!(ser >> len)) return false;\n"
-      "    if (!ser.skip(static_cast<ACE_UINT16>(len))) return false;\n";
+      "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     std::size_t sz = 0;
     to_cxx_type(br_type, sz);

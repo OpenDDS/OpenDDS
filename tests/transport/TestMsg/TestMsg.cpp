@@ -44,12 +44,12 @@ void serialized_size(
 
 bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)
 {
-  return strm << stru.t.key;
+  return strm << stru.value.key;
 }
 
 bool operator>>(Serializer& strm, KeyOnly<TestMsg> stru)
 {
-  return strm >> stru.t.key;
+  return strm >> stru.value.key;
 }
 
 }
