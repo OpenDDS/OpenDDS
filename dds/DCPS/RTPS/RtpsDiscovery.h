@@ -426,6 +426,28 @@ public:
     sedp_max_message_size_ = value;
   }
 
+  bool undirected_spdp() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return undirected_spdp_;
+  }
+  void undirected_spdp(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    undirected_spdp_ = value;
+  }
+
+  bool periodic_directed_spdp() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return periodic_directed_spdp_;
+  }
+  void periodic_directed_spdp(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    periodic_directed_spdp_ = value;
+  }
+
   DCPS::TimeDuration max_type_lookup_service_reply_period() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
@@ -478,6 +500,8 @@ private:
   bool use_ice_;
   bool use_ncm_;
   size_t sedp_max_message_size_;
+  bool undirected_spdp_;
+  bool periodic_directed_spdp_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
   bool use_xtypes_;
 };

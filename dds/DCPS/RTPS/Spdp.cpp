@@ -601,6 +601,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         pdata.leaseDuration.seconds));
     }
 
+    if (tport_->directed_sender_) {
+      if (tport_->directed_guids_.empty()) {
+        tport_->directed_sender_->schedule(TimeDuration::zero_value);
+      }
+      tport_->directed_guids_.push_back(guid);
+    }
+
     // add a new participant
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, now, seq)));
     iter = p.first;
@@ -2195,6 +2202,10 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
   local_sender_->enable(outer_->config_->resend_period());
 
+  if (outer_->config_->periodic_directed_spdp()) {
+    directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
+  }
+
 #ifdef OPENDDS_SECURITY
   handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
   handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
@@ -2337,6 +2348,9 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (local_sender_) {
     local_sender_->disable_and_wait();
   }
+  if (directed_sender_) {
+    directed_sender_->cancel_and_wait();
+  }
 
   if (thread_status_sender_) {
     thread_status_sender_->disable_and_wait();
@@ -2373,6 +2387,10 @@ Spdp::SpdpTransport::write(WriteFlags flags)
 void
 Spdp::SpdpTransport::write_i(WriteFlags flags)
 {
+  if (!outer_->config_->undirected_spdp()) {
+    return;
+  }
+
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
      outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
@@ -3609,6 +3627,26 @@ void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
   write(SEND_TO_LOCAL);
   outer_->remove_expired_participants();
+}
+
+void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+
+  while (!directed_guids_.empty()) {
+    const DCPS::RepoId id = directed_guids_.front();
+    directed_guids_.pop_front();
+
+    DiscoveredParticipantConstIter pos = outer_->participants_.find(id);
+    if (pos == outer_->participants_.end()) {
+      continue;
+    }
+
+    write_i(id, SEND_TO_LOCAL | SEND_TO_RELAY);
+    directed_guids_.push_back(id);
+    directed_sender_->schedule(outer_->config_->resend_period() * (1.0 / directed_guids_.size()));
+    break;
+  }
 }
 
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*now*/)

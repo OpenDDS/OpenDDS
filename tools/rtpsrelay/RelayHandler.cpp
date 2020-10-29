@@ -705,6 +705,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing application participant imposter detected at %C\n"), addr_to_string(remote).c_str()));
       return false;
     }
 
@@ -721,15 +722,8 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
       }
       stats_reporter.max_fan_out(to.size(), now);
     } else {
-      // Forward to all peers except the application participant.
-      for (auto& p : guid_addr_set_map_) {
-        if (p.first != config_.application_participant_guid()) {
-          for (const auto& addr : p.second.addr_set) {
-            vsend(addr, p.second.stats_reporter, msg, now);
-          }
-        }
-      }
-      stats_reporter.max_fan_out(guid_addr_set_map_.size(), now);
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing dropping non-directed SPDP message from application participant\n")));
+      return false;
     }
 
     return false;
@@ -828,6 +822,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing application participant imposter detected at %C\n"), addr_to_string(remote).c_str()));
       return false;
     }
 
@@ -844,15 +839,8 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
       }
       stats_reporter.max_fan_out(to.size(), now);
     } else {
-      // Forward to all peers except the application participant.
-      for (auto& p : guid_addr_set_map_) {
-        if (p.first != config_.application_participant_guid()) {
-          for (const auto& addr : p.second.addr_set) {
-            vsend(addr, p.second.stats_reporter, msg, now);
-          }
-        }
-      }
-      stats_reporter.max_fan_out(guid_addr_set_map_.size(), now);
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing dropping non-directed SEDP message from application participant\n")));
+      return false;
     }
 
     return false;
