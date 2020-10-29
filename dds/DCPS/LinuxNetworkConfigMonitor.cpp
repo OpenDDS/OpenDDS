@@ -33,7 +33,7 @@ LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch inte
 bool LinuxNetworkConfigMonitor::open()
 {
   // Listener to changes in links and IPV4 addresses.
-  const pid_t pid = getpid();
+  const pid_t pid = 0;
   ACE_Netlink_Addr addr;
   addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
