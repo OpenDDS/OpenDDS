@@ -871,16 +871,6 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
   return out;
 }
 
-std::ostream&
-operator<<(std::ostream& out, const OpenDDS::XTypes::TypeMap& tm)
-{
-  out << "XTypes::TypeMapBuilder()";
-  for (OpenDDS::XTypes::TypeMap::const_iterator pos = tm.begin(), limit = tm.end(); pos != limit; ++pos) {
-    out << "\n.insert(" << pos->first << "," << pos->second << ")";
-  }
-  return out;
-}
-
 }
 
 void
@@ -898,9 +888,39 @@ typeobject_generator::gen_epilogue()
   NamespaceGuard ng;
 
   be_global->impl_ <<
+    "namespace {\n";
+
+  size_t idx = 0;
+
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin(), limit = minimal_type_map_.end();
+       pos != limit; ++pos, ++idx) {
+    be_global->impl_ <<
+      "XTypes::TypeObject to" << idx << "()\n"
+      "{\n"
+      "  return " << pos->second << ";\n"
+      "}\n";
+  }
+
+  be_global->impl_ <<
+    "XTypes::TypeMap get_minimal_type_map_private()\n"
+    "{\n"
+    "  XTypes::TypeMap tm;\n";
+
+  idx = 0;
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin(), limit = minimal_type_map_.end();
+       pos != limit; ++pos, ++idx) {
+    be_global->impl_ << "  tm[" << pos->first << "] = to" << idx << "();\n";
+  }
+
+  be_global->impl_ <<
+    "  return tm;\n"
+    "}\n"
+    "}\n";
+
+  be_global->impl_ <<
     "const XTypes::TypeMap& get_minimal_type_map()\n"
     "{\n"
-    "  static const XTypes::TypeMap tm = " << minimal_type_map_ << ";\n"
+    "  static const XTypes::TypeMap tm = get_minimal_type_map_private();\n"
     "  return tm;\n"
     "}\n";
 }
