@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "dds/DCPS/RapidJsonWrapper.h"
+#include <dds/DCPS/RapidJsonWrapper.h>
 
 namespace Bench {
 

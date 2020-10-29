@@ -3,7 +3,7 @@
 #include "RapidJsonTestC.h"
 #include "RapidJsonTestTypeSupportImpl.h"
 
-#include "dds/DCPS/RapidJsonWrapper.h"
+#include <dds/DCPS/RapidJsonWrapper.h>
 
 #include <fstream>
 
