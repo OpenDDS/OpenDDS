@@ -1,5 +1,6 @@
-project(InternalThreadStatusPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+project(InternalThreadStatusPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps {
 
+  requires += no_opendds_safety_profile
   exename   = publisher
   requires += built_in_topics
 
@@ -12,8 +13,9 @@ project(InternalThreadStatusPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transp
   }
 }
 
-project(InternalThreadStatusSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+project(InternalThreadStatusSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps {
 
+  requires += no_opendds_safety_profile
   exename   = subscriber
   requires += built_in_topics
 

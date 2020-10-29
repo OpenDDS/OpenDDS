@@ -111,17 +111,18 @@ public:
     DBG_ENTRY("QueueTaskBase","svc");
 
     this->thr_id_ = ACE_OS::thr_self();
-    unsigned long tid = 0;
 #ifdef ACE_HAS_MAC_OSX
-      uint64_t osx_tid;
-      if (!pthread_threadid_np(NULL, &osx_tid)) {
-        tid = static_cast<unsigned long>(osx_tid);
-      } else {
-        tid = 0;
-        ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
-      }
+    unsigned long tid = 0;
+    uint64_t osx_tid;
+    if (!pthread_threadid_np(NULL, &osx_tid)) {
+      tid = static_cast<unsigned long>(osx_tid);
+    } else {
+      tid = 0;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
+    }
 #else
-      tid = thr_id_;
+    ACE_thread_t tid = 0;
+    tid = thr_id_;
 #endif /* ACE_HAS_MAC_OSX */
     TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
     ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
