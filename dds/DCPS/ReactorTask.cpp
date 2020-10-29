@@ -195,10 +195,8 @@ OpenDDS::DCPS::ReactorTask::svc()
               ACE_DEBUG((LM_DEBUG,
                         "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
             }
-            {
-              ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
-              thread_status_->map[key] = now;
-            }
+            ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
+            thread_status_->map[key] = now;
           }
         }
       }
