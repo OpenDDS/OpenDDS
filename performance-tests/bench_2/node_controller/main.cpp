@@ -34,6 +34,7 @@
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
 #include "PropertyStatBlock.h"
+#include "ProcessStatisticsUtils.h"
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
@@ -93,6 +94,11 @@ public:
   WorkerId id()
   {
     return worker_id_;
+  }
+
+  NodeId nodeid()
+  {
+    return node_id_;
   }
 
   void create_worker_report(WorkerReport& report)
@@ -172,7 +178,101 @@ private:
   std::string log_filename_;
 };
 
+class ProcessStats {
+public:
+  ProcessStats(const int& processId, const NodeId& nodeId, const WorkerId& workerId)
+  : processId_(processId),
+    node_id_(nodeId),
+    worker_id_(workerId)
+  {
+  }
+
+  ~ProcessStats() {
+    CloseHandle(processHandle_);
+  }
+
+  void InitCPUUsage() {
+    SYSTEM_INFO sysInfo;
+    FILETIME ftime, fcreatetime, fexittime, fsys, fuser;
+
+    GetSystemInfo(&sysInfo);
+
+    numProcessors_ = sysInfo.dwNumberOfProcessors;
+
+    GetSystemTimeAsFileTime(&ftime);
+
+    memcpy(&lastCPU_, &ftime, sizeof(FILETIME));
+
+    processHandle_ = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)processId_);
+
+    GetProcessTimes(processHandle_, &fcreatetime, &fexittime, &fsys, &fuser);
+    memcpy(&lastSysCPU_, &fsys, sizeof(FILETIME));
+    memcpy(&lastUserCPU_, &fuser, sizeof(FILETIME));
+  }
+
+  double GetProcessCPUUsage()
+  {
+    FILETIME ftime, fsys, fuser;
+    ULARGE_INTEGER current, sys, user;
+    double percent = 0;
+
+    GetSystemTimeAsFileTime(&ftime);
+    memcpy(&current, &ftime, sizeof(FILETIME));
+
+    if (GetProcessTimes(processHandle_, &ftime, &ftime, &fsys, &fuser))
+    {
+      memcpy(&sys, &fsys, sizeof(FILETIME));
+      memcpy(&user, &fuser, sizeof(FILETIME));
+      percent = static_cast<double>((sys.QuadPart - lastSysCPU_.QuadPart) + (user.QuadPart - lastUserCPU_.QuadPart));
+      percent /= static_cast<double>((current.QuadPart - lastCPU_.QuadPart));
+      percent /= static_cast<double>(numProcessors_);
+
+      lastCPU_ = current;
+      lastUserCPU_ = user;
+      lastSysCPU_ = sys;
+    }
+
+    return percent * 100;
+  }
+
+  double GetProcessPercentVirtualUsed() {
+    DWORDLONG const totalVirtual = GetTotalVirtualMemory();
+    DWORDLONG const processVirtualUsed = GetProcessVirtualMemoryUsed(processId_);
+    double percentProcessVirtualUsed = 0;
+
+    if (totalVirtual > 0) {
+      percentProcessVirtualUsed = (static_cast<double>(processVirtualUsed) / static_cast<double>(totalVirtual)) * 100.00;
+    }
+
+    return percentProcessVirtualUsed;
+  }
+
+  double GetProcessPercentRamUsed()
+  {
+    DWORDLONG const totalRam = GetTotalRamMemory();
+    DWORDLONG const processRamUsed = GetTotalRamMemoryUsedByProcess(processId_);
+    double percentProcessRamUsed = 0;
+
+    if (totalRam > 0) {
+      percentProcessRamUsed = (static_cast<double>(processRamUsed) / static_cast<double>(totalRam)) * 100.00;
+    }
+
+    return percentProcessRamUsed;
+  }
+
+private:
+  int processId_;
+  int numProcessors_;
+  NodeId node_id_;
+  WorkerId worker_id_;
+  HANDLE processHandle_;
+  ULARGE_INTEGER lastCPU_;
+  ULARGE_INTEGER lastSysCPU_;
+  ULARGE_INTEGER lastUserCPU_;
+};
+
 using WorkerPtr = std::shared_ptr<Worker>;
+using ProcessStatPtr = std::shared_ptr<ProcessStats>;
 
 class WorkerManager : public ACE_Event_Handler {
 public:
@@ -242,6 +342,7 @@ public:
         if (pid != ACE_INVALID_PID) {
           worker->set_pid(pid);
           pid_to_worker_id_[pid] = worker->id();
+          all_worker_processes_.push_back(std::make_shared<ProcessStats>(pid, worker->nodeid(), worker->id()));
         } else {
           std::cerr << "Failed to run worker " << worker->id() << std::endl;
           worker_is_finished(worker);
@@ -262,16 +363,36 @@ public:
 
     std::thread stat_collector([&](){
 
-      // TODO replace junk with real stats collection
-      size_t junk = 0;
+      // Initialize Cpu
+      double cpuPercent = 0.0;
+      double ramPercent = 0.0;
 
+      std::list< ProcessStatPtr>::iterator pIt;
+
+      for (pIt = all_worker_processes_.begin(); pIt != all_worker_processes_.end(); pIt++)
+      {
+        if ((*pIt) != nullptr) {
+          (*pIt)->InitCPUUsage();
+        }
+      }
+      
       while (running) {
-        // TODO replace junk with real stats collection
-        junk = junk + 3;
-        cpu_block->update(90.0 - ((junk / 3) % 80));
-        mem_block->update(20.0 + (junk * 2) % 60);
+
+        // Get cpuPercent Usage and memPercent Usage for each worker process;
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        for (pIt = all_worker_processes_.begin(); pIt != all_worker_processes_.end(); pIt++)
+        {
+          if ((*pIt) != nullptr) {
+            cpuPercent = (*pIt)->GetProcessCPUUsage();
+            ramPercent = (*pIt)->GetProcessPercentRamUsed();
+          }
+          cpu_block->update(cpuPercent);
+          mem_block->update(ramPercent);
+        }
+
+        
       }
     });
 
@@ -383,6 +504,7 @@ private:
   ACE_Process_Manager& process_manager_;
   std::atomic_bool scenario_timedout_{false};
   std::atomic_bool sigint_{false};
+  std::list<ProcessStatPtr> all_worker_processes_;
 };
 
 enum class RunMode {
