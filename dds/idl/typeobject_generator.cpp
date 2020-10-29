@@ -874,9 +874,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::TypeMap& tm)
 {
-  out << "XTypes::TypeMapBuilder()";
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = tm.begin(), limit = tm.end(); pos != limit; ++pos) {
-    out << "\n.insert(" << pos->first << "," << pos->second << ")";
+    out << "\n  tmb.insert(" << pos->first << "," << pos->second << ");";
   }
   return out;
 }
@@ -900,8 +899,10 @@ typeobject_generator::gen_epilogue()
   be_global->impl_ <<
     "const XTypes::TypeMap& get_minimal_type_map()\n"
     "{\n"
-    "  static const XTypes::TypeMap tm = " << minimal_type_map_ << ";\n"
-    "  return tm;\n"
+    "  static XTypes::TypeMapBuilder tmb;\n"
+    "  tmb.type_map_.clear();\n" << minimal_type_map_ << ";\n"
+    "\n"
+    "  return tmb.type_map_;\n"
     "}\n";
 }
 
