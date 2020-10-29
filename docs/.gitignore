@@ -1,2 +1,3 @@
-doxygen_ace_tao_generated_links.h
-_build
+/doxygen_ace_tao_generated_links.h
+/_build
+/.venv

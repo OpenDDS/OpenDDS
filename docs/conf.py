@@ -37,6 +37,7 @@ master_doc = 'index'
 
 primary_domain = 'cpp'
 
+needs_sphinx = '2.4'
 
 # -- General configuration ---------------------------------------------------
 
