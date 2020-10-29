@@ -164,8 +164,8 @@ OpenDDS::DCPS::ReactorTask::svc()
     if (timeout_ == TimeDuration(0)) {
      reactor_->run_reactor_event_loop();
     } else {
-      unsigned long tid = 0;
 #ifdef ACE_HAS_MAC_OSX
+      unsigned long tid = 0;
       uint64_t osx_tid;
       if (!pthread_threadid_np(NULL, &osx_tid)) {
         tid = static_cast<unsigned long>(osx_tid);
@@ -174,6 +174,7 @@ OpenDDS::DCPS::ReactorTask::svc()
         ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
       }
 #else
+      ACE_thread_t tid = 0;
       tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
       MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
