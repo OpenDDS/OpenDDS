@@ -418,36 +418,41 @@ namespace {
     be_global->impl_ <<
       "    return false;\n"
       "  }\n\n"
-      "  ACE_CDR::ULong map_name_to_id(const char* field_name) const\n"
+      "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
       "  {\n"
-      "    static const std::map<const char*, ACE_CDR::ULong> name_to_id_map[] = {";
+      "    static const std::map<const char*, ACE_CDR::ULong> name_to_id_map = {\n";
     if (struct_node) {
-
-      std::for_each(fields.begin(), fields.end(), print_field_name);
       const AutoidKind auto_id = be_global->autoid(node);
-      for (ACE_CDR::ULong default_id = 0; default_id < fields.size(); ++default_id) {
-        //TODO: Clayton is a ULONG a bad idea here?
-        be_global->impl_ << "{\"" << fields[default_id]->local_name()->get_string() << "\", " <<
-          be_global->get_id(fields[default_id], auto_id, default_id) << "},";
+      for (size_t i = 0; i < fields.size(); ++i) {
+        ACE_CDR::ULong default_id = i;
+        be_global->impl_ << "      {\"" << fields[i]->local_name()->get_string() << "\", " <<
+          be_global->get_id(fields[i], auto_id, default_id) << "},\n";
       }
     }
+    const std::string exception =
+      "throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+      "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
-      "0};\n"
-      "    return names;\n"
+      "    };\n"
+      "    std::map<const char*, ACE_CDR::ULong>::const_iterator it = name_to_id_map.find(field);\n"
+      "    if (it == name_to_id_map.end()) {\n"
+      "      " << exception <<
+      "    } else {\n"
+      "      return it->second;\n"
+      "    }\n"
       "  }\n\n"
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
       "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
       "    ACE_UNUSED_ARG(typed);\n";
     std::for_each(fields.begin(), fields.end(), gen_field_getValue);
-    const std::string exception =
-      "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
-      exception <<
+      "    " << exception <<
       "  }\n\n";
 
-    marshal_generator::clayton_gen_field_getValueFromSerialized(struct_node, clazz);
+    if (struct_node) {
+      marshal_generator::clayton_gen_field_getValueFromSerialized(struct_node, clazz);
+    }
     //   "  Value getValue(Serializer& ser, const char* field) const\n"
     //   "  {\n";
     // if (struct_node && fields.size()) {

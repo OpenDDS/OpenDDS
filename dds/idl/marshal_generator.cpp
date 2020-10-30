@@ -3346,8 +3346,14 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
   if (is_mutable) {
     be_global->impl_ <<
       "    if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
-      "      set_default(stru);\n"
-      "\n"
+      "      std::string base_field = field;\n"
+      "      size_t index = base_field.find('.');\n"
+      "      std::string subfield;\n"
+      "      if (index != std::string::npos) {\n"
+      "        subfield = base_field.substr(index+1);\n"
+      "        base_field = base_field.substr(0, index);\n"
+      "      }\n"
+      "      unsigned field_id = map_name_to_id(base_field.c_str());\n"
       "      unsigned member_id;\n"
       "      size_t field_size;\n"
       "      while (true) {\n";
@@ -3388,28 +3394,49 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
       std::string field_name = std::string("stru.") + field->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(field->field_type());
-      const std::string cxx_type = to_cxx_type(field_type, size);
       Classification fld_cls = classify(field_type);
-      const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
-        : getWrapper("val", field_type, WD_INPUT);
 
       cases <<
         "        case " << id << ": {\n"
-        "          if (!" << generate_field_stream(
-        indent, field, ">> stru", false, intro) << ") {\n";
-      
-
-      if (use_cxx11) {
-        field_name += "()";
+        "          if (field_id == member_id) {\n";
+      if (fld_cls & CL_SCALAR) {
+        const std::string cxx_type = to_cxx_type(field_type, size);
+        const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
+          : getWrapper("val", field_type, WD_INPUT);
+        cases <<
+          "            " << cxx_type << " val;\n";
+        if (fld_cls & CL_STRING) {
+          cases << "            if (!(strm >> val.out()))";
+        } else {
+          cases << "            if (!(strm >> val))";
+        }
+        cases <<  
+          " {\n"
+          "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n";
+        cases <<
+          "            }\n"
+          "            return val;\n"
+          "          } else {\n"
+          "            strm.skip(field_size);\n"
+          "          }\n"
+          "          break;\n"
+          "        }\n";
+      } else if (fld_cls & CL_STRUCTURE) {
+        cases <<
+          "        return getMetaStruct<" << scoped(field_type->name()) << ">().getValue(subfield);\n"
+          "      }\n"
+          "      break;\n";
+      } else { // array, sequence, union:
+        cases <<
+          "        strm.skip(field_size);\n"
+          "      }\n"
+          "      break;\n";
       }
-      cases <<
-        "          }\n"
-        "          break;\n"
-        "        }\n";
+
     }
     intro.join(be_global->impl_, indent);
     const std::string switch_cases = cases.str();
-    std::string sw_indent = "        ";
+    std::string sw_indent = "          ";
     if (switch_cases.empty()) {
       sw_indent = "        ";
     } else {
@@ -3425,7 +3452,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
       << cpp_name << "\\n\"), member_id));\n" <<
       sw_indent << "  }\n" <<
-      sw_indent << "  return false;\n" <<
+      sw_indent << "  throw std::runtime_error(\"member id did not exist in getValue\");\n" <<
       sw_indent << "}\n" <<
       sw_indent << "strm.skip(field_size);\n";
 
@@ -3436,10 +3463,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
     }
 
     be_global->impl_ <<
-      "      }\n"
-      "      return false;\n"
-      "    }\n"
-      "  }\n";
+      "      }\n";
   }
 
   expr = "";
