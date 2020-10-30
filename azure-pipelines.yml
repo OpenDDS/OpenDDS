@@ -63,6 +63,16 @@ jobs:
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
     displayName: Run configure script
+  - script: |
+      for /d %%x in (tests\googletest\build\*) do @if not %%x==tests\googletest\build\install del /s/q %%x
+      del /s/q ACE_TAO\ACE\protocols ACE_TAO\ACE\contrib ACE_TAO\ACE\examples
+      del /s/q ACE_TAO\ACE\tests ACE_TAO\ACE\netsvcs ACE_TAO\ACE\websvcs
+      del /s/q ACE_TAO\ACE\ASNMP ACE_TAO\ACE\performance-tests
+      del /s/q ACE_TAO\ACE\tests ACE_TAO\ACE\Kokyu ACE_TAO\TAO\interop-tests
+      del /s/q ACE_TAO\TAO\DevGuideExamples ACE_TAO\TAO\examples
+      del /s/q ACE_TAO\TAO\orbsvcs\tests ACE_TAO\TAO\orbsvcs\performance-tests
+      del /s/q ACE_TAO\TAO\orbsvcs\examples
+    displayName: Remove unused files from external repos
   - task: BatchScript@1
     displayName: Setenv from configure script
     inputs:
@@ -96,6 +106,9 @@ jobs:
   - script: |
       perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
+  - script: |
+      del /s/q *.obj *.idb
+    displayName: Remove unused build outputs
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd tests\DCPS\Messenger
