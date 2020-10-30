@@ -126,6 +126,13 @@ project(*DataSampleHeader): dcps_test, googletest {
   }
 }
 
+project(*NetworkConfig): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    NetworkConfig.cpp
+  }
+}
+
 project(*XTypesAssignability): dcps_test, googletest {
   exename = *
   Source_Files {
