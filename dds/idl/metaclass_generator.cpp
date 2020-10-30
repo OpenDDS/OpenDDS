@@ -6,6 +6,7 @@
  */
 
 #include "metaclass_generator.h"
+#include "marshal_generator.h"
 
 #include "field_info.h"
 #include "be_extern.h"
@@ -118,73 +119,6 @@ namespace {
                        "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
-  }
-
-  std::string string_type(Classification cls)
-  {
-    return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
-      ((cls & CL_WIDE) ? "std::wstring" : "std::string") :
-      (cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
-  }
-
-  std::string to_cxx_type(AST_Type* type, std::size_t& size)
-  {
-    const Classification cls = classify(type);
-    if (cls & CL_ENUM) {
-      size = 4;
-      return "ACE_CDR::ULong";
-    }
-    if (cls & CL_STRING) {
-      return string_type(cls);
-    }
-    if (cls & CL_PRIMITIVE) {
-      AST_Type* t = resolveActualType(type);
-      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(t);
-      switch (p->pt()) {
-      case AST_PredefinedType::PT_long:
-        size = 4;
-        return "ACE_CDR::Long";
-      case AST_PredefinedType::PT_ulong:
-        size = 4;
-        return "ACE_CDR::ULong";
-      case AST_PredefinedType::PT_longlong:
-        size = 8;
-        return "ACE_CDR::LongLong";
-      case AST_PredefinedType::PT_ulonglong:
-        size = 8;
-        return "ACE_CDR::ULongLong";
-      case AST_PredefinedType::PT_short:
-        size = 2;
-        return "ACE_CDR::Short";
-      case AST_PredefinedType::PT_ushort:
-        size = 2;
-        return "ACE_CDR::UShort";
-      case AST_PredefinedType::PT_float:
-        size = 4;
-        return "ACE_CDR::Float";
-      case AST_PredefinedType::PT_double:
-        size = 8;
-        return "ACE_CDR::Double";
-      case AST_PredefinedType::PT_longdouble:
-        size = 16;
-        return "ACE_CDR::LongDouble";
-      case AST_PredefinedType::PT_char:
-        size = 1;
-        return "ACE_CDR::Char";
-      case AST_PredefinedType::PT_wchar:
-        size = 2;
-        return "ACE_CDR::WChar";
-      case AST_PredefinedType::PT_boolean:
-        size = 1;
-        return "ACE_CDR::Boolean";
-      case AST_PredefinedType::PT_octet:
-        size = 1;
-        return "ACE_CDR::Octet";
-      default:
-        throw std::invalid_argument("Unknown PRIMITIVE type");
-      }
-    }
-    return scoped(type->name());
   }
 
   void
@@ -484,6 +418,23 @@ namespace {
     be_global->impl_ <<
       "    return false;\n"
       "  }\n\n"
+      "  ACE_CDR::ULong map_name_to_id(const char* field_name) const\n"
+      "  {\n"
+      "    static const std::map<const char*, ACE_CDR::ULong> name_to_id_map[] = {";
+    if (struct_node) {
+
+      std::for_each(fields.begin(), fields.end(), print_field_name);
+      const AutoidKind auto_id = be_global->autoid(node);
+      for (ACE_CDR::ULong default_id = 0; default_id < fields.size(); ++default_id) {
+        //TODO: Clayton is a ULONG a bad idea here?
+        be_global->impl_ << "{\"" << fields[default_id]->local_name()->get_string() << "\", " <<
+          be_global->get_id(fields[default_id], auto_id, default_id) << "},";
+      }
+    }
+    be_global->impl_ <<
+      "0};\n"
+      "    return names;\n"
+      "  }\n\n"
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
       "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
@@ -494,21 +445,23 @@ namespace {
       "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
       exception <<
-      "  }\n\n"
-      "  Value getValue(Serializer& ser, const char* field) const\n"
-      "  {\n";
-    if (struct_node && fields.size()) {
-      std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
-    } else {
-      be_global->impl_ << "    ACE_UNUSED_ARG(ser);\n";
-    }
-    be_global->impl_ <<
-      "    if (!field[0]) {\n"   // if 'field' is the empty string...
-      "      return 0;\n"        // ...we've skipped the entire struct
-      "    }\n"                  //    and the return value is ignored
-      "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "valid for struct " << clazz << "\");\n"
-      "  }\n\n"
+      "  }\n\n";
+
+    marshal_generator::clayton_gen_field_getValueFromSerialized(struct_node, clazz);
+    //   "  Value getValue(Serializer& ser, const char* field) const\n"
+    //   "  {\n";
+    // if (struct_node && fields.size()) {
+    //   std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
+    // } else {
+    //   be_global->impl_ << "    ACE_UNUSED_ARG(ser);\n";
+    // }
+    // be_global->impl_ <<
+    //   "    if (!field[0]) {\n"   // if 'field' is the empty string...
+    //   "      return 0;\n"        // ...we've skipped the entire struct
+    //   "    }\n"                  //    and the return value is ignored
+    //   "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+    //   "valid for struct " << clazz << "\");\n"
+    //   "  }\n\n"
       "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
       "ComparatorBase::Ptr next) const\n"
       "  {\n"
