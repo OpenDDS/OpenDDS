@@ -300,6 +300,9 @@ private:
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpMulti> local_sender_;
+    void send_directed(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> directed_sender_;
+    OPENDDS_LIST(DCPS::RepoId) directed_guids_;
     DCPS::ThreadStatus* thread_status_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;

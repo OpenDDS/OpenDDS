@@ -155,6 +155,8 @@ public:
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
+  void association_complete_i(const DCPS::RepoId& localId,
+                              const DCPS::RepoId& remoteId);
 
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
@@ -179,194 +181,11 @@ public:
 
 private:
 
-  class AssociationComplete : public DCPS::JobQueue::Job {
-  public:
-    AssociationComplete(Sedp* sedp, const DCPS::RepoId& local, const DCPS::RepoId& remote) : sedp_(sedp), local_(local), remote_(remote) {}
-    void execute();
-  private:
-    Sedp* sedp_;
-    DCPS::RepoId local_, remote_;
-  };
-
   Spdp& spdp_;
   DCPS::SequenceNumber participant_secure_sequence_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
-#endif
-
-  class MsgBase : public DCPS::JobQueue::Job {
-  public:
-    MsgBase(const DCPS::WeakRcHandle<Sedp>& sedp,
-            DCPS::MessageId id)
-      : sedp_(sedp)
-      , id_(id)
-    {}
-
-  protected:
-    DCPS::WeakRcHandle<Sedp> sedp_;
-    const DCPS::MessageId id_;
-  };
-
-  class MsgDiscoveredPublication : public MsgBase {
-  public:
-    MsgDiscoveredPublication(const DCPS::WeakRcHandle<Sedp>& sedp,
-                             DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DiscoveredPublication& data() { return data_; }
-    void execute();
-
-  private:
-    DiscoveredPublication data_;
-  };
-
-  class MsgDiscoveredSubscription : public MsgBase {
-  public:
-    MsgDiscoveredSubscription(const DCPS::WeakRcHandle<Sedp>& sedp,
-                              DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DiscoveredSubscription& data() { return data_; }
-    void execute();
-
-  private:
-    DiscoveredSubscription data_;
-  };
-
-  class MsgParticipantMessageData : public MsgBase {
-  public:
-    MsgParticipantMessageData(const DCPS::WeakRcHandle<Sedp>& sedp,
-                              DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    ParticipantMessageData& data() { return data_; }
-    void execute();
-
-  private:
-    ParticipantMessageData data_;
-  };
-
-#ifndef DDS_HAS_MINIMUM_BIT
-  class MsgRemoveFromPubBit : public MsgBase {
-  public:
-    MsgRemoveFromPubBit(const DCPS::WeakRcHandle<Sedp>& sedp,
-                        DCPS::MessageId id,
-                        DDS::InstanceHandle_t ih)
-      : MsgBase(sedp, id)
-      , ih_(ih)
-    {}
-
-    void execute();
-
-  private:
-    const DDS::InstanceHandle_t ih_;
-  };
-
-  class MsgRemoveFromSubBit : public MsgBase {
-  public:
-    MsgRemoveFromSubBit(const DCPS::WeakRcHandle<Sedp>& sedp,
-                        DCPS::MessageId id,
-                        DDS::InstanceHandle_t ih)
-      : MsgBase(sedp, id)
-      , ih_(ih)
-    {}
-
-    void execute();
-
-  private:
-    const DDS::InstanceHandle_t ih_;
-  };
-#endif /* DDS_HAS_MINIMUM_BIT */
-
-#ifdef OPENDDS_SECURITY
-  class MsgParticipantStatelessData : public MsgBase {
-  public:
-    MsgParticipantStatelessData(const DCPS::WeakRcHandle<Sedp>& sedp,
-                                DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DDS::Security::ParticipantGenericMessage& data() { return data_; }
-    void execute();
-
-  private:
-    DDS::Security::ParticipantGenericMessage data_;
-  };
-
-  class MsgParticipantVolatileSecure : public MsgBase {
-  public:
-    MsgParticipantVolatileSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
-                                 DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DDS::Security::ParticipantGenericMessage& data() { return data_; }
-    void execute();
-
-  private:
-    DDS::Security::ParticipantGenericMessage data_;
-  };
-
-  class MsgParticipantMessageDataSecure : public MsgBase {
-  public:
-    MsgParticipantMessageDataSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
-                                    DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    ParticipantMessageData& data() { return data_; }
-    void execute();
-
-  private:
-    ParticipantMessageData data_;
-  };
-
-  class MsgDiscoveredPublicationSecure : public MsgBase {
-  public:
-    MsgDiscoveredPublicationSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
-                                   DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DiscoveredPublication_SecurityWrapper& data() { return data_; }
-    void execute();
-
-  private:
-    DiscoveredPublication_SecurityWrapper data_;
-  };
-
-  class MsgDiscoveredSubscriptionSecure : public MsgBase {
-  public:
-    MsgDiscoveredSubscriptionSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
-                                    DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    DiscoveredSubscription_SecurityWrapper& data() { return data_; }
-    void execute();
-
-  private:
-    DiscoveredSubscription_SecurityWrapper data_;
-  };
-
-  class MsgParticipantDataSecure : public MsgBase {
-  public:
-    MsgParticipantDataSecure(const DCPS::WeakRcHandle<Sedp>& sedp,
-                             DCPS::MessageId id)
-      : MsgBase(sedp, id)
-    {}
-
-    ParticipantData_t& data() { return data_; }
-    void execute();
-
-  private:
-    ParticipantData_t data_;
-  };
-
 #endif
 
   class Endpoint : public DCPS::TransportClient {

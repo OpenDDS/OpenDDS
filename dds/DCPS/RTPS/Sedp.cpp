@@ -1407,16 +1407,6 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& remoteId)
 }
 #endif
 
-#ifdef OPENDDS_SECURITY
-void
-Sedp::MsgParticipantDataSecure::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->spdp_.handle_participant_data(id_, data_, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
-}
-#endif
-
 bool
 Sedp::disassociate(ParticipantData_t& pdata)
 {
@@ -1749,7 +1739,15 @@ void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  job_queue_->enqueue(make_rch<MsgRemoveFromPubBit>(rchandle_from(this), DCPS::DISPOSE_INSTANCE, pub.bit_ih_));
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+  ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+
+  DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+  // bit may be null if the DomainParticipant is shutting down
+  if (bit && pub.bit_ih_ != DDS::HANDLE_NIL) {
+    bit->set_instance_state(pub.bit_ih_,
+                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  }
 #else
   ACE_UNUSED_ARG(pub);
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -1759,39 +1757,16 @@ void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  job_queue_->enqueue(make_rch<MsgRemoveFromSubBit>(rchandle_from(this), DCPS::DISPOSE_INSTANCE, sub.bit_ih_));
+  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+  // bit may be null if the DomainParticipant is shutting down
+  if (bit && sub.bit_ih_ != DDS::HANDLE_NIL) {
+    bit->set_instance_state(sub.bit_ih_,
+                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  }
 #else
   ACE_UNUSED_ARG(sub);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
-
-#ifndef DDS_HAS_MINIMUM_BIT
-void
-Sedp::MsgRemoveFromPubBit::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp->pub_bit();
-  // bit may be null if the DomainParticipant is shutting down
-  if (bit && ih_ != DDS::HANDLE_NIL) {
-    bit->set_instance_state(ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
-}
-
-void
-Sedp::MsgRemoveFromSubBit::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp->sub_bit();
-  // bit may be null if the DomainParticipant is shutting down
-  if (bit && ih_ != DDS::HANDLE_NIL) {
-    bit->set_instance_state(ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
-}
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 #ifndef DDS_HAS_MINIMUM_BIT
 DCPS::TopicBuiltinTopicDataDataReaderImpl*
@@ -2021,15 +1996,6 @@ Sedp::shutdown()
   participant_volatile_message_secure_writer_->shutting_down();
   dcps_participant_secure_writer_->shutting_down();
 #endif
-}
-
-void
-Sedp::MsgDiscoveredPublication::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-
-  sedp->data_received(id_, data_);
 }
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
@@ -2308,7 +2274,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
 #ifdef OPENDDS_SECURITY
-  if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
+  if (message_id == DCPS::SAMPLE_DATA && should_drop_message(wdata.ddsPublicationData.topic_name)) {
     return;
   }
 #endif
@@ -2326,14 +2292,6 @@ Sedp::data_received(DCPS::MessageId message_id,
 }
 
 #ifdef OPENDDS_SECURITY
-void
-Sedp::MsgDiscoveredPublicationSecure::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->data_received(id_, data_);
-}
-
 void Sedp::data_received(DCPS::MessageId message_id,
                          const DiscoveredPublication_SecurityWrapper& wrapper)
 {
@@ -2657,14 +2615,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 }
 
 void
-Sedp::MsgDiscoveredSubscription::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->data_received(id_, data_);
-}
-
-void
 Sedp::data_received(DCPS::MessageId message_id,
                     const DiscoveredSubscription& dsub)
 {
@@ -2684,7 +2634,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
 #ifdef OPENDDS_SECURITY
-  if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
+  if (message_id == DCPS::SAMPLE_DATA && should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
 #endif
@@ -2702,14 +2652,6 @@ Sedp::data_received(DCPS::MessageId message_id,
 }
 
 #ifdef OPENDDS_SECURITY
-void
-Sedp::MsgDiscoveredSubscriptionSecure::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->data_received(id_, data_);
-}
-
 void Sedp::data_received(DCPS::MessageId message_id,
                          const DiscoveredSubscription_SecurityWrapper& wrapper)
 {
@@ -2730,14 +2672,6 @@ void Sedp::data_received(DCPS::MessageId message_id,
   process_discovered_reader_data(message_id, wrapper.data, guid, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
 }
 #endif
-
-void
-Sedp::MsgParticipantMessageData::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->data_received(id_, data_);
-}
 
 void
 Sedp::data_received(DCPS::MessageId /*message_id*/,
@@ -2775,14 +2709,6 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
 }
 
 #ifdef OPENDDS_SECURITY
-void
-Sedp::MsgParticipantMessageDataSecure::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->received_participant_message_data_secure(id_, data_);
-}
-
 void
 Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
             const ParticipantMessageData& data)
@@ -2888,14 +2814,6 @@ bool Sedp::should_drop_message(const char* unsecure_topic_name)
 }
 
 void
-Sedp::MsgParticipantStatelessData::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->received_stateless_message(id_, data_);
-}
-
-void
 Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
                     const DDS::Security::ParticipantStatelessMessage& msg)
 {
@@ -2916,14 +2834,6 @@ Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
     spdp_.handle_handshake_message(msg);
   }
   return;
-}
-
-void
-Sedp::MsgParticipantVolatileSecure::execute()
-{
-  DCPS::RcHandle<Sedp> sedp = sedp_.lock();
-  if (!sedp) { return; }
-  sedp->received_volatile_message_secure(id_, data_);
 }
 
 void
@@ -2974,14 +2884,21 @@ void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  association_complete_i(localId, remoteId);
+}
+
+void
+Sedp::association_complete_i(const RepoId& localId,
+                             const RepoId& remoteId)
+{
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DEBUG: Sedp::association_complete local %C remote %C\n"),
+               ACE_TEXT("(%P|%t) DEBUG: Sedp::association_complete_i local %C remote %C\n"),
                DCPS::LogGuid(localId).c_str(),
                DCPS::LogGuid(remoteId).c_str()));
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
   if (is_expectant_opendds(remoteId)) {
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
@@ -3160,7 +3077,12 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
     return;
   }
 
-  sedp_.job_queue_->enqueue(make_rch<AssociationComplete>(&sedp_, repo_id_, remote));
+  if (is_reliable()) {
+    // Message from transport.  Get the lock.
+    sedp_.association_complete(repo_id_, remote);
+  } else {
+    sedp_.association_complete_i(repo_id_, remote);
+  }
 }
 
 void
@@ -3584,8 +3506,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::RcHandle<MsgDiscoveredPublication> msg = make_rch<MsgDiscoveredPublication>(rchandle_from(&sedp_), id);
-      DiscoveredPublication& wdata = msg->data();
+      DiscoveredPublication wdata;
       if (!ParameterListConverter::from_param_list(data, wdata.writer_data_)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
@@ -3609,8 +3530,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         wdata.ice_agent_info_ = pos->second;
       }
 #endif
-      sedp_.job_queue_->enqueue(msg);
-
+      sedp_.data_received(id, wdata);
 
 #ifdef OPENDDS_SECURITY
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
@@ -3621,8 +3541,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::RcHandle<MsgDiscoveredPublicationSecure> msg = make_rch<MsgDiscoveredPublicationSecure>(rchandle_from(&sedp_), id);
-      DiscoveredPublication_SecurityWrapper& wdata_secure = msg->data();
+      DiscoveredPublication_SecurityWrapper wdata_secure;
 
       if (!ParameterListConverter::from_param_list(data, wdata_secure)) {
         ACE_ERROR((LM_ERROR,
@@ -3646,7 +3565,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         wdata_secure.have_ice_agent_info = true;
         wdata_secure.ice_agent_info = pos->second;
       }
-      sedp_.job_queue_->enqueue(msg);
+      sedp_.data_received(id, wdata_secure);
 
 #endif
 
@@ -3658,8 +3577,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::RcHandle<MsgDiscoveredSubscription> msg = make_rch<MsgDiscoveredSubscription>(rchandle_from(&sedp_), id);
-      DiscoveredSubscription& rdata = msg->data();
+      DiscoveredSubscription rdata;
       if (!ParameterListConverter::from_param_list(data, rdata.reader_data_)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
@@ -3686,8 +3604,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if (rdata.reader_data_.readerProxy.expectsInlineQos) {
         set_inline_qos(rdata.reader_data_.readerProxy.allLocators);
       }
-      sedp_.job_queue_->enqueue(msg);
-
+      sedp_.data_received(id, rdata);
 
 #ifdef OPENDDS_SECURITY
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
@@ -3698,8 +3615,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::RcHandle<MsgDiscoveredSubscriptionSecure> msg = make_rch<MsgDiscoveredSubscriptionSecure>(rchandle_from(&sedp_), id);
-      DiscoveredSubscription_SecurityWrapper& rdata = msg->data();
+      DiscoveredSubscription_SecurityWrapper rdata;
 
       if (!ParameterListConverter::from_param_list(data, rdata)) {
         ACE_ERROR((LM_ERROR,
@@ -3727,60 +3643,54 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if ((rdata.data).readerProxy.expectsInlineQos) {
         set_inline_qos((rdata.data).readerProxy.allLocators);
       }
-      sedp_.job_queue_->enqueue(msg);
+      sedp_.data_received(id, rdata);
 
 #endif
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
                && !sample.header_.key_fields_only_) {
-      DCPS::RcHandle<MsgParticipantMessageData> msg = make_rch<MsgParticipantMessageData>(rchandle_from(&sedp_), id);
-      ParticipantMessageData& data = msg->data();
+      ParticipantMessageData data;
       if (!(ser >> data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.job_queue_->enqueue(msg);
+      sedp_.data_received(id, data);
 
 #ifdef OPENDDS_SECURITY
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER
                && !sample.header_.key_fields_only_) {
 
-      DCPS::RcHandle<MsgParticipantMessageDataSecure> msg = make_rch<MsgParticipantMessageDataSecure>(rchandle_from(&sedp_), id);
-      ParticipantMessageData& data = msg->data();
+      ParticipantMessageData data;
 
       if (!(ser >> data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.job_queue_->enqueue(msg);
-
+      sedp_.received_participant_message_data_secure(id, data);
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
 
-      DCPS::RcHandle<MsgParticipantStatelessData> msg = make_rch<MsgParticipantStatelessData>(rchandle_from(&sedp_), id);
-      DDS::Security::ParticipantStatelessMessage& data = msg->data();
+      DDS::Security::ParticipantStatelessMessage data;
       ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
       if (!(ser >> data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.job_queue_->enqueue(msg);
+      sedp_.received_stateless_message(id, data);
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
 
-      DCPS::RcHandle<MsgParticipantVolatileSecure> msg = make_rch<MsgParticipantVolatileSecure>(rchandle_from(&sedp_), id);
-      DDS::Security::ParticipantVolatileMessageSecure& data = msg->data();
+      DDS::Security::ParticipantVolatileMessageSecure data;
       ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
       if (!(ser >> data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.job_queue_->enqueue(msg);
-
+      sedp_.received_volatile_message_secure(id, data);
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
 
@@ -3791,8 +3701,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::RcHandle<MsgParticipantDataSecure> msg = make_rch<MsgParticipantDataSecure>(rchandle_from(&sedp_), id);
-      Security::SPDPdiscoveredParticipantData& pdata = msg->data();
+      Security::SPDPdiscoveredParticipantData pdata;
 
       if (!ParameterListConverter::from_param_list(data, pdata)) {
         ACE_ERROR((LM_ERROR,
@@ -3803,7 +3712,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
       sedp_.spdp_.process_participant_ice(data, pdata, guid);
-      sedp_.job_queue_->enqueue(msg);
+      sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
+
 #endif
 
     }
@@ -5199,11 +5109,6 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub)
   ACE_UNUSED_ARG(guid);
   ACE_UNUSED_ARG(dsub);
 #endif
-}
-
-void
-Sedp::AssociationComplete::execute() {
-  sedp_->association_complete(local_, remote_);
 }
 
 void

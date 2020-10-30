@@ -72,6 +72,7 @@ public:
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
   void populate_connection_info();
+  bool is_reliable() const { return reliable_; }
 
   // Managing associations to remote peers:
 

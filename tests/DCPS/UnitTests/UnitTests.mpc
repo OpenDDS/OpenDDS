@@ -125,3 +125,11 @@ project(*DataSampleHeader): dcps_test, googletest {
     DataSampleHeader.cpp
   }
 }
+
+project(*NetworkConfig): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    NetworkConfig.cpp
+  }
+}
+

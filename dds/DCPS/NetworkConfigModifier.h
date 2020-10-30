@@ -29,6 +29,9 @@ public:
   bool close();
 
   void add_interface(const OPENDDS_STRING &name);
+  using NetworkConfigMonitor::remove_interface;
+  using NetworkConfigMonitor::add_address;
+  using NetworkConfigMonitor::remove_address;
 
 private:
   void validate_interfaces_index();
