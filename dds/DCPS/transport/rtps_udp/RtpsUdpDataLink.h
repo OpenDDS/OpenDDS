@@ -319,7 +319,7 @@ private:
   typedef RcHandle<ReaderInfo> ReaderInfo_rch;
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo_rch, GUID_tKeyLessThan) ReaderInfoMap;
   typedef OPENDDS_SET(ReaderInfo_rch) ReaderInfoSet;
-  struct ReaderInfoSetHolder : public RcObject {
+  struct ReaderInfoSetHolder : RcObject {
     ReaderInfoSet readers;
   };
   typedef RcHandle<ReaderInfoSetHolder> ReaderInfoSetHolder_rch;
@@ -392,9 +392,9 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
     SequenceNumber expected_max_sn(const ReaderInfo_rch& reader) const;
     static void snris_insert(RtpsUdpDataLink::SNRIS& snris, const ReaderInfo_rch& reader);
-    static void snris_erase(RtpsUdpDataLink::SNRIS& snris, const SequenceNumber& sn, const ReaderInfo_rch& reader);
+    static void snris_erase(RtpsUdpDataLink::SNRIS& snris, const SequenceNumber sn, const ReaderInfo_rch& reader);
     void make_leader_lagger(const RepoId& reader, SequenceNumber previous_max_sn);
-    void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber& previous_acked_sn);
+    void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
 
   public:

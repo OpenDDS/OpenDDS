@@ -3236,7 +3236,7 @@ RtpsUdpDataLink::RtpsWriter::snris_insert(RtpsUdpDataLink::SNRIS& snris,
 
 void
 RtpsUdpDataLink::RtpsWriter::snris_erase(RtpsUdpDataLink::SNRIS& snris,
-                                         const SequenceNumber& sn,
+                                         const SequenceNumber sn,
                                          const ReaderInfo_rch& reader)
 {
   SNRIS::iterator pos = snris.find(sn);
@@ -3288,7 +3288,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
 
 void
 RtpsUdpDataLink::RtpsWriter::make_lagger_leader(const ReaderInfo_rch& reader,
-                                                const SequenceNumber& previous_acked_sn)
+                                                const SequenceNumber previous_acked_sn)
 {
   const SequenceNumber acked_sn = reader->acked_sn();
   if (previous_acked_sn == acked_sn) { return; }
@@ -3620,7 +3620,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
-     CORBA::Octet(FLAG_E),
+     FLAG_E,
      HEARTBEAT_SZ},
     ENTITYID_UNKNOWN, // any matched reader may be interested in this
     id_.entityId,
@@ -3674,7 +3674,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   }
 
   // Directed, final.
-  meta_submessage.sm_.heartbeat_sm().smHeader.flags = FLAG_E | FLAG_F;
+  meta_submessage.sm_.heartbeat_sm().smHeader.flags |= FLAG_F;
   for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(),
          limit = readers_expecting_heartbeat_.end();
        pos != limit; ++pos) {
