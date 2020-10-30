@@ -153,47 +153,56 @@ OpenDDS::DCPS::ReactorTask::svc()
     }
   }
 
-  // Tell the reactor to handle events.
-  if (timeout_ == TimeDuration(0)) {
-    reactor_->run_reactor_event_loop();
-  } else {
-#ifdef ACE_HAS_MAC_OSX
-    unsigned long tid = 0;
-    uint64_t osx_tid;
-    if (!pthread_threadid_np(NULL, &osx_tid)) {
-      tid = static_cast<unsigned long>(osx_tid);
+  try {
+    // Tell the reactor to handle events.
+    if (timeout_ == TimeDuration(0)) {
+      reactor_->run_reactor_event_loop();
     } else {
-      tid = 0;
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
-    }
+#ifdef ACE_HAS_MAC_OSX
+      unsigned long tid = 0;
+      uint64_t osx_tid;
+      if (!pthread_threadid_np(NULL, &osx_tid)) {
+        tid = static_cast<unsigned long>(osx_tid);
+      } else {
+        tid = 0;
+        ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
+      }
 #else
-    ACE_thread_t tid = 0;
-    tid = ACE_OS::thr_self();
+      ACE_thread_t tid = 0;
+      tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
-    MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
+      MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
 
-    OPENDDS_STRING key = to_dds_string(tid);
-    if (name_ != "") {
-      key += " (" + name_ + ")";
-    }
+      OPENDDS_STRING key = to_dds_string(tid);
+      if (name_ != "") {
+        key += " (" + name_ + ")";
+      }
 
-    ACE_Time_Value t = timeout_.value();
+      ACE_Time_Value t = timeout_.value();
 
-    while (state_ == STATE_RUNNING) {
-      reactor_->run_reactor_event_loop(t, 0);
-      MonotonicTimePoint now = MonotonicTimePoint::now();
-      if (now > expire) {
-        expire = now + timeout_;
-        if (thread_status_) {
-          if (DCPS_debug_level > 4) {
-            ACE_DEBUG((LM_DEBUG,
-                       "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
+      while (state_ == STATE_RUNNING) {
+        reactor_->run_reactor_event_loop(t, 0);
+        MonotonicTimePoint now = MonotonicTimePoint::now();
+        if (now > expire) {
+          expire = now + timeout_;
+          if (thread_status_) {
+            if (DCPS_debug_level > 4) {
+              ACE_DEBUG((LM_DEBUG,
+                         "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
+            }
+            ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
+            thread_status_->map[key] = now;
           }
-          ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
-          thread_status_->map[key] = now;
         }
       }
     }
+  } catch (const std::exception& e) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",
+               e.what()));
+  } catch (...) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
   }
 
   return 0;
