@@ -1757,6 +1757,9 @@ void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+  ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+
   DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
   // bit may be null if the DomainParticipant is shutting down
   if (bit && sub.bit_ih_ != DDS::HANDLE_NIL) {
