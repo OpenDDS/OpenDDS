@@ -2776,25 +2776,20 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
-  bool first_ack = false;
-
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    first_ack = true;
-  }
-
-  if (first_ack) {
-    // Queue up durable data.
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
-    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-    link->invoke_on_start_callbacks(id_, remote, true);
-  }
-
-  ri = remote_readers_.find(remote);
-  if (ri == remote_readers_.end()) {
-    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
-          "WARNING ReaderInfo not found\n"));
-    return;
+    {
+      // Queue up durable data.
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+      link->invoke_on_start_callbacks(id_, remote, true);
+    }
+    ri = remote_readers_.find(remote);
+    if (ri == remote_readers_.end()) {
+      VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+            "WARNING ReaderInfo not found\n"));
+      return;
+    }
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
