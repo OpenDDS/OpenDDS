@@ -174,12 +174,15 @@ OpenDDS::DCPS::ReactorTask::svc()
         ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
       }
 #else
-      ACE_thread_t tid = 0;
-      tid = ACE_OS::thr_self();
+      ACE_thread_t tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
       MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
 
+#ifndef OPENDDS_SAFETY_PROFILE
       OPENDDS_STRING key = to_dds_string(tid);
+#else
+      OPENDDS_STRING key = "ReactorTask";
+#endif
       if (name_ != "") {
         key += " (" + name_ + ")";
       }

@@ -100,8 +100,8 @@ namespace OpenDDS {
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
         , interval_(TimeDuration(0))
         , status_(0)
-        , tid_(0)
       {
+        tid_ = 0;
         interval_ = TheServiceParticipant->get_thread_status_interval();
         status_ = TheServiceParticipant->get_thread_statuses();
 #ifdef ACE_HAS_MAC_OSX
@@ -116,7 +116,11 @@ namespace OpenDDS {
         tid_ = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
 
+#ifndef OPENDDS_SAFETY_PROFILE
         key_ = to_dds_string(tid_) + " (DcpsUpcalls)";
+#else
+        key_ = "(DcpsUpcalls)";
+#endif
       }
 
       int svc()

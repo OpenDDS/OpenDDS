@@ -127,7 +127,11 @@ public:
     TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
     ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
 
+#ifndef OPENDDS_SAFETY_PROFILE
     OPENDDS_STRING key = to_dds_string(tid);
+#else
+    OPENDDS_STRING key = "QueueTaskBase";
+#endif
     if (name_ != "") {
       key += " (" + name_ + ")";
     }
