@@ -43,13 +43,23 @@ bool NetworkInterface::has(const ACE_INET_Addr& addr) const
 
 bool NetworkInterface::exclude_from_multicast(const char* configured_interface) const
 {
-  if ((*configured_interface && name_ != configured_interface)
-      || addresses.empty() || !can_multicast_) {
+  if (addresses.empty() || !can_multicast_) {
     return true;
   }
 
+  if (configured_interface && *configured_interface && name_ != configured_interface) {
+    OPENDDS_STRING ci_semi(configured_interface);
+    if (ci_semi.find_first_of(':') == OPENDDS_STRING::npos) {
+      ci_semi += ':';
+    }
+    ACE_INET_Addr as_addr(ci_semi.c_str());
+    if (as_addr == ACE_INET_Addr() || addresses.count(as_addr) == 0) {
+      return true;
+    }
+  }
+
   const ACE_INET_Addr sp_default = TheServiceParticipant->default_address();
-  if (sp_default != ACE_INET_Addr() && !has(sp_default)) {
+  if (sp_default != ACE_INET_Addr() && addresses.count(sp_default) == 0) {
     return true;
   }
 
