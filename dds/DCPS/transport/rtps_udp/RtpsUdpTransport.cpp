@@ -386,19 +386,6 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 
   if (config.local_address().get_port_number() == 0) {
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    ipv6_unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
     ACE_INET_Addr address;
     if (unicast_socket_.get_local_addr(address) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
