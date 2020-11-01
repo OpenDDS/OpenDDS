@@ -59,7 +59,7 @@ bool NetworkConfigModifier::open()
       if (addr->sin_addr.s_addr != INADDR_ANY) {
         address.set((u_short) 0, addr->sin_addr.s_addr, 0);
 
-        NetworkInterface iface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
+        NetworkInterface iface(count, p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK));
         iface.addresses.insert(address);
 
         NetworkConfigMonitor::add_interface(iface);
@@ -113,7 +113,7 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
       if (name == p_if->ifa_name) {
-        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
+        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK));
         break;
       }
 
