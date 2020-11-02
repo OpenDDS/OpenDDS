@@ -1,12 +1,10 @@
 #pragma once
 
-#include <windows.h>
-#include <psapi.h>
-#include <stdio.h>
+#include <cstdint>
 
-DWORDLONG GetTotalVirtualMemory();
-DWORDLONG GetVirtualMemoryUsed();
-DWORDLONG GetProcessVirtualMemoryUsed(int ProcessId);
-DWORDLONG GetTotalRamMemory();
-DWORDLONG GetTotalRamMemoryUsed();
-DWORDLONG GetTotalRamMemoryUsedByProcess(int ProcessId);
+int64_t GetTotalVirtualMemory();
+int64_t GetVirtualMemoryUsed();
+int64_t GetProcessVirtualMemoryUsed(int ProcessId);
+int64_t GetTotalRamMemory();
+int64_t GetTotalRamMemoryUsed();
+int64_t GetTotalRamMemoryUsedByProcess(int ProcessId);

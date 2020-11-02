@@ -33,8 +33,9 @@
 #include <BenchTypeSupportImpl.h>
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
-#include "PropertyStatBlock.h"
+#include "ProcessStats.h"
 #include "ProcessStatisticsUtils.h"
+#include "PropertyStatBlock.h"
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
@@ -187,110 +188,6 @@ private:
   std::string log_filename_;
 };
 
-class ProcessStats {
-public:
-  ProcessStats(const int& processId, const NodeId& nodeId, const WorkerId& workerId) noexcept
-  : processId_(processId)
-  , numProcessors_(0)
-  , node_id_(nodeId)
-  , worker_id_(workerId)
-  , processHandle_(INVALID_HANDLE_VALUE)
-  , lastCPU_()
-  , lastSysCPU_()
-  , lastUserCPU_()
-  {
-  }
-
-  ProcessStats() = delete;
-  ProcessStats(const ProcessStats&) = delete;
-  ProcessStats(ProcessStats&&) = delete;
-  ProcessStats& operator=(const ProcessStats&) = delete;
-  ProcessStats& operator=(ProcessStats&&) = delete;
-
-  ~ProcessStats() noexcept {
-    CloseHandle(processHandle_);
-  }
-
-  void InitCPUUsage() noexcept {
-    SYSTEM_INFO sysInfo{};
-    FILETIME ftime{}, fcreatetime{}, fexittime{}, fsys{}, fuser{};
-
-    GetSystemInfo(&sysInfo);
-
-    numProcessors_ = sysInfo.dwNumberOfProcessors;
-
-    GetSystemTimeAsFileTime(&ftime);
-
-    memcpy(&lastCPU_, &ftime, sizeof(FILETIME));
-
-    processHandle_ = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)processId_);
-
-    GetProcessTimes(processHandle_, &fcreatetime, &fexittime, &fsys, &fuser);
-    memcpy(&lastSysCPU_, &fsys, sizeof(FILETIME));
-    memcpy(&lastUserCPU_, &fuser, sizeof(FILETIME));
-  }
-
-  double GetProcessCPUUsage() noexcept
-  {
-    FILETIME ftime{}, fsys{}, fuser{};
-    ULARGE_INTEGER current{}, sys{}, user{};
-    double percent = 0;
-
-    GetSystemTimeAsFileTime(&ftime);
-    memcpy(&current, &ftime, sizeof(FILETIME));
-
-    if (GetProcessTimes(processHandle_, &ftime, &ftime, &fsys, &fuser))
-    {
-      memcpy(&sys, &fsys, sizeof(FILETIME));
-      memcpy(&user, &fuser, sizeof(FILETIME));
-      percent = static_cast<double>((sys.QuadPart - lastSysCPU_.QuadPart) + (user.QuadPart - lastUserCPU_.QuadPart));
-      percent /= static_cast<double>((current.QuadPart - lastCPU_.QuadPart));
-      percent /= static_cast<double>(numProcessors_);
-
-      lastCPU_ = current;
-      lastUserCPU_ = user;
-      lastSysCPU_ = sys;
-    }
-
-    return percent * 100.0;
-  }
-
-  double GetProcessPercentVirtualUsed() {
-    DWORDLONG const totalVirtual = GetTotalVirtualMemory();
-    DWORDLONG const processVirtualUsed = GetProcessVirtualMemoryUsed(processId_);
-    double percentProcessVirtualUsed = 0;
-
-    if (totalVirtual > 0) {
-      percentProcessVirtualUsed = (static_cast<double>(processVirtualUsed) / static_cast<double>(totalVirtual)) * 100.00;
-    }
-
-    return percentProcessVirtualUsed;
-  }
-
-  double GetProcessPercentRamUsed()
-  {
-    DWORDLONG const totalRam = GetTotalRamMemory();
-    DWORDLONG const processRamUsed = GetTotalRamMemoryUsedByProcess(processId_);
-    double percentProcessRamUsed = 0;
-
-    if (totalRam > 0) {
-      percentProcessRamUsed = (static_cast<double>(processRamUsed) / static_cast<double>(totalRam)) * 100.00;
-    }
-
-    return percentProcessRamUsed;
-  }
-
-private:
-  int processId_;
-  int numProcessors_;
-  NodeId node_id_;
-  WorkerId worker_id_;
-  HANDLE processHandle_;
-  ULARGE_INTEGER lastCPU_;
-  ULARGE_INTEGER lastSysCPU_;
-  ULARGE_INTEGER lastUserCPU_;
-};
-
 using WorkerPtr = std::shared_ptr<Worker>;
 using ProcessStatPtr = std::shared_ptr<ProcessStats>;
 
@@ -393,34 +290,22 @@ public:
 
     std::thread stat_collector([&](){
 
-      // Initialize Cpu
-      double cpuPercent = 0.0;
-      double ramPercent = 0.0;
-
-      std::list< ProcessStatPtr>::iterator pIt;
-
-      for (pIt = all_worker_processes_.begin(); pIt != all_worker_processes_.end(); pIt++)
-      {
-        if ((*pIt) != nullptr) {
-          (*pIt)->InitCPUUsage();
-        }
-      }
+      std::list<ProcessStatPtr>::iterator pIt;
 
       while (running) {
 
-        // Get cpuPercent Usage and memPercent Usage for each worker process;
-
         std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        double cpu_sum = 0.0;
+        double mem_sum = 0.0;
 
         for (pIt = all_worker_processes_.begin(); pIt != all_worker_processes_.end(); pIt++)
         {
-          if ((*pIt) != nullptr) {
-            cpuPercent = (*pIt)->GetProcessCPUUsage();
-            ramPercent = (*pIt)->GetProcessPercentRamUsed();
-          }
-          cpu_block->update(cpuPercent);
-          mem_block->update(ramPercent);
+          cpu_sum += (*pIt)->GetProcessCPUUsage();
+          mem_sum += (*pIt)->GetProcessPercentRamUsed();
         }
+        cpu_block->update(cpu_sum);
+        mem_block->update(mem_sum);
       }
     });
 
