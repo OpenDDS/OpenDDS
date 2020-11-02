@@ -124,11 +124,8 @@ namespace OpenDDS {
 
       int svc()
       {
-        ACE_Time_Value expire;
-
-        if (has_timeout()) {
-          expire = MonotonicTimePoint::now().value() + interval_.value();
-        }
+        ACE_Time_Value expire = MonotonicTimePoint::now().value() + interval_.value();
+        const ACE_Time_Value* expire_ptr = has_timeout() ? &expire : 0;
 
         drr_->add_association(reader_, wa_, active_);
         {
@@ -136,10 +133,10 @@ namespace OpenDDS {
           reader_done_ = true;
           cnd_.signal();
           while (!writer_done_) {
-            cnd_.wait(&expire);
+            cnd_.wait(expire_ptr);
 
             const MonotonicTimePoint now = MonotonicTimePoint::now();
-            if (has_timeout() && now.value() > expire) {
+            if (expire_ptr && now.value() > expire) {
               expire = now.value() + interval_.value();
               if (status_) {
                 if (DCPS_debug_level > 4) {
