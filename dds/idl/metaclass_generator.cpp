@@ -452,21 +452,19 @@ namespace {
 
     if (struct_node) {
       marshal_generator::clayton_gen_field_getValueFromSerialized(struct_node, clazz);
+    } else {
+      be_global->impl_ <<
+        "  Value getValue(Serializer& ser, const char* field) const\n"
+        "  {\n"
+        "    ACE_UNUSED_ARG(ser);\n"
+        "    if (!field[0]) {\n"   // if 'field' is the empty string...
+        "      return 0;\n"        // ...we've skipped the entire struct
+        "    }\n"                  //    and the return value is ignored
+        "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+        "valid for struct " << clazz << "\");\n"
+        "  }\n\n";
     }
-    //   "  Value getValue(Serializer& ser, const char* field) const\n"
-    //   "  {\n";
-    // if (struct_node && fields.size()) {
-    //   std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
-    // } else {
-    //   be_global->impl_ << "    ACE_UNUSED_ARG(ser);\n";
-    // }
-    // be_global->impl_ <<
-    //   "    if (!field[0]) {\n"   // if 'field' is the empty string...
-    //   "      return 0;\n"        // ...we've skipped the entire struct
-    //   "    }\n"                  //    and the return value is ignored
-    //   "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-    //   "valid for struct " << clazz << "\");\n"
-    //   "  }\n\n"
+    be_global->impl_ <<
       "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
       "ComparatorBase::Ptr next) const\n"
       "  {\n"

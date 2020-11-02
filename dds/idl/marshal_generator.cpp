@@ -3314,58 +3314,45 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
   const ExtensibilityKind exten = be_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;
   const bool is_mutable = exten == extensibilitykind_mutable;
-  const bool is_appendable = exten == extensibilitykind_appendable;
   const std::string actual_cpp_name = scoped(node->name());
   std::string cpp_name = actual_cpp_name;
   FieldFilter field_type = FieldFilter_All;
   const Fields fields(node, field_type);
   const Fields::Iterator fields_end = fields.end();
   RtpsFieldCustomizer rtpsCustom(cpp_name);
-
+  const AutoidKind auto_id = be_global->autoid(node);
   
   
   be_global->impl_ <<
     "  Value getValue(Serializer& strm, const char* field) const\n"
-    "    {\n"
+    "  {\n"
     "    if (!field[0]) {\n"   // if 'field' is the empty string...
     "      return 0;\n"        //    the return value is ignored
     "    }\n"
     "    const Encoding& encoding = strm.encoding();\n"
     "    ACE_UNUSED_ARG(encoding);\n";
   generate_dheader_code(
-    "      if (!strm.read_delimiter(total_size)) {\n"
-    "        return false;\n"
-    "      }\n", not_final);
+    "    if (!strm.read_delimiter(total_size)) {\n"
+    "      return false;\n"
+    "    }\n", not_final);
 
-  if (not_final) {
-    be_global->impl_ <<
-      "    const size_t end_of_struct = strm.pos() + total_size;\n"
-      "\n";
-  }
+  be_global->impl_ <<
+    "    std::string base_field = field;\n"
+    "    size_t index = base_field.find('.');\n"
+    "    std::string subfield;\n"
+    "    if (index != std::string::npos) {\n"
+    "      subfield = base_field.substr(index+1);\n"
+    "      base_field = base_field.substr(0, index);\n"
+    "    }\n";
 
   if (is_mutable) {
     be_global->impl_ <<
       "    if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
-      "      std::string base_field = field;\n"
-      "      size_t index = base_field.find('.');\n"
-      "      std::string subfield;\n"
-      "      if (index != std::string::npos) {\n"
-      "        subfield = base_field.substr(index+1);\n"
-      "        base_field = base_field.substr(0, index);\n"
-      "      }\n"
       "      unsigned field_id = map_name_to_id(base_field.c_str());\n"
       "      unsigned member_id;\n"
       "      size_t field_size;\n"
-      "      while (true) {\n";
-
-    /*
-      * Get the Member ID and see if we're done. In XCDR1 we use a special
-      * member ID to stop the loop. We don't have a PID marking the end in
-      * XCDR2 parameter lists, but we have the size, so we need to stop
-      * after we hit the offset marked by the delimiter, but before trying
-      * to read a non-existent member id.
-      */
-    be_global->impl_ <<
+      "      const size_t end_of_struct = strm.pos() + total_size;\n"
+      "      while (true) {\n"
       "        if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
       "            strm.pos() >= end_of_struct) {\n"
       "          return true;\n"
@@ -3385,7 +3372,6 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       "\n";
 
     std::ostringstream cases;
-    const AutoidKind auto_id = be_global->autoid(node);
     for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
 
       AST_Field* const field = *i;
@@ -3405,7 +3391,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
           : getWrapper("val", field_type, WD_INPUT);
         cases <<
           "            " << cxx_type << " val;\n";
-        if (fld_cls & CL_STRING) {
+        if (fld_cls & CL_STRING && !use_cxx11) {
           cases << "            if (!(strm >> val.out()))";
         } else {
           cases << "            if (!(strm >> val))";
@@ -3423,14 +3409,16 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
           "        }\n";
       } else if (fld_cls & CL_STRUCTURE) {
         cases <<
-          "        return getMetaStruct<" << scoped(field_type->name()) << ">().getValue(subfield);\n"
+          "        return getMetaStruct<" << scoped(field_type->name()) << ">().getValue(strm, subfield.c_str());\n"
           "      }\n"
-          "      break;\n";
+          "      break;\n"
+          "    }\n";
       } else { // array, sequence, union:
         cases <<
           "        strm.skip(field_size);\n"
           "      }\n"
-          "      break;\n";
+          "      break;\n"
+          "    }\n";
       }
 
     }
@@ -3463,65 +3451,83 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
     }
 
     be_global->impl_ <<
-      "      }\n";
+      "      }\n"
+      "      throw std::runtime_error(\"Did not find field in getValue\");\n"
+      "    }\n";
   }
 
   expr = "";
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
     AST_Field* const field = *i;
-    if (expr.size() && exten != extensibilitykind_appendable) {
-      expr += "\n    && ";
-    }
-    if (is_appendable) {
+    ACE_CDR::ULong default_id = i.pos();
+    std::size_t size = 0;
+    const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
+    std::string field_name = std::string("stru.") + field->local_name()->get_string();
+    AST_Type* const field_type = resolveActualType(field->field_type());
+    Classification fld_cls = classify(field_type);
+    if (fld_cls & CL_SCALAR) {
+      const std::string cxx_type = to_cxx_type(field_type, size);
+      const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
+          : getWrapper("val", field_type, WD_INPUT);
       expr +=
-        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-        "      strm.pos() >= end_of_struct) {\n"
-        "    return true;\n"
-        "  }\n";
-    }
-    const std::string field_name = field->local_name()->get_string();
-    const std::string cond = rtpsCustom.getConditional(field_name);
-    if (!cond.empty()) {
-      std::string prefix = rtpsCustom.preFieldRead(field_name);
-      if (is_appendable) {
-        if (!prefix.empty()) {
-          prefix = prefix.substr(0, prefix.length() - 8);
-          expr +=
-            "  if (!" + prefix + ") {\n"
-            "    return false;\n"
-            "  }\n";
-        }
-        expr += "  if ((" + cond + ") && !";
+        "    if (std::strcmp(field, \"" + field_name + "\") == 0) {\n"
+        "      " + cxx_type + " val;\n"
+        "      if (!(strm >> " + val + ")) {\n"
+        "        throw std::runtime_error(\"Field '" + field_name + "' could "
+        "not be deserialized\");\n"
+        "      }\n"
+        "      return val;\n"
+        "    } else {\n";
+      if (fld_cls & CL_STRING) {
+        expr +=
+          "      ACE_CDR::ULong len;\n"
+          "      if (!(strm >> len)) {\n"
+          "        throw std::runtime_error(\"String '" + field_name +
+          "' length could not be deserialized\");\n"
+          "      }\n"
+          "      if (!strm.skip(len)) {\n"
+          "        throw std::runtime_error(\"String '" + field_name +
+          "' contents could not be skipped\");\n"
+          "      }\n"
+          "    }\n";
       } else {
-        expr += prefix + "(!(" + cond + ") || ";
+        expr +=
+          "      if (!strm.skip(1,  " + std::to_string(size) + " )) {\n"
+          "        throw std::runtime_error(\"Field '" + field_name +
+          "' could not be skipped\");\n"
+          "      }\n"
+          "    }\n";
       }
-    } else if (is_appendable) {
-      expr += "  if (!";
-    }
-    expr += generate_field_stream(
-      indent, field, ">> stru", false, intro);
-    if (is_appendable) {
-      expr += ") {\n"
-        "    return false;\n"
-        "  }\n";
-    } else if (!cond.empty()) {
-      expr += ")";
+    } else if (fld_cls & CL_STRUCTURE) {
+        expr +=
+          "      if (std::strcmp(field, \"" + field_name + "\") == 0) {\n"
+          "        return getMetaStruct<" + scoped(field_type->name()) + ">().getValue(strm, subfield.c_str());\n"
+          "      } else {\n"
+          "      if (!gen_skip_over(strm, static_cast<" + scoped(field_type->name()) + "*>(0))) {\n"
+          "        throw std::runtime_error(\"Field '" + field_name + "' could not be skipped\");\n"
+          "      }\n"
+          "    }\n";
+    } else { // array, sequence, union:
+      std::string pre, post;
+      if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
+        post = "_forany";
+      } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
+        pre = "IDL::DistinctType<";
+        post = ", " + dds_generator::scoped_helper(field->field_type()->name(), "_") + "_tag>";
+      }
+      const std::string ptr = field->field_type()->anonymous() ?
+        FieldInfo(*field).ptr_ : (pre + scoped(field->field_type()->name()) + post + '*');
+      expr +=
+        "    if (!gen_skip_over(strm, static_cast<" + ptr + ">(0))) {\n"
+        "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
+        "    }\n";
     }
   }
   intro.join(be_global->impl_, indent);
-  if (is_appendable) {
-    expr +=
-      "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-      "      strm.pos() < end_of_struct) {\n"
-      "    strm.skip(end_of_struct - strm.pos());\n"
-      "  return true;\n";
-    be_global->impl_ << expr;
-  } else if (expr.empty()) {
-    be_global->impl_ << "  return true;\n";
-  } else {
-    be_global->impl_ << "  return " << expr << ";\n";
-  }
-  be_global->impl_ << "  }\n\n";
+  be_global->impl_ <<
+    expr <<
+    "    throw std::runtime_error(\"Did not find field in getValue\");\n"
+    "  }\n\n";
 }
 
 
