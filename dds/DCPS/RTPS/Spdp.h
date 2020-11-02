@@ -225,7 +225,7 @@ private:
 #ifdef OPENDDS_SECURITY
         , public ICE::Endpoint
 #endif
-{
+  {
     typedef size_t WriteFlags;
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
@@ -303,6 +303,8 @@ private:
     void send_directed(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> directed_sender_;
     OPENDDS_LIST(DCPS::RepoId) directed_guids_;
+    void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> lease_expiration_processor_;
     DCPS::ThreadStatus* thread_status_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
@@ -393,11 +395,17 @@ private:
   ACE_Condition_Thread_Mutex shutdown_cond_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
 
-  void remove_expired_participants();
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;
+
+  typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
+
+  void update_lease_expiration_i(DiscoveredParticipantIter iter,
+                                 const DCPS::MonotonicTimePoint& now);
+  void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
+  TimeQueue lease_expirations_;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
@@ -416,16 +424,14 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
-  typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
-  TimeQueue handshake_deadlines_;
-  TimeQueue handshake_resends_;
-
   void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
   void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);
-  void purge_handshake_resends(DiscoveredParticipantIter iter);
+  TimeQueue handshake_deadlines_;
 
+  void purge_handshake_resends(DiscoveredParticipantIter iter);
+  TimeQueue handshake_resends_;
 #endif
 
   friend class ::DDS_TEST;
