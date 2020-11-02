@@ -3,10 +3,7 @@
 #include "RapidJsonTestC.h"
 #include "RapidJsonTestTypeSupportImpl.h"
 
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/stringbuffer.h"
-#include <rapidjson/writer.h>
+#include <dds/DCPS/RapidJsonWrapper.h>
 
 #include <fstream>
 
