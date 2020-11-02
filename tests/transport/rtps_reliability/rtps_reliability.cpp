@@ -985,10 +985,24 @@ bool run_test()
   sdw2.send_data(seq_dw2++);  // send #5
   reactor_wait();
 
-  if (part1.recvd_.disjoint() || part1.recvd_.empty()
-      || part1.recvd_.high() != seq_dw2.previous()
-      || part1.recvd_.low() != SequenceNumber()) {
-    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data\n"));
+  if (part1.recvd_.disjoint()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (disjoint)\n"));
+    return false;
+  }
+
+  if (part1.recvd_.empty()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (empty)\n"));
+    return false;
+  }
+
+  if (part1.recvd_.high() != seq_dw2.previous()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (high)\n"));
+    return false;
+  }
+
+  if (part1.recvd_.low() != SequenceNumber()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (low)\n"));
+    return false;
   }
 
   // cleanup

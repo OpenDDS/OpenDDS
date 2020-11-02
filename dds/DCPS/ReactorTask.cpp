@@ -153,16 +153,10 @@ OpenDDS::DCPS::ReactorTask::svc()
     }
   }
 
-  //TBD: Should the reactor continue running if there are some exceptions
-  //     are caught while handling events?
-//MJM: Put this in a loop with a state conditional and use the state to
-//MJM: indicate whether or not to terminate.  But I can think of no
-//MJM: reason to have anything in the conditional, so just expire.
-//MJM: Nevermind.
   try {
     // Tell the reactor to handle events.
     if (timeout_ == TimeDuration(0)) {
-     reactor_->run_reactor_event_loop();
+      reactor_->run_reactor_event_loop();
     } else {
 #ifdef ACE_HAS_MAC_OSX
       unsigned long tid = 0;
@@ -174,12 +168,15 @@ OpenDDS::DCPS::ReactorTask::svc()
         ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
       }
 #else
-      ACE_thread_t tid = 0;
-      tid = ACE_OS::thr_self();
+      ACE_thread_t tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
       MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
 
+#ifndef OPENDDS_SAFETY_PROFILE
       OPENDDS_STRING key = to_dds_string(tid);
+#else
+      OPENDDS_STRING key = "ReactorTask";
+#endif
       if (name_ != "") {
         key += " (" + name_ + ")";
       }
@@ -194,7 +191,7 @@ OpenDDS::DCPS::ReactorTask::svc()
           if (thread_status_) {
             if (DCPS_debug_level > 4) {
               ACE_DEBUG((LM_DEBUG,
-                        "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
+                         "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
             }
             ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
             thread_status_->map[key] = now;

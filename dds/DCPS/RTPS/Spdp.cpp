@@ -1506,6 +1506,12 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 bool
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg)
 {
+  if (DCPS::security_debug.auth_debug) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Spdp::handle_participant_crypto_tokens() from %C\n"),
+               DCPS::LogGuid(msg.source_endpoint_guid).c_str()));
+  }
+
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
 
