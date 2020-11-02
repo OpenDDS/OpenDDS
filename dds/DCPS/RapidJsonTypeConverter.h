@@ -1,7 +1,7 @@
 #ifndef OPENDDS_DCPS_RAPIDJSONTYPECONVERTER_H
 #define OPENDDS_DCPS_RAPIDJSONTYPECONVERTER_H
 
-#include "rapidjson/document.h"
+#include "RapidJsonWrapper.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
