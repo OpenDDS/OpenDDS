@@ -392,18 +392,35 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
   src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
+  bool valid_info_dst = false;
+  bool all_valid_info_dst = true;
+
   while (message_parser.parseSubmessageHeader()) {
     const auto submessage_header = message_parser.submessageHeader();
 
-    if (submessage_header.submessageId == OpenDDS::RTPS::INFO_DST) {
-      OpenDDS::DCPS::RepoId dest;
+    // Check that every non-info submessage has a "valid" (not unknown) destination.
+    switch (submessage_header.submessageId) {
+    case OpenDDS::RTPS::INFO_DST: {
+      OpenDDS::DCPS::RepoId dest = OpenDDS::DCPS::GUID_UNKNOWN;
       OpenDDS::DCPS::GuidPrefix_t_forany guidPrefix(dest.guidPrefix);
       if (!(message_parser >> guidPrefix)) {
         HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: VerticalHandler::parse_message %C failed to deserialize INFO_DST from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
         return false;
       }
-      dest.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-      to.insert(dest);
+      valid_info_dst = dest != OpenDDS::DCPS::GUID_UNKNOWN;
+      if (valid_info_dst) {
+        dest.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+        to.insert(dest);
+      }
+      break;
+    }
+    case OpenDDS::RTPS::INFO_TS:
+    case OpenDDS::RTPS::INFO_SRC:
+    case OpenDDS::RTPS::INFO_REPLY_IP4:
+    case OpenDDS::RTPS::INFO_REPLY:
+      break;
+    default:
+      all_valid_info_dst = all_valid_info_dst && valid_info_dst;
     }
 
     if (check_submessages) {
@@ -488,6 +505,10 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   if (message_parser.remaining() != 0) {
     HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: VerticalHandler::parse_message %C trailing bytes from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
     return false;
+  }
+
+  if (!all_valid_info_dst) {
+    to.clear();
   }
 
   return true;
