@@ -436,8 +436,8 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
 
 size_t
 Serializer::read_string(ACE_CDR::Char*& dest,
-    ACE_CDR::Char* str_alloc(ACE_CDR::ULong),
-    void str_free(ACE_CDR::Char*))
+                        StrAllocate str_alloc,
+                        StrFree str_free)
 {
   if (str_alloc == 0) {
 #ifdef NOTAO
@@ -500,7 +500,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
 
 void
 Serializer::free_string(ACE_CDR::Char* str,
-                        void str_free(ACE_CDR::Char*))
+                        StrFree str_free)
 {
   if (str_free == 0) {
 #ifdef NOTAO
@@ -514,8 +514,8 @@ Serializer::free_string(ACE_CDR::Char* str,
 
 size_t
 Serializer::read_string(ACE_CDR::WChar*& dest,
-    ACE_CDR::WChar* str_alloc(ACE_CDR::ULong),
-    void str_free(ACE_CDR::WChar*))
+                        WStrAllocate str_alloc,
+                        WStrFree str_free)
 {
   if (str_alloc == 0) {
 #ifdef NOTAO
@@ -586,7 +586,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
 
 void
 Serializer::free_string(ACE_CDR::WChar* str,
-                        void str_free(ACE_CDR::WChar*))
+                        WStrFree str_free)
 {
   if (str_free == 0) {
 #ifdef NOTAO
