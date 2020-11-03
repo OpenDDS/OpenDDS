@@ -1311,7 +1311,7 @@ bool RtpsUdpDataLink::force_inline_qos_ = false;
 void
 RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                                               const TransportQueueElement& tqe,
-                                              const SequenceNumber gap_start)
+                                              SequenceNumber gap_start)
 {
   // These are the GAP submessages that we'll send directly in-line with the
   // DATA when we notice that the DataWriter has deliberately skipped seq #s.

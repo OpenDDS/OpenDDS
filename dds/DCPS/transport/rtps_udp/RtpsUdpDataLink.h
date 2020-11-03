@@ -375,7 +375,7 @@ private:
 
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           const TransportQueueElement& tqe,
-                          const SequenceNumber gap_start);
+                          SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
                                 ACE_Message_Block* body);
     void send_heartbeats_manual_i(MetaSubmessageVec& meta_submessages);
