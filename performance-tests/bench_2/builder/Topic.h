@@ -27,7 +27,6 @@ protected:
   DDS::DomainParticipant_var participant_;
   DDS::TopicListener_var listener_;
   DDS::Topic_var topic_;
-  bool enabled_;
 };
 
 }

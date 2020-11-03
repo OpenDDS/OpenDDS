@@ -350,7 +350,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
-    std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
+    std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
@@ -359,7 +359,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     TheServiceParticipant->shutdown();
     return 1;
   } catch (...) {
-    std::cerr << "Unknown exception caught trying to build process object" << std::endl;
+    std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
