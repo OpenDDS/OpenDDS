@@ -1778,7 +1778,6 @@ void Spdp::remove_agent_info(const DCPS::RepoId&)
 void
 Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
 {
-  ACE_UNUSED_ARG(iter);
 
   remove_lease_expiration_i(iter);
 
