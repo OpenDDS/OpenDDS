@@ -3326,9 +3326,6 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
   be_global->impl_ <<
     "  Value getValue(Serializer& strm, const char* field) const\n"
     "  {\n"
-    "    if (!field[0]) {\n"   // if 'field' is the empty string...
-    "      return 0;\n"        //    the return value is ignored
-    "    }\n"
     "    const Encoding& encoding = strm.encoding();\n"
     "    ACE_UNUSED_ARG(encoding);\n";
   generate_dheader_code(
@@ -3378,7 +3375,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       ACE_CDR::ULong default_id = i.pos();
       std::size_t size = 0;
       const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
-      std::string field_name = std::string("stru.") + field->local_name()->get_string();
+      std::string field_name = field->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(field->field_type());
       Classification fld_cls = classify(field_type);
 
@@ -3390,16 +3387,10 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
         const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
         cases <<
-          "            " << cxx_type << " val;\n";
-        if (fld_cls & CL_STRING && !use_cxx11) {
-          cases << "            if (!(strm >> val.out()))";
-        } else {
-          cases << "            if (!(strm >> val))";
-        }
-        cases <<  
+          "            " << cxx_type << " val;\n" <<
+          "            if (!(strm >> " << val << "))" <<  
           " {\n"
-          "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n";
-        cases <<
+          "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n" <<
           "            }\n"
           "            return val;\n"
           "          } else {\n"
@@ -3452,6 +3443,9 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
 
     be_global->impl_ <<
       "      }\n"
+      "      if (!field[0]) {\n"   // if 'field' is the empty string...
+      "        return 0;\n"        //    the return value is ignored
+      "      }\n"
       "      throw std::runtime_error(\"Did not find field in getValue\");\n"
       "    }\n";
   }
@@ -3462,7 +3456,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
     ACE_CDR::ULong default_id = i.pos();
     std::size_t size = 0;
     const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
-    std::string field_name = std::string("stru.") + field->local_name()->get_string();
+    std::string field_name = field->local_name()->get_string();
     AST_Type* const field_type = resolveActualType(field->field_type());
     Classification fld_cls = classify(field_type);
     if (fld_cls & CL_SCALAR) {
@@ -3470,7 +3464,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
       expr +=
-        "    if (std::strcmp(field, \"" + field_name + "\") == 0) {\n"
+        "    if (base_field == \"" + field_name + "\") {\n"
         "      " + cxx_type + " val;\n"
         "      if (!(strm >> " + val + ")) {\n"
         "        throw std::runtime_error(\"Field '" + field_name + "' could "
@@ -3500,7 +3494,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       }
     } else if (fld_cls & CL_STRUCTURE) {
         expr +=
-          "      if (std::strcmp(field, \"" + field_name + "\") == 0) {\n"
+          "      if (base_field == \"" + field_name + "\") {\n"
           "        return getMetaStruct<" + scoped(field_type->name()) + ">().getValue(strm, subfield.c_str());\n"
           "      } else {\n"
           "      if (!gen_skip_over(strm, static_cast<" + scoped(field_type->name()) + "*>(0))) {\n"
@@ -3526,6 +3520,9 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
   intro.join(be_global->impl_, indent);
   be_global->impl_ <<
     expr <<
+    "    if (!field[0]) {\n"   // if 'field' is the empty string...
+    "      return 0;\n"        //    the return value is ignored
+    "    }\n"
     "    throw std::runtime_error(\"Did not find field in getValue\");\n"
     "  }\n\n";
 }
