@@ -158,6 +158,7 @@ void RelayHandler::send(const ACE_INET_Addr& addr,
 
   const int BUFFERS_SIZE = 2;
   iovec buffers[BUFFERS_SIZE];
+  size_t total_bytes = 0;
 
   int idx = 0;
   for (ACE_Message_Block* block = msg.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
@@ -169,6 +170,7 @@ void RelayHandler::send(const ACE_INET_Addr& addr,
 #pragma warning(disable : 4267)
 #endif
     buffers[idx].iov_len = block->length();
+    total_bytes += block->length();
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -178,9 +180,9 @@ void RelayHandler::send(const ACE_INET_Addr& addr,
 
   if (bytes < 0) {
     HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::handle_output %C failed to send to %C: %m\n"), name_.c_str(), addr_to_string(addr).c_str()));
-    stats_reporter_.dropped_message(static_cast<size_t>(bytes), now);
+    stats_reporter_.dropped_message(total_bytes, now);
   } else {
-    stats_reporter_.output_message(static_cast<size_t>(bytes), now);
+    stats_reporter_.output_message(total_bytes, now);
   }
 }
 
