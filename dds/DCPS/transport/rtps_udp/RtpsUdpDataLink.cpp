@@ -2768,8 +2768,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
-  bool first_ack = false;
-
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(remote);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
@@ -2777,24 +2775,35 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       OPENDDS_STRING(remote_conv).c_str()));
   }
 
-  const ReaderInfoMap::iterator ri = remote_readers_.find(remote);
+  ReaderInfoMap::iterator ri = remote_readers_.find(remote);
   if (ri == remote_readers_.end()) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING ReaderInfo not found\n"));
     return;
   }
 
-  const ReaderInfo_rch& reader = ri->second;
-
-  if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
+  if (!compare_and_update_counts(acknack.count.value, ri->second->acknack_recvd_count_)) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING Count indicates duplicate, dropping\n"));
     return;
   }
 
-  if (!reader->handshake_done()) {
-    first_ack = true;
+  if (!ri->second->handshake_done()) {
+    {
+      // Queue up durable data.
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+      link->invoke_on_start_callbacks(id_, remote, true);
+    }
+    ri = remote_readers_.find(remote);
+    if (ri == remote_readers_.end()) {
+      VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+            "WARNING ReaderInfo not found\n"));
+      return;
+    }
   }
+
+  const ReaderInfo_rch& reader = ri->second;
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
@@ -2966,13 +2975,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   while (deliver_iter != to_deliver.end()) {
     (*deliver_iter)->data_delivered();
     ++deliver_iter;
-  }
-
-  // TODO(jrw972): Move this earlier so the acknack can actually send
-  // the durability data.  Until then, the reader must send at least two
-  // acknacks before it will get any data.
-  if (first_ack) {
-    link->invoke_on_start_callbacks(id_, remote, true);
   }
 }
 
