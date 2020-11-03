@@ -179,7 +179,7 @@ void RelayHandler::send(const ACE_INET_Addr& addr,
   const auto bytes = socket_.send(buffers, idx, addr, 0);
 
   if (bytes < 0) {
-    HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::handle_output %C failed to send to %C: %m\n"), name_.c_str(), addr_to_string(addr).c_str()));
+    HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::send %C failed to send to %C: %m\n"), name_.c_str(), addr_to_string(addr).c_str()));
     stats_reporter_.dropped_message(total_bytes, now);
   } else {
     stats_reporter_.output_message(total_bytes, now);
@@ -238,10 +238,14 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     }
 
     ParticipantStatisticsReporter& psr = record_activity(remote_address, now, src_guid, msg_len);
+    ACE_INET_Addr deferred_addr;
 
-    if (do_normal_processing(remote_address, src_guid, psr, to, msg, now)) {
+    if (do_normal_processing(remote_address, src_guid, psr, to, msg, now, deferred_addr)) {
       association_table_.lookup_destinations(to, src_guid);
       send(src_guid, psr, to, msg, now);
+      if (deferred_addr != ACE_INET_Addr()) {
+        RelayHandler::send(deferred_addr, msg, now);
+      }
     }
   } else {
     // Assume STUN.
@@ -718,7 +722,8 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        ParticipantStatisticsReporter& stats_reporter,
                                        const GuidSet& to,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                       ACE_INET_Addr& deferred_addr)
 {
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
@@ -750,7 +755,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SPDP message is from a client.
   if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
     // Forward to the application participant.
-    RelayHandler::send(application_participant_addr_, msg, now);
+    deferred_addr = application_participant_addr_;
     stats_reporter.max_fan_out(1, now);
   }
 
@@ -835,7 +840,8 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        ParticipantStatisticsReporter& stats_reporter,
                                        const GuidSet& to,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                       ACE_INET_Addr& deferred_addr)
 {
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
@@ -867,7 +873,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SEDP message is from a client.
   if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
     // Forward to the application participant.
-    RelayHandler::send(application_participant_addr_, msg, now);
+    deferred_addr = application_participant_addr_;
     stats_reporter.max_fan_out(1, now);
   }
   return true;
