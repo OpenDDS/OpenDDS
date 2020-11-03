@@ -697,27 +697,47 @@ simply called “example”. The ``test_controller`` application also supports a
 number of optional configuration parameters, some of which are described in the
 section below.
 
-Basic Usage
------------
+Usage
+-----
 
 ``test_controller CONFIG_PATH SCENARIO_NAME [OPTIONS]``
 
-Options
--------
+``test_controller --help|-h``
 
---domain N                The DDS Domain to use. The default is 89.
---wait-for-nodes N        The number of seconds to wait for nodes before broadcasting
-                          the scenario to them. The default is 10 seconds.
---timeout N               The number of seconds to wait for a scenario to complete.
-                          Overrides the value defined in the scenario.
-                          If N is 0, there is no timeout.
---override-create-time N  Overwrite individual worker configs to create their
-                          DDS entities N seconds from now (absolute time
-                          reference)
+This is a subset of the options. Use ``--help`` option to see all the options.
 
---override-start-time N   Overwrite individual worker configs to start their
-                          test actions (writes & forwards) N seconds from now
-                          (absolute time reference)
+.. option:: CONFIG_PATH
+
+    Path to the directory of the test configurations and artifacts
+
+.. option:: SCENARIO_NAME
+
+    Name of the scenario file in the test context without the
+    `.json` extension.
+
+.. option:: --domain N
+
+    The DDS Domain to use. The default is 89.
+
+.. option:: --wait-for-nodes N
+
+    The number of seconds to wait for nodes before broadcasting the scenario to
+    them. The default is 10 seconds.
+
+.. option:: --timeout N
+
+    The number of seconds to wait for a scenario to complete. Overrides the
+    value defined in the scenario. If N is 0, there is no timeout.
+
+.. option:: --override-create-time N
+
+    Overwrite individual worker configs to create their DDS entities N seconds
+    from now (absolute time reference)
+
+.. option:: --override-start-time N
+
+    Overwrite individual worker configs to start their test actions (writes &
+    forwards) N seconds from now (absolute time reference)
 
 node_controller
 ===============
@@ -730,32 +750,35 @@ encountered, which is useful for restarting the application when errors are
 detected, if run as a part of an OS system environment (systemd, supervisord,
 etc).
 
-Basic Usage
------------
+Usage
+-----
 
-``node_controller [OPTIONS] RUN_MODE``
+``node_controller [OPTIONS] one-shot|daemon|daemon-exit-on-error``
 
-Run Mode Argument
------------------
+.. option:: one-shot
 
-.. glossary::
-
-  one-shot
     Run a single batch of worker requests (configs > processes > reports) and
     report the results before exiting. Useful for one-off and local testing.
 
-  daemon
+.. option:: daemon
+
     Act as a long-running process that continually runs batches of worker
     requests, reporting the results. Attempts to recover from errors.
 
-  daemon-exit-on-error
+.. option:: daemon-exit-on-error
+
     Act as a long-running process that continually runs batches of worker
     requests, reporting the results. Does not attempt to recover from errors.
 
-Options
--------
+.. option:: --domain N
 
---domain N  The DDS Domain to use. The default is 89.
+    The DDS Domain to use. The default is 89.
+
+.. option:: --name STRING
+
+    Human friendly name for the node. Will be used by the test controller for
+    referring to the node, but otherwise has no effect on behavior. Multiple
+    nodes could even have the same name.
 
 worker
 ======
@@ -796,5 +819,5 @@ Basic Usage
 Common Options
 --------------
 
---log LOG_FILE        The log file path.
+--log LOG_FILE        The log file path. Will log to `stdout` if not passed.
 --report REPORT_FILE  The report file path.
