@@ -104,9 +104,9 @@ bool WorkerDataWriterListener::wait_for_expected_match(const std::chrono::system
 {
   std::unique_lock<std::mutex> expected_lock(mutex_);
 
-  while (expected_match_count_ != match_count_) {
+  while (expected_match_count_ > match_count_) {
     if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
-      return match_count_ == expected_match_count_;
+      return match_count_ <= expected_match_count_;
     }
   }
   return true;
