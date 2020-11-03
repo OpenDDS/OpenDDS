@@ -1780,14 +1780,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
 {
   ACE_UNUSED_ARG(iter);
 
-  // Remove the expiration.
-  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_expiration_);
-       x.first != x.second; ++x.first) {
-    if (x.first->second == iter->first) {
-      lease_expirations_.erase(x.first);
-      break;
-    }
-  }
+  remove_lease_expiration_i(iter);
 
 #ifdef OPENDDS_SECURITY
   if (security_config_) {
@@ -3132,10 +3125,8 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
 }
 
 void
-Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
-                                const DCPS::MonotonicTimePoint& now)
+Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 {
-  // Remove previous expiration.
   for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_expiration_);
        x.first != x.second; ++x.first) {
     if (x.first->second == iter->first) {
@@ -3143,6 +3134,13 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
       break;
     }
   }
+}
+
+void
+Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
+                                const DCPS::MonotonicTimePoint& now)
+{
+  remove_lease_expiration_i(iter);
 
   // Compute new expiration.
   const DCPS::TimeDuration d =

@@ -400,8 +400,9 @@ private:
   BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;
 
-  typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
+  typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::RepoId) TimeQueue;
 
+  void remove_lease_expiration_i(DiscoveredParticipantIter iter);
   void update_lease_expiration_i(DiscoveredParticipantIter iter,
                                  const DCPS::MonotonicTimePoint& now);
   void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
