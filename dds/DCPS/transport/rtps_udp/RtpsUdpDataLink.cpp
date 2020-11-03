@@ -1326,18 +1326,14 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
     gapListBase = {max_sn_.getHigh(),
                    max_sn_.getLow()};
 
-  // We are not going to enable any bits in the "bitmap" of the SNSet,
-  // but the "numBits" and the bitmap.length must both be > 0.
-  LongSeq8 bitmap;
-  bitmap.length(1);
-  bitmap[0] = 0;
+  const LongSeq8 bitmap;
 
   GapSubmessage gap = {
     {GAP, FLAG_E, 0 /*length determined below*/},
     ENTITYID_UNKNOWN, // readerId: applies to all matched readers
     id_.entityId,
     gapStart,
-    {gapListBase, 1, bitmap}
+    {gapListBase, 0, bitmap}
   };
 
   size_t size = 0, padding = 0;
