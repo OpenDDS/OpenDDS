@@ -359,7 +359,6 @@ private:
     // These reader have acked everything they are supposed to have acked.
     SNRIS leading_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
-    SequenceNumber expected_;
     SequenceNumber max_sn_;
     typedef OPENDDS_SET(TransportQueueElement*) TqeSet;
     typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) SnToTqeMap;
@@ -376,7 +375,7 @@ private:
 
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           const TransportQueueElement& tqe,
-                          const DestToEntityMap& dtem);
+                          const SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
                                 ACE_Message_Block* body);
     void send_heartbeats_manual_i(MetaSubmessageVec& meta_submessages);
