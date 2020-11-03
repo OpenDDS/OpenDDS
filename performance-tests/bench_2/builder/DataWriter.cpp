@@ -121,11 +121,18 @@ DataWriter::~DataWriter() {
   }
 }
 
-void DataWriter::enable() {
+bool DataWriter::enable(bool throw_on_error) {
+  bool result = false;
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
-    datawriter_->enable();
+    result = (datawriter_->enable() == DDS::RETCODE_OK);
+    if (!result && throw_on_error) {
+      std::stringstream ss;
+      ss << "failed to enable datawriter '" << name_ << "'" << std::flush;
+      throw std::runtime_error(ss.str());
+    }
   }
+  return result;
 }
 
 void DataWriter::detach_listener() {

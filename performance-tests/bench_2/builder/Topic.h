@@ -15,6 +15,8 @@ public:
   const std::string& get_name() const;
   DDS::Topic_var& get_dds_topic();
 
+  bool enable(bool throw_on_error = false);
+
 protected:
   const std::string name_;
   const std::string type_name_;
@@ -25,6 +27,7 @@ protected:
   DDS::DomainParticipant_var participant_;
   DDS::TopicListener_var listener_;
   DDS::Topic_var topic_;
+  bool enabled_;
 };
 
 }

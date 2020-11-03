@@ -16,6 +16,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
   , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
   , participant_(participant)
+  , enabled_(false)
 {
   Log::log()
     << "Creating topic: '" << name_ << "' with type name '" << type_name_
@@ -73,10 +74,17 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
     }
   }
 
+  DDS::DomainParticipantQos participant_qos;
+  if (participant_->get_qos(participant_qos) == DDS::RETCODE_OK && participant_qos.entity_factory.autoenable_created_entities == true) {
+    enabled_ = true;
+  }
+
   // Create Topic
   topic_ = participant_->create_topic(name_.c_str(), type_name_.c_str(), qos, listener_, listener_status_mask_);
   if (CORBA::is_nil(topic_.in())) {
-    throw std::runtime_error("topic creation failed");
+    std::stringstream ss;
+    ss << "topic creation failed for topic '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
   }
 
   // Bind Transport Config
@@ -97,6 +105,18 @@ const std::string& Topic::get_name() const {
 
 DDS::Topic_var& Topic::get_dds_topic() {
   return topic_;
+}
+
+bool Topic::enable(bool throw_on_error) {
+  if (!enabled_) {
+    enabled_ = (topic_->enable() == DDS::RETCODE_OK);
+    if (!enabled_ && throw_on_error) {
+      std::stringstream ss;
+      ss << "failed to enable topic '" << name_ << "'" << std::flush;
+      throw std::runtime_error(ss.str());
+    }
+  }
+  return enabled_;
 }
 
 }

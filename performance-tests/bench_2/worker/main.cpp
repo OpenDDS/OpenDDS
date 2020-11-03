@@ -262,7 +262,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
 
     process_enable_begin_time = Builder::get_hr_time();
-    process.enable_dds_entities();
+    process.enable_dds_entities(true);
     process_enable_end_time = Builder::get_hr_time();
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
@@ -287,10 +287,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             dtRdrPtr = it->second;
             Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
 
-            if (wdrl->wait_for_expected_match(timeout_time)) {
-              Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
-            }
-            else {
+            if (!wdrl->wait_for_expected_match(timeout_time)) {
               Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
             }
           }
@@ -305,10 +302,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             dtWtrPtr = it->second;
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
-            if (wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
-            }
-            else {
+            if (!wdwl->wait_for_expected_match(timeout_time)) {
               Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
             }
           }
