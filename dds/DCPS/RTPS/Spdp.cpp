@@ -3214,9 +3214,10 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
     }
 
 #ifdef OPENDDS_SECURITY
-    ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+    ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
-      stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+      stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+               part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
     }
     ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
     if (spdp_endpoint) {
