@@ -82,6 +82,29 @@ make html
 If it built successfully, the root of the website should be able to be found
 at `_build/html/index.html`.
 
+##### Dash/Zeal (Optional):
+
+After building the HTML documentation, documentation can be built for
+[Dash](https://kapeli.com/dash), [Zeal](https://zealdocs.org/), and other
+Dash-compatible applications using
+[doc2dash](https://github.com/hynek/doc2dash).
+
+First install `doc2dash` using:
+
+```
+pip3 install doc2dash
+```
+
+Then run:
+
+```
+doc2dash _build/html --name OpenDDS --icon logo_100_100.png --force --enable-js
+```
+
+This will create a `OpenDDS.docset` directory. This should be copied to the
+docset directory for the Dash or Dash-compatible docset directory. If using
+Dash, `--add-to-global` can be used to do this automatically.
+
 #### 5. Build PDF (Optional):
 
 This has additional dependencies on LaTeX that are documented
