@@ -232,10 +232,10 @@ jobs:
         ConfigOpts: --compiler=clang++-5.0 --security --std=c++11 --features=uses_wchar=1 --no-inline
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
       CLANG6:
-        ConfigOpts: --compiler=clang++-6.0 --security
+        ConfigOpts: --compiler=clang++-6.0 --security --std=c++11
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
       CLANG10:
-        ConfigOpts: --compiler=clang++-10 --security
+        ConfigOpts: --compiler=clang++-10 --security --std=c++11
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-10
         Repo: llvm-toolchain-$(lsb_release -cs)-10
       GCC6_CPP03:
