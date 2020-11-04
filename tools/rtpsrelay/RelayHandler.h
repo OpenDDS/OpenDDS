@@ -106,7 +106,8 @@ protected:
                                     ParticipantStatisticsReporter& /*stats_reporter*/,
                                     const GuidSet& /*to*/,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
-                                    const OpenDDS::DCPS::MonotonicTimePoint& /*now*/) { return true; }
+                                    const OpenDDS::DCPS::MonotonicTimePoint& /*now*/,
+                                    ACE_INET_Addr& /*deferred_addr*/) { return true; }
   virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
   void process_message(const ACE_INET_Addr& remote,
@@ -218,7 +219,8 @@ private:
                             ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now) override;
+                            const OpenDDS::DCPS::MonotonicTimePoint& now,
+                            ACE_INET_Addr& deferred_addr) override;
 
   void purge(const OpenDDS::DCPS::RepoId& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
@@ -246,7 +248,8 @@ private:
                             ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now) override;
+                            const OpenDDS::DCPS::MonotonicTimePoint& now,
+                            ACE_INET_Addr& deferred_addr) override;
 };
 
 class DataHandler : public VerticalHandler {
