@@ -4,6 +4,19 @@ OpenDDS
 
 Welcome to the documentation for OpenDDS |release|!
 
+.. ifconfig:: not is_release
+
+    .. warning::
+
+        This copy of OpenDDS isn’t a release copy, so this documentation may
+        not be finalized. It may be missing documentation on new features or
+        the existing documentation may be incorrect.
+
+.. toctree::
+  :maxdepth: 2
+
+  Common Terms <devguide/common_terms>
+
 **********************
 Internal Documentation
 **********************

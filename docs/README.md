@@ -84,7 +84,7 @@ at `_build/html/index.html`.
 
 #### 5. Build PDF (Optional):
 
-This has additional dependencies on LaTeX that are doucmented
+This has additional dependencies on LaTeX that are documented
 [here](https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder).
 
 ```

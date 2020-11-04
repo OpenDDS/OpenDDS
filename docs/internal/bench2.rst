@@ -113,7 +113,7 @@ Windows
 
 Add ``%DDS_ROOT%\performance_tests\bench_2\lib`` to your ``PATH``
 
-Assuming ``DDS_ROOT`` is already set on your system (from the ``configure``
+Assuming :envvar:`DDS_ROOT` is already set on your system (from the ``configure``
 script or from sourcing ``setenv.sh``), there are convenience scripts to do
 this for you in the ``bench_2`` directory (``set_bench_env[.sh/.cmd]``)
 
@@ -685,6 +685,8 @@ Detailed Application Descriptions
 test_controller
 ===============
 
+.. program:: test_controller
+
 As mentioned above, the ``test_controller`` application is the application
 responsible for running test scenarios and, as such, will probably wind up
 being the application most frequently run directly by testers. The
@@ -742,6 +744,8 @@ This is a subset of the options. Use ``--help`` option to see all the options.
 node_controller
 ===============
 
+.. program:: node_controller
+
 The node controller application is best thought of as a daemon, though the
 application can be run both in a long-running ``daemon`` mode and also a
 ``one-shot`` mode more appropriate for testing. The ``daemon-exit-on-error``
@@ -783,6 +787,8 @@ Usage
 worker
 ======
 
+.. program:: worker
+
 The worker application is meant to mimic the behavior of a single arbitrary
 OpenDDS test application. It uses the Bench builder library along with its JSON
 configuration file to first configure OpenDDS (including discovery &
@@ -811,13 +817,15 @@ listeners attached to the created DDS entities. This report is read by the
 ``node_controller`` after the worker process ends and is then sent back to the
 waiting ``test_controller``.
 
-Basic Usage
------------
+Usage
+-----
 
 ``worker [OPTIONS] CONFIG_FILE``
 
-Common Options
---------------
+.. option:: --log LOG_FILE
 
---log LOG_FILE        The log file path. Will log to `stdout` if not passed.
---report REPORT_FILE  The report file path.
+    The log file path. Will log to `stdout` if not passed.
+
+.. option:: --report REPORT_FILE
+
+    The report file path.

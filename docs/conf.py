@@ -7,6 +7,12 @@
 import re
 import sys
 
+# Custom Values ---------------------------------------------------------------
+
+def setup(app):
+    app.add_config_value('is_release', True, True)
+
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -20,24 +26,33 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
+needs_sphinx = '2.4'
+master_doc = 'index'
+primary_domain = 'cpp'
+
 project = 'OpenDDS'
 copyright = '2020, Object Computing, Inc.'
 author = 'Object Computing, Inc.'
 
-# Get Version
-with open('../VERSION.txt') as f:
-    version_txt = f.read()
-m = re.search(r'version (\S+)', version_txt)
-if m:
-    release = version = m[1]
-else:
-    sys.exit('Could figure out version')
+# Get Version Info
+with open('../dds/Version.h') as f:
+    version_file = f.read()
 
-master_doc = 'index'
+def get_version_prop(macro, is_int=True):
+    regex = r'#define ' + macro + ' ' + ('(\d+)' if is_int else '"(.*)"')
+    m = re.search(regex, version_file)
+    if m:
+        return m[1]
+    raise RuntimeError('Could find ' + macro)
 
-primary_domain = 'cpp'
+version = get_version_prop('DDS_MAJOR_VERSION') \
+    + '.' + get_version_prop('DDS_MINOR_VERSION')
+metadata = get_version_prop('OPENDDS_VERSION_METADATA', False)
+if metadata:
+    metadata = '-' + metadata
+release = version + '.' + get_version_prop('DDS_MICRO_VERSION') + metadata
+is_release = bool(int(get_version_prop('OPENDDS_IS_RELEASE')))
 
-needs_sphinx = '2.4'
 
 # -- General configuration ---------------------------------------------------
 
@@ -46,6 +61,7 @@ needs_sphinx = '2.4'
 # ones.
 extensions = [
     'recommonmark',
+    'sphinx.ext.ifconfig',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,11 +71,20 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-  '_build',
-  'Thumbs.db',
-  '.DS_Store',
-  'history/**',
-  'design/**',
+    '_build',
+    'Thumbs.db',
+    '.DS_Store',
+    'history/**',
+    'design/**',
+    'README.md',
+    'android.md',
+    'cmake.md',
+    'dependencies.md',
+    'docker.md',
+    'ios.md',
+    'migrating_to_topic_type_annotations.md',
+    'multirepo.md',
+    'qt.md',
 ]
 
 source_suffix = {
@@ -86,8 +111,8 @@ html_theme_options = {
     'logo': 'logo.svg',
     'logo_name': True,
     'extra_nav_links': {
-      'Main Website': 'https://opendds.org',
-      'GitHub Repo': 'https://github.com/objectcomputing/OpenDDS',
+        'Main Website': 'https://opendds.org',
+        'GitHub Repo': 'https://github.com/objectcomputing/OpenDDS',
     },
 }
 
