@@ -1010,41 +1010,19 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     return 0;
   }
 
-  bool gap_ok = true;
-  DestToEntityMap gap_receivers;
-  if (!remote_readers_.empty()) {
-    for (ReaderInfoMap::iterator ri = remote_readers_.begin();
-         ri != remote_readers_.end(); ++ri) {
-      RepoId tmp;
-      std::memcpy(tmp.guidPrefix, ri->first.guidPrefix, sizeof(GuidPrefix_t));
-      tmp.entityId = ENTITYID_UNKNOWN;
-      gap_receivers[tmp].push_back(ri->first);
+  OPENDDS_ASSERT(element->publication_id() == id_);
 
-      if (ri->second->expecting_durable_data()) {
-        // Can't add an in-line GAP if some Data Reader is expecting durable
-        // data, the GAP could cause that Data Reader to ignore the durable
-        // data.  The other readers will eventually learn about the GAP by
-        // sending an ACKNACK and getting a GAP reply.
-        gap_ok = false;
-        break;
-      }
-    }
-  }
-
+  const SequenceNumber previous_max_sn = max_sn_;
   RTPS::SubmessageSeq subm;
-
-  if (gap_ok) {
-    add_gap_submsg_i(subm, *element, gap_receivers);
-  }
 
   const SequenceNumber seq = element->sequence();
   if (seq != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    expected_ = seq;
-    ++expected_;
+    max_sn_ = std::max(max_sn_, seq);
+    if (element->subscription_id() == GUID_UNKNOWN &&
+        previous_max_sn != max_sn_.previous()) {
+      add_gap_submsg_i(subm, *element, previous_max_sn + 1);
+    }
   }
-
-  const SequenceNumber previous_max_sn = max_sn_;
-  max_sn_ = std::max(max_sn_, seq);
 
   TransportSendElement* tse = dynamic_cast<TransportSendElement*>(element);
   TransportCustomizedElement* tce =
@@ -1329,7 +1307,7 @@ bool RtpsUdpDataLink::force_inline_qos_ = false;
 void
 RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                                               const TransportQueueElement& tqe,
-                                              const DestToEntityMap& dtem)
+                                              SequenceNumber gap_start)
 {
   // These are the GAP submessages that we'll send directly in-line with the
   // DATA when we notice that the DataWriter has deliberately skipped seq #s.
@@ -1337,75 +1315,30 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   // see send_nack_replies().
   using namespace OpenDDS::RTPS;
 
-  const SequenceNumber seq = tqe.sequence();
-  const RepoId pub = tqe.publication_id();
-  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || pub == GUID_UNKNOWN
-      || tqe.subscription_id() != GUID_UNKNOWN) {
-    return;
-  }
+  // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
+  // [gapStart, gapListBase) and those in the SNSet.
+  const SequenceNumber_t gapStart = {gap_start.getHigh(),
+                                     gap_start.getLow()},
+    gapListBase = {max_sn_.getHigh(),
+                   max_sn_.getLow()};
 
-  if (seq != expected_) {
-    SequenceNumber firstMissing = expected_;
+  const LongSeq8 bitmap;
 
-    // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
-    // [gapStart, gapListBase) and those in the SNSet.
-    const SequenceNumber_t gapStart = {firstMissing.getHigh(),
-                                       firstMissing.getLow()},
-                           gapListBase = {seq.getHigh(),
-                                          seq.getLow()};
-
-    // We are not going to enable any bits in the "bitmap" of the SNSet,
-    // but the "numBits" and the bitmap.length must both be > 0.
-    LongSeq8 bitmap;
-    bitmap.length(1);
-    bitmap[0] = 0;
-
-    GapSubmessage gap = {
-      {GAP, FLAG_E, 0 /*length determined below*/},
-      ENTITYID_UNKNOWN, // readerId: applies to all matched readers
-      pub.entityId,
-      gapStart,
-      {gapListBase, 1, bitmap}
-    };
+  GapSubmessage gap = {
+    {GAP, FLAG_E, 0 /*length determined below*/},
+    ENTITYID_UNKNOWN, // readerId: applies to all matched readers
+    id_.entityId,
+    gapStart,
+    {gapListBase, 0, bitmap}
+  };
 
     size_t size = serialized_size(Encoding(Encoding::KIND_XCDR1), gap);
-    gap.smHeader.submessageLength =
+  gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size) - SMHDR_SZ;
 
-    if (!durable_) {
-      const CORBA::ULong i = msg.length();
-      msg.length(i + 1);
-      msg[i].gap_sm(gap);
-    } else {
-      InfoDestinationSubmessage idst = {
-        {INFO_DST, FLAG_E, INFO_DST_SZ},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-      };
-      CORBA::ULong ml = msg.length();
-
-      //Change the non-directed Gap into multiple directed gaps to prevent
-      //delivering to currently undiscovered durable readers
-      DestToEntityMap::const_iterator iter = dtem.begin();
-      bool reset_info_dst = iter != dtem.end();
-      for (; iter != dtem.end(); ++iter) {
-        std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
-        msg.length(ml + 1);
-        msg[ml++].info_dst_sm(idst);
-
-        const OPENDDS_VECTOR(RepoId)& readers = iter->second;
-        for (size_t i = 0; i < readers.size(); ++i) {
-          gap.readerId = readers.at(i).entityId;
-          msg.length(ml + 1);
-          msg[ml++].gap_sm(gap);
-        } //END iter over reader entity ids
-      } //END iter over reader GuidPrefix_t's
-      if (reset_info_dst) {
-        std::memset(idst.guidPrefix, 0, sizeof(GuidPrefix_t));
-        msg.length(ml + 1);
-        msg[ml++].info_dst_sm(idst);
-      }
-    }
-  }
+  const CORBA::ULong i = msg.length();
+  msg.length(i + 1);
+  msg[i].gap_sm(gap);
 }
 
 

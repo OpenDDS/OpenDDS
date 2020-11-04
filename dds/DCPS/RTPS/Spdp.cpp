@@ -609,8 +609,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, now, seq)));
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
     iter = p.first;
+    update_lease_expiration_i(iter, now);
 
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
@@ -701,7 +702,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
     if (is_security_enabled() && iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED && !from_sedp) {
-      iter->second.last_seen_ = now;
+      update_lease_expiration_i(iter, now);
 #ifndef DDS_HAS_MINIMUM_BIT
       process_location_updates_i(iter);
 #endif
@@ -761,7 +762,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
 #endif
         iter->second.pdata_ = pdata;
-        iter->second.last_seen_ = now;
+        update_lease_expiration_i(iter, now);
 
 #ifndef DDS_HAS_MINIMUM_BIT
         process_location_updates_i(iter);
@@ -1799,58 +1800,10 @@ void Spdp::remove_agent_info(const DCPS::RepoId&)
 #endif
 
 void
-Spdp::remove_expired_participants()
-{
-  // Find and remove any expired discovered participant
-  ACE_GUARD (ACE_Thread_Mutex, g, lock_);
-  // Iterate through a copy of the repo Ids, rather than the map
-  //   as it gets unlocked in remove_discovered_participant()
-  DCPS::RepoIdSet participant_ids;
-  get_discovered_participant_ids(participant_ids);
-  for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
-       participant_id != participant_ids.end();
-       ++participant_id)
-  {
-    DiscoveredParticipantIter part = participants_.find(*participant_id);
-    if (part != participants_.end()) {
-      const MonotonicTimePoint expr(
-        MonotonicTimePoint::now() -
-        rtps_duration_to_time_duration(
-          part->second.pdata_.leaseDuration,
-          part->second.pdata_.participantProxy.protocolVersion,
-          part->second.pdata_.participantProxy.vendorId
-        )
-      );
-      if (part->second.last_seen_ < expr) {
-        if (DCPS::DCPS_debug_level > 1) {
-          DCPS::GuidConverter conv(part->first);
-          ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) Spdp::remove_expired_participants() - ")
-            ACE_TEXT("participant %C exceeded lease duration, removing\n"),
-            OPENDDS_STRING(conv).c_str()));
-        }
-#ifdef OPENDDS_SECURITY
-        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
-        if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
-                   part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
-        }
-        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
-        if (spdp_endpoint) {
-          ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
-        }
-        purge_handshake_deadlines(part);
-#endif
-        remove_discovered_participant(part);
-      }
-    }
-  }
-}
-
-void
 Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
 {
-  ACE_UNUSED_ARG(iter);
+
+  remove_lease_expiration_i(iter);
 
 #ifdef OPENDDS_SECURITY
   if (security_config_) {
@@ -2212,6 +2165,8 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
   }
 
+  lease_expiration_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_lease_expirations);
+
 #ifdef OPENDDS_SECURITY
   handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
   handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
@@ -2357,7 +2312,9 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (directed_sender_) {
     directed_sender_->cancel_and_wait();
   }
-
+  if (lease_expiration_processor_) {
+    lease_expiration_processor_->cancel_and_wait();
+  }
   if (thread_status_sender_) {
     thread_status_sender_->disable_and_wait();
   }
@@ -3194,6 +3151,87 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
   }
 }
 
+void
+Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
+{
+  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_expiration_);
+       x.first != x.second; ++x.first) {
+    if (x.first->second == iter->first) {
+      lease_expirations_.erase(x.first);
+      break;
+    }
+  }
+}
+
+void
+Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
+                                const DCPS::MonotonicTimePoint& now)
+{
+  remove_lease_expiration_i(iter);
+
+  // Compute new expiration.
+  const DCPS::TimeDuration d =
+    rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
+                                   iter->second.pdata_.participantProxy.protocolVersion,
+                                   iter->second.pdata_.participantProxy.vendorId);
+
+  iter->second.lease_expiration_ = now + d;
+
+  // Insert.
+  const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
+  const bool schedule = lease_expirations_.empty() || iter->second.lease_expiration_ < lease_expirations_.begin()->first;
+
+  lease_expirations_.insert(std::make_pair(iter->second.lease_expiration_, iter->first));
+
+  if (cancel) {
+    tport_->lease_expiration_processor_->cancel();
+  }
+  if (schedule) {
+    tport_->lease_expiration_processor_->schedule(d);
+  }
+}
+
+void
+Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
+{
+  ACE_GUARD (ACE_Thread_Mutex, g, lock_);
+
+  for (TimeQueue::iterator pos = lease_expirations_.begin(), limit = lease_expirations_.end();
+       pos != limit && pos->first <= now;) {
+    DiscoveredParticipantIter part = participants_.find(pos->second);
+    // Pre-emptively erase so remove_discovered_participant will not modify lease_expirations_.
+    lease_expirations_.erase(pos++);
+
+    if (part == participants_.end()) {
+      continue;
+    }
+
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) Spdp::process_lease_expirations() - ")
+                 ACE_TEXT("participant %C exceeded lease duration, removing\n"),
+                 DCPS::LogGuid(part->first).c_str()));
+    }
+
+#ifdef OPENDDS_SECURITY
+    ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+    if (sedp_endpoint) {
+      stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+    }
+    ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+    if (spdp_endpoint) {
+      ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
+    }
+    purge_handshake_deadlines(part);
+#endif
+    remove_discovered_participant(part);
+  }
+
+  if (!lease_expirations_.empty()) {
+    tport_->lease_expiration_processor_->schedule(lease_expirations_.begin()->first - now);
+  }
+}
+
 #ifdef OPENDDS_SECURITY
 Spdp::ParticipantCryptoInfoPair
 Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
@@ -3632,7 +3670,6 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
 void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
   write(SEND_TO_LOCAL);
-  outer_->remove_expired_participants();
 }
 
 void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
@@ -3653,6 +3690,12 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
     directed_sender_->schedule(outer_->config_->resend_period() * (1.0 / directed_guids_.size()));
     break;
   }
+}
+
+void
+Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
+{
+  outer_->process_lease_expirations(now);
 }
 
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*now*/)
