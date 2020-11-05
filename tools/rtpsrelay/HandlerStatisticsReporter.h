@@ -36,23 +36,33 @@ public:
     relay_statistics_reporter_.input_message(byte_count, time, now);
     handler_statistics_.bytes_in() += byte_count;
     ++handler_statistics_.messages_in();
-    processing_time_ += time;
+    input_processing_time_ += time;
     report(now);
   }
 
-  void output_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void output_message(size_t byte_count,
+                      const OpenDDS::DCPS::TimeDuration& time,
+                      const OpenDDS::DCPS::TimeDuration& queue_latency,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    relay_statistics_reporter_.output_message(byte_count, now);
+    relay_statistics_reporter_.output_message(byte_count, time, queue_latency, now);
     handler_statistics_.bytes_out() += byte_count;
     ++handler_statistics_.messages_out();
+    output_processing_time_ += time;
+    max_queue_latency_ = std::max(max_queue_latency_, queue_latency);
     report(now);
   }
 
-  void dropped_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void dropped_message(size_t byte_count,
+                       const OpenDDS::DCPS::TimeDuration& time,
+                       const OpenDDS::DCPS::TimeDuration& queue_latency,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    relay_statistics_reporter_.dropped_message(byte_count, now);
+    relay_statistics_reporter_.dropped_message(byte_count, time, queue_latency, now);
     handler_statistics_.bytes_dropped() += byte_count;
     ++handler_statistics_.messages_dropped();
+    output_processing_time_ += time;
+    max_queue_latency_ = std::max(max_queue_latency_, queue_latency);
     report(now);
   }
 
@@ -104,6 +114,13 @@ public:
     report(now);
   }
 
+  void max_queue_size(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.max_queue_size(size, now);
+    handler_statistics_.max_queue_size() = std::max(handler_statistics_.max_queue_size(), static_cast<ACE_CDR::ULong>(size));
+    report(now);
+  }
+
 private:
 
   void report(const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -114,7 +131,9 @@ private:
     }
 
     handler_statistics_.interval(time_diff_to_duration(d));
-    handler_statistics_.processing_time(time_diff_to_duration(processing_time_));
+    handler_statistics_.input_processing_time(time_diff_to_duration(input_processing_time_));
+    handler_statistics_.output_processing_time(time_diff_to_duration(output_processing_time_));
+    handler_statistics_.max_queue_latency(time_diff_to_duration(max_queue_latency_));
 
     if (config_.log_relay_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(handler_statistics_).c_str()));
@@ -142,13 +161,18 @@ private:
     handler_statistics_.expired_address_count(0);
     handler_statistics_.claim_count(0);
     handler_statistics_.disclaim_count(0);
-    processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    handler_statistics_.max_queue_size(0);
+    input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    max_queue_latency_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 
   const Config& config_;
   OpenDDS::DCPS::MonotonicTimePoint last_report_;
   HandlerStatistics handler_statistics_;
-  OpenDDS::DCPS::TimeDuration processing_time_;
+  OpenDDS::DCPS::TimeDuration input_processing_time_;
+  OpenDDS::DCPS::TimeDuration output_processing_time_;
+  OpenDDS::DCPS::TimeDuration max_queue_latency_;
   HandlerStatisticsDataWriter_var writer_;
   CORBA::String_var topic_name_;
   RelayStatisticsReporter& relay_statistics_reporter_;

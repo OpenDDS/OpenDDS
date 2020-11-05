@@ -102,11 +102,12 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
-    Duration_t processing_time;
+    Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
+    Duration_t output_processing_time;
     unsigned long max_fan_out;
     unsigned long local_active_participants;
     unsigned long error_count;
@@ -114,6 +115,8 @@ module RtpsRelay {
     unsigned long expired_address_count;
     unsigned long claim_count;
     unsigned long disclaim_count;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
   };
 
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
@@ -124,17 +127,20 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
-    Duration_t processing_time;
+    Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
+    Duration_t output_processing_time;
     unsigned long max_fan_out;
     unsigned long error_count;
     unsigned long new_address_count;
     unsigned long expired_address_count;
     unsigned long claim_count;
     unsigned long disclaim_count;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
   };
 
   const string DOMAIN_STATISTICS_TOPIC_NAME = "Domain Statistics";
