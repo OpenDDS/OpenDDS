@@ -3,7 +3,107 @@
 #ifdef ACE_WIN32
 #include <windows.h>
 #include <psapi.h>
+#elif defined ACE_LINUX
+#include <fstream>
+#include <sstream>
+#include <unistd.h>
 #endif
+
+#if defined ACE_LINUX
+namespace {
+
+bool read_total_cpu_usage(size_t& time)
+{
+  std::string line;
+  std::string filename = "/proc/stat";
+
+  std::ifstream statfile;
+  statfile.open(filename, std::ios::in);
+
+  size_t user_time = 0;
+  size_t nice_time = 0;
+  size_t system_time = 0;
+  size_t idle_time = 0;
+
+  if (!statfile.is_open()) {
+    return false;
+  }
+
+  std::stringstream ss;
+  std::string cpuname;
+
+  getline(statfile, line);
+
+  ss << line;
+  ss >> cpuname;
+
+  if (cpuname != "cpu") {
+    return false;
+  }
+  ss >> user_time;
+  ss >> nice_time;
+  ss >> system_time;
+  ss >> idle_time;
+
+  statfile.close();
+
+  time = user_time + nice_time + system_time + idle_time;
+  return true;
+}
+
+bool read_process_cpu_usage(int processId, size_t& utime, size_t& stime)
+{
+  std::string line;
+  std::string filename = "/proc/" + std::to_string(processId) + "/stat";
+
+  std::ifstream statfile;
+  statfile.open(filename, std::ios::in);
+
+  int pid;
+  std::string comm;
+  char state;
+  int ppid;
+  int pgrp;
+  int session;
+  int tty_nr;
+  int tpgid;
+  size_t flags;
+  size_t minflt;
+  size_t cminflt;
+  size_t majflt;
+  size_t cmajflt;
+
+  if (!statfile.is_open()) {
+    return false;
+  }
+
+  std::stringstream ss;
+  std::getline(statfile, line);
+
+  ss << line;
+  ss >> pid;
+  ss >> comm;
+  ss >> state;
+  ss >> ppid;
+  ss >> pgrp;
+  ss >> session;
+  ss >> tty_nr;
+  ss >> tpgid;
+  ss >> flags;
+  ss >> minflt;
+  ss >> cminflt;
+  ss >> majflt;
+  ss >> cmajflt;
+  ss >> utime;
+  ss >> stime;
+
+  statfile.close();
+
+  return true;
+}
+
+} // namespace {
+#endif // ACE_LINUX
 
 ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
   : process_id_(process_id)
@@ -15,6 +115,10 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
   , last_time_()
   , last_sys_time_()
   , last_user_time_()
+#elif defined ACE_LINUX
+  , last_time_(0)
+  , last_sys_time_(0)
+  , last_user_time_(0)
 #endif
 {
 #ifdef ACE_WIN32
@@ -42,7 +146,27 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
     total_virtual_mem_ = memInfo.ullTotalPageFile;
     total_mem_ = memInfo.ullTotalPhys;
   }
+#elif defined ACE_LINUX
+  std::ifstream meminfofile;
+  meminfofile.open("/proc/meminfo", ios::in);
+
+  if (meminfofile.is_open())
+  {
+    std::string token;
+    while (meminfofile >> token)
+    {
+      if (token == "MemTotal:")
+      {
+        meminfofile >> total_mem_;
+        break;
+      }
+    }
+    meminfofile.close();
+  }
+  read_total_cpu_usage(last_time_);
+  read_process_cpu_usage(process_id_, last_user_time_, last_sys_time_);
 #endif
+
 }
 
 ProcessStatsCollector::~ProcessStatsCollector() noexcept
@@ -73,6 +197,18 @@ double ProcessStatsCollector::get_cpu_usage() noexcept
     last_time_ = current;
     last_sys_time_ = sys;
     last_user_time_ = user;
+  }
+#elif defined ACE_LINUX
+  size_t time, sys_time, user_time;
+  if (read_total_cpu_usage(time) &&
+      read_process_cpu_usage(process_id_, user_time, sys_time)) {
+
+    percent = 100.0 * static_cast<double>((sys_time - last_sys_time_) + (user_time - last_user_time_));
+    percent /= time - last_time_; // total cpu time is across all processorss (ignore num_processors_)
+
+    last_time_ = time;
+    last_sys_time_ = sys_time;
+    last_user_time_ = user_time;
   }
 #endif
   return percent;
@@ -108,6 +244,29 @@ double ProcessStatsCollector::get_mem_usage() noexcept
       }
     }
   } catch (...) {}
+#elif defined ACE_LINUX
+  std::string filename = "/proc/" + std::to_string(process_id_) + "/statm";
+
+  std::ifstream statmfile;
+  statmfile.open(filename, ios::in);
+
+  long page_sz_kb = sysconf(_SC_PAGESIZE) / 1024;
+
+  if (statmfile.is_open())
+  {
+    long VmSize{}, VmRSS{}, shared{};
+    statmfile >> VmSize >> VmRSS >> shared;
+
+    VmSize *= page_sz_kb;
+    VmRSS *= page_sz_kb;
+    shared *= page_sz_kb;
+
+    if (total_mem_ > 0)
+    {
+      result = 100.0 * (static_cast<double>(VmRSS) / static_cast<double>(total_mem_));
+    }
+    statmfile.close();
+  }
 #endif
   return result;
 }

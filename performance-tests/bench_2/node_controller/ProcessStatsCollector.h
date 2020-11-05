@@ -30,6 +30,10 @@ private:
   ULARGE_INTEGER last_time_;
   ULARGE_INTEGER last_sys_time_;
   ULARGE_INTEGER last_user_time_;
+#elif defined ACE_LINUX
+  size_t last_time_;
+  size_t last_sys_time_;
+  size_t last_user_time_;
 #endif
 };
 
