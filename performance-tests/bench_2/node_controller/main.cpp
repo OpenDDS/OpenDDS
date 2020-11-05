@@ -710,8 +710,7 @@ void wait_for_full_scenario(
     }
 
     if (allocated_scenario.scenario_id != TAO::String_Manager() &&
-        initial_attempt + std::chrono::seconds(30) < std::chrono::system_clock::now())
-    {
+        initial_attempt + std::chrono::seconds(30) < std::chrono::system_clock::now()) {
       if (write_status(name, this_node_id, AVAILABLE, *status_writer_impl)) {
         allocated_scenario.scenario_id = TAO::String_Manager();
         allocated_scenario.launch_time = ZERO;
