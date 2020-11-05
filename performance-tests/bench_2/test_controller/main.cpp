@@ -372,7 +372,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   return result;
 };
 
-int handle_reports(const Bench::NodeController::ReportSeq& nc_reports, const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
+int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
+  const std::vector<Bench::WorkerReport>& parsed_reports,
+  std::ostringstream& result_out)
 {
   int result = EXIT_SUCCESS;
   using Builder::ZERO;
