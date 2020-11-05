@@ -22,7 +22,7 @@ public:
 
 private:
   int process_id_;
-  int num_processors_;
+  size_t num_processors_;
   size_t total_virtual_mem_;
   size_t total_mem_;
 #ifdef ACE_WIN32

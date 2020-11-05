@@ -1,10 +1,15 @@
 #include "ProcessStatsCollector.h"
 
-#include "ProcessStatisticsUtils.h"
+#ifdef ACE_WIN32
+#include <windows.h>
+#include <psapi.h>
+#endif
 
 ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
   : process_id_(process_id)
   , num_processors_(0)
+  , total_virtual_mem_(0)
+  , total_mem_(0)
 #ifdef ACE_WIN32
   , process_handle_(INVALID_HANDLE_VALUE)
   , last_time_()
@@ -22,17 +27,21 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
 
   GetSystemTimeAsFileTime(&ftime);
 
-  last_time_ = ftime;
+  memcpy(&last_time_, &ftime, sizeof(FILETIME));
 
-  processHandle_ = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id_);
+  process_handle_ = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id_);
 
   GetProcessTimes(process_handle_, &fcreatetime, &fexittime, &fsys, &fuser);
 
-  last_sys_time_ = fsys;
-  last_user_time_ = fuser;
+  memcpy(&last_sys_time_, &fsys, sizeof(FILETIME));
+  memcpy(&last_user_time_, &fuser, sizeof(FILETIME));
 
-  total_virtual_mem_ = GetTotalVirtualMemory();
-  total_mem_ = GetTotalRamMemory();
+  MEMORYSTATUSEX memInfo;
+  memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+  if (GlobalMemoryStatusEx(&memInfo)) {
+    total_virtual_mem_ = memInfo.ullTotalPageFile;
+    total_mem_ = memInfo.ullTotalPhys;
+  }
 #endif
 }
 
@@ -52,11 +61,11 @@ double ProcessStatsCollector::get_cpu_usage() noexcept
 
   GetSystemTimeAsFileTime(&ftime);
 
-  current = ftime;
+  memcpy(&current, &ftime, sizeof(FILETIME));
 
   if (GetProcessTimes(process_handle_, &ftime, &ftime, &fsys, &fuser)) {
-    sys = fsys;
-    user = fuser;
+    memcpy(&sys, &fsys, sizeof(FILETIME));
+    memcpy(&user, &fuser, sizeof(FILETIME));
 
     percent = 100.0 * static_cast<double>((sys.QuadPart - last_sys_time_.QuadPart) + (user.QuadPart - last_user_time_.QuadPart));
     percent /= num_processors_ * (current.QuadPart - last_time_.QuadPart);
@@ -73,25 +82,32 @@ double ProcessStatsCollector::get_virtual_mem_usage() noexcept
 {
   double result = 0;
 #ifdef ACE_WIN32
-  const size_t used = GetProcessVirtualMemoryUsed(process_id_);
-
-  if (totalVirtual > 0) {
-    result = 100.0 * (static_cast<double>(used) / static_cast<double>(total_virtual_mem_));
-  }
+  try {
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    if (GetProcessMemoryInfo(process_handle_, (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
+      const size_t used = pmc.PrivateUsage;
+      if (total_virtual_mem_ > 0) {
+        result = 100.0 * (static_cast<double>(used) / static_cast<double>(total_virtual_mem_));
+      }
+    }
+  } catch (...) {}
 #endif
   return result;
 }
 
 double ProcessStatsCollector::get_mem_usage() noexcept
 {
-  double result = 0;
+  double result = 0.0;
 #ifdef ACE_WIN32
-  const size_t used = GetTotalRamMemoryUsedByProcess(process_id_);
-
-  if (total_mem_ > 0) {
-    result = 100.0 * (static_cast<double>(used) / static_cast<double>(total_mem_)) * 100.00;
-  }
+  try {
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    if (GetProcessMemoryInfo(process_handle_, (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
+      const size_t used = pmc.PeakWorkingSetSize;
+      if (total_mem_ > 0) {
+        result = 100.0 * (static_cast<double>(used) / static_cast<double>(total_mem_));
+      }
+    }
+  } catch (...) {}
 #endif
   return result;
 }
-

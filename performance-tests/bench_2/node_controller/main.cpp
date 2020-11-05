@@ -34,7 +34,6 @@
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
 #include "ProcessStatsCollector.h"
-#include "ProcessStatisticsUtils.h"
 #include "PropertyStatBlock.h"
 
 using namespace Bench::NodeController;
