@@ -295,8 +295,7 @@ public:
         double cpu_sum = 0.0;
         double mem_sum = 0.0;
 
-        for (auto it = worker_process_stat_collectors_.begin(); it != worker_process_stat_collectors_.end(); it++)
-        {
+        for (auto it = worker_process_stat_collectors_.begin(); it != worker_process_stat_collectors_.end(); it++) {
           cpu_sum += it->second->get_cpu_usage();
           mem_sum += it->second->get_mem_usage();
         }
