@@ -114,8 +114,7 @@ bool DataReader::enable(bool throw_on_error) {
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
   }
-  bool result = false;
-  result = (datareader_->enable() == DDS::RETCODE_OK);
+  bool result = (datareader_->enable() == DDS::RETCODE_OK);
   if (!result && throw_on_error) {
     std::stringstream ss;
     ss << "failed to enable datareader '" << name_ << "'" << std::flush;
@@ -138,4 +137,3 @@ void DataReader::detach_listener() {
 }
 
 }
-
