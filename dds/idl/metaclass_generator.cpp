@@ -420,7 +420,7 @@ namespace {
       "  }\n\n"
       "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
       "  {\n"
-      "    static const std::map<const char*, ACE_CDR::ULong> name_to_id_map = {\n";
+      "    static const std::map<std::string, ACE_CDR::ULong> name_to_id_map = {\n";
     if (struct_node) {
       const AutoidKind auto_id = be_global->autoid(node);
       for (size_t i = 0; i < fields.size(); ++i) {
@@ -434,7 +434,7 @@ namespace {
       "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
       "    };\n"
-      "    std::map<const char*, ACE_CDR::ULong>::const_iterator it = name_to_id_map.find(field);\n"
+      "    std::map<std::string, ACE_CDR::ULong>::const_iterator it = name_to_id_map.find(field);\n"
       "    if (it == name_to_id_map.end()) {\n"
       "      " << exception <<
       "    } else {\n"
@@ -558,15 +558,70 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         f.addArg("ser", "Serializer&");
         f.addArg("", af.ptr_);
         f.endArgs();
-        if (af.seq_) {
-          be_global->impl_ <<
-          "  ACE_CDR::ULong length;\n" <<
-          "  if (!(ser >> length)) return false;\n";
+
+        AST_Type* elem;
+        if (af.seq_ != 0) {
+          elem = af.seq_->base_type();
+        } else {
+          elem = af.arr_->base_type();
         }
-        std::size_t sz = 0;
-        to_cxx_type(af.as_act_, sz);
-        be_global->impl_ <<
-          "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
+        be_global->impl_ << "    const Encoding& encoding = ser.encoding();\n";
+        Classification elem_cls = classify(elem);
+        const bool primitive = elem_cls & CL_PRIMITIVE;
+        marshal_generator::generate_dheader_code(
+          "    if (!ser.read_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n", !primitive, true);
+
+        std::string len;
+        if (af.arr_) {
+          std::ostringstream strstream;
+          strstream << array_element_count(af.arr_);
+          len = strstream.str();
+        } else { // Sequence
+          be_global->impl_ <<
+            "  ACE_CDR::ULong length;\n"
+            "  if (!(ser >> length)) return false;\n";
+          len = "length";
+        }
+        const std::string cxx_elem = scoped(elem->name());
+        AST_Type* elem_orig = elem;
+        elem = resolveActualType(elem);
+        elem_cls = classify(elem);
+
+        if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
+          // fixed-length sequence/array element -> skip all elements at once
+          std::size_t sz = 0;
+          to_cxx_type(af.as_act_, sz);
+          be_global->impl_ <<
+            "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
+        } else {
+          be_global->impl_ <<
+            "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
+          if (elem_cls & CL_STRING) {
+            be_global->impl_ <<
+              "    ACE_CDR::ULong strlength;\n"
+              "    if (!(ser >> strlength)) return false;\n"
+              "    if (!ser.skip(strlength)) return false;\n";
+          } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
+            std::string pre, post;
+            const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+            if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+              post = "_forany";
+            } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
+              pre = "IDL::DistinctType<";
+              post = ", " + dds_generator::scoped_helper(elem_orig->name(), "_") + "_tag>";
+            }
+            be_global->impl_ <<
+              "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
+              << "*>(0))) return false;\n";
+          }
+          be_global->impl_ <<
+            "  }\n";
+          be_global->impl_ <<
+            "  return true;\n";
+        }
+
       }
     }
   }
@@ -606,16 +661,27 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   }
   f.endArgs();
 
-  std::string len;
   AST_Type* elem;
+  if (seq != 0) {
+    elem = seq->base_type();
+  } else {
+    elem = arr->base_type();
+  }
+  be_global->impl_ << "    const Encoding& encoding = ser.encoding();\n";
+  Classification elem_cls = classify(elem);
+  const bool primitive = elem_cls & CL_PRIMITIVE;
+  marshal_generator::generate_dheader_code(
+    "    if (!ser.read_delimiter(total_size)) {\n"
+    "      return false;\n"
+    "    }\n", !primitive, true);
+
+  std::string len;
 
   if (arr) {
-    elem = arr->base_type();
     std::ostringstream strstream;
     strstream << array_element_count(arr);
     len = strstream.str();
   } else { // Sequence
-    elem = seq->base_type();
     be_global->impl_ <<
       "  ACE_CDR::ULong length;\n"
       "  if (!(ser >> length)) return false;\n";
@@ -625,7 +691,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   const std::string cxx_elem = scoped(elem->name());
   AST_Type* elem_orig = elem;
   elem = resolveActualType(elem);
-  const Classification elem_cls = classify(elem);
+  elem_cls = classify(elem);
 
   if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
     // fixed-length sequence/array element -> skip all elements at once
@@ -669,6 +735,12 @@ func(const std::string&, const std::string&, AST_Type* br_type, const std::strin
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
   const Classification br_cls = classify(br_type);
+  ss <<
+    "    if (is_mutable) {\n"
+    "      if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
+    "        return false;\n"
+    "      }\n"
+    "    }\n";   
   if (br_cls & CL_STRING) {
     ss <<
       "    ACE_CDR::ULong len;\n"
@@ -716,6 +788,27 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     f.addArg("ser", "Serializer&");
     f.addArg("", clazz + "*");
     f.endArgs();
+
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    const bool not_final = exten != extensibilitykind_final;
+    const bool is_mutable  = exten == extensibilitykind_mutable;
+    be_global->impl_ <<
+      "  const Encoding& encoding = ser.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n"
+      "  const bool is_mutable = " << is_mutable <<";\n"
+      "  unsigned member_id;\n"
+      "  size_t field_size;\n"
+      "  bool must_understand = false;\n";
+    marshal_generator::generate_dheader_code(
+      "    if (!ser.read_delimiter(total_size)) {\n"
+      "      return false;\n"
+      "    }\n", not_final);
+    if (exten == extensibilitykind_mutable) {
+      be_global->impl_ <<
+        "  if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "    return false;\n"
+        "  }\n";
+    }
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n"
       "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"

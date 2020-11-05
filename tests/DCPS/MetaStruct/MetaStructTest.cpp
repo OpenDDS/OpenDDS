@@ -69,12 +69,12 @@ bool checkVal(const T& lhs, const T& rhs, const char* name)
 
 template<typename T, typename T2>
 bool check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, Value::Type type,
-          const MetaStruct& ms, T2 Value::*ptrmbr)
+          const MetaStruct& ms, T2 Value::*ptrmbr, Encoding::Kind e)
 {
   if (!checkVal(lhs, rhs, name)) return false;
 
   Message_Block_Ptr mb (amb->duplicate());
-  const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+  const Encoding encoding(e);
   Serializer ser(mb.get(), encoding);
   Value val = ms.getValue(ser, name);
   if (val.type_ == type) {
@@ -119,6 +119,19 @@ bool run_test_i(Encoding::Kind e)
   src.ss[1].l = -27;
   src.e = other1;
   src.u.u_f(2.17f);
+  src.mu.u_f(2.17f);
+  src.anon_seq.length(2);
+  src.anon_seq[0].s = "seq elt 0";
+  src.anon_seq[0].l = 9;
+  src.anon_seq[1].s = "seq elt 1";
+  src.anon_seq[1].l = -27;
+  src.stra[0] = "hello";
+  src.stra[1] = "world!";
+  src.stra[2] = "goodbye";
+  src.astra[0] = "hello";
+  src.astra[1] = "world!";
+  src.astra[2] = "goodbye";
+  src.s = "hello";
 
   const MetaStruct& meta = getMetaStruct<Type>();
 
@@ -134,10 +147,11 @@ bool run_test_i(Encoding::Kind e)
     return false;
   }
   // Use checkVal for types that aren't supported in MetaStruct::getValue(), such as arrays and unions
-  return check(tgt.a.s, src.a.s, "a.s", data.get(), Value::VAL_STRING, meta, &Value::s_)
-    && check(tgt.a.l, src.a.l, "a.l", data.get(), Value::VAL_INT, meta, &Value::i_)
-    && check(tgt.a.w, src.a.w, "a.w", data.get(), Value::VAL_INT, meta, &Value::i_)
-    && check(tgt.a.c, src.a.c, "a.c", data.get(), Value::VAL_CHAR, meta, &Value::c_)
+  return
+    check(tgt.a.s, src.a.s, "a.s", data.get(), Value::VAL_STRING, meta, &Value::s_, e)
+    && check(tgt.a.l, src.a.l, "a.l", data.get(), Value::VAL_INT, meta, &Value::i_, e)
+    && check(tgt.a.w, src.a.w, "a.w", data.get(), Value::VAL_INT, meta, &Value::i_, e)
+    && check(tgt.a.c, src.a.c, "a.c", data.get(), Value::VAL_CHAR, meta, &Value::c_, e)
     && checkVal(tgt.sa[0], src.sa[0], "sa[0]")
     && checkVal(tgt.sa[1], src.sa[1], "sa[1]")
     && checkVal(tgt.sa[2], src.sa[2], "sa[2]")
@@ -147,9 +161,23 @@ bool run_test_i(Encoding::Kind e)
     && checkVal(tgt.ss[0].l, src.ss[0].l, "ss[0].l")
     && checkVal(tgt.ss[1].s, src.ss[1].s, "ss[1].s")
     && checkVal(tgt.ss[1].l, src.ss[1].l, "ss[1].l")
-    && check(tgt.e, src.e, "e", data.get(), Value::VAL_UINT, meta, &Value::u_)
+    && check(tgt.e, src.e, "e", data.get(), Value::VAL_UINT, meta, &Value::u_, e)
     && checkVal(tgt.u._d(), src.u._d(), "u._d()")
-    && checkVal(tgt.u.u_f(), src.u.u_f(), "u.u_f()");
+    && checkVal(tgt.u.u_f(), src.u.u_f(), "u.u_f()")
+    && checkVal(tgt.mu._d(), src.mu._d(), "mu._d()")
+    && checkVal(tgt.mu.u_f(), src.mu.u_f(), "mu.u_f()")
+    && checkVal(tgt.anon_seq.length(), src.anon_seq.length(), "anon_seq.length()")
+    && checkVal(tgt.anon_seq[0].s, src.anon_seq[0].s, "anon_seq[0].s")
+    && checkVal(tgt.anon_seq[0].l, src.anon_seq[0].l, "anon_seq[0].l")
+    && checkVal(tgt.anon_seq[1].s, src.anon_seq[1].s, "anon_seq[1].s")
+    && checkVal(tgt.anon_seq[1].l, src.anon_seq[1].l, "anon_seq[1].l")
+    && checkVal(tgt.stra[0], src.stra[0], "stra[0]")
+    && checkVal(tgt.stra[1], src.stra[1], "stra[1]")
+    && checkVal(tgt.stra[2], src.stra[2], "stra[2]")
+    && checkVal(tgt.astra[0], src.astra[0], "astra[0]")
+    && checkVal(tgt.astra[1], src.astra[1], "astra[1]")
+    && checkVal(tgt.astra[2], src.astra[2], "astra[2]")
+    && check(tgt.s, src.s, "s", data.get(), Value::VAL_STRING, meta, &Value::s_, e);
 }
 
 Encoding::Kind encodings[] = {

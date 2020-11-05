@@ -757,20 +757,6 @@ namespace {
     return true;
   }
 
-  void generate_dheader_code(const std::string& code, bool dheader_required, bool is_ser_func = true)
-  {
-    //DHeader appears on aggregated types that are mutable or appendable in XCDR2
-    //DHeader also appears on ALL sequences and arrays of non-primitives
-    if (dheader_required) {
-      if (is_ser_func) {
-        be_global->impl_ << "  size_t total_size = 0;\n";
-      }
-      be_global->impl_ << "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
-        << code <<
-        "  }\n";
-    }
-  }
-
   void skip_to_end_sequence(const std::string indent,
     std::string start, std::string end, std::string seq_type_name,
     bool use_cxx11, Classification cls, AST_Sequence* seq)
@@ -885,7 +871,7 @@ namespace {
       serialized_size.addArg("seq", wrapper.wrapped_type_name());
       serialized_size.endArgs();
 
-      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
+      marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       intro.join(be_global->impl_, "  ");
 
@@ -954,7 +940,7 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      generate_dheader_code(
+      marshal_generator::generate_dheader_code(
         "    serialized_size(encoding, total_size, seq);\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
@@ -1032,7 +1018,7 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      generate_dheader_code(
+      marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
         "    }\n", !primitive);
@@ -1287,7 +1273,7 @@ namespace {
       serialized_size.addArg("arr", wrapper.wrapped_type_name());
       serialized_size.endArgs();
 
-      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
+      marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
@@ -1335,7 +1321,7 @@ namespace {
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
 
-      generate_dheader_code(
+      marshal_generator::generate_dheader_code(
         "serialized_size(encoding, total_size, arr);"
         "if (!strm.write_delimiter(total_size)) {"
         "  return false;"
@@ -1375,7 +1361,7 @@ namespace {
         "  bool discard_flag = false;\n"
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      generate_dheader_code(
+      marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
         "    }\n", !primitive);
@@ -2705,7 +2691,7 @@ namespace {
           "  size_t mutable_running_total = 0;\n";
       }
 
-      generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
+      marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
       std::string expr;
       Intro intro;
@@ -2748,7 +2734,7 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      generate_dheader_code(
+      marshal_generator::generate_dheader_code(
         "    serialized_size(encoding, total_size, stru);\n"
         "    if (!strm.write_delimiter(total_size)) {\n"
         "      return false;\n"
@@ -2824,6 +2810,21 @@ namespace {
 
 } // anonymous namespace
 
+
+void marshal_generator::generate_dheader_code(const std::string& code, bool dheader_required, bool is_ser_func)
+{
+  //DHeader appears on aggregated types that are mutable or appendable in XCDR2
+  //DHeader also appears on ALL sequences and arrays of non-primitives
+  if (dheader_required) {
+    if (is_ser_func) {
+      be_global->impl_ << "  size_t total_size = 0;\n";
+    }
+    be_global->impl_ << "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+      << code <<
+      "  }\n";
+  }
+}
+
 bool marshal_generator::generate_struct_deserialization(
   AST_Structure* node, FieldFilter field_type)
 {
@@ -2868,7 +2869,7 @@ bool marshal_generator::generate_struct_deserialization(
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    generate_dheader_code(
+    marshal_generator::generate_dheader_code(
       "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"
       "    }\n", not_final);
@@ -3328,9 +3329,9 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
     "  {\n"
     "    const Encoding& encoding = strm.encoding();\n"
     "    ACE_UNUSED_ARG(encoding);\n";
-  generate_dheader_code(
+  marshal_generator::generate_dheader_code(
     "    if (!strm.read_delimiter(total_size)) {\n"
-    "      return false;\n"
+    "      throw std::runtime_error(\"Unable to reader delimiter in getValue\");\n"
     "    }\n", not_final);
 
   be_global->impl_ <<
@@ -3352,6 +3353,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       "      while (true) {\n"
       "        if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
       "            strm.pos() >= end_of_struct) {\n"
+      //TODO: Clayton fix return
       "          return true;\n"
       "        }\n"
       "        bool must_understand = false;\n"
@@ -3380,13 +3382,13 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       Classification fld_cls = classify(field_type);
 
       cases <<
-        "        case " << id << ": {\n"
-        "          if (field_id == member_id) {\n";
+        "        case " << id << ": {\n";
       if (fld_cls & CL_SCALAR) {
         const std::string cxx_type = to_cxx_type(field_type, size);
         const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
         cases <<
+          "          if (field_id == member_id) {\n"
           "            " << cxx_type << " val;\n" <<
           "            if (!(strm >> " << val << "))" <<  
           " {\n"
@@ -3400,16 +3402,18 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
           "        }\n";
       } else if (fld_cls & CL_STRUCTURE) {
         cases <<
-          "        return getMetaStruct<" << scoped(field_type->name()) << ">().getValue(strm, subfield.c_str());\n"
-          "      }\n"
-          "      break;\n"
-          "    }\n";
+          "          if (field_id == member_id) {\n"
+          "            return getMetaStruct<" << scoped(field_type->name()) << ">().getValue(strm, subfield.c_str());\n"
+          "          } else {\n"
+          "            strm.skip(field_size);\n"
+          "          }\n"
+          "          break;\n"
+          "        }\n";
       } else { // array, sequence, union:
         cases <<
-          "        strm.skip(field_size);\n"
-          "      }\n"
-          "      break;\n"
-          "    }\n";
+          "          strm.skip(field_size);\n"
+          "          break;\n"
+          "        }\n";
       }
 
     }
@@ -3699,7 +3703,7 @@ namespace {
       serialized_size.endArgs();
 
       if (has_key) {
-        generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
+        marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
         if (exten == extensibilitykind_mutable) {
           be_global->impl_ <<
@@ -3732,7 +3736,7 @@ namespace {
         be_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
-        generate_dheader_code(
+        marshal_generator::generate_dheader_code(
           "    serialized_size(encoding, total_size, uni);\n"
           "    if (!strm.write_delimiter(total_size)) {\n"
           "      return false;\n"
@@ -3776,7 +3780,7 @@ namespace {
         be_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
-        generate_dheader_code(
+        marshal_generator::generate_dheader_code(
           "    if (!strm.read_delimiter(total_size)) {\n"
           "      return false;\n"
           "    }\n", not_final);
@@ -3878,7 +3882,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     serialized_size.addArg("uni", "const " + cxx + "&");
     serialized_size.endArgs();
 
-    generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
+    marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
     if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
@@ -3903,8 +3907,12 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
                            "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
-      be_global->impl_ <<
-        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+      // TODO: Clayton Removes because it is not currently supported in insertion and extraction
+      // This should be fixed for XCDR1 to be compliant.
+      //be_global->impl_ <<
+      //  "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+      // TODO: Remove the below code when the above is uncommented
+      be_global->impl_ << "  size += mutable_running_total;\n";
     }
   }
   {
@@ -3916,7 +3924,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    generate_dheader_code(
+    marshal_generator::generate_dheader_code(
       "    serialized_size(encoding, total_size, uni);\n"
       "    if (!strm.write_delimiter(total_size)) {\n"
       "      return false;\n"
@@ -3961,7 +3969,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
-    generate_dheader_code(
+    marshal_generator::generate_dheader_code(
       "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"
       "    }\n", not_final);

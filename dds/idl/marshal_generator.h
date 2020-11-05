@@ -26,6 +26,8 @@ public:
                  AST_Type* discriminator,
                  const char* repoid);
 
+  static void generate_dheader_code(const std::string& code, bool dheader_required, bool is_ser_func = true);
+
   static bool generate_struct_deserialization(AST_Structure* node, FieldFilter field_type);
 
   static void clayton_gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);

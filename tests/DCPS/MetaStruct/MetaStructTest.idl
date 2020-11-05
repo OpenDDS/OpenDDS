@@ -8,11 +8,22 @@ struct A_t {
 
 typedef short ShortArray[3];
 typedef ShortArray ArrayOfShortArray[4];
+typedef string StringArray [3];
 typedef sequence<A_t> StructSeq;
 enum MyEnum {b, d, as, sa, ss, other1, other2};
 
 @final
 union MyUnion switch (MyEnum) {
+case b: boolean u_b;
+case d: double u_d;
+case as: A_t u_as;
+case sa: ShortArray u_sa;
+case ss: StructSeq u_ss;
+default: float u_f;
+};
+
+@mutable
+union MutableUnion switch (MyEnum) {
 case b: boolean u_b;
 case d: double u_d;
 case as: A_t u_as;
@@ -30,6 +41,11 @@ struct FinalStruct {
   StructSeq ss;
   MyEnum e;
   MyUnion u;
+  MutableUnion mu;
+  sequence<A_t> anon_seq;
+  StringArray stra;
+  string astra[3];
+  string s;
 };
 
 @topic
@@ -41,6 +57,11 @@ struct AppenableStruct {
   StructSeq ss;
   MyEnum e;
   MyUnion u;
+  MutableUnion mu;
+  sequence<A_t> anon_seq;
+  StringArray stra;
+  string astra[3];
+  string s;
 };
 
 @topic
@@ -52,4 +73,9 @@ struct MutableStruct {
   StructSeq ss;
   MyEnum e;
   MyUnion u;
+  MutableUnion mu;
+  sequence<A_t> anon_seq;
+  StringArray stra;
+  string astra[3];
+  string s;
 };
