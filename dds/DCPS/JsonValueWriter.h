@@ -98,7 +98,8 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   jvw.begin_field("topic");
   jvw.begin_struct();
   jvw.begin_field("name");
-  jvw.write_string(topic->get_name());
+  CORBA::String_var topic_name = topic->get_name();
+  jvw.write_string(topic_name);
   jvw.end_field();
   jvw.begin_field("type_name");
   jvw.write_string(topic->get_type_name());

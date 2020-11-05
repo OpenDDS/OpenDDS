@@ -75,7 +75,6 @@ check_for_newline
 check_for_tab
 check_for_inline_in_cpp
 check_for_push_and_pop
-check_for_changelog_errors
 check_for_ORB_init
 check_for_refcountservantbase
 check_for_trailing_whitespace

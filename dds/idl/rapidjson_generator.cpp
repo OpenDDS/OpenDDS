@@ -14,8 +14,7 @@ using namespace AstTypeClassification;
 
 void rapidjson_generator::gen_includes()
 {
-  be_global->add_include("rapidjson/document.h", BE_GlobalData::STREAM_H);
-  be_global->add_include("rapidjson/stringbuffer.h", BE_GlobalData::STREAM_CPP);
+  be_global->add_include("dds/DCPS/RapidJsonWrapper.h", BE_GlobalData::STREAM_H);
   be_global->add_include("<sstream>", BE_GlobalData::STREAM_CPP);
 }
 

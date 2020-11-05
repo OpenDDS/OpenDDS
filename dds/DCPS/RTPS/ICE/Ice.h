@@ -236,7 +236,8 @@ public:
   };
 
   ServerReflexiveStateMachine()
-    : indication_count_(0)
+    : message_class_(STUN::REQUEST)
+    , send_count_(0)
   {}
 
   // Return Unset if transitioning from a determined SRA to an undetermined SRA.
@@ -260,17 +261,18 @@ public:
   }
 
 private:
-  StateChange start(const ACE_INET_Addr& address, const DCPS::GuidPrefix_t& guid_prefix);
+  StateChange start(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
   StateChange stop();
   StateChange next_send(size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
   StateChange success_response(const STUN::Message& message);
   StateChange error_response(const STUN::Message& message);
 
+  STUN::Class message_class_;
   STUN::Message message_;
   ACE_INET_Addr unset_stun_server_address_;
   ACE_INET_Addr stun_server_address_;
   ACE_INET_Addr server_reflexive_address_;
-  size_t indication_count_;
+  size_t send_count_;
  };
 
 } // namespace ICE

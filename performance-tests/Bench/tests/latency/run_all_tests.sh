@@ -12,8 +12,7 @@ REPOHOST=`hostname`
 REPOPORT=2809
 TEST_DURATION=120
 
-
-REMOTE_HOST=dds-perf-test2
+REMOTE_HOST=localhost
 
 CONFIGS="rtps udp tcp multi-be multi-rel"
 SIZES="50 100 250 500 1000 2500 5000 8000 16000 32000"
@@ -24,8 +23,7 @@ ssh $REMOTE_HOST "sed 's/RELIABLE/BEST_EFFORT/' $TESTBASE/p2.ini > $TESTBASE/p2-
 
 for sz in $SIZES; do
   sed "s/RELIABLE/BEST_EFFORT/" $TESTBASE/p1-$sz.ini > $TESTBASE/p1-$sz-be.ini
-fi
-
+done
 
 for conf in $CONFIGS; do
   mkdir -p $conf
@@ -38,7 +36,7 @@ for conf in $CONFIGS; do
 
   for sz in $SIZES; do
     echo ============ Runing $conf $sz
-    ssh $REMOTE_HOST "$PROJECTBASE/bin/run_test -P -t $TEST_DURATION -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2$suffix.ini" &
+    ssh $REMOTE_HOST "source $DDS_ROOT/setenv.sh && $PROJECTBASE/bin/run_test -P -t $TEST_DURATION -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2$suffix.ini" &
     $PROJECTBASE/bin/run_test -P -t $TEST_DURATION -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-$sz$suffix.ini 2>&1 >  p1-$sz.log
   done
   cd ..

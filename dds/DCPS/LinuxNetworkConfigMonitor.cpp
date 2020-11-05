@@ -34,7 +34,7 @@ LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch inte
 bool LinuxNetworkConfigMonitor::open()
 {
   // Listen to changes in links and IPV4 and IPV6 addresses.
-  const pid_t pid = getpid();
+  const pid_t pid = 0;
   ACE_Netlink_Addr addr;
   addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
@@ -225,7 +225,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       }
 
       remove_interface(msg->ifi_index);
-      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & IFF_MULTICAST));
+      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK)));
     }
     break;
   case RTM_DELLINK:
