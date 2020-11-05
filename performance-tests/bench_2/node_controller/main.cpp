@@ -290,7 +290,6 @@ public:
     std::thread stat_collector([&](){
 
       while (running) {
-
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         double cpu_sum = 0.0;
