@@ -170,7 +170,6 @@ OpenDDS::DCPS::ReactorTask::svc()
 #else
       ACE_thread_t tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
-      MonotonicTimePoint expire = MonotonicTimePoint::now() + timeout_;
 
 #ifndef OPENDDS_SAFETY_PROFILE
       OPENDDS_STRING key = to_dds_string(tid);
@@ -181,21 +180,17 @@ OpenDDS::DCPS::ReactorTask::svc()
         key += " (" + name_ + ")";
       }
 
-      ACE_Time_Value t = timeout_.value();
-
       while (state_ == STATE_RUNNING) {
+        ACE_DEBUG((LM_DEBUG, "### Loop 3\n"));
+        ACE_Time_Value t = timeout_.value();
         reactor_->run_reactor_event_loop(t, 0);
-        MonotonicTimePoint now = MonotonicTimePoint::now();
-        if (now > expire) {
-          expire = now + timeout_;
-          if (thread_status_) {
-            if (DCPS_debug_level > 4) {
-              ACE_DEBUG((LM_DEBUG,
-                         "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
-            }
-            ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
-            thread_status_->map[key] = now;
+        if (thread_status_) {
+          if (DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+                       "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
           }
+          ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
+          thread_status_->map[key] = MonotonicTimePoint::now();
         }
       }
     }
