@@ -3291,7 +3291,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 }
 
 void
-marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz)
+marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz)
 {
   //loop through meta struct
   //check the id for a match to our id
@@ -3299,16 +3299,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
   //if we are a match, deserialize the field
 
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  //AST_Type* type = field->field_type();
-  //const Classification cls = classify(type);
-  //const std::string fieldName = field->local_name()->get_string();
-  //std::size_t size = 0;
-  //const std::string cxx_type = to_cxx_type(type, size);
 
-  //Function extraction("getValue", "Value");
-  //extraction.addArg("strm", "Serializer&");
-  //extraction.addArg("field", "const char*");
-  //extraction.endArgs();
   Intro intro;
   std::string expr;
   const std::string indent = "  ";
@@ -3322,8 +3313,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
   const Fields::Iterator fields_end = fields.end();
   RtpsFieldCustomizer rtpsCustom(cpp_name);
   const AutoidKind auto_id = be_global->autoid(node);
-  
-  
+
   be_global->impl_ <<
     "  Value getValue(Serializer& strm, const char* field) const\n"
     "  {\n"
@@ -3353,8 +3343,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       "      while (true) {\n"
       "        if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
       "            strm.pos() >= end_of_struct) {\n"
-      //TODO: Clayton fix return
-      "          return true;\n"
+      "          break;\n"
       "        }\n"
       "        bool must_understand = false;\n"
       "        if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
@@ -3390,7 +3379,7 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
         cases <<
           "          if (field_id == member_id) {\n"
           "            " << cxx_type << " val;\n" <<
-          "            if (!(strm >> " << val << "))" <<  
+          "            if (!(strm >> " << val << "))" <<
           " {\n"
           "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n" <<
           "            }\n"
@@ -3415,7 +3404,6 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
           "          break;\n"
           "        }\n";
       }
-
     }
     intro.join(be_global->impl_, indent);
     const std::string switch_cases = cases.str();
@@ -3428,7 +3416,6 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
         << switch_cases <<
         "        default:\n";
     }
-
     be_global->impl_ <<
       sw_indent << "if (must_understand) {\n" <<
       sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
@@ -3444,7 +3431,6 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
         "          break;\n"
         "        }\n";
     }
-
     be_global->impl_ <<
       "      }\n"
       "      if (!field[0]) {\n"   // if 'field' is the empty string...
@@ -3498,9 +3484,9 @@ marshal_generator::clayton_gen_field_getValueFromSerialized(AST_Structure* node,
       }
     } else if (fld_cls & CL_STRUCTURE) {
         expr +=
-          "      if (base_field == \"" + field_name + "\") {\n"
-          "        return getMetaStruct<" + scoped(field_type->name()) + ">().getValue(strm, subfield.c_str());\n"
-          "      } else {\n"
+          "    if (base_field == \"" + field_name + "\") {\n"
+          "      return getMetaStruct<" + scoped(field_type->name()) + ">().getValue(strm, subfield.c_str());\n"
+          "    } else {\n"
           "      if (!gen_skip_over(strm, static_cast<" + scoped(field_type->name()) + "*>(0))) {\n"
           "        throw std::runtime_error(\"Field '" + field_name + "' could not be skipped\");\n"
           "      }\n"
@@ -3907,12 +3893,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
                            "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
-      // TODO: Clayton Removes because it is not currently supported in insertion and extraction
-      // This should be fixed for XCDR1 to be compliant.
-      //be_global->impl_ <<
-      //  "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
-      // TODO: Remove the below code when the above is uncommented
-      be_global->impl_ << "  size += mutable_running_total;\n";
+      // TODO: XTypes B will need to edit this code to add the pid for the end of mutable unions.
+      // Until this change is made, XCDR1 will NOT be functional
+      be_global->impl_ <<
+       "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }
   }
   {

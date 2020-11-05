@@ -122,67 +122,6 @@ namespace {
   }
 
   void
-  gen_field_getValueFromSerialized(AST_Field* field)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    AST_Type* type = field->field_type();
-    const Classification cls = classify(type);
-    const std::string fieldName = field->local_name()->get_string();
-    std::size_t size = 0;
-    const std::string cxx_type = to_cxx_type(type, size);
-    if (cls & CL_SCALAR) {
-      type = resolveActualType(type);
-      const std::string val = (cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
-        : getWrapper("val", type, WD_INPUT);
-      be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      " << cxx_type << " val;\n"
-        "      if (!(ser >> " << val << ")) {\n"
-        "        throw std::runtime_error(\"Field '" << fieldName << "' could "
-        "not be deserialized\");\n"
-        "      }\n"
-        "      return val;\n"
-        "    } else {\n";
-      if (cls & CL_STRING) {
-        be_global->impl_ <<
-          "      ACE_CDR::ULong len;\n"
-          "      if (!(ser >> len)) {\n"
-          "        throw std::runtime_error(\"String '" << fieldName <<
-          "' length could not be deserialized\");\n"
-          "      }\n"
-          "      if (!ser.skip(len)) {\n"
-          "        throw std::runtime_error(\"String '" << fieldName <<
-          "' contents could not be skipped\");\n"
-          "      }\n";
-      } else {
-        be_global->impl_ <<
-          "      if (!ser.skip(1, " << size << ")) {\n"
-          "        throw std::runtime_error(\"Field '" << fieldName <<
-          "' could not be skipped\");\n"
-          "      }\n";
-      }
-      be_global->impl_ <<
-        "    }\n";
-    } else if (cls & CL_STRUCTURE) {
-      delegateToNested(fieldName, field, "ser", true);
-    } else { // array, sequence, union:
-      std::string pre, post;
-      if (!use_cxx11 && (cls & CL_ARRAY)) {
-        post = "_forany";
-      } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE))) {
-        pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
-      }
-      const std::string ptr = field->field_type()->anonymous() ?
-        FieldInfo(*field).ptr_ : (pre + cxx_type + post + '*');
-      be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << ptr << ">(0))) {\n"
-        "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
-        "    }\n";
-    }
-  }
-
-  void
   gen_field_createQC(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -451,7 +390,7 @@ namespace {
       "  }\n\n";
 
     if (struct_node) {
-      marshal_generator::clayton_gen_field_getValueFromSerialized(struct_node, clazz);
+      marshal_generator::gen_field_getValueFromSerialized(struct_node, clazz);
     } else {
       be_global->impl_ <<
         "  Value getValue(Serializer& ser, const char* field) const\n"
@@ -565,7 +504,9 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         } else {
           elem = af.arr_->base_type();
         }
-        be_global->impl_ << "    const Encoding& encoding = ser.encoding();\n";
+        be_global->impl_ <<
+          "  const Encoding& encoding = ser.encoding();\n"
+          "  ACE_UNUSED_ARG(encoding);\n";
         Classification elem_cls = classify(elem);
         const bool primitive = elem_cls & CL_PRIMITIVE;
         marshal_generator::generate_dheader_code(
@@ -667,7 +608,9 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   } else {
     elem = arr->base_type();
   }
-  be_global->impl_ << "    const Encoding& encoding = ser.encoding();\n";
+  be_global->impl_ <<
+    "  const Encoding& encoding = ser.encoding();\n"
+    "  ACE_UNUSED_ARG(encoding);\n";
   Classification elem_cls = classify(elem);
   const bool primitive = elem_cls & CL_PRIMITIVE;
   marshal_generator::generate_dheader_code(
@@ -740,7 +683,7 @@ func(const std::string&, const std::string&, AST_Type* br_type, const std::strin
     "      if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
     "        return false;\n"
     "      }\n"
-    "    }\n";   
+    "    }\n";
   if (br_cls & CL_STRING) {
     ss <<
       "    ACE_CDR::ULong len;\n"

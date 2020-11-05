@@ -30,7 +30,7 @@ public:
 
   static bool generate_struct_deserialization(AST_Structure* node, FieldFilter field_type);
 
-  static void clayton_gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);
+  static void gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);
 };
 
 #endif
