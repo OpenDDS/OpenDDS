@@ -33,7 +33,7 @@
 #include <BenchTypeSupportImpl.h>
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
-#include "ProcessStats.h"
+#include "ProcessStatsCollector.h"
 #include "ProcessStatisticsUtils.h"
 #include "PropertyStatBlock.h"
 
@@ -189,7 +189,7 @@ private:
 };
 
 using WorkerPtr = std::shared_ptr<Worker>;
-using ProcessStatPtr = std::shared_ptr<ProcessStats>;
+using ProcessStatsCollectorPtr = std::shared_ptr<ProcessStatsCollector>;
 
 class WorkerManager : public ACE_Event_Handler {
 public:
@@ -269,7 +269,7 @@ public:
         if (pid != ACE_INVALID_PID) {
           worker->set_pid(pid);
           pid_to_worker_id_[pid] = worker->id();
-          all_worker_processes_.push_back(std::make_shared<ProcessStats>(pid, worker->nodeid(), worker->id()));
+          worker_process_stat_collectors_[pid] = std::make_shared<ProcessStatsCollector>(pid);
         } else {
           std::cerr << "Failed to run worker " << worker->id() << std::endl;
           worker_is_finished(worker);
@@ -290,8 +290,6 @@ public:
 
     std::thread stat_collector([&](){
 
-      std::list<ProcessStatPtr>::iterator pIt;
-
       while (running) {
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -299,10 +297,10 @@ public:
         double cpu_sum = 0.0;
         double mem_sum = 0.0;
 
-        for (pIt = all_worker_processes_.begin(); pIt != all_worker_processes_.end(); pIt++)
+        for (auto it = worker_process_stat_collectors_.begin(); it != worker_process_stat_collectors_.end(); it++)
         {
-          cpu_sum += (*pIt)->GetProcessCPUUsage();
-          mem_sum += (*pIt)->GetProcessPercentRamUsed();
+          cpu_sum += it->second->get_cpu_usage();
+          mem_sum += it->second->get_mem_usage();
         }
         cpu_block->update(cpu_sum);
         mem_block->update(mem_sum);
@@ -414,12 +412,12 @@ private:
   std::map<WorkerId, WorkerPtr> all_workers_;
   size_t remaining_worker_count_ = 0;
   std::map<pid_t, WorkerId> pid_to_worker_id_;
+  std::map<pid_t, ProcessStatsCollectorPtr> worker_process_stat_collectors_;
   std::list<WorkerPtr> finished_workers_;
   NodeId node_id_;
   ACE_Process_Manager& process_manager_;
   std::atomic_bool scenario_timedout_{false};
   std::atomic_bool sigint_{false};
-  std::list<ProcessStatPtr> all_worker_processes_;
 };
 
 enum class RunMode {
