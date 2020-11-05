@@ -38,10 +38,11 @@ protected:
                HandlerStatisticsReporter& stats_reporter);
 
   int handle_input(ACE_HANDLE handle) override;
+  int handle_output(ACE_HANDLE handle) override;
 
-  void send(const ACE_INET_Addr& addr,
-            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-            const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void enqueue_message(const ACE_INET_Addr& addr,
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
@@ -51,6 +52,21 @@ protected:
 
 private:
   ACE_SOCK_Dgram socket_;
+  struct Element {
+    ACE_INET_Addr address;
+    OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
+    OpenDDS::DCPS::MonotonicTimePoint timestamp;
+
+    Element(const ACE_INET_Addr& a_address,
+            OpenDDS::DCPS::Message_Block_Shared_Ptr a_message_block,
+            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp)
+      : address(a_address)
+      , message_block(a_message_block)
+      , timestamp(a_timestamp)
+    {}
+  };
+  typedef std::queue<Element> OutgoingType;
+  OutgoingType outgoing_;
   mutable ACE_Thread_Mutex outgoing_mutex_;
 
 protected:
@@ -93,10 +109,10 @@ public:
     return guid_addr_set_map_.end();
   }
 
-  void vsend(const ACE_INET_Addr& addr,
-             ParticipantStatisticsReporter& stats_reporter,
-             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-             const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void venqueue_message(const ACE_INET_Addr& addr,
+                        ParticipantStatisticsReporter& stats_reporter,
+                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                        const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 protected:
   typedef std::map<ACE_INET_Addr, GuidSet> AddressMap;
@@ -171,10 +187,10 @@ public:
                              HandlerStatisticsReporter& stats_reporter);
 
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
-  void hsend(const ACE_INET_Addr& addr,
-             const GuidSet& to,
-             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-             const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void enqueue_message(const ACE_INET_Addr& addr,
+                       const GuidSet& to,
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
   VerticalHandler* vertical_handler_;
