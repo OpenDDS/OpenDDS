@@ -507,7 +507,7 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
 
   result_out << std::endl;
 
-  consolidated_cpu_percent_stats.pretty_print(result_out, "perecnt cpu utilization");
+  consolidated_cpu_percent_stats.pretty_print(result_out, "percent cpu utilization");
 
   result_out << std::endl;
 
