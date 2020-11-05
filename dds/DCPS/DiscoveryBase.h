@@ -1644,11 +1644,9 @@ namespace OpenDDS {
 
         DiscoveredParticipant(
           const DiscoveredParticipantData& p,
-          const MonotonicTimePoint& t,
           const SequenceNumber& seq)
         : pdata_(p)
         , location_ih_(DDS::HANDLE_NIL)
-        , last_seen_(t)
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
         , seq_reset_count_(0)
@@ -1705,7 +1703,7 @@ namespace OpenDDS {
         ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
-        MonotonicTimePoint last_seen_;
+        MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
         ACE_UINT16 seq_reset_count_;
