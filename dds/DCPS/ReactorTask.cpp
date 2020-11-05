@@ -181,7 +181,6 @@ OpenDDS::DCPS::ReactorTask::svc()
       }
 
       while (state_ == STATE_RUNNING) {
-        ACE_DEBUG((LM_DEBUG, "### Loop 3\n"));
         ACE_Time_Value t = timeout_.value();
         reactor_->run_reactor_event_loop(t, 0);
         if (thread_status_) {
