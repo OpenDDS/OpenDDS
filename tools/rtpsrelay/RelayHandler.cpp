@@ -150,39 +150,68 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   return 0;
 }
 
-void RelayHandler::send(const ACE_INET_Addr& addr,
-                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                        const OpenDDS::DCPS::MonotonicTimePoint& now)
+int RelayHandler::handle_output(ACE_HANDLE)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  const int BUFFERS_SIZE = 2;
-  iovec buffers[BUFFERS_SIZE];
-  size_t total_bytes = 0;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
 
-  int idx = 0;
-  for (ACE_Message_Block* block = msg.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
-    buffers[idx].iov_base = block->rd_ptr();
+  if (!outgoing_.empty()) {
+    const auto& out = outgoing_.front();
+
+    const int BUFFERS_SIZE = 2;
+    iovec buffers[BUFFERS_SIZE];
+    size_t total_bytes = 0;
+
+    int idx = 0;
+    for (ACE_Message_Block* block = out.message_block.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
+      buffers[idx].iov_base = block->rd_ptr();
 #ifdef _MSC_VER
 #pragma warning(push)
-    // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-    // since on other platforms iov_len is 64-bit
+      // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+      // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-    buffers[idx].iov_len = block->length();
-    total_bytes += block->length();
+      buffers[idx].iov_len = block->length();
+      total_bytes += buffers[idx].iov_len;
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+    }
+
+    const auto bytes = socket_.send(buffers, idx, out.address, 0);
+
+    if (bytes < 0) {
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::handle_output %C failed to send to %C: %m\n"), name_.c_str(), addr_to_string(out.address).c_str()));
+      const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
+      stats_reporter_.dropped_message(total_bytes, new_now - now, new_now - out.timestamp, now);
+    } else {
+      const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
+      stats_reporter_.output_message(total_bytes, new_now - now, new_now - out.timestamp, now);
+    }
+
+    outgoing_.pop();
   }
 
-  const auto bytes = socket_.send(buffers, idx, addr, 0);
+  if (outgoing_.empty()) {
+    reactor()->remove_handler(this, WRITE_MASK);
+  }
 
-  if (bytes < 0) {
-    HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::send %C failed to send to %C: %m\n"), name_.c_str(), addr_to_string(addr).c_str()));
-    stats_reporter_.dropped_message(total_bytes, now);
-  } else {
-    stats_reporter_.output_message(total_bytes, now);
+  return 0;
+}
+
+void RelayHandler::enqueue_message(const ACE_INET_Addr& addr,
+                                   const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                   const OpenDDS::DCPS::MonotonicTimePoint& now)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
+
+  const auto empty = outgoing_.empty();
+
+  outgoing_.push(Element(addr, msg, now));
+  stats_reporter_.max_queue_size(outgoing_.size(), now);
+  if (empty) {
+    reactor()->register_handler(this, WRITE_MASK);
   }
 }
 
@@ -212,15 +241,13 @@ VerticalHandler::VerticalHandler(const Config& config,
   ACE_UNUSED_ARG(crypto);
 }
 
-void VerticalHandler::vsend(const ACE_INET_Addr& addr,
-                            ParticipantStatisticsReporter& stats_reporter,
-                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now)
+void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
+                                       ParticipantStatisticsReporter& stats_reporter,
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  RelayHandler::send(addr, msg, now);
-  stats_reporter.output_message(msg->length(), now);
+  enqueue_message(addr, msg, now);
 }
-
 
 void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -244,7 +271,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       association_table_.lookup_destinations(to, src_guid);
       send(src_guid, psr, to, msg, now);
       if (deferred_addr != ACE_INET_Addr()) {
-        RelayHandler::send(deferred_addr, msg, now);
+        enqueue_message(deferred_addr, msg, now);
       }
     }
   } else {
@@ -533,13 +560,13 @@ void VerticalHandler::send(const OpenDDS::DCPS::RepoId&,
     const auto& guids = p.second;
     fan_out += guids.size();
     if (addr != horizontal_address_) {
-      horizontal_handler_->hsend(addr, guids, msg, now);
+      horizontal_handler_->enqueue_message(addr, guids, msg, now);
     } else {
       for (const auto& guid : guids) {
         auto p = find(guid);
         if (p != end()) {
           for (const auto& addr : p->second.addr_set) {
-            vsend(addr, p->second.stats_reporter, msg, now);
+            venqueue_message(addr, p->second.stats_reporter, msg, now);
           }
         } else {
           HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::send %C failed to get address for %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
@@ -560,7 +587,7 @@ void VerticalHandler::send(const ACE_INET_Addr& addr,
   Serializer serializer(block.get(), encoding);
   message.block = block.get();
   serializer << message;
-  RelayHandler::send(addr, block, now);
+  RelayHandler::enqueue_message(addr, block, now);
 }
 
 void VerticalHandler::populate_address_map(AddressMap& address_map,
@@ -638,10 +665,10 @@ HorizontalHandler::HorizontalHandler(const Config& config,
   , vertical_handler_(nullptr)
 {}
 
-void HorizontalHandler::hsend(const ACE_INET_Addr& addr,
-                              const GuidSet& guids,
-                              const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                              const OpenDDS::DCPS::MonotonicTimePoint& now)
+void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
+                                        const GuidSet& guids,
+                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                        const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   using namespace OpenDDS::DCPS;
 
@@ -670,7 +697,7 @@ void HorizontalHandler::hsend(const ACE_INET_Addr& addr,
     Serializer ser(header_block.get(), encoding);
     ser << relay_header;
     header_block->cont(msg.get()->duplicate());
-    RelayHandler::send(addr, header_block, now);
+    RelayHandler::enqueue_message(addr, header_block, now);
   }
 }
 
@@ -698,7 +725,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
     const auto p = vertical_handler_->find(guid_to_repoid(guid));
     if (p != vertical_handler_->end()) {
       for (const auto& addr : p->second.addr_set) {
-        vertical_handler_->vsend(addr, p->second.stats_reporter, msg, now);
+        vertical_handler_->venqueue_message(addr, p->second.stats_reporter, msg, now);
       }
     } else {
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: HorizontalHandler::process_message %C failed to get address for %C\n"), name_.c_str(), guid_to_string(guid_to_repoid(guid)).c_str()));
@@ -744,7 +771,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
         const auto pos = guid_addr_set_map_.find(guid);
         if (pos != guid_addr_set_map_.end()) {
           for (const auto& addr : pos->second.addr_set) {
-            vsend(addr, pos->second.stats_reporter, msg, now);
+            venqueue_message(addr, pos->second.stats_reporter, msg, now);
           }
         }
       }
@@ -862,7 +889,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
         auto pos = guid_addr_set_map_.find(guid);
         if (pos != guid_addr_set_map_.end()) {
           for (const auto& addr : pos->second.addr_set) {
-            vsend(addr, pos->second.stats_reporter, msg, now);
+            venqueue_message(addr, pos->second.stats_reporter, msg, now);
           }
         }
       }
