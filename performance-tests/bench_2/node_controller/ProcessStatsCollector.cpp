@@ -57,6 +57,9 @@ bool read_process_cpu_usage(int processId, size_t& utime, size_t& stime)
 
   std::ifstream statfile;
   statfile.open(filename, std::ios::in);
+  if (!statfile.is_open()) {
+    return false;
+  }
 
   int pid;
   std::string comm;
@@ -71,10 +74,6 @@ bool read_process_cpu_usage(int processId, size_t& utime, size_t& stime)
   size_t cminflt;
   size_t majflt;
   size_t cmajflt;
-
-  if (!statfile.is_open()) {
-    return false;
-  }
 
   std::stringstream ss;
   std::getline(statfile, line);
