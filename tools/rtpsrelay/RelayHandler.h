@@ -95,6 +95,7 @@ public:
                   GuidNameAddressDataReader_var responsible_relay_reader,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   const CRYPTO_TYPE& crypto,
+                  const ACE_INET_Addr& application_participant_addr,
                   HandlerStatisticsReporter& stats_reporter);
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
@@ -121,9 +122,9 @@ protected:
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     ParticipantStatisticsReporter& /*stats_reporter*/,
                                     const GuidSet& /*to*/,
+                                    bool& /*send_to_application_participant*/,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
-                                    const OpenDDS::DCPS::MonotonicTimePoint& /*now*/,
-                                    ACE_INET_Addr& /*deferred_addr*/) { return true; }
+                                    const OpenDDS::DCPS::MonotonicTimePoint& /*now*/) { return true; }
   virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
   void process_message(const ACE_INET_Addr& remote,
@@ -136,11 +137,12 @@ protected:
   void send(const OpenDDS::DCPS::RepoId& src_guid,
             ParticipantStatisticsReporter& stats_reporter,
             const GuidSet& to,
+            bool send_to_application_participant,
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
             const OpenDDS::DCPS::MonotonicTimePoint& now);
-  void send(const ACE_INET_Addr& addr,
-            OpenDDS::STUN::Message message,
-            const OpenDDS::DCPS::MonotonicTimePoint& now);
+  size_t send(const ACE_INET_Addr& addr,
+              OpenDDS::STUN::Message message,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void populate_address_map(AddressMap& address_map,
                             const GuidSet& to,
@@ -155,6 +157,7 @@ protected:
   GuidAddrExpirationMap guid_addr_expiration_map_;
   typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
   ExpirationGuidAddrMap expiration_guid_addr_map_;
+  const ACE_INET_Addr application_participant_addr_;
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -217,7 +220,6 @@ public:
               const GuidSet& to);
 
 private:
-  const ACE_INET_Addr application_participant_addr_;
   typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;
@@ -234,9 +236,9 @@ private:
                             const OpenDDS::DCPS::RepoId& src_guid,
                             ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
+                            bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now,
-                            ACE_INET_Addr& deferred_addr) override;
+                            const OpenDDS::DCPS::MonotonicTimePoint& now) override;
 
   void purge(const OpenDDS::DCPS::RepoId& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
@@ -257,15 +259,13 @@ public:
               HandlerStatisticsReporter& stats_reporter);
 
 private:
-  const ACE_INET_Addr application_participant_addr_;
-
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
+                            bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now,
-                            ACE_INET_Addr& deferred_addr) override;
+                            const OpenDDS::DCPS::MonotonicTimePoint& now) override;
 };
 
 class DataHandler : public VerticalHandler {

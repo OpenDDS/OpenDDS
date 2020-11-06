@@ -224,12 +224,14 @@ VerticalHandler::VerticalHandler(const Config& config,
                                  GuidNameAddressDataReader_var responsible_relay_reader,
                                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                                  const CRYPTO_TYPE& crypto,
+                                 const ACE_INET_Addr& application_participant_addr,
                                  HandlerStatisticsReporter& stats_reporter)
   : RelayHandler(config, name, reactor, stats_reporter)
   , association_table_(association_table)
   , responsible_relay_writer_(responsible_relay_writer)
   , responsible_relay_reader_(responsible_relay_reader)
   , horizontal_handler_(nullptr)
+  , application_participant_addr_(application_participant_addr)
   , horizontal_address_(horizontal_address)
   , horizontal_address_str_(addr_to_string(horizontal_address))
   , rtps_discovery_(rtps_discovery)
@@ -242,11 +244,12 @@ VerticalHandler::VerticalHandler(const Config& config,
 }
 
 void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
-                                       ParticipantStatisticsReporter& stats_reporter,
+                                       ParticipantStatisticsReporter& to_psr,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   enqueue_message(addr, msg, now);
+  to_psr.message_to(msg->length(), now);
 }
 
 void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
@@ -264,15 +267,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       return;
     }
 
-    ParticipantStatisticsReporter& psr = record_activity(remote_address, now, src_guid, msg_len);
-    ACE_INET_Addr deferred_addr;
+    ParticipantStatisticsReporter& from_psr = record_activity(remote_address, now, src_guid, msg_len);
+    bool send_to_application_participant = false;
 
-    if (do_normal_processing(remote_address, src_guid, psr, to, msg, now, deferred_addr)) {
+    if (do_normal_processing(remote_address, src_guid, from_psr, to, send_to_application_participant, msg, now)) {
       association_table_.lookup_destinations(to, src_guid);
-      send(src_guid, psr, to, msg, now);
-      if (deferred_addr != ACE_INET_Addr()) {
-        enqueue_message(deferred_addr, msg, now);
-      }
+      send(src_guid, from_psr, to, send_to_application_participant, msg, now);
     }
   } else {
     // Assume STUN.
@@ -298,6 +298,8 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       return;
     }
 
+    size_t bytes_sent = 0;
+
     switch (message.method) {
     case OpenDDS::STUN::BINDING:
       {
@@ -309,7 +311,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
           response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_fingerprint());
-          send(remote_address, response, now);
+          bytes_sent = send(remote_address, response, now);
         } else if (message.class_ == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
@@ -322,14 +324,18 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     default:
       // Unknown method.  Stop processing.
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
-      send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"), now);
+      bytes_sent = send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"), now);
       break;
     }
 
     OpenDDS::DCPS::RepoId src_guid;
     if (message.get_guid_prefix(src_guid.guidPrefix)) {
       src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-      record_activity(remote_address, now, src_guid, msg_len);
+      ParticipantStatisticsReporter& from_psr = record_activity(remote_address, now, src_guid, msg_len);
+      if (bytes_sent) {
+        from_psr.message_to(bytes_sent, now);
+        from_psr.max_directed_gain(1, now);
+      }
     }
   }
 }
@@ -356,7 +362,7 @@ VerticalHandler::record_activity(const ACE_INET_Addr& remote_address,
 
   // Record the participant stats only if a valid message was received
   ParticipantStatisticsReporter& stats_reporter = guid_addr_set_map_[src_guid].stats_reporter;
-  stats_reporter.input_message(msg_len, now);
+  stats_reporter.message_from(msg_len, now);
 
   const GuidAddr ga(src_guid, remote_address);
 
@@ -546,27 +552,29 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 }
 
 void VerticalHandler::send(const OpenDDS::DCPS::RepoId&,
-                           ParticipantStatisticsReporter& stats_reporter,
+                           ParticipantStatisticsReporter& from_psr,
                            const GuidSet& to,
+                           bool send_to_application_participant,
                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                            const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   AddressMap address_map;
   populate_address_map(address_map, to, now);
 
-  size_t fan_out = 0;
+  size_t sent_message_count = 0;
   for (const auto& p : address_map) {
     const auto& addr = p.first;
     const auto& guids = p.second;
-    fan_out += guids.size();
     if (addr != horizontal_address_) {
       horizontal_handler_->enqueue_message(addr, guids, msg, now);
+      sent_message_count += guids.size();
     } else {
       for (const auto& guid : guids) {
         auto p = find(guid);
         if (p != end()) {
           for (const auto& addr : p->second.addr_set) {
             venqueue_message(addr, p->second.stats_reporter, msg, now);
+            ++sent_message_count;
           }
         } else {
           HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::send %C failed to get address for %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
@@ -574,20 +582,35 @@ void VerticalHandler::send(const OpenDDS::DCPS::RepoId&,
       }
     }
   }
-  stats_reporter.max_fan_out(fan_out, now);
+
+  if (send_to_application_participant) {
+    venqueue_message(application_participant_addr_, guid_addr_set_map_[config_.application_participant_guid()].stats_reporter, msg, now);
+    ++sent_message_count;
+  }
+
+  if (to.empty()) {
+    from_psr.max_undirected_gain(sent_message_count, now);
+  } else {
+    from_psr.max_directed_gain(sent_message_count, now);
+  }
 }
 
-void VerticalHandler::send(const ACE_INET_Addr& addr,
-                           OpenDDS::STUN::Message message,
-                           const OpenDDS::DCPS::MonotonicTimePoint& now)
+size_t VerticalHandler::send(const ACE_INET_Addr& addr,
+                             OpenDDS::STUN::Message message,
+                             const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   using namespace OpenDDS::DCPS;
   using namespace OpenDDS::STUN;
-  Message_Block_Shared_Ptr block(new ACE_Message_Block(HEADER_SIZE + message.length()));
+  const size_t length = HEADER_SIZE + message.length();
+  Message_Block_Shared_Ptr block(new ACE_Message_Block(length));
   Serializer serializer(block.get(), Serializer::SWAP_BE);
   message.block = block.get();
   serializer << message;
   RelayHandler::enqueue_message(addr, block, now);
+  const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
+  stats_reporter_.output_message(length, new_now - now, new_now - now, now);
+  stats_reporter_.max_directed_gain(1, now);
+  return length;
 }
 
 void VerticalHandler::populate_address_map(AddressMap& address_map,
@@ -726,7 +749,6 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: HorizontalHandler::process_message %C failed to get address for %C\n"), name_.c_str(), guid_to_string(guid_to_repoid(guid)).c_str()));
     }
   }
-  stats_reporter_.max_fan_out(relay_header.to().size(), now);
 }
 
 SpdpHandler::SpdpHandler(const Config& config,
@@ -740,17 +762,16 @@ SpdpHandler::SpdpHandler(const Config& config,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr,
                          HandlerStatisticsReporter& stats_reporter)
-: VerticalHandler(config, name, address, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, stats_reporter)
-, application_participant_addr_(application_participant_addr)
+: VerticalHandler(config, name, address, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, application_participant_addr, stats_reporter)
 {}
 
 bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
-                                       ParticipantStatisticsReporter& stats_reporter,
+                                       ParticipantStatisticsReporter& from_psr,
                                        const GuidSet& to,
+                                       bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                       ACE_INET_Addr& deferred_addr)
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
@@ -762,15 +783,17 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
     // SPDP message is from the application participant.
     if (!to.empty()) {
       // Forward to destinations.
+      size_t sent_message_count = 0;
       for (const auto& guid : to) {
         const auto pos = guid_addr_set_map_.find(guid);
         if (pos != guid_addr_set_map_.end()) {
           for (const auto& addr : pos->second.addr_set) {
             venqueue_message(addr, pos->second.stats_reporter, msg, now);
+            ++sent_message_count;
           }
         }
       }
-      stats_reporter.max_fan_out(to.size(), now);
+      from_psr.max_directed_gain(sent_message_count, now);
     } else {
       HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing dropping non-directed SPDP message from application participant\n")));
       return false;
@@ -781,9 +804,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
 
   // SPDP message is from a client.
   if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
-    // Forward to the application participant.
-    deferred_addr = application_participant_addr_;
-    stats_reporter.max_fan_out(1, now);
+    send_to_application_participant = true;
   }
 
   // Cache it.
@@ -838,7 +859,7 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 
     const auto pos = spdp_messages_.find(r.from_guid);
     if (pos != spdp_messages_.end()) {
-      send(r.from_guid, guid_addr_set_map_[r.from_guid].stats_reporter, r.to, pos->second, now);
+      send(r.from_guid, guid_addr_set_map_[r.from_guid].stats_reporter, r.to, false, pos->second, now);
     }
 
     q.pop();
@@ -858,17 +879,16 @@ SedpHandler::SedpHandler(const Config& config,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr,
                          HandlerStatisticsReporter& stats_reporter)
-: VerticalHandler(config, name, address, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, stats_reporter)
-  , application_participant_addr_(application_participant_addr)
+: VerticalHandler(config, name, address, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, application_participant_addr, stats_reporter)
 {}
 
 bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
-                                       ParticipantStatisticsReporter& stats_reporter,
+                                       ParticipantStatisticsReporter& from_psr,
                                        const GuidSet& to,
+                                       bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                       ACE_INET_Addr& deferred_addr)
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
@@ -880,15 +900,17 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
     // SEDP message is from the application participant.
     if (!to.empty()) {
       // Forward to destinations.
+      size_t sent_message_count = 0;
       for (const auto& guid : to) {
         auto pos = guid_addr_set_map_.find(guid);
         if (pos != guid_addr_set_map_.end()) {
           for (const auto& addr : pos->second.addr_set) {
             venqueue_message(addr, pos->second.stats_reporter, msg, now);
+            ++sent_message_count;
           }
         }
       }
-      stats_reporter.max_fan_out(to.size(), now);
+      from_psr.max_directed_gain(sent_message_count, now);
     } else {
       HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing dropping non-directed SEDP message from application participant\n")));
       return false;
@@ -899,10 +921,9 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
 
   // SEDP message is from a client.
   if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
-    // Forward to the application participant.
-    deferred_addr = application_participant_addr_;
-    stats_reporter.max_fan_out(1, now);
+    send_to_application_participant = true;
   }
+
   return true;
 }
 
@@ -916,7 +937,7 @@ DataHandler::DataHandler(const Config& config,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          const CRYPTO_TYPE& crypto,
                          HandlerStatisticsReporter& stats_reporter)
-: VerticalHandler(config, name, address, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, stats_reporter)
+: VerticalHandler(config, name, address, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, ACE_INET_Addr(), stats_reporter)
 {}
 
 }
