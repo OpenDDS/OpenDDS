@@ -158,6 +158,11 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
         meminfofile >> total_mem_;
         break;
       }
+      if (token == "VmallocTotal:")
+      {
+        meminfofile >> total_virtual_mem_;
+        break;
+      }
     }
     meminfofile.close();
   }
@@ -225,6 +230,27 @@ double ProcessStatsCollector::get_virtual_mem_usage() noexcept
       }
     }
   } catch (...) {}
+#elif defined ACE_LINUX
+  std::string filename = "/proc/" + std::to_string(process_id_) + "/statm";
+
+  std::ifstream statmfile;
+  statmfile.open(filename, ios::in);
+
+  long page_sz_kb = sysconf(_SC_PAGESIZE) / 1024;
+
+  if (statmfile.is_open())
+  {
+    long VmSize{};
+    statmfile >> VmSize;
+
+    VmSize *= page_sz_kb;
+
+    if (total_virtual_mem_ > 0)
+    {
+      result = 100.0 * (static_cast<double>(VmSize) / static_cast<double>(total_virtual_mem_));
+    }
+    statmfile.close();
+  }
 #endif
   return result;
 }
@@ -252,12 +278,10 @@ double ProcessStatsCollector::get_mem_usage() noexcept
 
   if (statmfile.is_open())
   {
-    long VmSize{}, VmRSS{}, shared{};
-    statmfile >> VmSize >> VmRSS >> shared;
+    long VmSize{}, VmRSS{};
+    statmfile >> VmSize >> VmRSS;
 
-    VmSize *= page_sz_kb;
     VmRSS *= page_sz_kb;
-    shared *= page_sz_kb;
 
     if (total_mem_ > 0)
     {
