@@ -3297,9 +3297,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   //check the id for a match to our id
   //if we are not a match, skip to the next field
   //if we are a match, deserialize the field
-
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
   Intro intro;
   std::string expr;
   const std::string indent = "  ";
@@ -3323,7 +3321,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    if (!strm.read_delimiter(total_size)) {\n"
     "      throw std::runtime_error(\"Unable to reader delimiter in getValue\");\n"
     "    }\n", not_final);
-
   be_global->impl_ <<
     "    std::string base_field = field;\n"
     "    size_t index = base_field.find('.');\n"
@@ -3361,7 +3358,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
 
     std::ostringstream cases;
     for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-
       AST_Field* const field = *i;
       ACE_CDR::ULong default_id = i.pos();
       std::size_t size = 0;
@@ -3370,8 +3366,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       AST_Type* const field_type = resolveActualType(field->field_type());
       Classification fld_cls = classify(field_type);
 
-      cases <<
-        "        case " << id << ": {\n";
+      cases << "        case " << id << ": {\n";
       if (fld_cls & CL_SCALAR) {
         const std::string cxx_type = to_cxx_type(field_type, size);
         const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
@@ -3425,7 +3420,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       sw_indent << "  throw std::runtime_error(\"member id did not exist in getValue\");\n" <<
       sw_indent << "}\n" <<
       sw_indent << "strm.skip(field_size);\n";
-
     if (!switch_cases.empty()) {
       be_global->impl_ <<
         "          break;\n"
@@ -3439,7 +3433,8 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       "      throw std::runtime_error(\"Did not find field in getValue\");\n"
       "    }\n";
   }
-
+  //The following is Appendable/Final
+  //It is also used when Mutable but not in XCDR1 or XCDR2
   expr = "";
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
     AST_Field* const field = *i;
@@ -3516,7 +3511,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    throw std::runtime_error(\"Did not find field in getValue\");\n"
     "  }\n\n";
 }
-
 
 namespace {
 
@@ -3896,7 +3890,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       // TODO: XTypes B will need to edit this code to add the pid for the end of mutable unions.
       // Until this change is made, XCDR1 will NOT be functional
       be_global->impl_ <<
-       "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }
   }
   {

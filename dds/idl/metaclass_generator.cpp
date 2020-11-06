@@ -388,7 +388,6 @@ namespace {
     be_global->impl_ <<
       "    " << exception <<
       "  }\n\n";
-
     if (struct_node) {
       marshal_generator::gen_field_getValueFromSerialized(struct_node, clazz);
     } else {
