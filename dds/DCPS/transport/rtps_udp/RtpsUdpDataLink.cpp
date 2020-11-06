@@ -3388,7 +3388,8 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
 
 void RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
-  static const RTPS::FragmentNumberSet none = {{0}, 0, RTPS::LongSeq8()};
+  CORBA::Long buffer[8];
+  static const RTPS::FragmentNumberSet none = { {0}, 0, RTPS::LongSeq8(0, buffer) };
   durability_resend(element, none);
 }
 
