@@ -3158,7 +3158,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
   DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                                   ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
   using DCPS::Serializer;
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  Serializer ser(payload->cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
             (ser << ACE_OutputCDR::from_octet(3)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
@@ -3190,7 +3190,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
   DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                                   ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
   using DCPS::Serializer;
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  Serializer ser(payload->cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
             (ser << ACE_OutputCDR::from_octet(1)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
@@ -3222,7 +3222,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                                   ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
 
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  Serializer ser(payload->cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
             (ser << ACE_OutputCDR::from_octet(1)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
@@ -3254,7 +3254,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                                   ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
 
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  Serializer ser(payload->cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
             (ser << ACE_OutputCDR::from_octet(1)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
