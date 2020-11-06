@@ -2788,7 +2788,7 @@ Spdp::SendStun::execute()
 ACE_INET_Addr
 Spdp::SpdpTransport::stun_server_address() const
 {
-  return outer_->config_->sedp_stun_server_address();
+  return outer_->config_->spdp_stun_server_address();
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
