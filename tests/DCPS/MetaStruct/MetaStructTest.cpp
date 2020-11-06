@@ -182,7 +182,7 @@ bool run_test_i(Encoding::Kind e)
 
 Encoding::Kind encodings[] = {
   Encoding::KIND_UNALIGNED_CDR,
-  Encoding::KIND_XCDR1,
+  //Encoding::KIND_XCDR1,
   Encoding::KIND_XCDR2,
 };
 
