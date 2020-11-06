@@ -432,6 +432,7 @@ private:
     bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
 
     void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
+    const RepoId& id() const { return id_; }
 
   private:
     void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
@@ -440,7 +441,7 @@ private:
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
-    RepoId id_;
+    const RepoId id_;
     bool durable_;
     WriterInfoMap remote_writers_;
     bool stopping_;

@@ -768,7 +768,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       for (pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> iters =
              readers_of_writer_.equal_range(remote_id);
            iters.first != iters.second;) {
-        if (iters.first->first == local_id) {
+        if (iters.first->second->id() == local_id) {
           readers_of_writer_.erase(iters.first++);
         } else {
           ++iters.first;
