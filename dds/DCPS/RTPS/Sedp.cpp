@@ -3986,7 +3986,7 @@ void Sedp::TypeLookupReplyReader::cleanup(const DCPS::GuidPrefix_t& guid_prefix,
     it->second.erase(type_id);
   }
 
-  if (it->second.empty()) {
+  if (it != dependencies_.end() && it->second.empty()) {
     dependencies_.erase(it);
   }
 }
