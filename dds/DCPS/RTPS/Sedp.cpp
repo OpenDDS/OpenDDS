@@ -3155,8 +3155,8 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
   DCPS::gen_find_size(plist, size, padding);
 
   // Build RTPS message
-  Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
-                            ACE_Message_Block::MB_DATA, new ACE_Message_Block(size)));
+  DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
+                                  ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
@@ -3166,7 +3166,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
             (ser << plist);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
+    send_sample(payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3187,8 +3187,8 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
   DCPS::gen_find_size(pmd, size, padding);
 
   // Build RTPS message
-  Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
-                            ACE_Message_Block::MB_DATA, new ACE_Message_Block(size)));
+  DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
+                                  ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
@@ -3198,7 +3198,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
             (ser << pmd);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3219,8 +3219,8 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(msg, size, padding);
 
-  Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
-                            ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
+  DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
+                                  ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
 
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
@@ -3231,7 +3231,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   ok &= (ser << msg);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3251,8 +3251,8 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(msg, size, padding);
 
-  Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
-                            ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
+  DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
+                                  ACE_Message_Block::MB_DATA, new ACE_Message_Block(size + padding)));
 
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
@@ -3263,7 +3263,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   ok &= (ser << msg);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
