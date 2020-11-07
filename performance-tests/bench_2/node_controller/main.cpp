@@ -655,20 +655,20 @@ bool wait_for_scenario_data(AllocatedScenarioDataReader& allocated_scenario_read
 
   DDS::ReadCondition_var read_condition = allocated_scenario_reader_impl.create_readcondition(
     DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
-  DDS::WaitSet ws;
-  ws.attach_condition(read_condition);
+  DDS::WaitSet_var ws(new DDS::WaitSet());
+  ws->attach_condition(read_condition);
 
   while (!read_condition->get_trigger_value()) {
     DDS::ConditionSeq active;
     const DDS::Duration_t wake_interval = { 0, 500000000 };
-    const DDS::ReturnCode_t rc = ws.wait(active, wake_interval);
+    const DDS::ReturnCode_t rc = ws->wait(active, wake_interval);
     if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
       std::cerr << "Wait for node config failed" << std::endl;
       return false;
     }
   }
 
-  ws.detach_condition(read_condition);
+  ws->detach_condition(read_condition);
   allocated_scenario_reader_impl.delete_readcondition(read_condition);
 
   return true;
