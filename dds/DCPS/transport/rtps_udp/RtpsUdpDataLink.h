@@ -358,6 +358,8 @@ private:
     SNRIS lagging_readers_;
     // These reader have acked everything they are supposed to have acked.
     SNRIS leading_readers_;
+    // These readers have sent a nack and are expecting data.
+    ReaderInfoSet readers_expecting_data_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber max_sn_;
     typedef OPENDDS_SET(TransportQueueElement*) TqeSet;
