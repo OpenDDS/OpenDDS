@@ -2654,10 +2654,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         break; // submessageLength of 0 indicates the last submessage
       }
     }
-  }
-
-  // Handle some RTI protocol multicast to the same address
-  if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
+  } else if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
+    // Handle some RTI protocol multicast to the same address
     return 0; // Ignore
   }
 
