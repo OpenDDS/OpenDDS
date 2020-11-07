@@ -348,6 +348,13 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     TheServiceParticipant->default_address().addr_to_string(buff, sizeof(buff));
     config.local_address(ACE_TEXT_ALWAYS_CHAR(buff));
   }
+  if (config.multicast_interface_.empty() &&
+    TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
+    TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
+    OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
+    config.multicast_interface_ = addr_str.substr(0, addr_str.find_first_of(':'));
+  }
 
   // Open the socket here so that any addresses/ports left
   // unspecified in the RtpsUdpInst are known by the time we get to
