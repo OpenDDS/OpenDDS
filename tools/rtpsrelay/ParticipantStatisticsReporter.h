@@ -27,23 +27,29 @@ public:
     participant_statistics_.name(name);
   }
 
-  void input_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void message_from(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.bytes_in() += byte_count;
-    ++participant_statistics_.messages_in();
+    participant_statistics_.bytes_from() += byte_count;
+    ++participant_statistics_.messages_from();
     report(now);
   }
 
-  void output_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void message_to(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.bytes_out() += byte_count;
-    ++participant_statistics_.messages_out();
+    participant_statistics_.bytes_to() += byte_count;
+    ++participant_statistics_.messages_to();
     report(now);
   }
 
-  void max_fan_out(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.max_fan_out() = std::max(participant_statistics_.max_fan_out(), static_cast<uint32_t>(value));
+    participant_statistics_.max_directed_gain() = std::max(participant_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
+    report(now);
+  }
+
+  void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    participant_statistics_.max_undirected_gain() = std::max(participant_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
@@ -70,11 +76,12 @@ public:
 
     last_report_ = now;
 
-    participant_statistics_.messages_in(0);
-    participant_statistics_.bytes_in(0);
-    participant_statistics_.messages_out(0);
-    participant_statistics_.bytes_out(0);
-    participant_statistics_.max_fan_out(0);
+    participant_statistics_.messages_from(0);
+    participant_statistics_.bytes_from(0);
+    participant_statistics_.messages_to(0);
+    participant_statistics_.bytes_to(0);
+    participant_statistics_.max_directed_gain(0);
+    participant_statistics_.max_undirected_gain(0);
   }
 
 private:

@@ -66,10 +66,17 @@ public:
     report(now);
   }
 
-  void max_fan_out(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    relay_statistics_reporter_.max_fan_out(value, now);
-    handler_statistics_.max_fan_out() = std::max(handler_statistics_.max_fan_out(), static_cast<uint32_t>(value));
+    relay_statistics_reporter_.max_directed_gain(value, now);
+    handler_statistics_.max_directed_gain() = std::max(handler_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
+    report(now);
+  }
+
+  void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.max_undirected_gain(value, now);
+    handler_statistics_.max_undirected_gain() = std::max(handler_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
@@ -154,7 +161,8 @@ private:
     handler_statistics_.bytes_out(0);
     handler_statistics_.messages_dropped(0);
     handler_statistics_.bytes_dropped(0);
-    handler_statistics_.max_fan_out(0);
+    handler_statistics_.max_directed_gain(0);
+    handler_statistics_.max_undirected_gain(0);
     // Don't reset local_active_participant_count.
     handler_statistics_.error_count(0);
     handler_statistics_.new_address_count(0);
