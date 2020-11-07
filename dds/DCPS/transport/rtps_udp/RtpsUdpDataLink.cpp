@@ -3345,13 +3345,11 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
   //start with the max sequence number writer knows about and decrease
   //by what the min over all readers is
   SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
-
-  typedef ReaderInfoMap::iterator ri_iter;
-  const ri_iter end = remote_readers_.end();
-  for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
-    if (ri->second->cur_cumulative_ack_ < all_readers_ack) {
-      all_readers_ack = ri->second->cur_cumulative_ack_;
-    }
+  if (!lagging_readers_.empty()) {
+    all_readers_ack = std::min(all_readers_ack, lagging_readers_.begin()->first + 1);
+  }
+  if (!leading_readers_.empty()) {
+    all_readers_ack = std::min(all_readers_ack, leading_readers_.begin()->first + 1);
   }
   if (all_readers_ack == SequenceNumber::MAX_VALUE) {
     return;
