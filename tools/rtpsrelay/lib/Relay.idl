@@ -88,11 +88,12 @@ module RtpsRelay {
     @key GUID_t guid;
     @key string name;
     Duration_t interval;
-    unsigned long messages_in;
-    unsigned long long bytes_in;
-    unsigned long messages_out;
-    unsigned long long bytes_out;
-    unsigned long max_fan_out;
+    unsigned long messages_from;
+    unsigned long long bytes_from;
+    unsigned long messages_to;
+    unsigned long long bytes_to;
+    unsigned long max_directed_gain;
+    unsigned long max_undirected_gain;
   };
 
   const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
@@ -110,7 +111,8 @@ module RtpsRelay {
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
     Duration_t output_processing_time;
-    unsigned long max_fan_out;
+    unsigned long max_directed_gain;
+    unsigned long max_undirected_gain;
     unsigned long local_active_participants;
     unsigned long error_count;
     unsigned long new_address_count;
@@ -135,7 +137,8 @@ module RtpsRelay {
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
     Duration_t output_processing_time;
-    unsigned long max_fan_out;
+    unsigned long max_directed_gain;
+    unsigned long max_undirected_gain;
     unsigned long error_count;
     unsigned long new_address_count;
     unsigned long expired_address_count;

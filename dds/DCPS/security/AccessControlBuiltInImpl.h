@@ -15,6 +15,7 @@
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/SporadicTask.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Reactor.h"
@@ -256,44 +257,38 @@ private:
   typedef std::map<DDS::Security::IdentityHandle, DDS::Security::PermissionsHandle> ACIdentityMap;
   ACIdentityMap local_identity_map_;
 
-  class RevokePermissionsTimer : public ACE_Event_Handler {
+  class RevokePermissionsTask : public DCPS::SporadicTask {
   public:
-    RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
-    virtual ~RevokePermissionsTimer();
-    bool start_timer(const time_t& expiration, DDS::Security::PermissionsHandle pm_handle);
-    virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
-
-  protected:
-    AccessControlBuiltInImpl& impl_;
+    RevokePermissionsTask(DCPS::ReactorInterceptor_rch interceptor,
+                          AccessControlBuiltInImpl& impl);
+    virtual ~RevokePermissionsTask();
+    void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);
 
   private:
-    struct Entry {
-      DDS::Security::PermissionsHandle handle;
-      time_t expiration;
+    typedef OPENDDS_MULTIMAP(time_t, DDS::Security::PermissionsHandle) ExpirationToHandle;
 
-      Entry() : handle(0), expiration(0) {}
-      Entry(DDS::Security::PermissionsHandle a_handle,
-            time_t a_expiration)
-        : handle(a_handle)
-        , expiration(a_expiration)
-      {}
-    };
-    typedef OPENDDS_MAP(DDS::Security::PermissionsHandle, Entry*) EntryMap;
-    EntryMap entry_map_;
+    virtual void execute(const DCPS::MonotonicTimePoint& now);
+
+    AccessControlBuiltInImpl& impl_;
+
     mutable ACE_Thread_Mutex lock_;
+    ExpirationToHandle expiration_to_handle_;
   };
+  typedef DCPS::RcHandle<RevokePermissionsTask> RevokePermissionsTask_rch;
 
-  RevokePermissionsTimer local_rp_timer_;
-  RevokePermissionsTimer remote_rp_timer_;
+  RevokePermissionsTask_rch local_rp_task_;
+  RevokePermissionsTask_rch remote_rp_task_;
 
   int generate_handle();
 
-  ACE_Thread_Mutex handle_mutex_;
-  ACE_Thread_Mutex gen_handle_mutex_;
+  mutable ACE_Thread_Mutex handle_mutex_;
+  mutable ACE_Thread_Mutex gen_handle_mutex_;
 
   int next_handle_;
 
   DDS::Security::AccessControlListener_ptr listener_ptr_;
+
+  RevokePermissionsTask_rch& make_task(RevokePermissionsTask_rch& task);
 
   time_t convert_permissions_time(const std::string& timeString);
 

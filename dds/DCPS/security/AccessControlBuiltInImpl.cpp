@@ -52,9 +52,7 @@ bool AccessControlBuiltInImpl::pattern_match(const char* string, const char* pat
 }
 
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
-  : local_rp_timer_(*this)
-  , remote_rp_timer_(*this)
-  , handle_mutex_()
+  : handle_mutex_()
   , gen_handle_mutex_()
   , next_handle_(1)
   , listener_ptr_(0)
@@ -402,9 +400,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!local_rp_timer_.start_timer(expiration, permissions_handle)) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
-  }
+  make_task(local_rp_task_)->insert(permissions_handle, expiration);
 
   return true;
 }
@@ -468,9 +464,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!local_rp_timer_.start_timer(expiration, permissions_handle)) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-  }
+  make_task(local_rp_task_)->insert(permissions_handle, expiration);
 
   return true;
 }
@@ -746,9 +740,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!remote_rp_timer_.start_timer(expiration, permissions_handle)) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-  }
+  make_task(remote_rp_task_)->insert(permissions_handle, expiration);
 
   return true;
 }
@@ -809,9 +801,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!remote_rp_timer_.start_timer(expiration, permissions_handle)) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-  }
+  make_task(remote_rp_task_)->insert(permissions_handle, expiration);
 
   return true;
 }
@@ -1298,6 +1288,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return CommonUtilities::increment_handle(next_handle_);
 }
 
+AccessControlBuiltInImpl::RevokePermissionsTask_rch&
+AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
+{
+  if (!task) {
+    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->interceptor(), DCPS::ref(*this));
+  }
+  return task;
+}
+
 // NOTE: This function will return the time value as UTC
 // Format from DDS Security spec 1.1 is:
 //   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
@@ -1637,20 +1636,15 @@ void AccessControlBuiltInImpl::parse_class_id(
 
 }
 
-AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)
-  : impl_(impl)
+AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(DCPS::ReactorInterceptor_rch interceptor,
+                                                                       AccessControlBuiltInImpl& impl)
+  : SporadicTask(interceptor)
+  , impl_(impl)
 { }
 
-AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
+AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
 {
-  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
-
-  if (!entry_map_.empty() && reactor) {
-    reactor->cancel_timer(this);
-    for (EntryMap::const_iterator pos = entry_map_.begin(), limit = entry_map_.end(); pos != limit; ++pos) {
-      delete pos->second;
-    }
-  }
+  cancel_and_wait();
 }
 
 namespace {
@@ -1660,92 +1654,68 @@ namespace {
   const TimeDuration MAX_DURATION = TimeDuration(3600, 0);
 }
 
-bool
-AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
-  const time_t& expiration, ::DDS::Security::PermissionsHandle pm_handle)
+void
+AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::PermissionsHandle pm_handle,
+                                                        const time_t& expiration)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   const time_t current_date_time = time(0);
   tm* current_time_tm = gmtime(&current_date_time);
   const time_t cur_utc_time = mktime(current_time_tm);
   const TimeDuration duration = std::min(TimeDuration(expiration - cur_utc_time), MAX_DURATION);
 
-  Entry* entry = new Entry(pm_handle, expiration);
+  const bool empty_before = expiration_to_handle_.empty();
 
-  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
+  ExpirationToHandle::const_iterator pos =
+    expiration_to_handle_.insert(ExpirationToHandle::value_type(expiration, pm_handle));
 
-  if (reactor) {
-    const long timer_id = reactor->schedule_timer(this, entry, duration.value());
-
-    if (timer_id != -1) {
-      entry_map_[pm_handle] = entry;
-      return true;
-    }
-
+  if (!empty_before && pos == expiration_to_handle_.begin()) {
+    cancel();
   }
 
-  delete entry;
-  return false;
+  if (pos == expiration_to_handle_.begin()) {
+    schedule(duration);
+  }
 }
 
-int
-AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(
-  const ACE_Time_Value& /*tv*/, const void* arg)
+void
+AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, -1);
-
-  const Entry* entry = static_cast<const Entry*>(arg);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   const time_t current_date_time = time(0);
   tm* current_time_tm = gmtime(&current_date_time);
   const time_t cur_utc_time = mktime(current_time_tm);
 
-  if (cur_utc_time < entry->expiration) {
-    // Reschedule.
-    const TimeDuration duration = std::min(TimeDuration(entry->expiration - cur_utc_time), MAX_DURATION);
-
-    ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
-
-    if (reactor) {
-      const long timer_id = reactor->schedule_timer(this, entry, duration.value());
-
-      if (timer_id != -1) {
-        return true;
-      }
-
-    }
-
-  } else {
-    // Expired.
-    const ::DDS::Security::PermissionsHandle pm_handle = entry->handle;
-    entry_map_.erase(pm_handle);
-    delete entry;
-
+  for (ExpirationToHandle::iterator pos = expiration_to_handle_.begin(), limit = expiration_to_handle_.end();
+         pos != limit && pos->first < cur_utc_time;) {
+    const ::DDS::Security::PermissionsHandle pm_handle = pos->second;
     ACPermsMap::iterator iter = impl_.local_ac_perms_.find(pm_handle);
-
     if (iter == impl_.local_ac_perms_.end()) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: ")
                  ACE_TEXT("pm_handle %d not found!\n"), pm_handle));
-      return -1;
     }
-
     impl_.local_ac_perms_.erase(iter);
 
     // If a listener exists, call on_revoke_permissions
     if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, pm_handle)) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: ")
                  ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), pm_handle));
-      return -1;
     }
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-                                    "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: Completed...\n")));
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: Completed...\n")));
     }
+
+    expiration_to_handle_.erase(pos++);
   }
 
-  return 0;
+  if (!expiration_to_handle_.empty()) {
+    const TimeDuration duration = std::min(TimeDuration(expiration_to_handle_.begin()->first - cur_utc_time), MAX_DURATION);
+    schedule(duration);
+  }
 }
 
 } // namespace Security

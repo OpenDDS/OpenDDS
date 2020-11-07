@@ -862,7 +862,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       for (pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> iters =
              readers_of_writer_.equal_range(remote_id);
            iters.first != iters.second;) {
-        if (iters.first->first == local_id) {
+        if (iters.first->second->id() == local_id) {
           readers_of_writer_.erase(iters.first++);
         } else {
           ++iters.first;
@@ -2879,6 +2879,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     process_requested_changes_i(reqs, reader);
     if (reqs.empty()) {
       readers_expecting_heartbeat_.insert(reader);
+    } else {
+      readers_expecting_data_.insert(reader);
     }
   }
 
@@ -2968,46 +2970,40 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
   // consolidate requests from N readers
   AddrSet recipients;
   DisjointSequence requests;
-
-  //track if any messages have been fully acked by all readers
-  SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
-
   bool gaps_ok = true;
-  typedef ReaderInfoMap::iterator ri_iter;
-  const ri_iter end = remote_readers_.end();
-  for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
 
-    if (ri->second->cur_cumulative_ack_ < all_readers_ack) {
-      all_readers_ack = ri->second->cur_cumulative_ack_;
-    }
+  for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
+       pos != limit; ++pos) {
+
+    const ReaderInfo_rch& info = *pos;
 
 #ifdef OPENDDS_SECURITY
-    if (is_pvs_writer_ && !ri->second->requested_changes_.empty()) {
-      send_directed_nack_replies_i(ri->first, ri->second, meta_submessages);
+    if (is_pvs_writer_ && !info->requested_changes_.empty()) {
+      send_directed_nack_replies_i(info->id_, info, meta_submessages);
       continue;
     }
 #endif
 
-    process_requested_changes_i(requests, ri->second);
+    process_requested_changes_i(requests, info);
 
-    if (!ri->second->requested_changes_.empty()) {
-      AddrSet addrs = link->get_addresses(id_, ri->first);
+    if (!info->requested_changes_.empty()) {
+      AddrSet addrs = link->get_addresses(id_, info->id_);
       if (!addrs.empty()) {
         recipients.insert(addrs.begin(), addrs.end());
-        if (ri->second->expecting_durable_data()) {
+        if (info->expecting_durable_data()) {
           gaps_ok = false;
         }
         if (Transport_debug_level > 5) {
-          const GuidConverter local_conv(id_), remote_conv(ri->first);
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies "
                      "local %C remote %C requested resend\n",
-                     OPENDDS_STRING(local_conv).c_str(),
-                     OPENDDS_STRING(remote_conv).c_str()));
+                     LogGuid(id_).c_str(),
+                     LogGuid(info->id_).c_str()));
         }
       }
-      ri->second->requested_changes_.clear();
+      info->requested_changes_.clear();
     }
   }
+  readers_expecting_data_.clear();
 
   DisjointSequence gaps;
   if (!requests.empty()) {
@@ -3344,13 +3340,11 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
   //start with the max sequence number writer knows about and decrease
   //by what the min over all readers is
   SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
-
-  typedef ReaderInfoMap::iterator ri_iter;
-  const ri_iter end = remote_readers_.end();
-  for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
-    if (ri->second->cur_cumulative_ack_ < all_readers_ack) {
-      all_readers_ack = ri->second->cur_cumulative_ack_;
-    }
+  if (!lagging_readers_.empty()) {
+    all_readers_ack = std::min(all_readers_ack, lagging_readers_.begin()->first + 1);
+  }
+  if (!leading_readers_.empty()) {
+    all_readers_ack = std::min(all_readers_ack, leading_readers_.begin()->first + 1);
   }
   if (all_readers_ack == SequenceNumber::MAX_VALUE) {
     return;
@@ -3383,7 +3377,8 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
 
 void RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
-  static const RTPS::FragmentNumberSet none = {{0}, 0, RTPS::LongSeq8()};
+  static CORBA::Long buffer[8];
+  static const RTPS::FragmentNumberSet none = { {0}, 0, RTPS::LongSeq8(0, buffer) };
   durability_resend(element, none);
 }
 

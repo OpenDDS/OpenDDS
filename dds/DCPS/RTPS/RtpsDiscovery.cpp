@@ -380,6 +380,16 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
           config->use_rtps_relay(bool(smInt));
 #ifdef OPENDDS_SECURITY
+        } else if (name == "SpdpStunServerAddress") {
+          ACE_INET_Addr addr;
+          if (addr.set(it->second.c_str())) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("failed to parse SpdpStunServerAddress %C\n"),
+                              it->second.c_str()),
+                             -1);
+          }
+          config->spdp_stun_server_address(addr);
         } else if (name == "SedpStunServerAddress") {
           ACE_INET_Addr addr;
           if (addr.set(it->second.c_str())) {
@@ -873,6 +883,12 @@ RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
       part_pos->second->sedp_rtps_relay_address(address);
     }
   }
+}
+
+void
+RtpsDiscovery::spdp_stun_server_address(const ACE_INET_Addr& address)
+{
+  config_->spdp_stun_server_address(address);
 }
 
 void

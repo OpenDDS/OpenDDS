@@ -2682,10 +2682,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         break; // submessageLength of 0 indicates the last submessage
       }
     }
-  }
-
-  // Handle some RTI protocol multicast to the same address
-  if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
+  } else if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
+    // Handle some RTI protocol multicast to the same address
     return 0; // Ignore
   }
 
@@ -2816,7 +2814,7 @@ Spdp::SendStun::execute()
 ACE_INET_Addr
 Spdp::SpdpTransport::stun_server_address() const
 {
-  return outer_->config_->sedp_stun_server_address();
+  return outer_->config_->spdp_stun_server_address();
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
