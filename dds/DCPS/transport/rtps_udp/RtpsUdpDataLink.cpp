@@ -639,7 +639,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
       enable_replies = true;
       g.release();
-      reader->add_writer(remote_id, WriterInfo());
+      reader->add_writer(make_rch<WriterInfo>(remote_id));
     } else {
       invoke_on_start_callbacks(local_id, remote_id, true);
     }
@@ -1020,7 +1020,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     max_sn_ = std::max(max_sn_, seq);
     if (element->subscription_id() == GUID_UNKNOWN &&
         previous_max_sn != max_sn_.previous()) {
-      add_gap_submsg_i(subm, *element, previous_max_sn + 1);
+      add_gap_submsg_i(subm, previous_max_sn + 1);
     }
   }
 
@@ -1306,7 +1306,6 @@ bool RtpsUdpDataLink::force_inline_qos_ = false;
 
 void
 RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
-                                              const TransportQueueElement& tqe,
                                               SequenceNumber gap_start)
 {
   // These are the GAP submessages that we'll send directly in-line with the
@@ -1414,7 +1413,7 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
   }
 
   for (WriterInfoMap::iterator it = remote_writers_.begin(); it != remote_writers_.end(); ++it) {
-    it->second.held_.clear();
+    it->second->held_.clear();
   }
 }
 
@@ -1443,26 +1442,26 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   bool on_start = false;
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end()) {
-    WriterInfo& info = wi->second;
+    const WriterInfo_rch& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
 
-    if (info.first_activity_) {
+    if (info->first_activity_) {
       on_start = true;
-      info.first_activity_ = false;
+      info->first_activity_ = false;
     }
 
-    const bool no_nack = !(info.hb_range_.second == SequenceNumber::ZERO())
-      && info.hb_range_.second < info.hb_range_.first;
+    const bool no_nack = !(info->hb_range_.second == SequenceNumber::ZERO())
+      && info->hb_range_.second < info->hb_range_.first;
 
-    info.frags_.erase(seq);
+    info->frags_.erase(seq);
 
-    if (info.recvd_.empty()) {
+    if (info->recvd_.empty()) {
       if (durable_) {
-        info.hb_range_.first = 1;
-        info.hb_range_.second = seq;
-        info.recvd_.insert(SequenceNumber::ZERO());
-        info.recvd_.insert(seq);
+        info->hb_range_.first = 1;
+        info->hb_range_.second = seq;
+        info->recvd_.insert(SequenceNumber::ZERO());
+        info->recvd_.insert(seq);
 
         if (seq != 1) {
           if (Transport_debug_level > 5) {
@@ -1477,7 +1476,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
           }
           const ReceivedDataSample* sample =
             link->receive_strategy()->withhold_data_from(id_);
-          info.held_.insert(std::make_pair(seq, *sample));
+          info->held_.insert(std::make_pair(seq, *sample));
 
         } else {
           if (Transport_debug_level > 5) {
@@ -1491,28 +1490,28 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                                  OPENDDS_STRING(reader).c_str()));
           }
           link->receive_strategy()->do_not_withhold_data_from(id_);
-          info.first_delivered_data_ = false;
+          info->first_delivered_data_ = false;
         }
       } else {
-        SequenceNumber low = std::min(seq, info.frags_.empty() ? seq : info.frags_.begin()->first.previous());
+        SequenceNumber low = std::min(seq, info->frags_.empty() ? seq : info->frags_.begin()->first.previous());
         if (seq <= low) {
-          info.hb_range_.first = seq;
-          info.hb_range_.second = seq;
-          info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
-          info.first_delivered_data_ = false;
+          info->hb_range_.first = seq;
+          info->hb_range_.second = seq;
+          info->recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
+          info->first_delivered_data_ = false;
           link->receive_strategy()->do_not_withhold_data_from(id_);
         } else {
-          info.hb_range_.first = low;
-          info.hb_range_.second = seq;
+          info->hb_range_.first = low;
+          info->hb_range_.second = seq;
           const ReceivedDataSample* sample =
             link->receive_strategy()->withhold_data_from(id_);
-          info.held_.insert(std::make_pair(seq, *sample));
-          info.recvd_.insert(seq);
+          info->held_.insert(std::make_pair(seq, *sample));
+          info->recvd_.insert(seq);
           link->deliver_held_data(id_, info, durable_);
         }
       }
 
-    } else if (info.recvd_.contains(seq)) {
+    } else if (info->recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
@@ -1524,25 +1523,25 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       }
       link->receive_strategy()->withhold_data_from(id_);
 
-    } else if (!info.held_.empty()) {
+    } else if (!info->held_.empty()) {
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
       if (Transport_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::process_data_i WITHHOLD %q\n", seq.getValue()));
-        info.recvd_.dump();
+        info->recvd_.dump();
       }
-      info.held_.insert(std::make_pair(seq, *sample));
-      info.recvd_.insert(seq);
+      info->held_.insert(std::make_pair(seq, *sample));
+      info->recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
 
-    } else if (!durable_ && info.first_delivered_data_ && info.hb_range_.second < seq && no_nack) {
-      info.hb_range_.first = seq;
-      info.hb_range_.second = seq;
-      info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
-      info.first_delivered_data_ = false;
+    } else if (!durable_ && info->first_delivered_data_ && info->hb_range_.second < seq && no_nack) {
+      info->hb_range_.first = seq;
+      info->hb_range_.second = seq;
+      info->recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
+      info->first_delivered_data_ = false;
       link->receive_strategy()->do_not_withhold_data_from(id_);
 
-    } else if (info.recvd_.disjoint() || info.recvd_.cumulative_ack() != seq.previous()) {
+    } else if (info->recvd_.disjoint() || info->recvd_.cumulative_ack() != seq.previous()) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
@@ -1554,8 +1553,8 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       }
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
-      info.held_.insert(std::make_pair(seq, *sample));
-      info.recvd_.insert(seq);
+      info->held_.insert(std::make_pair(seq, *sample));
+      info->recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
 
     } else {
@@ -1568,9 +1567,18 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                              OPENDDS_STRING(writer).c_str(),
                              OPENDDS_STRING(reader).c_str()));
       }
-      info.recvd_.insert(seq);
+      info->recvd_.insert(seq);
       link->receive_strategy()->do_not_withhold_data_from(id_);
-      info.first_delivered_data_ = false;
+      info->first_delivered_data_ = false;
+    }
+
+    if (info->should_nack() ||
+        should_nack_durable(info) ||
+        should_nack_fragments(link, info)) {
+      writers_expecting_nack_.insert(info);
+      writers_expecting_ack_.erase(info);
+    } else {
+      writers_expecting_nack_.erase(info);
     }
 
   } else {
@@ -1599,10 +1607,10 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 }
 
 void
-RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, WriterInfo& info,
+RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, const WriterInfo_rch& info,
                                    bool durable)
 {
-  if (durable && (info.recvd_.empty() || info.recvd_.low() > 1)) return;
+  if (durable && (info->recvd_.empty() || info->recvd_.low() > 1)) return;
   held_data_delivery_handler_.notify_delivery(readerId, info);
 }
 
@@ -1627,7 +1635,9 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end()) {
-    if (wi->second.recvd_.empty()) {
+    const WriterInfo_rch& info = wi->second;
+
+    if (info->recvd_.empty()) {
       return false;
     }
 
@@ -1636,7 +1646,7 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
     base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
 
     SequenceRange sr;
-    sr.first = std::max(wi->second.recvd_.low(), start);
+    sr.first = std::max(info->recvd_.low(), start);
     sr.second = base.previous();
 
     // Insert the GAP range (but not before recvd_.low())
@@ -1651,7 +1661,7 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
                   sr.first.getValue(), sr.second.getValue(),
                   OPENDDS_STRING(conv).c_str()));
       }
-      wi->second.recvd_.insert(sr);
+      info->recvd_.insert(sr);
     } else {
       const GuidConverter conv(src);
       VDBG_LVL((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_gap_i "
@@ -1678,16 +1688,26 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
 
         (void) temp.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
         if (num_bits) {
-          wi->second.recvd_.insert(temp.cumulative_ack(), num_bits, &bitmap[0]);
+          info->recvd_.insert(temp.cumulative_ack(), num_bits, &bitmap[0]);
         }
       }
     } else {
-      wi->second.recvd_.insert(base, gap.gapList.numBits,
+      info->recvd_.insert(base, gap.gapList.numBits,
                                gap.gapList.bitmap.get_buffer());
     }
 
-    link->deliver_held_data(id_, wi->second, durable_);
+    link->deliver_held_data(id_, info, durable_);
+
+    if (info->should_nack() ||
+        should_nack_durable(info) ||
+        should_nack_fragments(link, info)) {
+      writers_expecting_nack_.insert(info);
+      writers_expecting_ack_.erase(info);
+    } else {
+      writers_expecting_nack_.erase(info);
+    }
   }
+
   return false;
 }
 
@@ -1770,12 +1790,12 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     return false;
   }
 
-  WriterInfo& info = wi->second;
+  const WriterInfo_rch& info = wi->second;
 
-  if (!compare_and_update_counts(heartbeat.count.value, info.heartbeat_recvd_count_)) {
+  if (!compare_and_update_counts(heartbeat.count.value, info->heartbeat_recvd_count_)) {
     return false;
   }
-  info.heartbeat_recvd_count_ = heartbeat.count.value;
+  info->heartbeat_recvd_count_ = heartbeat.count.value;
 
   // Heartbeat Sequence Range
   SequenceNumber hb_first;
@@ -1784,8 +1804,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   hb_last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
 
   // Internal Sequence Range
-  SequenceNumber& wi_first = info.hb_range_.first;
-  SequenceNumber& wi_last = info.hb_range_.second;
+  SequenceNumber& wi_first = info->hb_range_.first;
+  SequenceNumber& wi_last = info->hb_range_.second;
 
   static const SequenceNumber one, zero = SequenceNumber::ZERO();
 
@@ -1796,58 +1816,61 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   }
 
   // The first-ever HB can determine the start of our nackable range (wi_first)
-  if (info.first_activity_) {
+  if (info->first_activity_) {
     immediate_reply = true;
-    info.first_activity_ = false;
+    info->first_activity_ = false;
     first_ever_hb = true;
     // Don't re-initialize recvd_ values if a data sample has already done it
-    if (info.recvd_.empty()) {
+    if (info->recvd_.empty()) {
       if (!durable_) {
         if (hb_last > zero) {
-          info.recvd_.insert(SequenceRange(zero, hb_last));
+          info->recvd_.insert(SequenceRange(zero, hb_last));
         } else {
-          info.recvd_.insert(zero);
+          info->recvd_.insert(zero);
         }
         wi_first = hb_last; // non-durable reliable connections ignore previous data
       } else {
-        info.recvd_.insert(zero);
+        info->recvd_.insert(zero);
       }
     }
   }
 
   // Only valid heartbeats (see spec) will be "fully" applied to writer info
   if (hb_first <= hb_last + 1 || (hb_first == one && wi_last == zero)) {
-    if (info.first_valid_hb_) {
-      info.first_valid_hb_ = false;
+    if (info->first_valid_hb_) {
+      info->first_valid_hb_ = false;
       immediate_reply = true;
     }
     if (!durable_) {
       if (wi_first < hb_first) {
-        info.recvd_.insert(SequenceRange(wi_first, hb_first.previous()));
-        link->receive_strategy()->remove_fragments(SequenceRange(wi_first, hb_first.previous()), wi->first);
+        info->recvd_.insert(SequenceRange(wi_first, hb_first.previous()));
+        link->receive_strategy()->remove_fragments(SequenceRange(wi_first, hb_first.previous()), info->id_);
         wi_first = hb_first;
         link->deliver_held_data(id_, info, durable_);
       }
     }
     wi_last = wi_last < hb_last ? hb_last : wi_last;
 
-    info.first_valid_hb_ = false;
+    info->first_valid_hb_ = false;
   }
 
-  const bool is_final = heartbeat.smHeader.flags & RTPS::FLAG_F,
-    liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
+  if (!(heartbeat.smHeader.flags & RTPS::FLAG_F)) {
+    writers_expecting_ack_.insert(info);
+  }
 
-  bool result = false;
-  if (!is_final || (!liveliness && (info.should_nack() ||
-      should_nack_durable(info) ||
-      link->receive_strategy()->has_fragments(info.hb_range_, wi->first)))) {
-    info.ack_pending_ = true;
-
-    if (immediate_reply) {
-      link->heartbeat_reply_.enable(link->quick_heartbeat_response_delay_);
+  if (!(heartbeat.smHeader.flags & RTPS::FLAG_L)) {
+    if (info->should_nack() ||
+        should_nack_durable(info) ||
+        should_nack_fragments(link, info)) {
+      writers_expecting_nack_.insert(info);
+      writers_expecting_ack_.erase(info);
     } else {
-      result = true; // timer will invoke send_heartbeat_replies()
+      writers_expecting_nack_.erase(info);
     }
+  }
+
+  if (immediate_reply) {
+    link->heartbeat_reply_.enable(link->quick_heartbeat_response_delay_);
   }
 
   guard.release();
@@ -1858,7 +1881,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
-  return result;
+  return !immediate_reply; // timer will invoke send_heartbeat_replies()
 }
 
 bool
@@ -1939,16 +1962,16 @@ RtpsUdpDataLink::RtpsReader::is_writer_handshake_done(const RepoId& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   WriterInfoMap::const_iterator iter = remote_writers_.find(id);
-  return iter != remote_writers_.end() && !iter->second.first_activity_;
+  return iter != remote_writers_.end() && !iter->second->first_activity_;
 }
 
 bool
-RtpsUdpDataLink::RtpsReader::add_writer(const RepoId& id, const WriterInfo& info)
+RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& info)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  WriterInfoMap::const_iterator iter = remote_writers_.find(id);
+  WriterInfoMap::const_iterator iter = remote_writers_.find(info->id_);
   if (iter == remote_writers_.end()) {
-    remote_writers_[id] = info;
+    remote_writers_[info->id_] = info;
     return true;
   }
   return false;
@@ -1976,21 +1999,43 @@ RtpsUdpDataLink::RtpsReader::writer_count() const
 }
 
 bool
-RtpsUdpDataLink::RtpsReader::should_nack_durable(const WriterInfo& info)
+RtpsUdpDataLink::RtpsReader::should_nack_durable(const WriterInfo_rch& info)
 {
-  return durable_ && (info.recvd_.empty() || info.recvd_.low() > info.hb_range_.first);
+  return durable_ && (info->recvd_.empty() || info->recvd_.low() > info->hb_range_.first);
+}
+
+bool
+RtpsUdpDataLink::RtpsReader::should_nack_fragments(const RcHandle<RtpsUdpDataLink>& link,
+                                                   const WriterInfo_rch& info)
+{
+  if (!info->frags_.empty()) {
+    return true;
+  }
+
+  if (!info->recvd_.empty()) {
+    const SequenceRange range(info->recvd_.cumulative_ack() + 1, info->hb_range_.second);
+    if (link->receive_strategy()->has_fragments(range, info->id_)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void
-RtpsUdpDataLink::RtpsReader::gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag)
+RtpsUdpDataLink::RtpsReader::gather_ack_nacks(MetaSubmessageVec& meta_submessages)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  gather_ack_nacks_i(meta_submessages, finalFlag);
+  gather_ack_nacks_i(meta_submessages);
 }
 
 void
-RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag)
+RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessages)
 {
+  if (writers_expecting_nack_.empty() && writers_expecting_ack_.empty()) {
+    return;
+  }
+
   using namespace OpenDDS::RTPS;
 
   RtpsUdpDataLink_rch link = link_.lock();
@@ -2004,110 +2049,125 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
     return;
   }
 
-  for (WriterInfoMap::iterator wi = remote_writers_.begin(); wi != remote_writers_.end(); ++wi) {
+  // These writers need a nack.
+  for (WriterInfoSet::const_iterator pos = writers_expecting_nack_.begin(), limit = writers_expecting_nack_.end();
+       pos != limit; ++pos) {
+    const WriterInfo_rch& info = *pos;
 
-    // if we have some negative acknowledgments, we'll ask for a reply
-    DisjointSequence& recvd = wi->second.recvd_;
-    const bool nack = wi->second.should_nack() ||
-      should_nack_durable(wi->second);
-    bool is_final = finalFlag || !nack;
+    const EntityId_t reader_id = id_.entityId;
+    const EntityId_t writer_id = info->id_.entityId;
+    MetaSubmessage meta_submessage(id_, info->id_);
 
-    if (wi->second.ack_pending_ || nack || finalFlag) {
-      wi->second.ack_pending_ = false;
+    const DisjointSequence& recvd = info->recvd_;
+    const SequenceNumber& hb_low = info->hb_range_.first;
+    const SequenceNumber& hb_high = info->hb_range_.second;
+    const SequenceNumber ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
+    const SequenceNumber::Value ack_val = ack.getValue();
+    CORBA::ULong num_bits = 0;
+    LongSeq8 bitmap;
 
-      SequenceNumber ack;
-      CORBA::ULong num_bits = 0;
-      LongSeq8 bitmap;
-
-      const SequenceNumber& hb_low = wi->second.hb_range_.first;
-      const SequenceNumber& hb_high = wi->second.hb_range_.second;
-
-      ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
-
-      if (recvd.disjoint()) {
-        bitmap.length(DisjointSequence::bitmap_num_longs(ack, recvd.last_ack().previous()));
-        if (bitmap.length() > 0) {
-          (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
-            num_bits, true);
-        }
-      }
-
-      const SequenceNumber::Value ack_val = ack.getValue();
-
-      if (!recvd.empty() && hb_high > recvd.high()) {
-        const SequenceNumber eff_high =
-          (hb_high <= ack_val + 255) ? hb_high : (ack_val + 255);
-        const SequenceNumber::Value eff_high_val = eff_high.getValue();
-        // Nack the range between the received high and the effective high.
-        const CORBA::ULong old_len = bitmap.length(),
-          new_len = DisjointSequence::bitmap_num_longs(ack, eff_high);
-        if (new_len > old_len) {
-          bitmap.length(new_len);
-          for (CORBA::ULong i = old_len; i < new_len; ++i) {
-            bitmap[i] = 0;
-          }
-        }
-        const CORBA::ULong idx_hb_high = CORBA::ULong(eff_high_val - ack_val),
-          idx_recv_high = recvd.disjoint() ?
-          CORBA::ULong(recvd.high().getValue() - ack_val) : 0;
-        DisjointSequence::fill_bitmap_range(idx_recv_high, idx_hb_high,
-                                            bitmap.get_buffer(), new_len,
-                                            num_bits);
-      }
-
-      // If the receive strategy is holding any fragments, those should
-      // not be "nacked" in the ACKNACK reply.  They will be accounted for
-      // in the NACK_FRAG(s) instead.
-      bool frags_modified =
-        link->receive_strategy()->remove_frags_from_bitmap(bitmap.get_buffer(),
-                                                 num_bits, ack, wi->first);
-      if (frags_modified && !is_final) { // change to is_final if bitmap is empty
-        is_final = true;
-        for (CORBA::ULong i = 0; i < bitmap.length(); ++i) {
-          if ((i + 1) * 32 <= num_bits) {
-            if (bitmap[i]) {
-              is_final = false;
-              break;
-            }
-          } else {
-            if ((0xffffffff << (32 - (num_bits % 32))) & bitmap[i]) {
-              is_final = false;
-              break;
-            }
-          }
-        }
-      }
-
-      EntityId_t reader_id = id_.entityId, writer_id = wi->first.entityId;
-
-      MetaSubmessage meta_submessage(id_, wi->first);
-
-      AckNackSubmessage acknack = {
-        {ACKNACK,
-         CORBA::Octet(FLAG_E | (is_final ? FLAG_F : 0)),
-         0 /*length*/},
-        id_.entityId,
-        wi->first.entityId,
-        { // SequenceNumberSet: acking bitmapBase - 1
-          {ack.getHigh(), ack.getLow()},
-          num_bits, bitmap
-        },
-        {++acknack_count_}
-      };
-      meta_submessage.sm_.acknack_sm(acknack);
-
-      meta_submessages.push_back(meta_submessage);
-
-      NackFragSubmessageVec nfsv;
-      generate_nack_frags_i(nfsv, wi->second, wi->first);
-      for (size_t i = 0; i < nfsv.size(); ++i) {
-        nfsv[i].readerId = reader_id;
-        nfsv[i].writerId = writer_id;
-        meta_submessage.sm_.nack_frag_sm(nfsv[i]);
-        meta_submessages.push_back(meta_submessage);
+    if (recvd.disjoint()) {
+      bitmap.length(DisjointSequence::bitmap_num_longs(ack, recvd.last_ack().previous()));
+      if (bitmap.length() > 0) {
+        (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
+                              num_bits, true);
       }
     }
+
+    if (!recvd.empty() && hb_high > recvd.high()) {
+      const SequenceNumber eff_high =
+        (hb_high <= ack_val + 255) ? hb_high : (ack_val + 255);
+      const SequenceNumber::Value eff_high_val = eff_high.getValue();
+      // Nack the range between the received high and the effective high.
+      const CORBA::ULong old_len = bitmap.length(),
+        new_len = DisjointSequence::bitmap_num_longs(ack, eff_high);
+      if (new_len > old_len) {
+        bitmap.length(new_len);
+        for (CORBA::ULong i = old_len; i < new_len; ++i) {
+          bitmap[i] = 0;
+        }
+      }
+      const CORBA::ULong idx_hb_high = CORBA::ULong(eff_high_val - ack_val),
+        idx_recv_high = recvd.disjoint() ?
+        CORBA::ULong(recvd.high().getValue() - ack_val) : 0;
+      DisjointSequence::fill_bitmap_range(idx_recv_high, idx_hb_high,
+                                          bitmap.get_buffer(), new_len,
+                                          num_bits);
+    }
+
+    bool non_empty_bitmap = true;
+
+    // If the receive strategy is holding any fragments, those should
+    // not be "nacked" in the ACKNACK reply.  They will be accounted for
+    // in the NACK_FRAG(s) instead.
+    const bool frags_modified =
+      link->receive_strategy()->remove_frags_from_bitmap(bitmap.get_buffer(),
+                                                         num_bits, ack, info->id_);
+    if (frags_modified) {
+      bool non_empty_bitmap = false;
+      for (CORBA::ULong i = 0; i < bitmap.length(); ++i) {
+        if ((i + 1) * 32 <= num_bits) {
+          if (bitmap[i]) {
+            non_empty_bitmap = true;
+            break;
+          }
+        } else {
+          if ((0xffffffff << (32 - (num_bits % 32))) & bitmap[i]) {
+            non_empty_bitmap = true;
+            break;
+          }
+        }
+      }
+    }
+
+    AckNackSubmessage acknack = {
+      {ACKNACK,
+       CORBA::Octet(FLAG_E | (non_empty_bitmap ? 0 : FLAG_F)),
+       0 /*length*/},
+      reader_id,
+      writer_id,
+      { // SequenceNumberSet: acking bitmapBase - 1
+        {ack.getHigh(), ack.getLow()},
+        num_bits, bitmap
+      },
+      {++acknack_count_}
+    };
+    meta_submessage.sm_.acknack_sm(acknack);
+    meta_submessages.push_back(meta_submessage);
+
+    generate_nack_frags_i(meta_submessages, meta_submessage, info, reader_id, writer_id);
   }
+
+  // These writers just want an ack.
+  for (WriterInfoSet::const_iterator pos = writers_expecting_ack_.begin(), limit = writers_expecting_ack_.end();
+       pos != limit; ++pos) {
+    const WriterInfo_rch& info = *pos;
+    const DisjointSequence& recvd = info->recvd_;
+    const CORBA::ULong num_bits = 0;
+    const LongSeq8 bitmap;
+    const SequenceNumber& hb_low = info->hb_range_.first;
+    const SequenceNumber ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
+    const EntityId_t reader_id = id_.entityId;
+    const EntityId_t writer_id = info->id_.entityId;
+
+    MetaSubmessage meta_submessage(id_, info->id_);
+
+    AckNackSubmessage acknack = {
+      {ACKNACK,
+       CORBA::Octet(FLAG_E | FLAG_F),
+       0 /*length*/},
+      reader_id,
+      writer_id,
+      { // SequenceNumberSet: acking bitmapBase - 1
+        {ack.getHigh(), ack.getLow()},
+        num_bits, bitmap
+      },
+      {++acknack_count_}
+    };
+    meta_submessage.sm_.acknack_sm(acknack);
+    meta_submessages.push_back(meta_submessage);
+  }
+  writers_expecting_ack_.clear();
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2424,8 +2484,11 @@ RtpsUdpDataLink::send_heartbeat_replies(const DCPS::MonotonicTimePoint& /*now*/)
 }
 
 void
-RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
-                                                   WriterInfo& wi, const RepoId& pub_id)
+RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
+                                                   MetaSubmessage& meta_submessage,
+                                                   const WriterInfo_rch& wi,
+                                                   EntityId_t reader_id,
+                                                   EntityId_t writer_id)
 {
   typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t)::iterator iter_t;
   typedef RtpsUdpReceiveStrategy::FragmentInfo::value_type Frag_t;
@@ -2437,28 +2500,28 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
 
   // Populate frag_info with two possible sources of NackFrags:
   // 1. sequence #s in the reception gaps that we have partially received
-  OPENDDS_VECTOR(SequenceRange) missing = wi.recvd_.missing_sequence_ranges();
+  OPENDDS_VECTOR(SequenceRange) missing = wi->recvd_.missing_sequence_ranges();
   for (size_t i = 0; i < missing.size(); ++i) {
-    link->receive_strategy()->has_fragments(missing[i], pub_id, &frag_info);
+    link->receive_strategy()->has_fragments(missing[i], wi->id_, &frag_info);
   }
   // 1b. larger than the last received seq# but less than the heartbeat.lastSN
-  if (!wi.recvd_.empty()) {
-    const SequenceRange range(wi.recvd_.high(), wi.hb_range_.second);
-    link->receive_strategy()->has_fragments(range, pub_id, &frag_info);
+  if (!wi->recvd_.empty()) {
+    const SequenceRange range(wi->recvd_.high(), wi->hb_range_.second);
+    link->receive_strategy()->has_fragments(range, wi->id_, &frag_info);
   }
   for (size_t i = 0; i < frag_info.size(); ++i) {
     // If we've received a HeartbeatFrag, we know the last (available) frag #
-    const iter_t heartbeat_frag = wi.frags_.find(frag_info[i].first);
-    if (heartbeat_frag != wi.frags_.end()) {
+    const iter_t heartbeat_frag = wi->frags_.find(frag_info[i].first);
+    if (heartbeat_frag != wi->frags_.end()) {
       extend_bitmap_range(frag_info[i].second, heartbeat_frag->second.value);
     }
   }
 
   // 2. sequence #s outside the recvd_ gaps for which we have a HeartbeatFrag
-  const iter_t low = wi.frags_.lower_bound(wi.recvd_.cumulative_ack()),
-              high = wi.frags_.upper_bound(wi.recvd_.last_ack()),
-               end = wi.frags_.end();
-  for (iter_t iter = wi.frags_.begin(); iter != end; ++iter) {
+  const iter_t low = wi->frags_.lower_bound(wi->recvd_.cumulative_ack()),
+              high = wi->frags_.upper_bound(wi->recvd_.last_ack()),
+               end = wi->frags_.end();
+  for (iter_t iter = wi->frags_.begin(); iter != end; ++iter) {
     if (iter == low) {
       // skip over the range covered by step #1 above
       if (high == end) {
@@ -2468,7 +2531,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
     }
 
     const SequenceRange range(iter->first, iter->first);
-    if (!link->receive_strategy()->has_fragments(range, pub_id, &frag_info)) {
+    if (!link->receive_strategy()->has_fragments(range, wi->id_, &frag_info)) {
       // it was not in the recv strategy, so the entire range is "missing"
       frag_info.push_back(Frag_t(iter->first, RTPS::FragmentNumberSet()));
       RTPS::FragmentNumberSet& fnSet = frag_info.back().second;
@@ -2487,20 +2550,22 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
 
   const RTPS::NackFragSubmessage nackfrag_prototype = {
     {RTPS::NACK_FRAG, RTPS::FLAG_E, 0 /* length set below */},
-    ENTITYID_UNKNOWN, // readerId will be filled-in by send_heartbeat_replies()
-    ENTITYID_UNKNOWN, // writerId will be filled-in by send_heartbeat_replies()
+    reader_id,
+    writer_id,
     {0, 0}, // writerSN set below
     RTPS::FragmentNumberSet(), // fragmentNumberState set below
     {0} // count set below
   };
 
+  meta_submessage.sm_.nack_frag_sm(nackfrag_prototype);
+
   for (size_t i = 0; i < frag_info.size(); ++i) {
-    nf.push_back(nackfrag_prototype);
-    RTPS::NackFragSubmessage& nackfrag = nf.back();
+    RTPS::NackFragSubmessage& nackfrag = meta_submessage.sm_.nack_frag_sm();
     nackfrag.writerSN.low = frag_info[i].first.getLow();
     nackfrag.writerSN.high = frag_info[i].first.getHigh();
     nackfrag.fragmentNumberState = frag_info[i].second;
-    nackfrag.count.value = ++wi.nackfrag_count_;
+    nackfrag.count.value = ++wi->nackfrag_count_;
+    meta_submessages.push_back(meta_submessage);
   }
 }
 
@@ -2545,7 +2610,7 @@ RtpsUdpDataLink::RtpsReader::process_hb_frag_i(const RTPS::HeartBeatFragSubmessa
     return false;
   }
 
-  if (!compare_and_update_counts(hb_frag.count.value, wi->second.hb_frag_recvd_count_)) {
+  if (!compare_and_update_counts(hb_frag.count.value, wi->second->hb_frag_recvd_count_)) {
     return false;
   }
 
@@ -2556,10 +2621,11 @@ RtpsUdpDataLink::RtpsReader::process_hb_frag_i(const RTPS::HeartBeatFragSubmessa
   // it yet, send a NackFrag along with the AckNack.  The heartbeat range needs
   // to be checked first because recvd_ contains the numbers below the
   // heartbeat range (so that we don't NACK those).
-  if (seq < wi->second.hb_range_.first || seq > wi->second.hb_range_.second
-      || !wi->second.recvd_.contains(seq)) {
-    wi->second.frags_[seq] = hb_frag.lastFragmentNum;
-    wi->second.ack_pending_ = true;
+  if (seq < wi->second->hb_range_.first || seq > wi->second->hb_range_.second
+      || !wi->second->recvd_.contains(seq)) {
+    wi->second->frags_[seq] = hb_frag.lastFragmentNum;
+    writers_expecting_nack_.insert(wi->second);
+    writers_expecting_ack_.erase(wi->second);
     return true; // timer will invoke send_heartbeat_replies()
   }
   return false;
@@ -3530,6 +3596,10 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
+  if (additional_guids.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
+    return;
+  }
+
   RtpsUdpDataLink_rch link = link_.lock();
   if (!link) {
     return;
@@ -3931,7 +4001,7 @@ RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 
   if (reader) {
     MetaSubmessageVec meta_submessages;
-    reader->gather_ack_nacks(meta_submessages, true);
+    reader->gather_ack_nacks(meta_submessages);
     send_bundled_submessages(meta_submessages);
   }
 }
@@ -3951,19 +4021,19 @@ RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
   return 0;
 }
 
-void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& readerId, WriterInfo& info)
+void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& readerId, const WriterInfo_rch& info)
 {
   OPENDDS_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
 
-  const SequenceNumber ca = info.recvd_.cumulative_ack();
+  const SequenceNumber ca = info->recvd_.cumulative_ack();
   typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
-  const iter end = info.held_.upper_bound(ca);
+  const iter end = info->held_.upper_bound(ca);
 
-  if (info.held_.begin() != end) {
-    info.first_delivered_data_ = false;
+  if (info->held_.begin() != end) {
+    info->first_delivered_data_ = false;
   }
 
-  for (iter it = info.held_.begin(); it != end; /*increment in loop body*/) {
+  for (iter it = info->held_.begin(); it != end; /*increment in loop body*/) {
     if (Transport_debug_level > 5) {
       GuidConverter reader(readerId);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery -")
@@ -3973,7 +4043,7 @@ void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& rea
     }
     // The head_data_ is not protected by a mutex because it is always accessed from the reactor task thread.
     held_data_.push_back(HeldDataEntry(it->second, readerId));
-    info.held_.erase(it++);
+    info->held_.erase(it++);
   }
   link_->reactor_task_->get_reactor()->notify(this);
 }
