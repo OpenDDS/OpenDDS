@@ -282,6 +282,7 @@ public:
     constexpr size_t max_stat_buffer_size = 3600; // one hour in seconds
     auto cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
     auto mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
+    auto virtual_mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "virtual_mem_percent", max_stat_buffer_size, true);
     CORBA::ULong pos = 0;
     report.node_id = node_id_;
 
@@ -294,13 +295,16 @@ public:
 
         double cpu_sum = 0.0;
         double mem_sum = 0.0;
+        double virtual_mem_sum = 0.0;
 
         for (auto it = worker_process_stat_collectors_.begin(); it != worker_process_stat_collectors_.end(); it++) {
           cpu_sum += it->second->get_cpu_usage();
           mem_sum += it->second->get_mem_usage();
+          virtual_mem_sum += it->second->get_virtual_mem_usage();
         }
         cpu_block->update(cpu_sum);
         mem_block->update(mem_sum);
+        virtual_mem_block->update(virtual_mem_sum);
       }
     });
 
@@ -347,6 +351,7 @@ public:
     stat_collector.join();
     cpu_block->finalize();
     mem_block->finalize();
+    virtual_mem_block->finalize();
 
     std::cout << "Writing report for node " << node_id_ << std::endl;
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {

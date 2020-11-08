@@ -153,10 +153,11 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
     while (meminfofile >> token) {
       if (token == "MemTotal:") {
         meminfofile >> total_mem_;
-        break;
       }
       if (token == "VmallocTotal:") {
         meminfofile >> total_virtual_mem_;
+      }
+      if (total_mem_ != 0 && total_virtual_mem_ != 0) {
         break;
       }
     }

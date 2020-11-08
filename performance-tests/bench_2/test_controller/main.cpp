@@ -381,15 +381,18 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
 
   Bench::SimpleStatBlock consolidated_cpu_percent_stats;
   Bench::SimpleStatBlock consolidated_mem_percent_stats;
+  Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
 
   for (CORBA::ULong n = 0; n < nc_reports.length(); ++n) {
     const Bench::NodeController::Report& nc_report = nc_reports[n];
 
     Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
     Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
+    Bench::ConstPropertyStatBlock virtual_mem_percent(nc_report.properties, "virtual_mem_percent");
 
     consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
     consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
+    consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
   }
 
   Builder::TimeStamp max_construction_time = ZERO;
@@ -512,6 +515,10 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   result_out << std::endl;
 
   consolidated_mem_percent_stats.pretty_print(result_out, "percent memory utilization");
+
+  result_out << std::endl;
+
+  consolidated_virtual_mem_percent_stats.pretty_print(result_out, "percent virtual memory utilization");
 
   result_out << std::endl;
 
