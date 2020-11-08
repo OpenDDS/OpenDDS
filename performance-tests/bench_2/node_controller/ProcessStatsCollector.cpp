@@ -148,18 +148,14 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
   std::ifstream meminfofile;
   meminfofile.open("/proc/meminfo", ios::in);
 
-  if (meminfofile.is_open())
-  {
+  if (meminfofile.is_open()) {
     std::string token;
-    while (meminfofile >> token)
-    {
-      if (token == "MemTotal:")
-      {
+    while (meminfofile >> token) {
+      if (token == "MemTotal:") {
         meminfofile >> total_mem_;
         break;
       }
-      if (token == "VmallocTotal:")
-      {
+      if (token == "VmallocTotal:") {
         meminfofile >> total_virtual_mem_;
         break;
       }
@@ -238,15 +234,13 @@ double ProcessStatsCollector::get_virtual_mem_usage() noexcept
 
   long page_sz_kb = sysconf(_SC_PAGESIZE) / 1024;
 
-  if (statmfile.is_open())
-  {
+  if (statmfile.is_open()) {
     long VmSize{};
     statmfile >> VmSize;
 
     VmSize *= page_sz_kb;
 
-    if (total_virtual_mem_ > 0)
-    {
+    if (total_virtual_mem_ > 0) {
       result = 100.0 * (static_cast<double>(VmSize) / static_cast<double>(total_virtual_mem_));
     }
     statmfile.close();
@@ -276,15 +270,13 @@ double ProcessStatsCollector::get_mem_usage() noexcept
 
   long page_sz_kb = sysconf(_SC_PAGESIZE) / 1024;
 
-  if (statmfile.is_open())
-  {
+  if (statmfile.is_open()) {
     long VmSize{}, VmRSS{};
     statmfile >> VmSize >> VmRSS;
 
     VmRSS *= page_sz_kb;
 
-    if (total_mem_ > 0)
-    {
+    if (total_mem_ > 0) {
       result = 100.0 * (static_cast<double>(VmRSS) / static_cast<double>(total_mem_));
     }
     statmfile.close();
