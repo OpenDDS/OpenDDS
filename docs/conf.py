@@ -45,12 +45,13 @@ def get_version_prop(macro, is_int=True):
         return m[1]
     raise RuntimeError('Could find ' + macro)
 
-version = get_version_prop('DDS_MAJOR_VERSION') \
-    + '.' + get_version_prop('DDS_MINOR_VERSION')
 metadata = get_version_prop('OPENDDS_VERSION_METADATA', False)
 if metadata:
     metadata = '-' + metadata
-release = version + '.' + get_version_prop('DDS_MICRO_VERSION') + metadata
+version = get_version_prop('DDS_MAJOR_VERSION') \
+    + '.' + get_version_prop('DDS_MINOR_VERSION') \
+    + '.' + get_version_prop('DDS_MICRO_VERSION') + metadata
+release = version
 is_release = bool(int(get_version_prop('OPENDDS_IS_RELEASE')))
 
 
@@ -85,6 +86,7 @@ exclude_patterns = [
     'migrating_to_topic_type_annotations.md',
     'multirepo.md',
     'qt.md',
+    'OpenDDS.docset/**',
 ]
 
 source_suffix = {
@@ -115,6 +117,9 @@ html_theme_options = {
         'GitHub Repo': 'https://github.com/objectcomputing/OpenDDS',
     },
 }
+
+html_favicon = 'logo_32_32.ico'
+
 
 # -- LaTeX (PDF) output ------------------------------------------------------
 
