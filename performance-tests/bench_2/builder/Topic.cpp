@@ -76,7 +76,9 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
   // Create Topic
   topic_ = participant_->create_topic(name_.c_str(), type_name_.c_str(), qos, listener_, listener_status_mask_);
   if (CORBA::is_nil(topic_.in())) {
-    throw std::runtime_error("topic creation failed");
+    std::stringstream ss;
+    ss << "topic creation failed for topic '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
   }
 
   // Bind Transport Config
@@ -97,6 +99,16 @@ const std::string& Topic::get_name() const {
 
 DDS::Topic_var& Topic::get_dds_topic() {
   return topic_;
+}
+
+bool Topic::enable(bool throw_on_error) {
+  bool result = (topic_->enable() == DDS::RETCODE_OK);
+  if (!result && throw_on_error) {
+    std::stringstream ss;
+    ss << "failed to enable topic '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+  return result;
 }
 
 }

@@ -116,7 +116,7 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   return result;
 }
 
-PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size)
+PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size, bool timestamps)
 {
   sample_count_ = get_or_create_property(seq, prefix + "_sample_count", Builder::PVK_ULL);
   sample_count_->value.ull_prop(0);
@@ -134,6 +134,9 @@ PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::strin
   var_x_sample_count_->value.double_prop(0.0);
 
   median_buffer_.resize(median_buffer_size, 0.0);
+  if (timestamps) {
+    timestamp_buffer_.resize(median_buffer_size, Builder::ZERO);
+  }
 
   median_sample_count_ = get_or_create_property(seq, prefix + "_median_sample_count", Builder::PVK_ULL);
   median_sample_count_->value.ull_prop(0);
@@ -174,6 +177,10 @@ void PropertyStatBlock::update(double value)
   }
 
   median_buffer_[next_median_buffer_index] = value;
+
+  if (timestamp_buffer_.size()) {
+    timestamp_buffer_[next_median_buffer_index] = Builder::get_sys_time();
+  }
 }
 
 void PropertyStatBlock::finalize()

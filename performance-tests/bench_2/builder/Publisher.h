@@ -9,7 +9,7 @@ public:
   explicit Publisher(const PublisherConfig& config, PublisherReport& report, DDS::DomainParticipant_var& participant, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map);
   ~Publisher();
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
   PublisherReport& get_report() { return report_; }
   const PublisherReport& get_report() const { return report_; }
