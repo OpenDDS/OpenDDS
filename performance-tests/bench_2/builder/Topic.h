@@ -5,11 +5,14 @@
 #include "Common.h"
 #include "ListenerFactory.h"
 
+#include <vector>
+
 namespace Builder {
 
 class Topic : public ListenerFactory<DDS::TopicListener> {
 public:
-  explicit Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant);
+  explicit Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
+    std::map<std::string, DDS::ContentFilteredTopic_var>& content_filtered_topics_map);
   ~Topic();
 
   const std::string& get_name() const;
@@ -22,6 +25,7 @@ protected:
   uint32_t listener_status_mask_;
   Builder::PropertySeq listener_properties_;
   const std::string transport_config_name_;
+  Builder::ContentFilteredTopicSeq content_filtered_topics_;
   DDS::DomainParticipant_var participant_;
   DDS::TopicListener_var listener_;
   DDS::Topic_var topic_;

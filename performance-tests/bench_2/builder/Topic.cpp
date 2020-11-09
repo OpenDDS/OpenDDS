@@ -8,13 +8,15 @@
 
 namespace Builder {
 
-Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
+Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
+  std::map<std::string, DDS::ContentFilteredTopic_var>& content_filtered_topics_map)
   : name_(config.name.in())
   , type_name_((strlen(config.type_name.in()) == 0 && TypeSupportRegistry::get_type_names().size() == 1) ? TypeSupportRegistry::get_type_names().front() : config.type_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
   , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
+  , content_filtered_topics_(config.content_filtered_topics)
   , participant_(participant)
 {
   Log::log()
@@ -77,6 +79,20 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
   topic_ = participant_->create_topic(name_.c_str(), type_name_.c_str(), qos, listener_, listener_status_mask_);
   if (CORBA::is_nil(topic_.in())) {
     throw std::runtime_error("topic creation failed");
+  }
+
+  for (unsigned int i = 0; i != content_filtered_topics_.length(); ++i) {
+    DDS::ContentFilteredTopic_var cft =
+      participant_->create_contentfilteredtopic(content_filtered_topics_[i].cft_name,
+        topic_,
+        content_filtered_topics_[i].cft_expression,
+        content_filtered_topics_[i].cft_parameters);
+
+    if (CORBA::is_nil(cft.in())) {
+      throw std::runtime_error("topic creation failed");
+    }
+
+    content_filtered_topics_map[name_.c_str()] = cft;
   }
 
   // Bind Transport Config

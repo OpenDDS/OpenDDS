@@ -297,6 +297,7 @@ module Builder {
   struct DataReaderConfig {
     string name;
     string topic_name;
+    string cft_name;
     string listener_type_name;
     unsigned long listener_status_mask;
     PropertySeq listener_properties;
@@ -339,6 +340,14 @@ module Builder {
 
   // Topic
 
+  struct ContentFilteredTopic {
+    string cft_name;
+    string cft_expression;
+    DDS::StringSeq cft_parameters;
+  };
+
+  typedef sequence<ContentFilteredTopic> ContentFilteredTopicSeq;
+
   struct TopicConfig {
     string name;
     string type_name;
@@ -348,6 +357,7 @@ module Builder {
     unsigned long listener_status_mask;
     PropertySeq listener_properties;
     string transport_config_name;
+    ContentFilteredTopicSeq content_filtered_topics;
   };
 
   typedef sequence<TopicConfig> TopicConfigSeq;
