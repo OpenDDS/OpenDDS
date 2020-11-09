@@ -29,6 +29,7 @@ def setup(app):
 needs_sphinx = '2.4'
 master_doc = 'index'
 primary_domain = 'cpp'
+pygments_style = 'manni'
 
 project = 'OpenDDS'
 copyright = '2020, Object Computing, Inc.'
