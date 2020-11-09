@@ -382,6 +382,17 @@ public:
     rtps_relay_only_ = f;
   }
 
+  ACE_INET_Addr spdp_stun_server_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return spdp_stun_server_address_;
+  }
+  void spdp_stun_server_address(const ACE_INET_Addr& address)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp_stun_server_address_ = address;
+  }
+
   ACE_INET_Addr sedp_stun_server_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -474,6 +485,7 @@ private:
   ACE_INET_Addr sedp_rtps_relay_address_;
   bool use_rtps_relay_;
   bool rtps_relay_only_;
+  ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
   bool use_ncm_;
@@ -617,6 +629,7 @@ public:
 #endif
   void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
+  void spdp_stun_server_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 
 private:

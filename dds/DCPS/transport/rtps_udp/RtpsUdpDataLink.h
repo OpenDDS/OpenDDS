@@ -358,6 +358,8 @@ private:
     SNRIS lagging_readers_;
     // These reader have acked everything they are supposed to have acked.
     SNRIS leading_readers_;
+    // These readers have sent a nack and are expecting data.
+    ReaderInfoSet readers_expecting_data_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber max_sn_;
     typedef OPENDDS_SET(TransportQueueElement*) TqeSet;
@@ -374,7 +376,6 @@ private:
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
 
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
-                          const TransportQueueElement& tqe,
                           SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
                                 ACE_Message_Block* body);
@@ -443,37 +444,44 @@ private:
 
   // RTPS reliability support for local readers:
 
-  struct WriterInfo {
+  struct WriterInfo : RcObject {
+    const RepoId id_;
     DisjointSequence recvd_;
     OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
     SequenceRange hb_range_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
-    bool ack_pending_, first_activity_, first_valid_hb_, first_delivered_data_;
+    bool first_activity_, first_valid_hb_, first_delivered_data_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
 
-    WriterInfo()
-      : ack_pending_(false), first_activity_(true), first_valid_hb_(true), first_delivered_data_(true)
-      , heartbeat_recvd_count_(0), hb_frag_recvd_count_(0), nackfrag_count_(0)
+    WriterInfo(const RepoId& id)
+      : id_(id)
+      , first_activity_(true)
+      , first_valid_hb_(true)
+      , first_delivered_data_(true)
+      , heartbeat_recvd_count_(0)
+      , hb_frag_recvd_count_(0)
+      , nackfrag_count_(0)
     { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
   };
-
-  typedef OPENDDS_MAP_CMP(RepoId, WriterInfo, GUID_tKeyLessThan) WriterInfoMap;
-
-  typedef OPENDDS_VECTOR(RTPS::NackFragSubmessage) NackFragSubmessageVec;
+  typedef RcHandle<WriterInfo> WriterInfo_rch;
+  typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
+  typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
   class RtpsReader : public RcObject {
   public:
     RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false), acknack_count_(0) {}
 
-    bool add_writer(const RepoId& id, const WriterInfo& info);
+    bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;
     bool remove_writer(const RepoId& id);
     size_t writer_count() const;
 
     bool is_writer_handshake_done(const RepoId& id) const;
-    bool should_nack_durable(const WriterInfo& info);
+    bool should_nack_durable(const WriterInfo_rch& info);
+    bool should_nack_fragments(const RcHandle<RtpsUdpDataLink>& link,
+                               const WriterInfo_rch& info);
 
     void pre_stop_helper();
 
@@ -482,18 +490,24 @@ private:
     bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src, MetaSubmessageVec& meta_submessages);
     bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
 
-    void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
+    void gather_ack_nacks(MetaSubmessageVec& meta_submessages);
+    const RepoId& id() const { return id_; }
 
   private:
-    void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
-    void generate_nack_frags_i(NackFragSubmessageVec& nack_frags,
-                               WriterInfo& wi, const RepoId& pub_id);
+    void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages);
+    void generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
+                               MetaSubmessage& meta_submessage,
+                               const WriterInfo_rch& wi,
+                               EntityId_t reader_id,
+                               EntityId_t writer_id);
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
-    RepoId id_;
-    bool durable_;
+    const RepoId id_;
+    const bool durable_;
     WriterInfoMap remote_writers_;
+    WriterInfoSet writers_expecting_nack_;
+    WriterInfoSet writers_expecting_ack_;
     bool stopping_;
     CORBA::Long acknack_count_;
   };
@@ -521,7 +535,7 @@ private:
 
   WriterToSeqReadersMap writer_to_seq_best_effort_readers_;
 
-  void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
+  void deliver_held_data(const RepoId& readerId, const WriterInfo_rch& info, bool durable);
 
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
   /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
@@ -735,7 +749,7 @@ private:
     /// Reactor invokes this after being notified in schedule_stop or cancel_release
     int handle_exception(ACE_HANDLE /* fd */);
 
-    void notify_delivery(const RepoId& readerId, WriterInfo& info);
+    void notify_delivery(const RepoId& readerId, const WriterInfo_rch& info);
 
     virtual ACE_Event_Handler::Reference_Count add_reference();
     virtual ACE_Event_Handler::Reference_Count remove_reference();
