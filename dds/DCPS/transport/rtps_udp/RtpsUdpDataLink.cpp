@@ -2109,7 +2109,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       link->receive_strategy()->remove_frags_from_bitmap(bitmap.get_buffer(),
                                                          num_bits, ack, info->id_);
     if (frags_modified) {
-      bool non_empty_bitmap = false;
+      non_empty_bitmap = false;
       for (CORBA::ULong i = 0; i < bitmap.length(); ++i) {
         if ((i + 1) * 32 <= num_bits) {
           if (bitmap[i]) {
