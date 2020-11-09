@@ -15,7 +15,7 @@ public:
   explicit DataWriter(const DataWriterConfig& config, DataWriterReport& report, DDS::Publisher_var& publisher, const std::shared_ptr<TopicManager>& topics);
   ~DataWriter();
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
   void detach_listener();
 

@@ -17,7 +17,7 @@ public:
   explicit Participant(const ParticipantConfig& config, ParticipantReport& report, ReaderMap& reader_map, WriterMap& writer_map);
   ~Participant();
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
   ParticipantReport& get_report() { return report_; }
   const ParticipantReport& get_report() const { return report_; }

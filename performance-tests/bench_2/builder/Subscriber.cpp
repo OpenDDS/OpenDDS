@@ -72,9 +72,14 @@ Subscriber::~Subscriber() {
   }
 }
 
-void Subscriber::enable() {
-  subscriber_->enable();
-  datareaders_->enable();
+bool Subscriber::enable(bool throw_on_error) {
+  bool success = (subscriber_->enable() == DDS::RETCODE_OK);
+  if (!success && throw_on_error) {
+    std::stringstream ss;
+    ss << "failed to enable subscriber '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+  return success && datareaders_->enable(throw_on_error);
 }
 
 }

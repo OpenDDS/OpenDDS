@@ -10,11 +10,20 @@ TopicManager::TopicManager(const TopicConfigSeq& configs, DDS::DomainParticipant
     }
   }
 }
+
 std::shared_ptr<Topic> TopicManager::get_topic_by_name(const std::string& name) const {
   std::shared_ptr<Topic> result;
   auto it = topics_.find(name);
   if (it != topics_.end()) {
     result = it->second;
+  }
+  return result;
+}
+
+bool TopicManager::enable(bool throw_on_error) {
+  bool result = true;
+  for (auto it = topics_.begin(); it != topics_.end(); ++it) {
+    result &= it->second->enable(throw_on_error);
   }
   return result;
 }
