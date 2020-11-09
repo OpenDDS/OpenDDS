@@ -355,6 +355,18 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 #endif
   }
 
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
   send_strategy()->send_buffer(&multi_buff_);
 
   if (start(send_strategy_,
