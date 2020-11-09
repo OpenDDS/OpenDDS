@@ -522,12 +522,6 @@ private:
                                                    DiscoveredPublicationIter& iter,
                                                    const DCPS::RepoId& writer);
 
-#ifdef OPENDDS_SECURITY
-  DCPS::TransportLocatorSeq
-  add_security_info(const DCPS::TransportLocatorSeq& locators,
-                    const DCPS::RepoId& writer, const DCPS::RepoId& reader);
-#endif
-
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
@@ -588,10 +582,13 @@ private:
 protected:
 
 #ifdef OPENDDS_SECURITY
-  DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(
-    const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
-  DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(
-    const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
+  DDS::Security::DatawriterCryptoHandle
+  generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer,
+                                               const DCPS::RepoId& reader);
+  DDS::Security::DatareaderCryptoHandle
+  generate_remote_matched_reader_crypto_handle(const DCPS::RepoId& reader,
+                                               const DCPS::RepoId& writer,
+                                               bool relay_only);
 
   void create_datareader_crypto_tokens(
     const DDS::Security::DatareaderCryptoHandle& drch,

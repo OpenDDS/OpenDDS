@@ -9,6 +9,7 @@
 #include "dds/DCPS/security/AccessControlBuiltInImpl.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/security/CryptoBuiltInImpl.h"
+#include "dds/DCPS/security/HandleRegistryImpl.h"
 #include "dds/DCPS/security/UtilityImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -26,6 +27,7 @@ BuiltInSecurityPluginInst::BuiltInSecurityPluginInst()
   , key_factory_(new CryptoBuiltInImpl)
   , key_exchange_(CryptoKeyExchange::_narrow(key_factory_))
   , transform_(CryptoTransform::_narrow(key_factory_))
+  , handle_registry_(new HandleRegistryImpl())
   , utility_(new UtilityImpl())
 #endif
 {
@@ -33,6 +35,7 @@ BuiltInSecurityPluginInst::BuiltInSecurityPluginInst()
 
 BuiltInSecurityPluginInst::~BuiltInSecurityPluginInst()
 {
+  delete handle_registry_;
   delete utility_;
 }
 
@@ -60,6 +63,11 @@ CryptoKeyExchange_var BuiltInSecurityPluginInst::create_crypto_key_exchange()
 CryptoTransform_var BuiltInSecurityPluginInst::create_crypto_transform()
 {
   return transform_;
+}
+
+HandleRegistry* BuiltInSecurityPluginInst::create_handle_registry()
+{
+  return handle_registry_;
 }
 
 Utility* BuiltInSecurityPluginInst::create_utility()

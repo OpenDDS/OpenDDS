@@ -13,6 +13,7 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Util.h"
 
@@ -226,7 +227,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
     std::memcpy(peer.guidPrefix, encBuf + GuidPrefixOffset, sizeof peer.guidPrefix);
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
-    const ParticipantCryptoHandle sender = link_->peer_crypto_handle(peer);
+    const ParticipantCryptoHandle sender = link_->security_config()->get_handle_registry()->get_remote_participant_crypto_handle(peer);
     if (sender == DDS::HANDLE_NIL) {
       if (security_debug.encdec_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
@@ -296,7 +297,11 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
     return false;
   }
 
-  const EndpointSecurityAttributesMask esa = link_->security_attributes(sendGuid);
+  const GuidConverter conv(sendGuid);
+  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(
+    conv.isReader() ?
+    link_->security_config()->get_handle_registry()->get_remote_datareader_security_attributes(sendGuid) :
+    link_->security_config()->get_handle_registry()->get_remote_datawriter_security_attributes(sendGuid));
   static const EndpointSecurityAttributesMask MASK_PROTECT_SUBMSG =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED;
 
@@ -557,9 +562,9 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   }
 
   RepoId peer;
-  RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
+  assign(peer.guidPrefix, receiver_.source_guid_prefix_);
   peer.entityId = ENTITYID_PARTICIPANT;
-  const ParticipantCryptoHandle peer_pch = link_->peer_crypto_handle(peer);
+  const ParticipantCryptoHandle peer_pch = link_->security_config()->get_handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
   sec_submsg_to_octets(encoded_submsg, submessage);
@@ -692,10 +697,10 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                             const RTPS::DataSubmessage& submsg)
 {
   using namespace DDS::Security;
-  const DatawriterCryptoHandle writer_crypto_handle = link_->writer_crypto_handle(sample.header_.publication_id_);
+  const DatawriterCryptoHandle writer_crypto_handle = link_->security_config()->get_handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
-  const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
+  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(link_->security_config()->get_handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
   static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
   const bool payload_protected = (esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD;
@@ -995,7 +1000,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
 RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(const GuidPrefix_t& local)
   : have_timestamp_(false)
 {
-  RTPS::assign(local_, local);
+  assign(local_, local);
   source_version_.major = source_version_.minor = 0;
   source_vendor_.vendorId[0] = source_vendor_.vendorId[1] = 0;
   for (size_t i = 0; i < sizeof(GuidPrefix_t); ++i) {
@@ -1026,7 +1031,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   multicast_reply_locator_list_.length(1);
   multicast_reply_locator_list_[0].kind = address_to_kind(addr);
   multicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  assign(multicast_reply_locator_list_[0].address, LOCATOR_ADDRESS_INVALID);
+  RTPS::assign(multicast_reply_locator_list_[0].address, LOCATOR_ADDRESS_INVALID);
 
   have_timestamp_ = false;
   timestamp_ = TIME_INVALID;
@@ -1070,11 +1075,11 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   // see RTPS spec v2.1 section 8.3.7.7.4
   for (size_t i = 0; i < sizeof(GuidPrefix_t); ++i) {
     if (id.guidPrefix[i]) { // if some byte is > 0, it's not UNKNOWN
-      RTPS::assign(dest_guid_prefix_, id.guidPrefix);
+      assign(dest_guid_prefix_, id.guidPrefix);
       return;
     }
   }
-  RTPS::assign(dest_guid_prefix_, local_);
+  assign(dest_guid_prefix_, local_);
 }
 
 void
@@ -1135,7 +1140,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   const RTPS::InfoSourceSubmessage& is)
 {
   // see RTPS spec v2.1 section 8.3.7.9.4
-  RTPS::assign(source_guid_prefix_, is.guidPrefix);
+  assign(source_guid_prefix_, is.guidPrefix);
   source_version_ = is.version;
   source_vendor_ = is.vendorId;
   unicast_reply_locator_list_.length(1);

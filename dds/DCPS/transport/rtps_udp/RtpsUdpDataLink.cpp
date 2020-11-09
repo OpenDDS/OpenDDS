@@ -2644,9 +2644,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
                           const GuidPrefix_t& src_prefix)
 {
   // local side is DW
-  const RepoId local = RTPS::make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
+  const RepoId local = make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
 
-  const RepoId remote = RTPS::make_id(src_prefix, acknack.readerId);
+  const RepoId remote = make_id(src_prefix, acknack.readerId);
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
@@ -2757,7 +2757,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                                              const RepoId& src_prefix,
                                              MetaSubmessageVec& meta_submessages)
 {
-  const RepoId remote = RTPS::make_id(src_prefix, acknack.readerId);
+  const RepoId remote = make_id(src_prefix, acknack.readerId);
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -3793,92 +3793,6 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
 
   meta_submessages.push_back(meta_submessage);
 }
-
-#ifdef OPENDDS_SECURITY
-void
-RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
-                                           const RepoId& remote_id,
-                                           const unsigned char* buffer,
-                                           unsigned int buffer_size)
-{
-  using DDS::Security::ParticipantCryptoHandle;
-  using DDS::Security::DatawriterCryptoHandle;
-  using DDS::Security::DatareaderCryptoHandle;
-
-  ACE_Data_Block db(buffer_size, ACE_Message_Block::MB_DATA,
-    reinterpret_cast<const char*>(buffer),
-    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
-  ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-  mb.wr_ptr(mb.space());
-  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
-
-  const bool local_is_writer = GuidConverter(local_id).isWriter();
-  const RepoId& writer_id = local_is_writer ? local_id : remote_id;
-  const RepoId& reader_id = local_is_writer ? remote_id : local_id;
-
-  ACE_GUARD(ACE_Thread_Mutex, g, ch_lock_);
-
-  while (mb.length()) {
-    DDS::BinaryProperty_t prop;
-    if (!(ser >> prop)) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::populate_security_handles()"
-                 " - failed to deserialize BinaryProperty_t\n"));
-      return;
-    }
-
-    if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_PART_CRYPTO_HANDLE) == 0
-        && prop.value.length() >= sizeof(ParticipantCryptoHandle)) {
-      unsigned int handle = 0;
-      for (unsigned int i = 0; i < prop.value.length(); ++i) {
-        handle = handle << 8 | prop.value[i];
-      }
-
-      RepoId remote_participant;
-      RTPS::assign(remote_participant.guidPrefix, remote_id.guidPrefix);
-      remote_participant.entityId = ENTITYID_PARTICIPANT;
-      peer_crypto_handles_[remote_participant] = handle;
-      if (security_debug.bookkeeping) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
-                   ACE_TEXT("RPCH %C = %d\n"),
-                   OPENDDS_STRING(GuidConverter(remote_participant)).c_str(), handle));
-      }
-
-    } else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DW_CRYPTO_HANDLE) == 0
-               && prop.value.length() >= sizeof(DatawriterCryptoHandle)) {
-      unsigned int handle = 0;
-      for (unsigned int i = 0; i < prop.value.length(); ++i) {
-        handle = handle << 8 | prop.value[i];
-      }
-      peer_crypto_handles_[writer_id] = handle;
-      if (security_debug.bookkeeping) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
-                   ACE_TEXT("DWCH %C = %d\n"),
-                   OPENDDS_STRING(GuidConverter(writer_id)).c_str(), handle));
-      }
-
-    } else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DR_CRYPTO_HANDLE) == 0
-               && prop.value.length() >= sizeof(DatareaderCryptoHandle)) {
-      unsigned int handle = 0;
-      for (unsigned int i = 0; i < prop.value.length(); ++i) {
-        handle = handle << 8 | prop.value[i];
-      }
-      peer_crypto_handles_[reader_id] = handle;
-      if (security_debug.bookkeeping) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
-                   ACE_TEXT("DRCH %C = %d\n"),
-                   std::string(GuidConverter(reader_id)).c_str(), handle));
-      }
-
-    } else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_ENDPOINT_SEC_ATTR) == 0
-               && prop.value.length() >= max_marshaled_size_ulong()) {
-      DDS::Security::EndpointSecurityAttributesMask esa;
-      std::memcpy(&esa, prop.value.get_buffer(), prop.value.length());
-      endpoint_security_attributes_[writer_id] = endpoint_security_attributes_[reader_id] = esa;
-    }
-
-  }
-}
-#endif
 
 RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
 {

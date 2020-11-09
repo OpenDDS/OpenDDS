@@ -33,6 +33,7 @@ public:
   virtual CryptoKeyFactory_var create_crypto_key_factory();
   virtual CryptoKeyExchange_var create_crypto_key_exchange();
   virtual CryptoTransform_var create_crypto_transform();
+  virtual HandleRegistry* create_handle_registry();
   virtual Utility* create_utility();
 #endif
 
@@ -45,6 +46,7 @@ private:
   CryptoKeyFactory_var key_factory_;
   CryptoKeyExchange_var key_exchange_;
   CryptoTransform_var transform_;
+  HandleRegistry* handle_registry_;
   Utility* utility_;
 #endif
 

@@ -10,6 +10,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/security/HandleRegistry.h"
 #include "dds/DCPS/security/Utility.h"
 #endif
 
@@ -54,6 +55,7 @@ public:
   virtual CryptoKeyExchange_var create_crypto_key_exchange() = 0;
   virtual CryptoKeyFactory_var create_crypto_key_factory() = 0;
   virtual CryptoTransform_var create_crypto_transform() = 0;
+  virtual HandleRegistry* create_handle_registry() = 0;
   virtual Utility* create_utility() = 0;
 #endif
 

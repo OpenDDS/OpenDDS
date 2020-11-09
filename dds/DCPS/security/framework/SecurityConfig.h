@@ -18,6 +18,7 @@
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/security/Utility.h"
+#include "dds/DCPS/security/HandleRegistry.h"
 #endif
 
 #include "dds/DdsDcpsCoreC.h"
@@ -74,6 +75,11 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return transform_plugin_;
   }
 
+  HandleRegistry* get_handle_registry() const
+  {
+    return handle_registry_plugin_;
+  }
+
   Utility* get_utility() const
   {
     return utility_plugin_;
@@ -91,6 +97,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
                  CryptoKeyExchange_var key_exchange_plugin,
                  CryptoKeyFactory_var key_factory_plugin,
                  CryptoTransform_var transform_plugin,
+                 HandleRegistry* handle_registry_plugin,
                  Utility* utility_plugin,
 #endif
                  const ConfigPropertyList& properties);
@@ -111,6 +118,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   CryptoKeyExchange_var key_exchange_plugin_;
   CryptoKeyFactory_var key_factory_plugin_;
   CryptoTransform_var transform_plugin_;
+  HandleRegistry* handle_registry_plugin_;
   Utility* utility_plugin_;
 #endif
 

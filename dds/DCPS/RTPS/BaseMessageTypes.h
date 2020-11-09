@@ -61,11 +61,6 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_2_3 = { 2, 3 }; // DDS-Security 1.1
     const ProtocolVersion_t PROTOCOLVERSION_2_4 = { 2, 4 };
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_4;
-
-    const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
-    const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
-    const char BLOB_PROP_DR_CRYPTO_HANDLE[] = "DatareaderCryptoHandle";
-    const char BLOB_PROP_ENDPOINT_SEC_ATTR[] = "EndpointSecurityAttributes";
   }
 }
 

@@ -22,6 +22,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/security/HandleRegistry.h"
 #include "dds/DCPS/Ice.h"
 #endif
 
@@ -44,16 +45,10 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<ConnectionRecord> ConnectionRecordDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
-    typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::DatareaderCryptoHandle, GUID_tKeyLessThan)
-      DatareaderCryptoHandleMap;
-    typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::DatawriterCryptoHandle, GUID_tKeyLessThan)
-      DatawriterCryptoHandleMap;
     typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::DatareaderCryptoTokenSeq, GUID_tKeyLessThan)
       DatareaderCryptoTokenSeqMap;
     typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::DatawriterCryptoTokenSeq, GUID_tKeyLessThan)
       DatawriterCryptoTokenSeqMap;
-    typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::EndpointSecurityAttributes, GUID_tKeyLessThan)
-      EndpointSecurityAttributesMap;
 
     enum AuthState {
       AUTH_STATE_HANDSHAKE,
@@ -500,8 +495,7 @@ namespace OpenDDS {
                          ex.code, ex.minor_code, ex.message.in()));
             }
 
-            local_writer_crypto_handles_[rid] = handle;
-            local_writer_security_attribs_[rid] = pb.security_attribs_;
+            get_handle_registry()->insert_local_datawriter_crypto_handle(rid, handle, pb.security_attribs_);
           }
         }
 #endif
@@ -526,6 +520,22 @@ namespace OpenDDS {
         return rid;
       }
 
+#ifdef OPENDDS_SECURITY
+      void cleanup_secure_writer(const RepoId& publicationId)
+      {
+        using namespace DDS::Security;
+
+        const DatawriterCryptoHandle dwch = get_handle_registry()->get_local_datawriter_crypto_handle(publicationId);
+        SecurityException ex = {"", 0, 0};
+        if (!get_crypto_key_factory()->unregister_datawriter(dwch, ex)) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::cleanup_secure_writer() - ")
+                     ACE_TEXT("Failure calling unregister_datawriter.")
+                     ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+        }
+        get_handle_registry()->remove_local_datawriter_crypto_handle(publicationId);
+      }
+#endif
+
       void remove_publication(const RepoId& publicationId)
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -533,6 +543,11 @@ namespace OpenDDS {
         if (iter != local_publications_.end()) {
           if (DDS::RETCODE_OK == remove_publication_i(publicationId, iter->second)) {
             OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
+#ifdef OPENDDS_SECURITY
+            if (is_security_enabled()) {
+              cleanup_secure_writer(publicationId);
+            }
+#endif
             local_publications_.erase(publicationId);
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
               topics_.find(topic_name);
@@ -644,8 +659,7 @@ namespace OpenDDS {
                          ex.code, ex.minor_code, ex.message.in()));
             }
 
-            local_reader_crypto_handles_[rid] = handle;
-            local_reader_security_attribs_[rid] = sb.security_attribs_;
+            get_handle_registry()->insert_local_datareader_crypto_handle(rid, handle, sb.security_attribs_);
           }
         }
 #endif
@@ -670,6 +684,22 @@ namespace OpenDDS {
         return rid;
       }
 
+#ifdef OPENDDS_SECURITY
+      void cleanup_secure_reader(const RepoId& subscriptionId)
+      {
+        using namespace DDS::Security;
+
+        const DatareaderCryptoHandle drch = get_handle_registry()->get_local_datareader_crypto_handle(subscriptionId);
+        SecurityException ex = {"", 0, 0};
+        if (!get_crypto_key_factory()->unregister_datareader(drch, ex)) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::cleanup_secure_reader() - ")
+                     ACE_TEXT("Failure calling unregister_datareader.")
+                     ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+        }
+        get_handle_registry()->remove_local_datareader_crypto_handle(subscriptionId);
+      }
+#endif
+
       void remove_subscription(const RepoId& subscriptionId)
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -677,6 +707,11 @@ namespace OpenDDS {
         if (iter != local_subscriptions_.end()) {
           if (DDS::RETCODE_OK == remove_subscription_i(subscriptionId, iter->second)) {
             OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
+#ifdef OPENDDS_SECURITY
+            if (is_security_enabled()) {
+              cleanup_secure_reader(subscriptionId);
+            }
+#endif
             local_subscriptions_.erase(subscriptionId);
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
               topics_.find(topic_name);
@@ -913,13 +948,16 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
       virtual DDS::Security::DatawriterCryptoHandle
-      generate_remote_matched_writer_crypto_handle(const RepoId&, const DDS::Security::DatareaderCryptoHandle&)
+      generate_remote_matched_writer_crypto_handle(const RepoId& /*writer*/,
+                                                   const RepoId& /*reader*/)
       {
         return DDS::HANDLE_NIL;
       }
 
       virtual DDS::Security::DatareaderCryptoHandle
-      generate_remote_matched_reader_crypto_handle(const RepoId&, const DDS::Security::DatawriterCryptoHandle&, bool)
+      generate_remote_matched_reader_crypto_handle(const RepoId& /*reader*/,
+                                                   const RepoId& /*writer*/,
+                                                   bool)
       {
         return DDS::HANDLE_NIL;
       }
@@ -1122,22 +1160,20 @@ namespace OpenDDS {
           if (is_security_enabled()) {
             DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
             if (call_reader) {
-              RepoId writer_participant = writer;
-              writer_participant.entityId = ENTITYID_PARTICIPANT;
-              DatareaderCryptoHandleMap::const_iterator iter =
-                local_reader_crypto_handles_.find(reader);
+              DDS::Security::DatareaderCryptoHandle drch =
+                get_handle_registry()->get_local_datareader_crypto_handle(reader);
+              DDS::Security::EndpointSecurityAttributes attribs =
+                get_handle_registry()->get_local_datareader_security_attributes(reader);
 
               // It might not exist due to security attributes, and that's OK
-              if (iter != local_reader_crypto_handles_.end()) {
-                DDS::Security::DatareaderCryptoHandle drch = iter->second;
+              if (drch != DDS::HANDLE_NIL) {
                 DDS::Security::DatawriterCryptoHandle dwch =
-                  generate_remote_matched_writer_crypto_handle(writer_participant, drch);
-                remote_writer_crypto_handles_[writer] = dwch;
+                  generate_remote_matched_writer_crypto_handle(writer, reader);
                 DatawriterCryptoTokenSeqMap::iterator t_iter =
                   pending_remote_writer_crypto_tokens_.find(writer);
                 if (t_iter != pending_remote_writer_crypto_tokens_.end()) {
                   DDS::Security::SecurityException se;
-                  if (!keyexg->set_remote_datawriter_crypto_tokens(iter->second, dwch, t_iter->second, se)) {
+                  if (!keyexg->set_remote_datawriter_crypto_tokens(drch, dwch, t_iter->second, se)) {
                     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
                       ACE_TEXT("Unable to set pending remote datawriter crypto tokens with ")
@@ -1146,33 +1182,29 @@ namespace OpenDDS {
                   }
                   pending_remote_writer_crypto_tokens_.erase(t_iter);
                 }
-                EndpointSecurityAttributesMap::const_iterator s_iter =
-                  local_reader_security_attribs_.find(reader);
                 // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
-                if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) {
+                if (attribs.is_submessage_protected) {
                   create_and_send_datareader_crypto_tokens(drch, reader, dwch, writer);
                 }
               }
             }
 
             if (call_writer) {
-              RepoId reader_participant = reader;
-              reader_participant.entityId = ENTITYID_PARTICIPANT;
-              DatawriterCryptoHandleMap::const_iterator iter =
-                local_writer_crypto_handles_.find(writer);
+              DDS::Security::DatawriterCryptoHandle dwch =
+                get_handle_registry()->get_local_datawriter_crypto_handle(writer);
+              DDS::Security::EndpointSecurityAttributes attribs =
+                get_handle_registry()->get_local_datawriter_security_attributes(writer);
 
               // It might not exist due to security attributes, and that's OK
-              if (iter != local_writer_crypto_handles_.end()) {
-                DDS::Security::DatawriterCryptoHandle dwch = iter->second;
+              if (dwch != DDS::HANDLE_NIL) {
                 DDS::Security::DatareaderCryptoHandle drch =
-                  generate_remote_matched_reader_crypto_handle(
-                    reader_participant, dwch, relay_only_readers_.count(reader));
-                remote_reader_crypto_handles_[reader] = drch;
+                  generate_remote_matched_reader_crypto_handle(reader, writer,
+                                                               relay_only_readers_.count(reader));
                 DatareaderCryptoTokenSeqMap::iterator t_iter =
                   pending_remote_reader_crypto_tokens_.find(reader);
                 if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
                   DDS::Security::SecurityException se;
-                  if (!keyexg->set_remote_datareader_crypto_tokens(iter->second, drch, t_iter->second, se)) {
+                  if (!keyexg->set_remote_datareader_crypto_tokens(dwch, drch, t_iter->second, se)) {
                     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
                       ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto ")
@@ -1181,10 +1213,7 @@ namespace OpenDDS {
                   }
                   pending_remote_reader_crypto_tokens_.erase(t_iter);
                 }
-                EndpointSecurityAttributesMap::const_iterator s_iter =
-                  local_writer_security_attribs_.find(writer);
-                if (s_iter != local_writer_security_attribs_.end() &&
-                    (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
+                if (attribs.is_submessage_protected || attribs.is_payload_protected) {
                   create_and_send_datawriter_crypto_tokens(dwch, writer, drch, reader);
                 }
               }
@@ -1209,7 +1238,7 @@ namespace OpenDDS {
           wa.writerQos = *dwQos;
 #else
           const ReaderAssociation ra =
-            {add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
+            {*rTls, reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
              cfProp->filterClassName, cfProp->filterExpression,
 #else
@@ -1218,7 +1247,7 @@ namespace OpenDDS {
              cfProp->expressionParameters};
 
           const WriterAssociation wa =
-            {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos};
+            {*wTls, writer, *pubQos, *dwQos};
 #endif
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
@@ -1316,11 +1345,6 @@ namespace OpenDDS {
                                                        DiscoveredPublicationIter& iter,
                                                        const RepoId& reader) = 0;
 
-      virtual TransportLocatorSeq
-      add_security_info(const TransportLocatorSeq& locators,
-                        const RepoId& /*writer*/, const RepoId& /*reader*/)
-      { return locators; }
-
       void remove_from_bit(const DiscoveredPublication& pub)
       {
         remove_from_bit_i(pub);
@@ -1398,6 +1422,17 @@ namespace OpenDDS {
       {
         return crypto_key_exchange_;
       }
+
+      inline void set_handle_registry(OpenDDS::Security::HandleRegistry* hr)
+      {
+        handle_registry_ = hr;
+      }
+
+      inline OpenDDS::Security::HandleRegistry* get_handle_registry() const
+      {
+        return handle_registry_;
+      }
+
 #endif
 
       ACE_Thread_Mutex& lock_;
@@ -1417,18 +1452,10 @@ namespace OpenDDS {
       DDS::Security::AccessControl_var access_control_;
       DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
       DDS::Security::CryptoKeyExchange_var crypto_key_exchange_;
+      OpenDDS::Security::HandleRegistry* handle_registry_;
 
       DDS::Security::PermissionsHandle permissions_handle_;
       DDS::Security::ParticipantCryptoHandle crypto_handle_;
-
-      DatareaderCryptoHandleMap local_reader_crypto_handles_;
-      DatawriterCryptoHandleMap local_writer_crypto_handles_;
-
-      EndpointSecurityAttributesMap local_reader_security_attribs_;
-      EndpointSecurityAttributesMap local_writer_security_attribs_;
-
-      DatareaderCryptoHandleMap remote_reader_crypto_handles_;
-      DatawriterCryptoHandleMap remote_writer_crypto_handles_;
 
       DatareaderCryptoTokenSeqMap pending_remote_reader_crypto_tokens_;
       DatawriterCryptoTokenSeqMap pending_remote_writer_crypto_tokens_;
@@ -1633,7 +1660,6 @@ namespace OpenDDS {
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
-        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1663,10 +1689,9 @@ namespace OpenDDS {
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
-        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
-          const RepoId guid = make_guid(p.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+          const RepoId guid = make_id(p.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
           std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;
@@ -1737,7 +1762,6 @@ namespace OpenDDS {
         DDS::Security::AuthenticatedPeerCredentialToken authenticated_peer_credential_token_;
         DDS::Security::SharedSecretHandle_var shared_secret_handle_;
         DDS::Security::PermissionsHandle permissions_handle_;
-        DDS::Security::ParticipantCryptoHandle crypto_handle_;
         DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
 #endif
       };
