@@ -357,6 +357,13 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 
   int protocol_family = PF_UNSPEC;
   if (!open_appropriate_socket_type(unicast_socket_, config.local_address(), &protocol_family)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
+                      ACE_TEXT("%m\n")),
+                      false);
+  }
+
 #ifdef ACE_WIN32
   // By default Winsock will cause reads to fail with "connection reset"
   // when UDP sends result in ICMP "port unreachable" messages.
@@ -368,13 +375,6 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
   }
 #endif
-
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
-                      ACE_TEXT("%m\n")),
-                      false);
-  }
 
 #ifdef ACE_RECVPKTINFO
   if (protocol_family == PF_INET) {
