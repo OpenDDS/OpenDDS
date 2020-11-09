@@ -84,6 +84,12 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   last_discovery_time_->value.time_prop(Builder::ZERO);
 
   create_time_->value.time_prop(get_hr_time());
+
+  DDS::SubscriberQos subscriber_qos;
+  if (subscriber_->get_qos(subscriber_qos) == DDS::RETCODE_OK && subscriber_qos.entity_factory.autoenable_created_entities == true) {
+    enable_time_->value.time_prop(create_time_->value.time_prop());
+  }
+
   if (cft_name_.empty()) {
     datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
   } else {
@@ -101,11 +107,6 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     throw std::runtime_error("datareader creation failed");
   }
 
-  DDS::SubscriberQos subscriber_qos;
-  if (subscriber_->get_qos(subscriber_qos) == DDS::RETCODE_OK && subscriber_qos.entity_factory.autoenable_created_entities == true) {
-    enable_time_->value.time_prop(create_time_->value.time_prop());
-  }
-
   if (!transport_config_name_.empty()) {
     Log::log() << "Binding config for datareader " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), datareader_);
@@ -121,11 +122,17 @@ DataReader::~DataReader() {
   }
 }
 
-void DataReader::enable() {
+bool DataReader::enable(bool throw_on_error) {
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
-    datareader_->enable();
   }
+  bool result = (datareader_->enable() == DDS::RETCODE_OK);
+  if (!result && throw_on_error) {
+    std::stringstream ss;
+    ss << "failed to enable datareader '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+  return result;
 }
 
 void DataReader::detach_listener() {
@@ -142,4 +149,3 @@ void DataReader::detach_listener() {
 }
 
 }
-

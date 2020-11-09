@@ -35,7 +35,7 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
-int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
+int handle_reports(const Bench::NodeController::ReportSeq& nc_reports, const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -324,7 +324,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
       std::cout << scenario_start;
 
-      std::vector<Bench::WorkerReport> reports = scenario_manager.execute(allocated_scenario);
+      std::vector<Bench::WorkerReport> worker_reports;
+      Bench::NodeController::ReportSeq nc_reports;
+      scenario_manager.execute(allocated_scenario, worker_reports, nc_reports);
 
       std::ofstream result_file(result_path);
       if (!result_file.is_open()) {
@@ -346,7 +348,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << std::endl
           << "Ended at " << iso8601() << std::endl
           << std::endl;
-        result = handle_reports(reports, ss);
+        result = handle_reports(nc_reports, worker_reports, ss);
         scenario_end = ss.str();
       }
       result_file << scenario_end;
@@ -354,9 +356,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       std::cout << "Wrote results to " << result_path << std::endl;
 
-      if (reports.size() != allocated_scenario.expected_reports) {
-        result_file << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
-        std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+      if (worker_reports.size() != allocated_scenario.expected_reports) {
+        result_file << "ERROR: Only received " << worker_reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+        std::cerr << "ERROR: Only received " << worker_reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
         result = EXIT_FAILURE;
       }
     }
@@ -370,10 +372,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   return result;
 };
 
-int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
+int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
+  const std::vector<Bench::WorkerReport>& parsed_reports,
+  std::ostringstream& result_out)
 {
   int result = EXIT_SUCCESS;
   using Builder::ZERO;
+
+  Bench::SimpleStatBlock consolidated_cpu_percent_stats;
+  Bench::SimpleStatBlock consolidated_mem_percent_stats;
+  Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
+
+  for (CORBA::ULong n = 0; n < nc_reports.length(); ++n) {
+    const Bench::NodeController::Report& nc_report = nc_reports[n];
+
+    Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
+    Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
+    Bench::ConstPropertyStatBlock virtual_mem_percent(nc_report.properties, "virtual_mem_percent");
+
+    consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
+    consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
+    consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
+  }
 
   Builder::TimeStamp max_construction_time = ZERO;
   Builder::TimeStamp max_enable_time = ZERO;
@@ -390,6 +410,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
   uint64_t total_missing_data_count = 0;
   Builder::TimeStamp max_discovery_time_delta = ZERO;
 
+  Bench::SimpleStatBlock consolidated_discovery_delta_stats;
   Bench::SimpleStatBlock consolidated_latency_stats;
   Bench::SimpleStatBlock consolidated_jitter_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
@@ -419,6 +440,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
 
           const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
 
+          Bench::ConstPropertyStatBlock dr_discovery_delta(dr_report.properties, "discovery_delta");
           Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
           Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
@@ -467,14 +489,36 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
             total_missing_data_count += missing_data_count_prop->value.ull_prop();
           }
 
+          consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dr_discovery_delta.to_simple_stat_block());
           consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
           consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
           consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
         }
       }
+      for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
+        for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
+
+          const Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+
+          Bench::ConstPropertyStatBlock dw_discovery_delta(dw_report.properties, "discovery_delta");
+          consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dw_discovery_delta.to_simple_stat_block());
+        }
+      }
     }
   }
+
+  result_out << std::endl;
+
+  consolidated_cpu_percent_stats.pretty_print(result_out, "percent cpu utilization");
+
+  result_out << std::endl;
+
+  consolidated_mem_percent_stats.pretty_print(result_out, "percent memory utilization");
+
+  result_out << std::endl;
+
+  consolidated_virtual_mem_percent_stats.pretty_print(result_out, "percent virtual memory utilization");
 
   result_out << std::endl;
 
@@ -493,7 +537,11 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
     "Total Undermatched Readers: " << total_undermatched_readers <<
     (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
     "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
-  result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+  //result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+
+  result_out << std::endl;
+
+  consolidated_discovery_delta_stats.pretty_print(result_out, "discovery time delta");
 
   result_out << std::endl;
 

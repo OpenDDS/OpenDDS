@@ -11,7 +11,7 @@ public:
   explicit DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber, const std::shared_ptr<TopicManager>& topics);
   ~DataReader();
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
   void detach_listener();
 

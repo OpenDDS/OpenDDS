@@ -17,10 +17,12 @@ DataReaderManager::DataReaderManager(const DataReaderConfigSeq& configs, DataRea
   }
 }
 
-void DataReaderManager::enable() {
+bool DataReaderManager::enable(bool throw_on_error) {
+  bool result = true;
   for (auto it = datareaders_.begin(); it != datareaders_.end(); ++it) {
-    (*it)->enable();
+    result &= (*it)->enable(throw_on_error);
   }
+  return result;
 }
 
 }

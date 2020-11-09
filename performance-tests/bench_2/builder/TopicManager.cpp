@@ -29,5 +29,13 @@ DDS::ContentFilteredTopic_var TopicManager::get_content_filtered_topic_by_name(c
   return result;
 }
 
+bool TopicManager::enable(bool throw_on_error) {
+  bool result = true;
+  for (auto it = topics_.begin(); it != topics_.end(); ++it) {
+    result &= it->second->enable(throw_on_error);
+  }
+  return result;
+}
+
 }
 

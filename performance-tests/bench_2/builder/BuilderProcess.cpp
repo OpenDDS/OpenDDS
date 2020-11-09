@@ -31,8 +31,8 @@ void BuilderProcess::detach_listeners() {
   }
 }
 
-void BuilderProcess::enable_dds_entities() {
-  participants_->enable();
+bool BuilderProcess::enable_dds_entities(bool throw_on_error) {
+  return participants_->enable(throw_on_error);
 }
 
 }

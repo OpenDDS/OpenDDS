@@ -565,14 +565,10 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   }
 
   // either link is valid or assoc failed, clean up pending object
-  // for passive side processing
-  if (!pend->active_) {
-
-    for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = pend->impls_[i].lock();
-      if (impl) {
-        impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
-      }
+  for (size_t i = 0; i < pend->impls_.size(); ++i) {
+    RcHandle<TransportImpl> impl = pend->impls_[i].lock();
+    if (impl) {
+      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
     }
   }
 

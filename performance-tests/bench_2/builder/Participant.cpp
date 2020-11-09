@@ -97,10 +97,16 @@ Participant::~Participant() {
   }
 }
 
-void Participant::enable() {
-  participant_->enable();
-  subscribers_->enable();
-  publishers_->enable();
+bool Participant::enable(bool throw_on_error) {
+  bool success = (participant_->enable() == DDS::RETCODE_OK);
+  if (!success && throw_on_error) {
+    std::stringstream ss;
+    ss << "failed to enable participant '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+  return success && topics_->enable(throw_on_error) &&
+    subscribers_->enable(throw_on_error) &&
+    publishers_->enable(throw_on_error);
 }
 
 }
