@@ -97,7 +97,7 @@ std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
 template <typename T>
 class AbsentValue {
 public:
-  AbsentValue(const T& value)
+  explicit AbsentValue(const T& value)
     : absent_value(value)
   {}
 
@@ -156,7 +156,7 @@ protected:
 class KeyAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
 public:
   KeyAnnotation()
-    : AbsentValue(false)
+    : AbsentValue<bool>(false)
   {}
 
   std::string definition() const;
@@ -222,7 +222,7 @@ enum AutoidKind {
 class AutoidAnnotation : public AnnotationWithEnumValue<AutoidKind>, public AbsentValue<AutoidKind> {
 public:
   AutoidAnnotation()
-    : AbsentValue(autoidkind_sequential)
+    : AbsentValue<AutoidKind>(autoidkind_sequential)
   {}
 
   std::string definition() const;
@@ -242,7 +242,7 @@ public:
 class OptionalAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
 public:
   OptionalAnnotation()
-    : AbsentValue(false)
+    : AbsentValue<bool>(false)
   {}
 
   std::string definition() const;
@@ -254,7 +254,7 @@ public:
 class MustUnderstandAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
 public:
   MustUnderstandAnnotation()
-    : AbsentValue(false)
+    : AbsentValue<bool>(false)
   {}
 
   std::string definition() const;
@@ -266,7 +266,7 @@ public:
 class ExternalAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
 public:
   ExternalAnnotation()
-    : AbsentValue(false)
+    : AbsentValue<bool>(false)
   {}
 
   std::string definition() const;
@@ -319,10 +319,12 @@ enum TryConstructFailAction {
   tryconstructfailaction_trim,
 };
 
-class TryConstructAnnotation : public AnnotationWithEnumValue<TryConstructFailAction>, public AbsentValue<TryConstructFailAction> {
+class TryConstructAnnotation
+  : public AnnotationWithEnumValue<TryConstructFailAction>
+  , public AbsentValue<TryConstructFailAction> {
 public:
   TryConstructAnnotation()
-    : AbsentValue(tryconstructfailaction_discard)
+    : AbsentValue<TryConstructFailAction>(tryconstructfailaction_discard)
   {}
 
   std::string definition() const;

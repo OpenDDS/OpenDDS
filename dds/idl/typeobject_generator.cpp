@@ -110,15 +110,18 @@ struct UintPrinter : ValuePrinter<T> {
 };
 
 struct SBoundPrinter : UintPrinter<OpenDDS::XTypes::SBound> {
-  explicit SBoundPrinter(const OpenDDS::XTypes::SBound a_value) : UintPrinter(a_value) {}
+  explicit SBoundPrinter(const OpenDDS::XTypes::SBound a_value)
+  : UintPrinter<OpenDDS::XTypes::SBound>(a_value) {}
 };
 
 struct LBoundPrinter : UintPrinter<OpenDDS::XTypes::LBound> {
-  explicit LBoundPrinter(const OpenDDS::XTypes::LBound a_value) : UintPrinter(a_value) {}
+  explicit LBoundPrinter(const OpenDDS::XTypes::LBound a_value)
+  : UintPrinter<OpenDDS::XTypes::LBound>(a_value) {}
 };
 
 struct EquivalenceKindPrinter : ValuePrinter<OpenDDS::XTypes::EquivalenceKind> {
-  explicit EquivalenceKindPrinter(const OpenDDS::XTypes::EquivalenceKind a_value) : ValuePrinter(a_value) {}
+  explicit EquivalenceKindPrinter(const OpenDDS::XTypes::EquivalenceKind a_value)
+  : ValuePrinter<OpenDDS::XTypes::EquivalenceKind>(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
@@ -160,7 +163,8 @@ struct BitmaskPrintHelper {
 };
 
 struct MemberFlagPrinter : ValuePrinter<OpenDDS::XTypes::MemberFlag> {
-  explicit MemberFlagPrinter(const OpenDDS::XTypes::MemberFlag a_value) : ValuePrinter(a_value) {}
+  explicit MemberFlagPrinter(const OpenDDS::XTypes::MemberFlag a_value)
+  : ValuePrinter<OpenDDS::XTypes::MemberFlag>(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
@@ -215,7 +219,8 @@ struct AliasMemberFlagPrinter : MemberFlagPrinter {
 };
 
 struct TypeFlagPrinter : ValuePrinter<OpenDDS::XTypes::TypeFlag> {
-  explicit TypeFlagPrinter(const OpenDDS::XTypes::TypeFlag a_value) : ValuePrinter(a_value) {}
+  explicit TypeFlagPrinter(const OpenDDS::XTypes::TypeFlag a_value)
+  : ValuePrinter<OpenDDS::XTypes::TypeFlag>(a_value) {}
 
   std::ostream& print_on(std::ostream& out) const
   {
@@ -260,11 +265,13 @@ struct EnumTypeFlagPrinter :  TypeFlagPrinter {
 };
 
 struct MemberIdPrinter : UintPrinter<OpenDDS::XTypes::MemberId> {
-  explicit MemberIdPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : UintPrinter(a_value) {}
+  explicit MemberIdPrinter(const OpenDDS::XTypes::StructMemberFlag a_value)
+  : UintPrinter<OpenDDS::XTypes::MemberId>(a_value) {}
 };
 
 struct BitBoundPrinter : UintPrinter<OpenDDS::XTypes::BitBound> {
-  explicit BitBoundPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : UintPrinter(a_value) {}
+  explicit BitBoundPrinter(const OpenDDS::XTypes::StructMemberFlag a_value)
+  : UintPrinter<OpenDDS::XTypes::BitBound>(a_value) {}
 };
 
 std::ostream&

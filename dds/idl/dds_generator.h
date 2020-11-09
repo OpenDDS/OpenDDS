@@ -139,28 +139,29 @@ private:
 
 // common utilities for all "generator" derived classes
 
+const char* const namespace_guard_start =
+  "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
+  "namespace OpenDDS { namespace DCPS {\n\n";
+const char* const namespace_guard_end =
+  "} }\n"
+  "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+
 struct NamespaceGuard {
   const bool enabled_;
-  const char* const start =
-    "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
-    "namespace OpenDDS { namespace DCPS {\n\n";
-  const char* const end =
-    "} }\n"
-    "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
   NamespaceGuard(bool enabled = true)
   : enabled_(enabled)
   {
     if (enabled_) {
-      be_global->header_ << start;
-      be_global->impl_ << start;
+      be_global->header_ << namespace_guard_start;
+      be_global->impl_ << namespace_guard_start;
     }
   }
   ~NamespaceGuard()
   {
     if (enabled_) {
-      be_global->header_ << end;
-      be_global->impl_ << end;
+      be_global->header_ << namespace_guard_end;
+      be_global->impl_ << namespace_guard_end;
     }
   }
 };

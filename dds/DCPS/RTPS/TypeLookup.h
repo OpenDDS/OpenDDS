@@ -82,7 +82,7 @@ struct TypeLookup_getTypeDependencies_Result { //IDL: union switch (long)
 };
 
 struct TypeLookup_Call { //IDL: union switch (long)
-  ACE_CDR::Long kind;
+  ACE_CDR::ULong kind;
 
   // case TypeLookup_getTypes_Hash:
   TypeLookup_getTypes_In getTypes;
@@ -102,7 +102,7 @@ struct TypeLookup_Request {
 };
 
 struct TypeLookup_Return { //IDL: union switch (long)
-  ACE_CDR::Long kind;
+  ACE_CDR::ULong kind;
 
   // case TypeLookup_getTypes_Hash:
   TypeLookup_getTypes_Result getType;
