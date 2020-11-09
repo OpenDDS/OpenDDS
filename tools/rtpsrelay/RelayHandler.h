@@ -136,6 +136,7 @@ protected:
                                                  const size_t& msg_len);
   void send(const OpenDDS::DCPS::RepoId& src_guid,
             ParticipantStatisticsReporter& stats_reporter,
+            bool undirected,
             const GuidSet& to,
             bool send_to_application_participant,
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
