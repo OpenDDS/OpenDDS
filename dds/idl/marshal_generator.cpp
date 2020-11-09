@@ -11,6 +11,7 @@
 #include "field_info.h"
 #include "topic_keys.h"
 #include "be_util.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include <utl_identifier.h>
 
@@ -2647,6 +2648,261 @@ namespace {
     return true;
   }
 
+  bool generate_struct_deserialization(
+    AST_Structure* node, FieldFilter field_type)
+  {
+    const std::string actual_cpp_name = scoped(node->name());
+    std::string cpp_name = actual_cpp_name;
+    std::string const_cpp_name;
+    switch (field_type) {
+    case FieldFilter_All:
+      const_cpp_name = "const " + actual_cpp_name + "&";
+      break;
+    case FieldFilter_NestedKeyOnly:
+      cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
+      const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
+      break;
+    case FieldFilter_KeyOnly:
+      cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
+      const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
+      break;
+    }
+    const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
+    const bool wrap_nested_key_only = field_type != FieldFilter_All;
+    const Fields fields(node, field_type);
+    const Fields::Iterator fields_end = fields.end();
+    RtpsFieldCustomizer rtpsCustom(cpp_name);
+
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    const bool not_final = exten != extensibilitykind_final;
+    const bool is_mutable = exten == extensibilitykind_mutable;
+    const bool is_appendable = exten == extensibilitykind_appendable;
+
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cpp_name + "&");
+      extraction.endArgs();
+      Intro intro;
+      string expr;
+      const std::string indent = "  ";
+
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
+      marshal_generator::generate_dheader_code(
+        "    if (!strm.read_delimiter(total_size)) {\n"
+        "      return false;\n"
+        "    }\n", not_final);
+
+      if (not_final) {
+        be_global->impl_ <<
+          "  const size_t end_of_struct = strm.pos() + total_size;\n"
+          "\n";
+      }
+
+      if (is_mutable) {
+        be_global->impl_ <<
+          "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
+          "    set_default(stru" << (wrap_nested_key_only ? ".value" : "") << ");\n"
+          "\n"
+          "    unsigned member_id;\n"
+          "    size_t field_size;\n"
+          "    while (true) {\n";
+
+        /*
+        * Get the Member ID and see if we're done. In XCDR1 we use a special
+        * member ID to stop the loop. We don't have a PID marking the end in
+        * XCDR2 parameter lists, but we have the size, so we need to stop
+        * after we hit the offset marked by the delimiter, but before trying
+        * to read a non-existent member id.
+        */
+        be_global->impl_ <<
+          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
+          "            strm.pos() >= end_of_struct) {\n"
+          "        return true;\n"
+          "      }\n"
+          "      bool must_understand = false;\n"
+          "      if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "        return false;\n"
+          "      }\n"
+          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 &&\n"
+          "            member_id == Serializer::pid_list_end) {\n"
+          "        return true;\n"
+          "      }\n"
+          "      const size_t end_of_field = strm.pos() + field_size;\n"
+          "      ACE_UNUSED_ARG(end_of_field);\n"
+          "\n";
+
+        std::ostringstream cases;
+        const AutoidKind auto_id = be_global->autoid(node);
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          AST_Field* const field = *i;
+          ACE_CDR::ULong default_id = i.pos();
+          const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
+          string field_name =
+            string("stru") + value_access + "." + field->local_name()->get_string();
+          cases <<
+            "      case " << id << ": {\n"
+            "        if (!" << generate_field_stream(
+            indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
+          AST_Type* const field_type = resolveActualType(field->field_type());
+          Classification fld_cls = classify(field_type);
+
+          if (use_cxx11) {
+            field_name += "()";
+          }
+          const TryConstructFailAction try_construct = be_global->try_construct(field);
+          if (try_construct == tryconstructfailaction_use_default) {
+            cases <<
+              type_to_default("          ", field_type, field_name, field->field_type()->anonymous()) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+            if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
+          } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
+                    (fld_cls & (CL_STRING | CL_SEQUENCE))) {
+            if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
+              const std::string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
+              const std::string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
+              const std::string inout = use_cxx11 ? "" : ".inout()";
+              cases <<
+                "        if (" + construct_bound_fail + " && " << check_not_empty << " && ("
+                        << bounded_arg(field_type) << " < " << get_length << ")) {\n"
+                "          " << field_name << inout;
+              if (use_cxx11) {
+                cases <<
+                  ".resize(" << bounded_arg(field_type) <<  ");\n";
+              } else {
+                cases <<
+                  "[" << bounded_arg(field_type) << "] = 0;\n";
+              }
+              cases <<
+                "        } else {\n"
+                "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+                "          return false;\n"
+                "        }\n";
+            } else if (fld_cls & CL_SEQUENCE) {
+              cases <<
+                "          if (" + construct_elem_fail + ") {\n"
+                "            return false;\n"
+                "          }\n"
+                "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+                "          strm.skip(end_of_field - strm.pos());\n";
+            }
+
+          } else { //discard/default
+            cases <<
+              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            if (!(fld_cls & CL_STRING)) {
+              cases <<
+                "          strm.skip(end_of_field - strm.pos());\n";
+            }
+            cases <<
+              "          return false;\n";
+          }
+          cases <<
+            "        }\n"
+            "        break;\n"
+            "      }\n";
+        }
+        intro.join(be_global->impl_, indent);
+        const string switch_cases = cases.str();
+        string sw_indent = "        ";
+        if (switch_cases.empty()) {
+          sw_indent = "      ";
+        } else {
+          be_global->impl_ <<
+            "      switch (member_id) {\n"
+            << switch_cases <<
+            "      default:\n";
+        }
+
+        be_global->impl_ <<
+          sw_indent << "if (must_understand) {\n" <<
+          sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
+          sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
+          << cpp_name << "\\n\"), member_id));\n" <<
+          sw_indent << "  }\n" <<
+          sw_indent << "  return false;\n" <<
+          sw_indent << "}\n" <<
+          sw_indent << "strm.skip(field_size);\n";
+
+        if (!switch_cases.empty()) {
+          be_global->impl_ <<
+            "        break;\n"
+            "      }\n";
+        }
+
+        be_global->impl_ <<
+          "    }\n"
+          "    return false;\n"
+          "  }\n"
+          "\n";
+      }
+
+      expr = "";
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        AST_Field* const field = *i;
+        if (expr.size() && exten != extensibilitykind_appendable) {
+          expr += "\n    && ";
+        }
+        // TODO (sonndinh): Integrate with try-construct for when the stream
+        // ends before some fields on the reader side get their values.
+        if (is_appendable) {
+          expr +=
+            "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
+            "      strm.pos() >= end_of_struct) {\n"
+            "    return true;\n"
+            "  }\n";
+        }
+        const string field_name = field->local_name()->get_string();
+        const string cond = rtpsCustom.getConditional(field_name);
+        if (!cond.empty()) {
+          string prefix = rtpsCustom.preFieldRead(field_name);
+          if (is_appendable) {
+            if (!prefix.empty()) {
+              prefix = prefix.substr(0, prefix.length() - 8);
+              expr +=
+                "  if (!" + prefix + ") {\n"
+                "    return false;\n"
+                "  }\n";
+            }
+            expr += "  if ((" + cond + ") && !";
+          } else {
+            expr += prefix + "(!(" + cond + ") || ";
+          }
+        } else if (is_appendable) {
+          expr += "  if (!";
+        }
+        expr += generate_field_stream(
+          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
+        if (is_appendable) {
+          expr += ") {\n"
+            "    return false;\n"
+            "  }\n";
+        } else if (!cond.empty()) {
+          expr += ")";
+        }
+      }
+      intro.join(be_global->impl_, indent);
+      if (is_appendable) {
+        expr +=
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
+          "      strm.pos() < end_of_struct) {\n"
+          "    strm.skip(end_of_struct - strm.pos());\n"
+          "  }\n"
+          "  return true;\n";
+        be_global->impl_ << expr;
+      } else if (expr.empty()) {
+        be_global->impl_ << "  return true;\n";
+      } else {
+        be_global->impl_ << "  return " << expr << ";\n";
+      }
+    }
+    return true;
+  }
+
   bool generate_struct_serialization_functions(AST_Structure* node, FieldFilter field_type)
   {
     const std::string actual_cpp_name = scoped(node->name());
@@ -2805,7 +3061,7 @@ namespace {
       be_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
     }
 
-    return marshal_generator::generate_struct_deserialization(node, field_type);
+    return generate_struct_deserialization(node, field_type);
   }
 
 } // anonymous namespace
@@ -2823,261 +3079,6 @@ void marshal_generator::generate_dheader_code(const std::string& code, bool dhea
       << code <<
       "  }\n";
   }
-}
-
-bool marshal_generator::generate_struct_deserialization(
-  AST_Structure* node, FieldFilter field_type)
-{
-  const std::string actual_cpp_name = scoped(node->name());
-  std::string cpp_name = actual_cpp_name;
-  std::string const_cpp_name;
-  switch (field_type) {
-  case FieldFilter_All:
-    const_cpp_name = "const " + actual_cpp_name + "&";
-    break;
-  case FieldFilter_NestedKeyOnly:
-    cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
-    const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
-    break;
-  case FieldFilter_KeyOnly:
-    cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
-    const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
-    break;
-  }
-  const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
-  const bool wrap_nested_key_only = field_type != FieldFilter_All;
-  const Fields fields(node, field_type);
-  const Fields::Iterator fields_end = fields.end();
-  RtpsFieldCustomizer rtpsCustom(cpp_name);
-
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
-  const ExtensibilityKind exten = be_global->extensibility(node);
-  const bool not_final = exten != extensibilitykind_final;
-  const bool is_mutable = exten == extensibilitykind_mutable;
-  const bool is_appendable = exten == extensibilitykind_appendable;
-
-  {
-    Function extraction("operator>>", "bool");
-    extraction.addArg("strm", "Serializer&");
-    extraction.addArg("stru", cpp_name + "&");
-    extraction.endArgs();
-    Intro intro;
-    string expr;
-    const std::string indent = "  ";
-
-    be_global->impl_ <<
-      "  const Encoding& encoding = strm.encoding();\n"
-      "  ACE_UNUSED_ARG(encoding);\n";
-    marshal_generator::generate_dheader_code(
-      "    if (!strm.read_delimiter(total_size)) {\n"
-      "      return false;\n"
-      "    }\n", not_final);
-
-    if (not_final) {
-      be_global->impl_ <<
-        "  const size_t end_of_struct = strm.pos() + total_size;\n"
-        "\n";
-    }
-
-    if (is_mutable) {
-      be_global->impl_ <<
-        "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
-        "    set_default(stru" << (wrap_nested_key_only ? ".value" : "") << ");\n"
-        "\n"
-        "    unsigned member_id;\n"
-        "    size_t field_size;\n"
-        "    while (true) {\n";
-
-      /*
-       * Get the Member ID and see if we're done. In XCDR1 we use a special
-       * member ID to stop the loop. We don't have a PID marking the end in
-       * XCDR2 parameter lists, but we have the size, so we need to stop
-       * after we hit the offset marked by the delimiter, but before trying
-       * to read a non-existent member id.
-       */
-      be_global->impl_ <<
-        "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-        "            strm.pos() >= end_of_struct) {\n"
-        "        return true;\n"
-        "      }\n"
-        "      bool must_understand = false;\n"
-        "      if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
-        "        return false;\n"
-        "      }\n"
-        "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 &&\n"
-        "            member_id == Serializer::pid_list_end) {\n"
-        "        return true;\n"
-        "      }\n"
-        "      const size_t end_of_field = strm.pos() + field_size;\n"
-        "      ACE_UNUSED_ARG(end_of_field);\n"
-        "\n";
-
-      std::ostringstream cases;
-      const AutoidKind auto_id = be_global->autoid(node);
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        AST_Field* const field = *i;
-        ACE_CDR::ULong default_id = i.pos();
-        const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
-        string field_name =
-          string("stru") + value_access + "." + field->local_name()->get_string();
-        cases <<
-          "      case " << id << ": {\n"
-          "        if (!" << generate_field_stream(
-          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
-        AST_Type* const field_type = resolveActualType(field->field_type());
-        Classification fld_cls = classify(field_type);
-
-        if (use_cxx11) {
-          field_name += "()";
-        }
-        const TryConstructFailAction try_construct = be_global->try_construct(field);
-        if (try_construct == tryconstructfailaction_use_default) {
-          cases <<
-            type_to_default("          ", field_type, field_name, field->field_type()->anonymous()) <<
-            "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-          if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
-        } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
-                   (fld_cls & (CL_STRING | CL_SEQUENCE))) {
-          if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
-            const std::string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
-            const std::string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
-            const std::string inout = use_cxx11 ? "" : ".inout()";
-            cases <<
-              "        if (" + construct_bound_fail + " && " << check_not_empty << " && ("
-                       << bounded_arg(field_type) << " < " << get_length << ")) {\n"
-              "          " << field_name << inout;
-            if (use_cxx11) {
-              cases <<
-                ".resize(" << bounded_arg(field_type) <<  ");\n";
-            } else {
-              cases <<
-                "[" << bounded_arg(field_type) << "] = 0;\n";
-            }
-            cases <<
-              "        } else {\n"
-              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-              "          return false;\n"
-              "        }\n";
-          } else if (fld_cls & CL_SEQUENCE) {
-            cases <<
-              "          if (" + construct_elem_fail + ") {\n"
-              "            return false;\n"
-              "          }\n"
-              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-              "          strm.skip(end_of_field - strm.pos());\n";
-          }
-
-        } else { //discard/default
-          cases <<
-            "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          if (!(fld_cls & CL_STRING)) {
-            cases <<
-              "          strm.skip(end_of_field - strm.pos());\n";
-          }
-          cases <<
-            "          return false;\n";
-        }
-        cases <<
-          "        }\n"
-          "        break;\n"
-          "      }\n";
-      }
-      intro.join(be_global->impl_, indent);
-      const string switch_cases = cases.str();
-      string sw_indent = "        ";
-      if (switch_cases.empty()) {
-        sw_indent = "      ";
-      } else {
-        be_global->impl_ <<
-          "      switch (member_id) {\n"
-          << switch_cases <<
-          "      default:\n";
-      }
-
-      be_global->impl_ <<
-        sw_indent << "if (must_understand) {\n" <<
-        sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
-        sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
-        << cpp_name << "\\n\"), member_id));\n" <<
-        sw_indent << "  }\n" <<
-        sw_indent << "  return false;\n" <<
-        sw_indent << "}\n" <<
-        sw_indent << "strm.skip(field_size);\n";
-
-      if (!switch_cases.empty()) {
-        be_global->impl_ <<
-          "        break;\n"
-          "      }\n";
-      }
-
-      be_global->impl_ <<
-        "    }\n"
-        "    return false;\n"
-        "  }\n"
-        "\n";
-    }
-
-    expr = "";
-    for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-      AST_Field* const field = *i;
-      if (expr.size() && exten != extensibilitykind_appendable) {
-        expr += "\n    && ";
-      }
-      // TODO (sonndinh): Integrate with try-construct for when the stream
-      // ends before some fields on the reader side get their values.
-      if (is_appendable) {
-        expr +=
-          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "      strm.pos() >= end_of_struct) {\n"
-          "    return true;\n"
-          "  }\n";
-      }
-      const string field_name = field->local_name()->get_string();
-      const string cond = rtpsCustom.getConditional(field_name);
-      if (!cond.empty()) {
-        string prefix = rtpsCustom.preFieldRead(field_name);
-        if (is_appendable) {
-          if (!prefix.empty()) {
-            prefix = prefix.substr(0, prefix.length() - 8);
-            expr +=
-              "  if (!" + prefix + ") {\n"
-              "    return false;\n"
-              "  }\n";
-          }
-          expr += "  if ((" + cond + ") && !";
-        } else {
-          expr += prefix + "(!(" + cond + ") || ";
-        }
-      } else if (is_appendable) {
-        expr += "  if (!";
-      }
-      expr += generate_field_stream(
-        indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
-      if (is_appendable) {
-        expr += ") {\n"
-          "    return false;\n"
-          "  }\n";
-      } else if (!cond.empty()) {
-        expr += ")";
-      }
-    }
-    intro.join(be_global->impl_, indent);
-    if (is_appendable) {
-      expr +=
-        "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-        "      strm.pos() < end_of_struct) {\n"
-        "    strm.skip(end_of_struct - strm.pos());\n"
-        "  }\n"
-        "  return true;\n";
-      be_global->impl_ << expr;
-    } else if (expr.empty()) {
-      be_global->impl_ << "  return true;\n";
-    } else {
-      be_global->impl_ << "  return " << expr << ";\n";
-    }
-  }
-  return true;
 }
 
 bool marshal_generator::gen_struct(AST_Structure* node,
@@ -3298,16 +3299,13 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   //if we are not a match, skip to the next field
   //if we are a match, deserialize the field
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  Intro intro;
   std::string expr;
-  const std::string indent = "  ";
   const ExtensibilityKind exten = be_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;
   const bool is_mutable = exten == extensibilitykind_mutable;
   const std::string actual_cpp_name = scoped(node->name());
   std::string cpp_name = actual_cpp_name;
-  FieldFilter field_type = FieldFilter_All;
-  const Fields fields(node, field_type);
+  const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   RtpsFieldCustomizer rtpsCustom(cpp_name);
   const AutoidKind auto_id = be_global->autoid(node);
@@ -3326,7 +3324,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    size_t index = base_field.find('.');\n"
     "    std::string subfield;\n"
     "    if (index != std::string::npos) {\n"
-    "      subfield = base_field.substr(index+1);\n"
+    "      subfield = base_field.substr(index + 1);\n"
     "      base_field = base_field.substr(0, index);\n"
     "    }\n";
 
@@ -3344,8 +3342,8 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       "        }\n"
       "        bool must_understand = false;\n"
       "        if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
-      "          throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "valid for struct " << clazz << "\");\n"
+      "          throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" Deserialization "
+      "Error for struct " << clazz << "\");\n"
       "        }\n"
       "        if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 &&\n"
       "            member_id == Serializer::pid_list_end) {\n"
@@ -3360,7 +3358,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
       AST_Field* const field = *i;
       ACE_CDR::ULong default_id = i.pos();
-      std::size_t size = 0;
+      size_t size = 0;
       const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
       std::string field_name = field->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(field->field_type());
@@ -3374,8 +3372,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         cases <<
           "          if (field_id == member_id) {\n"
           "            " << cxx_type << " val;\n" <<
-          "            if (!(strm >> " << val << "))" <<
-          " {\n"
+          "            if (!(strm >> " << val << ")) {\n"
           "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n" <<
           "            }\n"
           "            return val;\n"
@@ -3400,7 +3397,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
           "        }\n";
       }
     }
-    intro.join(be_global->impl_, indent);
     const std::string switch_cases = cases.str();
     std::string sw_indent = "          ";
     if (switch_cases.empty()) {
@@ -3439,7 +3435,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
     AST_Field* const field = *i;
     ACE_CDR::ULong default_id = i.pos();
-    std::size_t size = 0;
+    size_t size = 0;
     const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
     std::string field_name = field->local_name()->get_string();
     AST_Type* const field_type = resolveActualType(field->field_type());
@@ -3471,7 +3467,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
           "    }\n";
       } else {
         expr +=
-          "      if (!strm.skip(1,  " + std::to_string(size) + " )) {\n"
+          "      if (!strm.skip(1,  " + OpenDDS::DCPS::to_dds_string(size) + " )) {\n"
           "        throw std::runtime_error(\"Field '" + field_name +
           "' could not be skipped\");\n"
           "      }\n"
@@ -3502,7 +3498,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         "    }\n";
     }
   }
-  intro.join(be_global->impl_, indent);
   be_global->impl_ <<
     expr <<
     "    if (!field[0]) {\n"   // if 'field' is the empty string...

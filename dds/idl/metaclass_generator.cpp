@@ -6,8 +6,8 @@
  */
 
 #include "metaclass_generator.h"
-#include "marshal_generator.h"
 
+#include "marshal_generator.h"
 #include "field_info.h"
 #include "be_extern.h"
 #include "topic_keys.h"
@@ -354,32 +354,36 @@ namespace {
         be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
       }
     }
-    be_global->impl_ <<
-      "    return false;\n"
-      "  }\n\n"
-      "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
-      "  {\n"
-      "    static const std::map<std::string, ACE_CDR::ULong> name_to_id_map = {\n";
-    if (struct_node) {
-      const AutoidKind auto_id = be_global->autoid(node);
-      for (size_t i = 0; i < fields.size(); ++i) {
-        ACE_CDR::ULong default_id = i;
-        be_global->impl_ << "      {\"" << fields[i]->local_name()->get_string() << "\", " <<
-          be_global->get_id(fields[i], auto_id, default_id) << "},\n";
-      }
-    }
     const std::string exception =
       "throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
       "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
-      "    };\n"
-      "    std::map<std::string, ACE_CDR::ULong>::const_iterator it = name_to_id_map.find(field);\n"
-      "    if (it == name_to_id_map.end()) {\n"
-      "      " << exception <<
-      "    } else {\n"
-      "      return it->second;\n"
-      "    }\n"
-      "  }\n\n"
+      "    return false;\n"
+      "  }\n\n";
+    if (struct_node) {
+      be_global->impl_ <<
+        "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
+        "  {\n"
+        "    static const std::pair<std::string, ACE_CDR::ULong> name_to_id_pairs[] = {\n";
+      const AutoidKind auto_id = be_global->autoid(node);
+      for (size_t i = 0; i < fields.size(); ++i) {
+        ACE_CDR::ULong default_id = i;
+        be_global->impl_ << "      std::make_pair(\"" << fields[i]->local_name()->get_string() << "\", " <<
+          be_global->get_id(fields[i], auto_id, default_id) << "),\n";
+      }
+      be_global->impl_ <<
+        "    };\n"
+        "    static const std::map<std::string, ACE_CDR::ULong> name_to_id_map(name_to_id_pairs,"
+        " name_to_id_pairs + " << fields.size() << ");\n"
+        "    std::map<std::string, ACE_CDR::ULong>::const_iterator it = name_to_id_map.find(field);\n"
+        "    if (it == name_to_id_map.end()) {\n"
+        "      " << exception <<
+        "    } else {\n"
+        "      return it->second;\n"
+        "    }\n"
+        "  }\n\n";
+    }
+    be_global->impl_ <<
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
       "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
@@ -531,7 +535,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 
         if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
           // fixed-length sequence/array element -> skip all elements at once
-          std::size_t sz = 0;
+          size_t sz = 0;
           to_cxx_type(af.as_act_, sz);
           be_global->impl_ <<
             "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
@@ -637,7 +641,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
   if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
     // fixed-length sequence/array element -> skip all elements at once
-    std::size_t sz = 0;
+    size_t sz = 0;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
       "  return ser.skip(" << len << ", " << sz << ");\n";
@@ -689,7 +693,7 @@ func(const std::string&, const std::string&, AST_Type* br_type, const std::strin
       "    if (!(ser >> len)) return false;\n"
       "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
-    std::size_t sz = 0;
+    size_t sz = 0;
     to_cxx_type(br_type, sz);
     ss <<
       "    if (!ser.skip(1, " << sz << ")) return false;\n";
@@ -745,7 +749,7 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       "    if (!ser.read_delimiter(total_size)) {\n"
       "      return false;\n"
       "    }\n", not_final);
-    if (exten == extensibilitykind_mutable) {
+    if (is_mutable) {
       be_global->impl_ <<
         "  if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
