@@ -32,8 +32,7 @@ public:
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
-    }
-    else {
+    } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) SporadicTask::schedule"
         " failed to receive ReactorInterceptor handle %p\n", ACE_TEXT("")));
     }
@@ -44,8 +43,7 @@ public:
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       interceptor->execute_or_enqueue(new CancelCommand(this));
-    }
-    else {
+    } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) SporadicTask::cancel"
         " failed to receive ReactorInterceptor handle %p\n", ACE_TEXT("")));
     }
@@ -57,8 +55,7 @@ public:
     if (interceptor) {
       ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
       command->wait();
-    }
-    else {
+    } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) SporadicTask::cancel_and_wait"
         " failed to receive ReactorInterceptor handle %p\n", ACE_TEXT("")));
     }
