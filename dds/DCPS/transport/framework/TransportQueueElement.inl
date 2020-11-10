@@ -47,9 +47,8 @@ bool
 TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
-
-  const unsigned long new_count = --sub_loan_count_;
-  if (new_count == 0) {
+  if (sub_loan_count_ > 0) {
+    if (--sub_loan_count_ == 0) {
     // All interested subscriptions have been satisfied.
 
     // The queue elements are released to its cached allocator
@@ -59,17 +58,19 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
     // accessible. Note it can not be set after release_element
     // call.
     // released_ = true;
-    release_element(dropped_by_transport);
-    return true;
-  }
-
+      release_element(dropped_by_transport);
+      return true;
+    }
   // ciju: The sub_loan_count_ has been observed to drop below zero.
   // Since it isn't exactly a ref count and the object is created in
   // allocater memory (user space) we *probably* can disregard the
   // count for now. Ideally we would like to prevent the count from
   // falling below 0 and opening up this assert.
   // assert (new_count > 0);
-  return false;
+    return false;
+  } else {
+    throw std::logic_error("TransportQueueElement::decision_made sub_loan_count_ is already 0");
+  }
 }
 
 ACE_INLINE
