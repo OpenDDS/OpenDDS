@@ -51,6 +51,7 @@ bool LinuxNetworkConfigMonitor::open()
     nlmsghdr header;
     rtgenmsg msg;
   } request;
+  memset(&request, 0, sizeof(request));
 
   // Request a dump of the links.
   request.header.nlmsg_len = NLMSG_LENGTH(sizeof(request.msg));

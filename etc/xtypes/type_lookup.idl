@@ -52,7 +52,7 @@ union TypeLookup_getTypeDependencies_Result switch(long){
 };
 
 // Service Request
-union TypeLookup_Call switch(unsigned long) {
+union TypeLookup_Call switch(long) {
   case TypeLookup_getTypes_HashId:
     TypeLookup_getTypes_In getTypes;
   case TypeLookup_getDependencies_HashId:
@@ -67,7 +67,7 @@ struct TypeLookup_Request {
 };
 
 // Service Reply
-union TypeLookup_Return switch(unsigned long) {
+union TypeLookup_Return switch(long) {
   case TypeLookup_getTypes_HashId:
     TypeLookup_getTypes_Result getType;
   case TypeLookup_getDependencies_HashId:
