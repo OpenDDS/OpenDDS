@@ -71,12 +71,6 @@ namespace {
       return "boolean";
     case AST_PredefinedType::PT_octet:
       return "byte";
-    case AST_PredefinedType::PT_any:
-    case AST_PredefinedType::PT_object:
-    case AST_PredefinedType::PT_value:
-    case AST_PredefinedType::PT_abstract:
-    case AST_PredefinedType::PT_void:
-    case AST_PredefinedType::PT_pseudo:
     default:
       return "";
     }
