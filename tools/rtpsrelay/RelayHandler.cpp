@@ -268,11 +268,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     }
 
     ParticipantStatisticsReporter& from_psr = record_activity(remote_address, now, src_guid, msg_len);
+    const bool undirected = to.empty();
     bool send_to_application_participant = false;
 
     if (do_normal_processing(remote_address, src_guid, from_psr, to, send_to_application_participant, msg, now)) {
       association_table_.lookup_destinations(to, src_guid);
-      send(src_guid, from_psr, to, send_to_application_participant, msg, now);
+      send(src_guid, from_psr, undirected, to, send_to_application_participant, msg, now);
     }
   } else {
     // Assume STUN.
@@ -553,6 +554,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 
 void VerticalHandler::send(const OpenDDS::DCPS::RepoId&,
                            ParticipantStatisticsReporter& from_psr,
+                           bool undirected,
                            const GuidSet& to,
                            bool send_to_application_participant,
                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
@@ -588,7 +590,7 @@ void VerticalHandler::send(const OpenDDS::DCPS::RepoId&,
     ++sent_message_count;
   }
 
-  if (to.empty()) {
+  if (undirected) {
     from_psr.max_undirected_gain(sent_message_count, now);
   } else {
     from_psr.max_directed_gain(sent_message_count, now);
@@ -864,7 +866,7 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 
     const auto pos = spdp_messages_.find(r.from_guid);
     if (pos != spdp_messages_.end()) {
-      send(r.from_guid, guid_addr_set_map_[r.from_guid].stats_reporter, r.to, false, pos->second, now);
+      send(r.from_guid, guid_addr_set_map_[r.from_guid].stats_reporter, false, r.to, false, pos->second, now);
     }
 
     q.pop();
