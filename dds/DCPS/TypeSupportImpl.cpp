@@ -90,7 +90,7 @@ void TypeSupportImpl::populate_dependencies(const RcHandle<XTypes::TypeLookupSer
                 it->kind() == XTypes::EK_MINIMAL ||
                 it->kind() == XTypes::TK_ANNOTATION)) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TypeSupportImpl::populate_dependencies, ")
-            ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
+                 ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
     }
   }
 
