@@ -1,5 +1,7 @@
 #pragma once
 
+#include "dds/DdsDcpsTopicC.h"
+
 #include "Topic.h"
 
 #include <map>
