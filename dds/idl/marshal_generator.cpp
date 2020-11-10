@@ -3434,9 +3434,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   expr = "";
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
     AST_Field* const field = *i;
-    ACE_CDR::ULong default_id = i.pos();
     size_t size = 0;
-    const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
     std::string field_name = field->local_name()->get_string();
     AST_Type* const field_type = resolveActualType(field->field_type());
     Classification fld_cls = classify(field_type);
