@@ -167,7 +167,7 @@ OpenDDS::DCPS::ReactorTask::svc()
         tid = 0;
         ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
       }
-#else
+#elif !defined (OPENDDS_SAFETY_PROFILE)
       ACE_thread_t tid = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
 
