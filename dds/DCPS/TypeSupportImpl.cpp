@@ -84,9 +84,13 @@ void TypeSupportImpl::populate_dependencies(const RcHandle<XTypes::TypeLookupSer
       const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
       XTypes::TypeIdentifierWithSize tmp = {*it, static_cast<ACE_CDR::ULong>(tobj_size)};
       deps_with_size.append(tmp);
-    } else if (DCPS_debug_level >= 1) {
+    } else if ((DCPS_debug_level >= 1) &&
+               (it->kind() ==  XTypes::TI_STRONGLY_CONNECTED_COMPONENT ||
+                it->kind() == XTypes::EK_COMPLETE ||
+                it->kind() == XTypes::EK_MINIMAL ||
+                it->kind() == XTypes::TK_ANNOTATION)) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TypeSupportImpl::populate_dependencies, ")
-                 ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
+            ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
     }
   }
 
