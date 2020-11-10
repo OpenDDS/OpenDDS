@@ -37,7 +37,7 @@ class DDS_TEST {
 public:
   DDS_TEST(const RcHandle<Spdp>& spdp, const GUID_t& guid)
   : spdp_(spdp)
-  , guid_(make_guid(guid.guidPrefix, ENTITYID_PARTICIPANT))
+  , guid_(make_id(guid.guidPrefix, ENTITYID_PARTICIPANT))
   {
   }
 

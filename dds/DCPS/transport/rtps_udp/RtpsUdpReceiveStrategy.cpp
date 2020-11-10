@@ -13,7 +13,6 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Util.h"
 
@@ -21,6 +20,10 @@
 
 #include <algorithm>
 #include <cstring>
+
+#ifdef OPENDDS_SECURITY
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
