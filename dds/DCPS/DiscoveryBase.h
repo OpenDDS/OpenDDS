@@ -101,7 +101,6 @@ namespace OpenDDS {
         , interval_(TimeDuration(0))
         , status_(0)
       {
-        tid_ = ACE_OS::thr_self();
         interval_ = TheServiceParticipant->get_thread_status_interval();
         status_ = TheServiceParticipant->get_thread_statuses();
 #ifdef ACE_HAS_MAC_OSX
@@ -112,6 +111,8 @@ namespace OpenDDS {
           tid_ = 0;
           ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
         }
+#else
+        tid_ = ACE_OS::thr_self();
 #endif /* ACE_HAS_MAC_OSX */
 
 #ifndef OPENDDS_SAFETY_PROFILE
