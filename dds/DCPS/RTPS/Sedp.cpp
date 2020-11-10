@@ -4028,7 +4028,8 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  if (XTypes::TypeLookup_getTypes_HashId == type_lookup_reply._cxx_return.kind) {
+  if (XTypes::TypeLookup_getTypes_HashId == static_cast<ACE_CDR::ULong>(
+        type_lookup_reply._cxx_return.kind)) {
     const DCPS::SequenceNumber key_seq_num = seq_num_it->second.seq_number;
 
     // Cleanup data
