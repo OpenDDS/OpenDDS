@@ -29,24 +29,45 @@ public:
 
   void schedule(const TimeDuration& delay)
   {
-    interceptor_->execute_or_enqueue(new ScheduleCommand(this, delay));
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
+    }
+    else {
+      ACE_ERROR((LM_ERROR, "(%P|%t) SporadicTask::schedule"
+        " failed to receive ReactorInterceptor handle %p\n", ACE_TEXT("")));
+    }
   }
 
   void cancel()
   {
-    interceptor_->execute_or_enqueue(new CancelCommand(this));
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(new CancelCommand(this));
+    }
+    else {
+      ACE_ERROR((LM_ERROR, "(%P|%t) SporadicTask::cancel"
+        " failed to receive ReactorInterceptor handle %p\n", ACE_TEXT("")));
+    }
   }
 
   void cancel_and_wait()
   {
-    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(new CancelCommand(this));
-    command->wait();
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
+      command->wait();
+    }
+    else {
+      ACE_ERROR((LM_ERROR, "(%P|%t) SporadicTask::cancel_and_wait"
+        " failed to receive ReactorInterceptor handle %p\n", ACE_TEXT("")));
+    }
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
-  RcHandle<ReactorInterceptor> interceptor_;
+  WeakRcHandle<ReactorInterceptor> interceptor_;
   bool scheduled_;
 
   struct ScheduleCommand : public ReactorInterceptor::Command {
