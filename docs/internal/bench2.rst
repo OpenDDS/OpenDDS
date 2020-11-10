@@ -159,7 +159,7 @@ workers to be run on the same node by placing them together in a node
 IDL Definition
 --------------
 
-::
+.. code-block:: omg-idl
 
   struct WorkerPrototype {
     // Filename of the JSON Serialized Bench::WorkerConfig
@@ -198,7 +198,7 @@ IDL Definition
 Annotated Example
 -----------------
 
-::
+.. code-block:: json
 
   {
     "name": "An Example",
@@ -262,7 +262,7 @@ by the parent factory class before the entity is created.
 
 IDL Definition
 
-::
+.. code-block:: omg-idl
 
   struct TimeStamp {
     long sec;
