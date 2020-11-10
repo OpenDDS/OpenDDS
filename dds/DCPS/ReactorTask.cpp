@@ -50,7 +50,7 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 }
 
 int
-OpenDDS::DCPS::ReactorTask::open(void*, TimeDuration timeout, ThreadStatus* thread_stat, OPENDDS_STRING name)
+OpenDDS::DCPS::ReactorTask::open_reactor_task(void*, TimeDuration timeout, ThreadStatus* thread_stat, OPENDDS_STRING name)
 {
   // thread status reporting support
   timeout_ = timeout;

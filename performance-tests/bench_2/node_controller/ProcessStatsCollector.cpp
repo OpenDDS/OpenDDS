@@ -104,10 +104,12 @@ bool read_process_cpu_usage(int processId, size_t& utime, size_t& stime)
 #endif // ACE_LINUX
 
 ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
+#ifndef ACE_HAS_MAC_OSX
   : process_id_(process_id)
   , num_processors_(0)
   , total_virtual_mem_(0)
   , total_mem_(0)
+#endif
 #ifdef ACE_WIN32
   , process_handle_(INVALID_HANDLE_VALUE)
   , last_time_()
@@ -166,7 +168,6 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
   read_total_cpu_usage(last_time_);
   read_process_cpu_usage(process_id_, last_user_time_, last_sys_time_);
 #endif
-
 }
 
 ProcessStatsCollector::~ProcessStatsCollector() noexcept
