@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -35,7 +37,38 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
-int handle_reports(const Bench::NodeController::ReportSeq& nc_reports, const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
+int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
+  const std::vector<Bench::WorkerReport>& parsed_reports,
+  const std::unordered_set<std::string>& tags,
+  std::ostringstream& result_out);
+
+void update_stats_for_tags(std::unordered_map<std::string, uint64_t>& stats,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const Builder::ConstPropertyIndex& prop)
+{
+  for (const std::string& tag : reported_tags) {
+    if (input_tags.find(tag) != input_tags.end()) {
+      if (stats.find(tag) == stats.end()) {
+        stats[tag] = prop->value.ull_prop();
+      } else {
+        stats[tag] += prop->value.ull_prop();
+      }
+    }
+  }
+}
+
+void update_details_for_tags(std::unordered_map<std::string, std::string>& details,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const std::string& detail)
+{
+  for (const std::string& tag : reported_tags) {
+    if (input_tags.find(tag) != input_tags.end()) {
+      details[tag] += detail;
+    }
+  }
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -341,6 +374,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         << std::endl
         << "Ran with " << allocated_scenario.configs.length() << " nodes" << std::endl;
 
+      std::unordered_set<std::string> tags;
       std::string scenario_end;
       {
         std::ostringstream ss;
@@ -348,7 +382,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << std::endl
           << "Ended at " << iso8601() << std::endl
           << std::endl;
-        result = handle_reports(nc_reports, worker_reports, ss);
+        result = handle_reports(nc_reports, worker_reports, tags, ss);
         scenario_end = ss.str();
       }
       result_file << scenario_end;
@@ -357,8 +391,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Wrote results to " << result_path << std::endl;
 
       if (worker_reports.size() != allocated_scenario.expected_reports) {
-        result_file << "ERROR: Only received " << worker_reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
-        std::cerr << "ERROR: Only received " << worker_reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+        std::string log_msg = "ERROR: Only received " + std::to_string(worker_reports.size()) +
+          " out of " + std::to_string(allocated_scenario.expected_reports) + " valid reports!\n";
+        result_file << log_msg;
+        std::cerr << log_msg;
         result = EXIT_FAILURE;
       }
     }
@@ -374,6 +410,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
 int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   const std::vector<Bench::WorkerReport>& parsed_reports,
+  const std::unordered_set<std::string>& tags,
   std::ostringstream& result_out)
 {
   int result = EXIT_SUCCESS;
@@ -418,8 +455,12 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
 
   bool missing_durable_data = false;
 
-  for (size_t r = 0; r < parsed_reports.size(); ++r) {
+  // Stats and details associated to user-specified tags
+  std::unordered_map<std::string, uint64_t> lost_sample_counts, rejected_sample_counts,
+    out_of_order_data_counts, duplicate_data_counts, missing_data_counts;
+  std::unordered_map<std::string, std::string> out_of_order_data_details, duplicate_data_details, missing_data_details;
 
+  for (size_t r = 0; r < parsed_reports.size(); ++r) {
     const Bench::WorkerReport& worker_report = parsed_reports[r];
 
     max_construction_time = std::max(max_construction_time, worker_report.construction_time);
@@ -437,7 +478,6 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
     for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
       for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
         for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
-
           const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
 
           Bench::ConstPropertyStatBlock dr_discovery_delta(dr_report.properties, "discovery_delta");
@@ -449,30 +489,40 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
           Builder::ConstPropertyIndex lost_sample_count_prop = get_property(dr_report.properties, "lost_sample_count", Builder::PVK_ULL);
           if (lost_sample_count_prop) {
             total_lost_sample_count += lost_sample_count_prop->value.ull_prop();
+            update_stats_for_tags(lost_sample_counts, dr_report.tags, tags, lost_sample_count_prop);
           }
           Builder::ConstPropertyIndex rejected_sample_count_prop = get_property(dr_report.properties, "rejected_sample_count", Builder::PVK_ULL);
           if (rejected_sample_count_prop) {
             total_rejected_sample_count += rejected_sample_count_prop->value.ull_prop();
+            update_stats_for_tags(rejected_sample_counts, dr_report.tags, tags, rejected_sample_count_prop);
           }
           Builder::ConstPropertyIndex out_of_order_data_count_prop = get_property(dr_report.properties, "out_of_order_data_count", Builder::PVK_ULL);
           if (out_of_order_data_count_prop) {
             if (out_of_order_data_count_prop->value.ull_prop()) {
               Builder::ConstPropertyIndex out_of_order_data_details_prop = get_property(dr_report.properties, "out_of_order_data_details", Builder::PVK_STRING);
               if (out_of_order_data_details_prop) {
-                result_out << "Out Of Order Data (" << out_of_order_data_count_prop->value.ull_prop() << ") Details: " << out_of_order_data_details_prop->value.string_prop() << std::endl;
+                std::string detail = "Out Of Order Data (" + std::to_string(out_of_order_data_count_prop->value.ull_prop()) +
+                  ") Details: " + out_of_order_data_details_prop->value.string_prop() + "\n";
+                result_out << detail;
+                update_details_for_tags(out_of_order_data_details, dr_report.tags, tags, detail);
               }
             }
             total_out_of_order_data_count += out_of_order_data_count_prop->value.ull_prop();
+            update_stats_for_tags(out_of_order_data_counts, dr_report.tags, tags, out_of_order_data_count_prop);
           }
           Builder::ConstPropertyIndex duplicate_data_count_prop = get_property(dr_report.properties, "duplicate_data_count", Builder::PVK_ULL);
           if (duplicate_data_count_prop) {
             if (duplicate_data_count_prop->value.ull_prop()) {
               Builder::ConstPropertyIndex duplicate_data_details_prop = get_property(dr_report.properties, "duplicate_data_details", Builder::PVK_STRING);
               if (duplicate_data_details_prop) {
-                result_out << "Duplicate Data (" << duplicate_data_count_prop->value.ull_prop() << ") Details: " << duplicate_data_details_prop->value.string_prop() << std::endl;
+                std::string detail = "Duplicate Data (" + std::to_string(duplicate_data_count_prop->value.ull_prop()) +
+                  ") Details: " + duplicate_data_details_prop->value.string_prop() + "\n";
+                result_out << detail;
+                update_details_for_tags(duplicate_data_details, dr_report.tags, tags, detail);
               }
             }
             total_duplicate_data_count += duplicate_data_count_prop->value.ull_prop();
+            update_stats_for_tags(duplicate_data_counts, dr_report.tags, tags, duplicate_data_count_prop);
           }
           Builder::ConstPropertyIndex missing_data_count_prop = get_property(dr_report.properties, "missing_data_count", Builder::PVK_ULL);
           if (missing_data_count_prop) {
@@ -480,13 +530,16 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
               Builder::ConstPropertyIndex missing_data_details_prop = get_property(dr_report.properties, "missing_data_details", Builder::PVK_STRING);
               if (missing_data_details_prop) {
                 std::string mdd(missing_data_details_prop->value.string_prop());
-                result_out << "Missing Data (" << missing_data_count_prop->value.ull_prop() << ") Details: " << mdd << std::endl;
+                std::string detail = "Missing Data (" + std::to_string(missing_data_count_prop->value.ull_prop()) + ") Details: " + mdd + "\n";
+                result_out << detail;
+                update_details_for_tags(missing_data_details, dr_report.tags, tags, detail);
                 if (mdd.find("Durable: true") != std::string::npos) {
                   missing_durable_data = true;
                 }
               }
             }
             total_missing_data_count += missing_data_count_prop->value.ull_prop();
+            update_stats_for_tags(missing_data_counts, dr_report.tags, tags, missing_data_count_prop);
           }
 
           consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dr_discovery_delta.to_simple_stat_block());
@@ -496,9 +549,9 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
           consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
         }
       }
+
       for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
         for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
-
           const Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
 
           Bench::ConstPropertyStatBlock dw_discovery_delta(dw_report.properties, "discovery_delta");
@@ -532,8 +585,7 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   result_out << std::endl;
 
   result_out << "Discovery Stats:" << std::endl;
-  result_out <<
-    (total_undermatched_readers != 0 ? "  ERROR: " : "  ") <<
+  result_out << (total_undermatched_readers != 0 ? "  ERROR: " : "  ") <<
     "Total Undermatched Readers: " << total_undermatched_readers <<
     (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
     "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
