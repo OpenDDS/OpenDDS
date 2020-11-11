@@ -74,6 +74,8 @@ namespace {
     return from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
   }
 
+#ifdef OPENDDS_SECURITY
+
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantLocation compute_ice_location_mask(const ACE_INET_Addr& address)
   {
@@ -84,7 +86,6 @@ namespace {
   }
 #endif
 
-#ifdef OPENDDS_SECURITY
   bool operator==(const DDS::Security::Property_t& rhs, const DDS::Security::Property_t& lhs) {
     return rhs.name == lhs.name && rhs.value == lhs.value && rhs.propagate == lhs.propagate;
   }

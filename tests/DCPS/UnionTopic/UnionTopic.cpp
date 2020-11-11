@@ -207,8 +207,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   canonical["Turtle"] = 5;
 
   // Calculate the canonical expected winner
-  ElectionResult_t canonical_result;
-  canonical_result.total_votes = 0;
+  ElectionResult_t canonical_result = { { "", 0 }, 0 };
   Vote_t max = 0;
   Canonical::iterator i, finished = canonical.end();
   for (i = canonical.begin(); i != finished; ++i) {
@@ -272,8 +271,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   }
   max = 0;
   ElectionNews_tSeq newsSeq;
-  ElectionResult_t result_from_statuses;
-  result_from_statuses.total_votes = 0;
+  ElectionResult_t result_from_statuses = { { "", 0 }, 0 };
   DDS::SampleInfoSeq info;
   rc = reader_i->take(
     newsSeq, info,
