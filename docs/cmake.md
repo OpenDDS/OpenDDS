@@ -245,7 +245,7 @@ auxiliary IDL library can be created for inclusion by other executables:
 ```cmake
 add_library(messenger)
 OPENDDS_TARGET_SOURCES(messenger "Messenger.idl")
-target_link_libraries(publisher messenger OpenDDS::Dcps)
+target_link_libraries(messenger OpenDDS::Dcps)
 
 add_executable(publisher
   "publisher.cpp"
