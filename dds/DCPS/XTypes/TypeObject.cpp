@@ -8,6 +8,7 @@
 
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Hash.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
