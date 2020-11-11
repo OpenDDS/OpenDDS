@@ -297,7 +297,6 @@ module Builder {
   struct DataReaderConfig {
     string name;
     string topic_name;
-    string cft_name;
     string listener_type_name;
     unsigned long listener_status_mask;
     PropertySeq listener_properties;

@@ -40,7 +40,6 @@ protected:
   const std::string transport_config_name_;
   DataReaderReport& report_;
   DDS::Subscriber_var subscriber_;
-  DDS::Topic_var topic_;
   DDS::DataReaderListener_var listener_;
   DDS::DataReader_var datareader_;
   PropertyIndex create_time_;

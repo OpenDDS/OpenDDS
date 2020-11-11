@@ -9,7 +9,7 @@
 namespace Builder {
 
 Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
-  std::map<std::string, DDS::ContentFilteredTopic_var>& content_filtered_topics_map)
+  ContentFilteredTopicMap& content_filtered_topics_map)
   : name_(config.name.in())
   , type_name_((strlen(config.type_name.in()) == 0 && TypeSupportRegistry::get_type_names().size() == 1) ? TypeSupportRegistry::get_type_names().front() : config.type_name.in())
   , listener_type_name_(config.listener_type_name.in())
@@ -94,7 +94,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
       throw std::runtime_error("topic creation failed");
     }
 
-    content_filtered_topics_map[name_.c_str()] = cft;
+    content_filtered_topics_map[content_filtered_topics_[i].cft_name.in()] = cft;
   }
 
   // Bind Transport Config

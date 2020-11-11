@@ -5,14 +5,14 @@
 #include "Common.h"
 #include "ListenerFactory.h"
 
-#include <vector>
-
 namespace Builder {
+
+using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
 
 class Topic : public ListenerFactory<DDS::TopicListener> {
 public:
   explicit Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
-    std::map<std::string, DDS::ContentFilteredTopic_var>& content_filtered_topics_map);
+    ContentFilteredTopicMap& content_filtered_topics_map);
   ~Topic();
 
   const std::string& get_name() const;
@@ -32,8 +32,6 @@ protected:
   DDS::TopicListener_var listener_;
   DDS::Topic_var topic_;
 };
-
-using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
 
 }
 

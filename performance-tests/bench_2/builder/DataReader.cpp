@@ -8,7 +8,8 @@ namespace Builder {
 
 DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber,
   const std::shared_ptr<TopicManager>& topics, const ContentFilteredTopicMap& cft_map)
-  : name_(config.name.in()), topic_name_(config.topic_name.in()), cft_name_(config.cft_name.in())
+  : name_(config.name.in())
+  , topic_name_(config.topic_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
   , listener_properties_(config.listener_properties)
@@ -21,14 +22,6 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
 {
   Log::log() << "Creating datareader: '" << name_ << "' with topic name '" << topic_name_
     << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
-
-  auto topic_ptr = topics->get_topic_by_name(config.topic_name.in());
-  if (!topic_ptr) {
-    std::stringstream ss;
-    ss << "topic lookup failed in datareader '" << config.name << "' for topic '" << config.topic_name << "'" << std::flush;
-    throw std::runtime_error(ss.str());
-  }
-  topic_ = topic_ptr->get_dds_topic();
 
   // Customize QoS Object
   subscriber_->get_default_datareader_qos(qos_);
@@ -91,22 +84,24 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     enable_time_->value.time_prop(create_time_->value.time_prop());
   }
 
-  if (cft_name_.empty()) {
-    datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
+  auto topic_ptr = topics->get_topic_by_name(topic_name_);
+  if (topic_ptr) {
+    DDS::Topic_var topic = topic_ptr->get_dds_topic();
+    datareader_ = subscriber_->create_datareader(topic, qos_, listener_, listener_status_mask_);
   } else {
-    DDS::ContentFilteredTopic_var cft_ptr;
-    auto it = cft_map.find(config.cft_name.in());
+    DDS::ContentFilteredTopic_var content_filtered_topic;
+    auto it = cft_map.find(topic_name_);
     if (it != cft_map.end()) {
-      cft_ptr = it->second;
+      content_filtered_topic = it->second;
     }
 
-    if (!cft_ptr) {
+    if (!content_filtered_topic) {
       std::stringstream ss;
-      ss << "content filtered topic lookup failed in datareader '" << config.name << "' for cft topic '" << config.cft_name << "'" << std::flush;
+      ss << "Topic lookup failed in datareader '" << config.name << "' for cft topic '" << topic_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     }
 
-    datareader_ = subscriber_->create_datareader(cft_ptr, qos_, listener_, listener_status_mask_);
+    datareader_ = subscriber_->create_datareader(content_filtered_topic, qos_, listener_, listener_status_mask_);
   }
 
   if (CORBA::is_nil(datareader_.in())) {
