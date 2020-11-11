@@ -300,8 +300,9 @@ bool is_fully_descriptive(const TypeIdentifier& ti)
   return false;
 }
 
-bool is_plain_collection(const TypeIdentifier ti) {
-  switch(ti.kind()) {
+bool is_plain_collection(const TypeIdentifier ti)
+{
+  switch (ti.kind()) {
   case TI_PLAIN_SEQUENCE_SMALL:
   case TI_PLAIN_SEQUENCE_LARGE:
   case TI_PLAIN_ARRAY_SMALL:
@@ -313,10 +314,10 @@ bool is_plain_collection(const TypeIdentifier ti) {
   return false;
 }
 
-bool has_type_object(const TypeIdentifier ti) {
-  return (!((is_fully_descriptive(ti)) ||
-            (is_plain_collection(ti) ||
-            (ti.kind() == TK_NONE))));
+bool has_type_object(const TypeIdentifier ti)
+{
+  return !is_fully_descriptive(ti) && is_plain_collection(ti) &&
+    ti.kind() != TK_NONE;
 }
 
 namespace {
