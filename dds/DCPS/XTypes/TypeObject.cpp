@@ -316,7 +316,7 @@ bool is_plain_collection(const TypeIdentifier ti)
 
 bool has_type_object(const TypeIdentifier ti)
 {
-  return !is_fully_descriptive(ti) && is_plain_collection(ti) &&
+  return !is_fully_descriptive(ti) && !is_plain_collection(ti) &&
     ti.kind() != TK_NONE;
 }
 
