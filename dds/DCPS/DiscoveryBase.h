@@ -104,7 +104,6 @@ namespace OpenDDS {
         , interval_(TimeDuration(0))
         , status_(0)
       {
-        tid_ = 0;
         interval_ = TheServiceParticipant->get_thread_status_interval();
         status_ = TheServiceParticipant->get_thread_statuses();
 #ifdef ACE_HAS_MAC_OSX
