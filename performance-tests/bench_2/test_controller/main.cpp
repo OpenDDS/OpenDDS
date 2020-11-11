@@ -237,9 +237,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tags"))) {
         num_tags = get_option_argument_uint(i, argc, argv);
-        std::string tag;
         while (num_tags > 0) {
-          tag = get_option_argument(++i, argc, argv);
+          if (i >= argc - 1) {
+            std::cerr << "Does not match the number of tags entered!" << std::endl;
+            throw 1;
+          }
+          std::string tag = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
           if (tag[0] == '-') {
             std::cerr << "Tags must not start with the dash ('-') character!" << std::endl;
             throw 1;
@@ -612,15 +615,12 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   result_out << std::endl;
 
   consolidated_cpu_percent_stats.pretty_print(result_out, "percent cpu utilization");
-
   result_out << std::endl;
 
   consolidated_mem_percent_stats.pretty_print(result_out, "percent memory utilization");
-
   result_out << std::endl;
 
   consolidated_virtual_mem_percent_stats.pretty_print(result_out, "percent virtual memory utilization");
-
   result_out << std::endl;
 
   result_out << "Test Timing Stats:" << std::endl;
@@ -629,7 +629,6 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   result_out << "  Max Start Time: " << max_start_time << " seconds" << std::endl;
   result_out << "  Max Stop Time: " << max_stop_time << " seconds" << std::endl;
   result_out << "  Max Destruction Time: " << max_destruction_time << " seconds" << std::endl;
-
   result_out << std::endl;
 
   result_out << "Discovery Stats:" << std::endl;
@@ -638,74 +637,70 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
     (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
     "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
   //result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
-
   result_out << std::endl;
 
   consolidated_discovery_delta_stats.pretty_print(result_out, "discovery time delta");
-
   result_out << std::endl;
 
   result_out << "DDS Sample Count Stats:" << std::endl;
   result_out << "  Total Lost Samples: " << total_lost_sample_count << std::endl;
   result_out << "  Total Rejected Samples: " << total_rejected_sample_count << std::endl;
-
   result_out << std::endl;
 
   result_out << "Data Count Stats:" << std::endl;
   result_out << "  Total Out-Of-Order Data Samples: " << total_out_of_order_data_count << std::endl;
   result_out << "  Total Duplicate Data Samples: " << total_duplicate_data_count << std::endl;
   result_out << "  Total Missing Data Samples: " << total_missing_data_count << std::endl;
-
   result_out << std::endl;
 
   result_out << "Data Timing Stats:" << std::endl;
-
   result_out << std::endl;
 
   consolidated_latency_stats.pretty_print(result_out, "latency", "  ", 1);
-
   result_out << std::endl;
 
   consolidated_jitter_stats.pretty_print(result_out, "jitter", "  ", 1);
-
   result_out << std::endl;
 
   consolidated_round_trip_latency_stats.pretty_print(result_out, "round trip latency", "  ", 1);
-
   result_out << std::endl;
 
   consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter", "  ", 1);
+  result_out << "\n\n";
 
   // Print stats information for the input tags
   for (const std::string& tag : tags) {
-    result_out << "===== Tag: " << tag << ":\n";
+    result_out << "===== Stats For Tag: " << tag << "\n";
     if (out_of_order_data_details.count(tag)) {
-      result_out << out_of_order_data_details[tag];
+      result_out << out_of_order_data_details[tag] << std::endl;
     }
     if (duplicate_data_details.count(tag)) {
-      result_out << duplicate_data_details[tag];
+      result_out << duplicate_data_details[tag] << std::endl;
     }
     if (missing_data_details.count(tag)) {
-      result_out << missing_data_details[tag];
+      result_out << missing_data_details[tag] << std::endl;
     }
-    result_out << std::endl;
 
     if (tagged_discovery_delta_stats.count(tag)) {
       tagged_discovery_delta_stats[tag].pretty_print(result_out, "discovery time delta");
+      result_out << std::endl;
     }
     if (tagged_latency_stats.count(tag)) {
       tagged_latency_stats[tag].pretty_print(result_out, "latency");
+      result_out << std::endl;
     }
     if (tagged_jitter_stats.count(tag)) {
       tagged_jitter_stats[tag].pretty_print(result_out, "jitter");
+      result_out << std::endl;
     }
     if (tagged_round_trip_latency_stats.count(tag)) {
       tagged_round_trip_latency_stats[tag].pretty_print(result_out, "round trip latency");
+      result_out << std::endl;
     }
     if (tagged_round_trip_jitter_stats.count(tag)) {
       tagged_round_trip_jitter_stats[tag].pretty_print(result_out, "round trip jitter");
+      result_out << std::endl;
     }
-    result_out << std::endl;
 
     result_out << "DDS Sample Count Stats:" << std::endl;
     result_out << "  Total Lost Samples: " <<
