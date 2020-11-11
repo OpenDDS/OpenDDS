@@ -205,10 +205,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "--override-start-time N                      Override the system-wide starting time." << std::endl
           << "--override-stop-time N                       Override the system-wide stopping time." << std::endl
           << "--override-destruction-time N                Override the system-wide destruction time." << std::endl
-          << "--tags N [TAGS...]                           List of tags for which the user wants to collect" << std::endl
-          << "                                             the statistics information. N is the number of tags," << std::endl
-          << "                                             followed by a list of space-separated tags. Tags must" << std::endl
-          << "                                             not start with the dash ('-') character." << std::endl;
+          << "--tag TAG                    Specify a tag for which the user wants to collect" << std::endl
+          << "                             the statistics information. User can specify multiple" << std::endl
+          << "                             --tag options, each with a single tag." << std::endl;
 //            ################################################################################
         return 0;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-out"))) {
@@ -235,21 +234,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         overrides.stop_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-destruction-time"))) {
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tags"))) {
-        num_tags = get_option_argument_uint(i, argc, argv);
-        while (num_tags > 0) {
-          if (i >= argc - 1) {
-            std::cerr << "Does not match the number of tags entered!" << std::endl;
-            throw 1;
-          }
-          std::string tag = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-          if (tag[0] == '-') {
-            std::cerr << "Tags must not start with the dash ('-') character!" << std::endl;
-            throw 1;
-          }
-          tags.insert(tag);
-          --num_tags;
-        }
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tag"))) {
+        tags.insert(get_option_argument(i, argc, argv));
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
