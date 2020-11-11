@@ -1,10 +1,12 @@
-#include <ace/OS_main.h>
-#include <ace/OS_NS_string.h>
-#include <tao/SystemException.h>
+#include "MetaStructTestTypeSupportImpl.h"
+
 #include <dds/DCPS/FilterEvaluator.h>
 #include <dds/DCPS/Serializer.h>
 
-#include "MetaStructTestTypeSupportImpl.h"
+#include <tao/SystemException.h>
+
+#include <ace/OS_main.h>
+#include <ace/OS_NS_string.h>
 
 #include <iostream>
 #include <string>
@@ -13,80 +15,78 @@
 
 using namespace OpenDDS::DCPS;
 
-int checkVal(const char* lhs, const char* rhs, const char* name)
+bool checkVal(const char* lhs, const char* rhs, const char* name)
 {
   if (std::strcmp(lhs, rhs)) {
-    std::cout << "ERROR: target's " << name << " " << lhs << " != "
-              << rhs << std::endl;
-    return 1;
+    std::cout << "ERROR: target's " << name << " \"" << lhs << "\" != \""
+              << rhs << "\"" << std::endl;
+    return false;
   }
-  return 0;
+  return true;
 }
 
-int checkVal(const TAO::String_Manager& lhs, const TAO::String_Manager& rhs,
+bool checkVal(const TAO::String_Manager& lhs, const TAO::String_Manager& rhs,
              const char* name)
 {
   return checkVal(lhs.in(), rhs.in(), name);
 }
 
-int checkVal(const float& lhs, const float& rhs, const char* name)
+bool checkVal(const float& lhs, const float& rhs, const char* name)
 {
   if (std::fabs((lhs - rhs) / lhs) > .001) {
     std::cout << "ERROR: target's " << name << " " << lhs << " != "
               << rhs << std::endl;
-    return 1;
+    return false;
   }
-  return 0;
+  return true;
 }
 
 template<size_t N, size_t M>
-int check_array(short (&lhs)[N][M], short (&rhs)[N][M], const char* name)
+bool check_array(short (&lhs)[N][M], short (&rhs)[N][M], const char* name)
 {
   for (size_t i = 0; i < N; ++i) {
     for (size_t j = 0; j < M; ++j) {
       if (lhs[i][j] != rhs[i][j]) {
         std::cout << "ERROR target's " << name << "[" << i << "][" << j
                   << "] (" << lhs[i][j] << ") != " << rhs[i][j] << std::endl;
-        return 1;
+        return false;
       }
     }
   }
-  return 0;
+  return true;
 }
 
 template<typename T>
-int checkVal(const T& lhs, const T& rhs, const char* name)
+bool checkVal(const T& lhs, const T& rhs, const char* name)
 {
   if (lhs != rhs) {
     std::cout << "ERROR: target's " << name << " " << lhs << " != "
               << rhs << std::endl;
-    return 1;
+    return false;
   }
-  return 0;
+  return true;
 }
 
 template<typename T, typename T2>
-int check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, Value::Type type,
-          const MetaStruct& ms, T2 Value::*ptrmbr)
+bool check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, Value::Type type,
+          const MetaStruct& ms, T2 Value::*ptrmbr, Encoding::Kind e)
 {
-  if (checkVal(lhs, rhs, name)) return 1;
+  if (!checkVal(lhs, rhs, name)) return false;
 
   Message_Block_Ptr mb (amb->duplicate());
-  const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+  const Encoding encoding(e);
   Serializer ser(mb.get(), encoding);
-  std::string rhs_name = name;
-  rhs_name[0] = 'r';
-  Value val = ms.getValue(ser, rhs_name.c_str());
+  Value val = ms.getValue(ser, name);
   if (val.type_ == type) {
     std::string ser_name = std::string("Serialized ") + name;
-    if (checkVal(T2(rhs), val.*ptrmbr, ser_name.c_str())) return 1;
+    if (!checkVal(T2(rhs), val.*ptrmbr, ser_name.c_str())) return false;
   } else {
     std::cout << "ERROR: Serialized type of " << name
               << " does not match. expected " << type
               << " received " << val.type_ << std::endl;
-    return 1;
+    return false;
   }
-  return 0;
+  return true;
 }
 
 template<size_t N, size_t M>
@@ -100,72 +100,127 @@ void fill_2d(short (&arr)[N][M])
 }
 
 
-int run_test(int, ACE_TCHAR*[])
+template<typename Type>
+bool run_test_i(Encoding::Kind e)
 {
-  Source src;
-  src.rhs_a.s = "hello";
-  src.rhs_a.l = 42;
-  src.rhs_a.w = L'\x263a';
-  src.rhs_a.c = 'j';
-  src.rhs_sa[0] = 23;
-  src.rhs_sa[1] = -16536;
-  src.rhs_sa[2] = 16535;
-  fill_2d(src.rhs_asa);
-  src.rhs_ss.length(2);
-  src.rhs_ss[0].s = "seq elt 0";
-  src.rhs_ss[0].l = 9;
-  src.rhs_ss[1].s = "seq elt 1";
-  src.rhs_ss[1].l = -27;
-  src.rhs_e = other1;
-  src.rhs_u.u_f(2.17f);
+  Type src;
+  src.a.s = "hello";
+  src.a.l = 42;
+  src.a.w = L'\x263a';
+  src.a.c = 'j';
+  src.sa[0] = 23;
+  src.sa[1] = -16536;
+  src.sa[2] = 16535;
+  fill_2d(src.asa);
+  src.ss.length(2);
+  src.ss[0].s = "seq elt 0";
+  src.ss[0].l = 9;
+  src.ss[1].s = "seq elt 1";
+  src.ss[1].l = -27;
+  src.e = other1;
+  src.u.u_f(2.17f);
+  src.mu.u_f(2.17f);
+  src.anon_seq.length(2);
+  src.anon_seq[0].s = "seq elt 0";
+  src.anon_seq[0].l = 9;
+  src.anon_seq[1].s = "seq elt 1";
+  src.anon_seq[1].l = -27;
+  src.stra[0] = "hello";
+  src.stra[1] = "world!";
+  src.stra[2] = "goodbye";
+  src.astra[0] = "hello";
+  src.astra[1] = "world!";
+  src.astra[2] = "goodbye";
+  src.s = "hello";
 
-  const MetaStruct& sourceMeta = getMetaStruct<Source>();
-  const MetaStruct& targetMeta = getMetaStruct<Target>();
+  const MetaStruct& meta = getMetaStruct<Type>();
 
-  Target tgt;
-  for (const char** fields = sourceMeta.getFieldNames(); *fields; ++fields) {
-    std::string tgtField = *fields;
-    tgtField[0] = 'l';
-    targetMeta.assign(&tgt, tgtField.c_str(), &src, *fields, sourceMeta);
+  Type tgt;
+  for (const char** fields = meta.getFieldNames(); *fields; ++fields) {
+    meta.assign(&tgt, *fields, &src, *fields, meta);
   }
-  const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+  const Encoding encoding(e);
   Message_Block_Ptr data(new ACE_Message_Block(serialized_size(encoding, src)));
   Serializer ser(data.get(), encoding);
-  if (!(ser<<src)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Tests::MetaStructTest::run_test: ")
-      ACE_TEXT("Failed to serialize source.\n")));
-    return 1;
+  if (!(ser << src)) {
+    std::cout << "ERROR: Failed to serialize source" << std::endl;
+    return false;
   }
   // Use checkVal for types that aren't supported in MetaStruct::getValue(), such as arrays and unions
-  return check(tgt.lhs_a.s, src.rhs_a.s, "lhs_a.s", data.get(), Value::VAL_STRING, sourceMeta, &Value::s_)
-    + check(tgt.lhs_a.l, src.rhs_a.l, "lhs_a.l", data.get(), Value::VAL_INT, sourceMeta, &Value::i_)
-    + check(tgt.lhs_a.w, src.rhs_a.w, "lhs_a.w", data.get(), Value::VAL_INT, sourceMeta, &Value::i_)
-    + check(tgt.lhs_a.c, src.rhs_a.c, "lhs_a.c", data.get(), Value::VAL_CHAR, sourceMeta, &Value::c_)
-    + checkVal(tgt.lhs_sa[0], src.rhs_sa[0], "lhs_sa[0]")
-    + checkVal(tgt.lhs_sa[1], src.rhs_sa[1], "lhs_sa[1]")
-    + checkVal(tgt.lhs_sa[2], src.rhs_sa[2], "lhs_sa[2]")
-    + check_array(tgt.lhs_asa, src.rhs_asa, "lhs_asa")
-    + checkVal(tgt.lhs_ss.length(), src.rhs_ss.length(), "lhs_ss.length()")
-    + checkVal(tgt.lhs_ss[0].s, src.rhs_ss[0].s, "lhs_ss[0].s")
-    + checkVal(tgt.lhs_ss[0].l, src.rhs_ss[0].l, "lhs_ss[0].l")
-    + checkVal(tgt.lhs_ss[1].s, src.rhs_ss[1].s, "lhs_ss[1].s")
-    + checkVal(tgt.lhs_ss[1].l, src.rhs_ss[1].l, "lhs_ss[1].l")
-    + check(tgt.lhs_e, src.rhs_e, "lhs_e", data.get(), Value::VAL_UINT, sourceMeta, &Value::u_)
-    + checkVal(tgt.lhs_u._d(), src.rhs_u._d(), "lhs_u._d()")
-    + checkVal(tgt.lhs_u.u_f(), src.rhs_u.u_f(), "lhs_u.u_f()");
+  return
+    check(tgt.a.s, src.a.s, "a.s", data.get(), Value::VAL_STRING, meta, &Value::s_, e)
+    && check(tgt.a.l, src.a.l, "a.l", data.get(), Value::VAL_INT, meta, &Value::i_, e)
+    && check(tgt.a.w, src.a.w, "a.w", data.get(), Value::VAL_INT, meta, &Value::i_, e)
+    && check(tgt.a.c, src.a.c, "a.c", data.get(), Value::VAL_CHAR, meta, &Value::c_, e)
+    && checkVal(tgt.sa[0], src.sa[0], "sa[0]")
+    && checkVal(tgt.sa[1], src.sa[1], "sa[1]")
+    && checkVal(tgt.sa[2], src.sa[2], "sa[2]")
+    && check_array(tgt.asa, src.asa, "asa")
+    && checkVal(tgt.ss.length(), src.ss.length(), "ss.length()")
+    && checkVal(tgt.ss[0].s, src.ss[0].s, "ss[0].s")
+    && checkVal(tgt.ss[0].l, src.ss[0].l, "ss[0].l")
+    && checkVal(tgt.ss[1].s, src.ss[1].s, "ss[1].s")
+    && checkVal(tgt.ss[1].l, src.ss[1].l, "ss[1].l")
+    && check(tgt.e, src.e, "e", data.get(), Value::VAL_UINT, meta, &Value::u_, e)
+    && checkVal(tgt.u._d(), src.u._d(), "u._d()")
+    && checkVal(tgt.u.u_f(), src.u.u_f(), "u.u_f()")
+    && checkVal(tgt.mu._d(), src.mu._d(), "mu._d()")
+    && checkVal(tgt.mu.u_f(), src.mu.u_f(), "mu.u_f()")
+    && checkVal(tgt.anon_seq.length(), src.anon_seq.length(), "anon_seq.length()")
+    && checkVal(tgt.anon_seq[0].s, src.anon_seq[0].s, "anon_seq[0].s")
+    && checkVal(tgt.anon_seq[0].l, src.anon_seq[0].l, "anon_seq[0].l")
+    && checkVal(tgt.anon_seq[1].s, src.anon_seq[1].s, "anon_seq[1].s")
+    && checkVal(tgt.anon_seq[1].l, src.anon_seq[1].l, "anon_seq[1].l")
+    && checkVal(tgt.stra[0], src.stra[0], "stra[0]")
+    && checkVal(tgt.stra[1], src.stra[1], "stra[1]")
+    && checkVal(tgt.stra[2], src.stra[2], "stra[2]")
+    && checkVal(tgt.astra[0], src.astra[0], "astra[0]")
+    && checkVal(tgt.astra[1], src.astra[1], "astra[1]")
+    && checkVal(tgt.astra[2], src.astra[2], "astra[2]")
+    && check(tgt.s, src.s, "s", data.get(), Value::VAL_STRING, meta, &Value::s_, e);
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+Encoding::Kind encodings[] = {
+  Encoding::KIND_UNALIGNED_CDR,
+  //Encoding::KIND_XCDR1, // XTYPE-155
+  Encoding::KIND_XCDR2,
+};
+
+template <typename Type, size_t length>
+size_t array_length(Type(&)[length])
 {
-  int ret = 1;
-  try {
-    ret = run_test(argc, argv);
-  } catch (const CORBA::SystemException& e) {
-    e._tao_print_exception("ERROR: ");
-  } catch (const std::exception& e) {
-    std::cout << "ERROR: exception caught: " << e.what() << std::endl;
-  } catch (...) {
-    std::cout << "ERROR: unknown exception in main" << std::endl;
+  return length;
+}
+
+template<typename Type>
+bool run_test()
+{
+  bool success = true;
+  for (size_t i = 0; i < array_length(encodings); i++) {
+    const Encoding::Kind e = encodings[i];
+    std::cout << "run_test_i<" << DDSTraits<Type>::type_name()
+      << ">(" << Encoding::kind_to_string(e) << ")" << std::endl;
+    try {
+      success &= run_test_i<Type>(e);
+    } catch (const CORBA::SystemException& e) {
+      e._tao_print_exception("ERROR: ");
+      success = false;
+    } catch (const std::exception& e) {
+      std::cout << "ERROR: exception caught: " << e.what() << std::endl;
+      success = false;
+    } catch (...) {
+      std::cout << "ERROR: unknown exception in main" << std::endl;
+      success = false;
+    }
   }
-  return ret;
+  return success;
+}
+
+int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
+{
+  bool success = true;
+  success &= run_test<FinalStruct>();
+  success &= run_test<AppenableStruct>();
+  success &= run_test<MutableStruct>();
+  return success ? 0 : 1;
 }

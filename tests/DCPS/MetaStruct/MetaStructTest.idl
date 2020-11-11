@@ -1,4 +1,5 @@
-struct A {
+@final
+struct A_t {
   string s;
   long l;
   wchar w;
@@ -7,38 +8,74 @@ struct A {
 
 typedef short ShortArray[3];
 typedef ShortArray ArrayOfShortArray[4];
-typedef sequence<A> StructSeq;
+typedef string StringArray [3];
+typedef sequence<A_t> StructSeq;
 enum MyEnum {b, d, as, sa, ss, other1, other2};
 
+@final
 union MyUnion switch (MyEnum) {
 case b: boolean u_b;
 case d: double u_d;
-case as: A u_as;
+case as: A_t u_as;
 case sa: ShortArray u_sa;
 case ss: StructSeq u_ss;
 default: float u_f;
 };
 
-// The complex types above appear as fields in the two structs below.
-// Each field should be able to be assigned from Source to the corresponding
-// field in Target using the MetaStruct infrastructure from the opendds_idl
-// compiler.  This is what the MultiTopic implementation uses to construct
-// samples of the resulting topic's type (i.e. Target).
-
-struct Source {
-  A rhs_a;
-  ShortArray rhs_sa;
-  ArrayOfShortArray rhs_asa;
-  StructSeq rhs_ss;
-  MyEnum rhs_e;
-  MyUnion rhs_u;
+@mutable
+union MutableUnion switch (MyEnum) {
+case b: boolean u_b;
+case d: double u_d;
+case as: A_t u_as;
+case sa: ShortArray u_sa;
+case ss: StructSeq u_ss;
+default: float u_f;
 };
 
-struct Target {
-  A lhs_a;
-  ShortArray lhs_sa;
-  ArrayOfShortArray lhs_asa;
-  StructSeq lhs_ss;
-  MyEnum lhs_e;
-  MyUnion lhs_u;
+@topic
+@final
+struct FinalStruct {
+  A_t a;
+  ShortArray sa;
+  ArrayOfShortArray asa;
+  StructSeq ss;
+  MyEnum e;
+  MyUnion u;
+  MutableUnion mu;
+  sequence<A_t> anon_seq;
+  StringArray stra;
+  string astra[3];
+  string s;
+};
+
+@topic
+@appendable
+struct AppenableStruct {
+  A_t a;
+  ShortArray sa;
+  ArrayOfShortArray asa;
+  StructSeq ss;
+  MyEnum e;
+  MyUnion u;
+  MutableUnion mu;
+  sequence<A_t> anon_seq;
+  StringArray stra;
+  string astra[3];
+  string s;
+};
+
+@topic
+@mutable
+struct MutableStruct {
+  A_t a;
+  ShortArray sa;
+  ArrayOfShortArray asa;
+  StructSeq ss;
+  MyEnum e;
+  MyUnion u;
+  MutableUnion mu;
+  sequence<A_t> anon_seq;
+  StringArray stra;
+  string astra[3];
+  string s;
 };
