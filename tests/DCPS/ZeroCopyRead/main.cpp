@@ -580,6 +580,29 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               9);
 
     try { // the real testing.
+
+      {
+
+        struct test_struct {
+          char* ptr;
+          int a;
+          double b;
+          bool c;
+        };
+        TAO::DCPS::ZeroCopyDataSeq<test_struct, 20ul> ls;
+        if (ls.length() != 0) {
+          throw TestException();
+        }
+        ls.length(ls.length() + 1);
+        if (ls.length() != 1) {
+          throw TestException();
+        }
+        ls.length(ls.length() + 1);
+        if (ls.length() != 2) {
+          throw TestException();
+        }
+      }
+
       ::Test::Simple foo;
       ::Test::LongSeq ls;
       //::Test::Simple::_ls_seq ls;
