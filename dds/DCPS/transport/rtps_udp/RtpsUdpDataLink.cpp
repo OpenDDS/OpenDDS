@@ -1844,6 +1844,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (hb_first <= hb_last + 1 || (hb_first == one && wi_last == zero)) {
     if (info->first_valid_hb_) {
       info->first_valid_hb_ = false;
+      writers_expecting_non_final_ack_.erase(info);
       immediate_reply = true;
     }
     if (!durable_) {
@@ -1977,6 +1978,7 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& info)
   WriterInfoMap::const_iterator iter = remote_writers_.find(info->id_);
   if (iter == remote_writers_.end()) {
     remote_writers_[info->id_] = info;
+    writers_expecting_non_final_ack_.insert(info);
     return true;
   }
   return false;
@@ -1993,7 +1995,16 @@ bool
 RtpsUdpDataLink::RtpsReader::remove_writer(const RepoId& id)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  return remote_writers_.erase(id) > 0;
+  WriterInfoMap::iterator pos = remote_writers_.find(id);
+  if (pos != remote_writers_.end()) {
+    writers_expecting_nack_.erase(pos->second);
+    writers_expecting_non_final_ack_.erase(pos->second);
+    writers_expecting_ack_.erase(pos->second);
+    remote_writers_.erase(pos);
+    return true;
+  }
+
+  return false;
 }
 
 size_t
@@ -2037,7 +2048,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks(MetaSubmessageVec& meta_submessage
 void
 RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessages)
 {
-  if (writers_expecting_nack_.empty() && writers_expecting_ack_.empty()) {
+  if (writers_expecting_nack_.empty() && writers_expecting_non_final_ack_.empty() && writers_expecting_ack_.empty()) {
     return;
   }
 
@@ -2141,6 +2152,36 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
     meta_submessages.push_back(meta_submessage);
 
     generate_nack_frags_i(meta_submessages, meta_submessage, info, reader_id, writer_id);
+  }
+
+  // We want a heartbeat from these writers.
+  for (WriterInfoSet::const_iterator pos = writers_expecting_non_final_ack_.begin(), limit = writers_expecting_non_final_ack_.end();
+       pos != limit; ++pos) {
+    const WriterInfo_rch& info = *pos;
+    const DisjointSequence& recvd = info->recvd_;
+    const CORBA::ULong num_bits = 0;
+    const LongSeq8 bitmap;
+    const SequenceNumber& hb_low = info->hb_range_.first;
+    const SequenceNumber ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
+    const EntityId_t reader_id = id_.entityId;
+    const EntityId_t writer_id = info->id_.entityId;
+
+    MetaSubmessage meta_submessage(id_, info->id_);
+
+    AckNackSubmessage acknack = {
+      {ACKNACK,
+       CORBA::Octet(FLAG_E),
+       0 /*length*/},
+      reader_id,
+      writer_id,
+      { // SequenceNumberSet: acking bitmapBase - 1
+        {ack.getHigh(), ack.getLow()},
+        num_bits, bitmap
+      },
+      {++acknack_count_}
+    };
+    meta_submessage.sm_.acknack_sm(acknack);
+    meta_submessages.push_back(meta_submessage);
   }
 
   // These writers just want an ack.
@@ -2918,7 +2959,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     }
   }
 
-  const SequenceNumber previous_acked_sn = reader->acked_sn();
+  SequenceNumber previous_acked_sn = reader->acked_sn();
 
   SequenceNumber ack;
   ack.setValue(acknack.readerSNState.bitmapBase.high,
@@ -2926,13 +2967,21 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
-    } else if (reader->durable_ && !reader->expecting_durable_data()) {
-      // Count increased but ack decreased.  Replay durable data for the reader.
-      if (Transport_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received: Enqueuing ReplayDurableData\n"));
+    } else {
+      // Count increased but ack decreased.  Reset.
+      const SequenceNumber max_sn = expected_max_sn(reader);
+      snris_erase(previous_acked_sn == max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
+      reader->cur_cumulative_ack_ = ack;
+      snris_insert(lagging_readers_, reader);
+      previous_acked_sn = reader->acked_sn();
+
+      if (reader->durable_ && !reader->expecting_durable_data()) {
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received: Enqueuing ReplayDurableData\n"));
+        }
+        link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
+        reader->durable_timestamp_ = MonotonicTimePoint::zero_value;
       }
-      link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
-      reader->durable_timestamp_ = MonotonicTimePoint::zero_value;
     }
   }
 

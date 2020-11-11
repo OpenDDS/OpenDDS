@@ -121,8 +121,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
     }
 #elif !defined (OPENDDS_SAFETY_PROFILE)
-    ACE_thread_t tid = 0;
-    tid = thr_id_;
+    ACE_thread_t tid = thr_id_;
 #endif /* ACE_HAS_MAC_OSX */
     TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
     ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
