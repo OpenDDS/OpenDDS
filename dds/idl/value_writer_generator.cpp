@@ -71,6 +71,8 @@ namespace {
       return "boolean";
     case AST_PredefinedType::PT_octet:
       return "byte";
+    default:
+      return "";
     }
     return "";
   }
