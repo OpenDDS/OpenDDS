@@ -6,7 +6,8 @@
 
 namespace Builder {
 
-DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber, const std::shared_ptr<TopicManager>& topics)
+DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber,
+  const std::shared_ptr<TopicManager>& topics, const ContentFilteredTopicMap& cft_map)
   : name_(config.name.in()), topic_name_(config.topic_name.in()), cft_name_(config.cft_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
@@ -93,7 +94,12 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   if (cft_name_.empty()) {
     datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
   } else {
-    DDS::ContentFilteredTopic_var cft_ptr = topics->get_content_filtered_topic_by_name(config.cft_name.in());
+    DDS::ContentFilteredTopic_var cft_ptr;
+    auto it = cft_map.find(config.cft_name.in());
+    if (it != cft_map.end()) {
+      cft_ptr = it->second;
+    }
+
     if (!cft_ptr) {
       std::stringstream ss;
       ss << "content filtered topic lookup failed in datareader '" << config.name << "' for cft topic '" << config.cft_name << "'" << std::flush;

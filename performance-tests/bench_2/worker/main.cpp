@@ -253,7 +253,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning action construction / initialization." << std::endl;
 
-    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map());
+    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map(), process.get_cft_map());
 
     Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 

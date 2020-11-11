@@ -33,5 +33,7 @@ protected:
   DDS::Topic_var topic_;
 };
 
+using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
+
 }
 
