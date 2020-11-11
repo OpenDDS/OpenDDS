@@ -1,0 +1,22 @@
+
+enum GearSelect {
+    PARK,
+    REVERSE,
+    NEUTRAL,
+    FIRST,
+    SECOND,
+    THIRD,
+    FOURTH,
+    FIFTH,
+    SIXTH
+};
+
+enum FaultCode {
+    OK,
+    ERROR
+};
+
+struct TransmissionStatus {
+    FaultCode fault;
+    GearSelect gear;
+};

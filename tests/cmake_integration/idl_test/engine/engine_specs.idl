@@ -1,0 +1,19 @@
+
+enum TempType {
+    OIL,
+    COOLANT
+};
+
+struct EngineOilTemp {
+    TempType type;
+    long value;
+};
+
+struct EngineCoolantTemp {
+    TempType type;
+    long value;
+};
+
+struct EngineRpm {
+    long value;
+};

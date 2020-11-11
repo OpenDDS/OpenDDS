@@ -1,0 +1,13 @@
+#include "engine_specs.idl"
+#include "transmission_specs.idl"
+
+@topic
+struct CarInfo {
+    @key
+    string id;
+
+    EngineOilTemp oil;
+    EngineCoolantTemp coolant;
+    EngineRpm rpm;
+    TransmissionStatus transmission;
+};
