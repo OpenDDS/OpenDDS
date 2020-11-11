@@ -25,7 +25,7 @@ SimpleStatBlock::SimpleStatBlock()
 namespace {
 char my_toupper(char ch)
 {
-    return static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+  return static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
 }
 }
 

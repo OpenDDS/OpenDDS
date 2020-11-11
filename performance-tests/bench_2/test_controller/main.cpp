@@ -47,7 +47,8 @@ void update_stats_for_tags(std::unordered_map<std::string, uint64_t>& stats,
   const std::unordered_set<std::string>& input_tags,
   const Builder::ConstPropertyIndex& prop)
 {
-  for (const std::string& tag : reported_tags) {
+  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
+    const std::string tag(reported_tags[i]);
     if (input_tags.find(tag) != input_tags.end()) {
       if (stats.find(tag) == stats.end()) {
         stats[tag] = prop->value.ull_prop();
@@ -63,9 +64,23 @@ void update_details_for_tags(std::unordered_map<std::string, std::string>& detai
   const std::unordered_set<std::string>& input_tags,
   const std::string& detail)
 {
-  for (const std::string& tag : reported_tags) {
+  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
+    const std::string tag(reported_tags[i]);
     if (input_tags.find(tag) != input_tags.end()) {
       details[tag] += detail;
+    }
+  }
+}
+
+void consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatBlock>& stats,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const Bench::ConstPropertyStatBlock& data)
+{
+  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
+    const std::string tag(reported_tags[i]);
+    if (input_tags.find(tag) != input_tags.end()) {
+      stats[tag] = consolidate(stats[tag], data.to_simple_stat_block());
     }
   }
 }
@@ -126,6 +141,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string result_id;
   bool overwrite_result = false;
 
+  // List of tags
+  unsigned num_tags = 0;
+  std::unordered_set<std::string> tags;
+
   ScenarioOverrides overrides;
   {
     char host[256];
@@ -179,7 +198,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "                             incrementing numbers are assigned, but ID doesn't" << std::endl
           << "                             have to be a valid number, just a valid file name." << std::endl
           << "--overwrite-result           Write the result when using --result-id, even if" << std::endl
-          << "                             it would overwrite another result." << std::endl;
+          << "                             it would overwrite another result." << std::endl
+          << "--override-bench-partition-suffix SUFFIX     Override the system-wide partition suffix." << std::endl
+          << "--override-create-time N                     Override the system-wide creation time." << std::endl
+          << "--override-enable-time N                     Override the system-wide enabling time." << std::endl
+          << "--override-start-time N                      Override the system-wide starting time." << std::endl
+          << "--override-stop-time N                       Override the system-wide stopping time." << std::endl
+          << "--override-destruction-time N                Override the system-wide destruction time." << std::endl
+          << "--tags N [TAGS...]                           List of tags for which the user wants to collect" << std::endl
+          << "                                             the statistics information. N is the number of tags," << std::endl
+          << "                                             followed by a list of space-separated tags. Tags must" << std::endl
+          << "                                             not start with the dash ('-') character." << std::endl;
 //            ################################################################################
         return 0;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-out"))) {
@@ -206,6 +235,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         overrides.stop_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-destruction-time"))) {
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tags"))) {
+        num_tags = get_option_argument_uint(i, argc, argv);
+        std::string tag;
+        while (num_tags > 0) {
+          tag = get_option_argument(++i, argc, argv);
+          if (tag[0] == '-') {
+            std::cerr << "Tags must not start with the dash ('-') character!" << std::endl;
+            throw 1;
+          }
+          tags.insert(tag);
+          --num_tags;
+        }
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -374,7 +415,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         << std::endl
         << "Ran with " << allocated_scenario.configs.length() << " nodes" << std::endl;
 
-      std::unordered_set<std::string> tags;
       std::string scenario_end;
       {
         std::ostringstream ss;
@@ -459,6 +499,8 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   std::unordered_map<std::string, uint64_t> lost_sample_counts, rejected_sample_counts,
     out_of_order_data_counts, duplicate_data_counts, missing_data_counts;
   std::unordered_map<std::string, std::string> out_of_order_data_details, duplicate_data_details, missing_data_details;
+  std::unordered_map<std::string, Bench::SimpleStatBlock> tagged_discovery_delta_stats, tagged_latency_stats,
+    tagged_jitter_stats, tagged_round_trip_latency_stats, tagged_round_trip_jitter_stats;
 
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
     const Bench::WorkerReport& worker_report = parsed_reports[r];
@@ -547,6 +589,12 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
           consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
           consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
+
+          consolidate_tagged_stats(tagged_discovery_delta_stats, dr_report.tags, tags, dr_discovery_delta);
+          consolidate_tagged_stats(tagged_latency_stats, dr_report.tags, tags, dr_latency);
+          consolidate_tagged_stats(tagged_jitter_stats, dr_report.tags, tags, dr_jitter);
+          consolidate_tagged_stats(tagged_round_trip_latency_stats, dr_report.tags, tags, dr_round_trip_latency);
+          consolidate_tagged_stats(tagged_round_trip_jitter_stats, dr_report.tags, tags, dr_round_trip_jitter);
         }
       }
 
@@ -614,19 +662,67 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
 
   result_out << std::endl;
 
-  consolidated_latency_stats.pretty_print(result_out, "latency");
+  consolidated_latency_stats.pretty_print(result_out, "latency", "  ", 1);
 
   result_out << std::endl;
 
-  consolidated_jitter_stats.pretty_print(result_out, "jitter");
+  consolidated_jitter_stats.pretty_print(result_out, "jitter", "  ", 1);
 
   result_out << std::endl;
 
-  consolidated_round_trip_latency_stats.pretty_print(result_out, "round trip latency");
+  consolidated_round_trip_latency_stats.pretty_print(result_out, "round trip latency", "  ", 1);
 
   result_out << std::endl;
 
-  consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter");
+  consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter", "  ", 1);
+
+  // Print stats information for the input tags
+  for (const std::string& tag : tags) {
+    result_out << "===== Tag: " << tag << ":\n";
+    if (out_of_order_data_details.count(tag)) {
+      result_out << out_of_order_data_details[tag];
+    }
+    if (duplicate_data_details.count(tag)) {
+      result_out << duplicate_data_details[tag];
+    }
+    if (missing_data_details.count(tag)) {
+      result_out << missing_data_details[tag];
+    }
+    result_out << std::endl;
+
+    if (tagged_discovery_delta_stats.count(tag)) {
+      tagged_discovery_delta_stats[tag].pretty_print(result_out, "discovery time delta");
+    }
+    if (tagged_latency_stats.count(tag)) {
+      tagged_latency_stats[tag].pretty_print(result_out, "latency");
+    }
+    if (tagged_jitter_stats.count(tag)) {
+      tagged_jitter_stats[tag].pretty_print(result_out, "jitter");
+    }
+    if (tagged_round_trip_latency_stats.count(tag)) {
+      tagged_round_trip_latency_stats[tag].pretty_print(result_out, "round trip latency");
+    }
+    if (tagged_round_trip_jitter_stats.count(tag)) {
+      tagged_round_trip_jitter_stats[tag].pretty_print(result_out, "round trip jitter");
+    }
+    result_out << std::endl;
+
+    result_out << "DDS Sample Count Stats:" << std::endl;
+    result_out << "  Total Lost Samples: " <<
+      (lost_sample_counts.count(tag) > 0 ? std::to_string(lost_sample_counts[tag]) : "") << std::endl;
+    result_out << "  Total Rejected Samples: " <<
+      (rejected_sample_counts.count(tag) > 0 ? std::to_string(rejected_sample_counts[tag]) : "") << std::endl;
+    result_out << std::endl;
+
+    result_out << "Data Count Stats:" << std::endl;
+    result_out << "  Total Out-Of-Order Data Samples: " <<
+      (out_of_order_data_counts.count(tag) > 0 ? std::to_string(out_of_order_data_counts[tag]) : "") << std::endl;
+    result_out << "  Total Duplicate Data Samples: " <<
+      (duplicate_data_counts.count(tag) > 0 ? std::to_string(duplicate_data_counts[tag]) : "") << std::endl;
+    result_out << "  Total Missing Data Samples: " <<
+      (missing_data_counts.count(tag) > 0 ? std::to_string(missing_data_counts[tag]) : "") << std::endl;
+    result_out << "\n\n";
+  }
 
   if (total_undermatched_readers ||
       total_undermatched_writers ||
