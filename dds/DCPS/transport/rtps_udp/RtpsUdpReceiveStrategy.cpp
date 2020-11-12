@@ -230,7 +230,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
     std::memcpy(peer.guidPrefix, encBuf + GuidPrefixOffset, sizeof peer.guidPrefix);
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
-    const ParticipantCryptoHandle sender = link_->security_config()->get_handle_registry()->get_remote_participant_crypto_handle(peer);
+    const ParticipantCryptoHandle sender = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
     if (sender == DDS::HANDLE_NIL) {
       if (security_debug.encdec_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
@@ -303,8 +303,8 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
   const GuidConverter conv(sendGuid);
   const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(
     conv.isReader() ?
-    link_->security_config()->get_handle_registry()->get_remote_datareader_security_attributes(sendGuid) :
-    link_->security_config()->get_handle_registry()->get_remote_datawriter_security_attributes(sendGuid));
+    link_->handle_registry()->get_remote_datareader_security_attributes(sendGuid) :
+    link_->handle_registry()->get_remote_datawriter_security_attributes(sendGuid));
   static const EndpointSecurityAttributesMask MASK_PROTECT_SUBMSG =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED;
 
@@ -567,7 +567,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   RepoId peer;
   assign(peer.guidPrefix, receiver_.source_guid_prefix_);
   peer.entityId = ENTITYID_PARTICIPANT;
-  const ParticipantCryptoHandle peer_pch = link_->security_config()->get_handle_registry()->get_remote_participant_crypto_handle(peer);
+  const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
   sec_submsg_to_octets(encoded_submsg, submessage);
@@ -700,10 +700,10 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                             const RTPS::DataSubmessage& submsg)
 {
   using namespace DDS::Security;
-  const DatawriterCryptoHandle writer_crypto_handle = link_->security_config()->get_handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
+  const DatawriterCryptoHandle writer_crypto_handle = link_->handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
-  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(link_->security_config()->get_handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
+  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(link_->handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
   static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
   const bool payload_protected = (esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD;

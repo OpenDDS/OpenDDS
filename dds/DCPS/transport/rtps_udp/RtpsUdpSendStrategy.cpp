@@ -317,7 +317,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
                                     RTPS::SubmessageSeq& submessages)
 {
   const DDS::Security::DatawriterCryptoHandle writer_crypto_handle =
-    link_->security_config()->get_handle_registry()->get_local_datawriter_crypto_handle(pub_id);
+    link_->handle_registry()->get_local_datawriter_crypto_handle(pub_id);
   DDS::Security::CryptoTransform_var crypto =
     link_->security_config()->get_crypto_transform();
 
@@ -487,7 +487,7 @@ RtpsUdpSendStrategy::encode_writer_submessage(const RepoId& receiver,
   DatareaderCryptoHandleSeq readerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
     DatareaderCryptoHandle drch =
-      link_->security_config()->get_handle_registry()->get_remote_datareader_crypto_handle(receiver);
+      link_->handle_registry()->get_remote_datareader_crypto_handle(receiver);
     if (drch != DDS::HANDLE_NIL) {
       readerHandles.length(1);
       readerHandles[0] = drch;
@@ -530,7 +530,7 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
 
   DatawriterCryptoHandleSeq writerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
-    DatawriterCryptoHandle dwch = link_->security_config()->get_handle_registry()->get_remote_datawriter_crypto_handle(receiver);
+    DatawriterCryptoHandle dwch = link_->handle_registry()->get_remote_datawriter_crypto_handle(receiver);
     if (dwch != DDS::HANDLE_NIL) {
       writerHandles.length(1);
       writerHandles[0] = dwch;
@@ -622,7 +622,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
       check_stateless_volatile(sender.entityId, stateless_or_volatile);
       DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, dataExtra, receiver.entityId, sender.entityId, remaining));
       if (!encode_writer_submessage(receiver, replacements, crypto, plainSm,
-                                    link_->security_config()->get_handle_registry()->get_local_datawriter_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
+                                    link_->handle_registry()->get_local_datawriter_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;
@@ -641,7 +641,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
       check_stateless_volatile(receiver.entityId, stateless_or_volatile);
       DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, 0, sender.entityId, receiver.entityId, remaining));
       if (!encode_reader_submessage(receiver, replacements, crypto, plainSm,
-                                    link_->security_config()->get_handle_registry()->get_local_datareader_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
+                                    link_->handle_registry()->get_local_datareader_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;

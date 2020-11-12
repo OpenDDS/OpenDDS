@@ -24,7 +24,6 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
                                CryptoKeyExchange_var key_exchange_plugin,
                                CryptoKeyFactory_var key_factory_plugin,
                                CryptoTransform_var transform_plugin,
-                               HandleRegistry* handle_registry_plugin,
                                Utility* utility_plugin,
 #endif
                                const ConfigPropertyList& properties)
@@ -35,7 +34,6 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
   , key_exchange_plugin_(key_exchange_plugin)
   , key_factory_plugin_(key_factory_plugin)
   , transform_plugin_(transform_plugin)
-  , handle_registry_plugin_(handle_registry_plugin)
   , utility_plugin_(utility_plugin)
 #endif
   , properties_(properties)

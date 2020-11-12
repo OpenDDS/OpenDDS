@@ -22,7 +22,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
-#include "security/HandleRegistry.h"
+#include "security/framework/HandleRegistry.h"
 #include "Ice.h"
 #endif
 
@@ -533,7 +533,7 @@ namespace OpenDDS {
                      ACE_TEXT("Failure calling unregister_datawriter.")
                      ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         }
-        get_handle_registry()->remove_local_datawriter_crypto_handle(publicationId);
+        get_handle_registry()->erase_local_datawriter_crypto_handle(publicationId);
       }
 #endif
 
@@ -697,7 +697,7 @@ namespace OpenDDS {
                      ACE_TEXT("Failure calling unregister_datareader.")
                      ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         }
-        get_handle_registry()->remove_local_datareader_crypto_handle(subscriptionId);
+        get_handle_registry()->erase_local_datareader_crypto_handle(subscriptionId);
       }
 #endif
 
@@ -755,6 +755,13 @@ namespace OpenDDS {
                                         const RepoId& remoteId) = 0;
 
       virtual bool disassociate(DiscoveredParticipantData& pdata) = 0;
+
+#ifdef OPENDDS_SECURITY
+      inline Security::HandleRegistry_rch get_handle_registry() const
+      {
+        return handle_registry_;
+      }
+#endif
 
     protected:
       struct LocalEndpoint {
@@ -1424,14 +1431,9 @@ namespace OpenDDS {
         return crypto_key_exchange_;
       }
 
-      inline void set_handle_registry(Security::HandleRegistry* hr)
+      inline void set_handle_registry(const Security::HandleRegistry_rch& hr)
       {
         handle_registry_ = hr;
-      }
-
-      inline Security::HandleRegistry* get_handle_registry() const
-      {
-        return handle_registry_;
       }
 
 #endif
@@ -1453,7 +1455,7 @@ namespace OpenDDS {
       DDS::Security::AccessControl_var access_control_;
       DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
       DDS::Security::CryptoKeyExchange_var crypto_key_exchange_;
-      Security::HandleRegistry* handle_registry_;
+      Security::HandleRegistry_rch handle_registry_;
 
       DDS::Security::PermissionsHandle permissions_handle_;
       DDS::Security::ParticipantCryptoHandle crypto_handle_;

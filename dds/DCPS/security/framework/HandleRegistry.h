@@ -8,9 +8,9 @@
 #ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 #define OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 
-#include "HandleRegistry.h"
-
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/RcObject.h"
+#include "dds/DdsSecurityCoreC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -21,28 +21,33 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-class DdsSecurity_Export HandleRegistryImpl : public HandleRegistry {
+class HandleRegistry : public DCPS::RcObject {
 public:
-  ~HandleRegistryImpl();
+  typedef std::pair<DCPS::RepoId, DDS::Security::DatareaderCryptoHandle> RepoIdDrch;
+  typedef OPENDDS_VECTOR(RepoIdDrch) DatareaderCryptoHandleList;
+  typedef std::pair<DCPS::RepoId, DDS::Security::DatawriterCryptoHandle> RepoIdDwch;
+  typedef OPENDDS_VECTOR(RepoIdDwch) DatawriterCryptoHandleList;
+
+  ~HandleRegistry();
 
   void insert_local_datareader_crypto_handle(const DCPS::RepoId& id,
                                              DDS::Security::DatareaderCryptoHandle handle,
                                              DDS::Security::EndpointSecurityAttributes attributes);
   DDS::Security::DatareaderCryptoHandle get_local_datareader_crypto_handle(const DCPS::RepoId& id) const;
   DDS::Security::EndpointSecurityAttributes get_local_datareader_security_attributes(const DCPS::RepoId& id) const;
-  void remove_local_datareader_crypto_handle(const DCPS::RepoId& id);
+  void erase_local_datareader_crypto_handle(const DCPS::RepoId& id);
 
   void insert_local_datawriter_crypto_handle(const DCPS::RepoId& id,
                                              DDS::Security::DatawriterCryptoHandle handle,
                                              DDS::Security::EndpointSecurityAttributes attributes);
   DDS::Security::DatawriterCryptoHandle get_local_datawriter_crypto_handle(const DCPS::RepoId& id) const;
   DDS::Security::EndpointSecurityAttributes get_local_datawriter_security_attributes(const DCPS::RepoId& id) const;
-  void remove_local_datawriter_crypto_handle(const DCPS::RepoId& id);
+  void erase_local_datawriter_crypto_handle(const DCPS::RepoId& id);
 
   void insert_remote_participant_crypto_handle(const DCPS::RepoId& id,
                                                DDS::Security::ParticipantCryptoHandle handle);
   DDS::Security::ParticipantCryptoHandle get_remote_participant_crypto_handle(const DCPS::RepoId& id) const;
-  void remove_remote_participant_crypto_handle(const DCPS::RepoId& id);
+  void erase_remote_participant_crypto_handle(const DCPS::RepoId& id);
 
   void insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
                                               DDS::Security::DatareaderCryptoHandle handle,
@@ -50,7 +55,7 @@ public:
   DDS::Security::DatareaderCryptoHandle get_remote_datareader_crypto_handle(const DCPS::RepoId& id) const;
   DDS::Security::EndpointSecurityAttributes get_remote_datareader_security_attributes(const DCPS::RepoId& id) const;
   DatareaderCryptoHandleList get_all_remote_datareaders(const DCPS::RepoId& prefix) const;
-  void remove_remote_datareader_crypto_handle(const DCPS::RepoId& id);
+  void erase_remote_datareader_crypto_handle(const DCPS::RepoId& id);
 
   void insert_remote_datawriter_crypto_handle(const DCPS::RepoId& id,
                                               DDS::Security::DatawriterCryptoHandle handle,
@@ -58,7 +63,7 @@ public:
   DDS::Security::DatawriterCryptoHandle get_remote_datawriter_crypto_handle(const DCPS::RepoId& id) const;
   DDS::Security::EndpointSecurityAttributes get_remote_datawriter_security_attributes(const DCPS::RepoId& id) const;
   DatawriterCryptoHandleList get_all_remote_datawriters(const DCPS::RepoId& prefix) const;
-  void remove_remote_datawriter_crypto_handle(const DCPS::RepoId& id);
+  void erase_remote_datawriter_crypto_handle(const DCPS::RepoId& id);
 
  private:
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::ParticipantCryptoHandle, DCPS::GUID_tKeyLessThan)
@@ -79,6 +84,9 @@ public:
   DatareaderCryptoHandleMap remote_datareader_crypto_handles_;
   DatawriterCryptoHandleMap remote_datawriter_crypto_handles_;
 };
+
+typedef DCPS::RcHandle<HandleRegistry> HandleRegistry_rch;
+
 
 } // namespace Security
 } // namespace OpenDDS

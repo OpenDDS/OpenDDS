@@ -1522,7 +1522,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
     reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
   const DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
-    security_config_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
+    sedp_.get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
 
   if (!key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp_crypto_handle, inboundTokens, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_participant_crypto_tokens() - ")
@@ -1694,13 +1694,13 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
-    security_config_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
+    sedp_.get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
 
   if (dp_crypto_handle == DDS::HANDLE_NIL) {
     dp_crypto_handle = key_factory->register_matched_remote_participant(
       crypto_handle_, iter->second.identity_handle_, iter->second.permissions_handle_,
       iter->second.shared_secret_handle_, se);
-    security_config_->get_handle_registry()->insert_remote_participant_crypto_handle(iter->first, dp_crypto_handle);
+    sedp_.get_handle_registry()->insert_remote_participant_crypto_handle(iter->first, dp_crypto_handle);
     if (dp_crypto_handle == DDS::HANDLE_NIL) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
@@ -1794,7 +1794,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
     DDS::Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::ParticipantCryptoHandle pch =
-      security_config_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
+      sedp_.get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
     if (!security_config_->get_crypto_key_factory()->unregister_participant(pch, se)) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
@@ -1804,7 +1804,7 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
                    se.code, se.minor_code, se.message.in()));
       }
     }
-    security_config_->get_handle_registry()->remove_remote_participant_crypto_handle(iter->first);
+    sedp_.get_handle_registry()->erase_remote_participant_crypto_handle(iter->first);
 
     if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
@@ -3229,7 +3229,7 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
-    result.first = security_config_->get_handle_registry()->get_remote_participant_crypto_handle(id);
+    result.first = sedp_.get_handle_registry()->get_remote_participant_crypto_handle(id);
     result.second = pi->second.shared_secret_handle_;
   }
   return result;
@@ -3510,7 +3510,7 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
 DDS::Security::ParticipantCryptoHandle
 Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 {
-  return security_config_->get_handle_registry()->get_remote_participant_crypto_handle(remote_participant);
+  return sedp_.get_handle_registry()->get_remote_participant_crypto_handle(remote_participant);
 }
 
 void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)

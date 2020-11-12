@@ -173,6 +173,9 @@ public:
   Security::SecurityConfig_rch security_config() const
   { return security_config_; }
 
+  Security::HandleRegistry_rch handle_registry() const
+  { return handle_registry_; }
+
   DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
 
@@ -757,6 +760,7 @@ private:
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
+  Security::HandleRegistry_rch handle_registry_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
 

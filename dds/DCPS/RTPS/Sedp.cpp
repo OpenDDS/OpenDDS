@@ -42,6 +42,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
+#include "dds/DCPS/security/framework/HandleRegistry.h"
 #endif
 
 #include <ace/Reverse_Lock_T.h>
@@ -476,12 +477,14 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
   AccessControl_var acl = spdp_.get_security_config()->get_access_control();
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
+  HandleRegistry_rch handle_registry = make_rch<HandleRegistry>();
+  spdp_.get_security_config()->insert_handle_registry(participant_id_, handle_registry);
 
   set_permissions_handle(perm_handle);
   set_access_control(acl);
   set_crypto_key_factory(key_factory);
   set_crypto_key_exchange(key_exchange);
-  set_handle_registry(spdp_.get_security_config()->get_handle_registry());
+  set_handle_registry(handle_registry);
   crypto_handle_ = crypto_handle;
 
   // TODO: Handle all exceptions below once error-codes have been defined, etc.
@@ -716,6 +719,7 @@ Sedp::~Sedp()
   cleanup_secure_reader(subscriptions_secure_reader_->get_repo_id());
   cleanup_secure_writer(dcps_participant_secure_writer_->get_repo_id());
   cleanup_secure_reader(dcps_participant_secure_reader_->get_repo_id());
+  spdp_.get_security_config()->erase_handle_registry(participant_id_);
 #endif
 
   job_queue_.reset();
@@ -1119,7 +1123,7 @@ void Sedp::remove_remote_crypto_handle(const RepoId& participant, const EntityId
                  ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    get_handle_registry()->remove_remote_datareader_crypto_handle(remote);
+    get_handle_registry()->erase_remote_datareader_crypto_handle(remote);
   } else if (traits.isWriter()) {
     const DDS::Security::DatawriterCryptoHandle dwch =
       get_handle_registry()->get_remote_datawriter_crypto_handle(remote);
@@ -1131,7 +1135,7 @@ void Sedp::remove_remote_crypto_handle(const RepoId& participant, const EntityId
                  ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    get_handle_registry()->remove_remote_datawriter_crypto_handle(remote);
+    get_handle_registry()->erase_remote_datawriter_crypto_handle(remote);
   }
 }
 
@@ -1459,7 +1463,7 @@ Sedp::disassociate(ParticipantData_t& pdata)
                    ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
                    se.code, se.minor_code, se.message.in()));
       }
-      get_handle_registry()->remove_remote_datareader_crypto_handle(pos->first);
+      get_handle_registry()->erase_remote_datareader_crypto_handle(pos->first);
     }
     const DatawriterCryptoHandleList dwlist = get_handle_registry()->get_all_remote_datawriters(key);
     for (DatawriterCryptoHandleList::const_iterator pos = dwlist.begin(), limit = dwlist.end();
@@ -1469,7 +1473,7 @@ Sedp::disassociate(ParticipantData_t& pdata)
                    ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
                    se.code, se.minor_code, se.message.in()));
       }
-      get_handle_registry()->remove_remote_datawriter_crypto_handle(pos->first);
+      get_handle_registry()->erase_remote_datawriter_crypto_handle(pos->first);
     }
   }
 #endif

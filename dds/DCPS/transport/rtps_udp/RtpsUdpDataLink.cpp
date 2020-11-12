@@ -92,6 +92,10 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
 {
+#ifdef OPENDDS_SECURITY
+  handle_registry_ = security_config_->get_handle_registry(make_id(local_prefix, ENTITYID_PARTICIPANT));
+#endif
+
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
   receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
