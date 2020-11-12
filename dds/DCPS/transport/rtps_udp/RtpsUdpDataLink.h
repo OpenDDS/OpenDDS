@@ -507,6 +507,7 @@ private:
     const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet writers_expecting_nack_;
+    WriterInfoSet writers_expecting_non_final_ack_;
     WriterInfoSet writers_expecting_ack_;
     bool stopping_;
     CORBA::Long acknack_count_;
