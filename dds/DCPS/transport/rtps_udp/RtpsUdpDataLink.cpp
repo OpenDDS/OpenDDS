@@ -3646,6 +3646,29 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
 }
 
 void
+RtpsUdpDataLink::RtpsWriter::expire_durable_data(const ReaderInfo_rch& reader,
+                                                 const RtpsUdpInst& cfg,
+                                                 const MonotonicTimePoint& now,
+                                                 OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks)
+{
+  if (!reader->durable_data_.empty()) {
+    const MonotonicTimePoint expiration = reader->durable_timestamp_ + cfg.durable_data_timeout_;
+    if (now > expiration) {
+      typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter;
+      for (dd_iter it = reader->durable_data_.begin(); it != reader->durable_data_.end(); ++it) {
+        pendingCallbacks.push_back(it->second);
+      }
+      reader->durable_data_.clear();
+      if (Transport_debug_level > 3) {
+        VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::gather_heartbeats - "
+                  "removed expired durable data for %C -> %C\n",
+                  LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()), 3);
+      }
+    }
+  }
+}
+
+void
 RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
                                                const RepoIdSet& additional_guids,
                                                MetaSubmessageVec& meta_submessages)
@@ -3662,7 +3685,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
-  RtpsUdpInst& cfg = link->config();
+  const RtpsUdpInst& cfg = link->config();
 
   using namespace OpenDDS::RTPS;
 
@@ -3690,37 +3713,36 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     meta_submessage.to_guids_.clear();
   }
 
-  for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
-       snris_pos != snris_limit; ++snris_pos) {
-    for (ReaderInfoSet::const_iterator pos = snris_pos->second->readers.begin(),
-           limit = snris_pos->second->readers.end();
-         pos != limit; ++pos) {
+  if (leading_readers_.empty()
+#ifdef OPENDDS_SECURITY
+      && !is_pvs_writer_
+#endif
+      ) {
+    // Every reader is lagging.
+    for (ReaderInfoMap::const_iterator pos = remote_readers_.begin(), limit = remote_readers_.end(); pos != limit; ++pos) {
       // TODO: This should be factored out in a sporadic task.
-      // Handle some durability cleanup.
-      const ReaderInfo_rch& ri = (*pos);
-      if (!ri->durable_data_.empty()) {
-        const MonotonicTimePoint expiration = ri->durable_timestamp_ + cfg.durable_data_timeout_;
-        if (now > expiration) {
-          typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter;
-          for (dd_iter it = ri->durable_data_.begin(); it != ri->durable_data_.end(); ++it) {
-            pendingCallbacks.push_back(it->second);
-          }
-          ri->durable_data_.clear();
-          if (Transport_debug_level > 3) {
-            const GuidConverter gw(id_), gr(ri->id_);
-            VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::gather_heartbeats - "
-                      "removed expired durable data for %C -> %C\n",
-                      OPENDDS_STRING(gw).c_str(), OPENDDS_STRING(gr).c_str()), 3);
-          }
-        }
-      }
+      expire_durable_data(pos->second, cfg, now, pendingCallbacks);
+      meta_submessage.to_guids_.insert(pos->first);
+    }
+    meta_submessages.push_back(meta_submessage);
+    meta_submessage.to_guids_.clear();
+  } else {
+    for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
+         snris_pos != snris_limit; ++snris_pos) {
+      for (ReaderInfoSet::const_iterator pos = snris_pos->second->readers.begin(),
+             limit = snris_pos->second->readers.end();
+           pos != limit; ++pos) {
+        const ReaderInfo_rch& ri = (*pos);
+        // TODO: This should be factored out in a sporadic task.
+        expire_durable_data(ri, cfg, now, pendingCallbacks);
 
-      const SequenceNumber sn = expected_max_sn(ri);
-      meta_submessage.dst_guid_ = ri->id_;
-      meta_submessage.sm_.heartbeat_sm().readerId = ri->id_.entityId;
-      meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
-      meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
-      meta_submessages.push_back(meta_submessage);
+        const SequenceNumber sn = expected_max_sn(ri);
+        meta_submessage.dst_guid_ = ri->id_;
+        meta_submessage.sm_.heartbeat_sm().readerId = ri->id_.entityId;
+        meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
+        meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
+        meta_submessages.push_back(meta_submessage);
+      }
     }
   }
 
