@@ -312,7 +312,6 @@ private:
     void swap_durable_data(OPENDDS_MAP(SequenceNumber, TransportQueueElement*)& dd);
     void expire_durable_data();
     bool expecting_durable_data() const;
-    bool handshake_done() const { return cur_cumulative_ack_ != SequenceNumber::ZERO(); }
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
   };
 
@@ -352,12 +351,14 @@ private:
   class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
-    // These readers have sent a non-final acknack that will be answered with a final heartbeat.
-    ReaderInfoSet readers_expecting_heartbeat_;
+    // Preassociation readers require a non-final heartbeat.
+    ReaderInfoSet preassociation_readers_;
     // These readers have not acked everything they are supposed to have acked.
     SNRIS lagging_readers_;
     // These reader have acked everything they are supposed to have acked.
     SNRIS leading_readers_;
+    // These readers have sent a non-final acknack that will be answered with a final heartbeat.
+    ReaderInfoSet readers_expecting_heartbeat_;
     // These readers have sent a nack and are expecting data.
     ReaderInfoSet readers_expecting_data_;
     RcHandle<SingleSendBuffer> send_buff_;
@@ -506,8 +507,8 @@ private:
     const RepoId id_;
     const bool durable_;
     WriterInfoMap remote_writers_;
+    WriterInfoSet preassociation_writers_;
     WriterInfoSet writers_expecting_nack_;
-    WriterInfoSet writers_expecting_non_final_ack_;
     WriterInfoSet writers_expecting_ack_;
     bool stopping_;
     CORBA::Long acknack_count_;

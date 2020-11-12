@@ -1456,65 +1456,20 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info->first_activity_ = false;
     }
 
-    const bool no_nack = !(info->hb_range_.second == SequenceNumber::ZERO())
-      && info->hb_range_.second < info->hb_range_.first;
-
     info->frags_.erase(seq);
 
     if (info->recvd_.empty()) {
-      if (durable_) {
-        info->hb_range_.first = 1;
-        info->hb_range_.second = seq;
-        info->recvd_.insert(SequenceNumber::ZERO());
-        info->recvd_.insert(seq);
-
-        if (seq != 1) {
-          if (Transport_debug_level > 5) {
-            GuidConverter writer(src);
-            GuidConverter reader(id_);
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                                 ACE_TEXT(" data seq: %q from %C being WITHHELD from %C because it's EXPECTING more data")
-                                 ACE_TEXT(" (first message, initializing reader)\n"),
-                                 seq.getValue(),
-                                 OPENDDS_STRING(writer).c_str(),
-                                 OPENDDS_STRING(reader).c_str()));
-          }
-          const ReceivedDataSample* sample =
-            link->receive_strategy()->withhold_data_from(id_);
-          info->held_.insert(std::make_pair(seq, *sample));
-
-        } else {
-          if (Transport_debug_level > 5) {
-            GuidConverter writer(src);
-            GuidConverter reader(id_);
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                                 ACE_TEXT(" data seq: %q from %C to %C OK to deliver")
-                                 ACE_TEXT(" (first message, initializing reader)\n"),
-                                 seq.getValue(),
-                                 OPENDDS_STRING(writer).c_str(),
-                                 OPENDDS_STRING(reader).c_str()));
-          }
-          link->receive_strategy()->do_not_withhold_data_from(id_);
-          info->first_delivered_data_ = false;
-        }
-      } else {
-        SequenceNumber low = std::min(seq, info->frags_.empty() ? seq : info->frags_.begin()->first.previous());
-        if (seq <= low) {
-          info->hb_range_.first = seq;
-          info->hb_range_.second = seq;
-          info->recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
-          info->first_delivered_data_ = false;
-          link->receive_strategy()->do_not_withhold_data_from(id_);
-        } else {
-          info->hb_range_.first = low;
-          info->hb_range_.second = seq;
-          const ReceivedDataSample* sample =
-            link->receive_strategy()->withhold_data_from(id_);
-          info->held_.insert(std::make_pair(seq, *sample));
-          info->recvd_.insert(seq);
-          link->deliver_held_data(id_, info, durable_);
-        }
+      if (Transport_debug_level > 5) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
+                   ACE_TEXT(" data seq: %q from %C being from %C expecting heartbeat\n"),
+                   seq.getValue(),
+                   LogGuid(src).c_str(),
+                   LogGuid(id_).c_str()));
       }
+      const ReceivedDataSample* sample =
+        link->receive_strategy()->withhold_data_from(id_);
+      info->held_.insert(std::make_pair(seq, *sample));
 
     } else if (info->recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
@@ -1538,13 +1493,6 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info->held_.insert(std::make_pair(seq, *sample));
       info->recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
-
-    } else if (!durable_ && info->first_delivered_data_ && info->hb_range_.second < seq && no_nack) {
-      info->hb_range_.first = seq;
-      info->hb_range_.second = seq;
-      info->recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
-      info->first_delivered_data_ = false;
-      link->receive_strategy()->do_not_withhold_data_from(id_);
 
     } else if (info->recvd_.disjoint() || info->recvd_.cumulative_ack() != seq.previous()) {
       if (Transport_debug_level > 5) {
@@ -1593,7 +1541,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       SequenceNumber seq;
       seq.setValue(data.writerSN.high, data.writerSN.low);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                           ACE_TEXT(" data seq: %q from %C to %C OK to deliver (Writer not currently in Reader remote writer map)\n"),
+                           ACE_TEXT(" data seq: %q from %C to %C dropped because of unknown writer\n"),
                            seq.getValue(),
                            OPENDDS_STRING(writer).c_str(),
                            OPENDDS_STRING(reader).c_str()));
@@ -1820,23 +1768,22 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     immediate_reply = true;
   }
 
-  // The first-ever HB can determine the start of our nackable range (wi_first)
   if (info->first_activity_) {
     immediate_reply = true;
     info->first_activity_ = false;
     first_ever_hb = true;
-    // Don't re-initialize recvd_ values if a data sample has already done it
-    if (info->recvd_.empty()) {
-      if (!durable_) {
-        if (hb_last > zero) {
-          info->recvd_.insert(SequenceRange(zero, hb_last));
-        } else {
-          info->recvd_.insert(zero);
-        }
-        wi_first = hb_last; // non-durable reliable connections ignore previous data
+  }
+
+  if (info->recvd_.empty()) {
+    if (!durable_) {
+      if (hb_last > zero) {
+        info->recvd_.insert(SequenceRange(zero, hb_last));
       } else {
         info->recvd_.insert(zero);
       }
+      wi_first = hb_last; // non-durable reliable connections ignore previous data
+    } else {
+      info->recvd_.insert(zero);
     }
   }
 
@@ -1844,7 +1791,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (hb_first <= hb_last + 1 || (hb_first == one && wi_last == zero)) {
     if (info->first_valid_hb_) {
       info->first_valid_hb_ = false;
-      writers_expecting_non_final_ack_.erase(info);
+      preassociation_writers_.erase(info);
       immediate_reply = true;
     }
     if (!durable_) {
@@ -1909,7 +1856,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
   ReaderInfoMap::const_iterator iter = remote_readers_.find(reader->id_);
   if (iter == remote_readers_.end()) {
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
-    snris_insert(lagging_readers_, reader);
+    preassociation_readers_.insert(reader);
     return true;
   }
   return false;
@@ -1933,9 +1880,11 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
     if (it != remote_readers_.end()) {
       const ReaderInfo_rch& reader = it->second;
       reader->swap_durable_data(dd);
-      readers_expecting_heartbeat_.erase(reader);
+      preassociation_readers_.erase(reader);
       const SequenceNumber acked_sn = reader->acked_sn();
       const SequenceNumber max_sn = expected_max_sn(reader);
+      readers_expecting_heartbeat_.erase(reader);
+      readers_expecting_data_.erase(reader);
       snris_erase(acked_sn == max_sn ? leading_readers_ : lagging_readers_, acked_sn, reader);
       remote_readers_.erase(it);
       result = true;
@@ -1960,7 +1909,7 @@ RtpsUdpDataLink::RtpsWriter::is_reader_handshake_done(const RepoId& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   ReaderInfoMap::const_iterator iter = remote_readers_.find(id);
-  return iter != remote_readers_.end() && iter->second->handshake_done();
+  return iter != remote_readers_.end() && preassociation_readers_.count(iter->second) == 0;
 }
 
 bool
@@ -1978,7 +1927,7 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& info)
   WriterInfoMap::const_iterator iter = remote_writers_.find(info->id_);
   if (iter == remote_writers_.end()) {
     remote_writers_[info->id_] = info;
-    writers_expecting_non_final_ack_.insert(info);
+    preassociation_writers_.insert(info);
     return true;
   }
   return false;
@@ -1997,8 +1946,8 @@ RtpsUdpDataLink::RtpsReader::remove_writer(const RepoId& id)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   WriterInfoMap::iterator pos = remote_writers_.find(id);
   if (pos != remote_writers_.end()) {
+    preassociation_writers_.erase(pos->second);
     writers_expecting_nack_.erase(pos->second);
-    writers_expecting_non_final_ack_.erase(pos->second);
     writers_expecting_ack_.erase(pos->second);
     remote_writers_.erase(pos);
     return true;
@@ -2048,7 +1997,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks(MetaSubmessageVec& meta_submessage
 void
 RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessages)
 {
-  if (writers_expecting_nack_.empty() && writers_expecting_non_final_ack_.empty() && writers_expecting_ack_.empty()) {
+  if (preassociation_writers_.empty() && writers_expecting_nack_.empty() && writers_expecting_ack_.empty()) {
     return;
   }
 
@@ -2155,7 +2104,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   }
 
   // We want a heartbeat from these writers.
-  for (WriterInfoSet::const_iterator pos = writers_expecting_non_final_ack_.begin(), limit = writers_expecting_non_final_ack_.end();
+  for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
        pos != limit; ++pos) {
     const WriterInfo_rch& info = *pos;
     const DisjointSequence& recvd = info->recvd_;
@@ -2828,13 +2777,24 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
-  if (!ri->second->handshake_done()) {
+  const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
+  const bool is_postassociation =
+    is_final ||
+    bitmapNonEmpty(acknack.readerSNState) ||
+    !(acknack.readerSNState.bitmapBase.high == 0 &&
+      acknack.readerSNState.bitmapBase.low == 1);
+
+  if (preassociation_readers_.count(ri->second) && is_postassociation) {
+    preassociation_readers_.erase(ri->second);
+    snris_insert(lagging_readers_, ri->second);
+
     {
       // Queue up durable data.
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
       ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
       link->invoke_on_start_callbacks(id_, remote, true);
     }
+
     ri = remote_readers_.find(remote);
     if (ri == remote_readers_.end()) {
       VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
@@ -2846,7 +2806,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const ReaderInfo_rch& reader = ri->second;
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
-  const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
 
   if (!reader->durable_data_.empty()) {
     if (Transport_debug_level > 5) {
@@ -3652,7 +3611,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-  if (additional_guids.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
+  if (additional_guids.empty() && preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
     return;
   }
 
@@ -3688,6 +3647,14 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     meta_submessage.to_guids_ = additional_guids;
     meta_submessages.push_back(meta_submessage);
     meta_submessage.to_guids_.clear();
+  }
+
+  // Directed, non-final.
+  for (ReaderInfoSet::const_iterator pos = preassociation_readers_.begin(), limit = preassociation_readers_.end();
+       pos != limit; ++pos) {
+    meta_submessage.dst_guid_ = (*pos)->id_;
+    meta_submessage.sm_.heartbeat_sm().readerId = (*pos)->id_.entityId;
+    meta_submessages.push_back(meta_submessage);
   }
 
   for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
