@@ -1315,12 +1315,10 @@ Sedp::send_builtin_crypto_tokens(
 {
   const DCPS::RepoId dst = make_id(dstParticipant, dstEntity);
   if (DCPS::GuidConverter(src).isReader()) {
-    create_and_send_datareader_crypto_tokens(
-                                             get_handle_registry()->get_local_datareader_crypto_handle(src), src,
+    create_and_send_datareader_crypto_tokens(get_handle_registry()->get_local_datareader_crypto_handle(src), src,
                                              get_handle_registry()->get_remote_datawriter_crypto_handle(dst), dst);
   } else {
-    create_and_send_datawriter_crypto_tokens(
-                                             get_handle_registry()->get_local_datawriter_crypto_handle(src), src,
+    create_and_send_datawriter_crypto_tokens(get_handle_registry()->get_local_datawriter_crypto_handle(src), src,
                                              get_handle_registry()->get_remote_datareader_crypto_handle(dst), dst);
   }
 }

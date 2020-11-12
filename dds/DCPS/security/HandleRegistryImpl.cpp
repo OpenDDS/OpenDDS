@@ -1,4 +1,4 @@
-#include "dds/DCPS/security/HandleRegistryImpl.h"
+#include "HandleRegistryImpl.h"
 
 #include "dds/DCPS/GuidConverter.h"
 

@@ -5,11 +5,11 @@
 * See: http://www.OpenDDS.org/license.html
 */
 
-#ifndef DDS_DCPS_HANDLE_REGISTRY_H
-#define DDS_DCPS_HANDLE_REGISTRY_H
+#ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_H
+#define OPENDDS_SECURITY_HANDLE_REGISTRY_H
 
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/security/DdsSecurity_Export.h"
+#include "DdsSecurity_Export.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
@@ -73,4 +73,4 @@ public:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
+#endif // OPENDDS_SECURITY_HANDLE_REGISTRY_H

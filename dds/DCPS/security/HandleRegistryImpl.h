@@ -5,8 +5,8 @@
 * See: http://www.OpenDDS.org/license.html
 */
 
-#ifndef DDS_DCPS_HANDLE_REGISTRY_IMPL_H
-#define DDS_DCPS_HANDLE_REGISTRY_IMPL_H
+#ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
+#define OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 
 #include "HandleRegistry.h"
 
@@ -85,4 +85,4 @@ public:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
+#endif // OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H

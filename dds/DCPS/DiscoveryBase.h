@@ -22,8 +22,8 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/HandleRegistry.h"
-#include "dds/DCPS/Ice.h"
+#include "security/HandleRegistry.h"
+#include "Ice.h"
 #endif
 
 #include "ace/Condition_Thread_Mutex.h"
@@ -528,7 +528,8 @@ namespace OpenDDS {
         const DatawriterCryptoHandle dwch = get_handle_registry()->get_local_datawriter_crypto_handle(publicationId);
         SecurityException ex = {"", 0, 0};
         if (!get_crypto_key_factory()->unregister_datawriter(dwch, ex)) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::cleanup_secure_writer() - ")
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: Sedp::cleanup_secure_writer() - ")
                      ACE_TEXT("Failure calling unregister_datawriter.")
                      ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         }
@@ -1423,12 +1424,12 @@ namespace OpenDDS {
         return crypto_key_exchange_;
       }
 
-      inline void set_handle_registry(OpenDDS::Security::HandleRegistry* hr)
+      inline void set_handle_registry(Security::HandleRegistry* hr)
       {
         handle_registry_ = hr;
       }
 
-      inline OpenDDS::Security::HandleRegistry* get_handle_registry() const
+      inline Security::HandleRegistry* get_handle_registry() const
       {
         return handle_registry_;
       }
@@ -1452,7 +1453,7 @@ namespace OpenDDS {
       DDS::Security::AccessControl_var access_control_;
       DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
       DDS::Security::CryptoKeyExchange_var crypto_key_exchange_;
-      OpenDDS::Security::HandleRegistry* handle_registry_;
+      Security::HandleRegistry* handle_registry_;
 
       DDS::Security::PermissionsHandle permissions_handle_;
       DDS::Security::ParticipantCryptoHandle crypto_handle_;
