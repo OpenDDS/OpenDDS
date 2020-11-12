@@ -3,7 +3,8 @@
 namespace Bench {
 
 bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report,
-  Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, const Builder::ContentFilteredTopicMap& cft_map) {
+  Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, const Builder::ContentFilteredTopicMap& cft_map)
+{
   config_ = &config;
   report_ = &report;
   for (CORBA::ULong j = 0; j < config.readers.length(); ++j) {
@@ -30,7 +31,7 @@ bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report
   if (it != cft_map.end()) {
     content_filtered_topic_ = it->second;
   }
-  
+
   return true;
 };
 
