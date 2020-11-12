@@ -156,7 +156,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}
         TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${EXTRA_IDL_PATHS}
-        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${EXTRA_IDL_PATHS}
+        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${EXTRA_IDL_FLAGS} ${EXTRA_IDL_PATHS}
         IDL_FILES ${_idl_sources_${scope}}
         SCOPE ${scope})
     endif()
@@ -166,6 +166,10 @@ macro(OPENDDS_TARGET_SOURCES target)
     target_sources(${target} ${scope} ${_sources_${scope}})
 
   endforeach()
+endmacro()
+
+macro(ADD_DDS_IDL_FLAG flag)
+  list(APPEND EXTRA_IDL_FLAGS "${flag}")
 endmacro()
 
 macro(ADD_IDL_PATH the_path)
