@@ -1,6 +1,6 @@
 {
   "name": "Simple Scenario with Tags",
-  "desc": "This is used to test tag-based stats",
+  "desc": "This is used to test tag-based stats.",
   "nodes": [
     {
       "workers": [
@@ -17,11 +17,11 @@
       "exclusive": false
     }
   ],
-  "any_nodes": [
+  "any_node": [
     {
       "config": "tagged_control.json",
       "count": 1
     }
   ],
-  "timeout": 180
+  "timeout": 100
 }

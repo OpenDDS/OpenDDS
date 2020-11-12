@@ -444,9 +444,26 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
           ss << std::endl;
           std::cerr << ss.str() << std::flush;
         }
+        std::cerr << "r: " << r << ". reports.length(): " << reports.length() << ". reports[r].worker_reports.length(): "
+                  << reports[r].worker_reports.length() << ".\n";
+        std::cerr << "Executing reports[r].worker_reports.length(0)...\n";
         reports[r].worker_reports.length(0);
-        nc_reports.length(nc_reports.length() + 1);
+        std::cerr << "Done executing reports[r].worker_reports.length(0)\n";
+        std::cerr << "r: " << r << ". reports.length(): " << reports.length() << ". reports[r].worker_reports.length(): "
+                  << reports[r].worker_reports.length() << ".\n";
+        std::cerr << "nc_reports.length(): " << nc_reports.length() << ". nc_reports.length() + 1 = " << nc_reports.length() + 1 << "\n";
+        std::cerr << "Executing nc_reports.length(" << nc_reports.length() + 1 << ")..." << "\n";
+        //        nc_reports.length(nc_reports.length() + 1);
+        if (nc_reports.length() == 1) {
+          nc_reports.length(2);
+        } else {
+          nc_reports.length(nc_reports.length() + 1);
+        }
+        std::cerr << "Done executing nc_reports.length(nc_reports.length() + 1)\n";
+        std::cerr << "nc_reports.length(): " << nc_reports.length() << "\n";
+        std::cerr << "About to write to index " << nc_reports.length() - 1 << " of nc_reports, from reports[" << r << "]...\n";
         nc_reports[nc_reports.length() - 1] = reports[r];
+        std::cerr << "Done writing to index " << nc_reports.length() - 1 << " of nc_reports, from reports[" << r << "]...\n";
       }
     }
     {
