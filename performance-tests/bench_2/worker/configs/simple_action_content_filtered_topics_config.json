@@ -96,9 +96,6 @@
       "type": "set_cft_parameters",
       "content_filtered_topic": "cft_1",
       "params": [
-        { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
-        },
 		{ "name": "max_count",
           "value": { "_d": "PVK_ULL", "ull_prop": 3 }
         },

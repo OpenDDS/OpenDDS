@@ -31,7 +31,8 @@ namespace Bench {
 }
 
 bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& report,
-  Builder::ReaderMap& readers, Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) {
+  Builder::ReaderMap& readers, Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map)
+{
 
   std::unique_lock<std::mutex> lock(mutex_);
   Action::init(config, report, readers, writers, cft_map);
@@ -97,7 +98,8 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
   return true;
 }
 
-void SetCftParametersAction::start() {
+void SetCftParametersAction::start()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     started_ = true;
@@ -105,7 +107,8 @@ void SetCftParametersAction::start() {
   }
 }
 
-void SetCftParametersAction::stop() {
+void SetCftParametersAction::stop()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
@@ -113,7 +116,8 @@ void SetCftParametersAction::stop() {
   }
 }
 
-void SetCftParametersAction::do_set_expression_parameters() {
+void SetCftParametersAction::do_set_expression_parameters()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     if (max_count_ == 0 || set_call_count_ < max_count_) {
