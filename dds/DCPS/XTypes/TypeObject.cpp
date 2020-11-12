@@ -297,8 +297,27 @@ bool is_fully_descriptive(const TypeIdentifier& ti)
   case TI_PLAIN_MAP_LARGE:
     return ti.map_ldefn().header.equiv_kind == EK_BOTH;
   }
-
   return false;
+}
+
+bool is_plain_collection(const TypeIdentifier& ti)
+{
+  switch (ti.kind()) {
+  case TI_PLAIN_SEQUENCE_SMALL:
+  case TI_PLAIN_SEQUENCE_LARGE:
+  case TI_PLAIN_ARRAY_SMALL:
+  case TI_PLAIN_ARRAY_LARGE:
+  case TI_PLAIN_MAP_SMALL:
+  case TI_PLAIN_MAP_LARGE:
+    return true;
+  }
+  return false;
+}
+
+bool has_type_object(const TypeIdentifier& ti)
+{
+  return !is_fully_descriptive(ti) && !is_plain_collection(ti) &&
+    ti.kind() != TK_NONE;
 }
 
 namespace {
