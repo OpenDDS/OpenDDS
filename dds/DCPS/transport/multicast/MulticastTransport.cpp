@@ -69,12 +69,11 @@ MulticastTransport::make_datalink(const RepoId& local_id,
             this->config().name().c_str(), (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
             priority, active), 2);
 
-  ReactorTask_rch rtask(reactor_task());
   MulticastDataLink_rch link(make_rch<MulticastDataLink>(ref(*this),
                                    session_factory,
                                    local_peer,
                                    ref(config()),
-                                   rtask.in(),
+                                   reactor_task(),
                                    active));
 
   // Join multicast group:
@@ -332,9 +331,10 @@ bool
 MulticastTransport::configure_i(MulticastInst& config)
 {
   // Override with DCPSDefaultAddress.
-  if (config.local_address_.empty () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-    config.local_address_ = TheServiceParticipant->default_address ().c_str ();
+  if (config.local_address_.empty() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    char buffer[INET6_ADDRSTRLEN];
+    config.local_address_ = TheServiceParticipant->default_address().get_host_addr(buffer, sizeof buffer);
   }
 
   if (!config.group_address_.is_multicast()) {
@@ -347,7 +347,7 @@ MulticastTransport::configure_i(MulticastInst& config)
                      false);
   }
 
-  this->create_reactor_task(config.async_send_);
+  this->create_reactor_task(config.async_send_, "MulticastTransport" + config.name());
 
   return true;
 }

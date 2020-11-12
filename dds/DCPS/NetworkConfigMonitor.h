@@ -20,7 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class NetworkInterface {
+class OpenDDS_Dcps_Export NetworkInterface {
 public:
   typedef OPENDDS_SET(ACE_INET_Addr) AddressSet;
 
@@ -28,7 +28,7 @@ public:
     : index_(-1)
     , can_multicast_(false)
   {}
-
+  NetworkInterface(const NetworkInterface& val) { *this = val; }
   NetworkInterface(int index,
                    const OPENDDS_STRING& name,
                    bool can_multicast)
@@ -40,10 +40,42 @@ public:
   void index(int index) { index_ = index; }
   const OPENDDS_STRING& name() const { return name_; }
   bool can_multicast() const { return can_multicast_; }
+  bool has_ipv4() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+    for (AddressSet::const_iterator pos = addresses_.begin(), limit = addresses_.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-  AddressSet addresses;
+  bool has_ipv6() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+    for (AddressSet::const_iterator pos = addresses_.begin(), limit = addresses_.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET6) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  AddressSet get_addresses() const { ACE_Guard<ACE_Thread_Mutex> g(mutex_); return addresses_; }
+
+  void add_default_addrs();
+  bool has(const ACE_INET_Addr& addr) const;
+  bool exclude_from_multicast(const char* configured_interface) const;
+
+  bool add_address(const ACE_INET_Addr& addr);
+  bool remove_address(const ACE_INET_Addr& addr);
+
+  NetworkInterface& operator=(const NetworkInterface& rhs);
 
 private:
+  mutable ACE_Thread_Mutex mutex_;
+  AddressSet addresses_;
   int index_;
   OPENDDS_STRING name_;
   bool can_multicast_;
@@ -60,14 +92,41 @@ struct NetworkInterfaceIndex {
   const int index_;
 };
 
+struct NetworkInterfaceName {
+  explicit NetworkInterfaceName(const OPENDDS_STRING& name) : name_(name) {}
+
+  bool operator()(const NetworkInterface& nic)
+  {
+    return name_ == nic.name();
+  }
+
+  const OPENDDS_STRING name_;
+};
+
 class NetworkConfigListener : public virtual RcObject {
 public:
-  virtual void add_interface(const NetworkInterface& /*interface*/) {}
-  virtual void remove_interface(const NetworkInterface& /*interface*/) {}
+  virtual void add_interface(const NetworkInterface& interface)
+  {
+    NetworkInterface::AddressSet addresses = interface.get_addresses();
+    for (NetworkInterface::AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end();
+         pos != limit; ++pos) {
+      add_address(interface, *pos);
+    }
+  }
+
+  virtual void remove_interface(const NetworkInterface& interface)
+  {
+    NetworkInterface::AddressSet addresses = interface.get_addresses();
+    for (NetworkInterface::AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end();
+         pos != limit; ++pos) {
+      remove_address(interface, *pos);
+    }
+  }
+
   virtual void add_address(const NetworkInterface& /*interface*/,
-                           const ACE_INET_Addr& /*address*/) {}
+                           const ACE_INET_Addr& /*address*/) = 0;
   virtual void remove_address(const NetworkInterface& /*interface*/,
-                              const ACE_INET_Addr& /*address*/) {}
+                              const ACE_INET_Addr& /*address*/) = 0;
 };
 
 typedef WeakRcHandle<NetworkConfigListener> NetworkConfigListener_wrch;
@@ -79,15 +138,21 @@ public:
   virtual bool open() = 0;
   virtual bool close() = 0;
 
-  NetworkInterfaces add_listener(NetworkConfigListener_wrch listener);
+  void add_listener(NetworkConfigListener_wrch listener);
   void remove_listener(NetworkConfigListener_wrch listener);
-  NetworkInterfaces get() const;
+  NetworkInterfaces get_interfaces() const;
 
 protected:
   void add_interface(const NetworkInterface& nic);
   void remove_interface(int index);
+  void remove_interface(const OPENDDS_STRING& name);
+  void publish_remove_interface(const NetworkInterface& nic);
   void add_address(int index, const ACE_INET_Addr& address);
+  void add_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address);
+  void publish_add_address(const NetworkInterface& nic, const ACE_INET_Addr& address);
   void remove_address(int index, const ACE_INET_Addr& address);
+  void remove_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address);
+  void publish_remove_address(const NetworkInterface& nic, const ACE_INET_Addr& address);
 
 private:
   typedef OPENDDS_SET(NetworkConfigListener_wrch) Listeners;

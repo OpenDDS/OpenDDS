@@ -333,14 +333,14 @@ TcpTransport::configure_i(TcpInst& config)
 {
   DBG_ENTRY_LVL("TcpTransport", "configure_i", 6);
 
-  this->create_reactor_task();
+  this->create_reactor_task(false, "TcpTransport" + config.name());
 
   connector_.open(reactor_task()->get_reactor());
 
   // Override with DCPSDefaultAddress.
-  if (config.local_address() == ACE_INET_Addr () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
+  if (config.local_address() == ACE_INET_Addr() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    config.local_address(TheServiceParticipant->default_address());
   }
 
   // Open our acceptor object so that we can accept passive connections

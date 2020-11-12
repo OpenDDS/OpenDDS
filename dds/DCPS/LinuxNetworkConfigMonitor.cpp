@@ -26,16 +26,17 @@ namespace DCPS {
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
 LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
+  : interceptor_(interceptor)
 {
   reactor(interceptor->reactor());
 }
 
 bool LinuxNetworkConfigMonitor::open()
 {
-  // Listener to changes in links and IPV4 addresses.
-  const pid_t pid = getpid();
+  // Listen to changes in links and IPV4 and IPV6 addresses.
+  const pid_t pid = 0;
   ACE_Netlink_Addr addr;
-  addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
+  addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n")));
     return false;
@@ -49,7 +50,8 @@ bool LinuxNetworkConfigMonitor::open()
   struct {
     nlmsghdr header;
     rtgenmsg msg;
-  } request = {};
+  } request;
+  memset(&request, 0, sizeof(request));
 
   // Request a dump of the links.
   request.header.nlmsg_len = NLMSG_LENGTH(sizeof(request.msg));
@@ -58,7 +60,7 @@ bool LinuxNetworkConfigMonitor::open()
   request.header.nlmsg_pid = pid;
   request.msg.rtgen_family = AF_UNSPEC;
 
-  if (socket_.send(&request, request.header.nlmsg_len, 0) != request.header.nlmsg_len) {
+  if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for links: %m\n")));
     return false;
   }
@@ -72,16 +74,16 @@ bool LinuxNetworkConfigMonitor::open()
   request.header.nlmsg_pid = pid;
   request.msg.rtgen_family = AF_UNSPEC;
 
-  if (socket_.send(&request, request.header.nlmsg_len, 0) != request.header.nlmsg_len) {
+  if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for addresses: %m\n")));
     return false;
   }
 
   read_messages();
 
-  if (reactor()->register_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
-    return false;
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    interceptor->execute_or_enqueue(new RegisterHandler(this));
   }
 
   return true;
@@ -91,7 +93,11 @@ bool LinuxNetworkConfigMonitor::close()
 {
   bool retval = true;
 
-  reactor()->remove_handler(this, READ_MASK);
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new RemoveHandler(this));
+    command->wait();
+  }
 
   if (socket_.close() != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n")));
@@ -153,6 +159,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       case AF_INET:
         address_length = 4;
         break;
+      case AF_INET6:
+        address_length = 16;
+        break;
       default:
         return;
       }
@@ -179,6 +188,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       switch (msg->ifa_family) {
       case AF_INET:
         address_length = 4;
+        break;
+      case AF_INET6:
+        address_length = 16;
         break;
       default:
         return;
@@ -214,7 +226,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       }
 
       remove_interface(msg->ifi_index);
-      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & IFF_MULTICAST));
+      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK)));
     }
     break;
   case RTM_DELLINK:

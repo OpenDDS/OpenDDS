@@ -45,8 +45,8 @@ struct OpenDDS_Dcps_Export PublicationInstance : public RcObject {
       registered_sample_(registered_sample.release()),
       unregistered_(false),
       instance_handle_(0),
-      deadline_timer_id_(-1),
-      durable_samples_remaining_(0)
+      durable_samples_remaining_(0),
+      deadline_()
   {
   }
 
@@ -71,14 +71,11 @@ struct OpenDDS_Dcps_Export PublicationInstance : public RcObject {
   /// The instance handle for the registered object
   DDS::InstanceHandle_t instance_handle_;
 
-  MonotonicTimePoint last_sample_tv_;
-
-  MonotonicTimePoint cur_sample_tv_;
-
-  long deadline_timer_id_;
-
   /// Only used by WriteDataContainer::reenqueue_all() while WDC is locked.
   ssize_t durable_samples_remaining_;
+
+  /// Deadline for Deadline QoS.
+  MonotonicTimePoint deadline_;
 };
 
 typedef RcHandle<PublicationInstance> PublicationInstance_rch;

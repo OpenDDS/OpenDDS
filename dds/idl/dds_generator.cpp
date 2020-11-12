@@ -13,18 +13,22 @@ using namespace std;
 
 dds_generator::~dds_generator() {}
 
+string dds_generator::to_string(Identifier* id)
+{
+  const string str = id->get_string();
+  return id->escaped() ? '_' + str : str;
+}
+
 string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
 {
   string sname;
 
   for (; sn; sn = static_cast<UTL_ScopedName*>(sn->tail())) {
-    if (sn->head()->escaped())
-      sname += "_";
+    sname += to_string(sn->head());
 
-    sname += sn->head()->get_string();
-
-    if (sname != "" && sn->tail())
+    if (sname != "" && sn->tail()) {
       sname += sep;
+    }
   }
 
   return sname;
@@ -36,13 +40,11 @@ string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep)
 
   for (; sn; sn = static_cast<UTL_ScopedName*>(sn->tail())) {
     if (sn->tail() != 0) {
-      if (sn->head()->escaped())
-        sname += "_";
+      sname += to_string(sn->head());
 
-      sname += sn->head()->get_string();
-
-      if (sname != "" && sn->tail())
+      if (sname != "" && sn->tail()) {
         sname += sep;
+      }
     }
   }
 
@@ -221,7 +223,7 @@ NestedForLoops::NestedForLoops(const char* type, const char* prefix,
     AST_Type* const base =
       AstTypeClassification::resolveActualType(arr->base_type());
     if (base->node_type() == AST_Decl::NT_array) {
-      arr = AST_Array::narrow_from_decl(base);
+      arr = dynamic_cast<AST_Array*>(base);
       n_ += arr->n_dims();
       j = i;
     } else {

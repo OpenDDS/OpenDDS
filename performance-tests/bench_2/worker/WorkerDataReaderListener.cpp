@@ -1,11 +1,10 @@
 #include "WorkerDataReaderListener.h"
+
 #include "Utils.h"
 
 #include <cmath>
 
 namespace Bench {
-
-const size_t DEFAULT_STAT_BLOCK_BUFFER_SIZE = 1000;
 
 WorkerDataReaderListener::WorkerDataReaderListener()
 {
@@ -85,7 +84,6 @@ WorkerDataReaderListener::on_liveliness_changed(
 void
 WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
-  //std::cout << "WorkerDataReaderListener::on_data_available" << std::endl;
   if (reader != data_dr_.in()) {
     data_dr_ = DataDataReader::_narrow(reader);
   }
@@ -96,7 +94,7 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
     if (status == DDS::RETCODE_OK && si.valid_data) {
 
       // Calculate the stateless stuff
-      const Builder::TimeStamp& now = Builder::get_time();
+      const Builder::TimeStamp& now = Builder::get_sys_time();
       double latency = Builder::to_seconds_double(now - data.sent_time);
       double jitter = -1.0;
       double round_trip_latency = -1.0;
@@ -186,19 +184,24 @@ WorkerDataReaderListener::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/,
   const DDS::SubscriptionMatchedStatus& status)
 {
-  //std::cout << "WorkerDataReaderListener::on_subscription_matched" << std::endl;
   std::unique_lock<std::mutex> lock(mutex_);
   if (expected_match_count_ != 0) {
     if (static_cast<size_t>(status.current_count) == expected_match_count_) {
-      //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
+      expected_match_cv.notify_all();
       if (datareader_) {
-        last_discovery_time_->value.time_prop(Builder::get_time());
+        last_discovery_time_->value.time_prop(Builder::get_hr_time());
+      }
+    } else if (static_cast<size_t>(status.current_count) > match_count_) {
+      if (datareader_) {
+        discovery_delta_stat_block_->update(Builder::to_seconds_double(Builder::get_hr_time() - enable_time_->value.time_prop()));
       }
     }
   } else {
     if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datareader_) {
-        last_discovery_time_->value.time_prop(Builder::get_time());
+        auto now = Builder::get_hr_time();
+        last_discovery_time_->value.time_prop(now);
+        discovery_delta_stat_block_->update(Builder::to_seconds_double(now - enable_time_->value.time_prop()));
       }
     }
   }
@@ -226,6 +229,8 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
   history_depth_ = datareader_->get_qos().history.depth;
   reliable_ = datareader_->get_qos().reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
+  enable_time_ =
+    get_property(datareader_->get_report().properties, "enable_time", Builder::PVK_TIME);
   last_discovery_time_ =
     get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
 
@@ -252,6 +257,8 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
     get_property(global_properties, "default_stat_median_buffer_size", Builder::PVK_ULL);
   size_t buffer_size = buffer_size_prop ? static_cast<size_t>(buffer_size_prop->value.ull_prop()) : DEFAULT_STAT_BLOCK_BUFFER_SIZE;
 
+  discovery_delta_stat_block_ =
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "discovery_delta", buffer_size);
   latency_stat_block_ =
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", buffer_size);
   jitter_stat_block_ =
@@ -362,6 +369,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     missing_data_count_->value.ull_prop(missing_data_count);
     missing_data_details_->value.string_prop(missing_data_details.str().c_str());
 
+    discovery_delta_stat_block_->finalize();
+
     latency_stat_block_->finalize();
     jitter_stat_block_->finalize();
 
@@ -370,6 +379,18 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 
     datareader_ = nullptr;
   }
+}
+
+bool WorkerDataReaderListener::wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const
+{
+  std::unique_lock<std::mutex> expected_lock(mutex_);
+
+  while (expected_match_count_ > match_count_) {
+    if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
+      return match_count_ <= expected_match_count_;
+    }
+  }
+  return true;
 }
 
 }

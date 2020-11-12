@@ -158,26 +158,34 @@ public:
     ttl_ = time_to_live;
   }
 
-  OPENDDS_STRING sedp_local_address() const
+  ACE_INET_Addr sedp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
     return sedp_local_address_;
   }
-  void sedp_local_address(const OPENDDS_STRING& mi)
+  void sedp_local_address(const ACE_INET_Addr& mi)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    sedp_local_address_ = mi;
+    if (mi.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      sedp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::sedp_local_address set failed because address family is not AF_INET\n")));
+    }
   }
 
-  OPENDDS_STRING spdp_local_address() const
+  ACE_INET_Addr spdp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
     return spdp_local_address_;
   }
-  void spdp_local_address(const OPENDDS_STRING& mi)
+  void spdp_local_address(const ACE_INET_Addr& mi)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    spdp_local_address_ = mi;
+    if (mi.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      spdp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::spdp_local_address set failed because address family is not AF_INET\n")));
+    }
   }
 
   bool sedp_multicast() const
@@ -202,16 +210,67 @@ public:
     multicast_interface_ = mi;
   }
 
-  OPENDDS_STRING default_multicast_group() const
+  ACE_INET_Addr default_multicast_group() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
     return default_multicast_group_;
   }
-  void default_multicast_group(const OPENDDS_STRING& group)
+  void default_multicast_group(const ACE_INET_Addr& group)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    default_multicast_group_ = group;
+    if (group.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      default_multicast_group_ = group;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::default_multicast_group set failed because address family is not AF_INET\n")));
+    }
   }
+
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr ipv6_spdp_local_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_spdp_local_address_;
+  }
+  void ipv6_spdp_local_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_spdp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_spdp_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_sedp_local_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_sedp_local_address_;
+  }
+  void ipv6_sedp_local_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_sedp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_sedp_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_default_multicast_group() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_default_multicast_group_;
+  }
+  void ipv6_default_multicast_group(const ACE_INET_Addr& group)
+  {
+    if (group.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_default_multicast_group_ = group;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_default_multicast_group set failed because address family is not AF_INET6\n")));
+    }
+  }
+#endif
 
   AddrVec spdp_send_addrs() const
   {
@@ -279,16 +338,6 @@ public:
     spdp_rtps_relay_address_ = address;
   }
 
-  DCPS::TimeDuration spdp_rtps_relay_beacon_period() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
-    return spdp_rtps_relay_beacon_period_;
-  }
-  void spdp_rtps_relay_beacon_period(const DCPS::TimeDuration& period) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    spdp_rtps_relay_beacon_period_ = period;
-  }
-
   DCPS::TimeDuration spdp_rtps_relay_send_period() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
@@ -309,17 +358,6 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     sedp_rtps_relay_address_ = address;
-  }
-
-  DCPS::TimeDuration sedp_rtps_relay_beacon_period() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
-    return sedp_rtps_relay_beacon_period_;
-  }
-  void sedp_rtps_relay_beacon_period(const DCPS::TimeDuration& period)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    sedp_rtps_relay_beacon_period_ = period;
   }
 
   bool use_rtps_relay() const
@@ -344,6 +382,17 @@ public:
     rtps_relay_only_ = f;
   }
 
+  ACE_INET_Addr spdp_stun_server_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return spdp_stun_server_address_;
+  }
+  void spdp_stun_server_address(const ACE_INET_Addr& address)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp_stun_server_address_ = address;
+  }
+
   ACE_INET_Addr sedp_stun_server_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -366,6 +415,50 @@ public:
     use_ice_ = ui;
   }
 
+  bool use_ncm() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_ncm_;
+  }
+  void use_ncm(bool ui)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    use_ncm_ = ui;
+  }
+
+  size_t sedp_max_message_size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, size_t());
+    return sedp_max_message_size_;
+  }
+  void sedp_max_message_size(size_t value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_max_message_size_ = value;
+  }
+
+  bool undirected_spdp() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return undirected_spdp_;
+  }
+  void undirected_spdp(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    undirected_spdp_ = value;
+  }
+
+  bool periodic_directed_spdp() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return periodic_directed_spdp_;
+  }
+  void periodic_directed_spdp(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    periodic_directed_spdp_ = value;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -375,22 +468,30 @@ private:
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
   bool sedp_multicast_;
-  OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;
-  OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
+  OPENDDS_STRING multicast_interface_;
+  ACE_INET_Addr sedp_local_address_, spdp_local_address_;
+  ACE_INET_Addr default_multicast_group_;  /// FUTURE: handle > 1 group.
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr ipv6_sedp_local_address_, ipv6_spdp_local_address_;
+  ACE_INET_Addr ipv6_default_multicast_group_;
+#endif
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
   DCPS::TimeDuration max_auth_time_;
   DCPS::TimeDuration auth_resend_period_;
   u_short max_spdp_sequence_msg_reset_check_;
   ACE_INET_Addr spdp_rtps_relay_address_;
-  DCPS::TimeDuration spdp_rtps_relay_beacon_period_;
   DCPS::TimeDuration spdp_rtps_relay_send_period_;
   ACE_INET_Addr sedp_rtps_relay_address_;
-  DCPS::TimeDuration sedp_rtps_relay_beacon_period_;
   bool use_rtps_relay_;
   bool rtps_relay_only_;
+  ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
+  bool use_ncm_;
+  size_t sedp_max_message_size_;
+  bool undirected_spdp_;
+  bool periodic_directed_spdp_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -418,13 +519,20 @@ public:
     const DDS::DomainParticipantQos& qos);
 
 #if defined(OPENDDS_SECURITY)
+#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__
+#    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
+#  else
+#    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION
+#  endif
+
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     const OpenDDS::DCPS::RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
-    DDS::Security::ParticipantCryptoHandle part_crypto);
+    DDS::Security::ParticipantCryptoHandle part_crypto)
+    OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION;
 #endif
 
   virtual bool supports_liveliness() const { return true; }
@@ -462,11 +570,11 @@ public:
   unsigned char ttl() const { return config_->ttl(); }
   void ttl(unsigned char time_to_live) { config_->ttl(time_to_live); }
 
-  OPENDDS_STRING sedp_local_address() const { return config_->sedp_local_address(); }
-  void sedp_local_address(const OPENDDS_STRING& mi) { config_->sedp_local_address(mi); }
+  ACE_INET_Addr sedp_local_address() const { return config_->sedp_local_address(); }
+  void sedp_local_address(const ACE_INET_Addr& mi) { config_->sedp_local_address(mi); }
 
-  OPENDDS_STRING spdp_local_address() const { return config_->spdp_local_address(); }
-  void spdp_local_address(const OPENDDS_STRING& mi) { config_->spdp_local_address(mi); }
+  ACE_INET_Addr spdp_local_address() const { return config_->spdp_local_address(); }
+  void spdp_local_address(const ACE_INET_Addr& mi) { config_->spdp_local_address(mi); }
 
   bool sedp_multicast() const { return config_->sedp_multicast(); }
   void sedp_multicast(bool sm) { config_->sedp_multicast(sm); }
@@ -474,8 +582,8 @@ public:
   OPENDDS_STRING multicast_interface() const { return config_->multicast_interface(); }
   void multicast_interface(const OPENDDS_STRING& mi) { config_->multicast_interface(mi); }
 
-  OPENDDS_STRING default_multicast_group() const { return config_->default_multicast_group(); }
-  void default_multicast_group(const OPENDDS_STRING& group) { config_->default_multicast_group(group); }
+  ACE_INET_Addr default_multicast_group() const { return config_->default_multicast_group(); }
+  void default_multicast_group(const ACE_INET_Addr& group) { config_->default_multicast_group(group); }
 
   AddrVec spdp_send_addrs() const { return config_->spdp_send_addrs(); }
   void spdp_send_addrs(const AddrVec& addrs) { return config_->spdp_send_addrs(addrs); }
@@ -492,6 +600,15 @@ public:
   u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
 
+  bool rtps_relay_only() const { return config_->rtps_relay_only(); }
+  void rtps_relay_only_now(bool f);
+
+  bool use_rtps_relay() const { return config_->use_rtps_relay(); }
+  void use_rtps_relay_now(bool f);
+
+  bool use_ice() const { return config_->use_ice(); }
+  void use_ice_now(bool f);
+
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
 #ifdef OPENDDS_SECURITY
@@ -504,9 +621,15 @@ public:
                         const DCPS::RepoId& local_participant) const;
   u_short get_sedp_port(DDS::DomainId_t domain,
                         const DCPS::RepoId& local_participant) const;
-
+#ifdef ACE_HAS_IPV6
+  u_short get_ipv6_spdp_port(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant) const;
+  u_short get_ipv6_sedp_port(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant) const;
+#endif
   void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
+  void spdp_stun_server_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 
 private:

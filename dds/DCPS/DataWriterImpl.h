@@ -50,7 +50,6 @@ namespace DCPS {
 
 class PublisherImpl;
 class DomainParticipantImpl;
-class OfferedDeadlineWatchdog;
 class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
@@ -180,6 +179,8 @@ public:
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
 
+  virtual void replay_durable_data_for(const RepoId& remote_sub_id);
+
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   virtual void update_subscription_params(const RepoId& readerId,
@@ -251,7 +252,8 @@ public:
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
                           DDS::InstanceHandle_t handle,
                           const DDS::Time_t& source_timestamp,
-                          GUIDSeq* filter_out);
+                          GUIDSeq* filter_out,
+                          const void* real_data);
 
   /**
    * Delegate to the WriteDataContainer to dispose all data
@@ -277,11 +279,6 @@ public:
   SendStateDataSampleList get_resend_data() {
     return data_container_->get_resend_data();
   }
-
-  /**
-   * Accessor of the repository id of this datawriter/publication.
-   */
-  RepoId get_publication_id();
 
   /**
    * Accessor of the repository id of the domain participant.
@@ -426,11 +423,14 @@ public:
   bool persist_data();
 #endif
 
-  // Reset time interval for each instance.
-  void reschedule_deadline();
-
-  /// Wait for pending samples to drain.
+  /// Wait for pending data and control messages to drain.
   void wait_pending();
+
+  /**
+   * Set deadline to complete wait_pending by. If 0, then wait_pending will
+   * wait indefinately if needed.
+   */
+  void set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
   /**
    * Get an instance handle for a new instance.
@@ -446,12 +446,6 @@ public:
                   const DDS::StringSeq& expression_params) const;
 #endif
 
-  /**
-   * Wait until pending control elements have either been delivered
-   * or dropped.
-   */
-  void wait_control_pending();
-
   DataBlockLockPool::DataBlockLock* get_db_lock() {
     return db_lock_pool_->get_lock();
   }
@@ -464,6 +458,10 @@ public:
 
  virtual ICE::Endpoint* get_ice_endpoint();
 
+ const RepoId& get_repo_id() const {
+    return this->publication_id_;
+  }
+
 protected:
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
@@ -472,6 +470,8 @@ protected:
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
+
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;
@@ -548,9 +548,7 @@ private:
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  const RepoId& get_repo_id() const {
-    return this->publication_id_;
-  }
+  DDS::Subscriber_var get_builtin_subscriber() const;
 
   DDS::DomainId_t domain_id() const {
     return this->domain_id_;
@@ -600,7 +598,7 @@ private:
   /// coherent change set.
   ACE_UINT32                      coherent_samples_;
   /// The sample data container.
-  unique_ptr<WriteDataContainer>  data_container_;
+  RcHandle<WriteDataContainer>  data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   ACE_Recursive_Thread_Mutex      lock_;
@@ -650,9 +648,6 @@ private:
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
-  /// Watchdog responsible for reporting missed offered
-  /// deadlines.
-  RcHandle<OfferedDeadlineWatchdog> watchdog_;
 
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
@@ -686,6 +681,8 @@ private:
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
   RcHandle<LivenessTimer> liveness_timer_;
+
+  MonotonicTimePoint wait_pending_deadline_;
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
@@ -700,8 +697,7 @@ public:
   }
 
   /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
+  virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
 
 private:
   WeakRcHandle<DataWriterImpl> writer_;

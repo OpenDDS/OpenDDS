@@ -10,7 +10,7 @@
 
 #include "ace/config.h"
 
-#if defined(ACE_HAS_GETIFADDRS) && !defined(OPENDDS_SAFETY_PROFILE)
+#if defined(ACE_HAS_GETIFADDRS) && !defined(OPENDDS_SAFETY_PROFILE) && !defined (ACE_LINUX)
 
 #define OPENDDS_NETWORK_CONFIG_MODIFIER
 
@@ -22,17 +22,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct NetworkInterfaceName {
-  explicit NetworkInterfaceName(const OPENDDS_STRING& name) : name_(name) {}
-
-  bool operator()(const NetworkInterface& nic)
-  {
-    return name_ == nic.name();
-  }
-
-  const OPENDDS_STRING name_;
-};
-
 class OpenDDS_Dcps_Export NetworkConfigModifier : public NetworkConfigMonitor {
 public:
   explicit NetworkConfigModifier();
@@ -40,12 +29,9 @@ public:
   bool close();
 
   void add_interface(const OPENDDS_STRING &name);
-  void remove_interface(const OPENDDS_STRING &name);
-  void add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
-  void remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
-
-protected:
-  int get_index(const OPENDDS_STRING& name);
+  using NetworkConfigMonitor::remove_interface;
+  using NetworkConfigMonitor::add_address;
+  using NetworkConfigMonitor::remove_address;
 
 private:
   void validate_interfaces_index();

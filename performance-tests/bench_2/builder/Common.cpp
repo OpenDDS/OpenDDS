@@ -1,5 +1,7 @@
 #include "Common.h"
 
+#include <dds/DCPS/RestoreOutputStreamState.h>
+
 #include <iomanip>
 #include <sstream>
 
@@ -7,7 +9,16 @@ namespace Builder {
 
 const TimeStamp ZERO = {0, 0};
 
-TimeStamp get_time()
+TimeStamp get_sys_time()
+{
+  auto now = std::chrono::system_clock::now();
+  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
+  auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>((now - seconds).time_since_epoch());
+  TimeStamp result = {static_cast<CORBA::Long>(seconds.count()), static_cast<CORBA::ULong>(nanoseconds.count())};
+  return result;
+}
+
+TimeStamp get_hr_time()
 {
   auto now = std::chrono::high_resolution_clock::now();
   auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
@@ -79,9 +90,9 @@ bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
 std::ostream&
 operator<<(std::ostream& out, const TimeStamp& ts)
 {
-  std::streamsize ssize = out.precision();
+  OpenDDS::DCPS::RestoreOutputStreamState out_state(out);
   out << std::setprecision(3) << std::fixed <<
-    static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::setprecision(ssize) << std::flush;
+    static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::flush;
   return out;
 }
 

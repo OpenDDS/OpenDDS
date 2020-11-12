@@ -51,6 +51,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(TheServiceParticipant->pending_timeout() == TimeDuration(10));
     TEST_CHECK(TheServiceParticipant->publisher_content_filter() == false);
     TEST_CHECK(TheServiceParticipant->get_default_discovery() == "MyDefaultDiscovery");
+    TEST_CHECK(TheServiceParticipant->default_address() == ACE_INET_Addr(u_short(0), "127.0.0.1"));
     TEST_CHECK(TheServiceParticipant->federation_recovery_duration() == 800);
     TEST_CHECK(TheServiceParticipant->federation_initial_backoff_seconds() == 2);
     TEST_CHECK(TheServiceParticipant->federation_backoff_multiplier() == 3);

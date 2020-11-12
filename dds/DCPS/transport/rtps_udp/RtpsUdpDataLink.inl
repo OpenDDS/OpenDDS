@@ -38,6 +38,20 @@ RtpsUdpDataLink::multicast_socket()
   return multicast_socket_;
 }
 
+#ifdef ACE_HAS_IPV6
+ACE_INLINE ACE_SOCK_Dgram&
+RtpsUdpDataLink::ipv6_unicast_socket()
+{
+  return ipv6_unicast_socket_;
+}
+
+ACE_INLINE ACE_SOCK_Dgram_Mcast&
+RtpsUdpDataLink::ipv6_multicast_socket()
+{
+  return ipv6_multicast_socket_;
+}
+#endif
+
 ACE_INLINE void
 RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
 {

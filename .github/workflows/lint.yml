@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 7 * * SUN'
+    - cron: '0 1 * * SUN'
 
 env:
   DDS_ROOT: ${{ github.workspace }}
@@ -18,10 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v1
-    - name: git clone dependent repositories
-      run: |
-        git clone --depth 1 git://github.com/DOCGroup/ACE_TAO.git $DOC_ROOT
+      uses: actions/checkout@v2
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: ${{ env.DOC_ROOT }}
     - name: Run lint.pl
       run: |
         perl $DDS_ROOT/tools/scripts/lint.pl

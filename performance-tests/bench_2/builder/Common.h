@@ -16,7 +16,9 @@ namespace Builder {
 
 Bench_Builder_Export extern const TimeStamp ZERO;
 
-Bench_Builder_Export TimeStamp get_time();
+Bench_Builder_Export TimeStamp get_sys_time();
+
+Bench_Builder_Export TimeStamp get_hr_time();
 
 Bench_Builder_Export TimeStamp from_seconds(int32_t sec);
 
@@ -51,11 +53,11 @@ public:
   const Property* operator->() const;
   Property* operator->();
 
-  inline explicit operator bool() const { return seq_ != 0; }
-  inline bool operator!() const { return seq_ == 0; }
+  inline explicit operator bool() const noexcept { return seq_ != 0; }
+  inline bool operator!() const noexcept { return seq_ == 0; }
 
-  PropertySeq* get_seq() { return seq_; };
-  const PropertySeq* get_seq() const { return seq_; };
+  PropertySeq* get_seq() noexcept { return seq_; };
+  const PropertySeq* get_seq() const noexcept { return seq_; };
 
 protected:
   PropertySeq* seq_;
@@ -69,10 +71,10 @@ public:
 
   const Property* operator->() const;
 
-  inline explicit operator bool() const { return seq_ != 0; }
-  inline bool operator!() const { return seq_ == 0; }
+  inline explicit operator bool() const noexcept { return seq_ != 0; }
+  inline bool operator!() const noexcept { return seq_ == 0; }
 
-  const PropertySeq* get_seq() const { return seq_; };
+  const PropertySeq* get_seq() const noexcept { return seq_; };
 
 protected:
   const PropertySeq* seq_;

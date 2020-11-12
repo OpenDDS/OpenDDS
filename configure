@@ -25,7 +25,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.8';
+my $doc_tao_version = '6.5.12';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -227,7 +227,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'cmake:s', 'Path to cmake binary for compiling Google Test' .
       $argIndent . 'Framework. (Check Path and Check Normal' .
       $argIndent . 'Locations)',
-    'gtest=s', 'Path to Google Test Framework, required for' .
+    'gtest:s', 'Path to Google Test Framework, required for' .
       $argIndent . 'tests (uses GTEST_ROOT).' .
       $argIndent . 'If not built, will try to build using CMake.',
    ],
@@ -654,7 +654,7 @@ EOF
       }
     }
 
-    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
+    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20)$/) {
       push(@{$opts{'features'}}, 'no_cxx11=0');
       print "Compiler has C++11 support\n" if $opts{'verbose'};
     }
@@ -1134,6 +1134,12 @@ if ($host_tools_only) {
   }
 }
 
+if ((exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) &&
+    !exists $opts{'glib'}) {
+  print "--wireshark and --wireshark-cmake imply --glib\n" if $opts{'verbose'};
+  $opts{'glib'} = '';
+}
+
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
 my $tests = exists $opts{'tests'} && $opts{'tests'};
 
@@ -1531,6 +1537,7 @@ if ($build_gtest) {
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
+                     '-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE',
                      @cmake_platform_args,
                      '..'],
                     ["$cmake", "--build", ".", "--target", "install"]);
@@ -1565,25 +1572,18 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
   die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
-if (exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) {
-  if (!exists $opts{'glib'}) {
-    $opts{'glib'} = '';
+if (exists $opts{'wireshark-cmake'}) {
+  if (exists $opts{'wireshark'}) {
+    die "ERROR: --wireshark and --wireshark-cmake can not be used at the same time.\nStopped";
   }
 
-  if (exists $opts{'wireshark-cmake'}) {
-
-    if (exists $opts{'wireshark'}) {
-      die "ERROR: --wireshark and --wireshark-cmake can not be used at the same time.\nStopped";
+  if (! -d ($opts{'wireshark-build'} . '/' . $opts{'wireshark-lib'})) {
+    if ($wireshark_lib_defaulted) {
+      die "ERROR: The default value for wireshark-lib: " . $opts{'wireshark-lib'} .
+          " does not exist, please supply wireshark-lib with the correct value";
     }
-
-    if (! -d ($opts{'wireshark-build'} . '/' . $opts{'wireshark-lib'})) {
-      if ($wireshark_lib_defaulted) {
-        die "ERROR: The default value for wireshark-lib: " . $opts{'wireshark-lib'} .
-            " does not exist, please supply wireshark-lib with the correct value";
-      }
-      else {
-        die "ERROR: The supplied wireshark-lib: " . $opts{'wireshark-lib'} . " does not exist.";
-      }
+    else {
+      die "ERROR: The supplied wireshark-lib: " . $opts{'wireshark-lib'} . " does not exist.";
     }
   }
 }
@@ -1655,18 +1655,18 @@ if (exists $opts{'qt'}) {
   if ($try_to_use_qt_system_pkg) {
     # Try to use pkg-config to get Qt locations
     `pkg-config --print-variables Qt5Core`;
-    if ($!) {
+    if ($?) {
       die "ERROR: Trying to use system Qt package but could not confirm " .
         "Qt and/or pkg-config exists on the system$qt_help_mesg";
     }
     $qt_include = `pkg-config --variable=includedir Qt5Core`;
-    die "ERROR: could not resolve system Qt include location$qt_help_mesg" if ($!);
+    die "ERROR: could not resolve system Qt include location$qt_help_mesg" if ($?);
     chomp $qt_include;
     $qt_bin = `pkg-config --variable=host_bins Qt5Core`;
-    die "ERROR: could not resolve system Qt build tools location$qt_help_mesg" if ($!);
+    die "ERROR: could not resolve system Qt build tools location$qt_help_mesg" if ($?);
     chomp $qt_bin;
     $qt_lib = `pkg-config --variable=libdir Qt5Core`;
-    die "ERROR: could not resolve system Qt lib location$qt_help_mesg" if ($!);
+    die "ERROR: could not resolve system Qt lib location$qt_help_mesg" if ($?);
     chomp $qt_lib;
   }
   else {
@@ -1699,11 +1699,11 @@ if (exists $opts{'qt'}) {
   # Try to guess if Qt vcpkg is being used
   my $vcpkg_tools = join($slash, $targetEnv{'QTDIR'}, "tools", "qt5");
   my $assume_vcpkg =
-    (-r $vcpkg_tools . $slash . $qt_moc) &&
+    (-r $vcpkg_tools . $slash . 'bin' . $slash . $qt_moc) &&
     !exists $ENV{'QT5_LIBDIR'} &&
     !exists $ENV{'QT5_BINDIR'};
   if ($assume_vcpkg) {
-    $qt_bin = $vcpkg_tools;
+    $qt_bin = $vcpkg_tools . $slash . 'bin';
     if ($debug) {
       $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug", "lib");
       $qt_path = join($slash, $targetEnv{'QTDIR'}, "debug",

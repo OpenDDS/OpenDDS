@@ -9,6 +9,7 @@
 
 #include "Checklist.h"
 
+#include "AgentImpl.h"
 #include "EndpointManager.h"
 #include "Ice.h"
 
@@ -21,8 +22,6 @@ namespace ICE {
 
 using OpenDDS::DCPS::MonotonicTimePoint;
 using OpenDDS::DCPS::TimeDuration;
-
-const ACE_UINT32 PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
 
 CandidatePair::CandidatePair(const Candidate& a_local,
                              const Candidate& a_remote,
@@ -62,7 +61,9 @@ ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
   request_.class_ = STUN::REQUEST;
   request_.method = STUN::BINDING;
   request_.generate_transaction_id();
-  request_.append_attribute(STUN::make_priority(PEER_REFLEXIVE_PRIORITY));
+
+  // No local preference, component 1.
+  request_.append_attribute(STUN::make_priority((110 << 24) + (local_priority(a_candidate_pair.local.address) << 8) + ((256 - 1) << 0)));
 
   if (a_candidate_pair.local_is_controlling) {
     request_.append_attribute(STUN::make_ice_controlling(a_ice_tie_breaker));
@@ -85,7 +86,6 @@ ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
 Checklist::Checklist(EndpointManager* a_endpoint_manager,
                      const AgentInfo& local, const AgentInfo& remote, ACE_UINT64 a_ice_tie_breaker)
   : Task(a_endpoint_manager->agent_impl)
-  , scheduled_for_destruction_(false)
   , endpoint_manager_(a_endpoint_manager)
   , local_agent_info_(local)
   , remote_agent_info_(remote)
@@ -96,33 +96,13 @@ Checklist::Checklist(EndpointManager* a_endpoint_manager,
   , nominated_(valid_list_.end())
   , nominated_is_live_(false)
 {
-  endpoint_manager_->set_responsible_checklist(remote_agent_info_.username, this);
+  endpoint_manager_->set_responsible_checklist(remote_agent_info_.username, rchandle_from(this));
 
   generate_candidate_pairs();
 }
 
-void Checklist::reset()
+Checklist::~Checklist()
 {
-  fix_foundations();
-
-  for (ConnectivityChecksType::const_iterator pos = connectivity_checks_.begin(),
-       limit = connectivity_checks_.end(); pos != limit; ++pos) {
-    endpoint_manager_->unset_responsible_checklist(pos->request().transaction_id, this);
-  }
-
-  frozen_.clear();
-  waiting_.clear();
-  in_progress_.clear();
-  succeeded_.clear();
-  failed_.clear();
-  triggered_check_queue_.clear();
-  valid_list_.clear();
-  nominating_ = valid_list_.end();
-  nominated_ = valid_list_.end();
-  nominated_is_live_ = false;
-  check_interval_ = TimeDuration::zero_value;
-  max_check_interval_ = TimeDuration::zero_value;
-  connectivity_checks_.clear();
 }
 
 void Checklist::generate_candidate_pairs()
@@ -134,7 +114,14 @@ void Checklist::generate_candidate_pairs()
     AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
     AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
     for (; remote_pos != remote_limit; ++remote_pos) {
+#if ACE_HAS_IPV6
+      if ((local_pos->address.is_linklocal() && remote_pos->address.is_linklocal()) ||
+          (!local_pos->address.is_linklocal() && !remote_pos->address.is_linklocal())) {
+        frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
+      }
+#else
       frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
+#endif
     }
   }
 
@@ -158,9 +145,9 @@ void Checklist::generate_candidate_pairs()
   }
 
   if (frozen_.size() != 0) {
-    check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
+    check_interval_ = ICE::Configuration::instance()->T_a();
     double s = static_cast<double>(frozen_.size());
-    max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
+    max_check_interval_ = ICE::Configuration::instance()->checklist_period() * (1.0 / s);
   }
 }
 
@@ -280,7 +267,7 @@ bool Checklist::get_remote_candidate(const ACE_INET_Addr& address, Candidate& ca
 
 void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 {
-  if (nominated_ != valid_list_.end()) {
+  if (nominating_ != valid_list_.end() || nominated_ != valid_list_.end()) {
     // Don't generate a check when we are done.
     return;
   }
@@ -366,7 +353,13 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
   // 7.3.1.4
   Candidate local;
   bool flag = get_local_candidate(local_address, local);
-  OPENDDS_ASSERT(flag);
+  if (!flag) {
+    // Network addresses may have changed so that local_address is not valid.
+    ACE_TCHAR addr_buff[256] = {};
+    local_address.addr_to_string(addr_buff, 256);
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::generate_triggered_check: WARNING local_address %s is no longer a local candidate\n"), addr_buff));
+    return;
+  }
 
   CandidatePair cp(local, remote, local_is_controlling_, use_candidate);
 
@@ -382,7 +375,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
   add_triggered_check(cp);
   // This can move something from failed to in progress.
   // In that case, we need to schedule.
-  check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
+  check_interval_ = ICE::Configuration::instance()->T_a();
   enqueue(MonotonicTimePoint::now());
 }
 
@@ -445,6 +438,8 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       else {
         remove_from_in_progress(cc.candidate_pair());
       }
+
+      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     }
 
     OPENDDS_ASSERT(frozen_.empty());
@@ -486,7 +481,7 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::success_response: WARNING Unknown comprehension required attributes\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
@@ -494,7 +489,7 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::success_response: WARNING No FINGERPRINT attribute\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
@@ -504,7 +499,7 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::success_response: WARNING No (XOR_)MAPPED_ADDRESS attribute\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
@@ -512,7 +507,7 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::success_response: WARNING No MESSAGE_INTEGRITY attribute\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
@@ -521,13 +516,13 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::success_response: WARNING MESSAGE_INTEGRITY check failed\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
   // At this point the check will either succeed or fail so remove from the list.
   connectivity_checks_.erase(pos);
-  endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+  endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
 
   const CandidatePair& cp = cc.candidate_pair();
 
@@ -589,7 +584,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING Unknown comprehension required attributes\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
@@ -597,7 +592,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING No FINGERPRINT attribute\n")));
     failed(cc);
     connectivity_checks_.erase(pos);
-    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+    endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     return;
   }
 
@@ -620,7 +615,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       // Waiting and/or resending won't fix these errors.
       failed(cc);
       connectivity_checks_.erase(pos);
-      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, this);
+      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     }
   }
 
@@ -636,7 +631,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     CandidatePair cp = triggered_check_queue_.front();
     triggered_check_queue_.pop_front();
 
-    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + endpoint_manager_->agent_impl->get_configuration().connectivity_check_ttl());
+    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + ICE::Configuration::instance()->connectivity_check_ttl());
 
     waiting_.remove(cp);
     in_progress_.push_back(cp);
@@ -644,8 +639,8 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
 
     endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
-    endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, this);
-    check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
+    endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
+    check_interval_ = ICE::Configuration::instance()->T_a();
     return;
   }
 
@@ -654,15 +649,15 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     CandidatePair cp = waiting_.front();
     waiting_.pop_front();
 
-    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + endpoint_manager_->agent_impl->get_configuration().connectivity_check_ttl());
+    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + ICE::Configuration::instance()->connectivity_check_ttl());
 
     in_progress_.push_back(cp);
     in_progress_.sort(CandidatePair::priority_sorted);
 
     endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
-    endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, this);
-    check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
+    endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
+    check_interval_ = ICE::Configuration::instance()->T_a();
     return;
   }
 
@@ -679,6 +674,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
         remove_from_in_progress(cc.candidate_pair());
       }
 
+      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
       continue;
     }
 
@@ -697,16 +693,11 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
   }
 
   // Waiting for the remote or frozen.
-  check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period();
+  check_interval_ = ICE::Configuration::instance()->checklist_period();
 }
 
 void Checklist::execute(const MonotonicTimePoint& a_now)
 {
-  if (scheduled_for_destruction_) {
-    delete this;
-    return;
-  }
-
   // Nominating check.
   if (frozen_.empty() &&
       waiting_.empty() &&
@@ -715,12 +706,13 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
       !valid_list_.empty() &&
       nominating_ == valid_list_.end() &&
       nominated_ == valid_list_.end()) {
+    triggered_check_queue_.clear();
     add_triggered_check(valid_list_.front());
     nominating_ = valid_list_.begin();
   }
 
   bool flag = false;
-  TimeDuration interval = std::max(check_interval_, endpoint_manager_->agent_impl->get_configuration().indication_period());
+  TimeDuration interval = std::max(check_interval_, ICE::Configuration::instance()->indication_period());
 
   if (!triggered_check_queue_.empty() ||
       !frozen_.empty() ||
@@ -741,15 +733,15 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     message.password = remote_agent_info_.password;
     message.append_attribute(STUN::make_message_integrity());
     message.append_attribute(STUN::make_fingerprint());
-    endpoint_manager_->send(selected_address(), message);
+    endpoint_manager_->send(nominated_->remote.address, message);
     flag = true;
-    interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
+    interval = std::min(interval, ICE::Configuration::instance()->indication_period());
 
     // Check that we are receiving indications.
     const bool before = nominated_is_live_;
-    nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->get_configuration().nominated_ttl();
+    nominated_is_live_ = (a_now - last_indication_) < ICE::Configuration::instance()->nominated_ttl();
     if (before && !nominated_is_live_) {
-      endpoint_manager_->ice_disconnect(guids_);
+      endpoint_manager_->ice_disconnect(guids_, nominated_->remote.address);
     } else if (!before && nominated_is_live_) {
       endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
     }
@@ -765,23 +757,25 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
 void Checklist::add_guid(const GuidPair& a_guid_pair)
 {
   guids_.insert(a_guid_pair);
-  endpoint_manager_->set_responsible_checklist(a_guid_pair, this);
+  endpoint_manager_->set_responsible_checklist(a_guid_pair, rchandle_from(this));
 }
 
 void Checklist::remove_guid(const GuidPair& a_guid_pair)
 {
   guids_.erase(a_guid_pair);
-  endpoint_manager_->unset_responsible_checklist(a_guid_pair, this);
+  endpoint_manager_->unset_responsible_checklist(a_guid_pair, rchandle_from(this));
 
   if (guids_.empty()) {
     // Cleanup this checklist.
-    endpoint_manager_->unset_responsible_checklist(remote_agent_info_.username, this);
-    reset();
-    scheduled_for_destruction_ = true;
+    fix_foundations();
 
-    // Flush ourselves out of the task queue.
-    // Schedule for now but it may be later.
-    enqueue(MonotonicTimePoint::now());
+    for (ConnectivityChecksType::const_iterator pos = connectivity_checks_.begin(),
+           limit = connectivity_checks_.end(); pos != limit; ++pos) {
+      endpoint_manager_->unset_responsible_checklist(pos->request().transaction_id, rchandle_from(this));
+    }
+
+    // This should drop our ref-count to zero.
+    endpoint_manager_->unset_responsible_checklist(remote_agent_info_.username, rchandle_from(this));
   }
 }
 

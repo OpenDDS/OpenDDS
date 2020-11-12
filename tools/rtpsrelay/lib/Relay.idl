@@ -27,6 +27,8 @@ module RtpsRelay {
     @key EntityId_t entityId;
   };
 
+  const string WRITERS_TOPIC_NAME = "Writers";
+
   @topic
   struct WriterEntry {
     @key GUID_t guid;
@@ -36,6 +38,8 @@ module RtpsRelay {
     DDS::DataWriterQos data_writer_qos;
     DDS::PublisherQos publisher_qos;
   };
+
+  const string READERS_TOPIC_NAME = "Readers";
 
   @topic
   struct ReaderEntry {
@@ -47,22 +51,112 @@ module RtpsRelay {
     DDS::SubscriberQos subscriber_qos;
   };
 
-  struct RelayAddresses {
-    string spdp_relay_address;
-    string sedp_relay_address;
-    string data_relay_address;
-  };
+  const string PARTICIPANTS_TOPIC_NAME = "Participants";
 
   @topic
-  struct GuidRelayAddresses {
+  struct ParticipantEntry {
     @key GUID_t guid;
-    RelayAddresses relay_addresses;
+    DDS::UserDataQosPolicy user_data;
+  };
+
+  const string RESPONSIBLE_RELAY_TOPIC_NAME = "Responsible Relay";
+
+  @topic
+  struct GuidNameAddress {
+    @key GUID_t guid;
+    @key string name;
+    string address;
   };
 
   typedef sequence<GUID_t> GuidSequence;
 
   struct RelayHeader {
     GuidSequence to;
+  };
+
+  struct Duration_t {
+    long sec;
+    unsigned long nanosec;
+  };
+
+  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
+
+  @topic
+  struct ParticipantStatistics {
+    @key GUID_t guid;
+    @key string name;
+    Duration_t interval;
+    unsigned long messages_from;
+    unsigned long long bytes_from;
+    unsigned long messages_to;
+    unsigned long long bytes_to;
+    unsigned long max_directed_gain;
+    unsigned long max_undirected_gain;
+  };
+
+  const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
+
+  @topic
+  struct HandlerStatistics {
+    @key GUID_t application_participant_guid;
+    @key string name;
+    Duration_t interval;
+    unsigned long messages_in;
+    unsigned long long bytes_in;
+    Duration_t input_processing_time;
+    unsigned long messages_out;
+    unsigned long long bytes_out;
+    unsigned long messages_dropped;
+    unsigned long long bytes_dropped;
+    Duration_t output_processing_time;
+    unsigned long max_directed_gain;
+    unsigned long max_undirected_gain;
+    unsigned long local_active_participants;
+    unsigned long error_count;
+    unsigned long new_address_count;
+    unsigned long expired_address_count;
+    unsigned long claim_count;
+    unsigned long disclaim_count;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
+  };
+
+  const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
+
+  @topic
+  struct RelayStatistics {
+    @key GUID_t application_participant_guid;
+    Duration_t interval;
+    unsigned long messages_in;
+    unsigned long long bytes_in;
+    Duration_t input_processing_time;
+    unsigned long messages_out;
+    unsigned long long bytes_out;
+    unsigned long messages_dropped;
+    unsigned long long bytes_dropped;
+    Duration_t output_processing_time;
+    unsigned long max_directed_gain;
+    unsigned long max_undirected_gain;
+    unsigned long error_count;
+    unsigned long new_address_count;
+    unsigned long expired_address_count;
+    unsigned long claim_count;
+    unsigned long disclaim_count;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
+  };
+
+  const string DOMAIN_STATISTICS_TOPIC_NAME = "Domain Statistics";
+
+  @topic
+  struct DomainStatistics {
+    @key GUID_t application_participant_guid;
+    Duration_t interval;
+    unsigned long local_participants;
+    unsigned long local_writers;
+    unsigned long local_readers;
+    unsigned long total_writers;
+    unsigned long total_readers;
   };
 
 };

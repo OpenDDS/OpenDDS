@@ -244,16 +244,32 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   static void split_payload(const ACE_Message_Block& orig, size_t size,
                             Message_Block_Ptr& head, Message_Block_Ptr& tail);
 
-  /// Returns false if the sample is dispose and/or unregister,
+  /// Returns true if the sample has a complete serialized payload.
   bool valid_data() const;
+
+  DDS::InstanceStateKind instance_state() const
+  {
+    switch (message_id_) {
+    case UNREGISTER_INSTANCE:
+      return DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+    case DISPOSE_INSTANCE:
+    case DISPOSE_UNREGISTER_INSTANCE:
+      return DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+    default:
+      return DDS::ALIVE_INSTANCE_STATE;
+    }
+  }
 
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_;
 };
 
+OpenDDS_Dcps_Export
 const char* to_string(MessageId value);
+OpenDDS_Dcps_Export
 const char* to_string(SubMessageId value);
+OpenDDS_Dcps_Export
 OPENDDS_STRING to_string(const DataSampleHeader& value);
 
 /// Marshal/Insertion into a buffer.

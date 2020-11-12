@@ -4,6 +4,7 @@
  */
 
 #include "langmap_generator.h"
+#include "field_info.h"
 #include "be_extern.h"
 
 #include "utl_identifier.h"
@@ -42,14 +43,14 @@ namespace {
   }
 
   std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
-    AST_Array* const arr = AST_Array::narrow_from_decl(type);
+    AST_Array* const arr = dynamic_cast<AST_Array*>(type);
     std::string ret;
     for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
       elems *= arr->dims()[dim]->ev()->u.ulval;
       if (dim) ret += "[0]";
     }
     AST_Type* base = resolveActualType(arr->base_type());
-    if (AST_Array::narrow_from_decl(base)) {
+    if (dynamic_cast<AST_Array*>(base)) {
       ret += "[0]" + array_dims(base, elems);
     }
     return ret;
@@ -85,13 +86,13 @@ struct GeneratorBase
 
   std::string map_type(AST_Type* type)
   {
-    if (AST_Typedef::narrow_from_decl(type)) {
+    if (dynamic_cast<AST_Typedef*>(type)) {
       return scoped(type->name());
     }
     const Classification cls = classify(type);
     if (cls & CL_PRIMITIVE) {
       AST_Type* actual = resolveActualType(type);
-      return primtype_[AST_PredefinedType::narrow_from_decl(actual)->pt()];
+      return primtype_[dynamic_cast<AST_PredefinedType*>(actual)->pt()];
     }
     if (cls & CL_STRING) {
       const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
@@ -105,6 +106,12 @@ struct GeneratorBase
       return scoped(type->name()) + "_var";
     }
     return "<<unknown>>";
+  }
+
+  std::string map_type(AST_Field* field)
+  {
+    FieldInfo af(*field);
+    return (af.type_->anonymous() && af.as_base_) ? af.type_name_ : map_type(af.type_);
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -211,10 +218,31 @@ struct GeneratorBase
         break;
       case AST_Expression::EV_enum:
         {
-          AST_Enum* e = AST_Enum::narrow_from_decl(the_union->disc_type());
-          if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-            first_label << scoped(e->name()) << "::"
-              << e->value_to_name(dv.u.enum_val)->last_component()->get_string();
+          AST_Enum* e = dynamic_cast<AST_Enum*>(the_union->disc_type());
+          if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ||
+              be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+            std::string prefix = scoped(e->name());
+            if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+              size_t pos = prefix.rfind("::");
+              if (pos == std::string::npos) {
+                prefix = "";
+              } else {
+                prefix = prefix.substr(0, pos) + "::";
+              }
+            } else {
+              prefix += "::";
+            }
+            first_label << prefix;
+            UTL_ScopedName* default_name;
+            if (dv.u.enum_val < static_cast<ACE_CDR::ULong>(e->member_count())) {
+              default_name = e->value_to_name(dv.u.enum_val);
+            } else {
+              const Fields fields(the_union);
+              AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*(fields.begin()));
+              AST_Expression::AST_ExprValue* ev = ub->label(0)->label_val()->ev();
+              default_name = e->value_to_name(ev->u.eval);
+            }
+            first_label << default_name->last_component()->get_string();
           } else {
             first_label << scoped(e->value_to_name(dv.u.enum_val));
           }
@@ -969,6 +997,7 @@ struct FaceGenerator : GeneratorBase
       AST_Type* field_type = fields[i]->field_type();
       const std::string field_name = fields[i]->local_name()->get_string();
       std::string type_name = map_type(field_type);
+
       const Classification cls = classify(field_type);
       if (cls & CL_STRING) {
         type_name = helpers_[(cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
@@ -1008,7 +1037,7 @@ struct FaceGenerator : GeneratorBase
         if (cls & CL_ARRAY) {
           std::string indent("  ");
           NestedForLoops nfl("int", "i",
-            AST_Array::narrow_from_decl(field_type), indent, true);
+            dynamic_cast<AST_Array*>(field_type), indent, true);
           be_global->impl_ <<
             indent << "if (" << field_name << nfl.index_ << " != rhs."
             << field_name << nfl.index_ << ") {\n" <<
@@ -1239,7 +1268,7 @@ struct SafetyProfileGenerator : GeneratorBase
         if (cls & CL_ARRAY) {
           std::string indent("  ");
           NestedForLoops nfl("int", "i",
-            AST_Array::narrow_from_decl(field_type), indent, true);
+            dynamic_cast<AST_Array*>(field_type), indent, true);
           be_global->impl_ <<
             indent << "if (" << field_name << nfl.index_ << " != rhs."
             << field_name << nfl.index_ << ") {\n" <<
@@ -1360,37 +1389,36 @@ struct Cxx11Generator : GeneratorBase
       "class " << name->last_component()->get_string() << ";\n";
   }
 
+  static void gen_array(AST_Array* arr, const std::string& type, const std::string& elem, const std::string& ind = "")
+  {
+    std::string array;
+    std::ostringstream bounds;
+    for (ACE_CDR::ULong dim = arr->n_dims(); dim; --dim) {
+      array += "std::array<";
+      bounds << ", " << arr->dims()[dim - 1]->ev()->u.ulval << '>';
+    }
+    be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
+    be_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
+  }
+
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
   {
-    be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
-    AST_Type* elem = arr->base_type();
-    const std::string elem_type = map_type(elem);
-
-    std::ostringstream bounds;
-    std::string array;
-    for (ACE_CDR::ULong dim = arr->n_dims(); dim; --dim) {
-      const ACE_CDR::ULong extent = arr->dims()[dim - 1]->ev()->u.ulval;
-      array += "std::array<";
-      bounds << ", " << extent << '>';
-    }
-
-    be_global->lang_header_ <<
-      "using " << nm << " = " << array << elem_type << bounds.str() << ";\n";
+    gen_array(arr, tdname->last_component()->get_string(), map_type(arr->base_type()));
   }
 
   void gen_array_traits(UTL_ScopedName*, AST_Array*) {}
   void gen_array_typedef(const char*, AST_Type*) {}
   void gen_typedef_varout(const char*, AST_Type*) {}
 
-  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  static void gen_sequence(const std::string& type, const std::string& elem,  const std::string& ind = "")
   {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
-    AST_Type* elem = seq->base_type();
-    const std::string elem_type = map_type(elem);
-    be_global->lang_header_ <<
-      "using " << nm << " = std::vector<" << elem_type << ">;\n";
+    be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
+  }
+
+  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  {
+    gen_sequence(tdname->last_component()->get_string(), map_type(seq->base_type()));
   }
 
   static void gen_common_strunion_pre(const char* nm)
@@ -1411,27 +1439,32 @@ struct Cxx11Generator : GeneratorBase
 
   static void gen_struct_members(AST_Field* field)
   {
-    const std::string nm = field->local_name()->get_string();
-    AST_Type* field_type = field->field_type();
-    AST_Type* actual_field_type = resolveActualType(field_type);
-    const Classification cls = classify(actual_field_type);
-    const std::string lang_field_type = generator_->map_type(field_type);
+    FieldInfo af(*field);
+    if (af.type_->anonymous() && af.as_base_) {
+      const std::string elem_type = generator_->map_type(af.as_base_);
+      if (af.arr_) {
+        gen_array(af.arr_, af.type_name_, elem_type, "  ");
+      } else if (af.seq_) {
+        gen_sequence(af.type_name_, elem_type, "  ");
+      }
+    }
 
-    const std::string assign_pre = "{ _" + nm + " = ",
+    const std::string lang_field_type = generator_->map_type(field);
+    const std::string assign_pre = "{ _" + af.name_ + " = ",
       assign = assign_pre + "val; }\n",
       move = assign_pre + "std::move(val); }\n",
-      ret = "{ return _" + nm + "; }\n";
+      ret = "{ return _" + af.name_ + "; }\n";
     std::string initializer;
-    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+    if (af.cls_ & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->lang_header_ <<
-        "  void " << nm << '(' << lang_field_type << " val) " << assign <<
-        "  " << lang_field_type << ' ' << nm << "() const " << ret <<
-        "  " << lang_field_type << "& " << nm << "() " << ret;
-      if (cls & CL_ENUM) {
-        AST_Enum* enu = AST_Enum::narrow_from_decl(actual_field_type);
+        "  void " << af.name_ << '(' << lang_field_type << " val) " << assign <<
+        "  " << lang_field_type << ' ' << af.name_ << "() const " << ret <<
+        "  " << lang_field_type << "& " << af.name_ << "() " << ret;
+      if (af.cls_ & CL_ENUM) {
+        AST_Enum* enu = dynamic_cast<AST_Enum*>(af.act_);
         for (UTL_ScopeActiveIterator it(enu, UTL_Scope::IK_decls); !it.is_done(); it.next()) {
           if (it.item()->node_type() == AST_Decl::NT_enum_val) {
-            initializer = '{' + generator_->map_type(field_type)
+            initializer = '{' + generator_->map_type(af.type_)
               + "::" + it.item()->local_name()->get_string() + '}';
             break;
           }
@@ -1440,18 +1473,18 @@ struct Cxx11Generator : GeneratorBase
         initializer = "{}";
       }
     } else {
-      if (cls & CL_ARRAY) {
+      if (af.cls_ & CL_ARRAY) {
         initializer = "{}";
       }
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
-        "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
-        "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
-        "  const " << lang_field_type << "& " << nm << "() const " << ret <<
-        "  " << lang_field_type << "& " << nm << "() " << ret;
+        "  void " << af.name_ << "(const " << lang_field_type << "& val) " << assign <<
+        "  void " << af.name_ << '(' << lang_field_type << "&& val) " << move <<
+        "  const " << lang_field_type << "& " << af.name_ << "() const " << ret <<
+        "  " << lang_field_type << "& " << af.name_ << "() " << ret;
     }
     be_global->lang_header_ <<
-      "  " << lang_field_type << " _" << nm << initializer << ";\n\n";
+      "  " << lang_field_type << " _" << af.name_ << initializer << ";\n\n";
   }
 
   bool gen_struct(AST_Structure*, UTL_ScopedName* name,
@@ -1463,6 +1496,8 @@ struct Cxx11Generator : GeneratorBase
     const char* const nm = name->last_component()->get_string();
     gen_common_strunion_pre(nm);
 
+    std::for_each(fields.begin(), fields.end(), gen_struct_members);
+
     be_global->lang_header_ <<
       "  " << nm << "() = default;\n"
       "  " << (fields.size() == 1 ? "explicit " : "") << nm << '(';
@@ -1472,7 +1507,7 @@ struct Cxx11Generator : GeneratorBase
     std::string init_list, swaps;
     for (size_t i = 0; i < fields.size(); ++i) {
       const std::string fn = fields[i]->local_name()->get_string();
-      const std::string ft = map_type(fields[i]->field_type());
+      const std::string ft = map_type(fields[i]);
       const Classification cls = classify(fields[i]->field_type());
       const bool by_ref = (cls & (CL_PRIMITIVE | CL_ENUM)) == 0;
       const std::string param = (by_ref ? "const " : "") + ft + (by_ref ? "&" : "")
@@ -1486,8 +1521,6 @@ struct Cxx11Generator : GeneratorBase
 
     be_global->lang_header_ << ";\n\n";
     be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
-
-    std::for_each(fields.begin(), fields.end(), gen_struct_members);
 
     gen_common_strunion_post(nm);
     be_global->impl_ <<
@@ -1516,7 +1549,7 @@ struct Cxx11Generator : GeneratorBase
     const char* nm = branch->local_name()->get_string();
 
     AST_UnionLabel* label = branch->label(0);
-    AST_Union* union_ = AST_Union::narrow_from_scope(branch->defined_in());
+    AST_Union* union_ = dynamic_cast<AST_Union*>(branch->defined_in());
     AST_Type* dtype = resolveActualType(union_->disc_type());
     const std::string disc_type = generator_->map_type(dtype);
 
@@ -1757,10 +1790,13 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
     generator_->const_keyword(type) << ' ' << type_name << ' ' << nm << " = ";
 
   if (is_enum) {
+    UTL_ScopedName* const enumerator = constant->constant_value()->n();
     if (generator_->scoped_enum()) {
-      be_global->lang_header_ << type_name << "::";
+      be_global->lang_header_ << type_name << "::"
+        << to_string(enumerator->last_component()) << ";\n";
+    } else {
+      be_global->lang_header_ << scoped(enumerator) << ";\n";
     }
-    be_global->lang_header_ << scoped(constant->constant_value()->n()) << ";\n";
   } else {
     be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
   }
@@ -1830,14 +1866,14 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:
-      generator_->gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+      generator_->gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
       break;
     case AST_Decl::NT_array:
-      generator_->gen_array(name, arr = AST_Array::narrow_from_decl(base));
+      generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
       break;
     case AST_Decl::NT_fixed:
 # ifdef ACE_HAS_CDR_FIXED
-      gen_fixed(name, AST_Fixed::narrow_from_decl(base));
+      gen_fixed(name, dynamic_cast<AST_Fixed*>(base));
       break;
 # else
       std::cerr << "ERROR: fixed data type (for " << nm << ") is not supported"

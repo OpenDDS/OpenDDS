@@ -286,7 +286,7 @@ public:
   /**
    *  Return the id given by discovery.
    */
-  RepoId get_id();
+  RepoId get_id() const;
 
   /**
    * Return a unique string based on repo ID.
@@ -379,6 +379,9 @@ public:
     return part_crypto_handle_;
   }
 #endif
+
+  bool prepare_to_delete_datawriters();
+  bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
 private:
 

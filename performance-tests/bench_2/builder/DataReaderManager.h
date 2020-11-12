@@ -10,7 +10,7 @@ class DataReaderManager {
 public:
   explicit DataReaderManager(const DataReaderConfigSeq& configs, DataReaderReportSeq& reports, DDS::Subscriber_var& subscriber, const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map);
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
 protected:
   std::vector<std::shared_ptr<DataReader>> datareaders_;

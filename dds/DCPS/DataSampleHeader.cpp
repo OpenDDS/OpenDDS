@@ -6,12 +6,19 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "DataSampleHeader.h"
+
 #include "Serializer.h"
 #include "GuidConverter.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "SafetyProfileStreams.h"
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include "RestoreOutputStreamState.h"
+#endif
+
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
+
 #include <cstdio>
 
 #if !defined (__ACE_INLINE__)
@@ -628,18 +635,7 @@ std::ostream& operator<<(std::ostream& os, const SubMessageId value)
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 {
-  struct SaveAndRestoreStreamState {
-    explicit SaveAndRestoreStreamState(std::ostream& s)
-      : fill_(s.fill()), fmt_(s.flags()), s_(s) {}
-    ~SaveAndRestoreStreamState()
-    {
-      s_.fill(fill_);
-      s_.flags(fmt_);
-    }
-    char fill_;
-    std::ios_base::fmtflags fmt_;
-    std::ostream& s_;
-  } stream_state(str);
+  RestoreOutputStreamState stream_state(str);
 
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
     str << SubMessageId(value.submessage_id_)

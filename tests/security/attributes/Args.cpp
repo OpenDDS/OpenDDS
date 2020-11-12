@@ -1,15 +1,15 @@
 #include "Args.h"
 
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
 #include <ace/Argv_Type_Converter.h>
-#include "ace/Arg_Shifter.h"
+#include <ace/Arg_Shifter.h>
 #include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+
 #include <iostream>
 
 namespace SecurityAttributes
@@ -29,18 +29,21 @@ Args::Args()
  , num_messages_(DEFAULT_NUM_MESSAGES)
  , expected_result_(0)
  , timeout_(0)
- , extra_space(0)
+ , extra_space_(0)
 {
 }
 
+#ifdef ACE_USES_WCHAR
 namespace {
-std::string operator+(const std::string& str, const wchar_t* app) {
+std::string operator+(const std::string& str, const wchar_t* app)
+{
   return str + ACE_Wide_To_Ascii(app).char_rep();
 }
 }
+#endif
 
 //static
-int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
+int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
 {
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
@@ -69,7 +72,7 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
       args.domain_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ExtraSpace"))) != 0) {
-       args.extra_space = ACE_OS::atoi(currentArg);
+       args.extra_space_ = ACE_OS::atoi(currentArg);
        arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Topic"))) != 0) {
       args.topic_name_ = std::string("") + currentArg;
@@ -87,6 +90,9 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
       } else {
         args.timeout_ = ACE_OS::atoi(currentArg);
       }
+      arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Partition"))) != 0) {
+      args.partition_.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -159,6 +165,15 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
   }
 
   return 0;
+}
+
+void Args::partition_to_qos(DDS::PartitionQosPolicy& policy)
+{
+  const unsigned int sz = static_cast<unsigned int>(partition_.size());
+  policy.name.length(sz);
+  for (unsigned int i = 0; i < sz; ++i) {
+    policy.name[i] = partition_[i].c_str();
+  }
 }
 
 }

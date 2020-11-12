@@ -514,6 +514,13 @@ module DDS {
         in    AccessControlListener  listener,
         inout SecurityException      ex);
 
+      // This method is not in the spec but is necessary for cleanup.
+      // See DDSSEC12-89.
+      boolean
+      return_permissions_handle(
+        in    PermissionsHandle  handle,
+        inout SecurityException  ex);
+
       boolean
       return_permissions_token(
         in    PermissionsToken   token,
@@ -600,7 +607,7 @@ module DDS {
 
       DatareaderCryptoHandle
       register_matched_remote_datareader(
-        in    DatawriterCryptoHandle   local_datawritert_crypto_handle,
+        in    DatawriterCryptoHandle   local_datawriter_crypto_handle,
         in    ParticipantCryptoHandle  remote_participant_crypto,
         in    SharedSecretHandle       shared_secret,
         in    boolean                  relay_only,

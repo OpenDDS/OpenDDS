@@ -54,18 +54,30 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     << ((participant.location & OpenDDS::DCPS::LOCATION_LOCAL) ? "LOCAL " : "")
     << ((participant.location & OpenDDS::DCPS::LOCATION_ICE) ? "ICE " : "")
     << ((participant.location & OpenDDS::DCPS::LOCATION_RELAY) ? "RELAY " : "")
+    << ((participant.location & OpenDDS::DCPS::LOCATION_LOCAL6) ? "LOCAL6 " : "")
+    << ((participant.location & OpenDDS::DCPS::LOCATION_ICE6) ? "ICE6 " : "")
+    << ((participant.location & OpenDDS::DCPS::LOCATION_RELAY6) ? "RELAY6 " : "")
     << std::endl
     << "  mask: "
     << ((participant.change_mask & OpenDDS::DCPS::LOCATION_LOCAL) ? "LOCAL " : "")
     << ((participant.change_mask & OpenDDS::DCPS::LOCATION_ICE) ? "ICE " : "")
     << ((participant.change_mask & OpenDDS::DCPS::LOCATION_RELAY) ? "RELAY " : "")
+    << ((participant.change_mask & OpenDDS::DCPS::LOCATION_LOCAL6) ? "LOCAL6 " : "")
+    << ((participant.change_mask & OpenDDS::DCPS::LOCATION_ICE6) ? "ICE6 " : "")
+    << ((participant.change_mask & OpenDDS::DCPS::LOCATION_RELAY6) ? "RELAY6 " : "")
     << std::endl
     << " local: " << participant.local_addr << std::endl
     << "      : " << participant.local_timestamp.sec << std::endl
     << "   ice: " << participant.ice_addr << std::endl
     << "      : " << participant.ice_timestamp.sec << std::endl
     << " relay: " << participant.relay_addr << std::endl
-    << "      : " << participant.relay_timestamp.sec << std::endl;
+    << "      : " << participant.relay_timestamp.sec << std::endl
+    << "local6: " << participant.local6_addr << std::endl
+    << "      : " << participant.local6_timestamp.sec << std::endl
+    << "  ice6: " << participant.ice6_addr << std::endl
+    << "      : " << participant.ice6_timestamp.sec << std::endl
+    << "relay6: " << participant.relay6_addr << std::endl
+    << "      : " << participant.relay6_timestamp.sec << std::endl;
 
     // update locations if SampleInfo is valid.
     if (si.valid_data == 1)
@@ -124,17 +136,28 @@ void ParticipantLocationListenerImpl::on_sample_lost(
     << "on_sample_lost" << std::endl;
 }
 
-bool ParticipantLocationListenerImpl::check(bool no_ice)
+bool ParticipantLocationListenerImpl::check(bool no_ice, bool ipv6)
 {
   const unsigned long expected =
-    OpenDDS::DCPS::LOCATION_LOCAL |
-    (!no_ice ? OpenDDS::DCPS::LOCATION_ICE : 0) |
-    OpenDDS::DCPS::LOCATION_RELAY;
+    OpenDDS::DCPS::LOCATION_LOCAL
+    | (ipv6 ? OpenDDS::DCPS::LOCATION_RELAY6 : OpenDDS::DCPS::LOCATION_RELAY)
+#ifdef ACE_HAS_IPV6
+    | OpenDDS::DCPS::LOCATION_LOCAL6
+    | (!no_ice ? OpenDDS::DCPS::LOCATION_ICE6 : 0)
+#else
+    | (!no_ice && !ipv6? OpenDDS::DCPS::LOCATION_ICE : 0)
+#endif
+    ;
 
   std::cout << id_ << " expecting "
             << " LOCAL"
             << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
-            << " RELAY"
+            << ((expected & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+#ifdef ACE_HAS_IPV6
+            << ((expected & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
+#endif
+            << ((expected & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
+            << ((expected & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
             << std::endl;
 
   bool found = false;
@@ -144,6 +167,9 @@ bool ParticipantLocationListenerImpl::check(bool no_ice)
               << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL) ? " LOCAL" : "")
               << ((pos->second & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
               << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+              << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
+              << ((pos->second & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
+              << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
               << std::endl;
     found = found || pos->second == expected;
   }

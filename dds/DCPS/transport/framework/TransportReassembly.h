@@ -25,9 +25,9 @@ public:
   /// is set.  Returns true/false to indicate if data should be delivered to
   /// the datalink.  The 'data' argument may be modified by this method.
   bool reassemble(const SequenceNumber& transportSeq, bool firstFrag,
-                  ReceivedDataSample& data);
+                  ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
 
-  bool reassemble(const SequenceRange& seqRange, ReceivedDataSample& data);
+  bool reassemble(const SequenceRange& seqRange, ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
 
   /// Called by TransportReceiveStrategy to indicate that we can
   /// stop tracking partially-reassembled messages when we know the
@@ -36,6 +36,10 @@ public:
 
   void data_unavailable(const SequenceNumber& dataSampleSeq,
                         const RepoId& pub_id);
+
+  /// Clears out "completed" sequence numbers in order to allow resends for
+  /// new associations to the same (given) publication id
+  void clear_completed(const RepoId& pub_id);
 
   /// Returns true if this object is storing fragments for the given
   /// DataSampleHeader sequence number from the given publication.
@@ -51,7 +55,7 @@ public:
 private:
 
   bool reassemble_i(const SequenceRange& seqRange, bool firstFrag,
-                    ReceivedDataSample& data);
+                    ReceivedDataSample& data, ACE_UINT32 total_frags);
 
   // A FragKey represents the identifier for an original (pre-fragmentation)
   // message.  Since DataSampleHeader sequence numbers are distinct for each
@@ -84,14 +88,26 @@ private:
     ReceivedDataSample rec_ds_;
   };
 
-  // Each element of the FragMap "fragments_" represents one sent message
+  // Each element of the FragRangeList represents one sent message
   // (one DataSampleHeader before fragmentation).  The list must have at
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
-  typedef OPENDDS_MAP(FragKey, OPENDDS_LIST(FragRange) ) FragMap;
-  FragMap fragments_;
+  typedef OPENDDS_LIST(FragRange) FragRangeList;
 
-  OPENDDS_SET(FragKey) have_first_;
+  struct FragInfo {
+    FragInfo()
+      : complete_(false), have_first_(false), range_list_(), total_frags_(0) {}
+    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf)
+      : complete_(false), have_first_(hf), range_list_(rl), total_frags_(tf) {}
+
+    bool complete_;
+    bool have_first_;
+    FragRangeList range_list_;
+    ACE_UINT32 total_frags_;
+  };
+
+  typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
+  FragInfoMap fragments_;
 
   static bool insert(OPENDDS_LIST(FragRange)& flist,
                      const SequenceRange& seqRange,

@@ -7,6 +7,17 @@ const unsigned long tao_version = __TAO_IDL;
 const unsigned long dds_version = __OPENDDS_IDL;
 #endif
 
+module enumunion {
+
+  enum EnumType {A1, A2, A3};
+
+  union UnionType switch (EnumType) {
+    case A2: short s;
+    case A1: boolean b;
+    case A3: string str;
+  };
+};
+
 module Xyz {
 
   const octet c0 = 42;
@@ -181,6 +192,8 @@ module Xyz {
     octet o;
   };
 };
+
+const Xyz::TestEnum enumConst = Xyz::TE_2;
 
 module N1 {
   struct FwdDeclStruct;

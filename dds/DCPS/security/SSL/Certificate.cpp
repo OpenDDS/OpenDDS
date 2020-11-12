@@ -410,6 +410,30 @@ int Certificate::cache_dsign_algo()
 
 void Certificate::load_cert_bytes(const std::string& path)
 {
+#ifdef ACE_ANDROID
+  CORBA::Octet *buffer;
+
+  char b[1024];
+  FILE* fp = ACE_OS::fopen(path.c_str(), "rb");
+
+  int n;
+  int i = 0;
+  while (!feof(fp)) {
+    n = ACE_OS::fread(&b, 1, 1024, fp);
+    i += n;
+
+    original_bytes_.length(i + 1); // +1 for null byte at end of cert
+    buffer = original_bytes_.get_buffer();
+    ACE_OS::memcpy(buffer + i - n, b, n);
+  }
+
+  ACE_OS::fclose(fp);
+
+  // To appease the other DDS security implementations which
+  // append a null byte at the end of the cert.
+  buffer[i + 1] = 0u;
+
+#else
   std::ifstream in(path.c_str(), std::ios::binary);
 
   if (!in) {
@@ -429,6 +453,7 @@ void Certificate::load_cert_bytes(const std::string& path)
   // To appease the other DDS security implementations which
   // append a null byte at the end of the cert.
   *back_inserter = 0u;
+#endif
 }
 
 void Certificate::load_cert_data_bytes(const std::string& data)

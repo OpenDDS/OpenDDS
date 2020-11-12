@@ -9,10 +9,12 @@ SubscriberManager::SubscriberManager(const SubscriberConfigSeq& configs, Subscri
   }
 }
 
-void SubscriberManager::enable() {
+bool SubscriberManager::enable(bool throw_on_error) {
+  bool result = true;
   for (auto it = subscribers_.begin(); it != subscribers_.end(); ++it) {
-    (*it)->enable();
+    result &= (*it)->enable(throw_on_error);
   }
+  return result;
 }
 
 }

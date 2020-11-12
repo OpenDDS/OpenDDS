@@ -1,6 +1,7 @@
 #ifndef BENCH_UTIL_HEADER
 #define BENCH_UTIL_HEADER
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -31,7 +32,7 @@ bool Bench_Common_Export file_exists(const std::string& path);
 /**
  * Get Current UTC Time in ISO8601
  */
-std::string Bench_Common_Export iso8601();
+std::string Bench_Common_Export iso8601(const std::chrono::system_clock::time_point& tp = std::chrono::system_clock::now());
 
 }
 

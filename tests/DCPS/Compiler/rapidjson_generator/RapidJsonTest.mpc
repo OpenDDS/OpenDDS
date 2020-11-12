@@ -3,6 +3,7 @@ project: dcpsexe, dcps_test, dcps_rapidjson, googletest {
   exename = *
 
   requires += no_opendds_safety_profile
+  avoids += no_cxx11
 
   Idl_Files {
     RapidJsonTest.idl

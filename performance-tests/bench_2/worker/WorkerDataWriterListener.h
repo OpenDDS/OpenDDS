@@ -1,6 +1,9 @@
 #pragma once
 
 #include "DataWriterListener.h"
+#include "PropertyStatBlock.h"
+
+#include <condition_variable>
 
 namespace Bench {
 
@@ -23,12 +26,17 @@ public:
   void set_datawriter(Builder::DataWriter& datawriter) override;
   void unset_datawriter(Builder::DataWriter& datawriter) override;
 
+  bool wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const;
+
 protected:
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   size_t expected_match_count_{0};
   size_t match_count_{0};
   Builder::DataWriter* datawriter_{0};
+  Builder::ConstPropertyIndex enable_time_;
   Builder::PropertyIndex last_discovery_time_;
+  std::shared_ptr<PropertyStatBlock> discovery_delta_stat_block_;
+  mutable std::condition_variable expected_match_cv;
 };
 
 }

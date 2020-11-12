@@ -3,15 +3,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "../Idl/MessengerTypeSupportImpl.h"
+#include <MessengerTypeSupportImpl.h>
 
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/WaitSet.h"
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/WaitSet.h>
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include <iostream>
 #include <cstdlib>

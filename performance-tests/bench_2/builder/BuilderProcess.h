@@ -13,7 +13,7 @@ public:
   explicit BuilderProcess(const ProcessConfig& config);
   ~BuilderProcess();
 
-  void enable_dds_entities();
+  bool enable_dds_entities(bool throw_on_error = false);
 
   void detach_listeners();
 

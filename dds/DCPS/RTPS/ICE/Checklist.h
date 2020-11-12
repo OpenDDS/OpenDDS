@@ -13,15 +13,62 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/TimeTypes.h"
-
+#include "Ice.h"
 #include "Task.h"
-#include "AgentImpl.h"
+
+#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/GuidUtils.h"
+
+#if !OPENDDS_SAFETY_PROFILE
+#include "dds/DCPS/GuidUtils.h"
+#include <iostream>
+#endif
+
+#include <map>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
+
+typedef std::pair<std::string, std::string> FoundationType;
+
+class ActiveFoundationSet {
+public:
+  void add(const FoundationType& a_foundation)
+  {
+    std::pair<FoundationsType::iterator, bool> x = foundations_.insert(std::make_pair(a_foundation, 0));
+    ++x.first->second;
+  }
+
+  bool remove(const FoundationType& a_foundation)
+  {
+    FoundationsType::iterator pos = foundations_.find(a_foundation);
+    OPENDDS_ASSERT(pos != foundations_.end());
+    --pos->second;
+
+    if (pos->second == 0) {
+      foundations_.erase(pos);
+      return true;
+    }
+
+    return false;
+  }
+
+  bool contains(const FoundationType& a_foundation) const
+  {
+    return foundations_.find(a_foundation) != foundations_.end();
+  }
+
+  bool operator==(const ActiveFoundationSet& a_other) const
+  {
+    return foundations_ == a_other.foundations_;
+  }
+
+private:
+  typedef std::map<FoundationType, size_t> FoundationsType;
+  FoundationsType foundations_;
+};
 
 struct CandidatePair {
   Candidate const local;
@@ -103,6 +150,8 @@ inline std::ostream& operator<<(std::ostream& stream, const GuidPair& guidp)
 }
 #endif
 
+struct EndpointManager;
+
 struct Checklist : public Task {
   Checklist(EndpointManager* a_endpoint,
             const AgentInfo& a_local, const AgentInfo& a_remote,
@@ -111,6 +160,16 @@ struct Checklist : public Task {
   void compute_active_foundations(ActiveFoundationSet& a_active_foundations) const;
 
   void check_invariants() const;
+
+  bool has_transaction_id(const STUN::TransactionId& a_tid) const
+  {
+    return std::find(connectivity_checks_.begin(), connectivity_checks_.end(), a_tid) != connectivity_checks_.end();
+  }
+
+  bool has_guid_pair(const GuidPair& a_guid_pair) const
+  {
+    return guids_.find(a_guid_pair) != guids_.end();
+  }
 
   void unfreeze();
 
@@ -157,7 +216,6 @@ struct Checklist : public Task {
   void indication();
 
 private:
-  bool scheduled_for_destruction_;
   EndpointManager* const endpoint_manager_;
   GuidSetType guids_;
   AgentInfo local_agent_info_;
@@ -186,9 +244,7 @@ private:
   typedef std::list<ConnectivityCheck> ConnectivityChecksType;
   ConnectivityChecksType connectivity_checks_;
 
-  ~Checklist() {}
-
-  void reset();
+  ~Checklist();
 
   void generate_candidate_pairs();
 
@@ -228,6 +284,8 @@ private:
 
   void execute(const DCPS::MonotonicTimePoint& a_now);
 };
+
+typedef DCPS::RcHandle<Checklist> ChecklistPtr;
 
 } // namespace ICE
 } // namespace OpenDDS

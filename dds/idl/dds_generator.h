@@ -84,6 +84,7 @@ public:
                              AST_Type::SIZE_TYPE /*size*/)
   { return true; }
 
+  static std::string to_string(Identifier* id);
   static std::string scoped_helper(UTL_ScopedName* sn, const char* sep);
   static std::string module_scope_helper(UTL_ScopedName* sn, const char* sep);
 };
@@ -164,8 +165,7 @@ struct ScopedNamespaceGuard  {
       const char* str = name->head()->get_string();
       if (str && str[0]) {
         ++n_;
-        os_ << keyword << (name->head()->escaped() ? " _" : " ")
-            << str << " {\n";
+        os_ << keyword << ' ' << dds_generator::to_string(name->head()) << " {\n";
       }
     }
     if (std::strcmp(keyword, "module") == 0) semi_ = ";";
@@ -185,7 +185,7 @@ struct Function {
   bool has_arg_;
   std::string preamble_;
 
-  Function(const char* name, const char* returntype)
+  Function(const std::string& name, const std::string returntype)
     : has_arg_(false)
   {
     using std::string;
@@ -235,39 +235,39 @@ namespace AstTypeClassification {
   inline AST_Type* resolveActualType(AST_Type* element)
   {
     if (element->node_type() == AST_Decl::NT_typedef) {
-      AST_Typedef* td = AST_Typedef::narrow_from_decl(element);
+      AST_Typedef* td = dynamic_cast<AST_Typedef*>(element);
       return td->primitive_base_type();
     }
 
     switch(element->node_type()) {
     case AST_Decl::NT_interface_fwd:
     {
-      AST_InterfaceFwd* td = AST_InterfaceFwd::narrow_from_decl(element);
+      AST_InterfaceFwd* td = dynamic_cast<AST_InterfaceFwd*>(element);
       return td->full_definition();
     }
     case AST_Decl::NT_valuetype_fwd:
     {
-      AST_ValueTypeFwd* td = AST_ValueTypeFwd::narrow_from_decl(element);
+      AST_ValueTypeFwd* td = dynamic_cast<AST_ValueTypeFwd*>(element);
       return td->full_definition();
     }
     case AST_Decl::NT_union_fwd:
     {
-      AST_UnionFwd* td = AST_UnionFwd::narrow_from_decl(element);
+      AST_UnionFwd* td = dynamic_cast<AST_UnionFwd*>(element);
       return td->full_definition();
     }
     case AST_Decl::NT_struct_fwd:
     {
-      AST_StructureFwd* td = AST_StructureFwd::narrow_from_decl(element);
+      AST_StructureFwd* td = dynamic_cast<AST_StructureFwd*>(element);
       return td->full_definition();
     }
     case AST_Decl::NT_component_fwd:
     {
-      AST_ComponentFwd* td = AST_ComponentFwd::narrow_from_decl(element);
+      AST_ComponentFwd* td = dynamic_cast<AST_ComponentFwd*>(element);
       return td->full_definition();
     }
     case AST_Decl::NT_eventtype_fwd:
     {
-      AST_EventTypeFwd* td = AST_EventTypeFwd::narrow_from_decl(element);
+      AST_EventTypeFwd* td = dynamic_cast<AST_EventTypeFwd*>(element);
       return td->full_definition();
     }
     default:
@@ -286,7 +286,7 @@ namespace AstTypeClassification {
     type = AstTypeClassification::resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
       switch (p->pt()) {
       case AST_PredefinedType::PT_any:
       case AST_PredefinedType::PT_object:
@@ -304,12 +304,12 @@ namespace AstTypeClassification {
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring:
       return CL_SCALAR | CL_STRING |
-        ((AST_String::narrow_from_decl(type)->max_size()->ev()->u.ulval == 0)
+        ((dynamic_cast<AST_String*>(type)->max_size()->ev()->u.ulval == 0)
         ? 0 : CL_BOUNDED) |
         ((type->node_type() == AST_Decl::NT_wstring) ? CL_WIDE : 0);
     case AST_Decl::NT_sequence:
       return CL_SEQUENCE |
-        ((AST_Sequence::narrow_from_decl(type)->unbounded()) ? 0 : CL_BOUNDED);
+        ((dynamic_cast<AST_Sequence*>(type)->unbounded()) ? 0 : CL_BOUNDED);
     case AST_Decl::NT_struct:
       return CL_STRUCTURE;
     case AST_Decl::NT_enum:
@@ -343,7 +343,7 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 {
   switch (type->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+    AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
     switch (p->pt()) {
     case AST_PredefinedType::PT_char:
       return (wd == WD_OUTPUT)
@@ -474,7 +474,7 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   AST_Decl::NodeType nt = disc->node_type();
   if (nt == AST_Decl::NT_enum) return true;
 
-  AST_PredefinedType* pdt = AST_PredefinedType::narrow_from_decl(disc);
+  AST_PredefinedType* pdt = dynamic_cast<AST_PredefinedType*>(disc);
   switch (pdt->pt()) {
   case AST_PredefinedType::PT_boolean:
     return n_labels < 2;
@@ -610,7 +610,7 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
-  AST_PredefinedType* bt = AST_PredefinedType::narrow_from_decl(dt);
+  AST_PredefinedType* bt = dynamic_cast<AST_PredefinedType*>(dt);
   if (bt && bt->pt() == AST_PredefinedType::PT_boolean) {
     AST_UnionBranch* true_branch = 0;
     AST_UnionBranch* false_branch = 0;

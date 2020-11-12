@@ -117,7 +117,7 @@ struct TestParticipant: ACE_Event_Handler {
   }
 
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
-                 const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, ACE_INET_Addr& send_to)
+                 const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, const ACE_INET_Addr& send_to)
   {
     const DataSubmessage ds = {
       {DATA, FLAG_E | FLAG_D, 0},
@@ -254,6 +254,7 @@ bool run_test()
 {
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
+  rd.config()->use_ncm(false);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
@@ -261,25 +262,18 @@ bool run_test()
 
   const DDS::Subscriber_var sVar;
   spdp->init_bit(sVar);
+  reactor_wait();
 
   // Create a "test participant" which will use sockets directly
   // This will act like a remote participant.
   ACE_SOCK_Dgram test_part_sock;
-  ACE_INET_Addr test_part_addr;
-  if (!open_appropriate_socket_type(test_part_sock, test_part_addr)) {
+  ACE_INET_Addr test_part_addr(u_short(0), "0.0.0.0");
+  if (test_part_sock.open(test_part_addr) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: run_test() unable to open test_part_sock\n")));
     return false;
   }
   test_part_sock.get_local_addr(test_part_addr);
-  test_part_addr.set(test_part_addr.get_port_number(),
-#ifdef OPENDDS_SAFETY_PROFILE
-    "127.0.0.1"
-#elif defined(ACE_HAS_IPV6)
-    "0:0:0:0:0:0:0:1"
-#else
-    "localhost"
-#endif
-    );
+  test_part_addr.set(test_part_addr.get_port_number(), "127.0.0.1");
 
   GuidGenerator gen;
   GUID_t test_part_guid;
@@ -294,20 +288,6 @@ bool run_test()
   if (!spdp_friend.get_multicast_address(send_addr)) {
     return false;
   }
-
-#if defined (ACE_HAS_IPV6)
-  ACE_INET_Addr tmp;
-  test_part_sock.get_local_addr(tmp);
-  if (tmp.get_type() == AF_INET6 && send_addr.get_type() == AF_INET) {
-    // need to map IPV4 multicast address to IPV6 address
-    LocatorSeq locators;
-    locators.length(1);
-    locators[0].kind = address_to_kind(send_addr);
-    locators[0].port = send_addr.get_port_number();
-    address_to_bytes(locators[0].address, send_addr);
-    locator_to_address(send_addr, locators[0], tmp.get_type() != AF_INET);
-  }
-#endif
 
   // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
@@ -327,18 +307,12 @@ bool run_test()
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
 
-#ifdef ACE_HAS_IPV6
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv6;
-  std::memset(nonEmptyList[0].address, 0, 15);
-  nonEmptyList[0].address[15] = 1;
-#else
   nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
   nonEmptyList[0].address[13] = 0;
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
-#endif
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
     {
@@ -355,8 +329,8 @@ bool run_test()
       false /*expectsIQoS*/,
       availableBuiltinEndpoints,
       0,
-      LocatorSeq() /* sedp_multicast */,
-      LocatorSeq() /* sedp_unicast */,
+      nonEmptyList /* sedp_multicast */,
+      nonEmptyList /* sedp_unicast */,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       { 0 /*manualLivelinessCount*/ },
@@ -366,7 +340,8 @@ bool run_test()
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    }
+    },
+    0
   };
 
   if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {

@@ -17,10 +17,12 @@ DataWriterManager::DataWriterManager(const DataWriterConfigSeq& configs, DataWri
   }
 }
 
-void DataWriterManager::enable() {
+bool DataWriterManager::enable(bool throw_on_error) {
+  bool result = true;
   for (auto it = datawriters_.begin(); it != datawriters_.end(); ++it) {
-    (*it)->enable();
+    result &= (*it)->enable(throw_on_error);
   }
+  return result;
 }
 
 }

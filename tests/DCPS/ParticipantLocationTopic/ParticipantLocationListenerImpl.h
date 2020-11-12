@@ -56,7 +56,7 @@ public:
                               DDS::DataReader_ptr reader,
                               const DDS::SampleLostStatus& status);
 
-  bool check(bool no_ice);
+  bool check(bool no_ice, bool ipv6);
 
   typedef std::map<OpenDDS::DCPS::RepoId, unsigned long, OpenDDS::DCPS::GUID_tKeyLessThan> LocationMapType;
   LocationMapType location_map;

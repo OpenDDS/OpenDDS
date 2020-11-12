@@ -43,20 +43,21 @@
 #include "WorkerPublisherListener.h"
 #include "WorkerParticipantListener.h"
 #include "WriteAction.h"
+#include "DataReader.h"
+#include "DataWriter.h"
 
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <mutex>
 #include <thread>
 #include <iomanip>
-#include <condition_variable>
 
 #include <util.h>
 #include <json_conversion.h>
 
 using Builder::Log;
+using Builder::ZERO;
 using Bench::get_option_argument;
 
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
@@ -77,6 +78,29 @@ double weighted_median(std::vector<double> medians, std::vector<size_t> weights,
     }
   }
   return default_value;
+}
+
+void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero_equals_key_press = true) {
+  if (zero_equals_key_press && ts == ZERO) {
+    std::stringstream ss;
+    ss << "No " << ts_name << " time specified. Press enter to continue." << std::endl;
+    std::cerr << ss.str() << std::flush;
+    std::string line;
+    std::getline(std::cin, line);
+  } else {
+    if (ts < ZERO) {
+      auto duration = -1 * get_duration(ts);
+      if (duration > std::chrono::milliseconds(100)) {
+        std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
+      }
+    } else {
+      auto now = std::chrono::system_clock::now();
+      auto duration = std::chrono::system_clock::time_point(get_duration(ts)) - now;
+      if (duration > std::chrono::milliseconds(100)) {
+        std::this_thread::sleep_until(std::chrono::steady_clock::now() + duration);
+      }
+    }
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
@@ -140,12 +164,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   using Builder::ZERO;
 
-  Bench::WorkerConfig config;
+  Bench::WorkerConfig config{};
 
   config.create_time = ZERO;
   config.enable_time = ZERO;
   config.start_time = ZERO;
   config.stop_time = ZERO;
+  config.wait_for_discovery = false;
+  config.wait_for_discovery_seconds = 0;
 
   if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
@@ -199,10 +225,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TimeStamp process_start_begin_time = ZERO, process_start_end_time = ZERO;
   Builder::TimeStamp process_stop_begin_time = ZERO, process_stop_end_time = ZERO;
   Builder::TimeStamp process_destruction_begin_time = ZERO, process_destruction_end_time = ZERO;
+  Builder::TimeStamp process_start_discovery_time = ZERO, process_stop_discovery_time = ZERO;
 
   set_global_properties(config.properties);
 
-  Bench::WorkerReport worker_report;
+  Bench::WorkerReport worker_report{};
   Builder::ProcessReport& process_report = worker_report.process_report;
 
   const size_t THREAD_POOL_SIZE = 4;
@@ -213,24 +240,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   try {
     std::string line;
-    std::condition_variable cv;
-    std::mutex cv_mutex;
 
-    if (!(config.create_time == ZERO)) {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.create_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.create_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.create_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.create_time, "create", false);
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
 
-    process_construction_begin_time = Builder::get_time();
+    process_construction_begin_time = Builder::get_hr_time();
     Builder::BuilderProcess process(config.process);
-    process_construction_end_time = Builder::get_time();
+    process_construction_end_time = Builder::get_hr_time();
 
     Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
 
@@ -240,66 +257,80 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 
-    if (config.enable_time == ZERO) {
-      std::cerr << "No test enable time specified. Press any key to enable process entities." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.enable_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.enable_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.enable_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.enable_time, "enable");
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
 
-    process_enable_begin_time = Builder::get_time();
-    process.enable_dds_entities();
-    process_enable_end_time = Builder::get_time();
+    process_enable_begin_time = Builder::get_hr_time();
+    process.enable_dds_entities(true);
+    process_enable_end_time = Builder::get_hr_time();
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
 
-    if (config.start_time == ZERO) {
-      std::cerr << "No test start time specified. Press any key to start process testing." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.start_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.start_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.start_time));
+    if (config.wait_for_discovery) {
+
+      Log::log() << "Starting Discovery Check." << std::endl;
+
+      process_start_discovery_time = Builder::get_sys_time();
+
+      if (config.wait_for_discovery_seconds > 0) {
+
+        const std::chrono::seconds timeoutPeriod(config.wait_for_discovery_seconds);
+        const std::chrono::system_clock::time_point timeout_time = std::chrono::system_clock::now() + timeoutPeriod;
+
+        auto readMap = process.get_reader_map();
+        if (readMap.size() > 0) {
+          typedef std::map<std::string, std::shared_ptr<Builder::DataReader>>::iterator ReadMapIt;
+          std::shared_ptr<Builder::DataReader> dtRdrPtr(nullptr);
+
+          for (ReadMapIt it = readMap.begin(); it != readMap.end(); ++it) {
+            dtRdrPtr = it->second;
+            Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
+
+            if (!wdrl->wait_for_expected_match(timeout_time)) {
+              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+            }
+          }
+        }
+
+        auto writeMap = process.get_writer_map();
+        if (writeMap.size() > 0) {
+          typedef std::map<std::string, std::shared_ptr<Builder::DataWriter>>::iterator WriteMapIt;
+          std::shared_ptr<Builder::DataWriter> dtWtrPtr(nullptr);
+
+          for (WriteMapIt it = writeMap.begin(); it != writeMap.end(); ++it) {
+            dtWtrPtr = it->second;
+            Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
+
+            if (!wdwl->wait_for_expected_match(timeout_time)) {
+              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+            }
+          }
+        }
       }
-      std::this_thread::sleep_until(timeout_time);
+
+      process_stop_discovery_time = Builder::get_sys_time();
+
+      Log::log() << "Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
     }
+
+    do_wait(config.start_time, "start");
 
     Log::log() << "Starting process tests." << std::endl;
 
-    process_start_begin_time = Builder::get_time();
+    process_start_begin_time = Builder::get_hr_time();
     am.start();
-    process_start_end_time = Builder::get_time();
+    process_start_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests started." << std::endl << std::endl;
 
-    if (config.stop_time == ZERO) {
-      std::cerr << "No stop time specified. Press any key to stop process testing." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.stop_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.stop_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.stop_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.stop_time, "stop");
 
     Log::log() << "Stopping process tests." << std::endl;
 
-    process_stop_begin_time = Builder::get_time();
+    process_stop_begin_time = Builder::get_hr_time();
     am.stop();
-    process_stop_end_time = Builder::get_time();
+    process_stop_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests stopped." << std::endl << std::endl;
 
@@ -309,18 +340,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
-    if (config.destruction_time == ZERO) {
-      std::cerr << "No destruction time specified. Press any key to destroy process entities." << std::endl;
-      std::getline(std::cin, line);
-    } else {
-      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
-      if (config.destruction_time < ZERO) {
-        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.destruction_time);
-      } else {
-        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.destruction_time));
-      }
-      std::this_thread::sleep_until(timeout_time);
-    }
+    do_wait(config.destruction_time, "destruction");
 
     process.detach_listeners();
 
@@ -328,9 +348,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning process destruction / entity deletion." << std::endl;
 
-    process_destruction_begin_time = Builder::get_time();
+    process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
-    std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
+    std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
@@ -339,7 +359,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     TheServiceParticipant->shutdown();
     return 1;
   } catch (...) {
-    std::cerr << "Unknown exception caught trying to build process object" << std::endl;
+    std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
@@ -348,7 +368,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     TheServiceParticipant->shutdown();
     return 1;
   }
-  process_destruction_end_time = Builder::get_time();
+  process_destruction_end_time = Builder::get_hr_time();
 
   Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
 
@@ -449,10 +469,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
         Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+
         const Builder::TimeStamp dw_enable_time =
           get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
         const Builder::TimeStamp dw_last_discovery_time =
           get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+
         if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
           auto delta = dw_last_discovery_time - dw_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {

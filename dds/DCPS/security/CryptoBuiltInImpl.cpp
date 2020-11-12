@@ -73,6 +73,11 @@ bool CryptoBuiltInImpl::marshal(TAO_OutputCDR&)
 NativeCryptoHandle CryptoBuiltInImpl::generate_handle()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return generate_handle_i();
+}
+
+NativeCryptoHandle CryptoBuiltInImpl::generate_handle_i()
+{
   return CommonUtilities::increment_handle(next_handle_);
 }
 
@@ -120,6 +125,8 @@ namespace {
     seq.length(i + 1);
     seq[i] = t;
   }
+
+  const unsigned submessage_key_index = 0;
 }
 
 ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
@@ -376,16 +383,24 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
     return DDS::HANDLE_NIL;
   }
 
-  const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(local_datawriter_crypto_handle);
   if (iter == keys_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  const KeySeq& dw_keys = iter->second;
 
-  if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
+  const KeySeq& dw_keys = iter->second;
+  const bool use_derived_key = dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0]);
+
+  const HandlePair_t input_handles = std::make_pair(remote_participant_crypto, local_datawriter_crypto_handle);
+  const DerivedKeyIndex_t::iterator existing_handle_iter =
+    use_derived_key ? derived_key_handles_.find(input_handles) : derived_key_handles_.end();
+  const DatareaderCryptoHandle h =
+    (existing_handle_iter == derived_key_handles_.end())
+    ? generate_handle_i() : existing_handle_iter->second;
+
+  if (use_derived_key) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
     KeySeq dr_keys(1);
     dr_keys.length(1);
@@ -399,15 +414,22 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
       return DDS::HANDLE_NIL;
     }
     if (security_debug.bookkeeping && !security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_remote_datareader ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader ")
         ACE_TEXT("created volatile key for RDRCH %d\n"), h));
     }
     if (security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_remote_datareader ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader ")
         ACE_TEXT("created volatile key for RDRCH %d:\n%C"), h,
         to_dds_string(dr_keys[0]).c_str()));
     }
     keys_[h] = dr_keys;
+    if (existing_handle_iter != derived_key_handles_.end()) {
+      sessions_.erase(std::make_pair(h, submessage_key_index));
+      return h;
+    }
+    derived_key_handles_[input_handles] = h;
   }
 
   const EntityInfo e(DATAREADER_SUBMESSAGE, h);
@@ -475,16 +497,24 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
     return DDS::HANDLE_NIL;
   }
 
-  const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(local_datareader_crypto_handle);
   if (iter == keys_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataReader Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  const KeySeq& dr_keys = iter->second;
 
-  if (dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0])) {
+  const KeySeq& dr_keys = iter->second;
+  const bool use_derived_key = dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0]);
+
+  const HandlePair_t input_handles = std::make_pair(remote_participant_crypto, local_datareader_crypto_handle);
+  const DerivedKeyIndex_t::iterator existing_handle_iter =
+    use_derived_key ? derived_key_handles_.find(input_handles) : derived_key_handles_.end();
+  const DatareaderCryptoHandle h =
+    (existing_handle_iter == derived_key_handles_.end())
+    ? generate_handle_i() : existing_handle_iter->second;
+
+  if (use_derived_key) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
     KeySeq dw_keys(1);
     dw_keys.length(1);
@@ -498,15 +528,22 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
       return DDS::HANDLE_NIL;
     }
     if (security_debug.bookkeeping && !security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_remote_datawriter ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter ")
         ACE_TEXT("created volatile key for RDWCH %d\n"), h));
     }
     if (security_debug.showkeys) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_remote_datawriter ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} ")
+        ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter ")
         ACE_TEXT("created volatile key for RDWCH %d:\n%C"), h,
         to_dds_string(dw_keys[0]).c_str()));
     }
     keys_[h] = dw_keys;
+    if (existing_handle_iter != derived_key_handles_.end()) {
+      sessions_.erase(std::make_pair(h, submessage_key_index));
+      return h;
+    }
+    derived_key_handles_[input_handles] = h;
   }
 
   const EntityInfo e(DATAWRITER_SUBMESSAGE, h);
@@ -523,6 +560,9 @@ bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, S
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   clear_common_data(handle);
+  for (DerivedKeyIndex_t::iterator it = derived_key_handles_.lower_bound(std::make_pair(handle, 0));
+       it != derived_key_handles_.end() && it->first.first == handle; derived_key_handles_.erase(it++)) {
+  }
   return true;
 }
 
@@ -1057,7 +1097,7 @@ namespace {
     return length + (offset ? alignment - offset : 0);
   }
 
-  const int SEQLEN_SZ = 4, SM_ALIGN = 4;
+  const int SEQLEN_SZ = 4;
 
   // Precondition: the bytes of 'original' starting at 'offset' to the end of 'original' are a valid Submessage
   // If that Submessage has octetsToNextHeader == 0, returns true and makes 'modified' a copy of 'original'
@@ -1085,7 +1125,7 @@ namespace {
     ser_in >> submessageLength;
     if (submessageLength == 0) {
       modified = original;
-      const size_t len = roundUp(static_cast<unsigned int>(origLength - RTPS::SMHDR_SZ), SM_ALIGN);
+      const size_t len = roundUp(static_cast<unsigned int>(origLength - RTPS::SMHDR_SZ), RTPS::SM_ALIGN);
       modified[offset + 2 + !flag_e] = len & 0xff;
       modified[offset + 2 + flag_e] = (len >> 8) & 0xff;
       return true;
@@ -1118,22 +1158,21 @@ bool CryptoBuiltInImpl::encode_submessage(
   CryptoFooter footer;
   DDS::OctetSeq out;
   const DDS::OctetSeq* pOut = &plain_rtps_submessage;
-  static const unsigned int SUBMSG_KEY_IDX = 0;
-  const KeyId_t sKey = std::make_pair(sender_handle, SUBMSG_KEY_IDX);
+  const KeyId_t sKey = std::make_pair(sender_handle, submessage_key_index);
   bool authOnly = false;
 
-  if (encrypts(keyseq[SUBMSG_KEY_IDX])) {
-    ok = encrypt(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], plain_rtps_submessage,
+  if (encrypts(keyseq[submessage_key_index])) {
+    ok = encrypt(keyseq[submessage_key_index], sessions_[sKey], plain_rtps_submessage,
                  header, footer, out, ex);
     pOut = &out;
 
-  } else if (authenticates(keyseq[SUBMSG_KEY_IDX])) {
+  } else if (authenticates(keyseq[submessage_key_index])) {
     // the original submessage may have octetsToNextHeader = 0 which isn't
     // legal when appending SEC_POSTFIX, patch in the actual submsg length
     if (setOctetsToNextHeader(out, plain_rtps_submessage)) {
       pOut = &out;
     }
-    ok = authtag(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], *pOut,
+    ok = authtag(keyseq[submessage_key_index], sessions_[sKey], *pOut,
                  header, footer, ex);
     authOnly = true;
 
@@ -1156,7 +1195,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   }
 
   size += pOut->length(); // submessage inside wrapper
-  align(SM_ALIGN, size, padding);
+  align(RTPS::SM_ALIGN, size, padding);
 
   size += RTPS::SMHDR_SZ; // postfix submessage header
   const size_t preFooter = size + padding;
@@ -1172,13 +1211,13 @@ bool CryptoBuiltInImpl::encode_submessage(
 
   if (!authOnly) {
     smHdr.submessageId = RTPS::SEC_BODY;
-    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), SM_ALIGN));
+    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), RTPS::SM_ALIGN));
     ser << smHdr;
     ser << pOut->length();
   }
 
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
-  ser.align_w(SM_ALIGN);
+  ser.align_w(RTPS::SM_ALIGN);
 
   smHdr.submessageId = RTPS::SEC_POSTFIX;
   smHdr.submessageLength = static_cast<ACE_UINT16>(size + padding - preFooter);
@@ -1355,7 +1394,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   }
 
   size += pOut->length();
-  align(SM_ALIGN, size, padding);
+  align(RTPS::SM_ALIGN, size, padding);
 
   size += RTPS::SMHDR_SZ; // SRTPS Postfix
   gen_find_size(cryptoFooter, size, padding);
@@ -1372,13 +1411,13 @@ bool CryptoBuiltInImpl::encode_rtps_message(
 
   if (addSecBody) {
     smHdr.submessageId = RTPS::SEC_BODY;
-    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), SM_ALIGN));
+    smHdr.submessageLength = static_cast<ACE_UINT16>(roundUp(SEQLEN_SZ + pOut->length(), RTPS::SM_ALIGN));
     ser << smHdr;
     ser << pOut->length();
   }
 
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
-  ser.align_w(SM_ALIGN);
+  ser.align_w(RTPS::SM_ALIGN);
 
   smHdr.submessageId = RTPS::SRTPS_POSTFIX;
   smHdr.submessageLength = 0; // final submessage doesn't need a length

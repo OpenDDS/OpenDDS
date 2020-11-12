@@ -9,7 +9,7 @@ schedules:
 
 jobs:
 - job: VisualStudio2019
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: windows-2019
   strategy:
@@ -36,7 +36,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
@@ -94,7 +94,7 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - script: |
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
+      perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
@@ -108,7 +108,7 @@ jobs:
     displayName: Run Examples DCPS Messenger
 
 - job: VisualStudio2017
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: vs2017-win2016
   strategy:
@@ -116,6 +116,9 @@ jobs:
       Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
+      Debug64WChar:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
   variables:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
@@ -124,7 +127,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
@@ -146,6 +149,7 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
+      if %BuildConfiguration%==Debug set OPT=--features=uses_wchar=1
       set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
       if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC= # Debug64 Fills up Disk with Security
       call configure -v --ace-github-latest --tests %SEC% %OPT%
@@ -182,7 +186,7 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - script: |
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
+      perl tests\cmake_integration\run_ci_tests.pl --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
@@ -195,89 +199,8 @@ jobs:
       perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
     displayName: Run Examples DCPS Messenger
 
-- job: VisualStudio2015
-  timeoutInMinutes: 90
-  pool:
-    vmImage: vs2015-win2012r2
-  strategy:
-    matrix:
-      Release64:
-        BuildPlatform: x64
-        BuildConfiguration: Release
-  steps:
-  - script: |
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
-    displayName: Set VcVarsArch
-  - task: BatchScript@1
-    displayName: VcVars
-    inputs:
-      filename: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"'
-      arguments: $(VcVarsArch)
-      modifyEnvironment: true
-  - powershell: |
-      $client = new-object System.Net.WebClient
-      $client.DownloadFile("http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-64bit-portable.zip", "strawberry-perl.zip");
-    displayName: Download perl
-  - task: ExtractFiles@1
-    displayName: Extract perl
-    inputs:
-      archiveFilePatterns: strawberry-perl.zip
-      destinationFolder: ext\strawberry
-  - task: BatchScript@1
-    displayName: Put perl on PATH
-    inputs:
-      filename: tools\scripts\prepend_path
-      arguments: '%CD%\ext\strawberry\perl\bin'
-      modifyEnvironment: true
-  - script: |
-      if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
-      call configure -v --ace-github-latest --tests %OPT%
-      perl tools\scripts\show_build_config.pl
-      if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
-      echo ##vso[task.setvariable variable=BuildSolution]%SLN%
-    failOnStderr: #
-    displayName: Run configure script
-  - task: BatchScript@1
-    displayName: Setenv from configure script
-    inputs:
-      filename: setenv.cmd
-      modifyEnvironment: true
-  - task: VSBuild@1
-    displayName: Build solution
-    inputs:
-      solution: $(BuildSolution)
-      platform: $(BuildPlatform)
-      configuration: $(BuildConfiguration)
-      maximumCpuCount: true
-  - script: |
-      perl "%ACE_ROOT%/bin/mwc.pl" -type vc14 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
-    displayName: Generate Messenger sln files
-  - task: VSBuild@1
-    displayName: Build Messenger Test
-    inputs:
-      solution: $(DDS_ROOT)\tests\DCPS\Messenger\Messenger.sln
-      platform: $(BuildPlatform)
-      configuration: $(BuildConfiguration)
-  - task: VSBuild@1
-    displayName: Build Messenger Example
-    inputs:
-      solution: $(DDS_ROOT)\DevGuideExamples\DCPS\Messenger\Messenger.sln
-      platform: $(BuildPlatform)
-      configuration: $(BuildConfiguration)
-  - script: |
-      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
-      cd tests\DCPS\Messenger
-      perl run_test.pl rtps -ExeSubDir %SUBDIR_FOR_MESSENGER%
-    displayName: Run DCPS Messenger Test
-  - script: |
-      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
-      cd DevGuideExamples\DCPS\Messenger
-      perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
-    displayName: Run Examples DCPS Messenger
-
 - job: Linux
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: ubuntu-18.04
   variables:
@@ -285,10 +208,10 @@ jobs:
   strategy:
     matrix:
       Debug:
-        ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
+        ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
         TEST_MESSENGER: true
       Release:
-        ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
+        ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
         DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
@@ -309,21 +232,22 @@ jobs:
         ConfigOpts: --compiler=clang++-5.0 --security --std=c++11 --features=uses_wchar=1 --no-inline
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
       CLANG6:
-        ConfigOpts: --compiler=clang++-6.0 --security
+        ConfigOpts: --compiler=clang++-6.0 --security --std=c++11
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
-      CLANG9:
-        ConfigOpts: --compiler=clang++-9 --security
-        PackageDeps: libxerces-c-dev libssl-dev cmake clang-9
-        Repo: llvm-toolchain-$(lsb_release -cs)-9
+      CLANG10:
+        ConfigOpts: --compiler=clang++-10 --security --std=c++11
+        PackageDeps: libxerces-c-dev libssl-dev cmake clang-10
+        Repo: llvm-toolchain-$(lsb_release -cs)-10
       GCC6_CPP03:
         ConfigOpts: --compiler=g++-6 --std=c++03
         PackageDeps: g++-6
+        CMakeTestOpts: --skip-cxx11
       GCC6:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
-      GCC9:
-        ConfigOpts: --compiler=g++-9 --no-inline
-        PackageDeps: g++-9
+      GCC10:
+        ConfigOpts: --compiler=g++-10 --no-inline
+        PackageDeps: g++-10
   steps:
   - script: |
       set -e
@@ -346,8 +270,8 @@ jobs:
     displayName: Compile
   - script: |
       set -e
-      source $(Build.SourcesDirectory)/setenv.sh
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
+      source setenv.sh
+      tests/cmake_integration/run_ci_tests.pl $(CMakeTestOpts)
     displayName: Compile and run CMake tests
     condition: >
       and(succeeded(),
@@ -410,7 +334,7 @@ jobs:
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 
 - job: macOS
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   pool:
     vmImage: macOS-latest
   variables:
@@ -425,14 +349,14 @@ jobs:
         ConfigOpts: --no-debug --optimize
   steps:
   - script: |
-      ./configure -v --ace-github-latest --tests $(ConfigOpts)
+      ./configure -v --std=c++11 --ace-github-latest --tests $(ConfigOpts)
       tools/scripts/show_build_config.pl
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
   - script: >
-      source $(Build.SourcesDirectory)/setenv.sh &&
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
+      source setenv.sh &&
+      tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
   - script: |
       source setenv.sh

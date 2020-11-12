@@ -40,10 +40,11 @@
 
 bool reliable = false;
 bool no_ice = false;
+bool ipv6 = false;
 
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n6"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -51,6 +52,9 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       {
       case 'n':
         no_ice = true;
+        break;
+      case '6':
+        ipv6 = true;
         break;
       case '?':
       default:
@@ -174,10 +178,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
-    ACE_OS::sleep(5);
+    ACE_OS::sleep(10);
 
     // check that all locations received
-    if (!listener->check(no_ice)) {
+    if (!listener->check(no_ice, ipv6)) {
       status = EXIT_FAILURE;
     }
 

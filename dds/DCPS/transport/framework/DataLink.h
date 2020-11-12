@@ -202,8 +202,9 @@ public:
   void terminate_send_if_suspended();
 
   /// This is called on publisher side to see if this link communicates
-  /// with the provided sub.
-  bool is_target(const RepoId& remote_sub_id);
+  /// with the provided sub or by the subscriber side to see if this link
+  /// communicates with the provided pub
+  bool is_target(const RepoId& remote_id);
 
   /// This is called by DataLinkCleanupTask thread to remove the associations
   /// based on the snapshot in release_resources().
@@ -257,7 +258,6 @@ public:
   typedef WeakRcHandle<TransportClient> TransportClient_wrch;
   typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
 
-  void add_pending_on_start(const RepoId& local, const RepoId& remote);
   bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
@@ -334,6 +334,8 @@ protected:
   GUIDSeq* peer_ids(const RepoId& local_id) const;
 
   void network_change() const;
+
+  void replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_sub_id) const;
 
 private:
 

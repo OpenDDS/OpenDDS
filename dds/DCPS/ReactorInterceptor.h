@@ -134,11 +134,13 @@ protected:
 
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
-  OPENDDS_DEQUE(CommandPtr) command_queue_;
+  typedef OPENDDS_VECTOR(CommandPtr) Queue;
+  Queue command_queue_;
   ReactorState state_;
 };
 
 typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
+typedef WeakRcHandle<ReactorInterceptor> ReactorInterceptor_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS

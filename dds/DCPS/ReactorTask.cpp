@@ -29,6 +29,8 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   , proactor_(0)
   , use_async_send_(useAsyncSend)
   , timer_queue_(0)
+  , thread_status_(0)
+  , timeout_(TimeDuration(0))
 {
 }
 
@@ -48,8 +50,12 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 }
 
 int
-OpenDDS::DCPS::ReactorTask::open(void*)
+OpenDDS::DCPS::ReactorTask::open_reactor_task(void*, TimeDuration timeout, ThreadStatus* thread_stat, OPENDDS_STRING name)
 {
+  // thread status reporting support
+  timeout_ = timeout;
+  thread_status_ = thread_stat;
+  name_ = name;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
   if (use_async_send_) {
@@ -147,15 +153,46 @@ OpenDDS::DCPS::ReactorTask::svc()
     }
   }
 
-  //TBD: Should the reactor continue running if there are some exceptions
-  //     are caught while handling events?
-//MJM: Put this in a loop with a state conditional and use the state to
-//MJM: indicate whether or not to terminate.  But I can think of no
-//MJM: reason to have anything in the conditional, so just expire.
-//MJM: Nevermind.
   try {
     // Tell the reactor to handle events.
-    reactor_->run_reactor_event_loop();
+    if (timeout_ == TimeDuration(0)) {
+      reactor_->run_reactor_event_loop();
+    } else {
+#ifdef ACE_HAS_MAC_OSX
+      unsigned long tid = 0;
+      uint64_t osx_tid;
+      if (!pthread_threadid_np(NULL, &osx_tid)) {
+        tid = static_cast<unsigned long>(osx_tid);
+      } else {
+        tid = 0;
+        ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
+      }
+#elif !defined (OPENDDS_SAFETY_PROFILE)
+      ACE_thread_t tid = ACE_OS::thr_self();
+#endif /* ACE_HAS_MAC_OSX */
+
+#ifndef OPENDDS_SAFETY_PROFILE
+      OPENDDS_STRING key = to_dds_string(tid);
+#else
+      OPENDDS_STRING key = "ReactorTask";
+#endif
+      if (name_ != "") {
+        key += " (" + name_ + ")";
+      }
+
+      while (state_ == STATE_RUNNING) {
+        ACE_Time_Value t = timeout_.value();
+        reactor_->run_reactor_event_loop(t, 0);
+        if (thread_status_) {
+          if (DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+                       "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
+          }
+          ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
+          thread_status_->map[key] = MonotonicTimePoint::now();
+        }
+      }
+    }
   } catch (const std::exception& e) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",

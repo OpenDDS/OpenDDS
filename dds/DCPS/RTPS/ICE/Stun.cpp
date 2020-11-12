@@ -11,6 +11,8 @@
 
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,7 +23,11 @@ ACE_UINT16 Attribute::length() const
 {
   switch (type) {
   case MAPPED_ADDRESS:
-    // TODO(jrw972):  Handle IPv6.
+#if ACE_HAS_IPV6
+    if (mapped_address.get_type() == AF_INET6) {
+      return 20;
+    }
+#endif
     return 8;
 
   case USERNAME:
@@ -37,7 +43,11 @@ ACE_UINT16 Attribute::length() const
     return static_cast<ACE_UINT16>(2 * unknown_attributes.size());
 
   case XOR_MAPPED_ADDRESS:
-    // TODO(jrw972):  Handle IPv6.
+#if ACE_HAS_IPV6
+    if (mapped_address.get_type() == AF_INET6) {
+      return 20;
+    }
+#endif
     return 8;
 
   case PRIORITY:
@@ -52,6 +62,10 @@ ACE_UINT16 Attribute::length() const
   case ICE_CONTROLLED:
   case ICE_CONTROLLING:
     return 8;
+
+  case GUID_PREFIX:
+    return sizeof(DCPS::GuidPrefix_t);
+
   default:
     break;
   }
@@ -63,7 +77,6 @@ Attribute make_mapped_address(const ACE_INET_Addr& addr)
 {
   Attribute attribute;
   attribute.type = MAPPED_ADDRESS;
-  // TODO(jrw972):  Handle IPv6.
   attribute.mapped_address = addr;
   return attribute;
 }
@@ -104,7 +117,6 @@ Attribute make_xor_mapped_address(const ACE_INET_Addr& addr)
 {
   Attribute attribute;
   attribute.type = XOR_MAPPED_ADDRESS;
-  // TODO(jrw972):  Handle IPv6.
   attribute.mapped_address = addr;
   return attribute;
 }
@@ -147,6 +159,15 @@ Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker)
   return attribute;
 }
 
+OpenDDS_Rtps_Export
+Attribute make_guid_prefix(const DCPS::GuidPrefix_t& guid_prefix)
+{
+  Attribute attribute;
+  attribute.type = GUID_PREFIX;
+  std::memcpy(attribute.guid_prefix, guid_prefix, sizeof(guid_prefix));
+  return attribute;
+}
+
 Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length)
 {
   Attribute attribute;
@@ -155,7 +176,7 @@ Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length)
   return attribute;
 }
 
-bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
+bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
 {
   ACE_UINT16 attribute_type;
   ACE_UINT16 attribute_length;
@@ -196,11 +217,23 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
         return false;
       }
 
-      attribute = make_mapped_address(ACE_INET_Addr(port, address));
-    }
+      holder.attribute = make_mapped_address(ACE_INET_Addr(port, address));
+    } else if (family == IPv6) {
+      if (attribute_length != 20) {
+        return false;
+      }
 
-    else if (family == IPv6) {
-      // TODO(jrw972):  Handle IPv6.
+      ACE_CDR::Octet address[16];
+
+      if (!(serializer.read_octet_array(address, 16))) {
+        return false;
+      }
+      ACE_INET_Addr addr;
+      addr.set_type(AF_INET6);
+      addr.set_address(reinterpret_cast<const char*>(address), 16, 0);
+      addr.set_port_number(port);
+
+      holder.attribute = make_mapped_address(addr);
     }
   }
   break;
@@ -216,14 +249,14 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       return false;
     }
 
-    attribute = make_username(std::string(reinterpret_cast<char*>(buffer), attribute_length));
+    holder.attribute = make_username(std::string(reinterpret_cast<char*>(buffer), attribute_length));
   }
   break;
 
   case MESSAGE_INTEGRITY: {
-    attribute = make_message_integrity();
+    holder.attribute = make_message_integrity();
 
-    if (!serializer.read_octet_array(attribute.message_integrity, sizeof(attribute.message_integrity))) {
+    if (!serializer.read_octet_array(holder.attribute.message_integrity, sizeof(holder.attribute.message_integrity))) {
       return false;
     }
   }
@@ -262,7 +295,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       return false;
     }
 
-    attribute = make_error_code(code, std::string(reinterpret_cast<char*>(buffer), reason_length));
+    holder.attribute = make_error_code(code, std::string(reinterpret_cast<char*>(buffer), reason_length));
   }
   break;
 
@@ -279,7 +312,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       unknown_attributes.push_back(static_cast<AttributeType>(code));
     }
 
-    attribute = make_unknown_attributes(unknown_attributes);
+    holder.attribute = make_unknown_attributes(unknown_attributes);
   }
   break;
 
@@ -313,11 +346,41 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       }
 
       address ^= MAGIC_COOKIE;
-      attribute = make_xor_mapped_address(ACE_INET_Addr(port, address));
-    }
+      holder.attribute = make_xor_mapped_address(ACE_INET_Addr(port, address));
+    } else if (family == IPv6) {
+      if (attribute_length != 20) {
+        return false;
+      }
 
-    else if (family == IPv6) {
-      // TODO(jrw972):  Handle IPv6.
+      ACE_CDR::Octet address[16];
+
+      if (!(serializer.read_octet_array(address, 16))) {
+        return false;
+      }
+
+      address[0] ^= ((MAGIC_COOKIE & 0xFF000000) >> 24);
+      address[1] ^= ((MAGIC_COOKIE & 0x00FF0000) >> 16);
+      address[2] ^= ((MAGIC_COOKIE & 0x0000FF00) >> 8);
+      address[3] ^= ((MAGIC_COOKIE & 0x000000FF) >> 0);
+      address[4] ^= holder.tid.data[0];
+      address[5] ^= holder.tid.data[1];
+      address[6] ^= holder.tid.data[2];
+      address[7] ^= holder.tid.data[3];
+      address[8] ^= holder.tid.data[4];
+      address[9] ^= holder.tid.data[5];
+      address[10] ^= holder.tid.data[6];
+      address[11] ^= holder.tid.data[7];
+      address[12] ^= holder.tid.data[8];
+      address[13] ^= holder.tid.data[9];
+      address[14] ^= holder.tid.data[10];
+      address[15] ^= holder.tid.data[11];
+
+      ACE_INET_Addr addr;
+      addr.set_type(AF_INET6);
+      addr.set_address(reinterpret_cast<const char*>(address), 16, 0);
+      addr.set_port_number(port);
+
+      holder.attribute = make_xor_mapped_address(addr);
     }
   }
   break;
@@ -329,18 +392,18 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       return false;
     }
 
-    attribute = make_priority(priority);
+    holder.attribute = make_priority(priority);
   }
   break;
 
   case USE_CANDIDATE:
-    attribute = make_use_candidate();
+    holder.attribute = make_use_candidate();
     break;
 
   case FINGERPRINT: {
-    attribute = make_fingerprint();
+    holder.attribute = make_fingerprint();
 
-    if (!(serializer >> attribute.fingerprint)) {
+    if (!(serializer >> holder.attribute.fingerprint)) {
       return false;
     }
   }
@@ -353,7 +416,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       return false;
     }
 
-    attribute = make_ice_controlled(ice_tie_breaker);
+    holder.attribute = make_ice_controlled(ice_tie_breaker);
   }
   break;
 
@@ -364,7 +427,17 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       return false;
     }
 
-    attribute = make_ice_controlling(ice_tie_breaker);
+    holder.attribute = make_ice_controlling(ice_tie_breaker);
+  }
+  break;
+
+  case GUID_PREFIX: {
+    DCPS::GuidPrefix_t guid_prefix;
+    if (!(serializer.read_octet_array(guid_prefix, sizeof(guid_prefix)))) {
+      return false;
+    }
+
+    holder.attribute = make_guid_prefix(guid_prefix);
   }
   break;
 
@@ -373,7 +446,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
       return false;
     }
 
-    attribute = make_unknown_attribute(attribute_type, attribute_length);
+    holder.attribute = make_unknown_attribute(attribute_type, attribute_length);
   }
   break;
   }
@@ -386,49 +459,56 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
   return true;
 }
 
-bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
+bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder)
 {
-  ACE_UINT16 attribute_type = attribute.type;
-  ACE_UINT16 attribute_length = attribute.length();
+  ACE_UINT16 attribute_type = holder.attribute.type;
+  ACE_UINT16 attribute_length = holder.attribute.length();
   serializer << attribute_type;
   serializer << attribute_length;
 
   switch (attribute_type) {
   case MAPPED_ADDRESS: {
     serializer << static_cast<ACE_CDR::Char>(0);
-    serializer << static_cast<ACE_CDR::Char>(IPv4);
-    serializer << static_cast<ACE_UINT16>(attribute.mapped_address.get_port_number());
-    serializer << attribute.mapped_address.get_ip_address();
-    // TODO(jrw972):  Handle IPv6.
+    if (holder.attribute.mapped_address.get_type() == AF_INET) {
+      serializer << static_cast<ACE_CDR::Char>(IPv4);
+      serializer << static_cast<ACE_UINT16>(holder.attribute.mapped_address.get_port_number());
+      serializer << holder.attribute.mapped_address.get_ip_address();
+    } else {
+      serializer << static_cast<ACE_CDR::Char>(IPv6);
+      serializer << static_cast<ACE_UINT16>(holder.attribute.mapped_address.get_port_number());
+      DCPS::OctetArray16 a;
+      RTPS::address_to_bytes(a, holder.attribute.mapped_address);
+      serializer.write_octet_array(a, 16);
+    }
   }
   break;
 
   case USERNAME: {
-    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.username.c_str()),
-                                 static_cast<ACE_CDR::ULong>(attribute.username.size()));
+    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(holder.attribute.username.c_str()),
+                                 static_cast<ACE_CDR::ULong>(holder.attribute.username.size()));
   }
   break;
 
   case MESSAGE_INTEGRITY: {
-    serializer.write_octet_array(attribute.message_integrity, sizeof(attribute.message_integrity));
+    serializer.write_octet_array(holder.attribute.message_integrity, sizeof(holder.attribute.message_integrity));
   }
   break;
 
   case ERROR_CODE: {
-    ACE_UINT8 class_ = attribute.error.code / 100;
-    ACE_UINT8 num = attribute.error.code % 100;
+    ACE_UINT8 class_ = holder.attribute.error.code / 100;
+    ACE_UINT8 num = holder.attribute.error.code % 100;
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(class_);
     serializer << static_cast<ACE_CDR::Char>(num);
-    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.error.reason.c_str()),
-                                 static_cast<ACE_CDR::ULong>(attribute.error.reason.size()));
+    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(holder.attribute.error.reason.c_str()),
+                                 static_cast<ACE_CDR::ULong>(holder.attribute.error.reason.size()));
   }
   break;
 
   case UNKNOWN_ATTRIBUTES: {
-    for (std::vector<AttributeType>::const_iterator pos = attribute.unknown_attributes.begin(),
-         limit = attribute.unknown_attributes.end(); pos != limit; ++pos) {
+    for (std::vector<AttributeType>::const_iterator pos = holder.attribute.unknown_attributes.begin(),
+         limit = holder.attribute.unknown_attributes.end(); pos != limit; ++pos) {
       serializer << static_cast<ACE_UINT16>(*pos);
     }
   }
@@ -436,15 +516,41 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
 
   case XOR_MAPPED_ADDRESS: {
     serializer << static_cast<ACE_CDR::Char>(0);
-    serializer << static_cast<ACE_CDR::Char>(IPv4);
-    serializer << static_cast<ACE_UINT16>(attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
-    serializer << (attribute.mapped_address.get_ip_address() ^ MAGIC_COOKIE);
-    // TODO(jrw972):  Handle IPv6.
+    if (holder.attribute.mapped_address.get_type() == AF_INET) {
+      serializer << static_cast<ACE_CDR::Char>(IPv4);
+      serializer << static_cast<ACE_UINT16>(holder.attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
+      serializer << (holder.attribute.mapped_address.get_ip_address() ^ MAGIC_COOKIE);
+    } else {
+      serializer << static_cast<ACE_CDR::Char>(IPv6);
+      serializer << static_cast<ACE_UINT16>(holder.attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
+
+      DCPS::OctetArray16 a;
+      RTPS::address_to_bytes(a, holder.attribute.mapped_address);
+
+      a[0] ^= ((MAGIC_COOKIE & 0xFF000000) >> 24);
+      a[1] ^= ((MAGIC_COOKIE & 0x00FF0000) >> 16);
+      a[2] ^= ((MAGIC_COOKIE & 0x0000FF00) >> 8);
+      a[3] ^= ((MAGIC_COOKIE & 0x000000FF) >> 0);
+      a[4] ^= holder.tid.data[0];
+      a[5] ^= holder.tid.data[1];
+      a[6] ^= holder.tid.data[2];
+      a[7] ^= holder.tid.data[3];
+      a[8] ^= holder.tid.data[4];
+      a[9] ^= holder.tid.data[5];
+      a[10] ^= holder.tid.data[6];
+      a[11] ^= holder.tid.data[7];
+      a[12] ^= holder.tid.data[8];
+      a[13] ^= holder.tid.data[9];
+      a[14] ^= holder.tid.data[10];
+      a[15] ^= holder.tid.data[11];
+
+      serializer.write_octet_array(a, 16);
+    }
   }
   break;
 
   case PRIORITY: {
-    serializer << attribute.priority;
+    serializer << holder.attribute.priority;
   }
   break;
 
@@ -452,13 +558,18 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
     break;
 
   case FINGERPRINT: {
-    serializer << attribute.fingerprint;
+    serializer << holder.attribute.fingerprint;
   }
   break;
 
   case ICE_CONTROLLED:
   case ICE_CONTROLLING: {
-    serializer << attribute.ice_tie_breaker;
+    serializer << holder.attribute.ice_tie_breaker;
+  }
+  break;
+
+  case GUID_PREFIX: {
+    serializer.write_octet_array(holder.attribute.guid_prefix, sizeof(holder.attribute.guid_prefix));
   }
   break;
 
@@ -494,7 +605,7 @@ bool TransactionId::operator!=(const TransactionId& other) const
 
 void Message::generate_transaction_id()
 {
-  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
+  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
 }
 
 void Message::clear_transaction_id()
@@ -618,7 +729,7 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
   block->wr_ptr(block->base() + HEADER_SIZE + length_for_message_integrity() - 24);
 
   // Compute the SHA1.
-  TheSecurityRegistry->fix_empty_default()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
+  TheSecurityRegistry->builtin_config()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
 
   // Write the correct length.
   block->wr_ptr(block->base() + 2);
@@ -744,6 +855,18 @@ bool Message::has_use_candidate() const
   return false;
 }
 
+bool Message::get_guid_prefix(DCPS::GuidPrefix_t& guid_prefix) const
+{
+  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+    if (pos->type == STUN::GUID_PREFIX) {
+      std::memcpy(guid_prefix, pos->guid_prefix, sizeof(guid_prefix));
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool operator>>(DCPS::Serializer& serializer, Message& message)
 {
   ACE_UINT16 message_type;
@@ -791,8 +914,9 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
 
   while (serializer.length() != 0) {
     Attribute attribute;
+    AttributeHolder holder(attribute, message.transaction_id);
 
-    if (!(serializer >> attribute)) {
+    if (!(serializer >> holder)) {
       return false;
     }
 
@@ -848,7 +972,8 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
       const_cast<Attribute&>(attribute).fingerprint = message.compute_fingerprint();
     }
 
-    serializer << attribute;
+    ConstAttributeHolder holder(attribute, message.transaction_id);
+    serializer << holder;
   }
 
   return true;

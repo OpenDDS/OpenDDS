@@ -825,7 +825,7 @@ bool run_test()
   part1_writer.remote_durable_ = true;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
-  message_block_to_sequence (mb_locator, part1_writer.remote_data_[0].data);
+  message_block_to_sequence(mb_locator, part1_writer.remote_data_[0].data);
   if (!sdr2.associate(part1_writer, false /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataReader(reader2) could not associate with writer1\n"));
@@ -983,15 +983,31 @@ bool run_test()
   sdw2.send_data(seq_dw2++);  // send #5
   reactor_wait();
 
-  if (part1.recvd_.disjoint() || part1.recvd_.empty()
-      || part1.recvd_.high() != seq_dw2.previous()
-      || part1.recvd_.low() != SequenceNumber()) {
-    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data\n"));
+  if (part1.recvd_.disjoint()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (disjoint)\n"));
+    return false;
+  }
+
+  if (part1.recvd_.empty()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (empty)\n"));
+    return false;
+  }
+
+  if (part1.recvd_.high() != seq_dw2.previous()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (high)\n"));
+    return false;
+  }
+
+  if (part1.recvd_.low() != SequenceNumber()) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data (low)\n"));
+    return false;
   }
 
   // cleanup
   sdw2.disassociate(reader1);
   sdr2.disassociate(writer1);
+  sdw2.transport_stop();
+  sdr2.transport_stop();
   return true;
 }
 

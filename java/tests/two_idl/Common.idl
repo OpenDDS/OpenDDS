@@ -1,3 +1,7 @@
+// This isn't used as a top-level type in the test, however @topic was added
+// to test that the code generated from this file doesn't conflict with code
+// generated from Message.idl.
+@topic
 struct Quote {
     string line;
 };

@@ -4,13 +4,18 @@
 OpenDDS 3.15 is currently in development, so this list might change.
 
 ### Additions:
-- TODO: Add your features here
+- Support for the C++11 mapping in the CMake module. `-Lc++11` can now be
+  passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`. (#1728)
 
 ### Fixes:
-- TODO: Add your fixes here
+- CMake Module:
+  - Fixed `OPENDDS_TARGET_SOURCES` setting global include paths. (#1741)
+  - Fixed situations requiring C++ source files to be passed to
+    `OPENDDS_TARGET_SOURCES`. (#1741)
 
 ### Notes:
-- TODO: Add your notes here
+- Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake
+  module is now deprecated. (#1741)
 
 ## Version 3.14 of OpenDDS
 OpenDDS 3.14 was released on Mar  5 2020.

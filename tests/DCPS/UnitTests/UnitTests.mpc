@@ -70,6 +70,14 @@ project(*RtpsDuration): dcps_rtpsexe, dcps_test {
   }
 }
 
+project(*RtpsSequenceNumberSet): dcps_rtpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    RtpsSequenceNumberSet.cpp
+  }
+}
+
 project(*GuidGenerator): dcps_rtpsexe, dcps_test {
   exename   = *
 
@@ -104,10 +112,24 @@ project(*BIT_DataReader): dcps_rtps_udp, dcps_default_discovery, dcps_test {
 }
 
 project(*MultiTask): dcpsexe, dcps_test {
-  exename   = *
+  exename = *
 
   Source_Files {
     ut_MultiTask.cpp
+  }
+}
+
+project(*DataSampleHeader): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    DataSampleHeader.cpp
+  }
+}
+
+project(*NetworkConfig): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    NetworkConfig.cpp
   }
 }
 

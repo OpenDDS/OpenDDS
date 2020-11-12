@@ -150,7 +150,11 @@ public:
     return tmp;
   }
 
+#if defined _MSC_VER && _MSC_VER < 1600
+  operator const CharT*() const { return str_; }
+#else
   using Base::operator const CharT*;
+#endif
 };
 
 template <typename CharT>
@@ -210,7 +214,11 @@ public:
   CharT& operator[](FACE::UnsignedLong index) { return str_[index]; }
   CharT operator[](FACE::UnsignedLong index) const { return str_[index]; }
 
+#if defined _MSC_VER && _MSC_VER < 1600
+  operator const CharT*() const { return str_; }
+#else
   using Base::operator const CharT*;
+#endif
 };
 
 template <typename CharT>

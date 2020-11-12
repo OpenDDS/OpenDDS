@@ -12,6 +12,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/TimeTypes.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
@@ -30,14 +31,25 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+// thread status reporting forward
+struct ThreadStatus {
+  ACE_Thread_Mutex lock;
+  OPENDDS_MAP(OPENDDS_STRING, MonotonicTimePoint) map;
+};
+
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
 public virtual RcObject {
+
 public:
 
   explicit ReactorTask(bool useAsyncSend);
   virtual ~ReactorTask();
 
-  virtual int open(void*);
+public:
+  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, OPENDDS_STRING name = "");
+  virtual int open(void* ptr) {
+    return open_reactor_task(ptr);
+  }
   virtual int svc();
   virtual int close(u_long flags = 0);
 
@@ -94,6 +106,11 @@ private:
   ACE_Proactor* proactor_;
   bool          use_async_send_;
   TimerQueueType* timer_queue_;
+
+  // thread status reporting
+  ThreadStatus* thread_status_;
+  TimeDuration timeout_;
+  OPENDDS_STRING name_;
 
   ReactorInterceptor_rch interceptor_;
 };

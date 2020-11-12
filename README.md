@@ -2,7 +2,7 @@
 
 # OpenDDS
 
-[![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
+[![Build Status](https://travis-ci.com/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.com/objectcomputing/OpenDDS)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4647c7248ac14e7bb60c142c626ba574)](https://www.codacy.com/app/OpenDDS/OpenDDS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=objectcomputing/OpenDDS&amp;utm_campaign=Badge_Grade)
 [![Azure DevOps](https://dev.azure.com/opendds/OpenDDS/_apis/build/status/objectcomputing.OpenDDS)](https://dev.azure.com/opendds/OpenDDS/_build/latest?definitionId=1)
@@ -46,9 +46,6 @@ details.
 
 - The OpenDDS Developer's Guide is freely downloadable at:
 http://download.objectcomputing.com/OpenDDS/
-
-- The TAO Developer's Guide book set may also be purchased from
-https://objectcomputing.com/products/tao/tao-developers-guide
 
 - A Doxygen for the latest release is available at
 http://download.opendds.org/doxygen/.
@@ -116,7 +113,10 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
       also downloads the master branch of MPC as is.
   * Can be manually downloaded from:
     * https://github.com/DOCGroup/ACE_TAO/releases
-    * http://download.dre.vanderbilt.edu/
+    * https://download.dre.vanderbilt.edu/
+
+The TAO Developer's Guide book can be requested for free from
+https://objectcomputing.com/products/tao/tao-developers-guide
 
 ### Perl
 
