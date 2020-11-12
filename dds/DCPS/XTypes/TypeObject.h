@@ -1833,10 +1833,10 @@ namespace XTypes {
   bool is_fully_descriptive(const TypeIdentifier& ti);
 
   OpenDDS_Dcps_Export
-  bool is_plain_collection(const TypeIdentifier ti);
+  bool is_plain_collection(const TypeIdentifier& ti);
 
   OpenDDS_Dcps_Export
-  bool has_type_object(const TypeIdentifier ti);
+  bool has_type_object(const TypeIdentifier& ti);
 
   typedef OPENDDS_MAP(TypeIdentifier, TypeObject) TypeMap;
 
