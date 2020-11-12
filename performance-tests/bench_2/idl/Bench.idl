@@ -163,14 +163,20 @@ module Bench {
     const string allocated_scenario_topic_name = "Allocated_Scenario_Config";
     typedef sequence<Config> Configs;
 
-    @topic
-    struct Report {
-      NodeId node_id;
+    struct WorkerReport {
       WorkerId worker_id;
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
       string log;
+    };
+    typedef sequence<WorkerReport> WorkerReports;
+
+    @topic
+    struct Report {
+      NodeId node_id;
+      WorkerReports worker_reports;
+      Builder::PropertySeq properties;
     };
     const string report_topic_name = "Node_Controller_Report";
   };

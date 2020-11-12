@@ -300,19 +300,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       char buffer[10];
 
-      for (int i = 0; i < num_readers; ++i) {
+      int i = 0;
+      for (OPENDDS_VECTOR(DDS::Subscriber_var)::const_iterator it = subscribers.begin(); it != subscribers.end(); ++it) {
+        DDS::Subscriber_var subscriber = *it;
+
         // Create DataReaders
         DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id + ACE_OS::itoa(i, buffer, 10), MSGS_PER_WRITER, reader_done_callback));
 
         DDS::DataReaderQos dr_qos;
-        subscribers[i]->get_default_datareader_qos(dr_qos);
+        subscriber->get_default_datareader_qos(dr_qos);
         dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
         DDS::DataReader_var reader =
-          subscribers[i]->create_datareader(topics[i],
-                                            dr_qos,
-                                            listener,
-                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+          subscriber->create_datareader(topics[i],
+                                        dr_qos,
+                                        listener,
+                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
         if (!reader) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -329,6 +332,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT(" _narrow failed!\n")),
                           -1);
         }
+
+        ++i;
       }
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n", writer_id.c_str()));
@@ -341,11 +346,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         readers_done_cond.wait();
 
       DDS::Duration_t timeout = { 3, 0 };
-      writer->wait_for_acknowledgments(timeout);
+      if (writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+        ACE_DEBUG((LM_INFO, "Writer: wait_for_acknowledgments timed out\n"));
+      }
 
       // Clean-up!
-      for (int i = 0; i < num_readers; ++i) {
-        DDS::DomainParticipant_var s_part = subscribers[i]->get_participant();
+      for (OPENDDS_VECTOR(DDS::Subscriber_var)::const_iterator it = subscribers.begin(); it != subscribers.end(); ++it) {
+        DDS::Subscriber_var subscriber = *it;
+        DDS::DomainParticipant_var s_part = subscriber->get_participant();
         s_part->delete_contained_entities();
         dpf->delete_participant(s_part);
       }

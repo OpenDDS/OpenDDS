@@ -72,9 +72,14 @@ Publisher::~Publisher() {
   }
 }
 
-void Publisher::enable() {
-  publisher_->enable();
-  datawriters_->enable();
+bool Publisher::enable(bool throw_on_error) {
+  bool success = (publisher_->enable() == DDS::RETCODE_OK);
+  if (!success && throw_on_error) {
+    std::stringstream ss;
+    ss << "failed to enable publisher '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+  return success && datawriters_->enable(throw_on_error);
 }
 
 }
