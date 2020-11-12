@@ -26,7 +26,7 @@ protected:
   std::mutex mutex_;
   ACE_Proactor& proactor_;
   bool started_, stopped_;
-  ACE_Time_Value write_period_;
+  ACE_Time_Value set_period_;
   size_t max_count_;
   size_t param_count_;
   DDS::InstanceHandle_t instance_;

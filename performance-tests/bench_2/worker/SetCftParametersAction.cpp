@@ -26,7 +26,7 @@ namespace Bench {
 
   SetCftParametersAction::SetCftParametersAction(ACE_Proactor& proactor)
  : proactor_(proactor), started_(false), stopped_(false)
- , write_period_(1, 0), max_count_(0), set_call_count_(0)
+ , set_period_(1, 0), max_count_(0), set_call_count_(0)
 {
 }
 
@@ -74,7 +74,7 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     double period = 1.0 / write_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    write_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    set_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
   }
 
   // Then check period as double (seconds)
@@ -83,13 +83,13 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     double period = write_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    write_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    set_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
   }
 
   // Finally check period as TimeStamp
   write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
   if (write_period_prop) {
-    write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
+    set_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
   }
 
   handler_.reset(new MemFunHandler<SetCftParametersAction>(&SetCftParametersAction::do_set_expression_parameters, *this));
@@ -101,7 +101,7 @@ void SetCftParametersAction::start() {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO, write_period_);
+    proactor_.schedule_timer(*handler_, nullptr, ZERO, set_period_);
   }
 }
 
