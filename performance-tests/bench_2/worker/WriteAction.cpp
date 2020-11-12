@@ -30,10 +30,11 @@ WriteAction::WriteAction(ACE_Proactor& proactor)
 {
 }
 
-bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
+bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
+  Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) {
 
   std::unique_lock<std::mutex> lock(mutex_);
-  Action::init(config, report, readers, writers);
+  Action::init(config, report, readers, writers, cft_map);
 
   if (writers_by_index_.empty()) {
     std::stringstream ss;

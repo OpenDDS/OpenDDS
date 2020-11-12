@@ -2,7 +2,8 @@
 
 namespace Bench {
 
-bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report, Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map) {
+bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report,
+  Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, const Builder::ContentFilteredTopicMap& cft_map) {
   config_ = &config;
   report_ = &report;
   for (CORBA::ULong j = 0; j < config.readers.length(); ++j) {
@@ -14,6 +15,7 @@ bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report
       return false;
     }
   }
+
   for (CORBA::ULong j = 0; j < config.writers.length(); ++j) {
     auto it = writer_map.find(config.writers[j].in());
     if (it != writer_map.end()) {
@@ -23,6 +25,12 @@ bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report
       return false;
     }
   }
+
+  auto it = cft_map.find(config.content_filtered_topic.in());
+  if (it != cft_map.end()) {
+    content_filtered_topic_ = it->second;
+  }
+  
   return true;
 };
 

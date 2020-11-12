@@ -45,6 +45,7 @@
 #include "WriteAction.h"
 #include "DataReader.h"
 #include "DataWriter.h"
+#include "SetCftParametersAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -217,6 +218,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Bench::ActionManager::Registration
     forward_action_registration("forward", [&](){
       return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor));
+    });
+  Bench::ActionManager::Registration
+    set_cft_parameters_action_registration("set_cft_parameters", [&]() {
+      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(proactor));
     });
 
   // Timestamps used to measure method call durations

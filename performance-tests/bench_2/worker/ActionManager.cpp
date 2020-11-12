@@ -16,7 +16,7 @@ ActionManager::ActionManager(const Bench::ActionConfigSeq& configs, Bench::Actio
       ss << "Invalid action name '" << configs[i].type << "'" << std::flush;
       throw std::runtime_error(ss.str());
     }
-    action->init(configs[i], reports[i], reader_map, writer_map);
+    action->init(configs[i], reports[i], reader_map, writer_map, cft_map);
     actions_.push_back(action);
   }
 }

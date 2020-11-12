@@ -35,6 +35,7 @@ module Bench {
     Builder::PropertySeq params;
     Builder::StringSeq readers;
     Builder::StringSeq writers;
+    string content_filtered_topic;
   };
 
   typedef sequence<ActionConfig> ActionConfigSeq;
