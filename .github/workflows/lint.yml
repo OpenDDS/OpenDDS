@@ -7,11 +7,11 @@ on:
     - cron: '0 1 * * SUN'
 
 env:
-  DDS_ROOT: ${{ github.workspace }}
-  DOC_ROOT: ${{ github.workspace }}/ACE
-  ACE_ROOT: ${{ github.workspace }}/ACE/ACE
-  MPC_ROOT: ${{ github.workspace }}/ACE/MPC
-  TAO_ROOT: ${{ github.workspace }}/ACE/TAO
+  DDS_ROOT: ${{github.workspace}}
+  DOC_ROOT: ${{env.DDS_ROOT}}/ACE_TAO
+  ACE_ROOT: ${{env.DOC_ROOT}}/ACE
+  MPC_ROOT: ${{env.ACE_ROOT}}/MPC
+  TAO_ROOT: ${{env.DOC_ROOT}}/TAO
 
 jobs:
   build:
