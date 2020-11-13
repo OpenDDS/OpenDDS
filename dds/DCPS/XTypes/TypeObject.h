@@ -370,7 +370,9 @@ namespace XTypes {
     EquivalenceKind equiv_kind;
     CollectionElementFlag element_flags;
 
-    PlainCollectionHeader() {}
+    PlainCollectionHeader()
+      : element_flags(0)
+    {}
 
     PlainCollectionHeader(const EquivalenceKind& a_equiv_kind,
                           const CollectionElementFlag& a_element_flags)
@@ -1197,7 +1199,9 @@ namespace XTypes {
     AliasMemberFlag related_flags;
     TypeIdentifier related_type;
 
-    CommonAliasBody() {}
+    CommonAliasBody()
+      : related_flags(0)
+    {}
 
     CommonAliasBody(const AliasMemberFlag& a_related_flags,
                     const TypeIdentifier& a_related_type)
@@ -1241,7 +1245,9 @@ namespace XTypes {
     MinimalAliasHeader header;
     MinimalAliasBody body;
 
-    MinimalAliasType() {}
+    MinimalAliasType()
+      : alias_flags(0)
+    {}
 
     MinimalAliasType(const AliasTypeFlag& a_alias_flags,
                      const MinimalAliasHeader& a_header,
@@ -1464,7 +1470,9 @@ namespace XTypes {
     MinimalEnumeratedHeader header;
     MinimalEnumeratedLiteralSeq literal_seq;
 
-    MinimalEnumeratedType() {}
+    MinimalEnumeratedType()
+      : enum_flags(0)
+    {}
 
     MinimalEnumeratedType(const EnumTypeFlag& a_enum_flags,
                           const MinimalEnumeratedHeader& a_header,
