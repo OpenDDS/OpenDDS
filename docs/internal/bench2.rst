@@ -751,6 +751,7 @@ This is a subset of the options. Use ``--help`` option to see all the options.
     forwards) N seconds from now (absolute time reference)
 
 .. option:: --tag TAG
+
     Specify a tag for which the performance statistics will be printed out
     (and saved to a results file). Multiple instances of this option can be
     specified, each for a single tag.
