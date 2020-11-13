@@ -79,7 +79,7 @@ namespace DCPS {
     /// This accessor is purely for debugging purposes
     long ref_count() const {
 #if defined (ACE_HAS_CPP11)
-      return this->ref_count_.load();
+      return this->ref_count_;
 #else
       return this->ref_count_.value();
 #endif

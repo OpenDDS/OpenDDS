@@ -86,7 +86,7 @@ public:
   long ref_count()
   {
 #if defined (ACE_HAS_CPP11)
-    return this->ref_count_.load();
+    return this->ref_count_;
 #else
     return this->ref_count_.value();
 #endif
