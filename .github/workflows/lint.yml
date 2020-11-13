@@ -8,10 +8,9 @@ on:
 
 env:
   DDS_ROOT: ${{github.workspace}}
-  DOC_ROOT: ${{env.DDS_ROOT}}/ACE_TAO
-  ACE_ROOT: ${{env.DOC_ROOT}}/ACE
-  MPC_ROOT: ${{env.ACE_ROOT}}/MPC
-  TAO_ROOT: ${{env.DOC_ROOT}}/TAO
+  DOC_ROOT: ${{github.workspace}}/ACE_TAO
+  ACE_ROOT: ${{github.workspace}}/ACE_TAO/ACE
+  TAO_ROOT: ${{github.workspace}}/ACE_TAO/TAO
 
 jobs:
   build:
