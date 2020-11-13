@@ -12,7 +12,11 @@
 #include "dds/DdsDcpsTypeSupportExtC.h"
 #include "Definitions.h"
 #include "ace/SString.h"
-#include "ace/Atomic_Op.h"
+#if defined (ACE_HAS_CPP11)
+# include <atomic>
+#else
+# include "ace/Atomic_Op.h"
+#endif
 #include "LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -84,7 +88,11 @@ protected:
   OpenDDS::DCPS::TypeSupport_var type_support_;
 
   /// The number of entities using this topic
+#if defined (ACE_HAS_CPP11)
+    std::atomic<uint32_t> entity_refs_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> entity_refs_;
+#endif
 };
 
 template <typename Topic>

@@ -336,7 +336,7 @@ OpenDDS::DCPS::TcpDataLink::set_release_pending(bool flag)
 bool
 OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 {
-  return this->release_is_pending_.value();
+  return this->release_is_pending_;
 }
 
 bool

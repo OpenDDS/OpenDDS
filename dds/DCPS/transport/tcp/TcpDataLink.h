@@ -12,6 +12,11 @@
 #include "TcpTransport.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
+#if defined (ACE_HAS_CPP11)
+# include <atomic>
+#else
+# include "ace/Atomic_Op.h"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -86,7 +91,11 @@ private:
   ACE_INET_Addr           remote_address_;
   WeakRcHandle<TcpConnection> connection_;
   bool graceful_disconnect_sent_;
+#if defined (ACE_HAS_CPP11)
+  std::atomic<bool> release_is_pending_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
+#endif
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;
   ACE_SYNCH_MUTEX pending_request_acks_lock_;
   PendingRequestAcks pending_request_acks_;

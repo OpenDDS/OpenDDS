@@ -28,7 +28,11 @@
 #include "Sedp.h"
 #include "rtps_export.h"
 
-#include "ace/Atomic_Op.h"
+#if defined (ACE_HAS_CPP11)
+# include <atomic>
+#else
+# include "ace/Atomic_Op.h"
+#endif
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Mcast.h"
 #include "ace/Condition_Thread_Mutex.h"
@@ -95,7 +99,7 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
   // Is Spdp shutting down?
-  bool shutting_down() { return shutdown_flag_.value(); }
+  bool shutting_down() { return shutdown_flag_; }
 
   bool associated() const;
   bool has_discovered_participant(const DCPS::RepoId& guid);
@@ -393,7 +397,11 @@ private:
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
+#if defined (ACE_HAS_CPP11)
+  std::atomic<bool> shutdown_flag_; // Spdp shutting down
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
+#endif
 
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 

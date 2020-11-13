@@ -3076,7 +3076,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
     return;
   }
 
-  if (shutting_down_.value()) {
+  if (shutting_down_) {
     return;
   }
 
@@ -3472,7 +3472,7 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
-  if (shutting_down_.value()) {
+  if (shutting_down_) {
     return;
   }
 

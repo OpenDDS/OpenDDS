@@ -18,6 +18,11 @@
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "TimeTypes.h"
+#if defined (ACE_HAS_CPP11)
+# include <atomic>
+#else
+# include "ace/Atomic_Op.h"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -157,7 +162,11 @@ public:
   DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
+#if defined (ACE_HAS_CPP11)
+  std::atomic<uint32_t> coherent_samples_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
+#endif
 
   /// Is this writer evaluated for owner ?
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;

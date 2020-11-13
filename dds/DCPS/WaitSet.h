@@ -20,7 +20,11 @@
 #include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Thread_Mutex.h"
-#include "ace/Atomic_Op.h"
+#if defined (ACE_HAS_CPP11)
+# include <atomic>
+#else
+# include "ace/Atomic_Op.h"
+#endif
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -52,7 +56,8 @@ public:
 
   WaitSet()
     : lock_(),
-      cond_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic())
+      cond_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic()),
+      waiting_ (false)
   {}
 
   virtual ~WaitSet() {}
@@ -82,8 +87,12 @@ private:
 
   ACE_Recursive_Thread_Mutex lock_;
   ACE_Condition_Recursive_Thread_Mutex cond_;
+#if defined (ACE_HAS_CPP11)
+  std::atomic<bool> waiting_;
+#else
   // Treat as a boolean value.
   ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
+#endif
 
   ConditionSet attached_conditions_;
   ConditionSet signaled_conditions_;

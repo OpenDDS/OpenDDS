@@ -114,7 +114,7 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   using OpenDDS::DCPS::MonotonicTimePoint;
   using OpenDDS::DCPS::MonotonicClock;
 
-  if (waiting_.value()) {
+  if (waiting_) {
     return RETCODE_PRECONDITION_NOT_MET;
   }
 

@@ -8,6 +8,11 @@
 #ifndef OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 #define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 
+#if defined (ACE_HAS_CPP11)
+# include <atomic>
+#else
+# include "ace/Atomic_Op.h"
+#endif
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -171,13 +176,16 @@ protected:
   bool was_dropped() const;
 
 private:
-
   /// Common logic for data_dropped() and data_delivered().
   bool decision_made(bool dropped_by_transport);
   friend class TransportCustomizedElement;
 
   /// Counts the number of outstanding sub-loans.
+#if defined (ACE_HAS_CPP11)
+  std::atomic<unsigned long> sub_loan_count_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;
+#endif
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;
