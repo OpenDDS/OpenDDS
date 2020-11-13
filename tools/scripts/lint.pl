@@ -20,7 +20,9 @@ my $files_only = 0;
 my $help = 0;
 my $list_checks = 0;
 my $list_default_checks = 0;
+my $list_non_default_checks = 0;
 my $all = 0;
+my $alt_root = '';
 
 my $usage_message =
   "usage: lint.pl [-h|--help] | [OPTIONS] [CHECK ...]\n";
@@ -29,28 +31,32 @@ my $usage_message =
 
 my $help_message = $usage_message .
   "\n" .
-  "OpenDDS Source Code Linter\n" .
+  "OpenDDS Repo General Linter\n" .
   "\n" .
-  "CHECK\t\tCheck(s) to run. If no checks are given, then the default checks are run.\n" .
+  "CHECK\t\t\tCheck(s) to run. If no checks are given, then the default checks are run.\n" .
   "\n" .
   "OPTIONS:\n" .
-  "--help | -h\tShow this message\n" .
-  "--debug\t\tPrint script debug information\n" .
-  "--[no-]ace\tRun ACE's fuzz.pl? True by default\n" .
-  "--simple-output\tPrint individual errors as single lines\n" .
-  "--files-only\tJust print the files that failed\n" .
-  "--list | -l\tList all checks\n" .
-  "--default-list\tList all default checks\n" .
-  "--all\t\tRun all checks\n";
+  "--help | -h\t\tShow this message\n" .
+  "--debug\t\t\tPrint script debug information\n" .
+  "--[no-]ace\t\tRun ACE's fuzz.pl? Requires ACE_ROOT. True by default\n" .
+  "--alt-root PATH\tLook at files in PATH instead of DDS_ROOT\n" .
+  "--simple-output\t\tPrint individual errors as single lines\n" .
+  "--files-only\t\tJust print the files that failed\n" .
+  "--list | -l\t\tList all checks\n" .
+  "--list-default\t\tList all default checks\n" .
+  "--list-non-default\tList all non-default checks\n" .
+  "--all | -a\t\tRun all checks\n";
 
 if (!GetOptions(
   'h|help' => \$help,
   'debug' => \$debug,
   'ace!' => \$ace,
+  'alt-root=s' => \$alt_root,
   'simple-output' => \$simple_output,
   'files-only' => \$files_only,
-  'list' => \$list_checks,
-  'default-list' => \$list_default_checks,
+  'l|list' => \$list_checks,
+  'list-default' => \$list_default_checks,
+  'list-non-default' => \$list_non_default_checks,
   'a|all' => \$all,
 )) {
   print STDERR $usage_message;
@@ -61,12 +67,12 @@ if ($help) {
   exit 0;
 }
 
-my $listing_checks = $list_checks || $list_default_checks;
+my $listing_checks = $list_checks || $list_default_checks ||  $list_non_default_checks;
 $all = 1 if $list_checks;
 
 if (not $listing_checks) {
   my @missing_env = ();
-  push(@missing_env, 'DDS_ROOT') if !defined $ENV{'DDS_ROOT'};
+  push(@missing_env, 'DDS_ROOT') if (!defined $ENV{'DDS_ROOT'} && !$alt_root);
   push(@missing_env, 'ACE_ROOT') if (!defined $ENV{'ACE_ROOT'} && $ace);
   if (scalar(@missing_env)) {
     die(join(', ', @missing_env) . " must be defined!");
@@ -74,7 +80,12 @@ if (not $listing_checks) {
 }
 
 my $opendds_checks_failed = 0;
-my $dds_root_len = length($ENV{'DDS_ROOT'});
+
+my $root = $alt_root;
+if (!$root) {
+  $root = $ENV{'DDS_ROOT'};
+}
+my $dds_root_len = length($root);
 
 sub is_elf_file {
   my $full_filename = shift;
@@ -374,7 +385,7 @@ elsif (scalar(@ARGV)) {
 else { # Default
   foreach my $name (keys(%all_checks)) {
     my %check = %{$all_checks{$name}};
-    if (defined $check{default} && !$check{default}) {
+    if ((defined $check{default} && !$check{default}) != $list_non_default_checks) {
       next;
     }
     push(@checks, $name);
@@ -432,6 +443,8 @@ sub process_file {
     || $filename =~ qr@^\.gitmodules$@
     || $filename =~ qr@^tests/googletest/@
     || $filename =~ qr@^tools/rapidjson/@
+    || $filename =~ qr@^ACE_wrappers@
+    || $filename =~ qr@^ACE_TAO@
   );
   my %line_numbers = ();
   my $failed = 0;
@@ -602,7 +615,7 @@ sub process_file {
   }
 }
 
-find({wanted => \&process_file, follow => 0, no_chdir => 1}, "$ENV{'DDS_ROOT'}");
+find({wanted => \&process_file, follow => 0, no_chdir => 1}, $root);
 
 # Run fuzz.pl (from ACE) passing in the list of tests applicable to OpenDDS
 
