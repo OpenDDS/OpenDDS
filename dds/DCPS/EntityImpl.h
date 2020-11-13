@@ -77,16 +77,16 @@ protected:
 
 #if defined (ACE_HAS_CPP11)
   /// The flag indicates the entity is enabled.
-  ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
-
-  /// The flag indicates the entity is being deleted.
-  ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       entity_deleted_;
-#else
-  /// The flag indicates the entity is enabled.
   std::atomic<bool>       enabled_;
 
   /// The flag indicates the entity is being deleted.
   std::atomic<bool>       entity_deleted_;
+#else
+  /// The flag indicates the entity is enabled.
+  ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
+
+  /// The flag indicates the entity is being deleted.
+  ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       entity_deleted_;
 #endif
 
 private:

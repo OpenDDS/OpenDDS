@@ -380,7 +380,7 @@ Spdp::~Spdp()
 void
 Spdp::write_secure_updates()
 {
-  if (shutdown_flag_) {
+  if (shutdown_flag_ == true) {
     return;
   }
 
@@ -778,7 +778,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  if (shutdown_flag_) {
+  if (shutdown_flag_ == true) {
     return;
   }
 

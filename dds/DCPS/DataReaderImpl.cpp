@@ -224,7 +224,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
         OPENDDS_STRING(writer_converter).c_str()));
   }
 
-  if (entity_deleted_.value()) {
+  if (entity_deleted_ == true) {
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
           ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
@@ -485,7 +485,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         OPENDDS_STRING(writer_converter).c_str(),
         writers.length()));
   }
-  if (!this->entity_deleted_.value()) {
+  if (this->entity_deleted_ == false) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 

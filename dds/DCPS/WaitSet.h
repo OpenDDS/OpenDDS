@@ -90,8 +90,7 @@ private:
 #if defined (ACE_HAS_CPP11)
   std::atomic<bool> waiting_;
 #else
-  // Treat as a boolean value.
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;
 #endif
 
   ConditionSet attached_conditions_;

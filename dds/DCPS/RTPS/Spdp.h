@@ -99,7 +99,13 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
   // Is Spdp shutting down?
-  bool shutting_down() { return shutdown_flag_; }
+  bool shutting_down() {
+#if defined (ACE_HAS_CPP11)
+    return shutdown_flag_;
+#else
+    return shutdown_flag_.value();
+#endif
+  }
 
   bool associated() const;
   bool has_discovered_participant(const DCPS::RepoId& guid);
