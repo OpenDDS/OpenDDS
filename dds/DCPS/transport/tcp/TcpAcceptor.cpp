@@ -14,39 +14,36 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-// This can not be inlined since it needs to have the internals of the
-// TcpTransport available in order to call add_ref(), and that
-// gets a bit circular in the dependencies.  Oh well.
-OpenDDS::DCPS::TcpAcceptor::TcpAcceptor
-(TcpTransport* transport_impl)
-  : transport_(transport_impl)
+namespace OpenDDS {
+namespace DCPS {
+
+TcpAcceptor::TcpAcceptor(RcHandle<TcpTransport> transport)
+  : transport_(transport)
 {
   DBG_ENTRY_LVL("TcpAcceptor","TcpAcceptor",6);
 }
 
-OpenDDS::DCPS::TcpAcceptor::~TcpAcceptor()
+TcpAcceptor::~TcpAcceptor()
 {
   DBG_ENTRY_LVL("TcpAcceptor","~TcpAcceptor",6);
+  transport_.reset();
 }
 
-OpenDDS::DCPS::TcpInst&
-OpenDDS::DCPS::TcpAcceptor::get_configuration()
-{
-  return this->transport_->config();
-}
-
-OpenDDS::DCPS::TcpTransport*
-OpenDDS::DCPS::TcpAcceptor::transport()
+RcHandle<TcpTransport>
+TcpAcceptor::transport()
 {
   DBG_ENTRY_LVL("TcpAcceptor","transport",6);
-  return this->transport_;
+  return transport_.lock();
 }
 
 void
-OpenDDS::DCPS::TcpAcceptor::transport_shutdown()
+TcpAcceptor::transport_shutdown()
 {
   DBG_ENTRY_LVL("TcpAcceptor","transport_shutdown",6);
+  transport_.reset();
+}
 
+}
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

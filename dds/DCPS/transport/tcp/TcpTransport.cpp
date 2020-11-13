@@ -23,6 +23,7 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 #include <sstream>
 
@@ -33,7 +34,7 @@ namespace DCPS {
 
 TcpTransport::TcpTransport(TcpInst& inst)
   : TransportImpl(inst)
-  , acceptor_(new TcpAcceptor(this))
+  , acceptor_(new TcpAcceptor(RcHandle<TcpTransport>(this, inc_count())))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
 
