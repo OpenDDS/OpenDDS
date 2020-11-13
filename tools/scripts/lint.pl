@@ -11,28 +11,47 @@ use Encode qw/decode encode FB_CROAK/;
 use Cwd qw/abs_path/;
 use Getopt::Long qw/GetOptions/;
 
+my $line_length_limit = 100;
+
 my $debug = 0;
-my $ace_fuzz = 1;
+my $ace = 1;
 my $simple_output = 0;
+my $files_only = 0;
 my $help = 0;
+my $list_checks = 0;
+my $list_default_checks = 0;
+my $all = 0;
 
 my $usage_message =
-  "usage: lint.pl [-h|--help] | [--debug] [--[no-]ace-fuzz] [--simple-output]\n";
+  "usage: lint.pl [-h|--help] | [OPTIONS] [CHECK ...]\n";
 
-# TODO: Way to define specific checks to do
 # TODO: Way to give arguments to ace fuzz.pl
 
 my $help_message = $usage_message .
   "\n" .
-  "OpenDDS Source Code Linter\n";
-  # TODO Document Arguments
+  "OpenDDS Source Code Linter\n" .
+  "\n" .
+  "CHECK\t\tCheck(s) to run. If no checks are given, then the default checks are run.\n" .
+  "\n" .
+  "OPTIONS:\n" .
+  "--help | -h\tShow this message\n" .
+  "--debug\t\tPrint script debug information\n" .
+  "--[no-]ace\tRun ACE's fuzz.pl? True by default\n" .
+  "--simple-output\tPrint individual errors as single lines\n" .
+  "--files-only\tJust print the files that failed\n" .
+  "--list | -l\tList all checks\n" .
+  "--default-list\tList all default checks\n" .
+  "--all\t\tRun all checks\n";
 
-my @extra_checks_array;
 if (!GetOptions(
-  'debug' => \$debug,
-  'ace-fuzz!' => \$ace_fuzz,
-  'simple-output' => \$simple_output,
   'h|help' => \$help,
+  'debug' => \$debug,
+  'ace!' => \$ace,
+  'simple-output' => \$simple_output,
+  'files-only' => \$files_only,
+  'list' => \$list_checks,
+  'default-list' => \$list_default_checks,
+  'a|all' => \$all,
 )) {
   print STDERR $usage_message;
   exit 1;
@@ -42,14 +61,17 @@ if ($help) {
   exit 0;
 }
 
-my @missing_env = ();
-push(@missing_env, 'DDS_ROOT') if !defined $ENV{'DDS_ROOT'};
-push(@missing_env, 'ACE_ROOT') if (!defined $ENV{'ACE_ROOT'} && $ace_fuzz);
-if (scalar(@missing_env)) {
-  die(join(', ', @missing_env) . " must be defined!");
-}
+my $listing_checks = $list_checks || $list_default_checks;
+$all = 1 if $list_checks;
 
-my %extra_checks = (); # TODO: Populate This
+if (not $listing_checks) {
+  my @missing_env = ();
+  push(@missing_env, 'DDS_ROOT') if !defined $ENV{'DDS_ROOT'};
+  push(@missing_env, 'ACE_ROOT') if (!defined $ENV{'ACE_ROOT'} && $ace);
+  if (scalar(@missing_env)) {
+    die(join(', ', @missing_env) . " must be defined!");
+  }
+}
 
 my $opendds_checks_failed = 0;
 my $dds_root_len = length($ENV{'DDS_ROOT'});
@@ -134,9 +156,11 @@ my %path_conditions = (
   png_file => qr/\.png$/,
   jar_file => qr/\.jar$/,
   gif_file => qr/\.gif$/,
+  ico_file => qr/\.ico$/,
   open_document_file => qr/\.od[gt]$/,
   excel_file => qr/\.xlam$/,
   photoshop_file => qr/\.psd$/,
+  batch_file => qr/\.(cmd|bat)$/,
 );
 
 # <name> => {
@@ -153,9 +177,10 @@ my %path_conditions = (
 #     - If file_matches and line_matches are not defined the file always fails the check.
 #   message => Array of strings to print when a failure happens
 #     - If left out no message is printed
-#   extra => do not run this check unless told to explicitly
+#   default => do not run this check unless told to explicitly. default is true.
+#   ignore => Array of specific file paths to ignore
 # }
-my %checks = (
+my %all_checks = (
 
   gettimeofday => {
     path_matches_all_of => ['cpp_file', 'in_dds_dcps'],
@@ -179,6 +204,7 @@ my %checks = (
       '!tao_idl_gen_file',
       '!old_design_files',
       '!svg_file',
+      '!batch_file',
     ],
     line_matches => qr/\s\n$/,
     message => [
@@ -199,6 +225,11 @@ my %checks = (
       '!make_file',
       '!old_design_files',
       '!mpc_file',
+      '!batch_file',
+    ],
+    ignore => [
+      'tests/DCPS/Crossplatform/test_list.txt',
+      'tests/security/certs/identity/index.txt',
     ],
     line_matches => qr/\t/,
     message => [
@@ -206,44 +237,16 @@ my %checks = (
     ],
   },
 
-  missing_final_newline => {
+  final_newline => {
     path_matches_all_of => [
       'text_file',
       '!in_secattr_config',
       '!in_modeling',
       '!in_old_bench',
-      '!in_java_jms',
       '!p7s_file',
-      '!svg_file',
     ],
     message => [
-      'Text file is missing an endline on the last line'
-    ],
-    file_matches => sub {
-      my $filename = shift;
-      my $full_filename = shift;
-      my $last_line;
-      open(my $fd, $full_filename);
-      while (my $line = <$fd>) {
-        $last_line = $line;
-      }
-      close($fd);
-      if (defined $last_line) {
-        return $last_line !~ /\n$/;
-      }
-      return 0;
-    }
-  },
-
-  redundunt_final_newlines => {
-    message => [
-      'Text file has redundent newlines at the end'
-    ],
-    path_matches_all_of => [
-      'text_file',
-      '!in_modeling',
-      '!p7s_file',
-      '!in_old_bench',
+      'Text file must end with one and only one newline'
     ],
     file_matches => sub {
       my $filename = shift;
@@ -261,22 +264,41 @@ my %checks = (
       }
       close($fd);
 
-      return $count > 0;
+      return $count == 1;
     }
   },
 
-  unicode_line_length => {
+  line_length => {
     # Converts to UTF-32 for the proper length length, checking for valid UTF-8 along the way
     message => [
       'Text file either has extremely long lines or has invalid UTF-8'
     ],
+    default => 0, # TODO: Make Default
     path_matches_any_of => ['cpp_file', 'idl_file'],
     line_matches => sub {
       my $line = shift;
       my $result;
       eval '$result = encode("UTF-32", decode("UTF-8", $line, FB_CROAK), FB_CROAK)';
       print("    decode says: $@") if ($@ && $debug);
-      return $@ || (length($result) / 4) > 150; # TODO: Determine final limit to use
+      return $@ || (length($result) / 4) > $line_length_limit;
+    },
+  },
+
+  utf8 => {
+    # Asserts that all text files are valid UTF-8. Will always be really slow,
+    # so it's not a default check.
+    # TODO: Refactor with line_length and don't run this when line_length will
+    # also run.
+    message => [
+      'Text file has invalid UTF-8'
+    ],
+    default => 0,
+    path_matches_all_of => ['text_file'],
+    line_matches => sub {
+      my $line = shift;
+      eval 'encode("UTF-32", decode("UTF-8", $line, FB_CROAK), FB_CROAK)';
+      print("    decode says: $@") if ($@ && $debug);
+      return $@;
     },
   },
 
@@ -285,10 +307,13 @@ my %checks = (
       'File is empty'
     ],
     path_matches_all_of => ['empty_file'],
+    ignore => [
+      'tests/security/certs/permissions/index.txt',
+      'performance-tests/Bench/tools/plot-all.gp',
+    ],
   },
 
   is_binary => {
-    extra => 1,
     message => [
       'File looks like a binary file'
     ],
@@ -298,6 +323,7 @@ my %checks = (
       '!png_file',
       '!jar_file',
       '!gif_file',
+      '!ico_file',
       '!open_document_file',
       '!old_design_files',
       '!excel_file',
@@ -309,6 +335,7 @@ my %checks = (
     message => [
       'Public macros must be prefixed with OPENDDS or ACE'
     ],
+    default => 0, # TODO: Make Default
     path_matches_all_of => ['cpp_header_file', 'in_dds_dcps'],
     line_matches => sub {
       my $line = shift;
@@ -323,6 +350,43 @@ my %checks = (
     },
   },
 );
+
+sub print_check {
+  my $check = shift;
+  my $file = shift;
+  print $file ("  - $check\n");
+  if (defined $all_checks{$check}->{message}) {
+    my $indent = "    - ";
+    foreach my $line (@{$all_checks{$check}->{message}}) {
+      print $file ("$indent$line\n");
+      $indent = "      ";
+    }
+  }
+}
+
+my @checks = ();
+if ($all) {
+  @checks = keys(%all_checks);
+}
+elsif (scalar(@ARGV)) {
+  @checks = @ARGV;
+}
+else { # Default
+  foreach my $name (keys(%all_checks)) {
+    my %check = %{$all_checks{$name}};
+    if (defined $check{default} && !$check{default}) {
+      next;
+    }
+    push(@checks, $name);
+  }
+}
+
+if ($listing_checks) {
+  foreach my $name (@checks) {
+    print_check($name, *STDOUT);
+  }
+  exit 0;
+}
 
 sub process_path_condition {
   my $path_condition_expr = shift;
@@ -374,13 +438,8 @@ sub process_file {
 
   # Figure Out What Checks To Do For This File
   my @checks_for_this_file = ();
-  while (my ($name, $check_ref) = each (%checks)) {
-    my %check = %{$check_ref};
-
-    # Skip Extra Tests Not Specified
-    if (defined $check{extra} && $check{extra} && !exists $extra_checks{$name}) {
-      next;
-    }
+  foreach my $name (@checks) {
+    my %check = %{$all_checks{$name}};
 
     my $matched = 1;
 
@@ -388,6 +447,7 @@ sub process_file {
       foreach my $path_condition (@{$check{path_matches_all_of}}) {
         if (!process_path_condition($path_condition, $filename, $full_filename)) {
           $matched = 0;
+          last;
         }
       }
     }
@@ -397,9 +457,19 @@ sub process_file {
       foreach my $path_condition (@{$check{path_matches_any_of}}) {
         if (process_path_condition($path_condition, $filename, $full_filename)) {
           $any_matched = 1;
+          last;
         }
       }
       $matched = $matched && $any_matched;
+    }
+
+    if (defined $check{ignore}) {
+      foreach my $path (@{$check{ignore}}) {
+        if ($filename eq $path) {
+          $matched = 0;
+          last;
+        }
+      }
     }
 
     if ($matched) {
@@ -414,10 +484,10 @@ sub process_file {
   foreach my $check (@checks_for_this_file) {
     my $checked = 0;
 
-    if (defined $checks{$check}->{file_matches}) {
+    if (defined $all_checks{$check}->{file_matches}) {
       print("  $check: file_matches\n") if $debug;
       $line_numbers{$check} = [];
-      if ($checks{$check}->{file_matches}->($filename, $full_filename, \$line_numbers{$check})) {
+      if ($all_checks{$check}->{file_matches}->($filename, $full_filename, \$line_numbers{$check})) {
         $failed = 1;
       } else {
         delete $line_numbers{$check};
@@ -425,17 +495,17 @@ sub process_file {
       $checked = 1;
     }
 
-    if (-f $full_filename && defined $checks{$check}->{line_matches}) {
+    if (-f $full_filename && defined $all_checks{$check}->{line_matches}) {
       print("  $check: line_matches\n") if $debug;
-      my $type = ref($checks{$check}->{line_matches});
+      my $type = ref($all_checks{$check}->{line_matches});
       my $check_sub;
       if ($type eq "Regexp") {
         $check_sub = sub {
-          return shift =~ $checks{$check}->{line_matches};
+          return shift =~ $all_checks{$check}->{line_matches};
         };
       }
       elsif ($type eq "CODE") {
-        $check_sub = $checks{$check}->{line_matches};
+        $check_sub = $all_checks{$check}->{line_matches};
       }
       else {
         die("Invalid line_matches type for $check: $type");
@@ -479,18 +549,15 @@ sub process_file {
           }
         }
       }
-    } else {
+    }
+    elsif ($files_only) {
+      print "$filename\n";
+    }
+    else {
       print STDERR "ERROR: $filename has failed the following checks:\n";
       foreach my $check (@checks_for_this_file) {
         if (defined $line_numbers{$check}) {
-          print STDERR ("  - $check\n");
-          if (defined $checks{$check}->{message}) {
-            my $indent = "    - ";
-            foreach my $line (@{$checks{$check}->{message}}) {
-              print STDERR ("$indent$line\n");
-              $indent = "      ";
-            }
-          }
+          print_check($check, *STDERR);
           if (scalar @{$line_numbers{$check}}) {
             print STDERR ("    - Failed on line(s): ");
             # Turn the list into a nice set of ranges
@@ -539,11 +606,9 @@ find({wanted => \&process_file, follow => 0, no_chdir => 1}, "$ENV{'DDS_ROOT'}")
 
 # Run fuzz.pl (from ACE) passing in the list of tests applicable to OpenDDS
 
-my $fuzz = catfile($ENV{'ACE_ROOT'}, 'bin', 'fuzz.pl');
 my $tests = join(',', qw/
 check_for_inline_in_cpp
 check_for_push_and_pop
-check_for_changelog_errors
 check_for_ORB_init
 check_for_refcountservantbase
 /);
@@ -552,9 +617,9 @@ check_for_refcountservantbase
 # check_for_improper_main_declaration
 # check_for_long_file_names
 
-my $ace_fuzz_result = 0;
-if ($ace_fuzz) {
-  $ace_fuzz_result = system("$fuzz -t $tests @ARGV") >> 8;
+my $ace_result = 0;
+if ($ace) {
+  $ace_result = system(catfile($ENV{'ACE_ROOT'}, 'bin', 'fuzz.pl') . " -t $tests") >> 8;
 }
 
-exit(($ace_fuzz_result || $opendds_checks_failed) ? 1 : 0);
+exit(($ace_result || $opendds_checks_failed) ? 1 : 0);
