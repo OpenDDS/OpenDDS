@@ -12,4 +12,3 @@ module M1 {
 #pragma DCPS_DATA_KEY "M1::S1 key"
 
 };
-

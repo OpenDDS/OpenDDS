@@ -55,4 +55,3 @@ TypeSupportRegistry::TypeSupportRegistration::TypeSupportRegistration(DDS::TypeS
 }
 
 }
-

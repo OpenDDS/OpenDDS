@@ -49,4 +49,3 @@ void WorkerSubscriberListener::set_subscriber(Builder::Subscriber& subscriber) {
 }
 
 }
-

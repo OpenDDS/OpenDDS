@@ -40,4 +40,3 @@ void OPENDDS_DCPS_TopicListener_i::on_inconsistent_topic (
   {
     last_status_ = status;
   }
-

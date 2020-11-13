@@ -974,4 +974,3 @@ DCPS_IR_Participant::dump_to_string(const std::string& prefix, int depth) const
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-

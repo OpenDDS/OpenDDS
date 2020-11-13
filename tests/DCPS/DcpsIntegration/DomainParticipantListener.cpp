@@ -132,5 +132,3 @@ void OPENDDS_DCPS_DomainParticipantListener_i::on_sample_lost (
   {
     // Add your implementation here
   }
-
-

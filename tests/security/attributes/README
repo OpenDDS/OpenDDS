@@ -29,4 +29,3 @@ Governance files in the governance directory have been automatically generated u
 
 In the unlikely event you need to build gov_gen, you should be able to simply run g++ to build it:
 g++ -o gov_gen gov_gen.cpp -Wall -pedantic -std=c++11
-

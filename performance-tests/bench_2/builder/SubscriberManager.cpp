@@ -18,4 +18,3 @@ bool SubscriberManager::enable(bool throw_on_error) {
 }
 
 }
-

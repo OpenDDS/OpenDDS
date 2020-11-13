@@ -114,4 +114,3 @@ PublicationProfile::messageSize() const
 }
 
 } // End of namespace Test
-

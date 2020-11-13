@@ -48,7 +48,3 @@ finish and it finally output "test PASSED".
 
 Since it needs special patch for this bug fix, this test case
 can not be added to automated nightly builds.
-
-
-
-

@@ -122,4 +122,3 @@ TestConfig::topicName() const
 {
   return this->topicName_;
 }
-

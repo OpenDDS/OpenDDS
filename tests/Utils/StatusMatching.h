@@ -129,4 +129,3 @@ int wait_match<DDS::DataReader_var>(const DDS::DataReader_var& reader, unsigned 
 }
 
 #endif
-

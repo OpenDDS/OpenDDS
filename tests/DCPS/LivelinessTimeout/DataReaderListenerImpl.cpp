@@ -180,4 +180,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     )
   {
   }
-

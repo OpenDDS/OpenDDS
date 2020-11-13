@@ -136,4 +136,3 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
   IdentityFilter match(data_sample);
   return remove(match, false); // short-circuit evaluation
 }
-

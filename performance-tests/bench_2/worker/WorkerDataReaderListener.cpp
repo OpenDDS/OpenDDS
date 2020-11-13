@@ -394,4 +394,3 @@ bool WorkerDataReaderListener::wait_for_expected_match(const std::chrono::system
 }
 
 }
-

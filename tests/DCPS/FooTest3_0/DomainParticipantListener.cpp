@@ -137,5 +137,3 @@ void DomainParticipantListenerImpl::on_sample_lost (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-
-

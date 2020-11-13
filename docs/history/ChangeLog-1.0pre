@@ -8387,7 +8387,7 @@ Fri Jun  3 18:37:43 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * orbsvcs/orbsvcs/DDS/transport/framework/TransportDefs.h:
 
-          Changed the MAX_SEND_BLOCKS to be ACE_IOV_MAX if 
+          Changed the MAX_SEND_BLOCKS to be ACE_IOV_MAX if
           it is defined.
 
 Fri Jun  3 17:33:34 USMST 2005  Yan Dai  <dai_y@ociweb.com>
@@ -8407,9 +8407,9 @@ Fri Jun  3 16:06:53 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/tests/DDS/DCPS/FooTest3_0/SubDriver.h:
         * orbsvcs/tests/DDS/DCPS/FooTest3_0/run_test.pl:
 
-          Added delay shutdown option to subscriber. 
-          This is to avoid the subscriber disconnect before the 
-          publisher shutdown which might still be sending  
+          Added delay shutdown option to subscriber.
+          This is to avoid the subscriber disconnect before the
+          publisher shutdown which might still be sending
           liveliness messages or unregister messages.
 
 Fri Jun  3 15:12:49 MST 2005  Scott Harris <harris_s@ociweb.com>
@@ -8425,12 +8425,12 @@ Fri Jun  3 14:28:57 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/Service_Participant.inl:
 
           Made shutdown not destroy the poa from the client's
-          orb and made the_poa to get the root poa from the 
+          orb and made the_poa to get the root poa from the
           orb if it's nil.
-          
+
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/subscriber.cpp:
 
-          Made the subscriber pass the client's orb to the 
+          Made the subscriber pass the client's orb to the
           service participant so the framwork can use it.
 
 Fri Jun  3 13:28:49 MST 2005  Scott Harris <harris_s@ociweb.com>
@@ -8441,19 +8441,19 @@ Fri Jun  3 13:28:49 MST 2005  Scott Harris <harris_s@ociweb.com>
         * TAO/orbsvcs/tests/DDS/DCPS/LivelinessTest/run_test.pl:
         * TAO/orbsvcs/tests/DDS/DCPS/LivelinessTest/subscriber.cpp:
         * TAO/orbsvcs/tests/DDS/DCPS/LivelinessTest/README:
-        
+
           Allowed the test to be run with "take" parameter that makes
           it take instead of read samples.
-          
+
 Fri Jun  3 12:57:54 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * orbsvcs/tests/DDS/DCPS/SimpleFooTest/run_test.pl:
         * orbsvcs/tests/DDS/DCPS/SimpleFooTest/obsolete_test.pl:
         * orbsvcs/tests/DDS/DCPS/SimpleFooTest/README:
 
-          Renamed the run_test.pl to obsolete_test.pl and 
+          Renamed the run_test.pl to obsolete_test.pl and
           documented the test is obsolete.
-          
+
 Fri Jun  3 13:12:02 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * orbsvcs/performance-tests/DDS/DCPS/TCPListenerTest/Writer.cpp:
@@ -16702,9 +16702,9 @@ Thu Feb 24 11:19:15 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/publisher.cpp:
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/subscriber.cpp:
-          Fixed the compilation errors since idl module and  
+          Fixed the compilation errors since idl module and
           implementation namespace changes.
-        
+
 Wed Feb 23 17:13:55 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * orbsvcs/orbsvcs/DDS/DCPS/DomainParticipantFactoryImpl.cpp:
@@ -16720,22 +16720,22 @@ Wed Feb 23 17:13:55 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * orbsvcs/orbsvcs/DDS/DCPS/DataWriterImpl.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/DataWriterImpl.h:
-          Implemented a few functions and changed the 
-          remove_associations method signiture since the idl 
+          Implemented a few functions and changed the
+          remove_associations method signiture since the idl
           interface is changed.
 
         * orbsvcs/orbsvcs/DDS/DCPS/DataReaderImpl.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/DataReaderImpl.h:
           Changed the remove_associations method signiture since
           the idl interface is changed.
-         
+
         * orbsvcs/orbsvcs/DdsDcpsDataReaderRemote.idl:
-          Corrected writerTransInfo variable name in the 
+          Corrected writerTransInfo variable name in the
           WriterAssociation struct.
-         
+
         * orbsvcs/tests/DDS/DCPS/FooType/FooType.idl:
           Corrected included DdsDcpsTypeSupportTAO.idl file name.
-          
+
 Tue Feb 22 18:47:21 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * orbsvcs/DDS/DCPSInfoRepo.mpc
@@ -16775,10 +16775,10 @@ Fri Feb 18 12:35:53 MST 2005  Trevor Fields  <fields_t@ociweb.com>
           Updating the idl.
 
 Fri Feb 18 12:00:54 USMST 2005  Yan Dai  <dai_y@ociweb.com>
-        
+
         * orbsvcs/orbsvcs/DdsDcpsTypeSupportTao.idl:
           Changed the interface return type.
-          
+
 Fri Feb 18 11:25:41 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * orbsvcs/orbsvcs/DDS/DCPS/DomainParticipantImpl.cpp
@@ -16795,10 +16795,10 @@ Fri Feb 18 10:40:05 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/DomainParticipantImpl.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/Service_Participant.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/Service_Participant.h:
-          Added template function servant_to_reference and 
-          reference_to_servant in TAO::DCPS namespace to 
+          Added template function servant_to_reference and
+          reference_to_servant in TAO::DCPS namespace to
           reduce duplicate code.
-          
+
 Thu Feb 17 14:31:37 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * orbsvcs/orbsvcs/DdsDcps.mpc
@@ -16818,7 +16818,7 @@ Thu Feb 17 14:31:37 MST 2005  Trevor Fields  <fields_t@ociweb.com>
         * orbsvcs/tests/DDS/DCPS/FooType/FooTypeSupportImpl.h
         * orbsvcs/tests/DDS/DCPS/FooType/footype_export.h
 
-          Adding DcpsFooType library for testing. 
+          Adding DcpsFooType library for testing.
 
 Wed Feb 16 13:13:13 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
@@ -16868,10 +16868,10 @@ Wed Feb 16 12:25:07 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/TopicImpl.h
         * orbsvcs/orbsvcs/DDS/DCPS/TypeSupportImpl.cpp
         * orbsvcs/orbsvcs/DDS/DCPS/TypeSupportImpl.h
-        
-          Renamed the DCPSInfo idl files and the servant files, 
+
+          Renamed the DCPSInfo idl files and the servant files,
           and added the CVS keyword string.
-          Added changeable methods to Qos_Helper and made all  
+          Added changeable methods to Qos_Helper and made all
           entities check if its qos is changeable after enabled.
 
         * orbsvcs/DDS/DCPS_IR_Domain.h
@@ -16890,7 +16890,7 @@ Tue Feb 15 15:42:42 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DCPSInfo.idl:
         * orbsvcs/orbsvcs/DCPSInfoUtils.idl:
           Made the interfaces in TAO::DCPS module.
-        
+
         * orbsvcs/orbsvcs/DDS/DCPS/DataReader.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/DataReader.h:
         * orbsvcs/orbsvcs/DDS/DCPS/DataWriter.cpp:
@@ -16919,7 +16919,7 @@ Tue Feb 15 15:42:42 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/TypeSupport.h:
           Made the servant implementation and the helper class
           in namespace TAO::DCPS.
-          
+
         * orbsvcs/DDS/DCPSInfoRepo.cpp:
         * orbsvcs/DDS/DCPSInfo_i.cpp:
         * orbsvcs/DDS/DCPSInfo_i.h:
@@ -16933,12 +16933,12 @@ Tue Feb 15 15:42:42 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/DDS/DCPS_IR_Subscription.h:
         * orbsvcs/DDS/DCPS_IR_Topic.cpp:
         * orbsvcs/DDS/DCPS_IR_Topic.h:
-          Fixed compilation error after the DCPSInfo idl interfaces 
+          Fixed compilation error after the DCPSInfo idl interfaces
           are changed to be in the TAO::DCPS module.
-          
+
         * orbsvcs/tests/DDS/DCPS/unit/Main.cpp:
         * orbsvcs/tests/DDS/DCPS/unit/domain_ids:
-          Added missing domain_ids file to support test and 
+          Added missing domain_ids file to support test and
           other minor changes in Main.cpp.
 
 Mon Feb 14 17:34:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
@@ -16967,14 +16967,14 @@ Mon Feb 14 17:34:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/TopicDescription.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/TopicDescription.h:
           Updated implementation of Domain components.
-          
+
         * orbsvcs/tests/DDS/DCPS/unit/Main.cpp:
         * orbsvcs/tests/DDS/DCPS/unit/run_test.pl:
         * orbsvcs/tests/DDS/DCPS/unit/README:
           Updated tests and tested against the DCPSInfo server.
 
         * orbsvcs/DDS/DCPSInfo_i.cpp:
-          Fixed a bug in find_topic() method that does not allocate 
+          Fixed a bug in find_topic() method that does not allocate
           memory for out parameter when the topic does not exist.
 
 Sun Feb 13 14:51:04 MST 2005  Trevor Fields  <fields_t@ociweb.com>
@@ -17027,7 +17027,7 @@ Tue Feb  8 11:57:01 MST 2005  Trevor Fields  <fields_t@ociweb.com>
         * orbsvcs/DDS/DCPS_IR_Topic_Description.h:
           Got it to a working state.  It is missing some error checking
           currently.
-        
+
         * orbsvcs/orbsvcs/DCPSDataReader.idl:
         * orbsvcs/orbsvcs/DCPSDataWriter.idl:
         * orbsvcs/orbsvcs/DCPSInfo.idl:
@@ -17035,7 +17035,7 @@ Tue Feb  8 11:57:01 MST 2005  Trevor Fields  <fields_t@ociweb.com>
         * orbsvcs/orbsvcs/DdsDcps.mpc:
           The callback interface for the publications and
           subscriptions.
-        
+
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
         * orbsvcs/tests/DDS/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
@@ -17050,9 +17050,9 @@ Tue Feb  8 11:43:23 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * orbsvcs/orbsvcs/DDS/DCPS/DataWriter.h:
         * orbsvcs/orbsvcs/DDS/DCPS/DataWriter.cpp:
-        Fixed get_offered_incompatible_qos_status method name 
+        Fixed get_offered_incompatible_qos_status method name
         misspelling.
-        
+
 Tue Feb  8 11:18:00 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * orbsvcs/DDS/DdsDcps.mpc:
@@ -17075,7 +17075,7 @@ Tue Feb  8 11:18:00 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/Topic.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/Topic.h:
         Added implementation of Domain components.
-        
+
         * orbsvcs/tests/DDS/DCPS/unit/Main.cpp:
         Added domain interface tests.
 
@@ -17111,19 +17111,19 @@ Tue Feb  1 14:04:38 MST 2005  Trevor Fields  <fields_t@ociweb.com>
           Adding the idl file.
 
 Thu Jan 27 13:04:17 USMST 2005 Yan Dai  <dai_y@ociweb.com>
-    
+
         * orbsvcs/DdsDcpsTopic.idl:
         * orbsvcs/orbsvcs/Topic.h:
         * orbsvcs/orbsvcs/Topic.cpp:
           Added set_qos, get_qos, set_listener and get_listener methods
           to Topic interface.
-        
+
         * orbsvcs/tests/DDS/DCPS/UnitTest.mpc
-          Renamed the project name to follow name convention of orbsvcs 
+          Renamed the project name to follow name convention of orbsvcs
           tests.
-          
+
 Thu Jan 27 11:58:09 USMST 2005 Yan Dai  <dai_y@ociweb.com>
-        
+
         * orbsvcs/DdsDcps.idl:
         * orbsvcs/DdsDcpsDomain.idl:
         * orbsvcs/DdsDcpsInfrastructure.idl:
@@ -17131,10 +17131,10 @@ Thu Jan 27 11:58:09 USMST 2005 Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/DdsDcpsSubscription.idl:
         * orbsvcs/DdsDcpsTopic.idl:
         * orbsvcs/DdsDcps.mpc:
-          Renamed the idl files, moved them from 
+          Renamed the idl files, moved them from
           orbsvcs/orbsvcs/DDS/DCPS directory to the orbsvcs/orbsvcs/ directory
           and made the TAO_DdsDcps library exportable.
-           
+
         * orbsvcs/orbsvcs/DDS/DCPS/dcps_export.h
         * orbsvcs/orbsvcs/DDS/DCPS/DataReader.h:
         * orbsvcs/orbsvcs/DDS/DCPS/DataReader.cpp:
@@ -17156,14 +17156,14 @@ Thu Jan 27 11:58:09 USMST 2005 Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/Topic.cpp:
         * orbsvcs/orbsvcs/TypeSupport.h:
         * orbsvcs/orbsvcs/TypeSupport.cpp:
-          Rename servant files, made the class name prefixed with "TAO_DCPS" and 
+          Rename servant files, made the class name prefixed with "TAO_DCPS" and
           made the class exportable.
-          
+
         * Service_Participant.h:
         * Service_Participant.cpp:
-          Added the Service_Participant singleton to initialize the configuration 
+          Added the Service_Participant singleton to initialize the configuration
           for DDS/DCPS and start/shutdown the DDS service.
-        
+
         * orbsvcs/tests/DDS/DCPS/UnitTest.mpc
         * orbsvcs/tests/DDS/DCPS/Main.cpp
         * orbsvcs/tests/DDS/DCPS/DataReaderListener.h:
@@ -17180,9 +17180,9 @@ Thu Jan 27 11:58:09 USMST 2005 Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/tests/DDS/DCPS/SubscriberListener.cpp:
         * orbsvcs/tests/DDS/DCPS/TopicListener.h:
         * orbsvcs/tests/DDS/DCPS/TopicListener.cpp:
-          Added DDS/DCPS/unit test directory and moved all listener implementations 
+          Added DDS/DCPS/unit test directory and moved all listener implementations
           there.
-          
+
 Mon Jan 24 11:22:01 USMST 2005 2005 Yan Dai  <dai_y@ociweb.com>
 
         * orbsvcs/orbsvcs/DDS/DCPS/DdsDcps.mpc:
@@ -17226,7 +17226,7 @@ Mon Jan 24 11:22:01 USMST 2005 2005 Yan Dai  <dai_y@ociweb.com>
         * orbsvcs/orbsvcs/DDS/DCPS/DDS_Topic_i.h:
         * orbsvcs/orbsvcs/DDS/DCPS/DDS_TypeSupport_i.cpp:
         * orbsvcs/orbsvcs/DDS/DCPS/DDS_TypeSupport_i.h:
-        
+
         Added dcps idl files and implementation starter code.
 
 Local Variables:

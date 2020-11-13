@@ -6,12 +6,12 @@ WARNING: these note may become obsolete and may not be updated.
 
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
+Date:
+DDS version:
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
+Date:
+DDS version:
 
 -----------------------------------------------------------------------------
 Date: 5/17/07
@@ -25,7 +25,7 @@ DCPSInfoRepo.EXE -d domain_ids -ORBEndpoint iiop://RepoHostName:12345
 ./publisher -DCPSInfoRepo corbaloc:iiop:RepoHostName:12345/DCPSInfoRepo
 
 -----------------------------------------------------------------------------
-Date: 5/9/07 
+Date: 5/9/07
 DDS version: 0.12
 The following error message means that the SimpleTcp transport has not been
 built or is not in the library path.
@@ -151,7 +151,7 @@ datawriters and their instances.
 Note: "BITDurationLookupMsec" is "DCPSBitLookupDurationMsec" in OpenDDS 0.8.
 
 Simple answer:
-	don't ask - you do not want to know and it should not impact you.
+  don't ask - you do not want to know and it should not impact you.
 
 The long answer:
 
@@ -197,74 +197,74 @@ Scott
 
 --- Tim's responses to the first few questions - Transport centric view --
 
-> How big is a Chunk? When I set the Chunks and 
-> ChunksAssociationMultiplier values, how much memory does that 
-> allocate?  Is that allocation global, or is it in a per-data 
-> reader/writer basis?  And what do the data reader/writer use the 
+> How big is a Chunk? When I set the Chunks and
+> ChunksAssociationMultiplier values, how much memory does that
+> allocate?  Is that allocation global, or is it in a per-data
+> reader/writer basis?  And what do the data reader/writer use the
 > chunks for?
 
-I dunno about those chunks.  There is a concept of "chunks" used in the 
-Cached_Allocator_With_Overflow<T> and the 
-Dynamic_Cached_Allocator_With_Overflow<T> template classes.  If I recall 
-correctly, these are allocators that attempt to grow bigger when they 
-run out of memory.  These are created by supplying the ctor with a 
-number of initial chunks and the size of one chunk.  Whenever the 
+I dunno about those chunks.  There is a concept of "chunks" used in the
+Cached_Allocator_With_Overflow<T> and the
+Dynamic_Cached_Allocator_With_Overflow<T> template classes.  If I recall
+correctly, these are allocators that attempt to grow bigger when they
+run out of memory.  These are created by supplying the ctor with a
+number of initial chunks and the size of one chunk.  Whenever the
 allocation attempts to grow bigger, it attempts to grow by one chunk.
 
-I just don't know where the Chunks and ChunksAssociationMultiplier 
-(config settings?) get used to tell you which allocator it configures.  
+I just don't know where the Chunks and ChunksAssociationMultiplier
+(config settings?) get used to tell you which allocator it configures.
 And it may be a different "chunk" concept altogether.
 
 >
-> On a write, how many times is the data copied before it gets sent 
+> On a write, how many times is the data copied before it gets sent
 > across the wire?
 
-I'm not sure about what happens before the data is sent to the DDS 
-transport layer (via a TransportInterface::send() or send_control() 
-call), but as far as I recall, it never gets copied within the 
-transport.  Instead, the reference counting on the ACE_Message_Block is 
-used, as well as some other mechanics that implement the concept of the 
-data being "loaned" to the transport.  Once a transport is done with a 
-piece of data (a sample), it returns the loan.  Also, if the loanee 
-tells the transport layer that the loan needs to be returned ASAP (via a 
-TransportInterface::remove_sample() call), the transport will take the 
-appropriate measures to return the loan pronto.  It is during this 
-particular use-case (when the remove_sample() method is called) that the 
-data may, in fact, be copied by the transport.  It really depends on 
-where the data sample currently is "stuck" within the transport.  If a 
-backpressure situation is in effect for the connection, then the data 
-sample may be in the backpressure queue.  If so, then no copy is 
-neccessary as we simply remove the sample from the backpressure queue 
-and return the loan.  However, if the data sample is part of a packet 
-that hasn't been completely sent, then other measures are taken in order 
-to be able to return the loan.  This may include copying the data sample 
-in some cases, and in other cases it may include copying "filler" bytes 
-in place of the data sample.  Which one depends on whether or not any of 
-the data sample in question has been partially sent.  If the data sample 
-has been partially sent, then we need to copy the unsent bytes of the 
-data sample into the packet before we can return the loan.  Otherwise, 
-when none of the data sample's bytes have been sent, we copy filler data 
-into the packet in place of the data sample, and then return the loan.  
+I'm not sure about what happens before the data is sent to the DDS
+transport layer (via a TransportInterface::send() or send_control()
+call), but as far as I recall, it never gets copied within the
+transport.  Instead, the reference counting on the ACE_Message_Block is
+used, as well as some other mechanics that implement the concept of the
+data being "loaned" to the transport.  Once a transport is done with a
+piece of data (a sample), it returns the loan.  Also, if the loanee
+tells the transport layer that the loan needs to be returned ASAP (via a
+TransportInterface::remove_sample() call), the transport will take the
+appropriate measures to return the loan pronto.  It is during this
+particular use-case (when the remove_sample() method is called) that the
+data may, in fact, be copied by the transport.  It really depends on
+where the data sample currently is "stuck" within the transport.  If a
+backpressure situation is in effect for the connection, then the data
+sample may be in the backpressure queue.  If so, then no copy is
+neccessary as we simply remove the sample from the backpressure queue
+and return the loan.  However, if the data sample is part of a packet
+that hasn't been completely sent, then other measures are taken in order
+to be able to return the loan.  This may include copying the data sample
+in some cases, and in other cases it may include copying "filler" bytes
+in place of the data sample.  Which one depends on whether or not any of
+the data sample in question has been partially sent.  If the data sample
+has been partially sent, then we need to copy the unsent bytes of the
+data sample into the packet before we can return the loan.  Otherwise,
+when none of the data sample's bytes have been sent, we copy filler data
+into the packet in place of the data sample, and then return the loan.
 It's something like that anyways.  :-)
 
 >
-> Do the transport queues only live on the sending side, or do they live 
+> Do the transport queues only live on the sending side, or do they live
 > on the receiving side as well?
 
-Within the transport, each connection is represented by a DataLink 
-object.  A DataLink object is always set up for both sending and 
-receiving over the connection.  This is accomplished in the code by 
-having each (connected) DataLink object be associated with its own 
-TransportSendStrategy object and TransportReceiveStrategy object.  The 
-TransportSendStrategy object manages a backpressure queue, for times 
-when there is backpressure encountered while attempting to send over the 
+Within the transport, each connection is represented by a DataLink
+object.  A DataLink object is always set up for both sending and
+receiving over the connection.  This is accomplished in the code by
+having each (connected) DataLink object be associated with its own
+TransportSendStrategy object and TransportReceiveStrategy object.  The
+TransportSendStrategy object manages a backpressure queue, for times
+when there is backpressure encountered while attempting to send over the
 DataLink's connection.
 
-Thus, if I understand your question, the answer is that they "live" on 
-both the sending side and receiving side, but only come into play on the 
-sending side.  Of course, roles could reverse over this particular 
-connection, where the sending side becomes the receiving side, and 
-vice-versa.  It depends on if the connection is used for both sending 
+Thus, if I understand your question, the answer is that they "live" on
+both the sending side and receiving side, but only come into play on the
+sending side.  Of course, roles could reverse over this particular
+connection, where the sending side becomes the receiving side, and
+vice-versa.  It depends on if the connection is used for both sending
 and receiving, or just one or the other.
 
 
@@ -369,7 +369,7 @@ If I have time, I will verify the above.
 > If 100 samples are pending, then the write call blocks for up to 10
 > seconds waiting for an
 > opening in the queue
-> » An opening occurs when a previously written sample is delivered to all
+> An opening occurs when a previously written sample is delivered to all
 > subscribers
 >
 
@@ -441,9 +441,9 @@ That is not necessary.
 Date: 2/8/06
 DDS version: 0.7
 
-> When building DDS I get warnings reporting that the environment variable 
-> OPENDDS_DCPS_TS_FLAGS wasn't found.  I searched the dev guide and saw no 
-> reference to it there.  What's it for and what should it be set to (, or 
+> When building DDS I get warnings reporting that the environment variable
+> OPENDDS_DCPS_TS_FLAGS wasn't found.  I searched the dev guide and saw no
+> reference to it there.  What's it for and what should it be set to (, or
 > should I just ignore it)?
 
 You can safely ignore this.
@@ -768,18 +768,17 @@ samples = 5000 reads = 65 zero_reads =0 samples per read = 76
 INFO: ../../../../DDS/DCPSInfoRepo being killed.
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
+Date:
+DDS version:
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
+Date:
+DDS version:
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
+Date:
+DDS version:
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
-
+Date:
+DDS version:

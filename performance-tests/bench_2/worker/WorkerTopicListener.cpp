@@ -24,4 +24,3 @@ void WorkerTopicListener::set_topic(Builder::Topic& topic) {
 }
 
 }
-

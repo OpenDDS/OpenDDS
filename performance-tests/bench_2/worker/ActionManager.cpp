@@ -64,4 +64,3 @@ ActionManager::Registration::Registration(const std::string& name, const ActionM
 }
 
 }
-

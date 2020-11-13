@@ -36,4 +36,3 @@ bool BuilderProcess::enable_dds_entities(bool throw_on_error) {
 }
 
 }
-

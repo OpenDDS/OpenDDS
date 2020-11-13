@@ -38,4 +38,3 @@ private:
 };
 
 #endif /* _BOUNCINGSHAPEDYNAMICS_HPP */
-

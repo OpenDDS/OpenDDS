@@ -172,4 +172,3 @@ TestBase::create_topic()
 
   return topic;
 }
-

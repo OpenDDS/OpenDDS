@@ -41,4 +41,3 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq) {
 }
 
 }
-
