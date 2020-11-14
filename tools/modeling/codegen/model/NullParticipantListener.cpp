@@ -25,8 +25,7 @@ OpenDDS::Model::NullParticipantListener::~NullParticipantListener()
 void
 OpenDDS::Model::NullParticipantListener::on_inconsistent_topic(
   DDS::Topic_ptr ,
-  const DDS::InconsistentTopicStatus&
-)
+  const DDS::InconsistentTopicStatus&)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -36,8 +35,7 @@ OpenDDS::Model::NullParticipantListener::on_inconsistent_topic(
 
 void
 OpenDDS::Model::NullParticipantListener::on_data_on_readers(
-  DDS::Subscriber_ptr
-)
+  DDS::Subscriber_ptr)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -48,8 +46,7 @@ OpenDDS::Model::NullParticipantListener::on_data_on_readers(
 void
 OpenDDS::Model::NullParticipantListener::on_offered_deadline_missed(
   DDS::DataWriter_ptr ,
-  const DDS::OfferedDeadlineMissedStatus&
-)
+  const DDS::OfferedDeadlineMissedStatus&)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -60,8 +57,7 @@ OpenDDS::Model::NullParticipantListener::on_offered_deadline_missed(
 void
 OpenDDS::Model::NullParticipantListener::on_offered_incompatible_qos(
   DDS::DataWriter_ptr,
-  const DDS::OfferedIncompatibleQosStatus&
-)
+  const DDS::OfferedIncompatibleQosStatus&)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -84,8 +80,7 @@ OpenDDS::Model::NullParticipantListener::on_liveliness_lost(
 void
 OpenDDS::Model::NullParticipantListener::on_publication_matched(
   DDS::DataWriter_ptr ,
-  const DDS::PublicationMatchedStatus&
-)
+  const DDS::PublicationMatchedStatus&)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -96,8 +91,7 @@ OpenDDS::Model::NullParticipantListener::on_publication_matched(
 void
 OpenDDS::Model::NullParticipantListener::on_requested_deadline_missed(
   DDS::DataReader_ptr ,
-  const DDS::RequestedDeadlineMissedStatus&
-)
+  const DDS::RequestedDeadlineMissedStatus&)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,

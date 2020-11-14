@@ -150,7 +150,7 @@ public:
 
   virtual DDS::ReturnCode_t assert_liveliness();
 
-  virtual DDS::ReturnCode_t assert_liveliness_by_participant();
+  DDS::ReturnCode_t assert_liveliness_by_participant();
 
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
