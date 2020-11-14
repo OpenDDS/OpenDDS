@@ -20,7 +20,7 @@
 #include "InfoRepoDiscovery_Export.h"
 
 #include "ace/Thread_Mutex.h"
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include <ace/Atomic_Op_T.h>
@@ -254,7 +254,7 @@ private:
     void shutdown();
 
     CORBA::ORB_var orb_;
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     std::atomic<unsigned long> use_count_;
 #else
     ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> use_count_;

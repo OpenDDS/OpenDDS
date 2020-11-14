@@ -7,7 +7,7 @@
 
 
 #include "dds/Versioned_Namespace.h"
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op.h"
@@ -48,7 +48,7 @@ namespace DCPS {
     RcObject* lock();
     bool set_expire();
   private:
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     std::atomic<long> ref_count_;
 #else
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
@@ -78,7 +78,7 @@ namespace DCPS {
 
     /// This accessor is purely for debugging purposes
     long ref_count() const {
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
       return this->ref_count_;
 #else
       return this->ref_count_.value();
@@ -98,7 +98,7 @@ namespace DCPS {
     {}
 
   private:
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     std::atomic<long> ref_count_;
 #else
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;

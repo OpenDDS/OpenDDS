@@ -8,7 +8,7 @@
 #ifndef DCPS_INSTANCEHANDLE_H
 #define DCPS_INSTANCEHANDLE_H
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op_T.h"
@@ -35,7 +35,7 @@ public:
   DDS::InstanceHandle_t next();
 
 private:
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   std::atomic<int32_t> sequence_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> sequence_;

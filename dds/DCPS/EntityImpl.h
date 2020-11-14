@@ -13,7 +13,7 @@
 #include "Definitions.h"
 #include "transport/framework/TransportConfig_rch.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include <ace/Atomic_Op_T.h>
@@ -75,7 +75,7 @@ protected:
 
   bool get_deleted();
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   /// The flag indicates the entity is enabled.
   std::atomic<bool>       enabled_;
 

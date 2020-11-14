@@ -12,7 +12,7 @@
 #include "TcpTransport.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op.h"
@@ -91,7 +91,7 @@ private:
   ACE_INET_Addr           remote_address_;
   WeakRcHandle<TcpConnection> connection_;
   bool graceful_disconnect_sent_;
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   std::atomic<bool> release_is_pending_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;

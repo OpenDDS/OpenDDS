@@ -41,7 +41,7 @@
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
 #endif
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op_T.h"
@@ -245,7 +245,7 @@ private:
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     std::atomic<bool> shutting_down_;
 #else
     ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutting_down_;

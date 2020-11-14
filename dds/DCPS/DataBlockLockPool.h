@@ -11,7 +11,7 @@
 #include "ace/Lock_Adapter_T.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Containers_T.h"
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op.h"
@@ -54,7 +54,7 @@ private:
   Pool   pool_;
   const unsigned long size_;
   /// Counter used to track which lock to give out next (modulus size_)
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   std::atomic<unsigned long> iterator_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> iterator_;

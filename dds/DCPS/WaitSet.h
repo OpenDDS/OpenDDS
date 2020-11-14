@@ -20,7 +20,7 @@
 #include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Thread_Mutex.h"
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op.h"
@@ -87,7 +87,7 @@ private:
 
   ACE_Recursive_Thread_Mutex lock_;
   ACE_Condition_Recursive_Thread_Mutex cond_;
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   std::atomic<bool> waiting_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;

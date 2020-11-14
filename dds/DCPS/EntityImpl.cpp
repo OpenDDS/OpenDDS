@@ -39,7 +39,7 @@ EntityImpl::set_enabled()
 bool
 EntityImpl::is_enabled() const
 {
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   return this->enabled_;
 #else
   return this->enabled_.value();
@@ -83,7 +83,7 @@ EntityImpl::set_deleted(bool state)
 bool
 EntityImpl::get_deleted()
 {
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   return this->entity_deleted_;
 #else
   return this->entity_deleted_.value();

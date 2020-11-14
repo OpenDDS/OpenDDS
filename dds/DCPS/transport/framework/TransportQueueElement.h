@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 #define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op.h"
@@ -181,7 +181,7 @@ private:
   friend class TransportCustomizedElement;
 
   /// Counts the number of outstanding sub-loans.
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   std::atomic<unsigned long> sub_loan_count_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;

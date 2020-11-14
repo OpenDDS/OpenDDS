@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op_T.h"
@@ -85,7 +85,7 @@ public:
 
   long ref_count()
   {
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     return this->ref_count_;
 #else
     return this->ref_count_.value();
@@ -134,7 +134,7 @@ public:
 
   /// This is needed to know if delete DataReader should fail with
   /// PRECONDITION_NOT_MET because there are outstanding loans.
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     std::atomic<long> zero_copy_cnt_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
@@ -154,7 +154,7 @@ public:
   void operator delete(void* memory, ACE_New_Allocator& pool);
 
 private:
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     std::atomic<long> ref_count_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;

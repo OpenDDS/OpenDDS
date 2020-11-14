@@ -28,7 +28,7 @@
 #include "Sedp.h"
 #include "rtps_export.h"
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 # include <atomic>
 #else
 # include "ace/Atomic_Op.h"
@@ -100,7 +100,7 @@ public:
 
   // Is Spdp shutting down?
   bool shutting_down() {
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
     return shutdown_flag_;
 #else
     return shutdown_flag_.value();
@@ -403,7 +403,7 @@ private:
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
   std::atomic<bool> shutdown_flag_; // Spdp shutting down
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
