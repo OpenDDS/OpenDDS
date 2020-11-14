@@ -199,12 +199,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
-               attribs.local_durable_, remote.durable_);
-
-  if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
-                       sizeof(GuidPrefix_t))) {
-    return AcceptConnectResult(link); // "loopback" connection return link right away
-  }
+               attribs.local_durable_, remote.durable_, attribs.max_sn_);
 
   if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
     return AcceptConnectResult(link);
@@ -241,12 +236,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
-               attribs.local_durable_, remote.durable_);
-
-  if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
-                       sizeof(GuidPrefix_t))) {
-    return AcceptConnectResult(link); // "loopback" connection return link right away
-  }
+               attribs.local_durable_, remote.durable_, attribs.max_sn_);
 
   if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
     return AcceptConnectResult(link);
@@ -280,7 +270,8 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
                                bool local_reliable, bool remote_reliable,
-                               bool local_durable, bool remote_durable)
+                               bool local_durable, bool remote_durable,
+                               SequenceNumber max_sn)
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
@@ -299,7 +290,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 #endif
 
     link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                      local_durable, remote_durable);
+                      local_durable, remote_durable, max_sn);
   }
 }
 

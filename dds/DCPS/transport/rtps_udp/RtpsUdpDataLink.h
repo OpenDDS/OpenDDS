@@ -141,7 +141,8 @@ public:
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
-                  bool local_durable, bool remote_durable);
+                  bool local_durable, bool remote_durable,
+                  SequenceNumber max_sn);
 
   bool check_handshake_complete(const RepoId& local, const RepoId& remote);
 
@@ -404,7 +405,7 @@ private:
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
-               int heartbeat_count, size_t capacity);
+               SequenceNumber max_sn, int heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);

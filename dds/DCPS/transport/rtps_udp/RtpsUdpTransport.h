@@ -99,7 +99,8 @@ private:
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
                     bool local_reliable, bool remote_reliable,
-                    bool local_durable, bool remote_durable);
+                    bool local_durable, bool remote_durable,
+                    SequenceNumber max_sn);
 
 #if defined(OPENDDS_SECURITY)
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)

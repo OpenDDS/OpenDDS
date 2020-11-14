@@ -2583,10 +2583,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         LocalPublicationIter lp = local_publications_.find(writerGuid);
         if (lp != local_publications_.end()) {
           // If the local writer is not fully associated with the reader
-          if (lp->second.remote_expectant_opendds_associations_.insert(guid).second) {
-            // This is a new association
-            lp->second.publication_->association_complete(guid);
-          }
+          lp->second.remote_expectant_opendds_associations_.insert(guid);
         }
       }
     }
@@ -2884,17 +2881,11 @@ Sedp::is_expectant_opendds(const GUID_t& endpoint) const
 }
 
 void
-Sedp::association_complete(const RepoId& localId,
-                           const RepoId& remoteId)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  association_complete_i(localId, remoteId);
-}
-
-void
 Sedp::association_complete_i(const RepoId& localId,
                              const RepoId& remoteId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DEBUG: Sedp::association_complete_i local %C remote %C\n"),
@@ -3080,12 +3071,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
     return;
   }
 
-  if (is_reliable()) {
-    // Message from transport.  Get the lock.
-    sedp_.association_complete(repo_id_, remote);
-  } else {
-    sedp_.association_complete_i(repo_id_, remote);
-  }
+  sedp_.association_complete_i(repo_id_, remote);
 }
 
 void

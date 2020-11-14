@@ -575,7 +575,8 @@ RtpsUdpDataLink::make_reservation(const RepoId& rpi,
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
-                            bool local_durable, bool remote_durable)
+                            bool local_durable, bool remote_durable,
+                            SequenceNumber max_sn)
 {
   const GuidConverter conv(local_id);
 
@@ -609,7 +610,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
           heartbeat_counts_.erase(hbc_it);
         }
         RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable,
-                                                     hb_start, multi_buff_.capacity());
+                                                     max_sn, hb_start, multi_buff_.capacity());
         rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
       RtpsWriter_rch writer = rw->second;
@@ -1444,12 +1445,13 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     return false;
   }
 
+  SequenceNumber seq;
+  seq.setValue(data.writerSN.high, data.writerSN.low);
+
   bool on_start = false;
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end()) {
     const WriterInfo_rch& info = wi->second;
-    SequenceNumber seq;
-    seq.setValue(data.writerSN.high, data.writerSN.low);
 
     if (info->first_activity_) {
       on_start = true;
@@ -1522,7 +1524,6 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       }
       info->recvd_.insert(seq);
       link->receive_strategy()->do_not_withhold_data_from(id_);
-      info->first_delivered_data_ = false;
     }
 
     if (info->should_nack() ||
@@ -1645,8 +1646,7 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
         }
       }
     } else {
-      info->recvd_.insert(base, gap.gapList.numBits,
-                               gap.gapList.bitmap.get_buffer());
+      info->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
     }
 
     link->deliver_held_data(id_, info, durable_);
@@ -3949,9 +3949,9 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 }
 
 RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id,
-                                        bool durable, int heartbeat_count, size_t capacity)
+                                        bool durable, SequenceNumber max_sn, int heartbeat_count, size_t capacity)
  : send_buff_(make_rch<SingleSendBuffer>(capacity, ONE_SAMPLE_PER_PACKET))
- , max_sn_(SequenceNumber::ZERO())
+ , max_sn_(max_sn == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ? SequenceNumber::ZERO() : max_sn)
  , link_(link)
  , id_(id)
  , durable_(durable)

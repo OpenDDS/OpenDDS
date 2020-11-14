@@ -289,38 +289,16 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
     // Have we already received an association_complete() callback?
-    if (assoc_complete_readers_.count(remote_id)) {
-      if (DCPS_debug_level) {
-        const GuidConverter writer_conv(publication_id_);
-        const GuidConverter converter(remote_id);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
-                   ACE_TEXT("writer %C found assoc_complete_reader %C, continue with association_complete_i\n"),
-                   OPENDDS_STRING(writer_conv).c_str(),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-      assoc_complete_readers_.erase(remote_id);
-      association_complete_i(remote_id);
-
-      // Add to pending_readers_ -> pending means we are waiting
-      // for the association_complete() callback.
-
-    } else if (OpenDDS::DCPS::insert(pending_readers_, remote_id) == -1) {
+    if (DCPS_debug_level) {
+      const GuidConverter writer_conv(publication_id_);
       const GuidConverter converter(remote_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::transport_assoc_done: ")
-                 ACE_TEXT("failed to mark %C as pending.\n"),
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+                 ACE_TEXT("writer %C reader %C calling association_complete_i\n"),
+                 OPENDDS_STRING(writer_conv).c_str(),
                  OPENDDS_STRING(converter).c_str()));
-
-    } else {
-      if (DCPS_debug_level) {
-        const GuidConverter converter(remote_id);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
-                   ACE_TEXT("marked %C as pending.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
     }
+    association_complete_i(remote_id);
 
   } else {
     // In the current implementation, DataWriter is always active, so this
@@ -332,9 +310,6 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                  ACE_TEXT("ERROR: DataWriter (%C) should always be active in current implementation\n"),
                  OPENDDS_STRING(conv).c_str()));
     }
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->association_complete(domain_id_, dp_id_,
-                                publication_id_, remote_id);
   }
 }
 
@@ -377,45 +352,6 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
   }
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
-}
-
-void
-DataWriterImpl::association_complete(const RepoId& remote_id)
-{
-  DBG_ENTRY_LVL("DataWriterImpl", "association_complete", 6);
-
-  if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
-  }
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-  if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-    if (DCPS_debug_level) {
-      GuidConverter writer_converter(this->publication_id_);
-      GuidConverter reader_converter(remote_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-                 ACE_TEXT("bit %d local %C did not find pending reader: %C ")
-                 ACE_TEXT("defer association_complete_i until add_association resumes\n"),
-                 is_bit_,
-                 OPENDDS_STRING(writer_converter).c_str(),
-                 OPENDDS_STRING(reader_converter).c_str()));
-    }
-    // Not found in pending_readers_, defer calling association_complete_i()
-    // until add_association() resumes and sees this ID in assoc_complete_readers_.
-    assoc_complete_readers_.insert(remote_id);
-
-  } else {
-    association_complete_i(remote_id);
-  }
 }
 
 void
@@ -660,17 +596,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         ++ rds_len;
         rds.length(rds_len);
         rds [rds_len - 1] = readers[i];
-
-      } else if (OpenDDS::DCPS::remove(pending_readers_, readers[i]) == 0) {
-        ++ rds_len;
-        rds.length(rds_len);
-        rds [rds_len - 1] = readers[i];
-
-        GuidConverter converter(readers[i]);
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_associations: ")
-                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
-                   OPENDDS_STRING(converter).c_str()));
       }
 
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
@@ -843,12 +768,10 @@ void DataWriterImpl::remove_all_associations()
 
   OpenDDS::DCPS::ReaderIdSeq readers;
   CORBA::ULong size;
-  CORBA::ULong num_pending_readers;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
-    num_pending_readers = static_cast<CORBA::ULong>(pending_readers_.size());
-    size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
+    size = static_cast<CORBA::ULong>(readers_.size());
     readers.length(size);
 
     RepoIdSet::iterator itEnd = readers_.end();
@@ -856,19 +779,6 @@ void DataWriterImpl::remove_all_associations()
 
     for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
-    }
-
-    itEnd = pending_readers_.end();
-
-    for (RepoIdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
-      readers[i ++] = *it;
-    }
-
-    if (num_pending_readers > 0) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
-                 ACE_TEXT("%d subscribers were pending and never fully associated.\n"),
-                 num_pending_readers));
     }
   }
 
