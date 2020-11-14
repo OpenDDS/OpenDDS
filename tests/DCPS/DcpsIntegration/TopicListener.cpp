@@ -35,8 +35,7 @@ OPENDDS_DCPS_TopicListener_i::~OPENDDS_DCPS_TopicListener_i (void)
 
 void OPENDDS_DCPS_TopicListener_i::on_inconsistent_topic (
     ::DDS::Topic_ptr ,
-    const ::DDS::InconsistentTopicStatus & status
-  )
+    const ::DDS::InconsistentTopicStatus & status)
   {
     last_status_ = status;
   }
