@@ -2884,8 +2884,6 @@ void
 Sedp::association_complete_i(const RepoId& localId,
                              const RepoId& remoteId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DEBUG: Sedp::association_complete_i local %C remote %C\n"),
@@ -3071,7 +3069,12 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
     return;
   }
 
-  sedp_.association_complete_i(repo_id_, remote);
+  if (is_reliable()) {
+    ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
+    sedp_.association_complete_i(repo_id_, remote);
+  } else {
+    sedp_.association_complete_i(repo_id_, remote);
+  }
 }
 
 void

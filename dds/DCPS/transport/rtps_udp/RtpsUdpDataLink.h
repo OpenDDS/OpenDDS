@@ -62,6 +62,7 @@ class RtpsUdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
+typedef RcHandle<TransportClient> TransportClient_rch;
 
 struct SeqReaders {
   SequenceNumber seq;
@@ -139,12 +140,11 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
-  void associated(const RepoId& local, const RepoId& remote,
+  bool associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
-                  SequenceNumber max_sn);
-
-  bool check_handshake_complete(const RepoId& local, const RepoId& remote);
+                  SequenceNumber max_sn,
+                  const TransportClient_rch& client);
 
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
@@ -420,7 +420,6 @@ private:
     size_t reader_count() const;
     int inc_heartbeat_count();
 
-    bool is_reader_handshake_done(const RepoId& id) const;
     void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
     TransportQueueElement* customize_queue_element_helper(TransportQueueElement* element,
                                                           bool requires_inline_qos,
@@ -484,7 +483,6 @@ private:
     bool remove_writer(const RepoId& id);
     size_t writer_count() const;
 
-    bool is_writer_handshake_done(const RepoId& id) const;
     bool should_nack_durable(const WriterInfo_rch& info);
     bool should_nack_fragments(const RcHandle<RtpsUdpDataLink>& link,
                                const WriterInfo_rch& info);

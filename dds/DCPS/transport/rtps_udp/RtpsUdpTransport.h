@@ -95,12 +95,13 @@ private:
 
   RtpsUdpDataLink_rch make_datalink(const GuidPrefix_t& local_prefix);
 
-  void use_datalink(const RepoId& local_id,
+  bool use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable,
-                    SequenceNumber max_sn);
+                    SequenceNumber max_sn,
+                    const TransportClient_rch& client);
 
 #if defined(OPENDDS_SECURITY)
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)

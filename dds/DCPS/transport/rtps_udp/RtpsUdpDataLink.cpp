@@ -572,17 +572,18 @@ RtpsUdpDataLink::make_reservation(const RepoId& rpi,
   return DataLink::make_reservation(rpi, lsi, trl, reliable);
 }
 
-void
+bool
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable,
-                            SequenceNumber max_sn)
+                            SequenceNumber max_sn,
+                            const TransportClient_rch& client)
 {
   const GuidConverter conv(local_id);
 
   if (!local_reliable) {
     if (conv.isReader()) {
-      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, readers_lock_, true);
       WriterToSeqReadersMap::iterator i = writer_to_seq_best_effort_readers_.find(remote_id);
       if (i == writer_to_seq_best_effort_readers_.end()) {
         writer_to_seq_best_effort_readers_.insert(WriterToSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
@@ -590,15 +591,16 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
         i->second.readers.insert(local_id);
       }
     }
-    return;
+    return true;
   }
 
+  bool associated = true;
   bool enable_heartbeat = false;
   bool enable_replies = false;
 
   if (conv.isWriter()) {
     if (remote_reliable) {
-      ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, true);
       // Insert count if not already there.
       RtpsWriterMap::iterator rw = writers_.find(local_id);
       if (rw == writers_.end()) {
@@ -614,9 +616,11 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
         rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
       RtpsWriter_rch writer = rw->second;
-      enable_heartbeat = true;
+      add_on_start_callback(client, remote_id);
       g.release();
       writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable));
+      associated = false;
+      enable_heartbeat = true;
     } else {
       invoke_on_start_callbacks(local_id, remote_id, true);
     }
@@ -628,7 +632,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
     }
     if (remote_reliable) {
-      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, readers_lock_, true);
       RtpsReaderMap::iterator rr = readers_.find(local_id);
       if (rr == readers_.end()) {
         pending_reliable_readers_.erase(local_id);
@@ -638,9 +642,11 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
       RtpsReader_rch reader = rr->second;
       readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
-      enable_replies = true;
+      add_on_start_callback(client, remote_id);
       g.release();
       reader->add_writer(make_rch<WriterInfo>(remote_id));
+      associated = false;
+      enable_replies = true;
     } else {
       invoke_on_start_callbacks(local_id, remote_id, true);
     }
@@ -652,37 +658,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   if (enable_replies) {
     heartbeat_reply_.enable(normal_heartbeat_response_delay_);
   }
-}
 
-bool
-RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
-                                          const RepoId& remote_id)
-{
-  const GuidConverter conv(local_id);
-  if (conv.isWriter()) {
-    RtpsWriter_rch writer;
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
-      RtpsWriterMap::iterator rw = writers_.find(local_id);
-      if (rw == writers_.end()) {
-        return true; // not reliable, no handshaking
-      }
-      writer = rw->second;
-    }
-    return writer->is_reader_handshake_done(remote_id);
-  } else if (conv.isReader()) {
-    RtpsReader_rch reader;
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
-      RtpsReaderMap::iterator rr = readers_.find(local_id);
-      if (rr == readers_.end()) {
-        return true; // not reliable, no handshaking
-      }
-      reader = rr->second;
-    }
-    return reader->is_writer_handshake_done(remote_id);
-  }
-  return false;
+  return associated;
 }
 
 void
@@ -1902,22 +1879,6 @@ RtpsUdpDataLink::RtpsWriter::reader_count() const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
   return remote_readers_.size();
-}
-
-bool
-RtpsUdpDataLink::RtpsWriter::is_reader_handshake_done(const RepoId& id) const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  ReaderInfoMap::const_iterator iter = remote_readers_.find(id);
-  return iter != remote_readers_.end() && preassociation_readers_.count(iter->second) == 0;
-}
-
-bool
-RtpsUdpDataLink::RtpsReader::is_writer_handshake_done(const RepoId& id) const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  WriterInfoMap::const_iterator iter = remote_writers_.find(id);
-  return iter != remote_writers_.end() && !iter->second->first_activity_;
 }
 
 bool
