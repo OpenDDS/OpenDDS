@@ -19,6 +19,8 @@ my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
 
+my $config_file = @ARGV[0];
+
 $test->{dcps_debug_level} = 0;
 $test->{dcps_transport_debug_level} = 0;
 $test->{add_transport_config} = 0;
@@ -29,7 +31,7 @@ my $is_rtps_disc = 1;
 
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log") unless $is_rtps_disc;
 
-$test->process("worker", "worker", "./configs/simple_action_content_filtered_topics_config.json");
+$test->process("worker", "worker", $config_file);
 
 $test->start_process("worker");
 
