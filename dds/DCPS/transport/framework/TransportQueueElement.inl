@@ -67,10 +67,8 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
   // count for now. Ideally we would like to prevent the count from
   // falling below 0 and opening up this assert.
   // assert (new_count > 0);
-    return false;
-  } else {
-    throw std::logic_error("TransportQueueElement::decision_made sub_loan_count_ is already 0");
   }
+  return false;
 }
 
 ACE_INLINE
