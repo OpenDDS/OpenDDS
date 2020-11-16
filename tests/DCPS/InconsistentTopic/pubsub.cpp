@@ -18,7 +18,6 @@
 using namespace Messenger;
 using namespace std;
 
-
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try
     {
@@ -96,7 +95,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
       // At this point the participants and topics exist but have not
       // been discovered since there are no readers or writers.
-
       DDS::Subscriber_var sub1 =
         p1->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                               DDS::SubscriberListener::_nil(),
@@ -116,7 +114,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       // Wait for p2 to see p1's datareader.
-
       for (;;) {
         DDS::SubscriptionBuiltinTopicDataSeq sub_data;
         DDS::SampleInfoSeq infos;
@@ -129,13 +126,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
          }
        }
 
+      DDS::Publisher_var pub2 =
+        p2->create_publisher(PUBLISHER_QOS_DEFAULT,
+                             DDS::PublisherListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil(pub2.in())) {
+        cerr << "ERROR: Failed to publisher." << endl;
+        exit(1);
+      }
+
+      DDS::DataWriter_var dw2 = pub2->create_datawriter(topic2.in(),
+                                                        DATAWRITER_QOS_DEFAULT,
+                                                        DDS::DataWriterListener::_nil(),
+                                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil(dw2.in())) {
+        cerr << "ERROR: create_datawriter failed." << endl;
+        exit(1);
+      }
+
       // At this point, p2 should have an inconsistent topic and p1
       // will not.
-
       DDS::InconsistentTopicStatus status;
-      DDS::ReturnCode_t retcode;
 
-      retcode = topic1->get_inconsistent_topic_status(status);
+      DDS::ReturnCode_t retcode = topic1->get_inconsistent_topic_status(status);
       if (retcode != DDS::RETCODE_OK) {
         cerr << "ERROR: not able to retrieve topic status." << endl;
         exit(1);
@@ -163,6 +176,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         test_error = true;
       }
 
+      // At this point dr1 should not have a subscription matched
+      DDS::SubscriptionMatchedStatus sub_status;
+      retcode = dr1->get_subscription_matched_status(sub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve subscription matched status from dr1." << endl;
+        exit(1);
+      }
+      if (sub_status.total_count != 0) {
+        cerr << "ERROR: (alpha) datareader 1 total_count should be 0 but is " << sub_status.total_count << endl;
+        test_error = true;
+      }
+      if (sub_status.total_count_change != 0) {
+        cerr << "ERROR: (alpha) datareader 1 total_count_change should be 0 but is " << sub_status.total_count_change << endl;
+        test_error = true;
+      }
+
       DDS::Subscriber_var sub2 =
         p2->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                               DDS::SubscriberListener::_nil(),
@@ -182,11 +211,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       // Wait for p1 to see p2's datareader.
-
       for (;;) {
         DDS::SubscriptionBuiltinTopicDataSeq sub_data;
         DDS::SampleInfoSeq infos;
-        DDS::ReturnCode_t ret = bit_dr1->read(sub_data, infos, 1, DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+        const DDS::ReturnCode_t ret = bit_dr1->read(sub_data, infos, 1, DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
         if (ret == DDS::RETCODE_OK) {
           break;
         } else {
@@ -220,6 +248,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
       if (status.total_count_change != 0) {
         cerr << "ERROR: (beta) participant 2 total_count_change should be 0 but is " << status.total_count_change << endl;
+        test_error = true;
+      }
+
+      // At this point dr1 should not have a subscription matched because there is no
+      // datawriter for topic1, but dr2 should have a subscription matched because dw2
+      // has the same topic as dr2.
+      retcode = dr1->get_subscription_matched_status(sub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve subscription matched status from dr1." << endl;
+        exit(1);
+      }
+      if (sub_status.total_count != 0) {
+        cerr << "ERROR: (beta) datareader 1 total_count should be 0 but is " << sub_status.total_count << endl;
+        test_error = true;
+      }
+      if (sub_status.total_count_change != 0) {
+        cerr << "ERROR: (beta) datareader 1 total_count_change should be 0 but is " << status.total_count_change << endl;
+        test_error = true;
+      }
+      retcode = dr2->get_subscription_matched_status(sub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve subscription matched status from dr2." << endl;
+        exit(1);
+      }
+      if (sub_status.total_count != 1) {
+        cerr << "ERROR: (beta) datareader 2 total_count should be 1 but is " << sub_status.total_count << endl;
+        test_error = true;
+      }
+      if (sub_status.total_count_change != 1) {
+        cerr << "ERROR: (beta) datareader 2 total_count_change should be 1 but is " << sub_status.total_count << endl;
         test_error = true;
       }
 
