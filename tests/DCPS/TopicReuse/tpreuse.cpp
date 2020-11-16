@@ -97,7 +97,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                                   DDS::TopicListener::_nil(),
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      if (!CORBA::is_nil(topic.in())) {
+      if (!CORBA::is_nil(topic3.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_topic another time should failed!\n")),
