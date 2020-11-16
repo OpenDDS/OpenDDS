@@ -16,6 +16,8 @@
 
 #include "MessengerTypeSupportImpl.h"
 
+#include "tests/Utils/WaitForSample.h"
+
 #include <cstdlib>
 #include <iostream>
 
@@ -29,24 +31,6 @@ using namespace std;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 using namespace Messenger;
-
-bool waitForSample(const DataReader_var& dr)
-{
-  ReadCondition_var dr_rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-  WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dr_rc);
-  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
-  ConditionSeq active;
-  ReturnCode_t ret = ws->wait(active, infinite);
-  ws->detach_condition(dr_rc);
-  dr->delete_readcondition(dr_rc);
-  if (ret != RETCODE_OK) {
-    cout << "ERROR: wait(rc) failed" << endl;
-    return false;
-  }
-  return true;
-}
 
 bool waitForPublicationMatched(const DataWriter_var& dw, const int count = 1)
 {
@@ -160,7 +144,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   waitForPublicationMatched(dw, 4); // each writer matches 4 readers
 
   // read durable data from dr
-  if (!waitForSample(dr)) return false;
+  if (!Utils::waitForSample(dr)) return false;
   if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 98)) != 1) {
     cout << "ERROR: take() should have returned a valid durable sample (99)"
          << endl;
@@ -211,12 +195,12 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
   }
 
-  if (!waitForSample(dr)) return false;
+  if (!Utils::waitForSample(dr)) return false;
 
   size_t taken = takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
   if (taken == 1) {
     cout << "INFO: partial read on DataReader \"dr\"\n";
-    if (!waitForSample(dr)) return false;
+    if (!Utils::waitForSample(dr)) return false;
     taken += takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
   }
 
@@ -225,7 +209,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  if (!waitForSample(sub2_dr2)) return false;
+  if (!Utils::waitForSample(sub2_dr2)) return false;
 
   if (takeSamples(sub2_dr2, bind2nd(greater<CORBA::Long>(), 2)) != 1) {
     cout << "ERROR: take() should have returned one valid sample" << endl;
@@ -311,7 +295,7 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
     if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
   }
 
-  if (!waitForSample(dr)) return false;
+  if (!Utils::waitForSample(dr)) return false;
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   size_t count(0);
   while (true) {
