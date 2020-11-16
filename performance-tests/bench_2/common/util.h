@@ -8,8 +8,29 @@
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 #include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
 #include <ace/SString.h>
+#include "ace/Time_Value.h"
 
 #include "Bench_Common_Export.h"
+
+namespace {
+
+  uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
+    size_t i = 0;
+    uint32_t hash = 0;
+    while (i != length) {
+      hash += key[i++];
+      hash += hash << 10;
+      hash ^= hash >> 6;
+    }
+    hash += hash << 3;
+    hash ^= hash >> 11;
+    hash += hash << 15;
+    return hash;
+  }
+
+  const ACE_Time_Value ZERO_TIME(0, 0);
+
+}
 
 namespace Bench {
 

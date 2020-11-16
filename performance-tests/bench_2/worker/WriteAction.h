@@ -33,6 +33,9 @@ protected:
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;
+  size_t filter_class_start_value_;
+  size_t filter_class_stop_value_;
+  size_t filter_class_increment_;
 };
 
 }

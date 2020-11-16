@@ -23,6 +23,7 @@ module Bench {
     Builder::TimeStamp created_time;
     Builder::TimeStamp sent_time;
     OctetSeq buffer;
+    unsigned long filter_class;
   };
 
 // ---
@@ -35,7 +36,6 @@ module Bench {
     Builder::PropertySeq params;
     Builder::StringSeq readers;
     Builder::StringSeq writers;
-    string content_filtered_topic;
   };
 
   typedef sequence<ActionConfig> ActionConfigSeq;

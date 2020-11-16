@@ -1,26 +1,7 @@
 #include "SetCftParametersAction.h"
 
 #include "MemFunHandler.h"
-
-namespace {
-
-uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
-  size_t i = 0;
-  uint32_t hash = 0;
-  while (i != length) {
-    hash += key[i++];
-    hash += hash << 10;
-    hash ^= hash >> 6;
-  }
-  hash += hash << 3;
-  hash ^= hash >> 11;
-  hash += hash << 15;
-  return hash;
-}
-
-const ACE_Time_Value ZERO(0, 0);
-
-}
+#include "util.h"
 
 namespace Bench {
 
@@ -36,6 +17,14 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
 
   std::unique_lock<std::mutex> lock(mutex_);
   Action::init(config, report, readers, writers, cft_map);
+
+  auto content_filtered_topic_prop = get_property(config.params, "content_filtered_topic_name", Builder::PVK_STRING);
+  if (content_filtered_topic_prop) {
+    auto it = cft_map.find(static_cast<std::string>(content_filtered_topic_prop->value.string_prop()));
+    if (it != cft_map.end()) {
+      content_filtered_topic_ = it->second;
+    }
+  }
 
   if (!content_filtered_topic_) {
     std::stringstream ss;
@@ -70,27 +59,27 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
   }
 
   // First check frequency as double (seconds)
-  auto write_frequency_prop = get_property(config.params, "write_frequency", Builder::PVK_DOUBLE);
-  if (write_frequency_prop) {
-    double period = 1.0 / write_frequency_prop->value.double_prop();
+  auto set_frequency_prop = get_property(config.params, "set_frequency", Builder::PVK_DOUBLE);
+  if (set_frequency_prop) {
+    double period = 1.0 / set_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
     set_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
   }
 
   // Then check period as double (seconds)
-  auto write_period_prop = get_property(config.params, "write_period", Builder::PVK_DOUBLE);
-  if (write_period_prop) {
-    double period = write_period_prop->value.double_prop();
+  auto set_period_prop = get_property(config.params, "set_period", Builder::PVK_DOUBLE);
+  if (set_period_prop) {
+    double period = set_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
     set_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
   }
 
   // Finally check period as TimeStamp
-  write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
-  if (write_period_prop) {
-    set_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
+  set_period_prop = get_property(config.params, "set_period", Builder::PVK_TIME);
+  if (set_period_prop) {
+    set_period_ = ACE_Time_Value(set_period_prop->value.time_prop().sec, static_cast<suseconds_t>(set_period_prop->value.time_prop().nsec / 1000u));
   }
 
   handler_.reset(new MemFunHandler<SetCftParametersAction>(&SetCftParametersAction::do_set_expression_parameters, *this));
@@ -103,7 +92,7 @@ void SetCftParametersAction::start()
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO, set_period_);
+    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, set_period_);
   }
 }
 

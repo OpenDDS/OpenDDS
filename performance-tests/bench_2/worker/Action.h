@@ -21,7 +21,6 @@ protected:
   Builder::WriterMap writers_by_name_;
   std::vector<std::shared_ptr<Builder::DataReader> > readers_by_index_;
   std::vector<std::shared_ptr<Builder::DataWriter> > writers_by_index_;
-  DDS::ContentFilteredTopic_var content_filtered_topic_;
 };
 
 }

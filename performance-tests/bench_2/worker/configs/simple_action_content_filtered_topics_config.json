@@ -88,21 +88,32 @@
         },
         { "name": "write_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+        },
+		{ "name": "filter_class_start_value",
+          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+        },
+		{ "name": "filter_class_stop_value",
+          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+        },
+		{ "name": "filter_class_increment",
+          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
         }
       ]
     },
 	{
 	  "name": "cft_action_01",
       "type": "set_cft_parameters",
-      "content_filtered_topic": "cft_1",
       "params": [
+		{ "name": "content_filtered_topic_name",
+          "value": { "_d": "PVK_STRING", "string_prop": "cft_1" }
+        },
 		{ "name": "max_count",
           "value": { "_d": "PVK_ULL", "ull_prop": 3 }
         },
 		{ "name": "param_count",
           "value": { "_d": "PVK_ULL", "ull_prop": 1 }
         },		
-        { "name": "write_frequency",
+        { "name": "set_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
         }
       ]

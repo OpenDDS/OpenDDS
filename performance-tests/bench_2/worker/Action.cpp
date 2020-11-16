@@ -27,11 +27,6 @@ bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report
     }
   }
 
-  auto it = cft_map.find(config.content_filtered_topic.in());
-  if (it != cft_map.end()) {
-    content_filtered_topic_ = it->second;
-  }
-
   return true;
 };
 

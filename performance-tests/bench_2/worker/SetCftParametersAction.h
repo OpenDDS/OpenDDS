@@ -33,6 +33,7 @@ protected:
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;
   size_t set_call_count_;
+  DDS::ContentFilteredTopic_var content_filtered_topic_;
 };
 
 }
