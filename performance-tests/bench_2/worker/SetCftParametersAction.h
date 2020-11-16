@@ -7,6 +7,7 @@
 #include "BenchTypeSupportImpl.h"
 
 #include <random>
+#include <vector>
 
 namespace Bench {
 
@@ -34,6 +35,8 @@ protected:
   std::mt19937_64 mt_;
   size_t set_call_count_;
   DDS::ContentFilteredTopic_var content_filtered_topic_;
+  Builder::StringSeqSeq acceptable_param_values_;
+  std::vector<int> current_acceptable_param_values_index_;
 };
 
 }

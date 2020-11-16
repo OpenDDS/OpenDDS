@@ -14,15 +14,20 @@ module Builder {
   };
 
   typedef sequence<string> StringSeq;
+  typedef sequence<StringSeq> StringSeqSeq;
 
   typedef sequence<double> DoubleSeq;
 
-  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
+  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_STRING_SEQ, PVK_STRING_SEQ_SEQ, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
   union PropertyValue switch (PropertyValueKind) {
     case PVK_TIME:
       TimeStamp time_prop;
     case PVK_STRING:
       string string_prop;
+    case PVK_STRING_SEQ:
+      StringSeq string_seq_prop;
+    case PVK_STRING_SEQ_SEQ:
+      StringSeqSeq string_seq_seq_prop;
     case PVK_DOUBLE:
       double double_prop;
     case PVK_DOUBLE_SEQ:

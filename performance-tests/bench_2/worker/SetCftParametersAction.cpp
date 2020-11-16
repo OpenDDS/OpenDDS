@@ -58,6 +58,23 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     throw std::runtime_error(ss.str());
   }
 
+  // Acceptable parameter values
+  auto acceptable_param_values_prop = get_property(config.params, "acceptable_param_values", Builder::PVK_STRING_SEQ_SEQ);
+  if (acceptable_param_values_prop) {
+    acceptable_param_values_ = static_cast<Builder::StringSeqSeq>(acceptable_param_values_prop->value.string_seq_seq_prop());
+  }
+
+  if (acceptable_param_values_.length() == 0) {
+    std::stringstream ss;
+    ss << "SetCftParametersAction '" << config.name << "' is missing a valid acceptable_param_values parameter" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+
+  for (size_t i = 0; i < acceptable_param_values_.length(); i++) {
+    current_acceptable_param_values_index_.push_back(0);
+  }
+
+  // Set period
   // First check frequency as double (seconds)
   auto set_frequency_prop = get_property(config.params, "set_frequency", Builder::PVK_DOUBLE);
   if (set_frequency_prop) {
@@ -115,8 +132,7 @@ void SetCftParametersAction::do_set_expression_parameters()
       DDS::StringSeq params(param_count_);
       params.length(param_count_);
       for (size_t i = 0; i < param_count_; i++) {
-        int new_val = mt_();
-        params[i] = std::to_string(new_val).c_str();
+        params[i] = acceptable_param_values_[i][current_acceptable_param_values_index_[i]++];
       }
 
       if (content_filtered_topic_->set_expression_parameters(params) != DDS::RETCODE_OK) {

@@ -43,7 +43,7 @@
             "content_filtered_topics": [
               {
                 "cft_name": "cft_1",
-                "cft_expression": "msg_count > %0",
+                "cft_expression": "filter_class > %0",
                 "cft_parameters": ["2"]
               }
             ]
@@ -115,8 +115,11 @@
         },		
         { "name": "set_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
-        }
-      ]
+        },
+		{ "name": "acceptable_param_values",
+		  "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
+		}
+	  ]
 	}
   ]
 }
