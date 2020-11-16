@@ -6,6 +6,8 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/WaitSet.h"
 
+#include <iostream>
+
 namespace Utils {
 
 inline
@@ -21,7 +23,7 @@ bool waitForSample(const DDS::DataReader_var& dr)
   ws->detach_condition(dr_rc);
   dr->delete_readcondition(dr_rc);
   if (ret != DDS::RETCODE_OK) {
-    cerr << "ERROR: wait(rc) failed" << endl;
+    std::cerr << "ERROR: wait(rc) failed" << std::endl;
     return false;
   }
   return true;
