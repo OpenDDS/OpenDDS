@@ -264,7 +264,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         test_error = true;
       }
       if (sub_status.total_count_change != 0) {
-        cerr << "ERROR: (beta) datareader 1 total_count_change should be 0 but is " << status.total_count_change << endl;
+        cerr << "ERROR: (beta) datareader 1 total_count_change should be 0 but is " << sub_status.total_count_change << endl;
         test_error = true;
       }
       retcode = dr2->get_subscription_matched_status(sub_status);
@@ -278,6 +278,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
       if (sub_status.total_count_change != 1) {
         cerr << "ERROR: (beta) datareader 2 total_count_change should be 1 but is " << sub_status.total_count << endl;
+        test_error = true;
+      }
+
+      // dw2 should be matched only with dr2, so they should be 1
+      DDS::PublicationMatchedStatus pub_status;
+      retcode = dw2->get_publication_matched_status(pub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve publication matched status from dw2." << endl;
+        exit(1);
+      }
+      if (pub_status.total_count != 1) {
+        cerr << "ERROR: (beta) datawriter 2 total_count should be 1 but is " << pub_status.total_count << endl;
+        test_error = true;
+      }
+      if (pub_status.total_count_change != 1) {
+        cerr << "ERROR: (beta) datawriter 2 total_count_change should be 1 but is " << pub_status.total_count_change << endl;
         test_error = true;
       }
 
