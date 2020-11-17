@@ -302,9 +302,10 @@ public:
           mem_sum += it->second->get_mem_usage();
           virtual_mem_sum += it->second->get_virtual_mem_usage();
         }
-        cpu_block->update(cpu_sum);
-        mem_block->update(mem_sum);
-        virtual_mem_block->update(virtual_mem_sum);
+        const auto time = Builder::get_sys_time();
+        cpu_block->update(cpu_sum, time);
+        mem_block->update(mem_sum, time);
+        virtual_mem_block->update(virtual_mem_sum, time);
       }
     });
 
