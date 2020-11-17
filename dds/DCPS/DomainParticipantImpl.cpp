@@ -91,13 +91,12 @@ namespace DCPS {
 
 // Implementation skeleton constructor
 DomainParticipantImpl::DomainParticipantImpl(
-  DomainParticipantFactoryImpl* factory,
+  InstanceHandleGenerator& handle_generator,
   const DDS::DomainId_t& domain_id,
   const DDS::DomainParticipantQos& qos,
   DDS::DomainParticipantListener_ptr a_listener,
   const DDS::StatusMask& mask)
-  : factory_(factory),
-    default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
+  : default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
     default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
     qos_(qos),
@@ -111,6 +110,7 @@ DomainParticipantImpl::DomainParticipantImpl(
     federated_(false),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
+    participant_handles_(handle_generator),
     pub_id_gen_(dp_id_),
     automatic_liveliness_timer_(*this),
     participant_liveliness_timer_(*this)
@@ -240,7 +240,7 @@ DomainParticipantImpl::create_subscriber(
     return DDS::Subscriber::_nil();
   }
 
-  SubscriberImpl* sub = 0 ;
+  SubscriberImpl* sub = 0;
   ACE_NEW_RETURN(sub,
                  SubscriberImpl(participant_handles_.next(),
                                 sub_qos,
