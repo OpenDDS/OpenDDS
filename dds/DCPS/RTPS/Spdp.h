@@ -8,38 +8,36 @@
 #ifndef OPENDDS_RTPS_SPDP_H
 #define OPENDDS_RTPS_SPDP_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcEventHandler.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/PeriodicTask.h"
-#include "dds/DCPS/SporadicTask.h"
-#include "dds/DCPS/MultiTask.h"
-#include "dds/DCPS/JobQueue.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
-#include "dds/DCPS/RTPS/ICE/Ice.h"
-
-#include "RtpsCoreC.h"
 #include "Sedp.h"
 #include "rtps_export.h"
+#include "ICE/Ice.h"
+#include "RtpsCoreC.h"
 
-#include "ace/Atomic_Op.h"
-#include "ace/SOCK_Dgram.h"
-#include "ace/SOCK_Dgram_Mcast.h"
-#include "ace/Condition_Thread_Mutex.h"
-
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-
-#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/MultiTask.h>
+#include <dds/DCPS/JobQueue.h>
+#include <dds/DCPS/NetworkConfigMonitor.h>
+#include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/security/framework/SecurityConfig.h"
+#  include <dds/DCPS/security/framework/SecurityConfig.h>
 #endif
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+
+#include <ace/Atomic_Op.h>
+#include <ace/SOCK_Dgram.h>
+#include <ace/SOCK_Dgram_Mcast.h>
+#include <ace/Condition_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -58,9 +56,10 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
-class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp>
+class OpenDDS_Rtps_Export Spdp
+  : public DCPS::LocalParticipant<Sedp>
 #ifdef OPENDDS_SECURITY
-                               , public ICE::AgentInfoListener
+  , public ICE::AgentInfoListener
 #endif
 {
 public:
@@ -180,9 +179,11 @@ public:
 
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
-                                      Security::DiscoveredParticipantDataKind kind
+    bool always_in_the_clear,
+    Security::DiscoveredParticipantDataKind kind
 #endif
-                                      );
+  );
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
   void remove_discovered_participant_i(DiscoveredParticipantIter iter);
@@ -212,6 +213,10 @@ private:
 
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
+  /// Get this participant's BIT data. user_data may be omitting depending on
+  /// security settings.
+  DDS::ParticipantBuiltinTopicData get_part_bit_data(bool secure) const;
+
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
@@ -223,11 +228,13 @@ private:
   void remove_agent_info(const DCPS::RepoId& local_guid);
 #endif
 
-  struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener
+  struct SpdpTransport
+    : public virtual DCPS::RcEventHandler
+    , public virtual DCPS::NetworkConfigListener
 #ifdef OPENDDS_SECURITY
-        , public ICE::Endpoint
+    , public ICE::Endpoint
 #endif
-{
+  {
     typedef size_t WriteFlags;
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);

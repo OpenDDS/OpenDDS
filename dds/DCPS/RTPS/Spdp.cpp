@@ -10,30 +10,28 @@
 #include "BaseMessageTypes.h"
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
-#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsDiscovery.h"
-
-#include "dds/DdsDcpsGuidC.h"
-
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Qos_Helper.h"
-
 #ifdef OPENDDS_SECURITY
-#include "SecurityHelpers.h"
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
+#  include "SecurityHelpers.h"
 #endif
 
-#include "ace/Reactor.h"
-#include "ace/OS_NS_sys_socket.h" // For setsockopt()
-#include "ace/OS_NS_strings.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Qos_Helper.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/SecurityRegistry.h>
+#endif
+
+#include <dds/DdsDcpsGuidC.h>
+
+#include <ace/Reactor.h>
+#include <ace/OS_NS_sys_socket.h> // For setsockopt()
+#include <ace/OS_NS_strings.h>
 
 #include <cstring>
 #include <stdexcept>
-
-#include "ace/Auto_Ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -112,13 +110,19 @@ namespace {
     attr.plugin_participant_attributes = 0;
     attr.ac_endpoint_properties.length(0);
   }
+
+  inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
+  {
+    return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
+  }
+
 #endif
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
-                       DCPS::RepoId& guid,
-                       const DDS::DomainParticipantQos& qos,
-                       RtpsDiscovery* disco)
+                DCPS::RepoId& guid,
+                const DDS::DomainParticipantQos& qos,
+                RtpsDiscovery* disco)
 {
   bool enable_writers = true;
 
@@ -239,7 +243,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , available_builtin_endpoints_(0)
   , sedp_(guid_, *this, lock_)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
-  , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
+  , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() &&
+    security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
   , identity_handle_(identity_handle)
   , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
@@ -380,7 +385,7 @@ Spdp::write_secure_updates()
   if (shutdown_flag_.value()) { return; }
 
   const Security::SPDPdiscoveredParticipantData pdata =
-    build_local_pdata(Security::DPDK_SECURE);
+    build_local_pdata(false, Security::DPDK_SECURE);
 
   sedp_.write_dcps_participant_secure(pdata, GUID_UNKNOWN);
 }
@@ -611,10 +616,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
-      bool has_security_data = iter->second.pdata_.dataKind == Security::DPDK_ENHANCED ||
-        iter->second.pdata_.dataKind == Security::DPDK_SECURE;
-
-      if (has_security_data == false) {
+      if (!has_security_data(iter->second.pdata_.dataKind)) {
         if (participant_sec_attr_.allow_unauthenticated_participants == false) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
@@ -626,7 +628,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
           match_unauthenticated(guid, iter);
         }
-      } else { // has_security_data == true
+      } else {
         iter->second.identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
         iter->second.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
         iter->second.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
@@ -877,10 +879,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 {
   DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
     {
-      {
-        DDS::BuiltinTopicKey_t() /*ignored*/,
-        qos_.user_data
-      },
+      get_part_bit_data(true),
       identity_token_,
       permissions_token_,
       qos_.property,
@@ -1003,7 +1002,11 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   }
 
   if (DCPS::security_debug.auth_debug) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication for %C from_discovery=%d have_remote_token=%d auth_state=%d handshake_state=%d\n", OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str(), from_discovery, !(dp.remote_auth_request_token_ == DDS::Security::Token()), dp.auth_state_, dp.handshake_state_));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication "
+      "for %C from_discovery=%d have_remote_token=%d auth_state=%d handshake_state=%d\n",
+      OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str(),
+      from_discovery, !(dp.remote_auth_request_token_ == DDS::Security::Token()),
+      dp.auth_state_, dp.handshake_state_));
   }
 
   if (!from_discovery && dp.handshake_state_ != DCPS::HANDSHAKE_STATE_WAITING_FOR_TOKEN && dp.handshake_state_ != DCPS::HANDSHAKE_STATE_DONE) {
@@ -1020,8 +1023,9 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se = {"", 0, 0};
 
-  const DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_,
-                                                                              dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
+  const DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(
+    dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_,
+    identity_handle_, dp.identity_token_, guid, se);
 
   dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
   if (dp.have_auth_req_msg_) {
@@ -1134,7 +1138,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DiscoveredParticipant& dp = iter->second;
 
   if (DCPS::security_debug.auth_debug) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message for %C auth_state=%d handshake_state=%d\n", OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str(), dp.auth_state_, dp.handshake_state_));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message "
+      "for %C auth_state=%d handshake_state=%d\n",
+      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str(),
+      dp.auth_state_, dp.handshake_state_));
   }
 
   if (msg.message_identity.sequence_number <= iter->second.handshake_sequence_number_) {
@@ -1901,12 +1908,12 @@ Spdp::is_expectant_opendds(const GUID_t& participant) const
   return is_opendds && ((iter->second.pdata_.participantProxy.opendds_participant_flags.bits & RTPS::PFLAGS_NO_ASSOCIATED_WRITERS) == 0);
 }
 
-ParticipantData_t
-Spdp::build_local_pdata(
+ParticipantData_t Spdp::build_local_pdata(
 #ifdef OPENDDS_SECURITY
-                        Security::DiscoveredParticipantDataKind kind
+  bool always_in_the_clear,
+  Security::DiscoveredParticipantDataKind kind
 #endif
-                        )
+)
 {
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
 
@@ -1939,10 +1946,7 @@ Spdp::build_local_pdata(
     kind,
     { // ParticipantBuiltinTopicDataSecure
       { // ParticipantBuiltinTopicData (security enhanced)
-        { // ParticipantBuiltinTopicData (original)
-          DDS::BuiltinTopicKey_t() /*ignored*/,
-          qos_.user_data
-        },
+        get_part_bit_data(!always_in_the_clear),
         identity_token_,
         permissions_token_,
         qos_.property,
@@ -1955,10 +1959,7 @@ Spdp::build_local_pdata(
     },
 #else
   const SPDPdiscoveredParticipantData pdata = {
-    {
-      DDS::BuiltinTopicKey_t() /*ignored*/,
-      qos_.user_data
-    },
+    get_part_bit_data(false),
 #endif
     { // ParticipantProxy_t
       domain_,
@@ -2315,9 +2316,9 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 {
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
-     outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
+    true, outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
 #endif
-                                                            );
+  );
 
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
@@ -2374,9 +2375,9 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 {
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
-     outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
+    false, outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
 #endif
-                                                            );
+  );
 
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
@@ -2403,7 +2404,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
       ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
 
-  if (!ParameterListConverter::to_param_list(ai_map, plist)) {
+    if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
@@ -3740,7 +3741,23 @@ Spdp::use_ice_now(bool f)
 #endif
 }
 
+DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
+{
+  bool include_user_data = true;
+#ifdef OPENDDS_SECURITY
+  if (security_enabled_ && config_->secure_participant_user_data()) {
+    include_user_data = secure;
+  }
+#else
+  ACE_UNUSED_ARG(secure);
+#endif
+  return {
+    DDS::BuiltinTopicKey_t(),
+    include_user_data ? qos_.user_data : DDS::UserDataQosPolicy()
+  };
 }
-}
+
+} // namespace RTPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
