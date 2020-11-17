@@ -7,7 +7,7 @@
 
 namespace Builder {
 
-#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
 #else
   class ContentFilteredTopic_var_stub

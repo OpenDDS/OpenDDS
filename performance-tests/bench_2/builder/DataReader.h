@@ -8,7 +8,7 @@ namespace Builder {
 
 class DataReader : public ListenerFactory<DDS::DataReaderListener> {
 public:
-  explicit DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber,
+  DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber,
     const std::shared_ptr<TopicManager>& topics, const ContentFilteredTopicMap& cft_map);
   ~DataReader();
 
