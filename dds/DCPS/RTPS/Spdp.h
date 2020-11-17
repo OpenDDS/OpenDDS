@@ -29,9 +29,9 @@
 #include "rtps_export.h"
 
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op.h"
+#  include <ace/Atomic_Op.h>
 #endif
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Mcast.h"
