@@ -451,6 +451,13 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
       TheServiceParticipant->default_address() != ACE_INET_Addr()) {
     config.local_address(TheServiceParticipant->default_address());
   }
+  if (config.multicast_interface_.empty() &&
+    TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
+    TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
+    OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
+    config.multicast_interface_ = addr_str.substr(0, addr_str.find_first_of(':'));
+  }
 
   // Open the socket here so that any addresses/ports left
   // unspecified in the RtpsUdpInst are known by the time we get to
@@ -537,7 +544,10 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 #endif
 
-  create_reactor_task();
+  create_reactor_task(false, "RtpsUdpTransport" + config.name());
+
+  ACE_Reactor* reactor = reactor_task_->get_reactor();
+  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
 #ifdef OPENDDS_SECURITY
   if (config.use_ice()) {
@@ -579,6 +589,8 @@ RtpsUdpTransport::shutdown_i()
 
   relay_stun_task_->disable_and_wait();
 #endif
+
+  job_queue_.reset();
 
   GuardThreadType guard_links(links_lock_);
   if (link_) {
@@ -626,11 +638,12 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
 
 namespace {
   bool shouldWarn(int code) {
-    return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS || code == ENOMEM;
+    return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS || code == ENOMEM
+      || code == EADDRNOTAVAIL || code == ENETUNREACH;
   }
 
   ssize_t
-  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr)
+  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
   {
     OPENDDS_ASSERT(addr != ACE_INET_Addr());
 #ifdef ACE_LACKS_SENDMSG
@@ -650,13 +663,22 @@ namespace {
     const ssize_t result = socket.send(iov, n, addr);
 #endif
     if (result < 0) {
-      ACE_TCHAR addr_buff[256] = {};
-      int err = errno;
-      addr.addr_to_string(addr_buff, 256);
+      const int err = errno;
+      if (err != ENETUNREACH || !network_is_unreachable) {
+        ACE_TCHAR addr_buff[256] = {};
+        addr.addr_to_string(addr_buff, 256);
+        errno = err;
+        const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+        ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
+                   "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+      }
+      if (err == ENETUNREACH) {
+        network_is_unreachable = true;
+      }
+      // Reset errno since the rest of framework expects it.
       errno = err;
-      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-      ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
-                 "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+    } else {
+      network_is_unreachable = false;
     }
     return result;
   }
@@ -728,8 +750,8 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
-  const ssize_t result = send_single_i(socket, iov, num_blocks, destination);
-  if (result < 0) {
+  const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
                "failed to send STUN message\n"));
@@ -830,36 +852,29 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
 
-  if (!bit_sub_) {
-    return;
-  }
-
-  DDS::DataReader_var d = bit_sub_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
-  if (!d) {
-    return;
-  }
-
-  DCPS::ConnectionRecordDataReaderImpl* dr = dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
-  if (!dr) {
-    return;
-  }
-
   switch (sc) {
   case ICE::ServerReflexiveStateMachine::SRSM_None:
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
-    dr->store_synthetic_data(connection_record, DDS::NEW_VIEW_STATE);
+    deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     {
       connection_record.address = to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
-      const DDS::InstanceHandle_t ih = dr->lookup_instance(connection_record);
-      dr->set_instance_state(ih, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      deferred_connection_records_.push_back(std::make_pair(false, connection_record));
       break;
     }
   }
+
+  if (!bit_sub_) {
+    return;
+  }
+
+  job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+  deferred_connection_records_.clear();
+
 #else
   ACE_UNUSED_ARG(sc);
 #endif

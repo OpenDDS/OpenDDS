@@ -180,7 +180,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
     if (dw_publisher.in() != this) {
-      RepoId id = dw_servant->get_publication_id();
+      RepoId id = dw_servant->get_repo_id();
       GuidConverter converter(id);
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
@@ -207,7 +207,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
         this->pi_lock_,
         DDS::RETCODE_ERROR);
 
-    publication_id = dw_servant->get_publication_id();
+    publication_id = dw_servant->get_repo_id();
 
     PublicationMap::iterator it = publication_map_.find(publication_id);
 
@@ -379,7 +379,7 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
         break;
       } else {
         a_datawriter = datawriter_map_.begin()->second;
-        pub_id = a_datawriter->get_publication_id();
+        pub_id = a_datawriter->get_repo_id();
       }
     }
 
@@ -432,7 +432,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
             ++iter) {
           DDS::DataWriterQos qos;
           iter->second->get_qos(qos);
-          RepoId id = iter->second->get_publication_id();
+          RepoId id = iter->second->get_repo_id();
           std::pair<DwIdToQosMap::iterator, bool> pair =
               idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
@@ -661,7 +661,7 @@ PublisherImpl::end_coherent_changes()
 
       std::pair<GroupCoherentSamples::iterator, bool> pair =
           group_samples.insert(GroupCoherentSamples::value_type(
-              it->second->get_publication_id(),
+              it->second->get_repo_id(),
               WriterCoherentSample(it->second->coherent_samples_,
                   it->second->sequence_number_)));
 
@@ -845,7 +845,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
 
   datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 
-  const RepoId publication_id = writer->get_publication_id();
+  const RepoId publication_id = writer->get_repo_id();
 
   std::pair<PublicationMap::iterator, bool> pair =
       publication_map_.insert(PublicationMap::value_type(publication_id, writer));
@@ -893,7 +893,7 @@ PublisherImpl::assert_liveliness_by_participant()
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {
-    DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
+    const DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
 
     if (dw_ret != DDS::RETCODE_OK) {
       ret = dw_ret;

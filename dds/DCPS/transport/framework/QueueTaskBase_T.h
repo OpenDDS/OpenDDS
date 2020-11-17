@@ -12,6 +12,10 @@
 
 #include "EntryExit.h"
 
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/Service_Participant.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -40,7 +44,8 @@ public:
   : work_available_(lock_),
       shutdown_initiated_(false),
       opened_(false),
-      thr_id_(ACE_OS::NULL_thread) {
+      thr_id_(ACE_OS::NULL_thread),
+      name_("QueueTaskBase") {
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
 
@@ -106,6 +111,29 @@ public:
     DBG_ENTRY("QueueTaskBase","svc");
 
     this->thr_id_ = ACE_OS::thr_self();
+#ifdef ACE_HAS_MAC_OSX
+    unsigned long tid = 0;
+    uint64_t osx_tid;
+    if (!pthread_threadid_np(NULL, &osx_tid)) {
+      tid = static_cast<unsigned long>(osx_tid);
+    } else {
+      tid = 0;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
+    }
+#elif !defined (OPENDDS_SAFETY_PROFILE)
+    ACE_thread_t tid = thr_id_;
+#endif /* ACE_HAS_MAC_OSX */
+    TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
+    ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
+
+#ifndef OPENDDS_SAFETY_PROFILE
+    OPENDDS_STRING key = to_dds_string(tid);
+#else
+    OPENDDS_STRING key = "QueueTaskBase";
+#endif
+    if (name_ != "") {
+      key += " (" + name_ + ")";
+    }
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
@@ -113,8 +141,30 @@ public:
       {
         GuardType guard(this->lock_);
 
-        if (this->queue_.is_empty()) {
-          this->work_available_.wait();
+        if (this->queue_.is_empty() && !shutdown_initiated_) {
+          if (interval > TimeDuration(0)) {
+            MonotonicTimePoint expire = MonotonicTimePoint::now() + interval;
+
+            do {
+              this->work_available_.wait(&expire.value()); // wait uses abstime
+              MonotonicTimePoint now = MonotonicTimePoint::now();
+              if (now > expire) {
+                expire = now + interval;
+                if (status) {
+                  if (DCPS_debug_level > 4) {
+                    ACE_DEBUG((LM_DEBUG,
+                              "%T (%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                  }
+                  {
+                    ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
+                    status->map[key] = now;
+                  }
+                }
+              }
+            } while (this->queue_.is_empty() && !shutdown_initiated_);
+          } else {
+            this->work_available_.wait();
+          }
         }
 
         if (this->shutdown_initiated_)
@@ -201,6 +251,9 @@ private:
 
   /// The id of the thread created by this task.
   ACE_thread_t thr_id_;
+
+  /// name for thread monitoring BIT
+  OPENDDS_STRING name_;
 };
 
 } // namespace DCPS

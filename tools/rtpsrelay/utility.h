@@ -16,7 +16,7 @@ inline std::string addr_to_string(const ACE_INET_Addr& a_addr)
 {
   std::array<ACE_TCHAR, 256> as_string{};
   if (a_addr.addr_to_string(as_string.data(), as_string.size()) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: addr_to_string failed to convert address to string")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: addr_to_string failed to convert address to string")));
     return "";
   }
   return ACE_TEXT_ALWAYS_CHAR(as_string.data());
@@ -69,6 +69,23 @@ inline void assign(GUID_t& guid, const OpenDDS::DCPS::RepoId& a_guid)
 {
   std::memcpy(&guid._guidPrefix[0], a_guid.guidPrefix, sizeof(a_guid.guidPrefix));
   assign(guid.entityId(), a_guid.entityId);
+}
+
+inline Duration_t time_diff_to_duration(const OpenDDS::DCPS::TimeDuration& d)
+{
+  Duration_t duration;
+  const auto x = d.to_dds_duration();
+  duration.sec(x.sec);
+  duration.nanosec(x.nanosec);
+  return duration;
+}
+
+inline bool operator<(const Duration_t& x, const Duration_t& y)
+{
+  if (x.sec() != y.sec()) {
+    return x.sec() < y.sec();
+  }
+  return x.nanosec() < y.nanosec();
 }
 
 }

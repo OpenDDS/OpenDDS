@@ -126,14 +126,14 @@ ServerReflexiveStateMachine::send(const ACE_INET_Addr& address,
     return SRSM_None;
   } else if (stun_server_address_ == ACE_INET_Addr() &&
              address != ACE_INET_Addr()) {
-    return start(address, guid_prefix);
+    return start(address, indication_count_limit, guid_prefix);
   } else if (stun_server_address_ != ACE_INET_Addr() &&
              address == ACE_INET_Addr()) {
     return stop();
   } else {
     if (stun_server_address_ != address) {
       const StateChange retval = stop();
-      start(address, guid_prefix);
+      start(address, indication_count_limit, guid_prefix);
       return retval;
     } else {
       return next_send(indication_count_limit, guid_prefix);
@@ -163,24 +163,20 @@ ServerReflexiveStateMachine::receive(const STUN::Message& message)
 
 ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::start(const ACE_INET_Addr& address,
+                                   size_t indication_count_limit,
                                    const DCPS::GuidPrefix_t& guid_prefix)
 {
   OPENDDS_ASSERT(address != ACE_INET_Addr());
   OPENDDS_ASSERT(stun_server_address_ == ACE_INET_Addr());
 
   // Send a binding request.
-  message_ = STUN::Message();
-  message_.class_ = STUN::REQUEST;
-  message_.method = STUN::BINDING;
-  message_.generate_transaction_id();
-  message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
-  message_.append_attribute(STUN::make_fingerprint());
+  message_class_ = STUN::REQUEST;
+  send_count_ = 0;
 
   stun_server_address_ = address;
   server_reflexive_address_ = ACE_INET_Addr();
-  indication_count_ = 0;
 
-  return SRSM_None;
+  return next_send(indication_count_limit, guid_prefix);
 }
 
 ServerReflexiveStateMachine::StateChange
@@ -191,7 +187,7 @@ ServerReflexiveStateMachine::stop()
   unset_stun_server_address_ = stun_server_address_;
   stun_server_address_ = ACE_INET_Addr();
   server_reflexive_address_ = ACE_INET_Addr();
-  indication_count_ = 0;
+  send_count_ = 0;
   return retval;
 }
 
@@ -201,33 +197,29 @@ ServerReflexiveStateMachine::next_send(size_t indication_count_limit,
 {
   StateChange retval = SRSM_None;
 
-  if (message_.class_ == STUN::REQUEST &&
-      server_reflexive_address_ != ACE_INET_Addr()) {
-    // Two consecutive sends in a row causes a reset.
+  if (message_class_ == STUN::REQUEST &&
+      server_reflexive_address_ != ACE_INET_Addr() &&
+      send_count_ == 3) {
+    // Reset.
     retval = SRSM_Unset;
     server_reflexive_address_ = ACE_INET_Addr();
     unset_stun_server_address_ = stun_server_address_;
   }
 
-  if (server_reflexive_address_ == ACE_INET_Addr() || indication_count_ >= indication_count_limit) {
-    // Send a request.
-    message_ = STUN::Message();
-    message_.class_ = STUN::REQUEST;
-    message_.method = STUN::BINDING;
-    message_.generate_transaction_id();
-    message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
-    message_.append_attribute(STUN::make_fingerprint());
-    indication_count_ = 0;
-  } else {
-    // Send an indication.
-    message_ = STUN::Message();
-    message_.class_ = STUN::INDICATION;
-    message_.method = STUN::BINDING;
-    message_.generate_transaction_id();
-    message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
-    message_.append_attribute(STUN::make_fingerprint());
-    ++indication_count_;
+  if ((server_reflexive_address_ == ACE_INET_Addr()) ||
+      (message_class_ == STUN::INDICATION && send_count_ >= indication_count_limit)) {
+    message_class_ = STUN::REQUEST;
+    send_count_ = 0;
   }
+
+  message_ = STUN::Message();
+  message_.class_ = message_class_;
+  message_.method = STUN::BINDING;
+  message_.generate_transaction_id();
+  message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
+  message_.append_attribute(STUN::make_fingerprint());
+
+  ++send_count_;
 
   return retval;
 }
@@ -266,9 +258,12 @@ ServerReflexiveStateMachine::success_response(const STUN::Message& message)
     return SRSM_None;
   }
 
-  message_.class_ = STUN::INDICATION;
+  message_class_ = STUN::INDICATION;
   if (server_reflexive_address == server_reflexive_address_) {
     return SRSM_None;
+  } else if (server_reflexive_address_ == ACE_INET_Addr()) {
+    server_reflexive_address_ = server_reflexive_address;
+    return SRSM_Set;
   } else {
     server_reflexive_address_ = server_reflexive_address;
     return SRSM_Change;

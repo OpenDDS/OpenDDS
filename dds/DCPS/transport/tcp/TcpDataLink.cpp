@@ -67,9 +67,9 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 
   DataLink::pre_stop_i();
 
-  TcpReceiveStrategy_rch rs = this->receive_strategy();
+  TcpReceiveStrategy_rch rs = receive_strategy();
 
-  TcpConnection_rch connection(this->connection_.lock());
+  TcpConnection_rch connection(connection_.lock());
 
   if (rs) {
     // If we received the GRACEFUL_DISCONNECT message from peer before we
@@ -77,10 +77,9 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
     // the GRACEFUL_DISCONNECT message to the peer.
     bool disconnected = rs->gracefully_disconnected();
 
-    if (connection && !this->graceful_disconnect_sent_
-        && !disconnected && !this->impl().is_shut_down()) {
-      this->send_graceful_disconnect_message();
-      this->graceful_disconnect_sent_ = true;
+    if (connection && !graceful_disconnect_sent_ && !disconnected) {
+      graceful_disconnect_sent_ = true;
+      send_graceful_disconnect_message();
     }
   }
 

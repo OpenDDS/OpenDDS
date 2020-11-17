@@ -156,7 +156,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
     if (DataReaderListenerImpl::is_reliable()) {
-      std::cout << "Reliable DataReader" << std::endl;
+      std::cerr << "Reliable DataReader" << std::endl;
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     }
 

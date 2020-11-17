@@ -162,7 +162,7 @@ inline void RtpsUdpInst::use_rtps_relay(bool flag)
   ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
   use_rtps_relay_ = flag;
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpInst::use_rtps_relay is now %d\n", rtps_relay_only_));
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpInst::use_rtps_relay is now %d\n", use_rtps_relay_));
   }
 }
 

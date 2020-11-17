@@ -159,6 +159,7 @@ static bool got_log_fname = false;
 static bool got_log_verbose = false;
 static bool got_default_address = false;
 static bool got_bidir_giop = false;
+static bool got_thread_status_interval = false;
 static bool got_monitor = false;
 
 Service_Participant::Service_Participant()
@@ -430,7 +431,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open(0);
+      reactor_task_.open_reactor_task(0, thread_status_interval_, &thread_status_, "Service_Participant");
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -571,6 +572,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       bidir_giop_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_bidir_giop = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSThreadStatusInterval"))) != 0) {
+      thread_status_interval_ = TimeDuration(ACE_OS::atoi(currentArg));
+      arg_shifter.consume_arg();
+      got_thread_status_interval = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
@@ -781,6 +787,11 @@ Service_Participant::initialize()
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+
+  bit_autopurge_nowriter_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
+  bit_autopurge_nowriter_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
+  bit_autopurge_disposed_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
+  bit_autopurge_disposed_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
 }
 
 void
@@ -1754,6 +1765,14 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBidirGIOP"), bidir_giop_, bool)
     }
 
+    if (got_thread_status_interval) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSThreadStatusInterval")));
+    } else {
+      int interval = 0;
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int)
+      thread_status_interval_ = TimeDuration(interval);
+    }
+
     ACE_Configuration::VALUETYPE type;
     if (got_log_fname) {
       if (cf.find_value(sect, ACE_TEXT("ORBLogFile"), type) != -1) {
@@ -2719,6 +2738,24 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
   default_configuration_file_ = path;
 }
 
+TimeDuration
+Service_Participant::get_thread_status_interval()
+{
+  return thread_status_interval_;
+}
+
+void
+Service_Participant::set_thread_status_interval(TimeDuration interval)
+{
+  thread_status_interval_ = interval;
+}
+
+ThreadStatus*
+Service_Participant::get_thread_statuses()
+{
+  return &thread_status_;
+}
+
 NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
@@ -2754,6 +2791,30 @@ NetworkConfigModifier* Service_Participant::network_config_modifier()
   return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
 }
 #endif
+
+DDS::Duration_t
+Service_Participant::bit_autopurge_nowriter_samples_delay() const
+{
+  return bit_autopurge_nowriter_samples_delay_;
+}
+
+void
+Service_Participant::bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration)
+{
+  bit_autopurge_nowriter_samples_delay_ = duration;
+}
+
+DDS::Duration_t
+Service_Participant::bit_autopurge_disposed_samples_delay() const
+{
+  return bit_autopurge_disposed_samples_delay_;
+}
+
+void
+Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
+{
+  bit_autopurge_disposed_samples_delay_ = duration;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

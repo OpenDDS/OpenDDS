@@ -11,15 +11,13 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $status = 0;
-my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-my $opts = $use_svc_config ? "-ORBSvcConf monitor.conf" : '';
-my $repo_bit_opt = $opts;
-
-my $pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
-my $sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
-my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSDebugLevel 10 -DCPSConfigFile sub.ini";
+my $pub_opts = "-ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
+my $sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
+my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSDebugLevel 10 -DCPSConfigFile mon.ini";
 
 my $dcpsrepo_ior = "repo.ior";
 
@@ -27,7 +25,7 @@ unlink $dcpsrepo_ior;
 unlink qw/pub.log sub.log mon.log DCPSInfoRepo.log/;
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-DCPSDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+                                  "-DCPSDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 
 my $Monitor    = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/monitor", " $mon_opts");
 my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");

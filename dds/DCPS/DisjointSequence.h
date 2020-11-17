@@ -137,8 +137,11 @@ public:
   static bool fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
                                 CORBA::Long bitmap[], CORBA::ULong length,
                                 CORBA::ULong& num_bits);
-};
 
+  /// Return the number of CORBA::Longs required for the bitmap representation of
+  /// sequence numbers between low and high, inclusive (maximum 8 longs).
+  static CORBA::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -52,7 +52,8 @@ public:
     return num_reads_;
   }
 
-  bool is_valid() const;
+  void mark_rediscovered();
+  bool is_valid(bool check_lease_recovery, bool expect_unmatch) const;
 
 private:
   typedef std::set<CORBA::Long> Counts;
@@ -61,6 +62,9 @@ private:
   long                num_reads_;
   Counts              counts_;
   bool                valid_;
+  bool                rediscovered_;
+  bool                initial_discovery_data_;
+  bool                rediscovery_data_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

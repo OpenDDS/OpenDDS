@@ -1,5 +1,8 @@
 project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
   exename = publisher
+  libpaths += ../common
+  libs     +=  common
+  after    += common
 
   Source_Files {
     TestObserver.cpp
@@ -10,6 +13,9 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
 
 project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
   exename = subscriber
+  libpaths += ../common
+  libs     +=  common
+  after    += common
 
   Source_Files {
     TestObserver.cpp

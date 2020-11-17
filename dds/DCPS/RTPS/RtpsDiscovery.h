@@ -382,6 +382,17 @@ public:
     rtps_relay_only_ = f;
   }
 
+  ACE_INET_Addr spdp_stun_server_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return spdp_stun_server_address_;
+  }
+  void spdp_stun_server_address(const ACE_INET_Addr& address)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp_stun_server_address_ = address;
+  }
+
   ACE_INET_Addr sedp_stun_server_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -426,6 +437,28 @@ public:
     sedp_max_message_size_ = value;
   }
 
+  bool undirected_spdp() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return undirected_spdp_;
+  }
+  void undirected_spdp(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    undirected_spdp_ = value;
+  }
+
+  bool periodic_directed_spdp() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return periodic_directed_spdp_;
+  }
+  void periodic_directed_spdp(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    periodic_directed_spdp_ = value;
+  }
+
   bool secure_participant_user_data() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
@@ -433,6 +466,7 @@ public:
   }
   void secure_participant_user_data(bool value)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     secure_participant_user_data_ = value;
   }
 
@@ -462,10 +496,13 @@ private:
   ACE_INET_Addr sedp_rtps_relay_address_;
   bool use_rtps_relay_;
   bool rtps_relay_only_;
+  ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
   bool use_ncm_;
   size_t sedp_max_message_size_;
+  bool undirected_spdp_;
+  bool periodic_directed_spdp_;
   /// Should participant user data QoS only be sent when the message is secure?
   bool secure_participant_user_data_;
 };
@@ -495,7 +532,7 @@ public:
     const DDS::DomainParticipantQos& qos);
 
 #if defined(OPENDDS_SECURITY)
-#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5)
+#  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__
 #    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
 #  else
 #    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION
@@ -614,6 +651,7 @@ public:
 #endif
   void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
+  void spdp_stun_server_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 
 private:

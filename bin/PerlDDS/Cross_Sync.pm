@@ -22,6 +22,8 @@ sub new {
     my $self =  $class->allocate ($verbose, $client_port
                                   , $server_port, $schedule_file);
 
+    print STDERR "PerlDDS::Cross_Sync::new \$class->allocate == '$self'\n";
+
     if ($self) {
         $self->{PUB_INI} = $pub_ini;
         $self->{SUB_INI} = $sub_ini;

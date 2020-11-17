@@ -5,18 +5,18 @@
 namespace RtpsRelay {
 
 PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                         WriterEntryDataWriter_ptr writer,
-                                         DomainStatisticsWriter& stats_writer)
+                                         WriterEntryDataWriter_var writer,
+                                         DomainStatisticsReporter& stats_reporter)
   : participant_(participant)
   , writer_(writer)
-  , stats_writer_(stats_writer)
+  , stats_reporter_(stats_reporter)
 {}
 
 void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::PublicationBuiltinTopicDataDataReader_var dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
     return;
   }
 
@@ -29,7 +29,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::on_data_available failed to read\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::on_data_available failed to read\n")));
     return;
   }
 
@@ -37,12 +37,12 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       write_sample(data[idx], infos[idx]);
-      stats_writer_.add_local_writer();
+      stats_reporter_.add_local_writer(OpenDDS::DCPS::MonotonicTimePoint::now());
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       unregister_instance(infos[idx]);
-      stats_writer_.remove_local_writer();
+      stats_reporter_.remove_local_writer(OpenDDS::DCPS::MonotonicTimePoint::now());
       break;
     }
   }
@@ -87,10 +87,10 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
     publisher_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l PublicationLister::write_sample add local writer %C\n"), guid_to_string(repoid).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::write_sample failed to write\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::write_sample failed to write\n")));
   }
 }
 
@@ -103,10 +103,10 @@ void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
   WriterEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l PublicationListener::unregister_instance remove local writer %C\n"), guid_to_string(repoid).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister_instance remove local writer %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::unregister_instance failed to unregister_instance\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::unregister_instance failed to unregister_instance\n")));
   }
 }
 

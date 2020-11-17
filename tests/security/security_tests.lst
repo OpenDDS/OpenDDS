@@ -53,6 +53,10 @@ tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_T
 tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6 secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6 join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6 single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
 

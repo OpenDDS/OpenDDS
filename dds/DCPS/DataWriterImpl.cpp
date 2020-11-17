@@ -228,7 +228,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    GuidConverter converter(get_publication_id());
+    GuidConverter converter(get_repo_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
@@ -1272,7 +1272,6 @@ DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness_by_participant()
 {
   // This operation is called by participant.
-
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
     // Set a flag indicating that we should send a liveliness message on the timer if necessary.
     liveliness_asserted_ = true;
@@ -1850,7 +1849,8 @@ DDS::ReturnCode_t
 DataWriterImpl::write(Message_Block_Ptr data,
                       DDS::InstanceHandle_t handle,
                       const DDS::Time_t& source_timestamp,
-                      GUIDSeq* filter_out)
+                      GUIDSeq* filter_out,
+                      const void* real_data)
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
 
@@ -1937,9 +1937,10 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->send(list, transaction_id);
   }
 
+  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
-  if (observer) {
-    Observer::Sample s(handle, *element, source_timestamp);
+  if (observer && real_data && vwd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vwd);
     observer->on_sample_sent(this, s);
   }
 
@@ -2069,12 +2070,6 @@ void
 DataWriterImpl::unregister_all()
 {
   data_container_->unregister_all();
-}
-
-RepoId
-DataWriterImpl::get_publication_id()
-{
-  return publication_id_;
 }
 
 RepoId

@@ -72,6 +72,8 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_ice_(false)
   , use_ncm_(true)
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
+  , undirected_spdp_(true)
+  , periodic_directed_spdp_(false)
   , secure_participant_user_data_(false)
 {}
 
@@ -126,6 +128,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
+        ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
+        TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
+        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
+        config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
       }
 
       DCPS::ValueMap values;
@@ -373,6 +379,16 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
           config->use_rtps_relay(bool(smInt));
 #ifdef OPENDDS_SECURITY
+        } else if (name == "SpdpStunServerAddress") {
+          ACE_INET_Addr addr;
+          if (addr.set(it->second.c_str())) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("failed to parse SpdpStunServerAddress %C\n"),
+                              it->second.c_str()),
+                             -1);
+          }
+          config->spdp_stun_server_address(addr);
         } else if (name == "SedpStunServerAddress") {
           ACE_INET_Addr addr;
           if (addr.set(it->second.c_str())) {
@@ -582,6 +598,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                        ACE_TEXT("%C section has a Customization setting.\n"),
                        rtps_name.c_str()));
           }
+        } else if (name == "UndirectedSpdp") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for UndirectedSpdp in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->undirected_spdp(bool(smInt));
+        } else if (name == "PeriodicDirectedSpdp") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for PeriodicDirectedSpdp in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->periodic_directed_spdp(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -833,6 +871,12 @@ RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
       part_pos->second->sedp_rtps_relay_address(address);
     }
   }
+}
+
+void
+RtpsDiscovery::spdp_stun_server_address(const ACE_INET_Addr& address)
+{
+  config_->spdp_stun_server_address(address);
 }
 
 void

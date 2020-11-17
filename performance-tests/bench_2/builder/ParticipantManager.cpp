@@ -9,10 +9,12 @@ ParticipantManager::ParticipantManager(const ParticipantConfigSeq& configs, Part
   }
 }
 
-void ParticipantManager::enable() {
+bool ParticipantManager::enable(bool throw_on_error) {
+  bool result = true;
   for (auto it = participants_.begin(); it != participants_.end(); ++it) {
-    (*it)->enable();
+    result &= (*it)->enable(throw_on_error);
   }
+  return result;
 }
 
 }

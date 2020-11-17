@@ -222,6 +222,8 @@ public:
   void set_default_discovery(const Discovery::RepoKey& defaultDiscovery);
   Discovery::RepoKey get_default_discovery();
 
+
+
   /// Convert domainId to repository key.
   Discovery::RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
 
@@ -423,6 +425,13 @@ public:
   NetworkConfigModifier* network_config_modifier();
 #endif
   NetworkConfigMonitor_rch network_config_monitor();
+
+
+  DDS::Duration_t bit_autopurge_nowriter_samples_delay() const;
+  void bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration);
+
+  DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
+  void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
 private:
 
@@ -630,6 +639,12 @@ private:
   bool is_discovery_template(const OPENDDS_STRING& name);
 
 public:
+  // thread status reporting
+  TimeDuration get_thread_status_interval();
+  void set_thread_status_interval(TimeDuration interval);
+
+  ThreadStatus* get_thread_statuses();
+
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
   MonitorFactory* monitor_factory_;
@@ -696,6 +711,11 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
+  /// Enable Internal Thread Status Monitoring
+  TimeDuration thread_status_interval_;
+
+  ThreadStatus thread_status_;
+
   /// Enable Monitor functionality
   bool monitor_enabled_;
 
@@ -717,6 +737,9 @@ private:
 
   NetworkConfigMonitor_rch network_config_monitor_;
   mutable ACE_Thread_Mutex network_config_monitor_lock_;
+
+  DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
+  DDS::Duration_t bit_autopurge_disposed_samples_delay_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()
