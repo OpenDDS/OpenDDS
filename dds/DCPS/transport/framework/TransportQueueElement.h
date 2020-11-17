@@ -8,18 +8,17 @@
 #ifndef OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 #define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/SequenceNumber.h"
-
 #include <utility>
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
