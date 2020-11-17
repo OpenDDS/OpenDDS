@@ -7,7 +7,7 @@ compiler:
 
 env:
   matrix:
-    - COMPILER=g++ LINT=1 STATIC=1 XERCES3=1 NO_TESTS=1
+    - COMPILER=g++ STATIC=1 XERCES3=1 NO_TESTS=1
     - NO_INLINE=1 NO_BIT=1
     - RELEASE_MODE=1 NO_TESTS=1
     - SAFETY_PROFILE=1
@@ -66,10 +66,6 @@ branches:
 
 before_script:
   - export
-  - if [ "$LINT" == "1" ]; then
-        rm -rf tools/modeling/plugins tools/rapidjson tests/googletest;
-        perl $DDS_ROOT/tools/scripts/lint.pl;
-    fi
   - if [ "$NO_INLINE" == "1" ]; then CONFIG_OPTIONS+=" --no-inline"; fi
   - if [ "$NO_BIT" == "1" ]; then CONFIG_OPTIONS+=" --no-built-in-topics"; fi
   - if [ "$STATIC" == "1" ]; then CONFIG_OPTIONS+=" --static"; fi
