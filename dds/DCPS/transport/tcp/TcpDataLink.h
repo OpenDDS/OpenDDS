@@ -13,9 +13,9 @@
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op.h"
+#  include <ace/Atomic_Op.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
