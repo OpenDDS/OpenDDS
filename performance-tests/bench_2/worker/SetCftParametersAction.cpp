@@ -18,6 +18,7 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
   std::unique_lock<std::mutex> lock(mutex_);
   Action::init(config, report, readers, writers, cft_map);
 
+#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
   auto content_filtered_topic_prop = get_property(config.params, "content_filtered_topic_name", Builder::PVK_STRING);
   if (content_filtered_topic_prop) {
     auto it = cft_map.find(static_cast<std::string>(content_filtered_topic_prop->value.string_prop()));
@@ -31,6 +32,7 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     ss << "SetCftParametersAction '" << config.name << "' is missing a valid DDS::ContentFilteredTopic_var content_filtered_topic_" << std::flush;
     throw std::runtime_error(ss.str());
   }
+#endif
 
   std::string name(config.name.in());
 
@@ -135,9 +137,11 @@ void SetCftParametersAction::do_set_expression_parameters()
         params[i] = acceptable_param_values_[i][current_acceptable_param_values_index_[i]++];
       }
 
+#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
       if (content_filtered_topic_->set_expression_parameters(params) != DDS::RETCODE_OK) {
         std::cout << "Error during SetCftParametersAction::do_set_expression_parameters()'s call to set_expression_parameters()" << std::endl;
       }
+#endif
     }
   }
 }

@@ -34,7 +34,9 @@ protected:
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;
   size_t set_call_count_;
+#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
   DDS::ContentFilteredTopic_var content_filtered_topic_;
+#endif
   Builder::StringSeqSeq acceptable_param_values_;
   std::vector<int> current_acceptable_param_values_index_;
 };

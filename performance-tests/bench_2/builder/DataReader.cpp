@@ -89,6 +89,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     DDS::Topic_var topic = topic_ptr->get_dds_topic();
     datareader_ = subscriber_->create_datareader(topic, qos_, listener_, listener_status_mask_);
   } else {
+#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
     DDS::ContentFilteredTopic_var content_filtered_topic;
     auto it = cft_map.find(topic_name_);
     if (it != cft_map.end()) {
@@ -102,6 +103,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     }
 
     datareader_ = subscriber_->create_datareader(content_filtered_topic, qos_, listener_, listener_status_mask_);
+#endif
   }
 
   if (CORBA::is_nil(datareader_.in())) {

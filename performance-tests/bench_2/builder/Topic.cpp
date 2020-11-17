@@ -83,6 +83,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
     throw std::runtime_error(ss.str());
   }
 
+#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
   for (unsigned int i = 0; i != content_filtered_topics_.length(); ++i) {
     DDS::ContentFilteredTopic_var cft =
       participant_->create_contentfilteredtopic(content_filtered_topics_[i].cft_name,
@@ -95,6 +96,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
     }
 
     content_filtered_topics_map[content_filtered_topics_[i].cft_name.in()] = cft;
+#endif
   }
 
   // Bind Transport Config

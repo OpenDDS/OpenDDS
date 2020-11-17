@@ -7,7 +7,20 @@
 
 namespace Builder {
 
-using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
+#ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
+  using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
+#else
+  class ContentFilteredTopic_var_stub
+  {
+  public:
+
+    inline bool operator < (const ContentFilteredTopic_var_stub& t) const {
+      return true;
+    }
+  };
+
+  using ContentFilteredTopicMap = std::map<std::string, ContentFilteredTopic_var_stub>;
+#endif
 
 class Topic : public ListenerFactory<DDS::TopicListener> {
 public:
