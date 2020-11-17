@@ -18,10 +18,11 @@
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "TimeTypes.h"
+
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op.h"
+#  include <ace/Atomic_Op.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
