@@ -29,6 +29,9 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   }
   topic_ = topic_ptr->get_dds_topic();
 
+  // Associate user tags to the report
+  report_.tags = config.tags;
+
   // Customize QoS Object
   subscriber_->get_default_datareader_qos(qos_);
 

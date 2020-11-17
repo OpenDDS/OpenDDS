@@ -53,18 +53,22 @@ DomainParticipantFactoryImpl::create_participant(
   }
 
   if (!Qos_Helper::valid(par_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-               ACE_TEXT("invalid qos.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                ACE_TEXT("invalid qos.\n")));
+    }
     return DDS::DomainParticipant::_nil();
   }
 
   if (!Qos_Helper::consistent(par_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-               ACE_TEXT("inconsistent qos.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                ACE_TEXT("inconsistent qos.\n")));
+    }
     return DDS::DomainParticipant::_nil();
   }
 
@@ -73,10 +77,12 @@ DomainParticipantFactoryImpl::create_participant(
 
   if (qos_.entity_factory.autoenable_created_entities) {
     if (dp->enable() != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                 ACE_TEXT("unable to enable DomainParticipant.\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                  ACE_TEXT("unable to enable DomainParticipant.\n")));
+      }
       return DDS::DomainParticipant::_nil();
     }
   }
@@ -94,15 +100,17 @@ DomainParticipantFactoryImpl::create_participant(
   if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
     OPENDDS_STRING instance_config_name = dp->get_unique_id();
 
-    bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
+    const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
 
     if (ret) {
       TheTransportRegistry->bind_config(instance_config_name, dp.in());
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                 ACE_TEXT("could not create new transport instance for participant.\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                  ACE_TEXT("could not create new transport instance for participant.\n")));
+      }
       return DDS::DomainParticipant::_nil();
     }
   }
@@ -116,21 +124,24 @@ DomainParticipantFactoryImpl::delete_participant(
   DDS::DomainParticipant_ptr a_participant)
 {
   if (CORBA::is_nil(a_participant)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                      ACE_TEXT("Nil participant.\n")),
-                     DDS::RETCODE_BAD_PARAMETER);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                ACE_TEXT("Nil participant.\n")));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   // The servant's ref count should be 2 at this point, one referenced
   // by the poa and the other referenced by the map.
   DomainParticipantImpl* the_servant = dynamic_cast<DomainParticipantImpl*>(a_participant);
   if (!the_servant) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-      ACE_TEXT("failed to obtain the DomainParticipantImpl.\n")));
-
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+        ACE_TEXT("failed to obtain the DomainParticipantImpl.\n")));
+    }
     return DDS::RETCODE_ERROR;
   }
 
@@ -138,19 +149,20 @@ DomainParticipantFactoryImpl::delete_participant(
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (!the_servant->is_clean()) {
-    RepoId id = the_servant->get_id();
+    const RepoId id = the_servant->get_id();
     GuidConverter converter(id);
-    ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
-               ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-               ACE_TEXT("the participant %C is not empty.\n"),
-               OPENDDS_STRING(converter).c_str()));
-
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+                ACE_TEXT("the participant %C is not empty.\n"),
+                OPENDDS_STRING(converter).c_str()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
   const DDS::DomainId_t domain_id = the_servant->get_domain_id();
-  RepoId dp_id = the_servant->get_id();
+  const RepoId dp_id = the_servant->get_id();
 
   DPSet* entry = 0;
 
@@ -161,38 +173,44 @@ DomainParticipantFactoryImpl::delete_participant(
                      DDS::RETCODE_ERROR);
 
     if (find(participants_, domain_id, entry) == -1) {
-      GuidConverter converter(dp_id);
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                        ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
-                        ACE_TEXT("find"),
-                        domain_id,
-                        OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
-
+      if (DCPS_debug_level > 0) {
+        GuidConverter converter(dp_id);
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+                   ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
+                   ACE_TEXT("find"),
+                   domain_id,
+                   OPENDDS_STRING(converter).c_str()));
+      }
+      return DDS::RETCODE_ERROR;
     } else {
-      DDS::ReturnCode_t result = the_servant->delete_contained_entities();
+      const DDS::ReturnCode_t result = the_servant->delete_contained_entities();
       if (result != DDS::RETCODE_OK) {
         return result;
       }
 
       if (OpenDDS::DCPS::remove(*entry, servant_rch) == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: ")
-                          ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                          ACE_TEXT(" %p.\n"),
-                          ACE_TEXT("remove")),
-                         DDS::RETCODE_ERROR);
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: ")
+                     ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                     ACE_TEXT(" %p.\n"),
+                     ACE_TEXT("remove")));
+        }
+        return DDS::RETCODE_ERROR;
       }
 
       if (entry->empty()) {
         if (unbind(participants_, domain_id) == -1) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: ")
-                            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                            ACE_TEXT(" %p.\n"),
-                            ACE_TEXT("unbind")),
-                           DDS::RETCODE_ERROR);
+          if (DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: ")
+                       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                       ACE_TEXT(" %p.\n"),
+                       ACE_TEXT("unbind")));
+          }
+          return DDS::RETCODE_ERROR;
         }
       }
     }
@@ -200,12 +218,13 @@ DomainParticipantFactoryImpl::delete_participant(
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
   if (disco) {
-    if (!disco->remove_domain_participant(domain_id,
-                                          dp_id)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("could not remove domain participant.\n")),
-                       DDS::RETCODE_ERROR);
+    if (!disco->remove_domain_participant(domain_id, dp_id)) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("could not remove domain participant.\n")));
+      }
+      return DDS::RETCODE_ERROR;
     }
   }
   return DDS::RETCODE_OK;
@@ -220,7 +239,7 @@ DomainParticipantFactoryImpl::lookup_participant(
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
-  DPSet* entry;
+  DPSet* entry = 0;
 
   if (find(participants_, domainId, entry) == -1) {
     if (DCPS_debug_level >= 1) {

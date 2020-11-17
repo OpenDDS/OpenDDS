@@ -1272,7 +1272,6 @@ DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness_by_participant()
 {
   // This operation is called by participant.
-
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
     // Set a flag indicating that we should send a liveliness message on the timer if necessary.
     liveliness_asserted_ = true;
