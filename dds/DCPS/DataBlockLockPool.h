@@ -12,9 +12,9 @@
 #include "ace/Thread_Mutex.h"
 #include "ace/Containers_T.h"
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op.h"
+#  include <ace/Atomic_Op.h>
 #endif
 #include "dcps_export.h"
 #include "dds/DCPS/PoolAllocationBase.h"
