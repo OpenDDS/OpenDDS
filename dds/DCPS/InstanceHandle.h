@@ -9,10 +9,10 @@
 #define DCPS_INSTANCEHANDLE_H
 
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op_T.h"
-# include "ace/Thread_Mutex.h"
+#  include <ace/Atomic_Op_T.h>
+#  include <ace/Thread_Mutex.h>
 #endif /* ACE_HAS_CPP11 */
 
 #include "dds/DdsDcpsInfrastructureC.h"
