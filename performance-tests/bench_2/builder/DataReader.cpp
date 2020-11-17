@@ -23,6 +23,9 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   Log::log() << "Creating datareader: '" << name_ << "' with topic name '" << topic_name_
     << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
+  // Associate user tags to the report
+  report_.tags = config.tags;
+
   // Customize QoS Object
   subscriber_->get_default_datareader_qos(qos_);
 

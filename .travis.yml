@@ -58,7 +58,7 @@ addons:
 before_install:
   - mkdir ext
   - cd ext && git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - cd .. && git clone --depth 1 git://github.com/DOCGroup/ACE_TAO.git
+  - cd .. && git clone --depth 1 -b ace6tao2 git://github.com/DOCGroup/ACE_TAO
 
 branches:
   only:

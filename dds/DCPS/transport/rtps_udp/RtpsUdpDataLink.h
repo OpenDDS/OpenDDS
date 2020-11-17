@@ -396,6 +396,10 @@ private:
     void make_leader_lagger(const RepoId& reader, SequenceNumber previous_max_sn);
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
+    void expire_durable_data(const ReaderInfo_rch& reader,
+                             const RtpsUdpInst& cfg,
+                             const MonotonicTimePoint& now,
+                             OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks);
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
@@ -507,6 +511,7 @@ private:
     const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet writers_expecting_nack_;
+    WriterInfoSet writers_expecting_non_final_ack_;
     WriterInfoSet writers_expecting_ack_;
     bool stopping_;
     CORBA::Long acknack_count_;

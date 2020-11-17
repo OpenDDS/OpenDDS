@@ -52,7 +52,7 @@ TqePair TransportQueueElement::fragment(size_t size)
   frag->set_msg(move(head));
 
   TransportCustomizedElement* rest = new TransportCustomizedElement(this);
-  frag->set_fragment(this);
+  rest->set_fragment(this);
   rest->set_msg(move(tail));
 
   return TqePair(frag, rest);
