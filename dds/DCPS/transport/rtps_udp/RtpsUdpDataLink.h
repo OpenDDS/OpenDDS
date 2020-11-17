@@ -455,14 +455,13 @@ private:
     OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
     SequenceRange hb_range_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
-    bool first_activity_, first_valid_hb_, first_delivered_data_;
+    bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
 
     WriterInfo(const RepoId& id)
       : id_(id)
       , first_activity_(true)
       , first_valid_hb_(true)
-      , first_delivered_data_(true)
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , nackfrag_count_(0)

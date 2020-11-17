@@ -3620,7 +3620,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     id_.entityId,
     {firstSN.getHigh(), firstSN.getLow()},
     {lastSN.getHigh(), lastSN.getLow()},
-    {++heartbeat_count_}
+    {0}
   };
 
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
@@ -3629,63 +3629,83 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   if (!additional_guids.empty()) {
     // Non-directed, non-final.
     meta_submessage.to_guids_ = additional_guids;
+    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
     meta_submessages.push_back(meta_submessage);
     meta_submessage.to_guids_.clear();
   }
 
   // Directed, non-final.
-  for (ReaderInfoSet::const_iterator pos = preassociation_readers_.begin(), limit = preassociation_readers_.end();
-       pos != limit; ++pos) {
-    meta_submessage.dst_guid_ = (*pos)->id_;
-    meta_submessage.sm_.heartbeat_sm().readerId = (*pos)->id_.entityId;
-    meta_submessages.push_back(meta_submessage);
+  if (!preassociation_readers_.empty()) {
+    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
+
+    for (ReaderInfoSet::const_iterator pos = preassociation_readers_.begin(), limit = preassociation_readers_.end();
+         pos != limit; ++pos) {
+      // Initialize high and low.
+      const SequenceNumber sn = expected_max_sn(*pos);
+      meta_submessage.dst_guid_ = (*pos)->id_;
+      meta_submessage.sm_.heartbeat_sm().readerId = (*pos)->id_.entityId;
+      meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
+      meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
+      meta_submessages.push_back(meta_submessage);
+    }
   }
 
-  if (leading_readers_.empty()
-#ifdef OPENDDS_SECURITY
-      && !is_pvs_writer_
-#endif
-      ) {
-    // Every reader is lagging.
-    for (ReaderInfoMap::const_iterator pos = remote_readers_.begin(), limit = remote_readers_.end(); pos != limit; ++pos) {
-      // TODO: This should be factored out in a sporadic task.
-      expire_durable_data(pos->second, cfg, now, pendingCallbacks);
-      meta_submessage.to_guids_.insert(pos->first);
-    }
-    meta_submessages.push_back(meta_submessage);
-    meta_submessage.to_guids_.clear();
-  } else {
-    for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
-         snris_pos != snris_limit; ++snris_pos) {
-      for (ReaderInfoSet::const_iterator pos = snris_pos->second->readers.begin(),
-             limit = snris_pos->second->readers.end();
-           pos != limit; ++pos) {
-        const ReaderInfo_rch& ri = (*pos);
-        // TODO: This should be factored out in a sporadic task.
-        expire_durable_data(ri, cfg, now, pendingCallbacks);
+  if (!lagging_readers_.empty()) {
+    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
 
-        const SequenceNumber sn = expected_max_sn(ri);
-        meta_submessage.dst_guid_ = ri->id_;
-        meta_submessage.sm_.heartbeat_sm().readerId = ri->id_.entityId;
-        meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
-        meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
-        meta_submessages.push_back(meta_submessage);
+    if (leading_readers_.empty() && remote_readers_.size() > 1
+#ifdef OPENDDS_SECURITY
+        && !is_pvs_writer_
+#endif
+        ) {
+      // Every reader is lagging and there is more than one.
+      for (ReaderInfoMap::const_iterator pos = remote_readers_.begin(), limit = remote_readers_.end(); pos != limit; ++pos) {
+        // TODO: This should be factored out in a sporadic task.
+        expire_durable_data(pos->second, cfg, now, pendingCallbacks);
+        meta_submessage.to_guids_.insert(pos->first);
+      }
+      meta_submessages.push_back(meta_submessage);
+      meta_submessage.to_guids_.clear();
+    } else {
+      for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
+           snris_pos != snris_limit; ++snris_pos) {
+        for (ReaderInfoSet::const_iterator pos = snris_pos->second->readers.begin(),
+               limit = snris_pos->second->readers.end();
+             pos != limit; ++pos) {
+          const ReaderInfo_rch& ri = (*pos);
+          // TODO: This should be factored out in a sporadic task.
+          expire_durable_data(ri, cfg, now, pendingCallbacks);
+
+          const SequenceNumber sn = expected_max_sn(ri);
+          meta_submessage.dst_guid_ = ri->id_;
+          meta_submessage.sm_.heartbeat_sm().readerId = ri->id_.entityId;
+          meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
+          meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
+          meta_submessages.push_back(meta_submessage);
+        }
       }
     }
   }
 
   // Directed, final.
-  meta_submessage.sm_.heartbeat_sm().smHeader.flags |= FLAG_F;
-  for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(),
-         limit = readers_expecting_heartbeat_.end();
-       pos != limit; ++pos) {
-    if (!is_lagging(*pos)) {
-      meta_submessage.dst_guid_ = (*pos)->id_;
-      meta_submessage.sm_.heartbeat_sm().readerId = (*pos)->id_.entityId;
-      meta_submessages.push_back(meta_submessage);
+  if (readers_expecting_heartbeat_.empty()) {
+    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
+    meta_submessage.sm_.heartbeat_sm().smHeader.flags |= FLAG_F;
+
+    for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(),
+           limit = readers_expecting_heartbeat_.end();
+         pos != limit; ++pos) {
+      if (preassociation_readers_.count(*pos) == 0 || !is_lagging(*pos)) {
+        const SequenceNumber sn = expected_max_sn(*pos);
+        meta_submessage.dst_guid_ = (*pos)->id_;
+        meta_submessage.sm_.heartbeat_sm().readerId = (*pos)->id_.entityId;
+        meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
+        meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
+        meta_submessages.push_back(meta_submessage);
+      }
     }
+    readers_expecting_heartbeat_.clear();
   }
-  readers_expecting_heartbeat_.clear();
 }
 
 void
@@ -4034,10 +4054,6 @@ void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& rea
   const SequenceNumber ca = info->recvd_.cumulative_ack();
   typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
   const iter end = info->held_.upper_bound(ca);
-
-  if (info->held_.begin() != end) {
-    info->first_delivered_data_ = false;
-  }
 
   for (iter it = info->held_.begin(); it != end; /*increment in loop body*/) {
     if (Transport_debug_level > 5) {
