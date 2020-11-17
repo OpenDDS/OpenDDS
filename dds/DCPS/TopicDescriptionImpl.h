@@ -13,9 +13,9 @@
 #include "Definitions.h"
 #include "ace/SString.h"
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op.h"
+#  include <ace/Atomic_Op.h>
 #endif
 #include "LocalObject.h"
 
