@@ -1,0 +1,16 @@
+enum GearSelect {
+    PARK,
+    REVERSE,
+    NEUTRAL,
+    FIRST,
+    SECOND,
+    THIRD,
+    FOURTH,
+    FIFTH,
+    SIXTH
+};
+
+enum FaultCode {
+    OK,
+    ERROR
+};

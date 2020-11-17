@@ -1,0 +1,5 @@
+
+struct FuelStats {
+    long mpg;
+    long range;
+};

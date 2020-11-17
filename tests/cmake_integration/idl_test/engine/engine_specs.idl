@@ -4,12 +4,7 @@ enum TempType {
     COOLANT
 };
 
-struct EngineOilTemp {
-    TempType type;
-    long value;
-};
-
-struct EngineCoolantTemp {
+struct EngineTemp {
     TempType type;
     long value;
 };
