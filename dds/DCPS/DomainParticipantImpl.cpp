@@ -127,12 +127,10 @@ DomainParticipantImpl::~DomainParticipantImpl()
     DDS::Security::SecurityException se;
     if (!access->return_permissions_handle(perm_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::~DomainParticipantImpl: ")
-                    ACE_TEXT("Unable to return permissions handle. SecurityException[%d.%d]: %C\n"),
-                    se.code, se.minor_code, se.message.in()));
-        }
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::~DomainParticipantImpl: ")
+                  ACE_TEXT("Unable to return permissions handle. SecurityException[%d.%d]: %C\n"),
+                  se.code, se.minor_code, se.message.in()));
       }
     }
   }
