@@ -485,7 +485,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         OPENDDS_STRING(writer_converter).c_str(),
         writers.length()));
   }
-  if (this->entity_deleted_ == false) {
+  if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
