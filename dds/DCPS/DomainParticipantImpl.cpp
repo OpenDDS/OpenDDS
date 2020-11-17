@@ -529,7 +529,6 @@ DomainParticipantImpl::delete_topic_i(
   DDS::Topic_ptr a_topic,
   bool             remove_objref)
 {
-
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   try {
@@ -545,8 +544,6 @@ DomainParticipantImpl::delete_topic_i(
         ACE_TEXT("failed to obtain TopicImpl.")),
         DDS::RETCODE_ERROR);
     }
-
-    CORBA::String_var topic_name = the_topic_servant->get_name();
 
     DDS::DomainParticipant_var dp = the_topic_servant->get_participant();
 
@@ -580,6 +577,7 @@ DomainParticipantImpl::delete_topic_i(
                        this->topics_protector_,
                        DDS::RETCODE_ERROR);
 
+      CORBA::String_var topic_name = the_topic_servant->get_name();
       TopicMap::mapped_type* entry = 0;
 
       if (Util::find(topics_, topic_name.in(), entry) == -1) {
@@ -590,10 +588,9 @@ DomainParticipantImpl::delete_topic_i(
                          DDS::RETCODE_ERROR);
       }
 
-      --entry->client_refs_;
+      const CORBA::ULong client_refs = --entry->client_refs_;
 
-      if (remove_objref == true ||
-          0 == entry->client_refs_) {
+      if (remove_objref == true || 0 == client_refs) {
         //TBD - mark the TopicImpl as deleted and make it
         //      reject calls to the TopicImpl.
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -613,12 +610,19 @@ DomainParticipantImpl::delete_topic_i(
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
                             ACE_TEXT("%p \n"),
-                            ACE_TEXT("unbind")),
+                            ACE_TEXT("erase")),
                            DDS::RETCODE_ERROR);
 
-        } else
+        } else {
           return DDS::RETCODE_OK;
-
+        }
+      } else {
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
+            ACE_TEXT("Didn't remove topic from the map, remove_objref %d client_refs %d\n"),
+            remove_objref, client_refs));
+        }
       }
     }
 
