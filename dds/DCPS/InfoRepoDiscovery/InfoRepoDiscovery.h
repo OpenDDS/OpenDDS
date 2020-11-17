@@ -21,9 +21,9 @@
 
 #include "ace/Thread_Mutex.h"
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include <ace/Atomic_Op_T.h>
+#  include <ace/Atomic_Op_T.h>
 #endif /* ACE_HAS_CPP11 */
 
 #include <string>
