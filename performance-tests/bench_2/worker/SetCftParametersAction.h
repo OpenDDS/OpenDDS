@@ -30,6 +30,7 @@ protected:
   ACE_Time_Value set_period_;
   size_t max_count_;
   size_t param_count_;
+  bool random_order_;
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;

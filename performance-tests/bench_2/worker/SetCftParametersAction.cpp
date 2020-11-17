@@ -7,7 +7,7 @@ namespace Bench {
 
   SetCftParametersAction::SetCftParametersAction(ACE_Proactor& proactor)
  : proactor_(proactor), started_(false), stopped_(false)
- , set_period_(1, 0), max_count_(0), set_call_count_(0)
+ , set_period_(1, 0), max_count_(0), random_order_(false), set_call_count_(0)
 {
 }
 
@@ -58,6 +58,11 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     std::stringstream ss;
     ss << "SetCftParametersAction '" << config.name << "' is missing a valid param_count parameter" << std::flush;
     throw std::runtime_error(ss.str());
+  }
+
+  auto random_order_prop = get_property(config.params, "random_order", Builder::PVK_ULL);
+  if (random_order_prop) {
+    random_order_ = static_cast<bool>(random_order_prop->value.ull_prop());
   }
 
   // Acceptable parameter values
@@ -134,7 +139,8 @@ void SetCftParametersAction::do_set_expression_parameters()
       DDS::StringSeq params(param_count_);
       params.length(param_count_);
       for (size_t i = 0; i < param_count_; i++) {
-        params[i] = acceptable_param_values_[i][current_acceptable_param_values_index_[i]++];
+        int index = random_order_ ? mt_() % acceptable_param_values_[i].length() : current_acceptable_param_values_index_[i]++;
+        params[i] = acceptable_param_values_[i][index];
       }
 
 #ifdef _DDS_CONTENTFILTEREDTOPIC__TRAITS_
