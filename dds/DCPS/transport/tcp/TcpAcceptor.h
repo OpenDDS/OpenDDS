@@ -18,27 +18,21 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class TcpInst;
-
-class TcpAcceptor : public ACE_Acceptor<TcpConnection,
-      ACE_SOCK_ACCEPTOR> {
+class TcpAcceptor : public ACE_Acceptor<TcpConnection, ACE_SOCK_ACCEPTOR> {
 public:
 
-  TcpAcceptor(TcpTransport* transport_impl);
+  TcpAcceptor(RcHandle<TcpTransport> transport);
   virtual ~TcpAcceptor();
 
-  // Returns a reference that the caller becomes responsible for.
-  TcpTransport* transport();
+  // Returns a RcHandle which should be checked before use
+  RcHandle<TcpTransport> transport();
 
-  // This causes the Acceptor to drop its reference to the
-  // TcpTransport object.
+  // This causes the Acceptor to drop its reference to the TcpTransport
   void transport_shutdown();
-
-  TcpInst& get_configuration();
 
 private:
 
-  TcpTransport* transport_;
+  WeakRcHandle<TcpTransport> transport_;
 };
 
 } // namespace DCPS

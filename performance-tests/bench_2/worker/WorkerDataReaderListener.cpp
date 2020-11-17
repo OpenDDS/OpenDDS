@@ -78,7 +78,8 @@ WorkerDataReaderListener::on_sample_rejected(
 void
 WorkerDataReaderListener::on_liveliness_changed(
   DDS::DataReader_ptr /*reader*/,
-  const DDS::LivelinessChangedStatus& /*status*/) {
+  const DDS::LivelinessChangedStatus& /*status*/)
+{
 }
 
 void
