@@ -3,26 +3,6 @@
 #include "MemFunHandler.h"
 #include "util.h"
 
-//namespace {
-//
-//uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
-//  size_t i = 0;
-//  uint32_t hash = 0;
-//  while (i != length) {
-//    hash += key[i++];
-//    hash += hash << 10;
-//    hash ^= hash >> 6;
-//  }
-//  hash += hash << 3;
-//  hash ^= hash >> 11;
-//  hash += hash << 15;
-//  return hash;
-//}
-//
-//const ACE_Time_Value ZERO(0, 0);
-//
-//}
-
 namespace Bench {
 
 WriteAction::WriteAction(ACE_Proactor& proactor)
@@ -32,7 +12,8 @@ WriteAction::WriteAction(ACE_Proactor& proactor)
 }
 
 bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
-  Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) {
+  Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map)
+{
 
   std::unique_lock<std::mutex> lock(mutex_);
   Action::init(config, report, readers, writers, cft_map);
@@ -156,7 +137,8 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   return true;
 }
 
-void WriteAction::start() {
+void WriteAction::start()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
@@ -165,7 +147,8 @@ void WriteAction::start() {
   }
 }
 
-void WriteAction::stop() {
+void WriteAction::stop()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
@@ -177,7 +160,8 @@ void WriteAction::stop() {
   }
 }
 
-void WriteAction::do_write() {
+void WriteAction::do_write()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     if (max_count_ == 0 || data_.msg_count < max_count_) {

@@ -3,7 +3,8 @@
 namespace Builder {
 
 DataReaderManager::DataReaderManager(const DataReaderConfigSeq& configs, DataReaderReportSeq& reports, DDS::Subscriber_var& subscriber,
-  const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map, const ContentFilteredTopicMap& cft_map) {
+  const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map, const ContentFilteredTopicMap& cft_map)
+{
   reports.length(configs.length());
   for (CORBA::ULong i = 0; i < configs.length(); ++i) {
     auto it = reader_map.find(configs[i].name.in());
@@ -18,7 +19,8 @@ DataReaderManager::DataReaderManager(const DataReaderConfigSeq& configs, DataRea
   }
 }
 
-bool DataReaderManager::enable(bool throw_on_error) {
+bool DataReaderManager::enable(bool throw_on_error)
+{
   bool result = true;
   for (auto it = datareaders_.begin(); it != datareaders_.end(); ++it) {
     result &= (*it)->enable(throw_on_error);
