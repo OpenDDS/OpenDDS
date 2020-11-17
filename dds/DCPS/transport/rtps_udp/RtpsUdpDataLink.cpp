@@ -1027,6 +1027,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       RtpsSampleHeader::populate_data_control_submessages(
         subm, *tsce, requires_inline_qos);
       make_leader_lagger(element->subscription_id(), previous_max_sn);
+      check_leader_lagger();
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples_i(tsce->header(), msg->cont());
       g.release();
@@ -1050,6 +1051,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
     make_leader_lagger(element->subscription_id(), previous_max_sn);
+    check_leader_lagger();
     durable = dsle->get_header().historic_sample_;
 
   } else if (tce) {  // Customized data message
@@ -1060,6 +1062,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
     make_leader_lagger(element->subscription_id(), previous_max_sn);
+    check_leader_lagger();
     durable = dsle->get_header().historic_sample_;
 
   } else {
@@ -1863,6 +1866,7 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
       readers_expecting_heartbeat_.erase(reader);
       readers_expecting_data_.erase(reader);
       snris_erase(acked_sn == max_sn ? leading_readers_ : lagging_readers_, acked_sn, reader);
+      check_leader_lagger();
       remote_readers_.erase(it);
       result = true;
     }
@@ -2747,7 +2751,11 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   if (preassociation_readers_.count(ri->second) && is_postassociation) {
     preassociation_readers_.erase(ri->second);
-    snris_insert(lagging_readers_, ri->second);
+
+    const SequenceNumber max_sn = expected_max_sn(ri->second);
+    const SequenceNumber acked_sn = ri->second->acked_sn();
+    snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, ri->second);
+    check_leader_lagger();
 
     {
       // Queue up durable data.
@@ -2894,6 +2902,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       reader->cur_cumulative_ack_ = ack;
       snris_insert(lagging_readers_, reader);
       previous_acked_sn = reader->acked_sn();
+      check_leader_lagger();
 
       if (reader->durable_ && !reader->expecting_durable_data()) {
         if (Transport_debug_level > 5) {
@@ -2927,6 +2936,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   make_lagger_leader(reader, previous_acked_sn);
+  check_leader_lagger();
 
   TqeSet to_deliver;
   acked_by_all_helper_i(to_deliver);
@@ -3273,6 +3283,38 @@ RtpsUdpDataLink::RtpsWriter::is_lagging(const ReaderInfo_rch& reader) const
 }
 
 void
+RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
+{
+  for (SNRIS::const_iterator pos1 = lagging_readers_.begin(), limit = lagging_readers_.end();
+       pos1 != limit; ++pos1) {
+    const SequenceNumber& sn = pos1->first;
+    const ReaderInfoSetHolder_rch& readers = pos1->second;
+    for (ReaderInfoSet::const_iterator pos2 = readers->readers.begin(), limit = readers->readers.end();
+         pos2 != limit; ++pos2) {
+      const ReaderInfo_rch& reader = *pos2;
+      OPENDDS_ASSERT(reader->acked_sn() == sn);
+      const SequenceNumber expect_max_sn = expected_max_sn(reader);
+      OPENDDS_ASSERT(sn < expect_max_sn);
+      OPENDDS_ASSERT(preassociation_readers_.count(reader) == 0);
+    }
+  }
+
+  for (SNRIS::const_iterator pos1 = leading_readers_.begin(), limit = leading_readers_.end();
+       pos1 != limit; ++pos1) {
+    const SequenceNumber& sn = pos1->first;
+    const ReaderInfoSetHolder_rch& readers = pos1->second;
+    for (ReaderInfoSet::const_iterator pos2 = readers->readers.begin(), limit = readers->readers.end();
+         pos2 != limit; ++pos2) {
+      const ReaderInfo_rch& reader = *pos2;
+      OPENDDS_ASSERT(reader->acked_sn() == sn);
+      const SequenceNumber expect_max_sn = expected_max_sn(reader);
+      OPENDDS_ASSERT(sn == expect_max_sn);
+      OPENDDS_ASSERT(preassociation_readers_.count(reader) == 0);
+    }
+  }
+}
+
+void
 RtpsUdpDataLink::RtpsWriter::process_requested_changes_i(DisjointSequence& requests,
                                                          const ReaderInfo_rch& reader)
 {
@@ -3598,6 +3640,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   if (additional_guids.empty() && preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
     return;
   }
+
+  check_leader_lagger();
 
   RtpsUdpDataLink_rch link = link_.lock();
   if (!link) {

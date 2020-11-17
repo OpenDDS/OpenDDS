@@ -398,6 +398,7 @@ private:
     void make_leader_lagger(const RepoId& reader, SequenceNumber previous_max_sn);
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
+    void check_leader_lagger() const;
     void expire_durable_data(const ReaderInfo_rch& reader,
                              const RtpsUdpInst& cfg,
                              const MonotonicTimePoint& now,
