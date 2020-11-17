@@ -49,6 +49,7 @@ BE_GlobalData::BE_GlobalData()
   , generate_v8_(false)
   , generate_rapidjson_(false)
   , face_ts_(false)
+  , filename_only_includes_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
@@ -197,6 +198,17 @@ bool BE_GlobalData::no_default_gen() const
   return this->no_default_gen_;
 }
 
+void BE_GlobalData::filename_only_includes(bool b)
+{
+  this->filename_only_includes_ = b;
+}
+
+bool BE_GlobalData::filename_only_includes() const
+{
+  return this->filename_only_includes_;
+}
+
+
 void BE_GlobalData::itl(bool b)
 {
   this->generate_itl_ = b;
@@ -339,6 +351,16 @@ BE_GlobalData::parse_args(long& i, char** av)
 #endif
     } else {
       output_dir_ = av[++i];
+    }
+    break;
+
+  case 'F':
+    // strip leading directories from generated #include lines.
+    if (0 == ACE_OS::strcasecmp(av[i], "-FilenameOnlyIncludes")) {
+      filename_only_includes_ = true;
+      break;
+    } else {
+      invalid_option(av[i]);
     }
     break;
 
@@ -525,18 +547,31 @@ namespace {
     return base_name + suffix;
   }
 
-  std::string make_relative(const std::string& absolute)
+  std::string make_relative(const std::string& absolute, const bool filename_only_includes)
   {
     for (Includes_t::const_iterator iter = inc_path_.begin(),
         end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
+
         if (rel.size() && (rel[0] == '/' || rel[0] == '\\')) {
           rel.erase(0, 1);
         }
+
+        if (filename_only_includes) {
+          size_t loc = rel.rfind('/', rel.length());
+          if (loc == string::npos) {
+            loc = rel.rfind('\\', rel.length());
+          }
+          if (loc != string::npos) {
+            rel = rel.substr(loc + 1, rel.length() - loc);
+          }
+        }
+
         return rel;
       }
     }
+
     return absolute;
   }
 
@@ -553,15 +588,17 @@ namespace {
 
   struct InsertRefIncludes : InsertIncludes {
     const char* const suffix_;
+    bool filename_only_includes_;
 
-    InsertRefIncludes(std::ostream& ret, const char* suffix)
+    InsertRefIncludes(std::ostream& ret, const char* suffix, const bool filename_only_includes)
       : InsertIncludes(ret)
       , suffix_(suffix)
+      , filename_only_includes_(filename_only_includes)
     {}
 
     void operator()(const std::string& str) const
     {
-      InsertIncludes::operator()(transform_referenced(make_relative(str), suffix_));
+      InsertIncludes::operator()(transform_referenced(make_relative(str, filename_only_includes_), suffix_));
     }
   };
 }
@@ -598,7 +635,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   switch (which) {
   case STREAM_LANG_H:
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "C.h"));
+                  InsertRefIncludes(ret, "C.h", filename_only_includes_));
     // fall through
   case STREAM_H:
     if (!export_include().empty())
@@ -607,7 +644,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   case STREAM_CPP:
     std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "TypeSupportImpl.h"));
+                  InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
     break;
   default:
     break;
