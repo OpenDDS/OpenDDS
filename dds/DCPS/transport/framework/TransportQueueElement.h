@@ -9,9 +9,9 @@
 #define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op.h"
+#  include <ace/Atomic_Op.h>
 #endif
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
