@@ -14,9 +14,9 @@
 #include "transport/framework/TransportConfig_rch.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include <ace/Atomic_Op_T.h>
+#  include <ace/Atomic_Op_T.h>
 #endif /* ACE_HAS_CPP11 */
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
