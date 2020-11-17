@@ -2935,8 +2935,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     }
   }
 
-  make_lagger_leader(reader, previous_acked_sn);
-  check_leader_lagger();
+  if (preassociation_readers_.count(reader) == 0) {
+    make_lagger_leader(reader, previous_acked_sn);
+    check_leader_lagger();
+  }
 
   TqeSet to_deliver;
   acked_by_all_helper_i(to_deliver);
@@ -3285,6 +3287,7 @@ RtpsUdpDataLink::RtpsWriter::is_lagging(const ReaderInfo_rch& reader) const
 void
 RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
 {
+  static const SequenceNumber negative_one = SequenceNumber::ZERO().previous();
   for (SNRIS::const_iterator pos1 = lagging_readers_.begin(), limit = lagging_readers_.end();
        pos1 != limit; ++pos1) {
     const SequenceNumber& sn = pos1->first;
@@ -3294,7 +3297,7 @@ RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
       const ReaderInfo_rch& reader = *pos2;
       OPENDDS_ASSERT(reader->acked_sn() == sn);
       const SequenceNumber expect_max_sn = expected_max_sn(reader);
-      OPENDDS_ASSERT(sn < expect_max_sn);
+      OPENDDS_ASSERT(sn == negative_one || sn < expect_max_sn);
       OPENDDS_ASSERT(preassociation_readers_.count(reader) == 0);
     }
   }
