@@ -1,3 +1,6 @@
+#ifndef ECU_IDL
+#define ECU_IDL
+
 #include "engine_specs.idl"
 #include "transmission_specs.idl"
 #include "fuel_stats.idl"
@@ -13,3 +16,5 @@ struct EcuInfo {
 
     FuelStats calc;
 };
+
+#endif /* ECU_IDL */
