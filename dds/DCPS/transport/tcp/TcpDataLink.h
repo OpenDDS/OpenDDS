@@ -70,6 +70,10 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  void received(ReceivedDataSample& sample);
+
+  void do_association_actions();
+
 protected:
 
   /// Called when the DataLink is self-releasing because all of its
@@ -77,10 +81,12 @@ protected:
   /// handling a shutdown() call.
   virtual void stop_i();
 
+  virtual void release_reservations_i(const RepoId& remote_id,
+                                      const RepoId& local_id);
+
 private:
   bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
-  void do_association_actions();
   void send_association_msg(const RepoId& local, const RepoId& remote);
 
   ACE_INET_Addr           remote_address_;
@@ -90,6 +96,12 @@ private:
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;
   ACE_SYNCH_MUTEX pending_request_acks_lock_;
   PendingRequestAcks pending_request_acks_;
+
+  typedef OPENDDS_VECTOR(ReceivedDataSample) SampleVector;
+  typedef OPENDDS_MAP_CMP(RepoId, SampleVector, GUID_tKeyLessThan) PendingReaderMap;
+  typedef OPENDDS_MAP_CMP(RepoId, PendingReaderMap, GUID_tKeyLessThan) WriterToPendingReaderMap;
+  WriterToPendingReaderMap writer_to_pending_reader_map_;
+  mutable ACE_Thread_Mutex writer_to_pending_reader_map_lock_;
 };
 
 } // namespace DCPS

@@ -72,7 +72,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
     link_.ack_received(sample);
   }
   else {
-    link_.data_received(sample);
+    link_.received(sample);
   }
 }
 
