@@ -16,13 +16,13 @@ set(opendds_libs
 ## debugging
 set(CMAKE_VERBOSE_MAKEFILE on)
 
-set(thecar "car")
+set(the_ecu "ecu")
 
 set(src "${CMAKE_CURRENT_BINARY_DIR}/..")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 
 foreach(file
-  car.cpp car.idl)
+  ecu.cpp ecu.idl)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
 
@@ -36,7 +36,7 @@ file(MAKE_DIRECTORY ${dst}/transmission)
 configure_file(${src}/transmission/transmission_specs.idl ${dst}/transmission COPYONLY)
 configure_file(${src}/transmission/transmission_states.idl ${dst}/transmission COPYONLY)
 
-add_executable(${thecar} "car.cpp")
+add_executable(${the_ecu} "ecu.cpp")
 
 # set add opendds_idl compiler option to strip leading directories from #include
 # needed for CMake builds with nested idl files
@@ -55,11 +55,9 @@ ADD_IDL_PATH(./transmission)
 # this will import both transmission idl files
 ADD_IDL_FILES_IN_PATH(./transmission)
 
-add_library(car_lib SHARED)
-OPENDDS_TARGET_SOURCES(car_lib car.idl ${IDL_DEPENDENCIES})
+add_library(ecu_lib SHARED)
+OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl ${IDL_DEPENDENCIES})
 
-message(STATUS "OPENDDS_LANGUAGE_MAPPINGS == ${OPENDDS_LANGUAGE_MAPPINGS}")
+target_link_libraries(ecu_lib ${opendds_libs})
 
-target_link_libraries(car_lib ${opendds_libs})
-
-target_link_libraries(${thecar} ${opendds_libs} car_lib)
+target_link_libraries(${the_ecu} ${opendds_libs} ecu_lib)
