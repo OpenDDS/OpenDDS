@@ -99,7 +99,8 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
   // Is Spdp shutting down?
-  bool shutting_down() {
+  bool shutting_down()
+  {
 #ifdef ACE_HAS_CPP11
     return shutdown_flag_;
 #else
