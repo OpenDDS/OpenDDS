@@ -42,9 +42,9 @@
 #endif
 
 #ifdef ACE_HAS_CPP11
-# include <atomic>
+#  include <atomic>
 #else
-# include "ace/Atomic_Op_T.h"
+#  include <ace/Atomic_Op_T.h>
 #endif
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
