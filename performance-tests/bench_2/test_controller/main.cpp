@@ -137,8 +137,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
    * a number is found. Can be manually assigned to be any valid file name,
    * not just a number.
    */
-  std::string result_id, json_result_id;
-  bool overwrite_result = false;
+  std::string result_id;
+  bool overwrite_result = false, json_result = false;
 
   // List of tags
   std::unordered_set<std::string> tags;
@@ -206,8 +206,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "--tag TAG                    Specify a tag for which the user wants to collect" << std::endl
           << "                             the statistics information. User can specify multiple" << std::endl
           << "                             --tag options, each with a single tag." << std::endl
-          << "--json-result-id ID          Specify a name to store the raw JSON report under." << std::endl
-          << "                             By default, this not enabled. These results will contain" << std::endl
+          << "--json                       Output full JSON report as '<resuld-id>.json' in the test conext." << std::endl
+          << "                             By default, this not enabled. This report will contain" << std::endl
           << "                             the full raw Bench::TestController report, including all" << std::endl
           << "                             node controller and worker reports (and DDS entity reports)" << std::endl;
 //            ################################################################################
@@ -238,8 +238,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tag"))) {
         tags.insert(get_option_argument(i, argc, argv));
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json-result-id"))) {
-        json_result_id = get_option_argument(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json"))) {
+        json_result = true;
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -297,7 +297,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
   const std::string result_path = join_path(results_path, result_id);
-  const std::string json_result_path = json_result_id.empty() ? "" : join_path(results_path, json_result_id);
+  const std::string json_result_path = json_result ? result_path + ".json" : "";
 
   // Check to see if the Result Already Exists
   try {
@@ -395,7 +395,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         std::ostringstream ss;
         ss << "Results will be stored in " << result_path << std::endl;
         if (!json_result_path.empty()) {
-          ss << "JSON Results will be stored in " << result_path << std::endl;
+          ss << "JSON Results will be stored in " << json_result_path << std::endl;
         }
         ss << std::endl << "Started at " << iso8601() << std::endl;
         scenario_start = ss.str();
