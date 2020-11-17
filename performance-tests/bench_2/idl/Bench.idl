@@ -118,6 +118,8 @@ module Bench {
     unsigned long long round_trip_jitter_weighted_median_overflow;
   };
 
+  typedef sequence<WorkerReport> WorkerReportSeq;
+
   /*
    * Interface between the Test Controller and the Node Controllers
    */
@@ -226,6 +228,21 @@ module Bench {
       unsigned long expected_reports;
       unsigned long timeout;
       Builder::TimeStamp launch_time;
+    };
+
+    struct NodeReport {
+      NodeController::NodeId node_id;
+      WorkerReportSeq worker_reports;
+      Builder::PropertySeq properties;
+    };
+
+    typedef sequence<NodeReport> NodeReportSeq;
+
+    struct Report {
+      string scenario_name;
+      Builder::TimeStamp time;
+      NodeReportSeq node_reports;
+      Builder::PropertySeq properties;
     };
   };
 };
