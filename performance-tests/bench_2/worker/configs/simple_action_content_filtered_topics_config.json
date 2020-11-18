@@ -100,8 +100,8 @@
         }
       ]
     },
-	  {
-	    "name": "cft_action_01",
+    {
+      "name": "cft_action_01",
       "type": "set_cft_parameters",
       "params": [
         { "name": "content_filtered_topic_name",
@@ -122,7 +122,7 @@
         { "name": "acceptable_param_values",
           "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
         }
-	    ]
-	  }
+      ]
+    }
   ]
 }
