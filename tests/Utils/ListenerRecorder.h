@@ -9,6 +9,9 @@
 #define TestUtils_ListenerRecorder_IMPL_H
 
 #include <tests/Utils/DataReaderListenerImpl.h>
+
+#include <dds/DCPS/JsonValueWriter.h>
+
 #include "ace/Thread_Mutex.h"
 
 #include <vector>
@@ -36,8 +39,9 @@ protected:
     messages_.push_back(msg);
     if (this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
-                 "(%P|%t) ListenerRecorder::on_sample: Received message #%d\n",
-                 messages_.size()));
+                 "(%P|%t) ListenerRecorder::on_sample: Received message #%d %C\n",
+                 messages_.size(),
+                 OpenDDS::DCPS::to_json(msg).c_str()));
     }
   }
 

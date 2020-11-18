@@ -453,9 +453,10 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
     return;
   }
 
+  // We have a connection.
+  // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
-  PairVec to_send;
-  PairVec to_call;
+  PairVec to_call_and_send;
 
   {
     GuardType guard(strategy_lock_);
@@ -463,9 +464,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
         GuidConverter conv(it2->first);
-        to_send.push_back(std::make_pair(it2->first, it->first));
         if (conv.isReader()) {
-          to_call.push_back(std::make_pair(it2->first, it->first));
+          to_call_and_send.push_back(std::make_pair(it2->first, it->first));
         }
       }
     }
@@ -473,16 +473,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
   send_strategy_->link_released(false);
 
-  for (PairVec::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
+  for (PairVec::const_iterator it = to_call_and_send.begin(); it != to_call_and_send.end(); ++it) {
     invoke_on_start_callbacks(it->first, it->second, true);
-  }
-
-  for (PairVec::const_iterator it = to_send.begin(); it != to_send.end(); ++it) {
-    GuidConverter conv(it->first);
-    if (conv.isReader()) {
-      ACE_GUARD(ACE_Thread_Mutex, g, writer_to_pending_reader_map_lock_);
-      writer_to_pending_reader_map_[it->second].insert(std::make_pair(it->first, SampleVector()));
-    }
     send_association_msg(it->first, it->second);
   }
 }
@@ -564,67 +556,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
   const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener, reliable);
   send_association_msg(local_subscription_id, remote_publication_id);
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writer_to_pending_reader_map_lock_, result);
-    WriterToPendingReaderMap::iterator pos1 = writer_to_pending_reader_map_.find(remote_publication_id);
-    if (pos1 != writer_to_pending_reader_map_.end()) {
-      PendingReaderMap& pending_reader_map = pos1->second;
-      PendingReaderMap::iterator pos2 = pending_reader_map.find(local_subscription_id);
-      if (pos2 != pending_reader_map.end()) {
-        SampleVector& sample_vector = pos2->second;
-        for (SampleVector::iterator pos3 = sample_vector.begin(), limit = sample_vector.end(); pos3 != limit; ++pos3) {
-          DataLink::data_received(*pos3, local_subscription_id);
-        }
-        pending_reader_map.erase(pos2);
-      }
-      if (pending_reader_map.empty()) {
-        writer_to_pending_reader_map_.erase(pos1);
-      }
-    }
-  }
-
   return result;
 }
-
-void
-OpenDDS::DCPS::TcpDataLink::release_reservations_i(const RepoId& remote_id,
-                                                   const RepoId& local_id)
-{
-  const GuidConverter conv(local_id);
-  if (!conv.isReader()) {
-    return;
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, writer_to_pending_reader_map_lock_);
-  WriterToPendingReaderMap::iterator pos1 = writer_to_pending_reader_map_.find(remote_id);
-  if (pos1 != writer_to_pending_reader_map_.end()) {
-    PendingReaderMap& pending_reader_map = pos1->second;
-    PendingReaderMap::iterator pos2 = pending_reader_map.find(local_id);
-    if (pos2 != pending_reader_map.end()) {
-      pending_reader_map.erase(pos2);
-    }
-    if (pending_reader_map.empty()) {
-      writer_to_pending_reader_map_.erase(pos1);
-    }
-  }
-}
-
-void
-OpenDDS::DCPS::TcpDataLink::received(ReceivedDataSample& sample)
-{
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, writer_to_pending_reader_map_lock_);
-    WriterToPendingReaderMap::iterator pos1 = writer_to_pending_reader_map_.find(sample.header_.publication_id_);
-    if (pos1 != writer_to_pending_reader_map_.end()) {
-      PendingReaderMap& pending_reader_map = pos1->second;
-      for (PendingReaderMap::iterator pos2 = pending_reader_map.begin(), limit = pending_reader_map.end(); pos2 != limit; ++pos2) {
-        pos2->second.push_back(sample);
-      }
-    }
-  }
-
-  DataLink::data_received(sample);
-}
-
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
