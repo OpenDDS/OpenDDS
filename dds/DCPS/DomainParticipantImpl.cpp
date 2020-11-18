@@ -273,9 +273,9 @@ DomainParticipantImpl::create_subscriber(
   if (OpenDDS::DCPS::insert(subscribers_, pair) == -1) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_subscriber, ")
-                ACE_TEXT("%p\n"),
-                ACE_TEXT("insert")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_subscriber, ")
+                 ACE_TEXT("%p\n"),
+                 ACE_TEXT("insert")));
     }
     return DDS::Subscriber::_nil();
   }
