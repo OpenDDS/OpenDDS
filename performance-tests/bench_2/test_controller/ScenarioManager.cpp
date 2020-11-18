@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <unordered_map>
 
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/GuardCondition.h>
@@ -57,14 +58,13 @@ namespace {
     return ss.str();
   }
 
-  void read_protoworker_configs(
-    const std::string& test_context,
+  void read_protoworker_configs(const std::string& test_context,
     const WorkerPrototypes& protoworkers,
     std::map<std::string, std::string>& worker_configs,
     bool debug_alloc)
   {
-    for (unsigned protoworker_i = 0; protoworker_i < protoworkers.length(); protoworker_i++) {
-      const std::string filename = protoworkers[protoworker_i].config.in();
+    for (unsigned i = 0; i < protoworkers.length(); i++) {
+      const std::string filename = protoworkers[i].config.in();
       if (!worker_configs.count(filename)) {
         worker_configs[filename] = debug_alloc ?
           filename : read_file(join_path(test_context, "config", "worker", filename));
@@ -72,8 +72,7 @@ namespace {
     }
   }
 
-  void add_single_worker_to_node(
-    const WorkerPrototype& protoworker,
+  void add_single_worker_to_node(const WorkerPrototype& protoworker,
     const std::map<std::string, std::string>& worker_configs,
     NodeController::Config& node)
   {
@@ -86,8 +85,7 @@ namespace {
     worker.worker_id = worker_id;
   }
 
-  unsigned add_protoworkers_to_node(
-    const WorkerPrototypes& protoworkers,
+  unsigned add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
     const std::map<std::string, std::string>& worker_configs,
     NodeController::Config& node)
   {
@@ -114,13 +112,13 @@ namespace {
 
 }
 
-void ScenarioManager::customize_configs(std::map<std::string, std::string>& worker_configs) {
+void ScenarioManager::customize_configs(std::map<std::string, std::string>& worker_configs)
+{
   using namespace std::chrono;
   system_clock::time_point cnow = system_clock::now();
   Builder::TimeStamp now = Builder::get_sys_time();
 
   for (auto it = worker_configs.begin(); it != worker_configs.end(); ++it) {
-
     // Convert to C++ IDL-generated structures
     std::stringstream iss(it->second);
     Bench::WorkerConfig wc{};
@@ -201,105 +199,161 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
   }
 }
 
-AllocatedScenario ScenarioManager::allocate_scenario(
-  const ScenarioPrototype& scenario_prototype, Nodes& available_nodes, bool debug_alloc)
+unsigned ScenarioManager::allocate_scenario_i(AllocatedScenario& allocated_scenario,
+  const NodePrototypes& node_prototypes, const Nodes& nodes,
+  const ScenarioPrototype& scenario_prototype, std::string name, bool debug_alloc)
+{
+  // Get maximum and exclusive node prototype counts
+  unsigned maximum_nodes = 0;
+  unsigned exclusive_nodes = 0;
+  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
+    if (node_prototypes[i].exclusive) {
+      exclusive_nodes += node_prototypes[i].count;
+    }
+    maximum_nodes += node_prototypes[i].count;
+  }
+
+  // If there are enough anonymous nodes, each any node worker can get one to itself
+  if (name.empty()) {
+    for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
+      maximum_nodes += scenario_prototype.any_node[i].count;
+    }
+  }
+
+  // Get minimum node prototype count
+  unsigned minimum_nodes = exclusive_nodes;
+  if (maximum_nodes - exclusive_nodes) { // If there are any non-exclusive node configs
+    ++minimum_nodes; // Then there just has to be at least one node for them
+  }
+
+  // Make sure we have enough node controllers
+  if (nodes.size() < minimum_nodes) {
+    std::stringstream ss;
+    ss << "At least " << minimum_nodes << " available node" <<
+      (minimum_nodes == 1 ? "" : "s") <<
+      (!name.empty() ? " with name '" + name + "'" : "") <<
+      (minimum_nodes == 1 ? " is " : " are ") << "required for this scenario.";
+    throw std::runtime_error(ss.str());
+  }
+
+  // Number of node controllers going to be used
+  const unsigned node_count = std::min(static_cast<unsigned>(nodes.size()), maximum_nodes);
+  unsigned start_id = allocated_scenario.configs.length();
+  allocated_scenario.configs.length(start_id + node_count);
+
+  // Set the node IDs and initialize worker length
+  auto ani = nodes.begin();
+  for (unsigned i = 0; i < node_count; i++) {
+    allocated_scenario.configs[start_id + i].node_id = ani->first;
+    allocated_scenario.configs[start_id + i].timeout = scenario_prototype.timeout;
+    allocated_scenario.configs[start_id + i].workers.length(0);
+    ++ani;
+  }
+
+  // Read in worker config files
+  std::map<std::string, std::string> worker_configs;
+  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
+    read_protoworker_configs(test_context_, node_prototypes[i].workers,
+      worker_configs, debug_alloc);
+  }
+
+  customize_configs(worker_configs);
+
+  // Allocate exclusive node configs first
+  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
+    auto& protonode = node_prototypes[i];
+    if (protonode.exclusive) {
+      for (unsigned count = 0; count < protonode.count; ++count) {
+        allocated_scenario.expected_reports += add_protoworkers_to_node(
+          protonode.workers, worker_configs, allocated_scenario.configs[start_id++]);
+      }
+    }
+  }
+
+  // Then allocate non-exclusive node configs
+  const unsigned nonexclusive_start = start_id;
+  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
+    auto& protonode = node_prototypes[i];
+    if (!protonode.exclusive) {
+      for (unsigned count = 0; count < protonode.count; ++count) {
+        allocated_scenario.expected_reports += add_protoworkers_to_node(
+          protonode.workers, worker_configs, allocated_scenario.configs[start_id++]);
+        if (start_id >= allocated_scenario.configs.length()) {
+          start_id = nonexclusive_start;
+        }
+      }
+    }
+  }
+  return nonexclusive_start;
+}
+
+AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& scenario_prototype,
+  const Nodes& available_nodes, bool debug_alloc)
 {
   if (scenario_prototype.nodes.length() == 0 && scenario_prototype.any_node.length() == 0) {
     throw std::runtime_error("Scenario Prototype is empty!");
   }
 
-  // Get Maximum and Exclusive Node Counts
-  unsigned maximum_nodes = 0;
-  unsigned exclusive_nodes = 0;
-  for (unsigned i = 0; i < scenario_prototype.nodes.length(); i++) {
-    if (scenario_prototype.nodes[i].exclusive) {
-      exclusive_nodes += scenario_prototype.nodes[i].count;
+  // Gather node prototypes by names
+  typedef std::unordered_map<std::string, NodePrototypes> NamedProtoNodes;
+  NamedProtoNodes named_protonodes;
+  NodePrototypes anon_protonodes;
+  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+    const std::string name = scenario_prototype.nodes[i].name.in();
+    if (!name.empty()) {
+      NodePrototypes& prototypes = named_protonodes[name];
+      prototypes.length(prototypes.length() + 1);
+      prototypes[prototypes.length() - 1] = scenario_prototype.nodes[i];
+    } else {
+      anon_protonodes.length(anon_protonodes.length() + 1);
+      anon_protonodes[anon_protonodes.length() - 1] = scenario_prototype.nodes[i];
     }
-    maximum_nodes += scenario_prototype.nodes[i].count;
-  }
-  // If there are enough nodes, each any node worker can get one to itself.
-  for (unsigned protoworker_i = 0; protoworker_i < scenario_prototype.any_node.length(); protoworker_i++) {
-    maximum_nodes += scenario_prototype.any_node[protoworker_i].count;
   }
 
-  // Get Minimum Node Count
-  unsigned minimum_nodes = 0;
-  minimum_nodes = exclusive_nodes;
-  if (maximum_nodes - exclusive_nodes) { // If there are any non-exclusive node configs
-    minimum_nodes++; // Then there just has to be at least one node for them
+  // Gather node controllers by names
+  typedef std::unordered_map<std::string, Nodes> NamedNodes;
+  NamedNodes named_nodes;
+  Nodes anon_nodes;
+  for (Nodes::const_iterator it = available_nodes.begin(); it != available_nodes.end(); ++it) {
+    const std::string name = it->second.name.in();
+    if (!name.empty()) {
+      named_nodes[name].insert(std::make_pair(it->first, it->second));
+    } else {
+      anon_nodes.insert(std::make_pair(it->first, it->second));
+    }
   }
 
-  // Make Sure We Have Enough Nodes
-  if (available_nodes.size() < minimum_nodes) {
-    std::stringstream ss;
-    ss
-      << "At least " << minimum_nodes << " available node" << (minimum_nodes == 1 ? " is " : "s are ")
-      << "required for this scenario.";
-    throw std::runtime_error(ss.str());
-  }
-
-  // Start Building the Scenario
-  const unsigned node_count = std::min(static_cast<unsigned>(available_nodes.size()), maximum_nodes);
+  // Each named node prototype is assigned to a named node controller with the same name
   AllocatedScenario allocated_scenario;
   allocated_scenario.expected_reports = 0;
   allocated_scenario.timeout = scenario_prototype.timeout;
-  allocated_scenario.configs.length(node_count);
-
-  // Set the Node IDs and Initialize Worker Length
-  auto ani = available_nodes.begin();
-  for (unsigned i = 0; i < node_count; i++) {
-    allocated_scenario.configs[i].node_id = ani->first;
-    allocated_scenario.configs[i].timeout = scenario_prototype.timeout;
-    allocated_scenario.configs[i].workers.length(0);
-    ani++;
+  allocated_scenario.configs.length(0);
+  for (NamedProtoNodes::const_iterator it = named_protonodes.begin(); it != named_protonodes.end(); ++it) {
+    const std::string& name = it->first;
+    if (named_nodes.find(name) == named_nodes.end()) {
+      std::string msg = "No available node with name '" + name + "'!";
+      throw std::runtime_error(msg);
+    }
+    allocate_scenario_i(allocated_scenario, it->second, named_nodes[name],
+                        scenario_prototype, name, debug_alloc);
   }
 
-  // Read in Worker Config Files
+  // Anonymous (no-named) node prototypes are assigned to the anonymous node controllers
+  const unsigned nonexclu_start = allocate_scenario_i(allocated_scenario, anon_protonodes, anon_nodes,
+                                                      scenario_prototype, "", debug_alloc);
+
   std::map<std::string, std::string> worker_configs;
-  for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
-    read_protoworker_configs(
-      test_context_, scenario_prototype.nodes[protonode_i].workers, worker_configs, debug_alloc);
-  }
-  read_protoworker_configs(
-    test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
+  read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
 
-  customize_configs(worker_configs);
-
-  // Allocate Exclusive Node Configs First
-  unsigned node_i = 0; // iter for allocated_scenario.configs
-  for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
-    auto& protonode = scenario_prototype.nodes[protonode_i];
-    if (protonode.exclusive) {
-      for (unsigned count = 0; count < protonode.count; count++) {
-        allocated_scenario.expected_reports += add_protoworkers_to_node(
-          protonode.workers, worker_configs, allocated_scenario.configs[node_i++]);
-      }
-    }
-  }
-
-  // Then Allocate Nonexclusive Node Configs
-  const unsigned nonexclusive_start = node_i;
-  for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
-    auto& protonode = scenario_prototype.nodes[protonode_i];
-    if (!protonode.exclusive) {
-      for (unsigned count = 0; count < protonode.count; count++) {
-        allocated_scenario.expected_reports += add_protoworkers_to_node(
-          protonode.workers, worker_configs, allocated_scenario.configs[node_i++]);
-        if (node_i >= node_count) {
-          node_i = nonexclusive_start;
-        }
-      }
-    }
-  }
-
-  // Finally Allocate Any-Node Worker Configs
-  for (unsigned protoworker_i = 0; protoworker_i < scenario_prototype.any_node.length(); protoworker_i++) {
-    const WorkerPrototype& protoworker = scenario_prototype.any_node[protoworker_i];
+  // Any node workers are also assigned to the anonymous node controllers
+  unsigned node_i = allocated_scenario.configs.length() - 1;
+  for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
+    const WorkerPrototype& protoworker = scenario_prototype.any_node[i];
     allocated_scenario.expected_reports += protoworker.count;
-    for (unsigned count_i = 0; count_i < protoworker.count; count_i++) {
-      add_single_worker_to_node(protoworker, worker_configs, allocated_scenario.configs[node_i++]);
-      if (node_i >= node_count) {
-        node_i = nonexclusive_start;
+    for (unsigned count_i = 0; count_i < protoworker.count; ++count_i) {
+      add_single_worker_to_node(protoworker, worker_configs, allocated_scenario.configs[node_i--]);
+      if (node_i < nonexclu_start) {
+        node_i = allocated_scenario.configs.length() - 1;
       }
     }
   }
@@ -310,13 +364,13 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   std::stringstream ss;
   ss << host << "_" << pid << std::flush;
   allocated_scenario.scenario_id = ss.str().c_str();
-
   allocated_scenario.launch_time = Builder::ZERO;
 
   return allocated_scenario;
 }
 
-void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& allocated_scenario, std::vector<Bench::WorkerReport>& worker_reports, NodeController::ReportSeq& nc_reports)
+void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& allocated_scenario,
+  std::vector<Bench::WorkerReport>& worker_reports, NodeController::ReportSeq& nc_reports)
 {
   worker_reports.clear();
   nc_reports.length(0);
