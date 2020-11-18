@@ -3290,6 +3290,7 @@ RtpsUdpDataLink::RtpsWriter::is_lagging(const ReaderInfo_rch& reader) const
 void
 RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
 {
+#ifndef NDEBUG
   static const SequenceNumber negative_one = SequenceNumber::ZERO().previous();
   for (SNRIS::const_iterator pos1 = lagging_readers_.begin(), limit = lagging_readers_.end();
        pos1 != limit; ++pos1) {
@@ -3318,6 +3319,7 @@ RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
       OPENDDS_ASSERT(preassociation_readers_.count(reader) == 0);
     }
   }
+#endif
 }
 
 void
