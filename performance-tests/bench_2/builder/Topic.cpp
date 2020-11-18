@@ -96,8 +96,8 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
     }
 
     content_filtered_topics_map[content_filtered_topics_[i].cft_name.in()] = cft;
-#endif
   }
+#endif
 
   // Bind Transport Config
   if (!transport_config_name_.empty()) {
