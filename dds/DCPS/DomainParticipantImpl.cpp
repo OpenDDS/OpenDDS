@@ -305,9 +305,9 @@ DomainParticipantImpl::delete_subscriber(
   if (!the_servant->is_clean()) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
-                ACE_TEXT("The subscriber is not empty.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
+                 ACE_TEXT("The subscriber is not empty.\n")));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
