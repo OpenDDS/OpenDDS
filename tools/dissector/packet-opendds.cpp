@@ -59,8 +59,14 @@ int hf_flags_byte_order    = -1;
 int hf_flags_first_fragment= -1;
 int hf_flags_last_fragment = -1;
 
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(3, 4, 0)
+#  define OPENDDS_WIRESHARK_FLAGS_ARRAY_TYPE int* const
+#else
+#  define OPENDDS_WIRESHARK_FLAGS_ARRAY_TYPE const int*
+#endif
+
 const int flags_bits = 8;
-const int* flags_fields[] = {
+static OPENDDS_WIRESHARK_FLAGS_ARRAY_TYPE flags_fields[] = {
   &hf_flags_byte_order,
   &hf_flags_first_fragment,
   &hf_flags_last_fragment,
@@ -105,7 +111,7 @@ expert_field ei_sample_payload_warning = EI_INIT;
 #endif
 
 const int sample_flags_bits = 8;
-const int* sample_flags_fields[] = {
+static OPENDDS_WIRESHARK_FLAGS_ARRAY_TYPE sample_flags_fields[] = {
   &hf_sample_flags_byte_order,
   &hf_sample_flags_coherent,
   &hf_sample_flags_historic,
@@ -118,7 +124,7 @@ const int* sample_flags_fields[] = {
 };
 
 const int sample_flags2_bits = 8;
-const int* sample_flags2_fields[] = {
+static OPENDDS_WIRESHARK_FLAGS_ARRAY_TYPE sample_flags2_fields[] = {
   &hf_sample_flags2_cdr_encap,
   &hf_sample_flags2_key_only,
   NULL
