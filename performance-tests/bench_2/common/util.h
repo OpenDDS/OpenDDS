@@ -12,26 +12,7 @@
 
 #include "Bench_Common_Export.h"
 
-namespace {
-
-uint32_t one_at_a_time_hash(const uint8_t* key, size_t length)
-{
-  size_t i = 0;
-  uint32_t hash = 0;
-  while (i != length) {
-    hash += key[i++];
-    hash += hash << 10;
-    hash ^= hash >> 6;
-  }
-  hash += hash << 3;
-  hash ^= hash >> 11;
-  hash += hash << 15;
-  return hash;
-}
-
 const ACE_Time_Value ZERO_TIME(0, 0);
-
-}
 
 namespace Bench {
 
@@ -55,6 +36,8 @@ bool Bench_Common_Export file_exists(const std::string& path);
  * Get Current UTC Time in ISO8601
  */
 std::string Bench_Common_Export iso8601(const std::chrono::system_clock::time_point& tp = std::chrono::system_clock::now());
+
+uint32_t Bench_Common_Export one_at_a_time_hash(const uint8_t* key, size_t length);
 
 }
 

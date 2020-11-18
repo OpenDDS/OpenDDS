@@ -27,10 +27,6 @@ $test->{add_transport_config} = 0;
 $test->{add_orb_log_file} = 0;
 $test->{add_pending_timeout} = 0;
 
-my $is_rtps_disc = 1;
-
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log") unless $is_rtps_disc;
-
 $test->process("worker", "worker", $config_file);
 
 $test->start_process("worker");
