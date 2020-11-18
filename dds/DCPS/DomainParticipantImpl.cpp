@@ -198,9 +198,9 @@ DomainParticipantImpl::delete_publisher(
   if (!the_servant) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
-        ACE_TEXT("Failed to obtain PublisherImpl.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
+                 ACE_TEXT("Failed to obtain PublisherImpl.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -295,9 +295,9 @@ DomainParticipantImpl::delete_subscriber(
   if (!the_servant) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
-        ACE_TEXT("Failed to obtain SubscriberImpl.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
+                 ACE_TEXT("Failed to obtain SubscriberImpl.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -316,9 +316,9 @@ DomainParticipantImpl::delete_subscriber(
   if (ret != DDS::RETCODE_OK) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
-                ACE_TEXT("Failed to delete contained entities.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
+                 ACE_TEXT("Failed to delete contained entities.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -333,9 +333,9 @@ DomainParticipantImpl::delete_subscriber(
   if (OpenDDS::DCPS::remove(subscribers_, pair) == -1) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_subscriber, ")
-                ACE_TEXT("%p\n"),
-                ACE_TEXT("remove")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_subscriber, ")
+                 ACE_TEXT("%p\n"),
+                 ACE_TEXT("remove")));
     }
     return DDS::RETCODE_ERROR;
 
@@ -412,9 +412,9 @@ DomainParticipantImpl::create_topic_i(
   if (!Qos_Helper::valid(topic_qos)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                ACE_TEXT("invalid qos.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                 ACE_TEXT("invalid qos.\n")));
     }
     return DDS::Topic::_nil();
   }
@@ -422,9 +422,9 @@ DomainParticipantImpl::create_topic_i(
   if (!Qos_Helper::consistent(topic_qos)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                ACE_TEXT("inconsistent qos.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                 ACE_TEXT("inconsistent qos.\n")));
     }
     return DDS::Topic::_nil();
   }
@@ -441,9 +441,9 @@ DomainParticipantImpl::create_topic_i(
     if (topic_descrs_.count(topic_name)) {
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("DomainParticipantImpl::create_topic, ")
-          ACE_TEXT("can't create a Topic due to name \"%C\" already in use ")
-          ACE_TEXT("by a TopicDescription.\n"), topic_name));
+                   ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                   ACE_TEXT("can't create a Topic due to name \"%C\" already in use ")
+                   ACE_TEXT("by a TopicDescription.\n"), topic_name));
       }
       return 0;
     }
@@ -521,9 +521,9 @@ DomainParticipantImpl::create_topic_i(
     if (!new_topic) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_WARNING,
-                    ACE_TEXT("(%P|%t) WARNING: ")
-                    ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                    ACE_TEXT("create_new_topic failed.\n")));
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                   ACE_TEXT("create_new_topic failed.\n")));
       }
       return DDS::Topic::_nil();
     }
@@ -532,9 +532,9 @@ DomainParticipantImpl::create_topic_i(
       if (new_topic->enable() != DDS::RETCODE_OK) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_WARNING,
-                      ACE_TEXT("(%P|%t) WARNING: ")
-                      ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                      ACE_TEXT("enable failed.\n")));
+                     ACE_TEXT("(%P|%t) WARNING: ")
+                     ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                     ACE_TEXT("enable failed.\n")));
         }
         return DDS::Topic::_nil();
       }
@@ -567,9 +567,9 @@ DomainParticipantImpl::delete_topic_i(
     if (!the_topic_servant) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-          ACE_TEXT("%p\n"),
-          ACE_TEXT("failed to obtain TopicImpl.")));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
+                   ACE_TEXT("%p\n"),
+                   ACE_TEXT("failed to obtain TopicImpl.")));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -584,9 +584,9 @@ DomainParticipantImpl::delete_topic_i(
     if (the_dp_servant != this) {
       if (DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-          ACE_TEXT("will return PRECONDITION_NOT_MET because this is not the ")
-          ACE_TEXT("participant that owns this topic\n")));
+                   ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
+                   ACE_TEXT("will return PRECONDITION_NOT_MET because this is not the ")
+                   ACE_TEXT("participant that owns this topic\n")));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -595,9 +595,9 @@ DomainParticipantImpl::delete_topic_i(
       // this topic and the spec requires delete_topic() to fail with the error:
       if (DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-          ACE_TEXT("will return PRECONDITION_NOT_MET because there are still ")
-          ACE_TEXT("outstanding references to this topic\n")));
+                   ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
+                   ACE_TEXT("will return PRECONDITION_NOT_MET because there are still ")
+                   ACE_TEXT("outstanding references to this topic\n")));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -633,9 +633,9 @@ DomainParticipantImpl::delete_topic_i(
         if (status != REMOVED) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                      ACE_TEXT("remove_topic failed with return value %d\n"), status));
-          }
+                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
+                       ACE_TEXT("remove_topic failed with return value %d\n"), status));
+           }
           return DDS::RETCODE_ERROR;
         }
 
@@ -659,8 +659,8 @@ DomainParticipantImpl::delete_topic_i(
   } catch (...) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                ACE_TEXT(" Caught Unknown Exception \n")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
+                 ACE_TEXT(" Caught Unknown Exception \n")));
     }
     ret = DDS::RETCODE_ERROR;
   }
@@ -734,8 +734,8 @@ DomainParticipantImpl::find_topic(
     } else if (status == INTERNAL_ERROR) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::find_topic - ")
-                  ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::find_topic - ")
+                   ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
       }
       return DDS::Topic::_nil();
     } else if (now < timeout_at) {
@@ -796,9 +796,9 @@ DomainParticipantImpl::create_contentfilteredtopic(
   if (CORBA::is_nil(related_topic)) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
-        ACE_TEXT("can't create a content-filtered topic due to null related ")
-        ACE_TEXT("topic.\n")));
+                 ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+                 ACE_TEXT("can't create a content-filtered topic due to null related ")
+                 ACE_TEXT("topic.\n")));
     }
     return 0;
   }
@@ -808,9 +808,9 @@ DomainParticipantImpl::create_contentfilteredtopic(
   if (topics_.count(name)) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
-        ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
-        ACE_TEXT("already in use by a Topic.\n"), name));
+                 ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+                 ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
+                 ACE_TEXT("already in use by a Topic.\n"), name));
     }
     return 0;
   }
@@ -818,9 +818,9 @@ DomainParticipantImpl::create_contentfilteredtopic(
   if (topic_descrs_.count(name)) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
-        ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
-        ACE_TEXT("already in use by a TopicDescription.\n"), name));
+                 ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+                 ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
+                 ACE_TEXT("already in use by a TopicDescription.\n"), name));
     }
     return 0;
   }
@@ -836,9 +836,9 @@ DomainParticipantImpl::create_contentfilteredtopic(
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
-        ACE_TEXT("can't create a content-filtered topic due to runtime error: ")
-        ACE_TEXT("%C.\n"), e.what()));
+                 ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+                 ACE_TEXT("can't create a content-filtered topic due to runtime error: ")
+                 ACE_TEXT("%C.\n"), e.what()));
     }
     return 0;
   }
@@ -859,9 +859,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   if (iter == topic_descrs_.end()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
-        ACE_TEXT("because it is not in the set.\n"), name.in ()));
+                 ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+                 ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+                 ACE_TEXT("because it is not in the set.\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -871,9 +871,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   if (!tdi) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
-        ACE_TEXT("failed to obtain TopicDescriptionImpl\n"), name.in()));
+                 ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+                 ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+                 ACE_TEXT("failed to obtain TopicDescriptionImpl\n"), name.in()));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -881,9 +881,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   if (tdi->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
-        ACE_TEXT("because it is used by a datareader\n"), name.in ()));
+                 ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+                 ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+                 ACE_TEXT("because it is used by a datareader\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -905,9 +905,9 @@ DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   if (topics_.count(name)) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
-        ACE_TEXT("can't create a multi topic due to name \"%C\" ")
-        ACE_TEXT("already in use by a Topic.\n"), name));
+                 ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
+                 ACE_TEXT("can't create a multi topic due to name \"%C\" ")
+                 ACE_TEXT("already in use by a Topic.\n"), name));
     }
     return 0;
   }
@@ -915,9 +915,9 @@ DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   if (topic_descrs_.count(name)) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
-        ACE_TEXT("can't create a multi topic due to name \"%C\" ")
-        ACE_TEXT("already in use by a TopicDescription.\n"), name));
+                 ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
+                 ACE_TEXT("can't create a multi topic due to name \"%C\" ")
+                 ACE_TEXT("already in use by a TopicDescription.\n"), name));
     }
     return 0;
   }
@@ -929,9 +929,9 @@ DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
-        ACE_TEXT("can't create a multi topic due to runtime error: ")
-        ACE_TEXT("%C.\n"), e.what()));
+                 ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
+                 ACE_TEXT("can't create a multi topic due to runtime error: ")
+                 ACE_TEXT("%C.\n"), e.what()));
     }
     return 0;
   }
@@ -951,9 +951,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   if (iter == topic_descrs_.end()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
-        ACE_TEXT("can't delete a multitopic \"%C\" ")
-        ACE_TEXT("because it is not in the set.\n"), mt_name.in ()));
+                 ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+                 ACE_TEXT("can't delete a multitopic \"%C\" ")
+                 ACE_TEXT("because it is not in the set.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -963,10 +963,10 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   if (!tdi) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
-        ACE_TEXT("can't delete a multitopic topic \"%C\" ")
-        ACE_TEXT("failed to obtain TopicDescriptionImpl.\n"),
-        mt_name.in()));
+                 ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+                 ACE_TEXT("can't delete a multitopic topic \"%C\" ")
+                 ACE_TEXT("failed to obtain TopicDescriptionImpl.\n"),
+                 mt_name.in()));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -974,9 +974,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   if (tdi->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
-        ACE_TEXT("can't delete a multitopic topic \"%C\" ")
-        ACE_TEXT("because it is used by a datareader.\n"), mt_name.in ()));
+                 ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+                 ACE_TEXT("can't delete a multitopic topic \"%C\" ")
+                 ACE_TEXT("because it is used by a datareader.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -1298,8 +1298,8 @@ DomainParticipantImpl::ignore_topic(
                            ignoreId)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_topic, ")
-                ACE_TEXT(" Could not ignore topic.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_topic, ")
+                 ACE_TEXT(" Could not ignore topic.\n")));
     }
   }
 
@@ -1712,8 +1712,8 @@ DomainParticipantImpl::enable()
   if (TheServiceParticipant->get_security() && !security_config_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-                ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                 ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -1733,9 +1733,9 @@ DomainParticipantImpl::enable()
     if (val_res != DDS::Security::VALIDATION_OK) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-          ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
       }
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
     }
@@ -1747,9 +1747,9 @@ DomainParticipantImpl::enable()
     if (perm_handle_ == DDS::HANDLE_NIL) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-          ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
       }
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
     }
@@ -1758,9 +1758,9 @@ DomainParticipantImpl::enable()
     if (!check_create) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-          ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
       }
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
     }
@@ -1771,9 +1771,9 @@ DomainParticipantImpl::enable()
     if (!check_part_sec_attr) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable,")
-          ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable,")
+                   ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -1782,8 +1782,8 @@ DomainParticipantImpl::enable()
       if (part_sec_attr.allow_unauthenticated_participants) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-                    ACE_TEXT("allow_unauthenticated_participants is not possible with is_rtps_protected\n")));
+                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                     ACE_TEXT("allow_unauthenticated_participants is not possible with is_rtps_protected\n")));
         }
         return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
       }
@@ -1794,9 +1794,9 @@ DomainParticipantImpl::enable()
       if (part_crypto_handle_ == DDS::HANDLE_NIL) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-                    ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
-                    se.code, se.minor_code, se.message.in()));
+                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                     ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -1810,8 +1810,8 @@ DomainParticipantImpl::enable()
     if (value.id == GUID_UNKNOWN) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-                  ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -1824,8 +1824,8 @@ DomainParticipantImpl::enable()
     if (value.id == GUID_UNKNOWN) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
-                  ACE_TEXT("add_domain_participant returned invalid id.\n")));
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("add_domain_participant returned invalid id.\n")));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -1965,11 +1965,11 @@ DomainParticipantImpl::create_new_topic(
     if (!access->get_topic_sec_attributes(perm_handle_, topic_name, sec_attr, se)) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: ")
-          ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
-          ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
-            topic_name, se.code, se.minor_code, se.message.in()));
-      }
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+                   ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
+                   topic_name, se.code, se.minor_code, se.message.in()));
+        }
       return DDS::Topic::_nil();
     }
 
@@ -1977,10 +1977,10 @@ DomainParticipantImpl::create_new_topic(
         !access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: ")
-          ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
-          ACE_TEXT("Permissions check failed to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
-            topic_name, se.code, se.minor_code, se.message.in()));
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+                   ACE_TEXT("Permissions check failed to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
+                   topic_name, se.code, se.minor_code, se.message.in()));
       }
       return DDS::Topic::_nil();
     }
@@ -2012,9 +2012,9 @@ DomainParticipantImpl::create_new_topic(
   if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
-                ACE_TEXT("%p \n"),
-                ACE_TEXT("bind")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
+                 ACE_TEXT("%p \n"),
+                 ACE_TEXT("bind")));
     }
     return DDS::Topic::_nil();
   }
@@ -2150,9 +2150,9 @@ DomainParticipantImpl::validate_publisher_qos(DDS::PublisherQos & pub_qos)
   if (!Qos_Helper::valid(pub_qos) || !Qos_Helper::consistent(pub_qos)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantImpl::validate_publisher_qos, ")
-                ACE_TEXT("invalid qos.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::validate_publisher_qos, ")
+                 ACE_TEXT("invalid qos.\n")));
     }
     return false;
   }
@@ -2172,9 +2172,9 @@ DomainParticipantImpl::validate_subscriber_qos(DDS::SubscriberQos & subscriber_q
   if (!Qos_Helper::valid(subscriber_qos) || !Qos_Helper::consistent(subscriber_qos)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantImpl::validate_subscriber_qos, ")
-                ACE_TEXT("invalid qos.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::validate_subscriber_qos, ")
+                 ACE_TEXT("invalid qos.\n")));
     }
     return false;
   }
@@ -2193,9 +2193,9 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
   if (CORBA::is_nil(a_topic)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("SubscriberImpl::create_datareader, ")
-                ACE_TEXT("topic desc is nil.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
   }
@@ -2238,9 +2238,9 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
   if (CORBA::is_nil(a_topic)) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("SubscriberImpl::create_datareader, ")
-                ACE_TEXT("topic desc is nil.\n")));
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
   }
@@ -2269,9 +2269,9 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
     if (ret != DDS::RETCODE_OK) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("DomainParticipantImpl::create_replayer, ")
-                  ACE_TEXT("enable failed.\n")));
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DomainParticipantImpl::create_replayer, ")
+                   ACE_TEXT("enable failed.\n")));
       }
       return 0;
     }
