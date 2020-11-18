@@ -8,20 +8,24 @@
 #ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 #define OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 
+#include <ace/config.h>
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "dds/DCPS/dcps_export.h"
+
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DdsSecurityCoreC.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
-class HandleRegistry : public DCPS::RcObject {
+class OpenDDS_Dcps_Export HandleRegistry : public DCPS::RcObject {
 public:
   typedef std::pair<DCPS::RepoId, DDS::Security::DatareaderCryptoHandle> RepoIdDrch;
   typedef OPENDDS_VECTOR(RepoIdDrch) DatareaderCryptoHandleList;
