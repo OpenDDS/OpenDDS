@@ -78,8 +78,7 @@
     ]
   },
   "actions": [
-    {
-      "name": "write_action_01",
+    { "name": "write_action_01",
       "type": "write",
       "writers": [ "datawriter_01" ],
       "params": [
@@ -100,8 +99,7 @@
         }
       ]
     },
-    {
-      "name": "cft_action_01",
+    { "name": "cft_action_01",
       "type": "set_cft_parameters",
       "params": [
         { "name": "content_filtered_topic_name",
