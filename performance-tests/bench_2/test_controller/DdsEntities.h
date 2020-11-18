@@ -1,15 +1,14 @@
 #ifndef DDSENTITIES_HEADER
 #define DDSENTITIES_HEADER
 
+#include "StatusListener.h"
+
+#include "BenchTypeSupportImpl.h"
+#include "PropertyStatBlock.h"
+
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-
-#include "BenchTypeSupportImpl.h"
-
-#include "PropertyStatBlock.h"
-
-#include "StatusListener.h"
 
 class DdsEntities {
 public:

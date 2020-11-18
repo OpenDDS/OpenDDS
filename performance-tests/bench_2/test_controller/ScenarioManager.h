@@ -1,12 +1,12 @@
 #ifndef SCENARIO_MANAGER_HEADER
 #define SCENARIO_MANAGER_HEADER
 
+#include "ScenarioOverrides.h"
+#include "DdsEntities.h"
+
 #include <string>
 #include <map>
 #include <vector>
-
-#include "ScenarioOverrides.h"
-#include "DdsEntities.h"
 
 /**
  * ScenarioManager is responsible for organizing nodes and planning and

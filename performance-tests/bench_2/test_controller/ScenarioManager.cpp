@@ -1,5 +1,13 @@
 #include "ScenarioManager.h"
 
+#include <util.h>
+#include <json_conversion.h>
+
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
+
+#include <ace/OS_NS_unistd.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -7,14 +15,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <unordered_map>
-
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/GuardCondition.h>
-
-#include <ace/OS_NS_unistd.h>
-
-#include <util.h>
-#include <json_conversion.h>
 
 using namespace Bench;
 using namespace Bench::TestController;

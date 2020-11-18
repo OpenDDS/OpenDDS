@@ -1,11 +1,10 @@
 #include "DdsEntities.h"
-
-#include <stdexcept>
+#include "StatusListener.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Service_Participant.h>
 
-#include "StatusListener.h"
+#include <stdexcept>
 
 using namespace Bench::NodeController;
 

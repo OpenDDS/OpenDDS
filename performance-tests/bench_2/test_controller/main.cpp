@@ -1,18 +1,9 @@
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
+#include "ScenarioOverrides.h"
+#include "ScenarioManager.h"
 
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Service_Participant.h>
-
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
+#include <PropertyStatBlock.h>
+#include <util.h>
+#include <json_conversion.h>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -23,13 +14,21 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "PropertyStatBlock.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/Service_Participant.h>
 
-#include <util.h>
-#include <json_conversion.h>
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
-#include "ScenarioOverrides.h"
-#include "ScenarioManager.h"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace Bench;
 using namespace Bench::NodeController;
