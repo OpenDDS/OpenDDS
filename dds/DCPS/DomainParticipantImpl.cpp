@@ -176,9 +176,9 @@ DomainParticipantImpl::create_publisher(
   if (OpenDDS::DCPS::insert(publishers_, pair) == -1) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_publisher, ")
-                ACE_TEXT("%p\n"),
-                ACE_TEXT("insert")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_publisher, ")
+                 ACE_TEXT("%p\n"),
+                 ACE_TEXT("insert")));
     }
     return DDS::Publisher::_nil();
   }
