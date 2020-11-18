@@ -23,7 +23,6 @@ project(ECU): dcpsexe {
 	ecu.idl
   }
 
-
   Source_Files {
     ecu.cpp
   }

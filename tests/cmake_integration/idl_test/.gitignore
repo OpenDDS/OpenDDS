@@ -3,7 +3,6 @@ ecu
 ecuC.cpp
 ecuC.h
 ecuC.inl
-ecu.cpp
 ecuS.cpp
 ecuS.h
 ecuTypeSupportC.cpp
