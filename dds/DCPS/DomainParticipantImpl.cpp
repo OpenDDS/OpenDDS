@@ -225,9 +225,9 @@ DomainParticipantImpl::delete_publisher(
   if (OpenDDS::DCPS::remove(publishers_, pair) == -1) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_publisher, ")
-                ACE_TEXT("%p\n"),
-                ACE_TEXT("remove")));
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_publisher, ")
+                 ACE_TEXT("%p\n"),
+                 ACE_TEXT("remove")));
     }
     return DDS::RETCODE_ERROR;
 
