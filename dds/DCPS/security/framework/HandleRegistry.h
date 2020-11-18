@@ -1,9 +1,11 @@
+#ifdef OPENDDS_SECURITY
+
 /*
-*
-*
-* Distributed under the OpenDDS License.
-* See: http://www.OpenDDS.org/license.html
-*/
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.OpenDDS.org/license.html
+ */
 
 #ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 #define OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
@@ -98,3 +100,4 @@ typedef DCPS::RcHandle<HandleRegistry> HandleRegistry_rch;
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
+#endif // OPENDDS_SECURITY

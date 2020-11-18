@@ -1,3 +1,5 @@
+#ifdef OPENDDS_SECURITY
+
 /*
  *
  *
@@ -326,3 +328,5 @@ HandleRegistry::erase_remote_datawriter_crypto_handle(const DCPS::RepoId& id)
 } // OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif // OPENDDS_SECURITY
