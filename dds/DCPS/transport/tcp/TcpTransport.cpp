@@ -90,7 +90,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     if (find_datalink_i(key, link)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink link[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
-      // TODO: Where do we remove?
       add_pending_connection(client, link);
       link->do_association_actions();
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -107,7 +106,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
 
     link->add_on_start_callback(client, remote.repo_id_);
-    // TODO: Where do we remove?
     add_pending_connection(client, link);
   }
 
@@ -236,7 +234,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     if (find_datalink_i(key, link)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink link[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
-      // TODO: Where do we remove?
       add_pending_connection(client, link);
       link->do_association_actions();
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -254,7 +251,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     }
 
     link->add_on_start_callback(client, remote.repo_id_);
-    // TODO: Where do we remove?
     add_pending_connection(client, link);
   }
 
