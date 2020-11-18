@@ -281,6 +281,12 @@ private:
     RepoId dst_guid_;
     RepoIdSet to_guids_;
     RTPS::Submessage sm_;
+
+    void reset_destination()
+    {
+      dst_guid_ = GUID_UNKNOWN;
+      to_guids_.clear();
+    }
   };
   typedef OPENDDS_VECTOR(MetaSubmessage) MetaSubmessageVec;
 

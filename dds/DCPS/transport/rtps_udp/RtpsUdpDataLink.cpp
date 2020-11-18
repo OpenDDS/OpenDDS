@@ -3681,7 +3681,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     meta_submessage.to_guids_ = additional_guids;
     meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
     meta_submessages.push_back(meta_submessage);
-    meta_submessage.to_guids_.clear();
+    meta_submessage.reset_destination();
   }
 
   // Directed, non-final.
@@ -3697,6 +3697,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
       meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
       meta_submessages.push_back(meta_submessage);
+      meta_submessage.reset_destination();
     }
   }
 
@@ -3715,7 +3716,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         meta_submessage.to_guids_.insert(pos->first);
       }
       meta_submessages.push_back(meta_submessage);
-      meta_submessage.to_guids_.clear();
+      meta_submessage.reset_destination();
     } else {
       for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
            snris_pos != snris_limit; ++snris_pos) {
@@ -3732,6 +3733,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
           meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
           meta_submessages.push_back(meta_submessage);
+          meta_submessage.reset_destination();
         }
       }
     }
@@ -3752,6 +3754,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         meta_submessage.sm_.heartbeat_sm().lastSN.low = sn.getLow();
         meta_submessage.sm_.heartbeat_sm().lastSN.high = sn.getHigh();
         meta_submessages.push_back(meta_submessage);
+        meta_submessage.reset_destination();
       }
     }
     readers_expecting_heartbeat_.clear();
