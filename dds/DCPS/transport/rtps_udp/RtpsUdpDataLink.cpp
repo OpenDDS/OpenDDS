@@ -3232,38 +3232,36 @@ void
 RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
                                                 SequenceNumber previous_max_sn)
 {
-  if (reader_id == GUID_UNKNOWN) {
-    // All readers that have acked previous_max_sn are now lagging.
-    // Move leader_readers_[previous_max_sn] to lagging_readers_[previous_max_sn].
-    SNRIS::iterator leading_pos = leading_readers_.find(previous_max_sn);
-    SNRIS::iterator lagging_pos = lagging_readers_.find(previous_max_sn);
-    if (leading_pos != leading_readers_.end()) {
-      if (lagging_pos != lagging_readers_.end()) {
-        lagging_pos->second->readers.insert(leading_pos->second->readers.begin(), leading_pos->second->readers.end());
-      } else {
-        lagging_readers_[previous_max_sn] = leading_pos->second;
-      }
-      leading_readers_.erase(leading_pos);
-    }
-  } else {
-    // Move a specific reader.
-    const ReaderInfoMap::iterator iter = remote_readers_.find(reader_id);
-    if (iter == remote_readers_.end()) {
-      return;
-    }
-
-    const ReaderInfo_rch reader = iter->second;
-
 #ifdef OPENDDS_SECURITY
-    if (is_pvs_writer_) {
+    if (!is_pvs_writer_) {
+#endif
+      // All readers that have acked previous_max_sn are now lagging.
+      // Move leader_readers_[previous_max_sn] to lagging_readers_[previous_max_sn].
+      SNRIS::iterator leading_pos = leading_readers_.find(previous_max_sn);
+      SNRIS::iterator lagging_pos = lagging_readers_.find(previous_max_sn);
+      if (leading_pos != leading_readers_.end()) {
+        if (lagging_pos != lagging_readers_.end()) {
+          lagging_pos->second->readers.insert(leading_pos->second->readers.begin(), leading_pos->second->readers.end());
+        } else {
+          lagging_readers_[previous_max_sn] = leading_pos->second;
+        }
+        leading_readers_.erase(leading_pos);
+      }
+#ifdef OPENDDS_SECURITY
+    } else {
+      // Move a specific reader.
+      const ReaderInfoMap::iterator iter = remote_readers_.find(reader_id);
+      if (iter == remote_readers_.end()) {
+        return;
+      }
+
+      const ReaderInfo_rch& reader = iter->second;
       reader->max_pvs_sn_ = max_sn_;
+      const SequenceNumber acked_sn = reader->acked_sn();
+      snris_erase(leading_readers_, acked_sn, reader);
+      snris_insert(lagging_readers_, reader);
     }
 #endif
-
-    const SequenceNumber acked_sn = reader->acked_sn();
-    snris_erase(leading_readers_, acked_sn, reader);
-    snris_insert(lagging_readers_, reader);
-  }
 }
 
 void
