@@ -64,4 +64,3 @@ DataWriterListenerImpl::on_publication_lost (
     ::OpenDDS::DCPS::PublicationLostStatus const & /* status */)
 {
 }
-

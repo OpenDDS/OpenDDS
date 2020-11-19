@@ -106,4 +106,3 @@ DataSampleElement::get_handle() const
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-

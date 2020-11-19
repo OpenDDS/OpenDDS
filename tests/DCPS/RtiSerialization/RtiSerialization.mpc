@@ -39,4 +39,3 @@ project(DDS*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
     DataReaderListener.cpp
   }
 }
-

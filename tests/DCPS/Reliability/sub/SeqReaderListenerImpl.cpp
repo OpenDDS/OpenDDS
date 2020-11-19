@@ -47,4 +47,3 @@ SeqReaderListenerImpl::take_samples(
     }
   }
 }
-

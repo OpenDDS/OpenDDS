@@ -186,4 +186,3 @@ void DataReaderListenerImpl::on_sample_lost(
     ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")
   ));
 }
-

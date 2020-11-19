@@ -893,7 +893,7 @@ PublisherImpl::assert_liveliness_by_participant()
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {
-    DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
+    const DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
 
     if (dw_ret != DDS::RETCODE_OK) {
       ret = dw_ret;

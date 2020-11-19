@@ -8,8 +8,11 @@
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 #include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
 #include <ace/SString.h>
+#include "ace/Time_Value.h"
 
 #include "Bench_Common_Export.h"
+
+const ACE_Time_Value ZERO_TIME(0, 0);
 
 namespace Bench {
 
@@ -33,6 +36,8 @@ bool Bench_Common_Export file_exists(const std::string& path);
  * Get Current UTC Time in ISO8601
  */
 std::string Bench_Common_Export iso8601(const std::chrono::system_clock::time_point& tp = std::chrono::system_clock::now());
+
+uint32_t Bench_Common_Export one_at_a_time_hash(const uint8_t* key, size_t length);
 
 }
 

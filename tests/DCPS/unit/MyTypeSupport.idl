@@ -4,5 +4,3 @@
 
 local interface MyTypeSupport : OpenDDS::DCPS::TypeSupport {
 };
-
-

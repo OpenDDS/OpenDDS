@@ -246,4 +246,3 @@ else {
 }
 
 exit $status;
-

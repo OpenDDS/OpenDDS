@@ -252,4 +252,3 @@ DDS_TEST::run(int num_messages, int msg_size)
 
   return 0;
 }
-

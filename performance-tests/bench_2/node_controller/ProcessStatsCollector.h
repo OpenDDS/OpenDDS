@@ -38,4 +38,3 @@ private:
   size_t last_user_time_;
 #endif
 };
-

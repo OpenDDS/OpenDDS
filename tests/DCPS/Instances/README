@@ -96,6 +96,3 @@ Auto run test:
     No key type data multiple writers:
 
         run_test.pl multiple_instance multiple_datawriter nokey
-
-
-

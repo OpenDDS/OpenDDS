@@ -57,37 +57,37 @@ Note: "Ideas:" are ideas that are not developed by the design but could enhance 
   and implements those virtual functions in the TransportGenerator class.
 
 
-  The SimpleTCP library should be defaults to be loaded automatically without specifing in svc.conf. 
-  
+  The SimpleTCP library should be defaults to be loaded automatically without specifing in svc.conf.
+
   Each concrete transport automatically registers with TheTransportFactory via service configurator.
 
   The SimpleUdpTransport and some other user-implemented transport (e.g. MyTransport)
-  are separated in each individual library. Each library(except SimpleTcpTransport) implements a 
-  *TransportLoader that will register with the Service Configurator during static intialization. 
-  When the Service_Object init() function is called, it will create a concrete TransportGenerator object and 
-  register with the TheTransportFactory. 
+  are separated in each individual library. Each library(except SimpleTcpTransport) implements a
+  *TransportLoader that will register with the Service Configurator during static intialization.
+  When the Service_Object init() function is called, it will create a concrete TransportGenerator object and
+  register with the TheTransportFactory.
 
   Example of svc.conf:
 
       dynamic SimpleUDPTransportLoader Service_Object * TAO:_make_DDS_SimpleUDPTransportLoader() "-type SimpleUDP"
       dynamic MyTransportLoader Service_Object * TAO:_make_DDS_MyTransportLoader() "-type MyTransport"
 
-  When the concrete transport is loaded, the concrete transport library will create a concrete 
+  When the concrete transport is loaded, the concrete transport library will create a concrete
   ConfigurationGenerator object and register with TheTransportFactory.  TheTransportFactory will call the new_factory()
   on the ConfigurationGenerator object to create a concrete TransportImplFactory object and use the transport_name
-  as the default factory id for registration. 
+  as the default factory id for registration.
   Here are some examples of the TransportImplFactoryMap entry.
 
        "SimpleTcp"->SimpleTcpTransportImplFactory*
        "SimpleUdp"->SimpleUdpTransportImplFactory*
-       "MyTransport"->MyTransportImplFactory* 
+       "MyTransport"->MyTransportImplFactory*
 
-      
+
   After the concrete transport is registered with TheTransportFactory, the configuration data loaded by the
-  Service_Participant is used to configure the new TransportImplFactory instances and the TransportImpl 
+  Service_Participant is used to configure the new TransportImplFactory instances and the TransportImpl
   instances.
 
-  I have tried to make the SimpleTcpTransport in a seperate library. Since the builtin topic requires 
+  I have tried to make the SimpleTcpTransport in a seperate library. Since the builtin topic requires
   SimpleTcpTransport configuration, this would require the SimpleTcpTransport library statically linked
   and hence the ddsdcps and SimpleTcpTransport library have dependency problem. So I have changed back
   to make the SimpleTcpTransport still be part of the ddsdcps library.
@@ -111,13 +111,13 @@ Note: "Ideas:" are ideas that are not developed by the design but could enhance 
   NOTE: we may need to make the TCP transport static when Built-in-topic is supported because BIT uses SimpleTCP.
 
 
-2) Service Participant 
+2) Service Participant
 
 
-  The Service_Participant creates the ACE_Configuration object and imports the configuration file. 
-  The name of the configuration file can be passed via command line option, otherwise use the 
+  The Service_Participant creates the ACE_Configuration object and imports the configuration file.
+  The name of the configuration file can be passed via command line option, otherwise use the
   default name "conf.ini". After the configuration file is loaded, all values are stored in the
-  ACE_Configuration object. 
+  ACE_Configuration object.
 
 
 The configuration file format:
@@ -164,16 +164,16 @@ We could make it backward compatible by having an "id=" value in the [transport_
 section.
 
 
-The *common* section configures the values currently configured by Service_Participant via 
+The *common* section configures the values currently configured by Service_Participant via
 command line. These command line options can override the values in configuration file.
- 
+
 
 The [transport_impl_<id>] sections provides the informatiopn for configuring a TransportImpl.
 It has the transport_type to tell which factory should be used to create the TransportImpl object
 and it has the configuration specific to the concrete transport.
 
 After the Service_Participant loads the configuration file, the ACE_Configuration is passed to
-the TheTransportFactory to configure the TransportImpl. See 
+the TheTransportFactory to configure the TransportImpl. See
 void TransportFactory::load_configuration (ACE_Configuration&) for details.
 
 
@@ -184,15 +184,15 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
 
   - New map:
 
-    ConfigurationGeneratorMap: transport_type->ConfigurationGenerator* 
+    ConfigurationGeneratorMap: transport_type->ConfigurationGenerator*
 
          The transport_type is the name of the concrete transport such as SimpleTcp, SimpleUdp, MyTransport ...
-    
+
          Each concrete transport library needs provide a subclass of ConfigurationGenerator and implements
          the virtual functions defined in ConfigurationGenerator class.
-         
-         1) TransportImplFactory* new_factory () 
-             
+
+         1) TransportImplFactory* new_factory ()
+
             This function returns a new concrete TransportImplFactory instance.
 
             e.g.
@@ -201,53 +201,53 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
              {
                return new SimpleTcpFactory();
              }
-         
+
          2) TransportConfiguration* new_configuration()
 
-            This function returns a new concrete TransportConfiguration instance which uses the 
+            This function returns a new concrete TransportConfiguration instance which uses the
             default(hard coded) configurations.
 
             e.g.
 
             TransportConfiguration* SimpleTcpConfigurationGenerator::new_configuration()
              {
- 		           return new SimpleTcpConfiguration ();
+               return new SimpleTcpConfiguration ();
              }
 
-         
+
     ConfigurationMap:  transport_id -> TransportConfiguration*
 
-         
+
 
 
   - current existing maps that are referenced in this document.
 
-    TransportImplFactoryMap:  factory_id->TransportImplFactory*  
+    TransportImplFactoryMap:  factory_id->TransportImplFactory*
       Note the factory_id is changed to be a string instead of an integer.
-      
+
     TransportImplMap: transport_id -> TransportImpl*
       Note the transport_id is still integer type.
-      
+
 
   - new methods:
 
      - void register_transport_generator (ACE_TString transport_type, ConfigurationGenerator*)
 
-       This function is called when the concrete transport libraries are dynamically loaded by 
+       This function is called when the concrete transport libraries are dynamically loaded by
        the service configurator. This function adds the transport_type->ConfigurationGenerator* pair
-       to the ConfigurationGeneratorMap in TheTransportFactory. 
-       
+       to the ConfigurationGeneratorMap in TheTransportFactory.
+
      - void load_configuration (ACE_Configuration&)
-         
-       This function is called by the Service_Participant after the Service_Participant reads 
-       the conf.ini to the ACE_Configuration object. TheTransportFactory uses the configuration 
+
+       This function is called by the Service_Participant after the Service_Participant reads
+       the conf.ini to the ACE_Configuration object. TheTransportFactory uses the configuration
        information in the ACE_Configuration object to create a TransportImpl objects.
-       
-       This function iterates the sections in the ACE_Configuration object. If the section is a 
-       transport section then a new concrete configuration object is created and added to the 
-       ConfigurationMap. The TransportImpl object is created upon the user's request which 
+
+       This function iterates the sections in the ACE_Configuration object. If the section is a
+       transport section then a new concrete configuration object is created and added to the
+       ConfigurationMap. The TransportImpl object is created upon the user's request which
        means when the user call create_transport_impl () funtion.
-       
+
         iterates over the sections.
 
           if it's a transport section, // The transport section has the factory_id and transport configuration info.
@@ -258,33 +258,33 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
         This function is previously implemented which return a ref counted TransportImpl object.
 
      - TransportImpl* create_transport_impl (transport_id, bool auto_config=true)
-     
-        This function is called when the transport_id is configured in the conf.ini. 
+
+        This function is called when the transport_id is configured in the conf.ini.
         If the TransportConfiguration object is not found for the transport_id in the configuration
         map then an error is reported. If the object exists then we use the transport_type information
         to create or get the TransportImplFactory object and use the factory instance to create the
         TransportImpl object.
-         
+
         pseudo code:
 
         TransportConfiguration* config;
         if (configuration_map_.find (transport_id, config) != 0) // not found
            error return // the transport_id is not defined in conf.ini
-        
+
         transport_type = config->transport_type ();
         TransportImplFactory* factory = get_or_create_factory (transport_type);
- 
+
         TransportImpl* trans_impl = factory->create_impl ();
         bind transport_id->transport_impl to impl_map_.
         if (auto_config)
            trans_impl->configure (config);
            return trans_impl;
- 
+
 
      - TransportImpl* create_transport_impl (transport_id, transport_type, bool auto_config=true)
 
         This function is called when the transport_id is not specified in the conf.ini.
-        A new TransportConfiguration object is created when the auto_config is true. If the user 
+        A new TransportConfiguration object is created when the auto_config is true. If the user
         does not want call configure() automatically then this function will not create a new
         TransportConfiguration object. The user can call create_configuration() afterwards
         and then call configure().
@@ -292,19 +292,19 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
         pseudo code:
 
           TransportImplFactory* factory = get_or_create_factory (transport_type);
- 
+
           TransportImpl* trans_impl = factory->create_impl ();
           if (auto_config)
             TransportConfiguration* config = create_configuration (transport_id, transport_type);
- 
+
             trans_impl->configure (config);
           return trans_impl;
-            
+
 
      - TransportConfiguration* get_configuration (transport_id)
 
        This function is called if the transport_id is configured in the configuration file.
-       The TransportConfiguration object is created during the time of Service_Participant 
+       The TransportConfiguration object is created during the time of Service_Participant
        initialization and added to the configuration map.
        If the transport_id is not configured then an error is reported.
 
@@ -315,25 +315,25 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
          return config;
        else
          error.
-       
+
      - TransportConfiguration* create_configuration (transport_id, transport_type)
-  
+
        This function is to create a new TransportConfiguration object from the transport_type
        and bind to the configuration_map_. If the transport_id is already in the map then an
        error is reported.
- 
+
        pseudo code:
 
        TransportGenerator* generator;
        if (generator_map_.find (transport_type, generator) ==0)
-           config = generator->new_configuration ();    
+           config = generator->new_configuration ();
            bind transport_id->config to configuration map.
        else
           error. //The transport type is not registered.
 
 
      - TransportConfiguration* get_or_create_configuration (transport_id, transport_type="")
- 
+
        This function check if the configuration map for transport_id. If it's already created
        then return it. Otherwise use the provided transport_type to create one.
 
@@ -341,7 +341,7 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
 
        TransportConfiguration* config;
        if (configuration_map_.find (transport_id, config) == 0) // found
-         // check if there is conflict between the user provided transport_type and in the 
+         // check if there is conflict between the user provided transport_type and in the
          // TransportConfiguration object.
        else
          create_configuration (transport_id, transport_type);
@@ -350,39 +350,39 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
      - TransportImplFactory* get_or_create_factory (transport_type)
 
         This function is called to provide the TransportImplFactory object for the given transport_type.
-        Note we have one TranportImplpFactory instance per transport_type. The TransportImplFactory instance 
+        Note we have one TranportImplpFactory instance per transport_type. The TransportImplFactory instance
         is registered in the TransportImplFactory map using transport_type as it's id.
 
-        This function looks the TransportImplFactory map for the "transport_type" id. If the 
-        TransportImplFactory object is created already then the reference is returned. 
+        This function looks the TransportImplFactory map for the "transport_type" id. If the
+        TransportImplFactory object is created already then the reference is returned.
         Otherwise a new TransportImplFactory object is created using the generator of the transport_type.
-   
+
 
         pseudo code:
 
         if (TransportImplFactoryMap->find (transport_type, factory_impl) == 0)
            return factory_impl;
-        
+
         TransportGenerator* generator;
         if (generator_map_.find (transport_type, generator) ==0)
-           factory_impl = generator->new_factory ();    
+           factory_impl = generator->new_factory ();
         else
            error // transport_type is not registered.
 
         return factory_impl;
-       
 
-   
+
+
 5)  Scenarios for using dds configurations:
 
 
-   - single step to create/configure TransportImpl when transport_id is configured in the conf.ini 
+   - single step to create/configure TransportImpl when transport_id is configured in the conf.ini
 
      TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, AUTO_CONFIG);
 
 
         e.g.        DevGuideExamples\DDS\Messenger
-   
+
             - Configure via conf.ini using SimpleTcp, run run_test.pl
             - Change to use SimpleUdp in conf.ini and run "run_test.pl udp"
 
@@ -390,9 +390,9 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
 
      // using the transport type's default configuration (hardcoded).
      TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, transport_type, OpenDDS::DCPS::AUTO_CONFIG);
-   
 
-	e.g.     performance-tests\DCPS\SimpleLatency
+
+        e.g.     performance-tests\DCPS\SimpleLatency
 
 
    - the user needs overwrite the configuration in the conf.ini
@@ -407,26 +407,25 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
         e.g.    performance-tests\DCPS\TCPListenerTest
 
 
-   - the user does not use file configuration and the test code overwrites the default hardcoded 
+   - the user does not use file configuration and the test code overwrites the default hardcoded
      configuration. Most tests configure in this way.
-     
+
      TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, transport_type, DONT_AUTO_CONFIG);
      TransportConfiguration* config = TheTransportFactory->create_configuration (transport_id)
      //overwrite the configuration in the conf.ini.
      config->... = ...
      trans->configure (config)
 
- 
+
 
 6) Allow the transport statically linked.
 
    To allow the transport statically linked, the user application needs include the header
    file such as SimpleUdp.h and the specify the project depend on the SimplUdp lib.
 
-   
+
    e.g of svc.conf:
 
       static DCPS_SimpleUdpLoader "-type SimpleUdp"
 
    See tests\transport\udp_simple as an example.
-

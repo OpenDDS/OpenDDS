@@ -50,4 +50,3 @@ Each test also tests the following:
   read_next_instance
   take_next_instance
   simple loan(read)/return_loan
-

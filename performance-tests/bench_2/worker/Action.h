@@ -8,7 +8,8 @@ namespace Bench {
 class Action {
 public:
   virtual ~Action() {}
-  virtual bool init(const Bench::ActionConfig& config, Bench::ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers);
+  virtual bool init(const Bench::ActionConfig& config, Bench::ActionReport& report,
+    Builder::ReaderMap& readers, Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map);
 
   virtual void start() = 0;
   virtual void stop() = 0;
@@ -23,4 +24,3 @@ protected:
 };
 
 }
-

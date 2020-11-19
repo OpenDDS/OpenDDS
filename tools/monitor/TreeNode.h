@@ -501,4 +501,3 @@ bool Monitor::TreeNode::display() const
 }
 
 #endif /* TREENODE_H */
-

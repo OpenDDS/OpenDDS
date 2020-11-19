@@ -41,8 +41,7 @@ public:
    * worker reports to come back.
    */
   void execute(const Bench::TestController::AllocatedScenario& allocated_scenario,
-    std::vector<Bench::WorkerReport>& worker_reports,
-    Bench::NodeController::ReportSeq& nc_reports);
+    Bench::TestController::Report& report);
 
 private:
   void customize_configs(std::map<std::string, std::string>& worker_configs);

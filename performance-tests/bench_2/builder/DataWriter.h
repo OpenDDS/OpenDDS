@@ -48,4 +48,3 @@ protected:
 using WriterMap = std::map<std::string, std::shared_ptr<DataWriter>>;
 
 }
-

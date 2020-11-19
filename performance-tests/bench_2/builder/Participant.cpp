@@ -7,7 +7,8 @@
 
 namespace Builder {
 
-Participant::Participant(const ParticipantConfig& config, ParticipantReport& report, ReaderMap& reader_map, WriterMap& writer_map)
+Participant::Participant(const ParticipantConfig& config, ParticipantReport& report,
+  ReaderMap& reader_map, WriterMap& writer_map, ContentFilteredTopicMap& cft_map)
   : name_(config.name.in())
   , domain_(config.domain)
   , listener_type_name_(config.listener_type_name.in())
@@ -79,8 +80,8 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
     }
   }
 
-  topics_.reset(new TopicManager(config.topics, participant_));
-  subscribers_.reset(new SubscriberManager(config.subscribers, report.subscribers, participant_, topics_, reader_map));
+  topics_.reset(new TopicManager(config.topics, participant_, cft_map));
+  subscribers_.reset(new SubscriberManager(config.subscribers, report.subscribers, participant_, topics_, reader_map, cft_map));
   publishers_.reset(new PublisherManager(config.publishers, report.publishers, participant_, topics_, writer_map));
 }
 

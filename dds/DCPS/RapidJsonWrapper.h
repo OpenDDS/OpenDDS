@@ -7,6 +7,8 @@
 #    if __has_warning("-Wclass-memaccess")
 #      pragma GCC diagnostic ignored "-Wclass-memaccess"
 #    endif
+#  elif __GNUC__ > 7
+#    pragma GCC diagnostic ignored "-Wclass-memaccess"
 #  endif
 #endif
 #include <rapidjson/document.h>
