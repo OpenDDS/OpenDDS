@@ -74,7 +74,6 @@ namespace {
     default:
       return "";
     }
-    return "";
   }
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
@@ -133,11 +132,14 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string& field_name,
+  std::string branch_helper(const std::string&,
+                            const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
-                            std::string&,
-                            const std::string&)
+                            bool,
+                            Intro&,
+                            const std::string&,
+                            bool)
   {
     be_global->impl_ <<
       "    value_writer.begin_field(\"" << field_name << "\");\n";
@@ -232,7 +234,7 @@ bool value_writer_generator::gen_struct(AST_Structure*,
 }
 
 
-bool value_writer_generator::gen_union(AST_Union*,
+bool value_writer_generator::gen_union(AST_Union* u,
                                        UTL_ScopedName* name,
                                        const std::vector<AST_UnionBranch*>& branches,
                                        AST_Type* discriminator,
@@ -257,9 +259,9 @@ bool value_writer_generator::gen_union(AST_Union*,
     be_global->impl_ <<
       "  value_writer.end_discriminator();\n";
 
-    generateSwitchForUnion("value._d()", branch_helper, branches, discriminator,
-                           "", "", type_name.c_str(), false, false);
-
+    generateSwitchForUnion(u, "value._d()", branch_helper, branches,
+                           discriminator, "", "", type_name.c_str(),
+                           false, false);
     be_global->impl_ <<
       "  value_writer.end_union();\n";
   }

@@ -74,6 +74,8 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , undirected_spdp_(true)
   , periodic_directed_spdp_(false)
+  , max_type_lookup_service_reply_period_(5, 0)
+  , use_xtypes_(true)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -608,6 +610,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->periodic_directed_spdp(bool(smInt));
+        } else if (name == "TypeLookupServiceReplyTimeout") {
+          const OPENDDS_STRING& value = it->second;
+          int timeout;
+          if (!DCPS::convertToInteger(value, timeout)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for TypeLookupServiceReplyTimeout in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
+        } else if (name == "UseXTypes") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->use_xtypes(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

@@ -7,15 +7,16 @@
 
 #include "ParameterListConverter.h"
 
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/Service_Participant.h"
-
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-
+#include "BaseMessageUtils.h"
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#  include "SecurityHelpers.h"
 #endif
+
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Service_Participant.h>
 
 #include <cstring>
 
@@ -34,6 +35,18 @@ namespace {
     const CORBA::ULong length = param_list.length();
     param_list.length(length + 1);
     param_list[length] = param;
+  }
+
+  void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info) {
+    XTypes::deserialize_type_info(type_info, param.type_information());
+  }
+
+  void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
+    Parameter param;
+    DDS::OctetSeq seq;
+    XTypes::serialize_type_info(type_info, seq);
+    param.type_information(seq);
+    add_param(param_list, param);
   }
 
   void add_param_locator_seq(ParameterList& param_list,
@@ -245,7 +258,8 @@ namespace {
       PERM_TOKEN_FIELD = 0x02,
       PROPERTY_LIST_FIELD = 0x04,
       PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
-      IDENTITY_STATUS_TOKEN_FIELD = 0x10
+      IDENTITY_STATUS_TOKEN_FIELD = 0x10,
+      EXTENDED_BUILTIN_ENDPOINTS = 0x20
     };
 
     unsigned char field_mask = 0x00;
@@ -268,6 +282,9 @@ namespace {
           break;
         case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
           field_mask |= IDENTITY_STATUS_TOKEN_FIELD;
+          break;
+        case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+          field_mask |= EXTENDED_BUILTIN_ENDPOINTS;
           break;
       }
     }
@@ -348,6 +365,10 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   param_psi.participant_security_info(pbtd.security_info);
   add_param(param_list, param_psi);
 
+  Parameter param_ebe;
+  param_ebe.extended_builtin_endpoints(pbtd.extended_builtin_endpoints);
+  add_param(param_list, param_ebe);
+
   return true;
 }
 
@@ -375,6 +396,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
         pbtd.security_info = param.participant_security_info();
+        break;
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        pbtd.extended_builtin_endpoints = param.extended_builtin_endpoints();
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -476,6 +500,13 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   add_param(param_list, be_param);
 
+#ifdef OPENDDS_SECURITY
+  Parameter ebe_param;
+  ebe_param.extended_builtin_endpoints(
+    proxy.availableExtendedBuiltinEndpoints);
+  add_param(param_list, abe_param);
+#endif
+
   // Each locator
   add_param_locator_seq(
       param_list,
@@ -521,6 +552,9 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
+#ifdef OPENDDS_SECURITY
+  proxy.availableExtendedBuiltinEndpoints = 0;
+#endif
   proxy.expectsInlineQos = false;
 
   CORBA::ULong length = param_list.length();
@@ -560,6 +594,12 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
+#ifdef OPENDDS_SECURITY
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        proxy.availableExtendedBuiltinEndpoints =
+          param.extended_builtin_endpoints();
+        break;
+#endif
       case PID_METATRAFFIC_UNICAST_LOCATOR:
         append_locator(
             proxy.metatrafficUnicastLocatorList,
@@ -712,7 +752,7 @@ bool from_param_list(const ParameterList& param_list,
       break;
     }
 
-    default : {
+    default: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
       break;
     }
@@ -731,8 +771,21 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
+{
+  DDS::DataRepresentationQosPolicy dr_qos;
+  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
+  if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
+    Parameter param;
+    param.representation(dr_qos);
+    add_param(param_list, param);
+  }
+}
+
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -743,6 +796,11 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     param._d(PID_TOPIC_NAME);
     add_param(param_list, param);
   }
+
+  if (use_xtypes) {
+    add_type_info_param(param_list, type_info);
+  }
+
   {
     Parameter param;
     param.string_data(writer_data.ddsPublicationData.type_name);
@@ -867,6 +925,8 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
+  add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value);
+
   {
     Parameter param;
     param.guid(writer_data.writerProxy.remoteWriterGuid);
@@ -902,7 +962,9 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                     DCPS::DiscoveredWriterData& writer_data)
+                     DCPS::DiscoveredWriterData& writer_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info)
 {
   // Collect the rtps_udp locators before appending them to allLocators
   DCPS::LocatorSeq rtps_udp_locators;
@@ -944,6 +1006,8 @@ bool from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
+  writer_data.ddsPublicationData.representation.value.length(1);
+  writer_data.ddsPublicationData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1022,6 +1086,11 @@ bool from_param_list(const ParameterList& param_list,
       case PID_GROUP_DATA:
         writer_data.ddsPublicationData.group_data = param.group_data();
         break;
+      case PID_DATA_REPRESENTATION:
+        if (param.representation().value.length() != 0) {
+          writer_data.ddsPublicationData.representation = param.representation();
+        }
+        break;
       case PID_ENDPOINT_GUID:
         writer_data.writerProxy.remoteWriterGuid = param.guid();
         break;
@@ -1043,6 +1112,11 @@ bool from_param_list(const ParameterList& param_list,
       case PID_PAD:
         // ignore
         break;
+      case PID_XTYPES_TYPE_INFORMATION:
+        if (use_xtypes) {
+          extract_type_info_param(param, type_info);
+        }
+        break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
           return false;
@@ -1060,6 +1134,8 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -1069,6 +1145,11 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     param._d(PID_TOPIC_NAME);
     add_param(param_list, param);
   }
+
+  if (use_xtypes) {
+    add_type_info_param(param_list, type_info);
+  }
+
   {
     Parameter param;
     param.string_data(reader_data.ddsSubscriptionData.type_name);
@@ -1198,6 +1279,8 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
+
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
   // Serialize from allLocators, rather than the unicastLocatorList
@@ -1235,7 +1318,9 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                     DCPS::DiscoveredReaderData& reader_data)
+                     DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info)
 {
   // Collect the rtps_udp locators before appending them to allLocators
 
@@ -1275,6 +1360,8 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterClassName = "";
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
+  reader_data.ddsSubscriptionData.representation.value.length(1);
+  reader_data.ddsSubscriptionData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1344,6 +1431,11 @@ bool from_param_list(const ParameterList& param_list,
       case PID_GROUP_DATA:
         reader_data.ddsSubscriptionData.group_data = param.group_data();
         break;
+      case PID_DATA_REPRESENTATION:
+        if (param.representation().value.length() != 0) {
+          reader_data.ddsSubscriptionData.representation = param.representation();
+        }
+        break;
       case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();
         break;
@@ -1370,6 +1462,11 @@ bool from_param_list(const ParameterList& param_list,
       case PID_SENTINEL:
       case PID_PAD:
         // ignore
+        break;
+      case PID_XTYPES_TYPE_INFORMATION:
+        if (use_xtypes) {
+          extract_type_info_param(param, type_info);
+        }
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -1450,9 +1547,11 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, map);
+  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
 
   to_param_list(wrapper.security_info, param_list);
   to_param_list(wrapper.data_tags, param_list);
@@ -1461,9 +1560,11 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                     DiscoveredPublication_SecurityWrapper& wrapper)
+                     DiscoveredPublication_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data) &&
+  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
                from_param_list(param_list, wrapper.security_info) &&
                from_param_list(param_list, wrapper.data_tags);
 
@@ -1472,9 +1573,11 @@ bool from_param_list(const ParameterList& param_list,
 
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, map);
+  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
 
   to_param_list(wrapper.security_info, param_list);
   to_param_list(wrapper.data_tags, param_list);
@@ -1483,9 +1586,11 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                     DiscoveredSubscription_SecurityWrapper& wrapper)
+                     DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data) &&
+  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
                from_param_list(param_list, wrapper.security_info) &&
                from_param_list(param_list, wrapper.data_tags);
 

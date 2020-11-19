@@ -10,6 +10,7 @@
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #include <MultiTopicTestTypeSupportImpl.h>
 

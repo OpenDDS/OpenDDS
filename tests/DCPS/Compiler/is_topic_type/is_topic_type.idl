@@ -9,6 +9,26 @@ struct TopicStruct {
   long value;
 };
 
+@topic(platform="*")
+struct TopicStarStruct {
+  long value;
+};
+
+@topic(platform="DDS")
+struct TopicDdsStruct {
+  long value;
+};
+
+@topic(platform="OpenDDS")
+struct TopicOpenDdsStruct {
+  long value;
+};
+
+@topic(platform="Invalid")
+struct TopicInvalidStruct {
+  long value;
+};
+
 @nested
 struct NestedStruct {
   long value;

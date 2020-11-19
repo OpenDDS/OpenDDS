@@ -102,7 +102,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     bytes -= block_size;
   }
 
-  DCPS::Serializer serializer(head, DCPS::Serializer::SWAP_BE);
+  DCPS::Serializer serializer(head, STUN::encoding);
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
@@ -650,25 +650,23 @@ void
 RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
                                              const RTPS::Submessage& postfix)
 {
-  size_t size = 0, padding = 0;
-  gen_find_size(secure_prefix_, size, padding);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_BIG);
+  size_t size = serialized_size(encoding, secure_prefix_);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
-    gen_find_size(secure_submessages_[i], size, padding);
+    serialized_size(encoding, size, secure_submessages_[i]);
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
       size += secure_sample_.sample_->size();
     }
-    if ((size + padding) % 4) {
-      padding += 4 - ((size + padding) % 4);
-    }
+    align(size, RTPS::SMHDR_SZ);
   }
-  gen_find_size(postfix, size, padding);
+  serialized_size(encoding, size, postfix);
 
-  ACE_Message_Block mb(size + padding);
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  ACE_Message_Block mb(size);
+  Serializer ser(&mb, encoding);
   ser << secure_prefix_;
-  ser.align_r(4);
+  ser.align_r(RTPS::SMHDR_SZ);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
     ser << secure_submessages_[i];
@@ -679,7 +677,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
       ser.write_octet_array(sample_bytes,
                             static_cast<unsigned int>(secure_sample_.sample_->length()));
     }
-    ser.align_r(4);
+    ser.align_r(RTPS::SMHDR_SZ);
   }
   ser << postfix;
 
@@ -713,13 +711,14 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
     i += static_cast<unsigned int>(mb->length());
   }
 
-  size_t iQosSize = 0, iQosPadding = 0;
-  gen_find_size(submsg.inlineQos, iQosSize, iQosPadding);
-  iQos.length(static_cast<unsigned int>(iQosSize + iQosPadding));
+  const Encoding encoding(Encoding::KIND_XCDR1,
+    static_cast<Endianness>(submsg.smHeader.flags & 1));
+  size_t iQosSize = 0;
+  serialized_size(encoding, iQosSize, submsg.inlineQos);
+  iQos.length(static_cast<unsigned int>(iQosSize));
   const char* iQos_raw = reinterpret_cast<const char*>(iQos.get_buffer());
   ACE_Message_Block iQosMb(iQos_raw, iQos.length());
-  Serializer ser(&iQosMb, ACE_CDR_BYTE_ORDER != (submsg.smHeader.flags & 1),
-                 Serializer::ALIGN_CDR);
+  Serializer ser(&iQosMb, encoding);
   ser << submsg.inlineQos;
 
   SecurityException ex = {"", 0, 0};

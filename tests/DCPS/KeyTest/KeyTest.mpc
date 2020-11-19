@@ -50,7 +50,7 @@ project(DDS*KeyMarshalling) : dcpsexe, dcps_test, dcps_transports_for_test, dcps
 }
 
 
-project(*MD5): dcps_rtpsexe, dcps_test {
+project(*MD5): dcps_test {
   exename   = *
 
   Idl_Files {

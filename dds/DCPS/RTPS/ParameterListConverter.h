@@ -7,14 +7,16 @@
 #ifndef PARAMETER_LIST_CONVERTER_H
 #define PARAMETER_LIST_CONVERTER_H
 
-#include "dds/DCPS/RTPS/rtps_export.h"
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-
-#include "dds/DCPS/RTPS/ICE/Ice.h"
+#include "rtps_export.h"
+#include "RtpsCoreC.h"
 
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/RtpsSecurityC.h"
+#include "RtpsSecurityC.h"
 #endif
+
+#include "ICE/Ice.h"
+
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -105,24 +107,35 @@ bool from_param_list(const ParameterList& param_list,
 // OpenDDS::DCPS::DiscoveredWriterData
 
 OpenDDS_Rtps_Export
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader = false);
+
+OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                    DCPS::DiscoveredWriterData& writer_data);
+                     DCPS::DiscoveredWriterData& writer_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info);
 
 // OpenDDS::DCPS::DiscoveredReaderData
 
 OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                     DCPS::DiscoveredReaderData& reader_data);
+                     DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info);
 
 #ifdef OPENDDS_SECURITY
 // DDS::Security::EndpointSecurityInfo
@@ -150,22 +163,30 @@ bool from_param_list(const ParameterList& param_list,
 OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                     DiscoveredPublication_SecurityWrapper& wrapper);
+                     DiscoveredPublication_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info);
 
 // DiscoveredSubscription_SecurityWrapper
 
 OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   bool use_xtypes,
+                   const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                     DiscoveredSubscription_SecurityWrapper& wrapper);
+                     DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info);
 
 // Extensions for ICE
 

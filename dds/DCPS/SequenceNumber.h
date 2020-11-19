@@ -47,14 +47,14 @@ public:
     } else {
       ++this->low_;
     }
-    return *this ;
+    return *this;
   }
 
   /// Post-increment.
   SequenceNumber operator++(int) {
     SequenceNumber value(*this);
     ++*this;
-    return value ;
+    return value;
   }
 
   SequenceNumber previous() const {
@@ -70,7 +70,7 @@ public:
     } else {
       --retVal.low_;
     }
-    return retVal ;
+    return retVal;
   }
 
   void setValue(Value value) {
@@ -101,11 +101,11 @@ public:
   /// Derive a full suite of logical operations.
   bool operator==(const SequenceNumber& rvalue) const {
     return (this->high_ == rvalue.high_) &&
-           (this->low_ == rvalue.low_) ;
+           (this->low_ == rvalue.low_);
   }
   bool operator!=(const SequenceNumber& rvalue) const {
     return (this->high_ != rvalue.high_) ||
-           (this->low_ != rvalue.low_) ;
+           (this->low_ != rvalue.low_);
   }
   bool operator>=(const SequenceNumber& rvalue) const {
     return !(*this  < rvalue);
@@ -193,10 +193,11 @@ operator+(int lhs, const SequenceNumber& rhs)
   return rhs + lhs;
 }
 
-inline void
-gen_find_size(const SequenceNumber& /*sn*/, size_t& size, size_t& padding) {
-  find_size_ulong(size, padding);
-  size += gen_max_marshaled_size(CORBA::Long());
+inline
+void serialized_size(const Encoding& encoding, size_t& size,
+  const SequenceNumber& /*sn*/)
+{
+  primitive_serialized_size_ulong(encoding, size, 2);
 }
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;

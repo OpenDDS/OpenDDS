@@ -459,6 +459,28 @@ public:
     periodic_directed_spdp_ = value;
   }
 
+  DCPS::TimeDuration max_type_lookup_service_reply_period() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return max_type_lookup_service_reply_period_;
+  }
+  void max_type_lookup_service_reply_period(const DCPS::TimeDuration& x)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    max_type_lookup_service_reply_period_ = x;
+  }
+
+  bool use_xtypes() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_;
+  }
+  void use_xtypes(bool use_xtypes)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    use_xtypes_ = use_xtypes;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -492,6 +514,8 @@ private:
   size_t sedp_max_message_size_;
   bool undirected_spdp_;
   bool periodic_directed_spdp_;
+  DCPS::TimeDuration max_type_lookup_service_reply_period_;
+  bool use_xtypes_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -608,6 +632,9 @@ public:
 
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
+
+  bool use_xtypes() const { return config_->use_xtypes(); }
+  void use_xtypes(bool xt) { config_->use_xtypes(xt); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

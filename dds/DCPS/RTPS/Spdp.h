@@ -158,21 +158,27 @@ public:
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
-  u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
+  u_short get_sedp_port() const { return sedp_->local_address().get_port_number(); }
 
 #ifdef ACE_HAS_IPV6
   u_short get_ipv6_spdp_port() const { return tport_ ? tport_->ipv6_uni_port_ : 0; }
 
-  u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
+  u_short get_ipv6_sedp_port() const { return sedp_->ipv6_local_address().get_port_number(); }
 #endif
 
   void rtps_relay_only_now(bool f);
   void use_rtps_relay_now(bool f);
   void use_ice_now(bool f);
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
-  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_->rtps_relay_address(address); }
+  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
+#ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const
+  {
+    return available_extended_builtin_endpoints_;
+  }
+#endif
 
   ICE::Endpoint* get_ice_endpoint_if_added();
 
@@ -182,7 +188,7 @@ public:
 #endif
                                       );
 protected:
-  Sedp& endpoint_manager() { return sedp_; }
+  Sedp& endpoint_manager() { return *sedp_; }
   void remove_discovered_participant_i(DiscoveredParticipantIter iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -398,7 +404,7 @@ private:
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
-  Sedp sedp_;
+  DCPS::RcHandle<Sedp>  sedp_;
 
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::RepoId) TimeQueue;
 
@@ -409,6 +415,7 @@ private:
   TimeQueue lease_expirations_;
 
 #ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 
@@ -425,8 +432,11 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
+  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
+                 const ICE::AgentInfo& agent_info);
+  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+                DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);
   TimeQueue handshake_deadlines_;

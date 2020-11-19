@@ -2,6 +2,11 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
 
   exename = publisher
 
+  after += opendds_tests_transport_testmsg
+  libs += opendds_tests_transport_testmsg
+  libpaths += $(TEST_ROOT)/tests/transport/TestMsg
+  includes += $(TEST_ROOT)/tests/transport/TestMsg
+
   Source_Files {
     AppConfig.cpp
     publisher.cpp
@@ -11,6 +16,11 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
 project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
 
   exename = subscriber
+
+  after += opendds_tests_transport_testmsg
+  libs += opendds_tests_transport_testmsg
+  libpaths += $(TEST_ROOT)/tests/transport/TestMsg
+  includes += $(TEST_ROOT)/tests/transport/TestMsg
 
   Source_Files {
     AppConfig.cpp

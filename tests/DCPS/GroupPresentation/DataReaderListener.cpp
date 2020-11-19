@@ -11,6 +11,7 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"

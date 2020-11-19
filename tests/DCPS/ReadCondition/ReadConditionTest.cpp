@@ -5,6 +5,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include "GeneratedCode/MessengerTypeSupportImpl.h"
 #include <iostream>

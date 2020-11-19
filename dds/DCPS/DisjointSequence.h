@@ -82,8 +82,8 @@ public:
   /// bit_index is 0-based.
   /// Precondition: the array 'bits' has at least ceil(num_bits / 32) entries.
   bool insert(SequenceNumber value,
-              CORBA::ULong num_bits,
-              const CORBA::Long bits[]);
+              ACE_CDR::ULong num_bits,
+              const ACE_CDR::Long bits[]);
 
   /// Insert the intersection of range and filter
   bool insert_filtered(const SequenceRange& range, const DisjointSequence& filter);
@@ -97,9 +97,9 @@ public:
   /// true, the 1's in the bitmap represent the missing_sequence_ranges()
   /// instead of the present_sequence_ranges().
   /// Precondition: the array 'bits' has 'length' entries allocated.
-  bool to_bitmap(CORBA::Long bitmap[],
-                 CORBA::ULong length,
-                 CORBA::ULong& num_bits,
+  bool to_bitmap(ACE_CDR::Long bitmap[],
+                 ACE_CDR::ULong length,
+                 ACE_CDR::ULong& num_bits,
                  bool invert = false) const;
 
   /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
@@ -134,13 +134,13 @@ private:
 
 public:
   /// Set the bits in range [low, high] in the bitmap, updating num_bits.
-  static bool fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
-                                CORBA::Long bitmap[], CORBA::ULong length,
-                                CORBA::ULong& num_bits);
+  static bool fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
+                                ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
+                                ACE_CDR::ULong& num_bits);
 
   /// Return the number of CORBA::Longs required for the bitmap representation of
   /// sequence numbers between low and high, inclusive (maximum 8 longs).
-  static CORBA::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
+  static ACE_CDR::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
 };
 
 } // namespace DCPS

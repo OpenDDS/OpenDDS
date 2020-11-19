@@ -15,6 +15,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "XTypes/TypeLookupService.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsCoreTypeSupportC.h"
@@ -371,6 +372,8 @@ public:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
+  XTypes::TypeLookupService_rch get_type_lookup_service() { return type_lookup_service_; }
+
 #if defined(OPENDDS_SECURITY)
   void set_security_config(const Security::SecurityConfig_rch& config);
 
@@ -565,6 +568,8 @@ private:
   MonotonicTimePoint last_liveliness_activity_;
 
   virtual int handle_exception(ACE_HANDLE fd);
+
+  XTypes::TypeLookupService_rch type_lookup_service_;
 };
 
 } // namespace DCPS

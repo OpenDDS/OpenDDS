@@ -20,6 +20,7 @@
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
 #include "MonitorFactory.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
@@ -358,6 +359,14 @@ ReplayerImpl::enable()
 
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+
+
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
@@ -365,7 +374,8 @@ ReplayerImpl::enable()
                            this,
                            this->qos_,
                            trans_conf_info,
-                           this->publisher_qos_);
+                           this->publisher_qos_,
+                           type_info);
 
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
@@ -1049,12 +1059,11 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
 
   // header_data.publication_id_ = publication_id_;
   // header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
   ACE_Message_Block* tmp;
   ACE_NEW_MALLOC_RETURN(tmp,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
+                        ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(),   //cont
                                           0,   //data

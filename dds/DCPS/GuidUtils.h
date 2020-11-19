@@ -5,15 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef GUIDUTILS_H
-#define GUIDUTILS_H
+#ifndef OPENDDS_DDS_DCPS_GUIDUTILS_H
+#define OPENDDS_DDS_DCPS_GUIDUTILS_H
 
-#include "dds/DdsDcpsGuidC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"
+#include "PoolAllocator.h"
+#include "Serializer.h"
 
-#include "tao/Basic_Types.h"
+#include <dds/DdsDcpsGuidC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <tao/Basic_Types.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #include <iosfwd>
@@ -46,6 +48,11 @@ const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER        = { {0x00,0x01,
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER        = { {0x00,0x01,0x00}, 0xc7};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xc2};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xc7};
+// From XTypes spec:
+const EntityId_t ENTITYID_TL_SVC_REQ_WRITER                      = { {0x00,0x03,0x00}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REQ_READER                      = { {0x00,0x03,0x00}, 0xc4};
+const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER                    = { {0x00,0x03,0x01}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REPLY_READER                    = { {0x00,0x03,0x01}, 0xc4};
 ///@}
 
 /// Nil value for GUID.
@@ -101,11 +108,7 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
 
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
-inline size_t
-gen_max_marshaled_size(const GUID_t&)
-{
-  return 16;
-}
+const size_t guid_cdr_size = 16;
 
 #ifndef OPENDDS_SAFETY_PROFILE
 inline bool
@@ -204,4 +207,4 @@ bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* GUIDUTILS_H */
+#endif /* OPENDDS_DDS_DCPS_GUIDUTILS_H */

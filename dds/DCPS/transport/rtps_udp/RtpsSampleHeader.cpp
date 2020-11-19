@@ -79,10 +79,9 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     return;
   }
 
-  const bool little_endian = flags & FLAG_E;
   const size_t starting_length = mb.total_length();
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER != little_endian,
-                 Serializer::ALIGN_CDR);
+  Serializer ser(&mb, Encoding::KIND_XCDR1,
+    (flags & FLAG_E) ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   ACE_CDR::UShort octetsToNextHeader = 0;
 
@@ -147,8 +146,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
     frag_ = (kind == DATA_FRAG);
 
-    // marshaled_size_ is # of bytes of submessage we have read from "mb"
-    marshaled_size_ = starting_length - mb.total_length();
+    // serialized_size_ is # of bytes of submessage we have read from "mb"
+    serialized_size_ = starting_length - mb.total_length();
 
     const ACE_CDR::UShort remaining = static_cast<ACE_CDR::UShort>(message_length_ - SMHDR_SZ);
 
@@ -168,16 +167,16 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       // These Submessages have a payload which we haven't deserialized yet.
       // The TransportReceiveStrategy will know this via message_length().
       // octetsToNextHeader does not count the SubmessageHeader (4 bytes)
-      message_length_ = octetsToNextHeader + SMHDR_SZ - marshaled_size_;
+      message_length_ = octetsToNextHeader + SMHDR_SZ - serialized_size_;
     } else {
       // These Submessages _could_ have extra data that we don't know about
       // (from a newer minor version of the RTPS spec).  Either way, indicate
       // to the TransportReceiveStrategy that there is no data payload here.
       message_length_ = 0;
-      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(marshaled_size_);
+      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(serialized_size_);
       if (octetsToNextHeader + SMHDR_SZ > marshaled) {
         valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ - marshaled);
-        marshaled_size_ = octetsToNextHeader + SMHDR_SZ;
+        serialized_size_ = octetsToNextHeader + SMHDR_SZ;
       }
     }
   }
@@ -263,6 +262,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
             rds.sample_.reset(new ACE_Message_Block(20));
+            // TODO(iguessthislldo) Convert to Encoding
             // CDR_BE encapsuation scheme (endianness is not used for key hash)
             rds.sample_->copy("\x00\x00\x00\x00", 4);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
@@ -292,6 +292,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     }
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
+      // TODO(iguessthislldo: Convert to use Encoding
       // Peek at the byte order from the encapsulation containing the payload.
       opendds.byte_order_ = payload_byte_order(rds);
     }

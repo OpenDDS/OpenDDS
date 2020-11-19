@@ -17,6 +17,8 @@
 #include <iostream>
 #include <sstream>
 
+using namespace OpenDDS::DCPS;
+
 SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& ad)
   : config(ac), index(readerIndex), done_(false)
 {
@@ -48,9 +50,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(),
-                 sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                 Serializer::ALIGN_CDR);
+  Serializer ser(sample.sample_.get(), Encoding::KIND_XCDR1,
+                 sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   TestMsg data;
   if (!deserializeData(data, ser)) {
     return;
@@ -92,6 +93,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 // ========== ========== ========== ========== ========== ========== ==========
 // private:
 bool SimpleDataReader::deserializeEncapsulationHeader(Serializer& s) {
+  // TODO(iguessthislldo): convert
   ACE_CDR::ULong encap;
   return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
 }

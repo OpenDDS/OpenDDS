@@ -15,3 +15,6 @@
 /SatelliteS.h
 /SatelliteS.inl
 /SatelliteS.cpp
+/publisher_ready.txt
+/subscriber_finished.txt
+/subscriber_ready.txt

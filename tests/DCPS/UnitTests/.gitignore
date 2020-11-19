@@ -15,3 +15,5 @@
 /UnitTests_RtpsSequenceNumberSet
 /UnitTests_SequenceNumber
 /UnitTests_TimeTSubtraction
+/UnitTests_XTypesAssignability
+/UnitTests_Serializer

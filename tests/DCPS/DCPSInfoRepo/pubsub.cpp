@@ -9,6 +9,7 @@
 #include "dds/DCPS/MonitorFactory.h"
 
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -170,6 +171,11 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
 
+  OpenDDS::XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
   pubId = disc->add_publication(domain,
@@ -178,7 +184,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                 dwImpl.in(),
                                 dwQos.in(),
                                 tii,
-                                pQos.in());
+                                pQos.in(),
+                                type_info);
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubId)
     {
       failed = true;
@@ -282,6 +289,11 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
   *subQos = TheServiceParticipant->initial_SubscriberQos();
+
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   subId = disc->add_subscription(domain,
                                  subPartId,
                                  subTopicId,
@@ -289,7 +301,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                  drQos.in(),
                                  tii,
                                  subQos.in(),
-                                 "", "", DDS::StringSeq());
+                                 "", "", DDS::StringSeq(),
+                                 type_info);
   if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
     {
       failed = true;
@@ -334,13 +347,19 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
+
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   pubIncQosId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
                                 &dwIncQosImpl,
                                 dwIncQosQos.in(),
                                 tii,
-                                pQos.in());
+                                pQos.in(),
+                                type_info);
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubIncQosId)
     {
       failed = true;

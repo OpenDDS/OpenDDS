@@ -524,10 +524,12 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
 
   void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
-  void bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_map,
-                               MetaSubmessageIterVecVec& meta_submessage_bundles,
-                               OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
-                               OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes);
+  void bundle_mapped_meta_submessages(
+    const Encoding& encoding,
+    AddrDestMetaSubmessageMap& adr_map,
+    MetaSubmessageIterVecVec& meta_submessage_bundles,
+    OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+    OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes);
   void send_bundled_submessages(MetaSubmessageVec& meta_submessages);
 
   RepoIdSet pending_reliable_readers_;

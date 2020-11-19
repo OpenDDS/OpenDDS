@@ -270,6 +270,8 @@ private:
   void error_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/);
 };
 
+const DCPS::Encoding encoding(DCPS::Encoding::KIND_UNALIGNED_CDR, DCPS::ENDIAN_BIG);
+
 } // namespace STUN
 } // namespace OpenDDS
 

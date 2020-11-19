@@ -196,6 +196,10 @@ public:
   virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
   virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
+  void cleanup_type_lookup_data(const GuidPrefix_t& prefix,
+                                const XTypes::TypeIdentifier& ti,
+                                bool secure);
+
 #ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
@@ -213,13 +217,13 @@ public:
                     const DDS::DomainParticipantQos& qos,
                     const EndpointRegistry& registry)
     : LocalParticipant<StaticEndpointManager>(qos)
-    , endpoint_manager_(guid, lock_, registry, *this)
+    , endpoint_manager_(DCPS::make_rch<StaticEndpointManager>(guid, ref(lock_), ref(registry), ref(*this)))
   {}
 
   void init_bit(const DDS::Subscriber_var& bit_subscriber)
   {
     bit_subscriber_ = bit_subscriber;
-    endpoint_manager_.init_bit();
+    endpoint_manager_->init_bit();
   }
 
   void fini_bit()
@@ -228,9 +232,9 @@ public:
   }
 
 private:
-  virtual StaticEndpointManager& endpoint_manager() { return endpoint_manager_; }
+  virtual StaticEndpointManager& endpoint_manager() { return *endpoint_manager_; }
 
-  StaticEndpointManager endpoint_manager_;
+  DCPS::RcHandle<StaticEndpointManager> endpoint_manager_;
 };
 
 class OpenDDS_Dcps_Export StaticDiscovery

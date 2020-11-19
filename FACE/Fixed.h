@@ -384,8 +384,9 @@ inline Fixed_T<Digits, Scale>::Fixed_T(const Fixed& f)
 }
 
 template <unsigned int Digits, unsigned int Scale>
-inline void
-gen_find_size(const Fixed_T<Digits, Scale>&, size_t& size, size_t&)
+inline
+void serialized_size(const DCPS::Encoding&, size_t& size,
+  const Fixed_T<Digits, Scale>&)
 {
   size += (Digits + 2) / 2;
 }

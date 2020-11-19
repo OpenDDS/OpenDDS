@@ -35,6 +35,11 @@ const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER = {{0xf
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER = {{0xff, 0x02, 0x02}, 0xc4};
 const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER = {{0xff, 0x01, 0x01}, 0xc2};
 const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER = {{0xff, 0x01, 0x01}, 0xc7};
+// https://issues.omg.org/browse/DDSSEC12-87
+const EntityId_t ENTITYID_TL_SVC_REQ_WRITER_SECURE = {{0xff, 0x03, 0x00}, 0xc3 };
+const EntityId_t ENTITYID_TL_SVC_REQ_READER_SECURE = {{0xff, 0x03, 0x00}, 0xc4 };
+const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER_SECURE = {{0xff, 0x03, 0x01}, 0xc3 };
+const EntityId_t ENTITYID_TL_SVC_REPLY_READER_SECURE = {{0xff, 0x03, 0x01}, 0xc4 };
 ///@}
 
 const DDS::Security::ParticipantSecurityInfo PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
@@ -109,6 +114,7 @@ struct DiscoveredPublication_SecurityWrapper {
   DDS::Security::DataTags data_tags;
   bool have_ice_agent_info;
   ICE::AgentInfo ice_agent_info;
+  XTypes::TypeInformation type_info;
 
   DiscoveredPublication_SecurityWrapper()
     : have_ice_agent_info(false) {
@@ -123,6 +129,7 @@ struct DiscoveredSubscription_SecurityWrapper {
   DDS::Security::DataTags data_tags;
   bool have_ice_agent_info;
   ICE::AgentInfo ice_agent_info;
+  XTypes::TypeInformation type_info;
 
   DiscoveredSubscription_SecurityWrapper()
     : have_ice_agent_info(false) {

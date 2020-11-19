@@ -1,17 +1,18 @@
-#ifndef dds_DCPS_DataReaderImpl_T_h
-#define dds_DCPS_DataReaderImpl_T_h
-#include "dds/DCPS/MultiTopicImpl.h"
-#include "dds/DCPS/RakeResults_T.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/TypeSupportImpl.h"
-#include "dds/DCPS/Watchdog.h"
-#include "dcps_export.h"
-#include "dds/DCPS/GuidConverter.h"
+#ifndef OPENDDS_DDS_DCPS_DATAREADERIMPL_T_H
+#define OPENDDS_DDS_DCPS_DATAREADERIMPL_T_H
 
-#include "ace/Bound_Ptr.h"
-#include "ace/Time_Value.h"
+#include "MultiTopicImpl.h"
+#include "RakeResults_T.h"
+#include "SubscriberImpl.h"
+#include "BuiltInTopicUtils.h"
+#include "Util.h"
+#include "TypeSupportImpl.h"
+#include "Watchdog.h"
+#include "dcps_export.h"
+#include "GuidConverter.h"
+
+#include <ace/Bound_Ptr.h>
+#include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,11 +26,11 @@ namespace OpenDDS {
    *
    */
   template <typename MessageType>
-    class
+  class
 #if ( __GNUC__ == 4 && __GNUC_MINOR__ == 1)
     OpenDDS_Dcps_Export
 #endif
-    DataReaderImpl_T
+  DataReaderImpl_T
     : public virtual LocalObject<typename DDSTraits<MessageType>::DataReaderType>
     , public virtual DataReaderImpl
     , public ValueWriterDispatcher
@@ -923,40 +924,67 @@ namespace OpenDDS {
                                OpenDDS::DCPS::SubscriptionInstance_rch& instance)
   {
     //!!! caller should already have the sample_lock_
-
-    MessageType data;
-
-    const bool cdr = sample.header_.cdr_encapsulation_;
-
+    const bool encapsulated = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
       sample.sample_.get(),
-      sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-      cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-          : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+      encapsulated ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
+      static_cast<Endianness>(sample.header_.byte_order_));
 
-    if (cdr) {
-      ACE_CDR::ULong header;
-      if (!(ser >> header)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                  ACE_TEXT("deserialization header failed.\n"),
-                  TraitsType::type_name()));
+    if (encapsulated) {
+      EncapsulationHeader encap;
+      if (!(ser >> encap)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+          ACE_TEXT("deserialization of encapsulation header failed.\n"),
+          TraitsType::type_name()));
+        return;
+      }
+      Encoding encoding;
+      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
         return;
       }
 
-      // Start counting byte-offset AFTER header
-      ser.reset_alignment();
+      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+            ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+            ACE_TEXT("Encoding kind of the received sample (%C) does not ")
+            ACE_TEXT("match the ones specified by DataReader.\n"),
+            TraitsType::type_name(),
+            Encoding::kind_to_string(encoding.kind()).c_str()));
+        }
+        return;
+      }
+      if (DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+          ACE_TEXT("Deserializing with encoding kind %C.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+      }
+
+      ser.encoding(encoding);
     }
 
+    bool ser_ret = true;
+    MessageType data;
     if (sample.header_.key_fields_only_) {
-      ser >> OpenDDS::DCPS::KeyOnly< MessageType>(data);
+      ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data);
     } else {
-      ser >> data;
+      ser_ret = ser >> data;
     }
-
-    if (!ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                 ACE_TEXT("deserialization failed.\n"),
-                 TraitsType::type_name()));
+    if (!ser_ret) {
+      if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
+        if (DCPS_debug_level > 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                     ACE_TEXT("object construction failure, dropping sample.\n"),
+                     TraitsType::type_name()));
+        }
+      } else {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                   ACE_TEXT("deserialization failed.\n"),
+                   TraitsType::type_name()));
+      }
       return;
     }
 
@@ -1025,40 +1053,71 @@ protected:
       store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
       return message_holder;
     }
-    const bool cdr = sample.header_.cdr_encapsulation_;
+    const bool encapsulated = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
-                                  sample.sample_.get(),
-                                  sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                                  cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+      sample.sample_.get(),
+      encapsulated ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
+      static_cast<Endianness>(sample.header_.byte_order_));
 
-    if (cdr) {
-      ACE_CDR::ULong header;
-      if (!(ser >> header)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("deserialization header failed, dropping sample.\n"),
-                  TraitsType::type_name()));
+    if (encapsulated) {
+      EncapsulationHeader encap;
+      if (!(ser >> encap)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+          ACE_TEXT("deserialization of encapsulation header failed.\n"),
+          TraitsType::type_name()));
+        return message_holder;
+      }
+      Encoding encoding;
+      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
         return message_holder;
       }
 
-      // Start counting byte-offset AFTER header
-      ser.reset_alignment();
+      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+            ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+            ACE_TEXT("Encoding kind %C of the received sample does not ")
+            ACE_TEXT("match the ones specified by DataReader.\n"),
+            TraitsType::type_name(),
+            Encoding::kind_to_string(encoding.kind()).c_str()));
+        }
+        return message_holder;
+      }
+      if (DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+          ACE_TEXT("Deserializing with encoding kind %C.\n"),
+          TraitsType::type_name(),
+          Encoding::kind_to_string(encoding.kind()).c_str()));
+      }
+
+      ser.encoding(encoding);
     }
 
     const bool key_only_marshaling =
       marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING;
+
+    bool ser_ret = true;
     if (key_only_marshaling) {
-      ser >> OpenDDS::DCPS::KeyOnly< MessageType>(*data);
+      ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
-      ser >> *data;
+      ser_ret = ser >> *data;
       message_holder = make_rch<MessageHolder_T<MessageType> >(*data);
     }
-
-    if (!ser.good_bit()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
-                 ACE_TEXT("deserialization failed, dropping sample.\n"),
-                 TraitsType::type_name()));
-      message_holder.reset();
+    if (!ser_ret) {
+      if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
+        if (DCPS_debug_level > 1) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                     ACE_TEXT("object construction failure, dropping sample.\n"),
+                     TraitsType::type_name()));
+        }
+      } else {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
+                   ACE_TEXT("deserialization failed, dropping sample.\n"),
+                   TraitsType::type_name()));
+      }
       return message_holder;
     }
 
@@ -2332,7 +2391,7 @@ unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->da
 
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
-InstanceMap  instance_map_;
+InstanceMap instance_map_;
 
 bool marshal_skip_serialize_;
 
@@ -2368,4 +2427,4 @@ void DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator delete(vo
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* dds_DCPS_DataReaderImpl_T_h */
+#endif /* OPENDDS_DDS_DCPS_DATAREADERIMPL_T_H */

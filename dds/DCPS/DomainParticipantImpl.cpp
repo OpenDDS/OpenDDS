@@ -117,6 +117,7 @@ DomainParticipantImpl::DomainParticipantImpl(
 {
   (void) this->set_listener(a_listener, mask);
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
+  type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
 }
 
 DomainParticipantImpl::~DomainParticipantImpl()
@@ -407,6 +408,7 @@ DomainParticipantImpl::create_topic_i(
     return DDS::Topic::_nil();
   }
 
+  // See if there is a Topic with the same name.
   TopicMap::mapped_type* entry = 0;
   bool found = false;
   {
@@ -432,6 +434,10 @@ DomainParticipantImpl::create_topic_i(
     }
   }
 
+  /*
+   * If there is a topic with the same name, return the topic if it has the
+   * same type name and QoS, else it is an error.
+   */
   if (found) {
     CORBA::String_var found_type = entry->pair_.svt_->get_type_name();
     if (ACE_OS::strcmp(type_name, found_type) == 0) {
@@ -448,23 +454,25 @@ DomainParticipantImpl::create_topic_i(
         }
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
 
-      } else {
+      } else { // Same Name and Type, Different QoS
         if (DCPS_debug_level >= 1) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DomainParticipantImpl::create_topic, ")
-                     ACE_TEXT("qos not match: topic_name=%C type_name=%C\n"),
-                     topic_name, type_name));
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic: ")
+            ACE_TEXT("topic with name \"%C\" and type %C already exists, ")
+            ACE_TEXT("but the QoS doesn't match.\n"),
+            topic_name, type_name));
         }
 
         return DDS::Topic::_nil();
       }
 
-    } else { // no match
+    } else { // Same Name, Different Type
       if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::create_topic, ")
-                   ACE_TEXT(" not match: topic_name=%C type_name=%C\n"),
-                   topic_name, type_name));
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic: ")
+          ACE_TEXT("topic with name \"%C\" already exists, but its type, %C ")
+          ACE_TEXT("is not the same as %C.\n"),
+          topic_name, found_type.in(), type_name));
       }
 
       return DDS::Topic::_nil();
@@ -1763,6 +1771,8 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
+  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
+
   if (monitor_) {
     monitor_->report();
   }
@@ -1923,7 +1933,15 @@ DomainParticipantImpl::create_new_topic(
 
   if ((enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities)) {
-    topic_servant->enable();
+    const DDS::ReturnCode_t ret = topic_servant->enable();
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: ")
+          ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+          ACE_TEXT("enable failed.\n")));
+      return DDS::Topic::_nil();
+    }
   }
 
   DDS::Topic_ptr obj(topic_servant);
