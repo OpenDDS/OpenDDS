@@ -1,16 +1,19 @@
 #pragma once
 
+#include "dds/DdsDcpsTopicC.h"
+
 #include "Action.h"
 #include "ace/Proactor.h"
 #include "BenchTypeSupportImpl.h"
 
 #include <random>
+#include <vector>
 
 namespace Bench {
 
-class WriteAction : public Action {
+class SetCftParametersAction : public Action {
 public:
-  WriteAction(ACE_Proactor& proactor);
+  SetCftParametersAction(ACE_Proactor& proactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
@@ -18,24 +21,26 @@ public:
   void start() override;
   void stop() override;
 
-  void do_write();
+  void do_set_expression_parameters();
 
 protected:
   std::mutex mutex_;
   ACE_Proactor& proactor_;
   bool started_, stopped_;
-  DataDataWriter_var data_dw_;
-  Data data_;
-  ACE_Time_Value write_period_;
+  ACE_Time_Value set_period_;
   size_t max_count_;
-  size_t new_key_count_;
-  uint64_t new_key_probability_;
+  size_t param_count_;
+  bool random_order_;
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;
-  size_t filter_class_start_value_;
-  size_t filter_class_stop_value_;
-  size_t filter_class_increment_;
+  size_t set_call_count_;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  DDS::ContentFilteredTopic_var content_filtered_topic_;
+#endif
+  Builder::StringSeqSeq acceptable_param_values_;
+  std::vector<int> current_acceptable_param_values_index_;
 };
 
 }
+

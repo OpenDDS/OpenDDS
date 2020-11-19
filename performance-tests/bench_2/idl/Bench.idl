@@ -23,6 +23,7 @@ module Bench {
     Builder::TimeStamp created_time;
     Builder::TimeStamp sent_time;
     OctetSeq buffer;
+    unsigned long filter_class;
   };
 
 // ---
