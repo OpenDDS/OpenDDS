@@ -2,5 +2,3 @@
 This test verifies that when a persistent InfoRepo goes down and comes back up that all readers
 and writers started before the InfoRepo went down and all readers and writers started after the
 InfoRepo was restarted will associate correctly.
-
-

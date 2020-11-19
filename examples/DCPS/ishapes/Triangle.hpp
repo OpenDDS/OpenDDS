@@ -29,4 +29,3 @@ private:
 };
 
 #endif /* _TRIANGLE_HPP */
-

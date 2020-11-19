@@ -87,4 +87,3 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
   // decrement_reference()).
   return -1;
 }
-

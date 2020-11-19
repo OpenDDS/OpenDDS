@@ -16,7 +16,8 @@ class ForwardAction : public Action, public DataHandler {
 public:
   ForwardAction(ACE_Proactor& proactor);
 
-  bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) override;
+  bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
+    Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
 
   void start() override;
   void stop() override;
@@ -48,4 +49,3 @@ protected:
 };
 
 }
-

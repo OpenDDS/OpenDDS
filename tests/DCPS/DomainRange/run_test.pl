@@ -29,7 +29,7 @@ sub runTest {
     print "Domains and transports are dynamically configured from the \n";
     print "templates in config.ini. The DW in each domain sends 10 \n";
     print "messages to its DRs.\n";
-		print "*********************************\n";
+    print "*********************************\n";
 
     $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 3 -domain 2 -domain 4 -domain 7 -domain 15");
 
@@ -41,7 +41,7 @@ sub runTest {
     if ($res != 0) {
         print STDERR "ERROR: test returned $res\n";
         $result += $res;
-		}
+    }
 }
 
 runTest(0);

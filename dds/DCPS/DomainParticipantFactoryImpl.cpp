@@ -149,7 +149,7 @@ DomainParticipantFactoryImpl::delete_participant(
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (!the_servant->is_clean()) {
-    RepoId id = the_servant->get_id();
+    const RepoId id = the_servant->get_id();
     GuidConverter converter(id);
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose

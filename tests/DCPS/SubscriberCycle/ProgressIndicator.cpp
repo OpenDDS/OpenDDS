@@ -33,4 +33,3 @@ ProgressIndicator::operator++()
 
   return *this;
 }
-

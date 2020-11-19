@@ -133,4 +133,3 @@ Test::Options::profiles() const
 {
   return this->publicationProfiles_;
 }
-

@@ -23,8 +23,8 @@ my $i = 0;
 for my $arg (@ARGV) {
   if ($prevarg eq '-classpath') {
     push(@classpath, $arg);
-	# remove two args
-	splice(@ARGV, $i - 1, 2);
+    # remove two args
+    splice(@ARGV, $i - 1, 2);
   }
   if ($arg eq '-cp' || $arg eq '-classpath') {
     $prevarg = '-classpath';

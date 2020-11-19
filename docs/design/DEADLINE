@@ -56,4 +56,3 @@ Implementation_notes:
     set_qos()        - compatibility processing on change after enable().
                        Incompatible values fail to make change.
     timer->timeout() - call on_requested_deadline_missed();
-

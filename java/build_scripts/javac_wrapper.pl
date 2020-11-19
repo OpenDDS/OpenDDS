@@ -37,4 +37,3 @@ for my $key (keys %added) {
 
 my $status = system("\"$JAVA_HOME/bin/javac\" @newARGV");
 exit($status >> 8);
-

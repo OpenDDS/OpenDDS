@@ -5,7 +5,9 @@ namespace Bench {
 std::mutex ActionManager::s_mutex;
 ActionManager::action_factory_map ActionManager::s_factory_map;
 
-ActionManager::ActionManager(const Bench::ActionConfigSeq& configs, Bench::ActionReportSeq& reports, Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map) {
+ActionManager::ActionManager(const Bench::ActionConfigSeq& configs, Bench::ActionReportSeq& reports,
+  Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, Builder::ContentFilteredTopicMap& cft_map)
+{
   reports.length(configs.length());
   for (CORBA::ULong i = 0; i < configs.length(); ++i) {
     auto action = create_action(configs[i].type.in());
@@ -14,24 +16,27 @@ ActionManager::ActionManager(const Bench::ActionConfigSeq& configs, Bench::Actio
       ss << "Invalid action name '" << configs[i].type << "'" << std::flush;
       throw std::runtime_error(ss.str());
     }
-    action->init(configs[i], reports[i], reader_map, writer_map);
+    action->init(configs[i], reports[i], reader_map, writer_map, cft_map);
     actions_.push_back(action);
   }
 }
 
-void ActionManager::start() {
+void ActionManager::start()
+{
   for (auto it = actions_.begin(); it != actions_.end(); ++it) {
     (*it)->start();
   }
 }
 
-void ActionManager::stop() {
+void ActionManager::stop()
+{
   for (auto it = actions_.begin(); it != actions_.end(); ++it) {
     (*it)->stop();
   }
 }
 
-bool ActionManager::register_action_factory(const std::string& name, const ActionManager::action_factory& factory) {
+bool ActionManager::register_action_factory(const std::string& name, const ActionManager::action_factory& factory)
+{
   std::unique_lock<std::mutex> lock(s_mutex);
   bool result = false;
 
@@ -43,7 +48,8 @@ bool ActionManager::register_action_factory(const std::string& name, const Actio
   return result;
 }
 
-std::shared_ptr<Action> ActionManager::create_action(const std::string& name) {
+std::shared_ptr<Action> ActionManager::create_action(const std::string& name)
+{
   std::unique_lock<std::mutex> lock(s_mutex);
   std::shared_ptr<Action> result;
 
@@ -54,7 +60,8 @@ std::shared_ptr<Action> ActionManager::create_action(const std::string& name) {
   return result;
 }
 
-ActionManager::Registration::Registration(const std::string& name, const ActionManager::action_factory& factory) {
+ActionManager::Registration::Registration(const std::string& name, const ActionManager::action_factory& factory)
+{
   Builder::Log::log() << "Action registration created for name '" << name << "'" << std::endl;
   if (!register_action_factory(name, factory)) {
     std::stringstream ss;
@@ -64,4 +71,3 @@ ActionManager::Registration::Registration(const std::string& name, const ActionM
 }
 
 }
-

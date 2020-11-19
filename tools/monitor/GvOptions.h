@@ -76,4 +76,3 @@ class GvOptionsDialog : public QDialog {
 } // End of namespace Monitor
 
 #endif
-

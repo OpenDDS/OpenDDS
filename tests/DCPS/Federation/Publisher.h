@@ -50,4 +50,3 @@ class Publisher {
 };
 
 #endif // TESTMONITOR_H
-

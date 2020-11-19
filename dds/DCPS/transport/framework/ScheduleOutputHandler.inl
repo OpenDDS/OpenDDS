@@ -21,4 +21,3 @@ OpenDDS::DCPS::ScheduleOutputHandler::ScheduleOutputHandler(
   reference_counting_policy().value(
     ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
-

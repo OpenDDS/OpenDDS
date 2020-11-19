@@ -64,4 +64,3 @@ security. If all participants are not set the same, it will cause security to
 fail. It can also be set in the common section of ini files. Refer to the RTPS
 and DDS Security specs for the structure of secure RTPS packets to aid in
 manually demarshaling them.
-

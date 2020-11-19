@@ -65,4 +65,3 @@ else
   echo File $pid_file does not exist. Services do not currently appear to be running.
   exit
 fi
-

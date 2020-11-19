@@ -3,4 +3,3 @@ feature(!no_opendds_safety_profile) {
   libs += OpenDDS_Corba
   after += OpenDDS_Corba
 }
-

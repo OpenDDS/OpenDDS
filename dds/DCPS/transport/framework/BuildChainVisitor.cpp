@@ -44,4 +44,3 @@ OpenDDS::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
   // Visit entire queue.
   return 1;
 }
-

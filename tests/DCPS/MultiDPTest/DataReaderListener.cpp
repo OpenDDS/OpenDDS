@@ -163,4 +163,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
   }
-

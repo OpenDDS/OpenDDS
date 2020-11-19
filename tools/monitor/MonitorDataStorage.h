@@ -447,4 +447,3 @@ class MonitorDataStorage {
 } // End of namespace Monitor
 
 #endif /* MONITORDATASTORAGE_H */
-
