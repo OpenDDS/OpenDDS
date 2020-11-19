@@ -895,7 +895,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 {
   DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
     {
-      get_part_bit_data(true),
+      get_part_bit_data(false),
       identity_token_,
       permissions_token_,
       qos_.property,
@@ -2389,7 +2389,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 {
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
-    false, outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
+    true, outer_->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
 #endif
   );
 
@@ -3906,10 +3906,10 @@ DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
 #else
   ACE_UNUSED_ARG(secure);
 #endif
-  return {
-    DDS::BuiltinTopicKey_t(),
-    include_user_data ? qos_.user_data : DDS::UserDataQosPolicy()
-  };
+  DDS::ParticipantBuiltinTopicData bit_data;
+  bit_data.key = DDS::BuiltinTopicKey_t();
+  bit_data.user_data = include_user_data ? qos_.user_data : DDS::UserDataQosPolicy();
+  return bit_data;
 }
 
 } // namespace RTPS
