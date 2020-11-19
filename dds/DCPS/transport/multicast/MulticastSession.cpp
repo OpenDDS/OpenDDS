@@ -7,8 +7,13 @@
 
 #include "MulticastSession.h"
 
+#include "dds/DCPS/GuidConverter.h"
+
 #include "ace/Log_Msg.h"
+
 #include <cmath>
+
+
 #ifndef __ACE_INLINE__
 # include "MulticastSession.inl"
 #endif  /* __ACE_INLINE__ */

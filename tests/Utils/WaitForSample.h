@@ -32,4 +32,3 @@ bool waitForSample(const DDS::DataReader_var& dr)
 }
 
 #endif
-
