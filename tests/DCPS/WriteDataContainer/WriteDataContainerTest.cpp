@@ -40,7 +40,6 @@ int test_failed = 0;
 class TestException
 {
   public:
-
     TestException()  {}
     ~TestException() {}
 };
@@ -48,19 +47,14 @@ class TestException
 class TestParticipantImpl : public DomainParticipantImpl
 {
 public:
-  TestParticipantImpl()
-    : DomainParticipantImpl(0,
+  TestParticipantImpl(InstanceHandleGenerator & participant_handles)
+    : DomainParticipantImpl(participant_handles,
                             MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
                             ::DDS::DomainParticipantListener::_nil(),
                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK) {};
 
   virtual ~TestParticipantImpl() {};
-
-  virtual DDS::InstanceHandle_t get_instance_handle() { return participant_handles_.next(); }
-
-private:
-  InstanceHandleGenerator participant_handles_;
 };
 
 namespace Test
@@ -359,7 +353,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
     {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
-    TestParticipantImpl* tpi = new TestParticipantImpl();
+    InstanceHandleGenerator participant_handles;
+    TestParticipantImpl* tpi = new TestParticipantImpl(participant_handles);
     DDS::DomainParticipant_var participant = tpi;
     OpenDDS::DCPS::unique_ptr<DDS_TEST> test(new DDS_TEST);
     ::DDS::DataWriterQos dw_qos;
