@@ -74,7 +74,6 @@ namespace {
     default:
       return "";
     }
-    return "";
   }
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,

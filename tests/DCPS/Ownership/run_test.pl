@@ -55,11 +55,11 @@ elsif ($ARGV[0] ne '') {
 
 if ($#ARGV > 0) {
     if ($ARGV[1] eq 'rtps') {
-	$is_rtps_disc = 1;
+        $is_rtps_disc = 1;
     }
     else {
-	print STDERR "ERROR: invalid test case\n";
-	exit 1;
+        print STDERR "ERROR: invalid test case\n";
+        exit 1;
     }
 }
 
@@ -80,7 +80,7 @@ unlink <*.log>;
 
 unless ($is_rtps_disc) {
     $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-			 "$debug_opts -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
+         "$debug_opts -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 }
 
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
@@ -92,9 +92,9 @@ unless ($is_rtps_disc) {
     print $DCPSREPO->CommandLine() . "\n";
     $DCPSREPO->Spawn ();
     if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-	print STDERR "ERROR: waiting for Info Repo IOR file\n";
-	$DCPSREPO->Kill ();
-	exit 1;
+        print STDERR "ERROR: waiting for Info Repo IOR file\n";
+        $DCPSREPO->Kill ();
+        exit 1;
     }
 }
 
@@ -136,8 +136,8 @@ if ($SubscriberResult != 0) {
 unless ($is_rtps_disc) {
     $ir = $DCPSREPO->TerminateWaitKill(5);
     if ($ir != 0) {
-	print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-	$status = 1;
+        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+        $status = 1;
     }
 }
 

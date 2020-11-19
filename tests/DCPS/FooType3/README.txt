@@ -25,6 +25,3 @@ FooType_Export CORBA::Boolean operator>> (OpenDDS::DCPS::Serializer &, Xyz::Foo 
 
 -----------------------------------------------------
 generate_export_file.pl FooLib > foolib_export.h
-
-
-

@@ -29,4 +29,3 @@ OpenDDS::DCPS::ThreadSynchWorker::schedule_output()
 {
   DBG_ENTRY_LVL("ThreadSynchWorker","schedule_output",6);
 }
-

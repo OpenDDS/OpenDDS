@@ -1,5 +1,5 @@
 workspace {
-  // the -relative and -include cmdlines make it so this workspace 
+  // the -relative and -include cmdlines make it so this workspace
   // does not have to be in the $DDS_ROOT directory tree.
 
   // tell MPC to substitute our DDS_ROOT environment variables for relative paths

@@ -301,5 +301,3 @@ a number of features remain to be implemented:
 
 The above features have not been implemented.  Any attempt to use one of these
 features will result in undefined behavior.
-
-

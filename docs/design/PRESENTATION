@@ -82,7 +82,7 @@ DataReader::data_received()
   - Process END_COHERENT_SET control messages by clearing all of the
     'incoherent' flags for samples of all instances received from the
     same publication (DataWriter).
-    
+
     NOTE: If the publication information is not available for each sample
           (which it should be since that is set in the SampleInfo),
           then we will need to add this information to the stored data
@@ -489,4 +489,3 @@ and only if the following conditions are met:
 
     3. Requested ordered_access is FALSE, or else both offered and
        requested ordered _access are TRUE.
-

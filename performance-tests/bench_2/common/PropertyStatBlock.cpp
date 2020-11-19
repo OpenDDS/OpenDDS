@@ -148,7 +148,7 @@ PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::strin
   median_absolute_deviation_->value.double_prop(0.0);
 }
 
-void PropertyStatBlock::update(double value)
+void PropertyStatBlock::update(double value, const Builder::TimeStamp& time)
 {
   auto prev_mean = mean_->value.double_prop();
   auto prev_var_x_sample_count = var_x_sample_count_->value.double_prop();
@@ -179,7 +179,7 @@ void PropertyStatBlock::update(double value)
   median_buffer_[next_median_buffer_index] = value;
 
   if (timestamp_buffer_.size()) {
-    timestamp_buffer_[next_median_buffer_index] = Builder::get_sys_time();
+    timestamp_buffer_[next_median_buffer_index] = time == Builder::ZERO ? Builder::get_sys_time() : time;
   }
 }
 

@@ -63,4 +63,3 @@ project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt5_widgets, msvc_bigobj {
     NodeOptions_moc.cpp
   }
 }
-

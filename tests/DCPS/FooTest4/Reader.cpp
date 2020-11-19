@@ -446,4 +446,3 @@ Reader::reader_id () const
 {
   return reader_id_;
 }
-

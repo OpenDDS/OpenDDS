@@ -188,4 +188,3 @@ TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
   ASSERT_EQ(0, strcmp("BinaryProperty 0", w2.ddsParticipantDataSecure.identity_status_token.binary_properties[0].name));
   ASSERT_EQ(0, memcmp("BinaryPropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.binary_properties[0].value.get_buffer(), strlen("BinaryPropertyValue 0")));
 }
-

@@ -158,4 +158,3 @@ DataReaderListenerImpl::on_budget_exceeded (
 {
   cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
 }
-

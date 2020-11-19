@@ -9,4 +9,3 @@ steps to build:
   dcps_ts.pl --export=FooLib_Export --module=Mine T1::Foo1 Foo1Def.idl
   dcps_ts.pl --export=FooLib_Export --module=Mine T2::Foo2 Foo2Def.idl
   dcps_ts.pl --export=FooLib_Export --module=Mine T3::Foo3 Foo3Def.idl
-

@@ -83,4 +83,3 @@ bool Publisher::enable(bool throw_on_error) {
 }
 
 }
-

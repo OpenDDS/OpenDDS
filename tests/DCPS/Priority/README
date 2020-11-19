@@ -7,4 +7,3 @@ easily by executing:
 > ./run_test.pl --man
 
 which will format the POD as a manual page on the terminal.
-
