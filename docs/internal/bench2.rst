@@ -724,6 +724,9 @@ case, twice a second.
 Value range and increment for "filter_class" data variable,
 used when writing data. This variable is an unsigned integer
 intended to be used for content filtered topics "set_cft_parameters" actions
+
+::
+
         ]
       },
 
@@ -765,6 +768,7 @@ Lists of allowed values to set to, for each parameter. Worker will iterate
 throught the list sequentially unless "random_order" flag (below) is specified
 
 ::
+
           { "name": "random_order",
             "value": { "_d": "PVK_ULL", "ull_prop": 1 }
           }
