@@ -40,7 +40,7 @@ add_executable(${the_ecu} "ecu.cpp")
 
 # set add opendds_idl compiler option to strip leading directories from #include
 # needed for CMake builds with nested idl files
-ADD_DDS_IDL_FLAG("-FilenameOnlyIncludes")
+ADD_DDS_IDL_FLAG("--filename-only-includes")
 
 # add idl explicitly
 ADD_IDL_PATH(./engine/engine_stats)

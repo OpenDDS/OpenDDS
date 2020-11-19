@@ -6,7 +6,7 @@ project(ECU): dcpsexe {
 
   TypeSupport_Files {
     idlflags += -I./engine -I./engine/engine_stats -I./transmission
-    idlflags += -FilenameOnlyIncludes
+    idlflags += --filename-only-includes
     engine/engine_specs.idl
     engine/engine_stats/fuel_stats.idl
     transmission/transmission_specs.idl
