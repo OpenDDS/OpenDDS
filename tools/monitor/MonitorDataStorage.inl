@@ -1268,4 +1268,3 @@ MonitorDataStorage::update<DDS::SubscriptionBuiltinTopicData>(
     //this->model_->updated( node, 1, (*node)[ node->size()-1], 1);
   }
 }
-

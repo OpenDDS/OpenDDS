@@ -24,4 +24,3 @@ project: dcpslib, msvc_bigobj {
     Builder.idl
   }
 }
-

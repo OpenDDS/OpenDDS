@@ -6,11 +6,11 @@
  */
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/Definitions.h"
+#include "SafetyProfileStreams.h"
 
+#include "Definitions.h"
 #ifdef OPENDDS_SECURITY
-#  include "dds/DdsSecurityCoreC.h"
+#  include "../DdsSecurityCoreC.h"
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

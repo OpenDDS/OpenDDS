@@ -73,4 +73,3 @@ Implementation notes:
     If the effort to implement the modified value feature is too great,
     the initial implementation does not need to deal with changed values.
     We can declare that modification of values is not supported initially.
-

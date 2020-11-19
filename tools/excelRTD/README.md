@@ -124,4 +124,3 @@ The links column in the table indicates which, if any, fields contained by the e
 
   - `*.{h,cpp,inl}`
     - source code for application.
-

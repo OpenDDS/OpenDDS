@@ -8,8 +8,3 @@ data type to support the system test.
   and cpp files containing the servant implementations.
 
   The FooDataReader/FooNoKeyDataReader also contains zero-copy method overloads.
-
-
-
-
-

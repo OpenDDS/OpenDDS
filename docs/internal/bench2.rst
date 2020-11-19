@@ -756,6 +756,12 @@ This is a subset of the options. Use ``--help`` option to see all the options.
     (and saved to a results file). Multiple instances of this option can be
     specified, each for a single tag.
 
+.. option:: --json-result-id ID
+
+    Specify a name to store the raw JSON report under. By default, this not
+    enabled. These results will contain the full raw Bench::TestController
+    report, including all node controller and worker reports (and DDS entity reports)
+
 node_controller
 ===============
 

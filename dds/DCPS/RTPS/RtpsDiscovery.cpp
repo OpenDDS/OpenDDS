@@ -74,6 +74,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , undirected_spdp_(true)
   , periodic_directed_spdp_(false)
+  , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
 {}
@@ -581,6 +582,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SecureParticipantUserData") {
+          const OPENDDS_STRING& string_value = it->second;
+          int int_value;
+          if (!DCPS::convertToInteger(string_value, int_value)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config: ")
+                       ACE_TEXT("Invalid entry (%C) for SecureParticipantUserData in ")
+                       ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                       string_value.c_str(), rtps_name.c_str()));
+            return -1;
+          }
+          config->secure_participant_user_data(int_value);
         } else if (name == "Customization") {
           if (DCPS::DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,

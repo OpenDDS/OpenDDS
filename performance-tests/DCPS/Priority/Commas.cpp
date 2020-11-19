@@ -30,4 +30,3 @@ std::ostream& operator<<( std::ostream& str, const Commas& value)
 {
   return value( str);
 }
-

@@ -63,4 +63,3 @@ class Writer : public ACE_Task_Base {
 } // End of namespace Test
 
 #endif /* WRITER_H */
-

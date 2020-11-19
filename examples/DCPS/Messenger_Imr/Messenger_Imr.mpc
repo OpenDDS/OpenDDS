@@ -12,7 +12,7 @@ project(DDS*idl): dcps_idl_only_lib {
 
 
 project(DDS*Publisher): dcpsexe, dcps_tcp {
-  requires += no_opendds_safety_profile  
+  requires += no_opendds_safety_profile
   exename   = publisher
   after    += DDS*idl
   libs     += DDS*idl

@@ -4764,9 +4764,8 @@ Sedp::write_durable_dcps_participant_secure(const DCPS::RepoId& reader)
     return;
   }
 
-  const Security::SPDPdiscoveredParticipantData& pdata = spdp_.build_local_pdata(Security::DPDK_SECURE);
-
-  write_dcps_participant_secure(pdata, reader);
+  write_dcps_participant_secure(
+    spdp_.build_local_pdata(false, Security::DPDK_SECURE), reader);
   dcps_participant_secure_writer_->end_historic_samples(reader);
 }
 

@@ -207,4 +207,3 @@ Monitor::MonitorData::changed()
 {
   this->model_->changed();
 }
-

@@ -1,17 +1,17 @@
-#ifndef SAFETY_PROFILE_STREAMS_H
-#define SAFETY_PROFILE_STREAMS_H
+#ifndef OPENDDS_SAFETY_PROFILE_STREAMS_H
+#define OPENDDS_SAFETY_PROFILE_STREAMS_H
 
-#include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"
+#include "PoolAllocator.h"
 
-#include "ace/OS_NS_stdio.h"
-#include "ace/INET_Addr.h"
+#include <ace/INET_Addr.h>
+#include <ace/OS_NS_stdio.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+#  include <fstream>
+#  include <iostream>
+#  include <iomanip>
+#  include <sstream>
 #endif //OPENDDS_SAFETY_PROFILE
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -59,4 +59,4 @@ to_dds_string(const T* to_convert)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //SAFETY_PROFILE_STREAMS_H
+#endif // OPENDDS_SAFETY_PROFILE_STREAMS_H

@@ -194,4 +194,3 @@ class MonitorTask : public ACE_Task_Base {
 } // End of namespace Monitor
 
 #endif /* MONITORTASK_H */
-

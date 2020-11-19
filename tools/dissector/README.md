@@ -405,4 +405,3 @@ opendds.sample.payload.Messenger.Message.u.u_b == 1
       - Mark the OpenDDS packet as malformed, which will be colored red.
       - Fill the sample payload fields with incorrect data, or omit fields
         entirely.
-

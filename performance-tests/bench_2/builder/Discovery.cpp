@@ -27,4 +27,3 @@ Discovery::Discovery(const DiscoveryConfig& config)
 }
 
 }
-

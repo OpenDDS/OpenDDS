@@ -79,4 +79,3 @@ Implementation notes:
     the lifespan of any given sample is checked for expiration, and if
     expired the sample is released by to the resource pool.  No access
     of data after expiration is allowed.
-

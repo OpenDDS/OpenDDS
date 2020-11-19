@@ -95,4 +95,3 @@ NodeOptionsData::NodeOptionsData() : parentChild_(false)
 
 
 } // End of namespace Monitor
-

@@ -14,7 +14,8 @@ namespace Builder {
 class Participant : public ListenerFactory<DDS::DomainParticipantListener>, public TypeSupportRegistry {
 public:
 
-  explicit Participant(const ParticipantConfig& config, ParticipantReport& report, ReaderMap& reader_map, WriterMap& writer_map);
+  explicit Participant(const ParticipantConfig& config, ParticipantReport& report,
+    ReaderMap& reader_map, WriterMap& writer_map, ContentFilteredTopicMap& cft_map);
   ~Participant();
 
   bool enable(bool throw_on_error = false);
@@ -38,4 +39,3 @@ protected:
 };
 
 }
-

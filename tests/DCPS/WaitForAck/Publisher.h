@@ -57,4 +57,3 @@ class Publisher {
 } // End of namespace Test
 
 #endif /* end of include guard: PUBLISHER_H_96CE2642 */
-
