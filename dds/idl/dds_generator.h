@@ -27,6 +27,7 @@
 #include <vector>
 #include <cstring>
 #include <set>
+#include <stdexcept>
 
 class dds_generator {
 public:

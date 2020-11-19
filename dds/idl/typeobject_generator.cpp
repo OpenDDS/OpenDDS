@@ -878,6 +878,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
   return out;
 }
 
+const std::string get_minimal_type_map_decl =
+  "static const XTypes::TypeMap& get_minimal_type_map();\n";
 }
 
 void
@@ -886,12 +888,20 @@ typeobject_generator::gen_prologue()
   be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
 
-  be_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
+  be_global->impl_ << get_minimal_type_map_decl;
 }
 
 void
 typeobject_generator::gen_epilogue()
 {
+  if (minimal_type_map_.empty()) {
+    std::string impl_contents = be_global->impl_.str();
+    impl_contents.erase(
+      impl_contents.find(get_minimal_type_map_decl), get_minimal_type_map_decl.size());
+    be_global->impl_.str(impl_contents);
+    return;
+  }
+
   NamespaceGuard ng;
 
   be_global->impl_ <<
