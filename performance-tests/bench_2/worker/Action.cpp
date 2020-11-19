@@ -27,4 +27,3 @@ bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report
 };
 
 }
-

@@ -126,4 +126,3 @@ operator<<( std::ostream& str, Test::Options::TransportType value)
 }
 
 } // End of namespace Test
-

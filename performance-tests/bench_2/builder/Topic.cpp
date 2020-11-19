@@ -112,4 +112,3 @@ bool Topic::enable(bool throw_on_error) {
 }
 
 }
-

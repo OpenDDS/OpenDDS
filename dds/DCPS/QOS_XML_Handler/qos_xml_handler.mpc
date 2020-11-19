@@ -63,4 +63,3 @@ project(OpenDDS_QOS_XML_XSC_Handler): install, ace_xml_utils, dcpslib {
     install_dir = dds/DCPS/QOS_XML_Handler
   }
 }
-

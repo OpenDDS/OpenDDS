@@ -18,4 +18,3 @@ bool ParticipantManager::enable(bool throw_on_error) {
 }
 
 }
-

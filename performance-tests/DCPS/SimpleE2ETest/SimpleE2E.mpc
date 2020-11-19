@@ -33,4 +33,3 @@ project(DCPS_Perf*Sub): dcpsexe, dcps_test {
     Reader.cpp
   }
 }
-

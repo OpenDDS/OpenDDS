@@ -185,4 +185,3 @@ Writer::data_map ()
 {
   return data_map_;
 }
-

@@ -66,4 +66,3 @@ extern ACE_TString liveliness_kind_str;
 DDS::Duration_t get_lease_duration(const ACE_TString& argument);
 
 #endif /* end of include guard: COMMON_H_BB55E14B */
-

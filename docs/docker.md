@@ -49,4 +49,3 @@ e.g., `release-DDS-3.12`.
 
         docker-compose -f docker-compose-inforepo.yml up
         # Use Control-C to kill the InfoRepo process
-

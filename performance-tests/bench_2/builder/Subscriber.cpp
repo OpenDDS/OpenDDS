@@ -83,4 +83,3 @@ bool Subscriber::enable(bool throw_on_error) {
 }
 
 }
-

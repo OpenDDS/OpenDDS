@@ -75,4 +75,3 @@ void DataWriterListenerImpl::on_publication_matched (
       this->repo_.c_str()
     ));
   }
-

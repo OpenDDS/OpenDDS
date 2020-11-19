@@ -144,4 +144,3 @@ ContentFilteredTopicImpl::remove_reader(DataReaderImpl& reader)
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
-

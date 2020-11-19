@@ -48,4 +48,3 @@ project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_tcp {
     SubscriberListener.cpp
   }
 }
-

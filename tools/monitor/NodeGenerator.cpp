@@ -277,5 +277,3 @@ Monitor::NodeGenerator::abbr(const std::string &s)
 
   return ret;
 }
-
-

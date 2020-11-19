@@ -221,4 +221,3 @@ Subscriber::run()
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber::run done processing.\n")));
 }
-

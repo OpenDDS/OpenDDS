@@ -29,4 +29,3 @@ bool TopicManager::enable(bool throw_on_error) {
 }
 
 }
-

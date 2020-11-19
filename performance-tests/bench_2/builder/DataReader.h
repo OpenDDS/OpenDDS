@@ -50,4 +50,3 @@ protected:
 using ReaderMap = std::map<std::string, std::shared_ptr<DataReader>>;
 
 }
-

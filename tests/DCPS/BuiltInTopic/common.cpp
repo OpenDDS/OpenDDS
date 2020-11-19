@@ -356,4 +356,3 @@ int read (int expect_success)
 
   return 0;
 }
-

@@ -26,4 +26,3 @@ bool DataWriterManager::enable(bool throw_on_error) {
 }
 
 }
-

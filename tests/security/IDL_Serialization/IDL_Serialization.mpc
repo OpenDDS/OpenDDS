@@ -9,4 +9,3 @@ project (Security*): dcpsexe, dcps_test, googletest {
     BinaryPropertyTest.cpp
   }
 }
-

@@ -48,4 +48,3 @@ cd %DDS_ROOT%\performance-tests\Dcps\TCPListenerTest
   - start publisher:
 
     .\publisher -DCPSConfigFile conf.ini -a localhost:0 -p 1 -n 10000 -d 13 -msi 1000 -mxs 1000
-

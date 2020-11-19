@@ -42,4 +42,3 @@ OpenDDS::DCPS::CopyChainVisitor::visit_element(TransportQueueElement* element)
 
 
 }
-
