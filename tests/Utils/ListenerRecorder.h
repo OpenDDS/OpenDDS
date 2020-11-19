@@ -38,7 +38,7 @@ protected:
     if (this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) ListenerRecorder::on_sample: Received message #%d\n",
-                 messages_.size()));;
+                 messages_.size()));
     }
   }
 
