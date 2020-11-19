@@ -110,13 +110,13 @@
         },
         { "name": "param_count",
           "value": { "_d": "PVK_ULL", "ull_prop": 1 }
-        },		
+        },
         { "name": "set_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
         },
         { "name": "random_order",
           "value": { "_d": "PVK_ULL", "ull_prop": 1 }
-        },		
+        },
         { "name": "acceptable_param_values",
           "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
         }
