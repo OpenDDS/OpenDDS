@@ -8,4 +8,3 @@ project (Security*): dcpsexe, dcps_test, dcps_rtps, googletest {
     ParameterListConverterTest.cpp
   }
 }
-

@@ -17,4 +17,3 @@ class Commas {
 std::ostream& operator<<( std::ostream& str, const Commas& value);
 
 #endif // COMMAS_H
-

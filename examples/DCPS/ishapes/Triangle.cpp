@@ -77,4 +77,3 @@ Triangle::paint(QPainter& painter) {
       ++idx;
     }
 }
-

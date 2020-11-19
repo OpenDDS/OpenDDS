@@ -1,0 +1,3 @@
+ignore paths .git .gitmodules
+ignore paths tests/googletest tools/rapidjson
+ignore paths ACE_wrappers ACE_TAO

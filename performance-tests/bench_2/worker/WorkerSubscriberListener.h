@@ -6,10 +6,9 @@ namespace Bench {
 
 class WorkerSubscriberListener : public Builder::SubscriberListener {
 public:
-
-  WorkerSubscriberListener();
+  WorkerSubscriberListener() = default;
   WorkerSubscriberListener(const Builder::PropertySeq& properties);
-  virtual ~WorkerSubscriberListener();
+  virtual ~WorkerSubscriberListener() = default;
 
   // From DDS::DataReaderListener
 
@@ -31,8 +30,7 @@ public:
 
 protected:
   std::mutex mutex_;
-  Builder::Subscriber* subscriber_{0};
+  Builder::Subscriber* subscriber_{};
 };
 
 }
-

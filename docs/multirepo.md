@@ -98,7 +98,8 @@ association will be honored.
 
 ### Single Repo, Single Domain
 
-This example defines a single repository to be used for all domains within the application. 
+This example defines a single repository to be used for all domains within the
+application.
 
 ```
 [common]
@@ -110,7 +111,7 @@ DCPSInfoRepo = file://repo3.ior
 This example defines a default repository and explicitly associates two domains
 with it. Note that the [domain] subsections are redundant in this example,
 since they would be associated with the default repository by default. These
-sections can be considered as documentation in this case. 
+sections can be considered as documentation in this case.
 
 ```
 [common]
@@ -147,7 +148,7 @@ DomainRepoKey = 311
 ### Multiple Repos, Multiple Domains
 
 This example defines three different repositories and associates six domains
-with them. Note how the repository key values are used to do this. 
+with them. Note how the repository key values are used to do this.
 
 ```
 [repository/Top]

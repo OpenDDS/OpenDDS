@@ -6,7 +6,7 @@ Last updated: 4/24/2006
 - normal DW/DR remove on passive side.
 - active side upon peer disconnect
 - passive side upon peer disconnect
-- active side has backpressure 
+- active side has backpressure
 
 
 
@@ -30,8 +30,8 @@ Sequence for abnormal shutdown
 issue1:
 
 ======================================
-In current implementation (as of 04/20/2006), we use the send() and recv() return value as an 
-indication of whether the connection lost is caused by peer normal or abnormal shutdown, we do 
+In current implementation (as of 04/20/2006), we use the send() and recv() return value as an
+indication of whether the connection lost is caused by peer normal or abnormal shutdown, we do
 reconnecting on the active side when peer shutdown abnormally. But the recv() return value
 upon the peer crashes is different on windows and linux. On linux, recv() return 0 when peer
 shutdown abnormal. On windows it returns -1.
@@ -40,16 +40,16 @@ shutdown abnormal. On windows it returns -1.
 The relations of send/recv return value and shutdown/remove_association are listed:
 
 
-send  ->  0 this should not happen, we will not deal with this case. 
+send  ->  0 this should not happen, we will not deal with this case.
 
-          -1    normal shutdown     remove association  
+          -1    normal shutdown     remove association
                 abnormal shutdown   not remove association
- 
 
-recv  ->  0     normal shutdown     remove association  
-                abnormal shutdown   not remove association  
 
-          -1    abnormal shutdown   not remove association 
+recv  ->  0     normal shutdown     remove association
+                abnormal shutdown   not remove association
+
+          -1    abnormal shutdown   not remove association
 
 
 Solution1:
@@ -124,7 +124,7 @@ Solution:
 
 Add a new control message GRACEFUL_DISCONNECT to the peer whenever the transport
 initiates the connection closure. The Send/Receive strategy should check if a graceful
-shutdown message is received to determine if it needs try reconnect. If recv() 
+shutdown message is received to determine if it needs try reconnect. If recv()
 returns 0 and a graceful shutdown message is received then no reconnect notification.
 If recv return 0 and has not received the graceful shutdown message then do similar
 as recv return -1.
@@ -138,13 +138,13 @@ Issue2:
 
 There are two scenoria a publisher reconnect to a subscriber:
 
-- The connection is lost and then reconnected by the same datawriter. 
+- The connection is lost and then reconnected by the same datawriter.
 In this case the subscriber side needs know this publication is reconnected.
 
 - When a publisher crashes and restart again. If the publisher is from the
-  same remote address then the subscriber think it's the same datalink and 
-  will notify reconnected. In this case, the subscriber should not be 
-  notified the new publication is reconnected. 
+  same remote address then the subscriber think it's the same datalink and
+  will notify reconnected. In this case, the subscriber should not be
+  notified the new publication is reconnected.
 
 The run_test.pl restart_pub show the problem.
 
@@ -154,15 +154,6 @@ Solution:
 
 When the DataLink::notify is called for disconnected, make a copy of
 the map in DataLink and when the DataLink::notify is called for reconnected
-notification the datareader/datawriter with the ids in the copied map and clear 
-the map. If the DataLink::notify is called for lost notification, notify the 
+notification the datareader/datawriter with the ids in the copied map and clear
+the map. If the DataLink::notify is called for lost notification, notify the
 the datareader/datawriter with the ids in the original map.
-
-
-
-
-
-
-
-
-

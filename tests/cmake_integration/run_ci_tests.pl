@@ -60,8 +60,9 @@ for my $dir (@dirs) {
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 
   my @generate_cmd = ("cmake",
-		      "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
-		      "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+    "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
+    "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+  );
   my @build_cmd = ("cmake", "--build", ".");
 
   if ($generator ne "") {

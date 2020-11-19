@@ -66,4 +66,3 @@ void WorkerParticipantListener::set_participant(Builder::Participant& participan
 }
 
 }
-

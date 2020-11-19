@@ -19,4 +19,3 @@ run_test2.pl: 3 writers in one publisher process and 3 subscriber
 
 run_test3.pl: 3 publisher process (one for each topic) and 3 subscriber
               processes.
-

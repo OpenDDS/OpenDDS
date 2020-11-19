@@ -5,10 +5,10 @@ project: dcpsexe, dcps_test, dcps_tcp {
   exename   = test
 
   requires += object_model_profile
-  
+
   after    += DcpsFooType
   libs     += DcpsFooType
-  
+
   includes += ../FooType
   libpaths += ../FooType
 

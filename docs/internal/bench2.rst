@@ -330,6 +330,7 @@ IDL Definition
     string transport_config_name;
     DDS::DataReaderQos qos;
     DataReaderQosMask qos_mask;
+    StringSeq tags;
   };
   typedef sequence<DataReaderConfig> DataReaderConfigSeq;
 
@@ -591,11 +592,19 @@ bitmask for all listener events (i.e. ``2^32 - 1``).
 ::
 
                   "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                  "qos_mask": { "reliability": { "has_kind": true } }
+                  "qos_mask": { "reliability": { "has_kind": true } },
 
 DataReaders default to best effort QoS, so here we are setting the reader to
 reliable QoS and flagging the ``qos_mask`` appropriately in order to get a
 reliable datareader.
+
+::
+
+                  "tags": [ "my_topic", "reliable_transport" ]
+
+The config can specify a list of tags associated with each data reader. The
+statistics for each tag is computed in addition to the overall statistics and
+can be printed out at the end of the run by the ``test_controller``.
 
 ::
 
@@ -740,6 +749,18 @@ This is a subset of the options. Use ``--help`` option to see all the options.
 
     Overwrite individual worker configs to start their test actions (writes &
     forwards) N seconds from now (absolute time reference)
+
+.. option:: --tag TAG
+
+    Specify a tag for which the performance statistics will be printed out
+    (and saved to a results file). Multiple instances of this option can be
+    specified, each for a single tag.
+
+.. option:: --json-result-id ID
+
+    Specify a name to store the raw JSON report under. By default, this not
+    enabled. These results will contain the full raw Bench::TestController
+    report, including all node controller and worker reports (and DDS entity reports)
 
 node_controller
 ===============

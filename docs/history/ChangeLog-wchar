@@ -7,7 +7,7 @@ Thu Jun 25 20:37:02 UTC 2009  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
           Release the ACE Message Block if there is still data in the dtor.
-          
+
         * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
         * dds/DCPS/transport/framework/TransportSendElement.cpp:
 

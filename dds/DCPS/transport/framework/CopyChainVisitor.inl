@@ -26,4 +26,3 @@ OpenDDS::DCPS::CopyChainVisitor::status() const
 {
   return this->status_;
 }
-
