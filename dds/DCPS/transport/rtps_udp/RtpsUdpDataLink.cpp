@@ -3232,6 +3232,8 @@ void
 RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
                                                 SequenceNumber previous_max_sn)
 {
+  ACE_UNUSED_ARG(reader_id);
+
 #ifdef OPENDDS_SECURITY
     if (!is_pvs_writer_) {
 #endif
@@ -3290,6 +3292,7 @@ RtpsUdpDataLink::RtpsWriter::is_lagging(const ReaderInfo_rch& reader) const
 void
 RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
 {
+#ifndef OPENDDS_SAFETY_PROFILE
 #ifndef NDEBUG
   static const SequenceNumber negative_one = SequenceNumber::ZERO().previous();
   for (SNRIS::const_iterator pos1 = lagging_readers_.begin(), limit = lagging_readers_.end();
@@ -3319,6 +3322,7 @@ RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
       OPENDDS_ASSERT(preassociation_readers_.count(reader) == 0);
     }
   }
+#endif
 #endif
 }
 
