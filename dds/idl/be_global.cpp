@@ -339,6 +339,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
   static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
 
+  static const char FILENAME_ONLY_INCLUDES_FLAG[] = "--filename-only-includes";
+  static const size_t FILENAME_ONLY_INCLUDES_FLAG_SIZE = sizeof(FILENAME_ONLY_INCLUDES_FLAG) - 1;
+
   switch (av[i][1]) {
   case 'o':
     idl_global->append_idl_flag(av[i + 1]);
@@ -351,16 +354,6 @@ BE_GlobalData::parse_args(long& i, char** av)
 #endif
     } else {
       output_dir_ = av[++i];
-    }
-    break;
-
-  case 'F':
-    // strip leading directories from generated #include lines.
-    if (0 == ACE_OS::strcasecmp(av[i], "-FilenameOnlyIncludes")) {
-      filename_only_includes_ = true;
-      break;
-    } else {
-      invalid_option(av[i]);
     }
     break;
 
@@ -424,6 +417,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       warn_about_dcps_data_type_ = false;
+    } else if (!ACE_OS::strncasecmp(av[i], FILENAME_ONLY_INCLUDES_FLAG, FILENAME_ONLY_INCLUDES_FLAG_SIZE)) {
+      filename_only_includes_ = true;
     } else {
       invalid_option(av[i]);
     }

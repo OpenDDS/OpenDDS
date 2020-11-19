@@ -213,7 +213,8 @@ private:
 
   bool java_, suppress_idl_, suppress_typecode_,
     no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_, filename_only_includes_;
+    generate_rapidjson_, face_ts_,
+    filename_only_includes_;
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,
