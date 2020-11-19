@@ -836,4 +836,3 @@ C<network-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>.
 __END__
 
 # vim: filetype=perl
-

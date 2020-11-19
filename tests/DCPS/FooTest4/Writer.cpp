@@ -86,4 +86,3 @@ Writer::start()
     ex._tao_print_exception("Exception caught in svc:");
   }
 }
-

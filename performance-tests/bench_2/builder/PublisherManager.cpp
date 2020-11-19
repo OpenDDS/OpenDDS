@@ -18,4 +18,3 @@ bool PublisherManager::enable(bool throw_on_error) {
 }
 
 }
-

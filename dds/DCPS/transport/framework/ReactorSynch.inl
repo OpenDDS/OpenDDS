@@ -34,4 +34,3 @@ OpenDDS::DCPS::ReactorSynch::ReactorSynch(
                id,(worker ? "with":"without")));
   }
 }
-

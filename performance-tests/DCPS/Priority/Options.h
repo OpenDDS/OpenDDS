@@ -200,4 +200,3 @@ std::ostream& operator<<(std::ostream& str, Test::Options::TransportType value);
 #endif  /* __ACE_INLINE__ */
 
 #endif // OPTIONS_H
-

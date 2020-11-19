@@ -48,7 +48,7 @@ or an ACE_TString (ACE_CString / ACE_WString).
 
 ACE Logging:
 The log format string itself does *not* need to be switchable, but making it
-switchable means that wide systems will not pay a performance penalty to 
+switchable means that wide systems will not pay a performance penalty to
 convert the string at runtime.  Core library code should be switchable.  Tests
 that aren't performance sensitive can just be left with narrow format strings.
 The C++ language prohibits concatenating different types of literals by

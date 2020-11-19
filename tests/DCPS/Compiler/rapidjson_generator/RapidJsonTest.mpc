@@ -13,4 +13,3 @@ project: dcpsexe, dcps_test, dcps_rapidjson, googletest {
     RapidJsonTest.idl
   }
 }
-

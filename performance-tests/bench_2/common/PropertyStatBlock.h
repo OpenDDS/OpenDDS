@@ -35,7 +35,7 @@ public:
   // Constructor for initializing / writing PropertyStatBlock
   PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size, bool timestamps = false);
 
-  void update(double value);
+  void update(double value, const Builder::TimeStamp& time = Builder::ZERO);
   void finalize();
 
   SimpleStatBlock to_simple_stat_block() const;

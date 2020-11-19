@@ -53,4 +53,3 @@ int write ();
 int read (int expect_success);
 
 #endif /* COMMON_H */
-

@@ -290,4 +290,3 @@ Publisher::run()
   ));
   std::cout << "Publisher exiting" << std::endl;
 }
-

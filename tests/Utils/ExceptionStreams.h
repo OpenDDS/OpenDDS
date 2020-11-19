@@ -29,4 +29,3 @@ inline std::ostream& operator<< (std::ostream &os, const CORBA::Exception *e)
 #endif
 
 #endif
-
