@@ -203,4 +203,3 @@ namespace yard
 }
 
 #endif // #ifndef YARD_CHAR_SET_HPP
-

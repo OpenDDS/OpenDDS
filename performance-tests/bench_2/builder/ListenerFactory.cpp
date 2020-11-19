@@ -63,5 +63,3 @@ void register_data_reader_listener(const std::string& name, const std::function<
 }
 
 }
-
-

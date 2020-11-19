@@ -49,4 +49,3 @@ class Publisher {
 };
 
 } // End of namespace Test
-

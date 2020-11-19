@@ -46,4 +46,3 @@ public:
 };
 
 #endif /* PUBLISHERLISTENERIMPL_H  */
-

@@ -50,4 +50,3 @@ Qt tools.
 
   - `*.{h,cpp}`
     - source code for application.
-

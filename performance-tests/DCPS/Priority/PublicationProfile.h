@@ -117,4 +117,3 @@ PublicationProfile::priority() const
 } // End of namespace Test
 
 #endif // PUBLICATIONPROFILE_H
-

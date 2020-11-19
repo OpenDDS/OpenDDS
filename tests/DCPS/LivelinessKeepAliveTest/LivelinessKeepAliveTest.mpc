@@ -40,4 +40,3 @@ project(LivelinessKeepAliveTestSubscriber): dcpsexe, dcps_test, dcps_transports_
     AlertDataReaderListenerImpl.cpp
   }
 }
-

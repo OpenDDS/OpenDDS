@@ -66,4 +66,3 @@ class TestConfig {
 };
 
 #endif // TESTCONFIG_H
-

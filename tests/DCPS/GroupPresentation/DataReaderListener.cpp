@@ -132,4 +132,3 @@ void DataReaderListenerImpl::on_sample_lost(
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
-

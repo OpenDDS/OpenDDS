@@ -1488,4 +1488,3 @@ bool Monitor::MonitorDataStorage::b1 = false;
 bool Monitor::MonitorDataStorage::b2 = false;
 bool Monitor::MonitorDataStorage::b3 = false;
 bool Monitor::MonitorDataStorage::b4 = false;
-

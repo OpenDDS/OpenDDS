@@ -56,4 +56,3 @@ Square::paint(QPainter& painter) {
 
 Square::~Square() {
 }
-

@@ -168,4 +168,3 @@ DataReaderImpl:
   ADD METHOD:    send_sample_ack()
                    - internal utility method to actually form and send
                      the SAMPLE_ACK messages that need to be sent.
-

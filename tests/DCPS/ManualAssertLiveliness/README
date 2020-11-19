@@ -21,5 +21,3 @@ callbacks (4 for each writer when it bacomes alive upon
 add_associations, becomes dead because no liveliness message or
 sample read in, becomes active as there is liveliness message or
 sample read in, becomes dead upon remove_associations).
-
-

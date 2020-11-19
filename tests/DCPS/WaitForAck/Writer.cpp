@@ -148,4 +148,3 @@ Writer::svc ()
 }
 
 } // End of namespace Test
-

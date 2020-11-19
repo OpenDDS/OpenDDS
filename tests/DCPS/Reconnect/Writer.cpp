@@ -127,5 +127,3 @@ Writer::get_timeout_writes () const
 {
   return timeout_writes_.value ();
 }
-
-

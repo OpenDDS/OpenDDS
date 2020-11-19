@@ -7,9 +7,25 @@
 
 namespace Builder {
 
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
+#else
+  class ContentFilteredTopic_var_stub
+  {
+  public:
+
+    inline bool operator < (const ContentFilteredTopic_var_stub& t) const {
+      return true;
+    }
+  };
+
+  using ContentFilteredTopicMap = std::map<std::string, ContentFilteredTopic_var_stub>;
+#endif
+
 class Topic : public ListenerFactory<DDS::TopicListener> {
 public:
-  explicit Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant);
+  explicit Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
+    ContentFilteredTopicMap& content_filtered_topics_map);
   ~Topic();
 
   const std::string& get_name() const;
@@ -24,10 +40,10 @@ protected:
   uint32_t listener_status_mask_;
   Builder::PropertySeq listener_properties_;
   const std::string transport_config_name_;
+  Builder::ContentFilteredTopicSeq content_filtered_topics_;
   DDS::DomainParticipant_var participant_;
   DDS::TopicListener_var listener_;
   DDS::Topic_var topic_;
 };
 
 }
-

@@ -103,5 +103,3 @@ Currently the GUI files that should not be reformatted include:
 
   - `*.{h,cpp}`
     - source code for application.
-
-

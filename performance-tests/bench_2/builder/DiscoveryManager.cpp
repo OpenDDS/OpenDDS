@@ -9,4 +9,3 @@ DiscoveryManager::DiscoveryManager(const DiscoveryConfigSeq& seq) {
 }
 
 }
-

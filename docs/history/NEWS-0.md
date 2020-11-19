@@ -21,11 +21,11 @@ Version 0.12 of TAO DDS.
 
 - It is now possible to build DDS without Built-In-Topic (BIT) support in order
   to reduce the footprint of DDS.
-    
+
     - Generate the makefiles/projects like:
-    
+
       mwc.pl -type <yourtype> -features built\_in\_topics=0 DDS.mwc
-    
+
      Also, if <yourtype> happens to be gnuace, add built\_in\_topics=0 to the
   platform\_macros.GNU file or the MAKEFLAGS environment variable.
 
@@ -36,7 +36,7 @@ Version 0.12 of TAO DDS.
 
 - The reliable multicast transport was added. See the DDS developers guide
   for details.
-  
+
   NOTE: The reliable multicast (unlike the unreliable multicast) transport
         currently doesn't provide a default configuration.  The use of the
         transport IDs TAO::DCPS::DEFAULT\_RELIABLE\_MULTICAST\_SUB\_ID and
@@ -59,7 +59,7 @@ Version 0.12 of TAO DDS.
   The first parameter of the constructor defines the max\_len.
   If max\_len == 0 then zero-copy reading/taking is enabled.
   If max\_len > 0 then single-copy reading/taking is enabled.
-  
+
   See dds/DCPS/ZeroCopySeq\_T.h for more details.
 
   In the next release there will be just one data sequence type
@@ -213,8 +213,8 @@ Version 0.9 of TAO DDS.
 
   - Added fully association establishment support. This should fix the
     problem:
-    
-    
+
+
       "create\_meteorite() does not wait for full association establishment
       so even if there are waiting subscribers,  a write shortly after
       creating the datawriter may be dropped on the publisher side because
@@ -225,11 +225,11 @@ Version 0.9 of TAO DDS.
 
 
   - Supported thread-per-connection send.
-   
+
      - A new configuration "thread\_per\_connection" is added to turn on and turn
      off(default) this new feature. With this new feature, the samples are sent
      to different connections in parallel .
-     
+
      ```
       # Determine if the transport needs create a new thread for a
       # datalink/connection to send samples under normal traffic (no backpressure).
@@ -252,25 +252,25 @@ Version 0.9 of TAO DDS.
   - The built-in topic tests failure are expected since the builtin topic was not
     supported and tested.
 
-  - tests failed intermittently 
-  
-  ```  
+  - tests failed intermittently
+
+  ```
   tests/DCPS/Compiler/idl_test1_main/run_test.pl
   [Details] ERROR: <idl_test1> exited with coredump from signal 11 : SEXY
-    
+
   tests/DCPS/FooTest5_0/run_test.pl udp
-  [Details] (24994|1084229984) DataReaderImpl::remove_associations: 
+  [Details] (24994|1084229984) DataReaderImpl::remove_associations:
    ERROR: Unable to remove writer publisher_id 5.
-  [Details] (24994|1084229984) ERROR: DataReaderImpl::add_associations, invalid 
+  [Details] (24994|1084229984) ERROR: DataReaderImpl::add_associations, invalid
   liveliness_changed_status inactive count.
-    
+
   tests/DCPS/Reconnect/run_test.pl bp_timeout
 [Details] test FAILED. Please see the /tao\_builds/taoadmin/BETA/ACE_wrappers/
 TAO/DDS/tests/DCPS/Reconnect/test.log for details.
 [Details] Error: tests/DCPS/Reconnect/run_test.pl bp_timeout returned with
  status 2
   ```
-  
+
 _______________________________________________________________________________
 
 Version 0.8 of TAO DDS.
@@ -284,9 +284,9 @@ Version 0.8 of TAO DDS.
     See file://TAO\_DDS\_Configuration\_Settings.html for more information.
 
   - Fixed a possible deadlock.
-  
+
     The scenario it was found in was:
-    
+
     - Start a subscriber with two readers.
     - Start a publisher with two corresponding writers.
     - The subscriber would deadlock between the ORB and transport
@@ -328,7 +328,7 @@ Version 0.8 of TAO DDS.
    disconnected/lost/reconnected publication and subscription callbacks.
    The disconnected callback is called just before reconnect is attempted.
    If reconnect fails, the connection lost callback is called.
-   If reconnect succeeds, the reconnected callback is called. 
+   If reconnect succeeds, the reconnected callback is called.
    During reconnecting, the messages are queued until the reconnecting is done.
 
 
@@ -337,21 +337,21 @@ Version 0.8 of TAO DDS.
 
     The main changes are:
 
- - Added new idl interfaces 
-   - TAO::DataReaderListener and TAO::DataWriterListener to support 
+ - Added new idl interfaces
+   - TAO::DataReaderListener and TAO::DataWriterListener to support
    on\_\*\_disconnected, on\_\*\_lost and on\_*\_reconnected callbacks.
 
    - New configuration values are added to support the reconnect strategy.
 
   ```
     ###=== Configurations for connector side during reconnecting===
-    
+
     # The initial retry delay in milliseconds.
     # The first connection retry will be when the loss of connection
     # is detected.  The second try will be after this delay.
     # The default is 500 miliseconds.
     conn_retry_initial_delay=
-    
+
     # The backoff multiplier for reconnection strategy.
     # The third and so on reconnect will be this value * the previous delay.
     # Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5
@@ -361,21 +361,21 @@ Version 0.8 of TAO DDS.
     # fails.
     # The default value is 2.0.
     conn_retry_backoff_multiplier=
-    
+
     # Number of attemps to reconnect before giving up and calling
     # on_publication_lost() and on_subscription_lost() callbacks.
     # The default is 3.
     conn_retry_attempts=
-    
+
     # Maximum period (in milliseconds) of not being able to send queued
     # messages. If there are samples queued and no output for longer
     # than this period then the connection will be closed and on\_*\_lost()
     # callbacks will be called. If the value is zero, the default, then
     # this check will not be made.
     max_output_pause_period=
-    
+
     ###=== Configurations for acceptor side during reconnecting===
-    
+
     # The time period in milliseconds for the acceptor side
     # of a connection to wait for the connection to be reconnected.
     # If not reconnected within this period then
@@ -384,7 +384,7 @@ Version 0.8 of TAO DDS.
     # The default is 2 seconds (2000 millseconds).
     passive_reconnect_duration=
     ```
-    
+
 ##### Implemenation details:
 
 - A new interface - relink() is added to both receive
@@ -393,7 +393,7 @@ Version 0.8 of TAO DDS.
     object represents does not change during reconnecting. The
     connector side actively tries to reconnect and the acceptor
     side passively waits for the new connection coming.
-    
+
   - Added a new test $DDS\_ROOT/tests/DCPS/Reconnect to test
     the on\_*\_lost callback and the connection re-establishment.
 
@@ -421,7 +421,7 @@ Version 0.8 of TAO DDS.
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
     ```
-    
+
 _______________________________________________________________________________
 
 Version 0.7 of TAO DDS.
@@ -429,7 +429,7 @@ Version 0.7 of TAO DDS.
 
 ##### New to this version are the following changes:
 
-  - Added a configuration parameter to control the use of the Nagle algorithm 
+  - Added a configuration parameter to control the use of the Nagle algorithm
   for the SimpleTCP protocol.  By default, the Nagle algorithm is now disabled.
   - Improved VC6 support.
   - Fixed some memory leaks.
@@ -463,22 +463,22 @@ Version 0.5 of TAO DDS.
 
 - **This is the first release of a Data Distribution Service (DDS).**
 
-- **See the User's Guide for an user introduction to the service.** 
+- **See the User's Guide for an user introduction to the service.**
 
 - TAO's DDS implementation consists of the following:
 
     - Implementation of the interfaces in the DDS spec and $DDS\_ROOT/dds/DCPS
-    
+
     - A service repository driver in $DDS\_ROOT/dds/InfoRepo
-    
+
     - Type support generator, dcps\_ts.pl, is in $DDS\_ROOT/bin and its
      templates are in $DDS\_ROOT/bin/DCPS.
-    
+
     - You must use DDS with a version of TAO that has had its TAO\_IDL compiler
-     modified to support DDS type definition using the -Gdcps option. 
+     modified to support DDS type definition using the -Gdcps option.
      Any OCI version later than TAO 1.4a P4 or DOC group version later than
       1.4.6 should work.
-    
+
 - An example in $DDS\_ROOT/DevGuideExamples/DDS
 
 - Functional tests in $DDS\_ROOT/tests
@@ -486,4 +486,3 @@ Version 0.5 of TAO DDS.
 - Performance tests in $DDS\_ROOT/performance-tests
 
 _______________________________________________________________________________
-
