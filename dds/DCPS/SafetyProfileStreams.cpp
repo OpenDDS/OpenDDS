@@ -6,11 +6,11 @@
  */
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/Definitions.h"
+#include "SafetyProfileStreams.h"
 
+#include "Definitions.h"
 #ifdef OPENDDS_SECURITY
-#  include "dds/DdsSecurityCoreC.h"
+#  include "../DdsSecurityCoreC.h"
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -141,6 +141,14 @@ OPENDDS_STRING to_hex_dds_string(
     rv.push_back(nibble_to_hex_char(data[i]));
   }
   return rv;
+}
+
+OPENDDS_STRING to_hex_dds_string(
+  const DDS::OctetSeq& data, const char delim, const size_t delim_every)
+{
+  const size_t size = data.length();
+  return size ? to_hex_dds_string(
+    reinterpret_cast<const char*>(&data[0]), size, delim, delim_every) : "";
 }
 
 OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr)

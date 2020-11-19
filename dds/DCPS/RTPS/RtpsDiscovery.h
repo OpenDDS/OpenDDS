@@ -9,14 +9,14 @@
 #define OPENDDS_RTPS_RTPSDISCOVERY_H
 
 
-#include "dds/DCPS/DiscoveryBase.h"
-#include "dds/DCPS/RTPS/GuidGenerator.h"
-#include "dds/DCPS/RTPS/Spdp.h"
+#include "GuidGenerator.h"
+#include "Spdp.h"
 #include "rtps_export.h"
 
-#include "ace/Configuration.h"
+#include <dds/DCPS/DiscoveryBase.h>
+#include <dds/DCPS/PoolAllocator.h>
 
-#include "dds/DCPS/PoolAllocator.h"
+#include <ace/Configuration.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -459,6 +459,17 @@ public:
     periodic_directed_spdp_ = value;
   }
 
+  bool secure_participant_user_data() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return secure_participant_user_data_;
+  }
+  void secure_participant_user_data(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    secure_participant_user_data_ = value;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -492,6 +503,8 @@ private:
   size_t sedp_max_message_size_;
   bool undirected_spdp_;
   bool periodic_directed_spdp_;
+  /// Should participant user data QoS only be sent when the message is secure?
+  bool secure_participant_user_data_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -608,6 +621,15 @@ public:
 
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
+
+  bool secure_participant_user_data() const
+  {
+    return config_->secure_participant_user_data();
+  }
+  void secure_participant_user_data(bool value)
+  {
+    config_->secure_participant_user_data(value);
+  }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
