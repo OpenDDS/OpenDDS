@@ -194,8 +194,8 @@ module Bench {
     typedef sequence<WorkerPrototype> WorkerPrototypes;
 
     struct NodePrototype {
-      // Name of a node_controller to which the workers are assigned
-      string name;
+      // Assign to a node controller with a name that matches this wildcard
+      string name_wildcard;
       WorkerPrototypes workers;
       // Number of Nodes to spawn using this prototype (Must be >=1)
       unsigned long count;

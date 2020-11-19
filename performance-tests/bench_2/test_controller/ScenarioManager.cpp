@@ -287,12 +287,36 @@ unsigned ScenarioManager::allocate_scenario_i(AllocatedScenario& allocated_scena
   return nonexclusive_start;
 }
 
+bool ScenarioManager::is_name_matched(const string& name, const string& wildcard) const
+{
+  // TODO: Implement this
+  return true;
+}
+
 AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& scenario_prototype,
   const Nodes& available_nodes, bool debug_alloc)
 {
   if (scenario_prototype.nodes.length() == 0 && scenario_prototype.any_node.length() == 0) {
     throw std::runtime_error("Scenario Prototype is empty!");
   }
+
+  // Get a set of matched node controllers for each node prototype
+  typedef std::vector<NodeId> MatchedNodeControllers;
+  std::vector<MatchedNodeControllers> matched_ncs(scenario_prototype.nodes.length());
+  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+    const NodePrototype& nodeproto = scenario_prototype.nodes[i];
+    for (Nodes::const_iterator it = available_nodes.begin(); it != available_nodes.end(); ++it) {
+      if (is_name_matched(it->second.name.in(), nodeproto.name_wildcard)) {
+        matched_ncs[i].push_back(it->first);
+      }
+    }
+  }
+
+
+
+
+
+
 
   // Gather node prototypes by names
   typedef std::unordered_map<std::string, NodePrototypes> NamedProtoNodes;
