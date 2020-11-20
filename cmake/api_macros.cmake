@@ -100,6 +100,21 @@ macro(OPENDDS_TARGET_SOURCES target)
     _opendds_options
     ${ARGN})
 
+  foreach(extra ${ARGN})
+    if("${extra}" MATCHES "\\.idl$")
+      get_filename_component(dir ${extra} DIRECTORY)
+      if (NOT dir STREQUAL "")
+        if (NOT "-I${dir}" IN_LIST extra_idl_paths)
+          list(APPEND extra_idl_paths "-I${dir}")
+        endif()
+      endif()
+    endif()
+  endforeach()
+
+  if(extra_idl_paths)
+    list(APPEND extra_idl_flags "--filename-only-includes")
+  endif()
+
   if(NOT _opendds_options MATCHES "--(no-)?default-nested")
     if (OPENDDS_DEFAULT_NESTED)
       list(APPEND _opendds_options "--default-nested")
@@ -155,8 +170,8 @@ macro(OPENDDS_TARGET_SOURCES target)
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}
-        TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${EXTRA_IDL_PATHS}
-        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${EXTRA_IDL_FLAGS} ${EXTRA_IDL_PATHS}
+        TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${extra_idl_paths}
+        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${extra_idl_flags} ${extra_idl_paths}
         IDL_FILES ${_idl_sources_${scope}}
         SCOPE ${scope})
     endif()
@@ -165,22 +180,5 @@ macro(OPENDDS_TARGET_SOURCES target)
     # regular c/cpp/h files specified by the user are added.
     target_sources(${target} ${scope} ${_sources_${scope}})
 
-  endforeach()
-endmacro()
-
-macro(ADD_DDS_IDL_FLAG flag)
-  list(APPEND EXTRA_IDL_FLAGS "${flag}")
-endmacro()
-
-macro(ADD_IDL_PATH the_path)
-  list(APPEND EXTRA_IDL_PATHS "-I${the_path}")
-endmacro()
-
-# add .idl files in path to IDL_DEPENDENCIES
-# note globbing is not recommended CMake practice.
-macro(ADD_IDL_FILES_IN_PATH the_path)
-  FILE(GLOB idl_list "${the_path}/*.idl")
-  foreach(idl_file ${idl_list})
-    list(APPEND IDL_DEPENDENCIES ${idl_file})
   endforeach()
 endmacro()

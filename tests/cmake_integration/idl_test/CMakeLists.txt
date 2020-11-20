@@ -38,25 +38,13 @@ configure_file(${src}/transmission/transmission_states.idl ${dst}/transmission C
 
 add_executable(${the_ecu} "ecu.cpp")
 
-# set add opendds_idl compiler option to strip leading directories from #include
-# needed for CMake builds with nested idl files
-ADD_DDS_IDL_FLAG("--filename-only-includes")
-
-# add idl explicitly
-ADD_IDL_PATH(./engine/engine_stats)
-set(IDL_DEPENDENCIES ./engine/engine_stats/fuel_stats.idl)
-
-# add idl given a path. this updates IDL_DEPENDENCIES.
-ADD_IDL_PATH(./engine)
-ADD_IDL_FILES_IN_PATH(./engine)
-
-# add idl given a path. this updates IDL_DEPENDENCIES.
-ADD_IDL_PATH(./transmission)
-# this will import both transmission idl files
-ADD_IDL_FILES_IN_PATH(./transmission)
-
 add_library(ecu_lib SHARED)
-OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl ${IDL_DEPENDENCIES})
+
+OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl
+  ./engine/engine_specs.idl
+  ./engine/engine_stats/fuel_stats.idl
+  ./transmission/transmission_specs.idl
+  ./transmission/transmission_states.idl)
 
 target_link_libraries(ecu_lib ${opendds_libs})
 
