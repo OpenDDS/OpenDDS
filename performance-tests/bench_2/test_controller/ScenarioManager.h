@@ -45,6 +45,7 @@ public:
 
 private:
   void customize_configs(std::map<std::string, std::string>& worker_configs);
+  bool is_matched(const std::string& str, const std::string& wildcard) const;
 
   const std::string bench_root_;
   const std::string test_context_;
