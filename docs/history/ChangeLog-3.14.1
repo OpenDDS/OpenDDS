@@ -1,0 +1,1176 @@
+Fri Nov 20 18:53:58 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 873131a9860be2c8ae4bec15687a090302fa8fe4
+
+        * NEWS.md:
+
+          NEWS for 3.14.1
+
+Fri Nov 13 20:40:46 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1c0fd890cb30f160839266e4c664b920267b5919
+
+          Merge pull request #2053 from simpsont-oci/fix_lncm_warning_3_14
+
+          Port LinuxNetworkConfigMonitor Warning Fix to 3.14
+
+Sun Jul 12 19:50:48 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 419314b9487258378e9aa00531bebdefa9b1595b
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Merge pull request #1787 from mitza-oci/durable-cleanup
+
+          Fixing leaked durable buffered data
+
+          (cherry picked from commit
+          ce2741a730a6b811290c90b9b069276321594ef7)
+
+Fri Nov 13 15:09:24 UTC 2020  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit af073b777a3d8a80022649f4861fd6da2798ea0a
+
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+
+          Port LinuxNetworkConfigMonitor Warning Fix to 3.14
+
+Fri Nov 13 03:29:57 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7a00616315670509e573f37be471c71648757cac
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Merge pull request #2044 from
+          simpsont-oci/remove_local_struct_template_from_zerocopyread_test
+
+          Remove Local Struct Template Instantiation From ZeroCopyRead Test
+
+          (cherry picked from commit
+          4691c6400f2ba25facd2eb92daeaa88d0b613cc2)
+
+Thu Nov 12 14:15:54 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 54ba5326f41f06f81cd919044972532ec7d95c35
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Merge pull request #2039 from
+          simpsont-oci/fix_zerocopy_seq_length
+
+          Fix Length Issue in ZeroCopySeq, Add Test Coverage
+
+          (cherry picked from commit
+          bbdd8d588a0713ebccbc7a9ca1b9d2d9d1e11191)
+
+Thu Nov 12 14:15:42 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 281589197e5ca2d5ada938ea570943ef33179e18
+
+        * dds/DCPS/SporadicTask.h:
+
+          Merge pull request #2038 from
+          ClaytonCalabrese/opendds3_15_monitortest
+
+          Monitor Test Failure due to strong RcHandle
+
+          (cherry picked from commit
+          79f77516e3907a32024b8f6c7b598b3bd3986792)
+
+Sat Nov 07 23:06:15 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7a9334dd5ac9893fe0fc090b0d351d173aef528d
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Merge pull request #2021 from
+          simpsont-oci/fix_multicast_join_rtps_udp_transport
+
+          Use DCPSDefaultAddress to Initialize multicast_interface for
+          RtpsUdpTransport Config
+
+          (cherry picked from commit
+          c411ea9bbfedaa7894947de5e372dda677803a67)
+
+Sat Nov 07 23:05:17 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit d3be75780c2fe492a09fb73d624b1f8fd558e9d0
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Merge pull request #2014 from jrw972/transport-resource-leak-1
+
+          TransportImpl/TransportClient leak resources for pending
+          connections
+
+          (cherry picked from commit
+          a882f3428c64bdfd905c248f87d1d868cd8bedab)
+
+Fri Nov 06 17:17:22 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3a4ec759c18f64ae7b04dd14399d9fd161265c09
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Merge pull request #2015 from jrw972/readers-of-writers-leak
+
+          `readers_of_writers_` map leaks
+
+          (cherry picked from commit
+          8e164058bcb2e2c4755f8938cd79dca1ffe311a8)
+
+Thu Oct 29 05:11:38 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit d3e5f373fbd5332662875448601869821723ba03
+
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+
+          Merge pull request #1985 from
+          ClaytonCalabrese/linuxmonitor_open_fix
+
+          LinuxMonitor failing to bind socket
+
+          (cherry picked from commit
+          539d5f5ce5bc9b824fff65f6d9f37cfcf9b63df0)
+
+Wed Oct 28 04:15:06 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit e9ebf48af7f9a0ec2403a3eae389b97f01d8a434
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Merge pull request #1979 from jrw972/secure-dispose
+
+          SEDP ignores dispose messages with security
+
+          (cherry picked from commit
+          ec9aed1013f1b0e6cb3416295522e93c0fb62d40)
+
+Mon Nov 09 20:53:27 UTC 2020  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8e8a305f0965331a5e45e1a0a56817899cca14ef
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          fixing merge issue for 1903
+
+Sun Nov 01 19:54:31 UTC 2020  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ea856fc2608301bfd1167f9fa7a25bf1e4063e3d
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fixing VS2019 Build Issues
+
+Sat Oct 24 19:37:20 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9e509fed9cc3f17275241d92ceaaf89daaa61445
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+        * performance-tests/Bench/tests/latency/run_all_tests.sh:
+        * performance-tests/Bench/tests/latency/test_list.txt:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Merge pull request #1968 from
+          simpsont-oci/minor_fixes_for_simplelatency_test
+
+          Check sample validity in SimpleLatency performance test
+
+          (cherry picked from commit
+          5ef2ccc2c9d5eb0e46931ce37f6c128f853214c7)
+
+Fri Oct 23 13:24:35 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 094da57e6c097259798462ff5937e01b330b734b
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+          Merge pull request #1966 from
+          simpsont-oci/reduce_compat_test_wasted_time
+
+          Reduce Wasted Time in CompatibilityTest Script
+
+          (cherry picked from commit
+          322d9affda628243f70fc29d18064aded9a8dbf1)
+
+Sun Nov 01 03:20:23 UTC 2020  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ba1a929e710f74cae0092d8e38c6432f6d4f0d47
+
+        * dds/DCPS/NetworkConfigModifier.cpp:
+
+          Manual migration of fix from PR #1964 (merge
+          9f50bfef9df20d9f8b7d919b42ddf1da08813175)
+
+Fri Oct 23 13:23:50 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit df571a831f2aa63c59706316f3ea0f5a4a807f6f
+
+        * dds/idl/langmap_generator.cpp:
+        * tests/DCPS/Compiler/C++11/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Merge pull request #1950 from ClaytonCalabrese/cpp11enumunion
+
+          fix and test for enum union cpp11
+
+          (cherry picked from commit
+          a4cc77c847c488205cff0d4a7e91afc6758f6b42)
+
+Sat Oct 31 21:17:30 UTC 2020  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit aed7506d779b1811163ac4879d8caded406cb3af
+
+        * dds/DCPS/NetworkConfigMonitor.cpp:
+
+          Manual migration of fix from PR #1956 (merge
+          75ef540cd0a52236a66e795f37e2efb64465dc34)
+
+Sat Oct 17 22:53:52 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3cdb3b93c43e77decebe1b0b093d45e2611a3c36
+
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+
+          Merge pull request #1953 from
+          simpsont-oci/fix_loopback_multicast_join
+
+          Perform Multicast Join on Loopback Interface
+
+          (cherry picked from commit
+          5227b9698b8ccc6f84a1ce59da7c151d2bc9979e)
+
+Sat Oct 17 22:53:40 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit d9dcb036007c33a649401265a863e49052d549a8
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Merge pull request #1949 from
+          simpsont-oci/apply_default_addr_to_rtps_discovery_mc_interface
+
+          Allow DCPSDefaultAddress to Initialize RtpsDiscovery's
+          MulticastInterface
+
+          (cherry picked from commit
+          0ea5bad60c3e08d78bb1d2dfd3916456ab1c6800)
+
+Fri Oct 16 01:11:03 UTC 2020  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2e4c39799a7d922f5cca4d53dcf5c781836c2651
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Merge pull request #1948 from jrw972/bundling-placeholder
+
+          BUNDLING_PLACEHOLDER not removed in bundles
+
+          (cherry picked from commit
+          07cb8da24bb8da9d49bd3a586020899daaaa3922)
+
+Wed Oct 14 12:55:59 UTC 2020  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 30f79308f2b514ba237b5c4cf69229046a441250
+
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Merge pull request #1940 from jrw972/leaky-bits
+
+          BIT readers have spec-defined memory leak
+
+          (cherry picked from commit
+          656ae60212e73eb07bd4ce1aadbcb8b50a5f9802)
+
+Sat Oct 10 13:21:40 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 16dfc4fc13a6abba9b2763b6042ed8082288d81f
+
+        * dds/DCPS/JobQueue.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/ReactorInterceptor.h:
+
+          Merge pull request #1941 from jrw972/deque-to-vector
+
+          Deque is memory inefficient
+
+          (cherry picked from commit
+          e9ed60820772f734309bd7c8ffba861e33326293)
+
+Fri Oct 02 02:38:11 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit bb7315083478d74d12eae5387868897e2a63318a
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.h:
+        * dds/DdsSecurityCore.idl:
+
+          Merge pull request #1917 from jrw972/return-permissions-handle
+
+          Permissions handles are not returned to Access Control Plugin
+
+          (cherry picked from commit
+          d44db531d915ea3057a9f0955a1804e779d36ed6)
+
+Sat Oct 31 18:30:19 UTC 2020  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit bb910c7618ab77dba45da9aebfaf6f0d3b6fffe6
+
+        * tests/transport/rtps_directed_write/.gitignore:
+
+          updating .gitignore
+
+Fri Sep 25 22:03:34 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit fa6d6fdeb83672cae97c529b2e13fcc42a3e1c46
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Merge pull request #1903 from jrw972/windows-conn-reset
+
+          Windows connection reset prevention code immediately after open
+
+          (cherry picked from commit
+          041cdc6342b59c6d65cbcf8483940068cc195ab7)
+
+Thu Sep 24 20:57:46 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 764a20495751d0c68c70c050570a2ead84862e7b
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Merge pull request #1898 from jrw972/rtps-control-logging
+
+          Don't log failed RTPS control sends if network is unreachable
+
+          (cherry picked from commit
+          e2281728495be03208101f21f0c59ee504ecc407)
+
+Fri Sep 04 19:42:23 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit b1149a34765d49d41e1c17d38640131a0619a67d
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Merge pull request #1873 from jrw972/durable-participant-messages
+
+          Durable participant messages
+
+          (cherry pick of commit 5dcfdd40d31d594b9273ceef4077048da6528d7b)
+
+Tue Aug 04 23:23:57 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit ddf7e8f01f3011d5f5c1a0bddeff0716ad892f20
+
+        * dds/DCPS/DiscoveryBase.h:
+
+          Merge pull request #1822 from
+          jrw972/remove-discovered-participant-deadlock
+
+          remove_discovered_participant doesn't unlock before calling BITS
+
+          (cherry pick of commit 66ec4e76367f8d86ab8e283542dc3b6111890047)
+
+Wed Jul 29 21:51:27 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 480b2a6db341f23981fbd16bf9980608dd2edaf0
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Merge pull request #1811 from
+          simpsont-oci/prevent_transportclient_schedulecommand_invalid_access
+
+          Prevent invalid access in
+          TransportClient::PendingAssocTimer::ScheduleCommand during
+          shutdown
+
+          (cherry picked from commit
+          bd252ab0def90f63922d0437b2e804a280d7717e)
+
+Tue Jul 21 03:14:18 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 96c5ee6ddcf314975a71df7575619c1e28152e8a
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Merge pull request #1799 from jrw972/durability-nacks
+
+          RTPS durability nacks gapped or answered from send buffer
+
+          (cherry picked from commit
+          b352ec5e5509862fb275b467beba587b30a4fb06)
+
+Mon Jul 13 15:28:26 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 21575af4747595931e1604d704a20d938a76affc
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Merge pull request #1788 from jrw972/set-historic-sample
+
+          Set historic_sample_ on replayed durable data
+
+          (cherry picked from commit
+          ab04e6308e35c2a3a0889ba7b716fbeb4ac7c2e7)
+
+Fri Jul 10 12:51:26 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8f230c5531ebeea05f17f8c3b594ca53daafe413
+
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+
+          Merge pull request #1783 from jrw972/reauth-redux
+
+          Authentication does handle resends
+
+          (cherry picked from commit
+          71542aa50e869d8228b98949c940d9efb10c6cad)
+
+Fri Jul 10 12:51:15 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit df01bf115129f245ba580cf9985332cc4459a4b2
+
+        * MPC/config/opendds_security.mpb:
+
+          Merge pull request #1784 from iguessthislldo/igtd/dcpslib_leak
+
+          Remove dcpslib from opendds_security.mpb
+
+          (cherry picked from commit
+          fa1f9bf536ec265de94f5ebc0f9c585c75da9f27)
+
+Thu Jul 02 16:26:00 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit faf63c0f85bc19ef267f10f67784b9211886c253
+
+        * tests/DCPS/Messenger/optional_security.mpb  MPC/config/opendds_optional_security.mpb:
+        * dds/DCPS/security/BuiltInPluginLoader.cpp:
+        * dds/DCPS/security/BuiltInPluginLoader.h:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.h:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Restart/RestartTest.cpp:
+        * tests/DCPS/Restart/RestartTest.mpc:
+        * tests/DCPS/Restart/run_test.pl:
+        * tests/security/security_tests.lst:
+        * tools/rtpsrelay/RtpsRelay.mpc:
+        * tools/rtpsrelay/optional_security.mpb:
+
+          Merge pull request #1737 from
+          iguessthislldo/igtd/static_secure_restart_test
+
+          Allow Built-in Security Plugin to be Reloaded in a Static Build
+
+          (cherry picked from commit
+          89b351a72fc877442ec6250e98225f6d6723114d)
+
+Sun Jun 28 21:14:36 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4b7eda72e4723207e0d6ffead23fd5e95dd67ea8
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Merge pull request #1763 from
+          simpsont-oci/protect_listeners_in_datalink_network_change
+
+          Protect Listeners in DataLink::network_change()
+
+          (cherry picked from commit
+          bbafadd354676550159659b2b71e4847190eeafe)
+
+Sun Jun 28 01:25:08 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit caecb1271288d34815372b03fa805639af03de96
+
+        * azure-pipelines.yml:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/debug.cpp:
+        * dds/DCPS/debug.h:
+        * dds/DCPS/security/AuthenticationBuiltInImpl.cpp:
+        * dds/DCPS/security/CryptoBuiltInImpl.cpp:
+        * dds/DCPS/security/CryptoBuiltInImpl.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DdsSecurityCore.idl:
+        * docs/design/security.md:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Merge pull request #1732 from jrw972/reauth
+
+          Participants cannot reauthenticate
+
+          (cherry picked from commit
+          88fcd4aefaaa3bf758ff5e50f9b6527d6a8b0582)
+
+Tue Jun 16 16:25:19 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 835e1d7b825146e02e2d06a4a622dd279598d15c
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.h:
+
+          Merge pull request #1752 from mitza-oci/defaultaddress
+
+          Update to #1727, avoid name resolution of DCPSDefaultAddress in
+          ACE
+
+          (cherry picked from commit
+          09c63425242382a47b39a5e404b11122a5281989)
+
+Wed Jun 10 19:05:34 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit c3ff88711e938df9b94eaf13678be8e9c01ef3b8
+
+        * dds/DCPS/NetworkConfigMonitor.cpp:
+        * dds/DCPS/NetworkConfigMonitor.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/ConfigFile/test1_nobits.ini:
+
+          Merge pull request #1727 from mitza-oci/defaultaddress
+
+          DCPSDefaultAddress parsing and integration with
+          NetworkConfigMonitor
+
+          (cherry picked from commit
+          8c3ae78ab9d60363a5aa12e1f25aed4ffc760af5)
+
+Mon Jun 08 16:18:22 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 83c76a2fd013723a44a1333e0d9e2bd485916642
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RemoveAssociationSweeper.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Merge pull request #1723 from
+          jrw972/cancel-remove-association-sweeper
+
+          Associations are removed after expire-associate
+
+          (cherry picked from commit
+          7cf92aabe0b1d6bd89bddda5db00b8d76ff348d5)
+
+Thu May 21 02:03:07 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit c22a615597954ab5838348fdeda0b17784029fdd
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/TimePoint_T.inl:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Merge pull request #1677 from
+          jrw972/remove-offered-deadline-watchdog
+
+          Remove OfferedDeadlineWatchdog
+
+          (cherry picked from commit
+          dd2bf6e2ae67cb888eb77083025b486762b1a357)
+
+Mon May 18 20:56:27 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 877b9c0307e40cdc6a2a48d11f987a1c91ecb9b1
+
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/security/AuthenticationBuiltInImpl.cpp:
+        * tests/security/AccessControlTest.cpp:
+        * tests/security/Authentication/AuthenticationTest.cpp:
+
+          Merge pull request #1691 from jrw972/no-auth-reply-resend
+
+          Only send auth replies for auth requests
+
+          (cherry picked from commit
+          394cba5b362e6a17d3bf57926632b5ec4a835ef1)
+
+Sat May 09 04:23:40 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 29b7f95e2abd66f9ff07e250476d41a54306fc01
+
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Merge pull request #1679 from jrw972/spdp-transport-fix
+
+          Fix SPDP transport test on Windows IPV6 builds
+
+          (cherry picked from commit
+          68ad2f231d74ff208959632805fe10467d74e458)
+
+Wed Apr 29 22:32:27 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 58c1e2a54e1145dd4eaf3774541583b9f122f0ba
+
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Merge pull request #1658 from jrw972/spdp-transport-fixes
+
+          Use IPV4 for spdp transport test
+
+          (cherry picked from commit
+          0357d46a4443a0473e90af034c2c4f54abdbe52e)
+
+Wed Apr 29 22:32:17 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 512d8eb91b170006ffdecdcd085811a74ed36e70
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+
+          Merge pull request #1657 from jrw972/dead-dog-lock
+
+          Fix deadlock in OfferedDeadlineWatchdog
+
+          (cherry picked from commit
+          b21eb4ab162a80e386c666997f6f04462cc3ba2e)
+
+Tue Apr 28 04:42:20 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit a13de211fa9bf16f7410032f3c8882a59dc71d66
+
+        * dds/DCPS/NetworkConfigModifier.h:
+
+          Merge pull request #1648 from jonesc-oci/netCfgMod
+
+          Do not use NetworkConfigModifier for Linux builds.
+
+          (cherry picked from commit
+          043dd1a59770a6f114c6ecd84d9148eb1f367dc0)
+
+Tue Apr 28 04:41:38 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 24afcafedf5f312d0a82db9480e730cf2870f772
+
+        * tools/scripts/setenv.csh:
+        * tools/scripts/setenv.sh:
+        * tools/scripts/show_build_config.pl:
+        * tools/scripts/update_gitignore.pl:
+
+          Merge pull request #1647 from
+          iguessthislldo/igtd/tools_scripts_tweaks
+
+          Tweaks for tools/scripts
+
+          (cherry picked from commit
+          680605f0801741c469933269de958335fc709455)
+
+Mon Apr 27 03:58:57 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 29c47b3c5298dad11452ccdd36d61d97986ee233
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Merge pull request #1644 from iguessthislldo/igtd/863_fixes
+
+          Replace Manual BIT Topic Check
+
+          (cherry picked from commit
+          c275f7055773d90975d23858f108f4e60a7bc94a)
+
+Fri Apr 10 16:58:27 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 99c1aee65b8ae9cbb28e54f5ddcae36bcc3f1ade
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataWriterCallbacks.h:
+
+          Merge pull request #1626 from
+          ClaytonCalabrese/android_clang_visibility
+
+          Adding Missing Exports for Getting InfoRepo Disc. Working on
+          Android
+
+          (cherry picked from commit
+          79d3a4624de507d639df7ac3f42ee136748cc0aa)
+
+Sat Apr 04 20:32:27 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9a599cceaa2f52ea271fffe5fad0ff08f4adff5e
+
+        * configure:
+
+          Merge pull request #1619 from iguessthislldo/igtd/wireshark
+
+          configure: Fix Issue with Implied --glib
+
+          (cherry picked from commit
+          1846ef9fa1adadb50e13888304198c4385b73e45)
+
+Mon Mar 30 23:58:24 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit ac73ecffecc288bb9091360628cf31bfb60c8aa6
+
+        * docs/android.md:
+
+          Merge pull request #1607 from iguessthislldo/igtd/android
+
+          android.md: Fix Indent on List
+
+          (cherry picked from commit
+          6b194469cc9b22a4e55a39a70e6fec1f55b512f5)
+
+Thu Mar 19 01:50:43 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 36fea54890ca399748c093ac7197de74f1c4dfd6
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Merge pull request #1598 from
+          simpsont-oci/prevent_infinite_reactor_interceptor_processing
+
+          Prevent Potential Infinite Processing Loop in ReactorInterceptor
+
+          (cherry picked from commit
+          46a3fe0fbc7dca6dc68899312abdf356e5af378b)
+
+Thu Mar 19 01:50:16 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8bd741e23b23110a45560b00ac585f3a751b913b
+
+        * configure:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * tests/DCPS/ContentFilteredTopic/Messenger.idl:
+        * tests/DCPS/QueryCondition/Messenger.idl:
+        * tests/DCPS/UnitTests/.gitignore:
+        * tests/DCPS/UnitTests/DataSampleHeader.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Merge pull request #1596 from
+          iguessthislldo/igtd/filter_instance_register
+
+          Fix Filtering Instance Registration by Non-Key Fields
+
+          (cherry picked from commit
+          24cf2e132535705a3300a5a61950a89834a4856c)
+
+Mon Mar 16 02:27:06 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit e0c1b781ed07a11373d8f9af048aca60c1f916ab
+
+        * dds/DCPS/security/AuthenticationBuiltInImpl.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.h:
+
+          Merge pull request #1593 from jrw972/multi-secure-deadlock
+
+          Fix race conditions and deadlock from multiple secure
+          participants
+
+          (cherry picked from commit
+          e5f7c74454264d743174c0e8d02a5e341193949f)
+
+Mon Mar 16 02:26:53 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit a573c709f35b5f141268d49ff4fecf5aed24a921
+
+        * tools/scripts/gitrelease.pl:
+
+          Merge pull request #1590 from iguessthislldo/igtd/release_script
+
+          gitrelease.pl: Fixes from 3.14 release
+
+          (cherry picked from commit
+          ed854cce2eaa7e9e74bed301dcaba87b0904d587)
+
+Wed Oct 21 13:17:46 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0f76d0057743412e5faa802b5aff7909317398ab
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Merge pull request #1960 from
+          jrw972/transport-send-buffer-memory-leak
+
+          TransportSendBuffer leaks memory
+
+          (cherry picked from commit
+          dff7dd993f318178d7f33614fe9326a425de2b2d)
+
+Fri Aug 21 16:20:02 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2e048bce4f036133f98a91bc095d4850db8de477
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Merge pull request #1844 from mitza-oci/issue1826
+
+          Additional validity check for submessage parsing
+
+          (cherry picked from commit
+          407faaa39bd30a797c7fcdef658e7de670f6ef33)
+
+Wed Apr 29 22:32:07 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1de87a969456c3d34d3d099e114a8e2d10056c24
+
+        * dds/DCPS/RTPS/ICE/Checklist.h:
+
+          Merge pull request #1656 from jrw972/ice-include
+
+          Fix missing include
+
+          (cherry picked from commit
+          6125fbb4fe8dfaaed79c31c1730fbf2bb20abef2)
+
+          # Conflicts:
+          #       dds/DCPS/RTPS/ICE/Checklist.h
+
+Tue Jun 30 22:50:49 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit e242cde19cfdbac1d021494463704be8241bb943
+
+        * dds/DCPS/security/AccessControl/Governance.cpp:
+        * dds/DCPS/security/AccessControl/Permissions.cpp:
+        * dds/DCPS/security/AccessControl/Permissions.h:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.h:
+        * tests/security/AccessControlTest.cpp:
+        * tests/security/attributes/Args.cpp:
+        * tests/security/attributes/Args.h:
+        * tests/security/attributes/Writer.cpp:
+        * tests/security/attributes/permissions/permissions_test_participant_01_partitions.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_partitions_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_partitions.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_partitions_signed.p7s:
+        * tests/security/attributes/publisher.cpp:
+        * tests/security/attributes/run_test.pl:
+        * tests/security/attributes/subscriber.cpp:
+        * tests/security/security_tests.lst:
+
+          Merge pull request #1733 from mitza-oci/secpartitions
+
+          Security: checking permissions based on Partition QoS
+          (cherry picked from commit
+          30b5fe412e1306e5624e8ff3c2016290c2288f9f)
+
+Mon May 18 20:57:00 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 69be830908e9152402bdfbd18639f995258d45ab
+
+        * dds/idl/dds_visitor.cpp:
+        * java/tests/two_idl/.gitignore:
+        * java/tests/two_idl/Common.idl:
+        * java/tests/two_idl/two_idl.mpc:
+
+          Merge pull request #1695 from mitza-oci/java-ts-includes
+
+          Fixed Java code generation when an included IDL file has @topic
+
+          (cherry picked from commit
+          5c73412f5eaf378447a4b3a19bcdbbb4cc990b52)
+
+Fri May 08 04:36:37 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 48605f339ce845a338492bec429d08ff7d3c6405
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/tests/union/.gitignore:
+        * java/idl2jni/tests/union/TestUnion.cpp:
+        * java/idl2jni/tests/union/TestUnion.java:
+        * java/idl2jni/tests/union/UnionTest.idl:
+        * java/idl2jni/tests/union/idl2jni_test_union.mpc:
+        * java/idl2jni/tests/union/run_test.pl:
+        * java/tests/dcps_java_tests.lst:
+
+          Merge pull request #1671 from mitza-oci/idl2jni-union
+
+          Fixed a corner case for IDL union code generation in Java
+
+          (cherry picked from commit
+          7342446053207c199512c8570fac97dfa07e1236)
+
+Fri May 01 20:20:15 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit b74edf11839eaf46e11f50a136b991cfe1429101
+
+        * README.md:
+
+          Merge pull request #1663 from objectcomputing/mitza-travis-url
+
+          README.md: updated Travis CI URL
+
+          (cherry picked from commit
+          66cc5c16b8df939d13a4aa2780675532d7b03b62)
+
+Fri May 01 20:20:03 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 62a339ac8da800733450669e9d71d339937963a6
+
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/langmap_generator.cpp:
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Merge pull request #1661 from mitza-oci/master
+
+          IDL-to-C++11: corrected mapping of enum constants when enum is in
+          a module
+
+          (cherry picked from commit
+          665f5c922a271b8ea5fc721548f7a2a0c6bf8231)
+
+Thu Apr 16 14:30:53 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3626fcb5693fdbb02ce42b600cc4ecb519a371ae
+
+        * Dockerfile:
+
+          Merge pull request #1631 from mitza-oci/dockerfile-ldconfig
+
+          Dockerfile: use ldconfig for installed libraries in
+          /usr/local/lib
+          (cherry picked from commit
+          a5515b09b6daec9da1c163c322d1921fccdab3a9)
+
+Tue Oct 20 22:44:52 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit b7a26183b7e168efbe64082c3e82f279025696e4
+
+          Merge pull request #1955 from
+          iguessthislldo/igtd/3.14.1-cmake-fixes
+
+          [3.14] Backport CMake Changes from Master
+
+Wed Jun 10 16:10:56 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f9d7151da2a35ac6b059358fbb1fa8a6c2e480d5
+
+        * cmake/dds_idl_sources.cmake:
+
+          dds_idl_sources.cmake: Fix syntax
+
+Wed Jun 10 05:03:12 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7ff26d9e3e3a85154e0114aa5b1ac6d635e59573
+
+        * cmake/dds_idl_sources.cmake:
+        * docs/cmake.md:
+
+          Respond to Review for #1728
+
+          Also Other Tweaks
+
+Tue Jun 09 03:27:04 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 756d10b165aadbc9a39ef9bc6581d10929dfb8d9
+
+        * cmake/dds_idl_sources.cmake:
+        * docs/cmake.md:
+        * tests/DCPS/C++11/Messenger/Publisher/DDS_Cxx11_Messenger_Publisher.mpc:
+        * tests/DCPS/C++11/Messenger/Publisher/publisher.cpp:
+        * tests/DCPS/C++11/Messenger/Subscriber/DDS_Cxx11_Messenger_Subscriber.mpc:
+        * tests/DCPS/C++11/Messenger/Subscriber/subscriber.cpp:
+        * tests/cmake_integration/Messenger/C++11_Messenger/.gitignore:
+        * tests/cmake_integration/Messenger/CMakeLists.txt:
+        * tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt:
+
+          Support for C++11 Mapping in the CMake Module
+
+          Fix for https://github.com/objectcomputing/OpenDDS/issues/1714
+
+          Support for the C++11 mapping in the CMake module. `-Lc++11` can
+          now be
+          passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`.
+
+          Also added a property to the target of `OPENDDS_TARGET_SOURCES`
+          called
+          `OPENDDS_LANGUAGE_MAPPING` that states what mapping was used.
+          This will
+          be exported if supported by CMake. Fix for
+          https://github.com/oci-labs/pyopendds/issues/9.
+
+Mon Oct 19 19:28:26 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 8a7a5cc65b47f1cc3a334ae15df947e49893b0e1
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/api_macros.cmake:
+        * docs/cmake.md:
+
+          Remove Deprecation in CMake Added for 3.15
+
+Sat Jun 13 04:43:43 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ac631bd05818fe53ed0251ba300e7b323ca7cf6b
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/api_macros.cmake:
+        * docs/cmake.md:
+
+          CMake: Deprecate C++ Files OPENDDS_TARGET_SOURCES
+
+          Add deprecation warning when non IDL files are passed to
+          OPENDDS_TARGET_SOURCES.
+
+Sat Jun 13 04:40:17 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit bd6d66d76bcea8bf9929f4d0b80ba0ad9834672f
+
+        * cmake/OpenDDSConfig.cmake:
+        * docs/cmake.md:
+        * tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt:
+
+          CMake: Remove C++ Files in OPENDDS_TARGET_SOURCES
+
+          Remove these from the tests to make sure nothing special is being
+          done
+          to them to help test my previous commits.
+
+          Also remove references to that ability in the documention.
+
+Sat Jun 13 04:30:12 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f443de70fc68ecef375b62845f177a557f025433
+
+        * cmake/OpenDDSConfig.cmake:
+        * docs/cmake.md:
+        * tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt:
+
+          Add to CMake Documentation
+
+Sat Jun 13 01:31:45 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 307963537e195b0837adac86a06fb810ec5c03d6
+
+        * cmake/OpenDDSConfig.cmake:
+
+          CMake: Include options.cmake Sooner
+
+          To fix issue with macro definitions list not being defined.
+
+Fri Jun 12 23:42:52 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7c23dbc9325b8623f8ad6a5e7963066eba8f0f7d
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/api_macros.cmake:
+        * cmake/init.cmake:
+
+          CMake: Remove include_directories Usage
+
+          Except for `$TAO_ROOT/orbsvcs` these were already being added to
+          the
+          libraries correctly anyway, so all this was doing was adding
+          include
+          paths to the global include paths for no good reason.
+
+Fri Jun 12 21:11:37 UTC 2020  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit e30e7d58901a3012c646e9327ef4ae43f7390032
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/api_macros.cmake:
+        * cmake/options.cmake:
+
+          CMake: Move Macros Out of OPENDDS_TARGET_SOURCES
+
+          Moved OpenDDS library preprocessor macro definitions from
+          `OPENDS_TARGET_SOURCES`, which should just be IDL related, to the
+          OpenDDS library definitions where they belong. I think this is
+          good
+          enough for now, but I added TODO comments about possible future
+          improvements regarding how macros definitions should be handled.
+
+Thu Jun 11 22:24:48 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4dcb890269b31e91134e3c1eabf946fb5c426bd6
+
+        * .travis.yml:
+        * tests/cmake_integration/run_ci_tests.pl:
+
+          Adapt CMake tests for Travis-CI static build
+
+Thu Jun 11 19:55:37 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit f96bcfb9e64bd9b3450611396f19dfacf123c358
+
+        * tests/cmake_integration/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake_integration/run_ci_tests.pl:
+
+          run_ci_tests.pl updated expected location of run_test.pl for
+          C++11 test
+
+Thu Jun 11 17:47:26 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit ddd09a6e60f4a36cbf18f8c8ed64fe8ae333142d
+
+        * tests/cmake_integration/run_ci_tests.pl:
+
+          run_ci_tests.pl: change current directory back after running test
+
+Thu Jun 11 16:32:59 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 738f7bd93d5e0828306c275e5bb082d5f7ec98a7
+
+        * azure-pipelines.yml:
+        * tests/cmake_integration/run_ci_tests.pl:
+
+          Updated script for CMake integration testing
+
+          Some other minor cleanups in azure-pipelines.yml
+
+Thu Jun 11 16:30:44 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0ad90ed0690e09957007bb624940b33c5a2cd0d7
+
+        * .travis.yml:
+
+          Travis CI macOS: use latest XCode and enable -std=c++11
+
+Wed Jun 10 22:54:06 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5e41ce3f69794c0f0e07e16fe662cc872cb44311
+
+        * cmake/api_macros.cmake:
+        * tests/cmake_integration/run_ci_tests.pl:
+
+          CMake: support C++11 mapping when building shared libs
+
+          Updated run_ci_tests.pl to attempt C++11 test and shared libs for
+          all 3 tests
+
+Fri May 22 03:52:27 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit c918d721b358f36967e5cb0c1d11caf8e54da4ae
+
+        * dds/DCPS/Serializer.h:
+
+          Merge pull request #1701 from jmccabe/master
+
+          Fix to make master build on VS 2019 Version 16.7.0 Preview 1.0
+          (cherry picked from commit
+          05cb7bd3c1cc025f0d15b68ba7145fd2a55ed021)
+
+Thu Jul 09 18:47:40 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 782c4a654c8769895822d3c5fcb7e11f358a303d
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Merge pull request #1780 from
+          simpsont-oci/handle_duplicate_array_types_for_idl2njni
+
+          Correctly handle duplicate underlying array types within idl2jni
+          (cherry picked from commit
+          4ae8af7add8d2fe7942554a0a6b10d8f1d5fdab0)
+
+Fri May 08 22:45:34 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+        commit 997bb845ac5e74b21da3502c572541d7902e3b07
+
+        * java/idl2jni/codegen/idl_mapping.cpp:
+        * java/idl2jni/codegen/idl_mapping.h:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Merge pull request #1676 from mitza-oci/idl2jni-union
+
+          Fixed one more case of Java bindings generated code for unions
+          (cherry picked from commit
+          c692de58a91f8fb74d31228f6734b2689d987479)
+
+Thu Mar 19 01:51:09 UTC 2020  Adam Mitz  <mitza@objectcomputing.com>
+
+        * azure-pipelines.yml:
+        * configure:
+
+          Merge pull request #1601 from mitza-oci/qt-vcpkg
+
+          configure: updated Qt-from-vcpkg paths
+          (cherry picked from commit
+          d1cc1dbfc77117bc17565092d4d3f2b9e2c1f238)
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

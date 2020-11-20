@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.14.1 of OpenDDS
-OpenDDS 3.14.1 is currently in development, so this list might change.
+OpenDDS 3.14.1 was released on Nov 20 2020.
 
 ### Fixes:
 - Improved robustness when using multiple secure participants in the same process (#1593)
