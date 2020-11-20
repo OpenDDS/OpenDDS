@@ -174,8 +174,6 @@ public:
 
   virtual void transport_assoc_done(int flags, const RepoId& remote_id);
 
-  virtual void association_complete(const RepoId& remote_id);
-
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
 
@@ -462,6 +460,8 @@ public:
     return this->publication_id_;
   }
 
+ SequenceNumber get_max_sn() const { return sequence_number_; }
+
 protected:
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
@@ -657,8 +657,6 @@ private:
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
   bool is_bit_;
-
-  RepoIdSet pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending and associated transaction ids.
   ACE_UINT64 min_suspended_transaction_id_;

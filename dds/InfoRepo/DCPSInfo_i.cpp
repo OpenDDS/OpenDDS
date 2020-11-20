@@ -1520,50 +1520,6 @@ int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 }
 #endif
 
-void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
-  const OpenDDS::DCPS::RepoId& participantId,
-  const OpenDDS::DCPS::RepoId& localId,
-  const OpenDDS::DCPS::RepoId& remoteId)
-{
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-  DCPS_IR_Domain_Map::iterator dom_iter = this->domains_.find(domainId);
-  if (dom_iter == this->domains_.end()) {
-    return;
-  }
-
-  DCPS_IR_Participant* partPtr = dom_iter->second->participant(participantId);
-  if (0 == partPtr) {
-    return;
-  }
-
-  // localId could be pub or sub (initial implementation will only use sub
-  // since the DataReader is the passive peer)
-  DCPS_IR_Subscription* sub = 0;
-  DCPS_IR_Publication* pub = 0;
-  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) completing association\n"));
-  }
-  if (0 == partPtr->find_subscription_reference(localId, sub)) {
-    sub->association_complete(remoteId);
-  } else if (0 == partPtr->find_publication_reference(localId, pub)) {
-    pub->association_complete(remoteId);
-  } else {
-    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-      OpenDDS::DCPS::RepoIdConverter part_converter(participantId);
-      OpenDDS::DCPS::RepoIdConverter local_converter(localId);
-      OpenDDS::DCPS::RepoIdConverter remote_converter(remoteId);
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::association_complete: ")
-                 ACE_TEXT("participant %C could not find subscription or publication %C ")
-                 ACE_TEXT("to complete association with remote %C.\n"),
-                 std::string(part_converter).c_str(),
-                 std::string(local_converter).c_str(),
-                 std::string(remote_converter).c_str()));
-    }
-  }
-}
-
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,

@@ -269,6 +269,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   pend->attribs_.priority_ = get_priority_value(data);
   pend->attribs_.local_reliable_ = reliable_;
   pend->attribs_.local_durable_ = durable_;
+  pend->attribs_.max_sn_ = get_max_sn();
 
   if (active) {
     pend->impls_.reserve(impls_.size());

@@ -231,6 +231,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
+
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) publisher main done\n"));
   }
   catch (CORBA::Exception& e) {
     e._tao_print_exception("publisher: PUB: Exception caught in main.cpp:");

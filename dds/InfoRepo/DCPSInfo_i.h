@@ -242,11 +242,6 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId);
 
-  virtual void association_complete(DDS::DomainId_t domainId,
-                                    const OpenDDS::DCPS::RepoId& participantId,
-                                    const OpenDDS::DCPS::RepoId& localId,
-                                    const OpenDDS::DCPS::RepoId& remoteId);
-
   bool remove_by_owner(
     DDS::DomainId_t domain,
     long              owner);

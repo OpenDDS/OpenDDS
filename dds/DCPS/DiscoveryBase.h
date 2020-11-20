@@ -152,7 +152,6 @@ namespace OpenDDS {
             }
           }
         }
-        dwr_->association_complete(reader_);
         return 0;
       }
 
@@ -777,9 +776,6 @@ namespace OpenDDS {
           write_subscription_data(subscriptionId, iter->second);
         }
       }
-
-      virtual void association_complete(const RepoId& localId,
-                                        const RepoId& remoteId) = 0;
 
       virtual bool disassociate(DiscoveredParticipantData& pdata) = 0;
 
@@ -1482,16 +1478,6 @@ namespace OpenDDS {
             drr->add_association(reader, wa, !writer_active);
           }
 
-          // change this if 'writer_active' (above) changes
-          if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
-            if (DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("calling writer %C association_complete for %C\n"),
-                OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
-            }
-            dwr->association_complete(reader);
-          }
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
@@ -1981,12 +1967,6 @@ namespace OpenDDS {
                                    const TransportLocatorSeq& transInfo)
       {
         endpoint_manager().update_subscription_locators(subId, transInfo);
-      }
-
-      void
-      association_complete(const RepoId& localId, const RepoId& remoteId)
-      {
-        endpoint_manager().association_complete(localId, remoteId);
       }
 
       DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
@@ -2537,13 +2517,6 @@ namespace OpenDDS {
         get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
       }
 
-      virtual void association_complete(DDS::DomainId_t domainId,
-                                        const RepoId& participantId,
-                                        const RepoId& localId,
-                                        const RepoId& remoteId)
-      {
-        get_part(domainId, participantId)->association_complete(localId, remoteId);
-      }
 
       virtual void set_type_lookup_service(DDS::DomainId_t domainId,
                                            const RepoId& participantId,
@@ -2551,7 +2524,6 @@ namespace OpenDDS {
       {
         get_part(domainId, participantId)->type_lookup_service(type_lookup_service);
       }
-
 
     protected:
 

@@ -215,15 +215,6 @@ public:
     const OpenDDS::DCPS::RepoId& subscriptionId,
     const DDS::StringSeq& params);
 
-
-  // Managing reader/writer associations:
-
-  virtual void association_complete(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId);
-
 private:
   TransportConfig_rch bit_config();
 

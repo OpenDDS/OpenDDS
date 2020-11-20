@@ -21,6 +21,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "tests/Utils/WaitForSample.h"
 
 #if !defined(DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/StaticIncludes.h"
@@ -186,6 +187,8 @@ void test_bit_participant ()
 
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
+      Utils::waitForSample(dr);
+
       ::DDS::ParticipantBuiltinTopicDataDataReader_var part_dr
         = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (dr.in ());
 
@@ -230,6 +233,8 @@ void test_bit_topic ()
         = bit_subscriber->lookup_datareader (BUILT_IN_TOPIC_TOPIC);
 
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
+
+      Utils::waitForSample(dr);
 
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_dr
         = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr.in ());
@@ -291,6 +296,8 @@ void test_bit_publication ()
         = bit_subscriber->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
 
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
+
+      Utils::waitForSample(dr);
 
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_dr
         = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr.in ());
@@ -360,6 +367,8 @@ void test_bit_subscription ()
         = bit_subscriber->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
 
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
+
+      Utils::waitForSample(dr);
 
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var sub_dr
         = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr.in ());

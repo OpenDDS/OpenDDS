@@ -97,8 +97,6 @@ DiscReceivedCalls::toString(Called called)
     return "enable_specific";
   case ADD_ASSOC:
     return "add_association";
-  case ASSOC_COMPLETE:
-    return "association_complete";
   case REM_ASSOC:
     return "remove_association";
   case UPDATE_INCOMP_QOS:

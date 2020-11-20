@@ -163,9 +163,6 @@ public:
   virtual bool update_subscription_params(const RepoId& /*subId*/,
                                           const DDS::StringSeq& /*params*/);
 
-  virtual void association_complete(const RepoId& /*localId*/,
-                                    const RepoId& /*remoteId*/);
-
   virtual bool disassociate(StaticDiscoveredParticipantData& /*pdata*/);
 
   virtual DDS::ReturnCode_t add_publication_i(const RepoId& /*rid*/,

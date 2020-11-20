@@ -250,16 +250,10 @@ public:
 
   // Managing reader/writer associations:
 
-  virtual void association_complete(
-    DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& localId,
-    const RepoId& remoteId) = 0;
 
   virtual void set_type_lookup_service(DDS::DomainId_t,
     const RepoId&,
     XTypes::TypeLookupService_rch) {}
-
   virtual bool supports_liveliness() const { return false; }
 
   virtual void signal_liveliness(const DDS::DomainId_t /*domain_id*/,

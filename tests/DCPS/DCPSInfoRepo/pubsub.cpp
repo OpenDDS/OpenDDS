@@ -318,8 +318,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       failed = true;
     }
 
-  if (use_rtps)
-    expected.push_back(DiscReceivedCalls::ASSOC_COMPLETE);
   if (!dwImpl->received().expect(orb, max_delay, expected))
     {
       failed = true;
