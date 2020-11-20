@@ -262,10 +262,9 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   NodeControllerWeights nc_weights;
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
-    // Probability that a node in this prototype is assigned to a matched node controller
+    // Probability that a matched node controller is allocated to a node in this prototype
     double my_prob = 0.0;
     if (nodeproto.exclusive && nodeproto.count > 0) {
-      //      if (nodeproto.count == 0) continue;
       if (nodeproto.count > matched_ncs[i].size()) {
         std::string msg = "Not enough nodes for node prototype with wildcard '" +
           std::string(nodeproto.name_wildcard.in()) + "'!";
