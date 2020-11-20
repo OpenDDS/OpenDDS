@@ -359,13 +359,16 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
     if (!nodeproto.exclusive && nodeproto.count > 0) {
       ConfigIndexMap my_ncs;
       for (unsigned j = 0; j < matched_ncs[i].size(); ++j) {
-        NodeController::NodeId id = matched_ncs[i][j];
+        const NodeController::NodeId& id = matched_ncs[i][j];
         if (!nc_weights[id].exclusive_occupied) {
           if (nonexclusive_ncs.find(id) != nonexclusive_ncs.end()) {
             my_ncs.insert(std::make_pair(id, nonexclusive_ncs[id]));
           } else {
             unsigned next_idx = allocated_scenario.configs.length();
             allocated_scenario.configs.length(next_idx + 1);
+            allocated_scenario.configs[next_idx].node_id = id;
+            allocated_scenario.configs[next_idx].timeout = scenario_prototype.timeout;
+            allocated_scenario.configs[next_idx].workers.length(0);
             my_ncs.insert(std::make_pair(id, next_idx));
             nonexclusive_ncs.insert(std::make_pair(id, next_idx));
           }
@@ -383,12 +386,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
 
       ConfigIndexMap::const_iterator it = my_ncs.begin();
       for (unsigned j = 0; j < nodeproto.count; ++j) {
-        unsigned idx = it->second;
-        allocated_scenario.configs[idx].node_id = it->first;
-        allocated_scenario.configs[idx].timeout = scenario_prototype.timeout;
-        allocated_scenario.configs[idx].workers.length(0);
         allocated_scenario.expected_reports += add_protoworkers_to_node(
-          nodeproto.workers, worker_configs, allocated_scenario.configs[idx]);
+          nodeproto.workers, worker_configs, allocated_scenario.configs[it->second]);
         if (++it == my_ncs.end()) {
           it = my_ncs.begin();
         }
