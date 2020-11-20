@@ -3198,7 +3198,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
             (ser << pmd);
 
   if (ok) {
-    send_sample(*payload, size + padding, reader, sequence);
+    send_sample(*payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3231,7 +3231,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   ok &= (ser << msg);
 
   if (ok) {
-    send_sample(*payload, size + padding, reader, sequence);
+    send_sample(*payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3263,7 +3263,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   ok &= (ser << msg);
 
   if (ok) {
-    send_sample(*payload, size + padding, reader, sequence);
+    send_sample(*payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
