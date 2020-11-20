@@ -199,95 +199,7 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
   }
 }
 
-unsigned ScenarioManager::allocate_scenario_i(AllocatedScenario& allocated_scenario,
-  const NodePrototypes& node_prototypes, const Nodes& nodes,
-  const ScenarioPrototype& scenario_prototype, std::string name, bool debug_alloc)
-{
-  // Get maximum and exclusive node prototype counts
-  unsigned maximum_nodes = 0;
-  unsigned exclusive_nodes = 0;
-  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
-    if (node_prototypes[i].exclusive) {
-      exclusive_nodes += node_prototypes[i].count;
-    }
-    maximum_nodes += node_prototypes[i].count;
-  }
-
-  // If there are enough anonymous nodes, each any node worker can get one to itself
-  if (name.empty()) {
-    for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
-      maximum_nodes += scenario_prototype.any_node[i].count;
-    }
-  }
-
-  // Get minimum node prototype count
-  unsigned minimum_nodes = exclusive_nodes;
-  if (maximum_nodes - exclusive_nodes) { // If there are any non-exclusive node configs
-    ++minimum_nodes; // Then there just has to be at least one node for them
-  }
-
-  // Make sure we have enough node controllers
-  if (nodes.size() < minimum_nodes) {
-    std::stringstream ss;
-    ss << "At least " << minimum_nodes << " available node" <<
-      (minimum_nodes == 1 ? "" : "s") <<
-      (!name.empty() ? " with name '" + name + "'" : "") <<
-      (minimum_nodes == 1 ? " is " : " are ") << "required for this scenario.";
-    throw std::runtime_error(ss.str());
-  }
-
-  // Number of node controllers going to be used
-  const unsigned node_count = std::min(static_cast<unsigned>(nodes.size()), maximum_nodes);
-  unsigned start_id = allocated_scenario.configs.length();
-  allocated_scenario.configs.length(start_id + node_count);
-
-  // Set the node IDs and initialize worker length
-  auto ani = nodes.begin();
-  for (unsigned i = 0; i < node_count; i++) {
-    allocated_scenario.configs[start_id + i].node_id = ani->first;
-    allocated_scenario.configs[start_id + i].timeout = scenario_prototype.timeout;
-    allocated_scenario.configs[start_id + i].workers.length(0);
-    ++ani;
-  }
-
-  // Read in worker config files
-  std::map<std::string, std::string> worker_configs;
-  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
-    read_protoworker_configs(test_context_, node_prototypes[i].workers,
-      worker_configs, debug_alloc);
-  }
-
-  customize_configs(worker_configs);
-
-  // Allocate exclusive node configs first
-  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
-    auto& protonode = node_prototypes[i];
-    if (protonode.exclusive) {
-      for (unsigned count = 0; count < protonode.count; ++count) {
-        allocated_scenario.expected_reports += add_protoworkers_to_node(
-          protonode.workers, worker_configs, allocated_scenario.configs[start_id++]);
-      }
-    }
-  }
-
-  // Then allocate non-exclusive node configs
-  const unsigned nonexclusive_start = start_id;
-  for (unsigned i = 0; i < node_prototypes.length(); ++i) {
-    auto& protonode = node_prototypes[i];
-    if (!protonode.exclusive) {
-      for (unsigned count = 0; count < protonode.count; ++count) {
-        allocated_scenario.expected_reports += add_protoworkers_to_node(
-          protonode.workers, worker_configs, allocated_scenario.configs[start_id++]);
-        if (start_id >= allocated_scenario.configs.length()) {
-          start_id = nonexclusive_start;
-        }
-      }
-    }
-  }
-  return nonexclusive_start;
-}
-
-bool ScenarioManager::is_name_matched(const string& name, const string& wildcard) const
+bool ScenarioManager::is_matched(const string& str, const string& wildcard) const
 {
   // TODO: Implement this
   return true;
@@ -301,75 +213,172 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   }
 
   // Get a set of matched node controllers for each node prototype
-  typedef std::vector<NodeId> MatchedNodeControllers;
+  typedef std::vector<NodeController::NodeId> MatchedNodeControllers;
   std::vector<MatchedNodeControllers> matched_ncs(scenario_prototype.nodes.length());
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
     for (Nodes::const_iterator it = available_nodes.begin(); it != available_nodes.end(); ++it) {
-      if (is_name_matched(it->second.name.in(), nodeproto.name_wildcard)) {
+      if (is_matched(it->second.name.in(), nodeproto.name_wildcard.in())) {
         matched_ncs[i].push_back(it->first);
       }
     }
   }
 
+  struct NcMetaData {
+    NcMetaData() : max_prob{0.0},
+                   overlap_count{0},
+                   exclusive_occupied{false}
+    {
+    }
 
+    NodeController::NodeId id;
 
+    // Maximum probabilty that it is used for an exclusive node
+    double max_prob;
 
+    // Number of node prototypes that can assign a node to it
+    unsigned overlap_count;
 
+    // Whether it is occupied by an exclusive node
+    bool exclusive_occupied;
 
+    bool operator()(const NcMetaData& a, const NcMetaData& b) const
+    {
+      return (a.max_prob > b.max_prob) ||
+        (a.max_prob == b.max_prob && a.overlap_count > b.overlap_count);
+    }
+  };
+  typedef std::priority_queue<NcMetaData, std::vector<NcMetaData>, NcMetaData> MinNcQueue;
 
-  // Gather node prototypes by names
-  typedef std::unordered_map<std::string, NodePrototypes> NamedProtoNodes;
-  NamedProtoNodes named_protonodes;
-  NodePrototypes anon_protonodes;
+  // Each of the matched node controllers should have an entry in this map
+  typedef std::map<NodeController::NodeId, NcMetaData, OpenDDS::DCPS::GUID_tKeyLessThan> NodeControllerWeights;
+  NodeControllerWeights nc_weights;
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
-    const std::string name = scenario_prototype.nodes[i].name.in();
-    if (!name.empty()) {
-      NodePrototypes& prototypes = named_protonodes[name];
-      prototypes.length(prototypes.length() + 1);
-      prototypes[prototypes.length() - 1] = scenario_prototype.nodes[i];
-    } else {
-      anon_protonodes.length(anon_protonodes.length() + 1);
-      anon_protonodes[anon_protonodes.length() - 1] = scenario_prototype.nodes[i];
+    const NodePrototype& nodeproto = scenario_prototype.nodes[i];
+    // Probability that a node in this prototype is assigned to a matched node controller
+    double my_prob = 0.0;
+    if (nodeproto.exclusive) {
+      if (nodeproto.count == 0) continue;
+      if (nodeproto.count > matched_ncs[i].size()) {
+        std::string msg = "Not enough nodes for node prototype with wildcard '" +
+          nodeproto.name_wildcard.in() + "'!";
+        throw std::runtime_error(msg);
+      }
+      my_prob = static_cast<double>(nodeproto.count)/matched_ncs[i].size();
+    }
+
+    // Update the weight for each of the matched node controller
+    for (unsigned j = 0; j < matched_ncs[i].size(); ++j) {
+      const NodeController::NodeId& nc_id = matched_ncs[i][j];
+      if (nc_weights.find(nc_id) != nc_weights.end()) {
+        nc_weights[nc_id].max_prob = std::max(nc_weights[nc_id].max_prob, my_prob);
+        ++nc_weights[nc_id].overlap_count;
+      } else {
+        nc_weights[nc_id].id = nc_id;
+        nc_weights[nc_id].max_prob = my_prob;
+        nc_weights[nc_id].overlap_count = 1;
+      }
     }
   }
 
-  // Gather node controllers by names
-  typedef std::unordered_map<std::string, Nodes> NamedNodes;
-  NamedNodes named_nodes;
-  Nodes anon_nodes;
-  for (Nodes::const_iterator it = available_nodes.begin(); it != available_nodes.end(); ++it) {
-    const std::string name = it->second.name.in();
-    if (!name.empty()) {
-      named_nodes[name].insert(std::make_pair(it->first, it->second));
-    } else {
-      anon_nodes.insert(std::make_pair(it->first, it->second));
-    }
+  // Read in worker config files
+  std::map<std::string, std::string> worker_configs;
+  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+    read_protoworker_configs(test_context_, scenario_prototype.nodes[i].workers,
+      worker_configs, debug_alloc);
   }
+  read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
 
-  // Each named node prototype is assigned to a named node controller with the same name
   AllocatedScenario allocated_scenario;
   allocated_scenario.expected_reports = 0;
   allocated_scenario.timeout = scenario_prototype.timeout;
   allocated_scenario.configs.length(0);
-  for (NamedProtoNodes::const_iterator it = named_protonodes.begin(); it != named_protonodes.end(); ++it) {
-    const std::string& name = it->first;
-    if (named_nodes.find(name) == named_nodes.end()) {
-      std::string msg = "No available node with name '" + name + "'!";
-      throw std::runtime_error(msg);
+
+  // Allocate exclusive node configs first
+  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+    const NodePrototype& nodeproto = scenario_prototype.nodes[i];
+    if (nodeproto.exclusive) {
+      // Node controllers that are less likely to be used by some other node prototypes
+      // are considered first. This is done by taking the ones with smaller max_prob values.
+      // If there are multiple node controllers with equal max_prob, the ones with smaller
+      // overlap_count are considered first.
+      MinNcQueue my_queue;
+      for (auto nid : matched_ncs[i]) {
+        my_queue.push(nc_weights[nid]);
+      }
+
+      for (unsigned j = 0; j < nodeproto.count; ++j) {
+        bool found = false;
+        while (!my_queue.empty()) {
+          const NcMetaData& top = my_queue.top();
+          if (!top.exclusive_occupied) {
+            nc_weights[top.id].exclusive_occupied = true;
+            found = true;
+
+            // Update the allocated scenario to add a config for this node controller
+            CORBA::ULong old_len = allocated_scenario.configs.length();
+            allocated_scenario.configs.length(old_len + 1);
+            allocated_scenario.configs[old_len].node_id = top.id;
+            allocated_scenario.configs[old_len].timeout = scenario_prototype.timeout;
+            allocated_scenario.configs[old_len].workers.length(0);
+            allocated_scenario.expected_reports += add_protoworkers_to_node(
+              nodeproto.workers, worker_configs, allocated_scenario.configs[old_len]);
+
+            my_queue.pop();
+            break;
+          }
+          my_queue.pop();
+        }
+        if (!found) {
+          std::string msg = "Could not find a node for exclusive node prototype with wildcard '" +
+            nodeproto.name_wildcard.in() + "'!";
+          throw std::runtime_error(msg);
+        }
+      }
     }
-    allocate_scenario_i(allocated_scenario, it->second, named_nodes[name],
-                        scenario_prototype, name, debug_alloc);
   }
 
-  // Anonymous (no-named) node prototypes are assigned to the anonymous node controllers
-  const unsigned nonexclu_start = allocate_scenario_i(allocated_scenario, anon_protonodes, anon_nodes,
-                                                      scenario_prototype, "", debug_alloc);
+  // Matched node controllers that are not occupied exclusively
+  //  std::vector<NcMetaData> remaining_nodes;
+  std::set<NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan> remaining_nodes;
 
-  std::map<std::string, std::string> worker_configs;
-  read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
+  // The allocate non-exclusive node configs
+  unsigned nonexclusive_start = allocated_scenario.configs.length();
+  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+    const NodePrototype& nodeproto = scenario_prototype.nodes[i];
+    if (!nodeproto.exclusive) {
+      unsigned old_size = remaining_nodes.size();
+      for (unsigned j = 0; j < matched_ncs[i].size(); ++j) {
+        NodeController::NodeId id = matched_ncs[i][j];
+        if (!nc_weights[id].exclusive_occupied) {
+          remaining_nodes.push_back(nc_weights[id]);
+        }
+      }
+      if (nodeproto.count > 0 && remaining_nodes.size() - old_size == 0) {
+        std::string msg = "No node left for non-exclusive node prototype with wildcard '" +
+          nodeproto.name_wildcard.in() + "'!";
+        throw std::runtime_error(msg);
+      }
 
-  // Any node workers are also assigned to the anonymous node controllers
+      // Number of node controllers used for this node prototype
+      unsigned node_count = std::min(nodeproto.count, remaining_nodes.size() - old_size);
+      unsigned start_id = allocated_scenario.configs.length();
+      if (node_count > 0) {
+        allocated_scenario.configs.length(start_id + node_count);
+        for (unsigned j = 0; j < node_count; ++j) {
+          allocated_scenario.configs[start_id + j].node_id = remaining_nodes[old_size + j].id;
+          allocated_scenario.configs[start_id + j].timeout = scenario_prototype.timeout;
+          allocated_scenario.configs[start_id + j].workers.length(0);
+        }
+        for (CORBA::ULong j = 0; j < nodeproto.count; ++j) {
+          unsigned idx = start_id + j % node_count;
+          allocated_scenario.expected_reports += add_protoworkers_to_node(nodeproto.workers, worker_configs, allocated_scenario.configs[idx]);
+        }
+      }
+    }
+  }
+
+  // Any node workers are allocated to unmatched and non-exclusive node controllers
   unsigned node_i = allocated_scenario.configs.length() - 1;
   for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
     const WorkerPrototype& protoworker = scenario_prototype.any_node[i];

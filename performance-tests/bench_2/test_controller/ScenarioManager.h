@@ -46,13 +46,6 @@ public:
 private:
   void customize_configs(std::map<std::string, std::string>& worker_configs);
 
-  unsigned allocate_scenario_i(Bench::TestController::AllocatedScenario& allocated_scenario,
-    const Bench::TestController::NodePrototypes& node_prototypes,
-    const Nodes& nodes,
-    const Bench::TestController::ScenarioPrototype& scenario_prototype,
-    std::string name,
-    bool debug_alloc);
-
   const std::string bench_root_;
   const std::string test_context_;
   ScenarioOverrides overrides_;
