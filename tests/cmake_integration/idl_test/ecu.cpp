@@ -27,7 +27,7 @@ int main() {
   ecu.coolant.type = OIL;
   ecu.oil.value = 180;
   ecu.rpm.value = 2250;
-  ecu.transmission.fault = OK;
+  ecu.transmission.fault = FC_OK;
   ecu.transmission.gear = THIRD;
 
   ecu.calc.range = 125;

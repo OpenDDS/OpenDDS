@@ -14,8 +14,8 @@ enum GearSelect {
 };
 
 enum FaultCode {
-    OK,
-    ERROR
+    FC_OK,
+    FC_ERROR
 };
 
 #endif /* TRANSMISSION_STATES_IDL */
