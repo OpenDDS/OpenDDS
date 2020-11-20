@@ -3191,7 +3191,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
             (ser << pmd);
 
   if (ok) {
-      send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
 
   } else {
       result = DDS::RETCODE_ERROR;
