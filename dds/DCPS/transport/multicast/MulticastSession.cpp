@@ -7,8 +7,13 @@
 
 #include "MulticastSession.h"
 
+#include "dds/DCPS/GuidConverter.h"
+
 #include "ace/Log_Msg.h"
+
 #include <cmath>
+
+
 #ifndef __ACE_INLINE__
 # include "MulticastSession.inl"
 #endif  /* __ACE_INLINE__ */
@@ -53,7 +58,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by sending a MULTICAST_SYN control
   // sample to the assigned remote peer:
-  this->session_->send_syn();
+  this->session_->send_all_syn();
 }
 
 TimeDuration
@@ -177,54 +182,95 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   Serializer serializer(control.get(), header.swap_bytes());
 
   MulticastPeer local_peer;
+  RepoId remote_writer;
+  RepoId local_reader;
   serializer >> local_peer; // sent as remote_peer
+  serializer.read_octet_array(reinterpret_cast<ACE_CDR::Octet*>(&remote_writer), sizeof(remote_writer));
+  serializer.read_octet_array(reinterpret_cast<ACE_CDR::Octet*>(&local_reader), sizeof(local_reader));
 
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::syn_received "
-                    "local %#08x%08x remote %#08x%08x\n",
-                    this->link()->config().name().c_str(),
-                    (unsigned int)(this->link()->local_peer() >> 32),
-                    (unsigned int) this->link()->local_peer(),
-                    (unsigned int)(this->remote_peer_ >> 32),
-                    (unsigned int) this->remote_peer_), 2);
-
+  bool call_passive_connection = false;
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
+    PendingRemoteMap::const_iterator pos1 = pending_remote_map_.find(local_reader);
+    if (pos1 == pending_remote_map_.end()) {
+      return;
+    }
+
+    RepoIdSet::const_iterator pos2 = pos1->second.find(remote_writer);
+    if (pos2 == pos1->second.end()) {
+      return;
+    }
+
+    VDBG_LVL((LM_DEBUG,
+              "(%P|%t) MulticastSession[%C]::syn_received "
+              "local %#08x%08x %C remote %#08x%08x %C\n",
+              this->link()->config().name().c_str(),
+              (unsigned int)(this->link()->local_peer() >> 32),
+              (unsigned int) this->link()->local_peer(),
+              LogGuid(local_reader).c_str(),
+              (unsigned int)(this->remote_peer_ >> 32),
+              (unsigned int) this->remote_peer_,
+              LogGuid(remote_writer).c_str()),
+             2);
 
     if (!this->acked_) {
       this->acked_ = true;
       syn_hook(header.sequence_);
+      call_passive_connection = true;
     }
+  }
+
+  if (call_passive_connection) {
+    this->link_->transport().passive_connection(this->link_->local_peer(), this->remote_peer_);
   }
 
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
-  send_synack();
-
-  this->link_->transport().passive_connection(this->link_->local_peer(), this->remote_peer_);
-
+  send_synack(local_reader, remote_writer);
 }
 
 void
-MulticastSession::send_syn()
+MulticastSession::send_all_syn()
 {
-  size_t len = sizeof(this->remote_peer_);
+  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
+  for (PendingRemoteMap::const_iterator pos1 = pending_remote_map_.begin(), limit = pending_remote_map_.end();
+       pos1 != limit; ++pos1) {
+    const RepoId& local_writer = pos1->first;
+    for (RepoIdSet::const_iterator pos2 = pos1->second.begin(), limit = pos1->second.end(); pos2 != limit; ++pos2) {
+      const RepoId& remote_reader = *pos2;
+      send_syn(local_writer, remote_reader);
+    }
+  }
+}
+
+void
+MulticastSession::send_syn(const RepoId& local_writer,
+                           const RepoId& remote_reader)
+{
+  size_t len = sizeof(this->remote_peer_) + 2 * sizeof(RepoId);
 
   Message_Block_Ptr data( new ACE_Message_Block(len));
 
   Serializer serializer(data.get());
 
   serializer << this->remote_peer_;
+  serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(&local_writer), sizeof(local_writer));
+  serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(&remote_reader), sizeof(remote_reader));
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_syn "
-                      "local %#08x%08x remote %#08x%08x\n",
-                      this->link()->config().name().c_str(),
-                      (unsigned int)(this->link()->local_peer() >> 32),
-                      (unsigned int) this->link()->local_peer(),
-                      (unsigned int)(this->remote_peer_ >> 32),
-                      (unsigned int) this->remote_peer_), 2);
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) MulticastSession[%C]::send_syn "
+            "local %#08x%08x %C remote %#08x%08x %C\n",
+            this->link()->config().name().c_str(),
+            (unsigned int)(this->link()->local_peer() >> 32),
+            (unsigned int) this->link()->local_peer(),
+            LogGuid(local_writer).c_str(),
+            (unsigned int)(this->remote_peer_ >> 32),
+            (unsigned int) this->remote_peer_,
+            LogGuid(remote_reader).c_str()),
+           2);
 
   // Send control sample to remote peer:
   send_control(MULTICAST_SYN, move(data));
@@ -236,7 +282,7 @@ MulticastSession::synack_received(const Message_Block_Ptr& control)
   if (!this->active_) return; // sub send synack, then doesn't receive them.
 
   // Already received ack.
-  if (this->acked()) return;
+  //if (this->acked()) return;
 
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
@@ -247,47 +293,59 @@ MulticastSession::synack_received(const Message_Block_Ptr& control)
   Serializer serializer(control.get(), header.swap_bytes());
 
   MulticastPeer local_peer;
+  RepoId remote_reader;
+  RepoId local_writer;
   serializer >> local_peer; // sent as remote_peer
+  serializer.read_octet_array(reinterpret_cast<ACE_CDR::Octet*>(&remote_reader), sizeof(remote_reader));
+  serializer.read_octet_array(reinterpret_cast<ACE_CDR::Octet*>(&local_writer), sizeof(local_writer));
 
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::synack_received "
-                      "local %#08x%08x remote %#08x%08x\n",
-                      this->link()->config().name().c_str(),
-                      (unsigned int)(this->link()->local_peer() >> 32),
-                      (unsigned int) this->link()->local_peer(),
-                      (unsigned int)(this->remote_peer_ >> 32),
-                      (unsigned int) this->remote_peer_), 2);
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) MulticastSession[%C]::synack_received "
+            "local %#08x%08x %C remote %#08x%08x %C\n",
+            this->link()->config().name().c_str(),
+            (unsigned int)(this->link()->local_peer() >> 32),
+            (unsigned int) this->link()->local_peer(),
+            LogGuid(local_writer).c_str(),
+            (unsigned int)(this->remote_peer_ >> 32),
+            (unsigned int) this->remote_peer_,
+            LogGuid(remote_reader).c_str()),
+           2);
 
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
-
-    if (this->acked_) return; // already acked
-
-    this->syn_watchdog_->cancel();
     this->acked_ = true;
+    remove_remote_i(local_writer, remote_reader);
   }
+
+  this->link_->invoke_on_start_callbacks(local_writer, remote_reader, true);
 }
 
 void
-MulticastSession::send_synack()
+MulticastSession::send_synack(const RepoId& local_reader,
+                              const RepoId& remote_writer)
 {
-  size_t len = sizeof(this->remote_peer_);
+  size_t len = sizeof(this->remote_peer_) + 2 * sizeof(RepoId);
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
   Serializer serializer(data.get());
 
   serializer << this->remote_peer_;
+  serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(&local_reader), sizeof(local_reader));
+  serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(&remote_writer), sizeof(remote_writer));
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_synack "
-                      "local %#08x%08x remote %#08x%08x active %d\n",
+                      "local %#08x%08x %C remote %#08x%08x %C active %d\n",
                       this->link()->config().name().c_str(),
                       (unsigned int)(this->link()->local_peer() >> 32),
                       (unsigned int) this->link()->local_peer(),
+                      LogGuid(local_reader).c_str(),
                       (unsigned int)(this->remote_peer_ >> 32),
                       (unsigned int) this->remote_peer_,
+                      LogGuid(remote_writer).c_str(),
                       this->active_ ? 1 : 0), 2);
 
   // Send control sample to remote peer:
@@ -311,6 +369,61 @@ MulticastSession::reassemble(ReceivedDataSample& data,
   return this->reassembly_.reassemble(header.sequence_,
                                       header.first_fragment_,
                                       data);
+}
+
+void
+MulticastSession::add_remote(const RepoId& local,
+                             const RepoId& remote)
+{
+  const GuidConverter conv(local);
+
+  bool empty;
+
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
+    empty = pending_remote_map_.empty();
+    pending_remote_map_[local].insert(remote);
+  }
+
+  if (conv.isWriter() && empty) {
+    // Active peers schedule a watchdog timer to initiate a 2-way
+    // handshake to verify that passive endpoints can send/receive
+    // data reliably. This process must be executed using the
+    // transport reactor thread to prevent blocking.
+    // Only publisher send syn so just schedule for pub role.
+    if (!this->start_syn()) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("MulticastSession::add_reader: ")
+                 ACE_TEXT("failed to schedule SYN watchdog!\n")));
+    }
+  }
+}
+
+void
+MulticastSession::remove_remote(const RepoId& local,
+                                const RepoId& remote)
+{
+  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
+  remove_remote_i(local, remote);
+}
+
+void
+MulticastSession::remove_remote_i(const RepoId& local,
+                                  const RepoId& remote)
+{
+  const GuidConverter conv(local);
+
+  const bool empty_before = pending_remote_map_.empty();
+  pending_remote_map_[local].erase(remote);
+  if (pending_remote_map_[local].empty()) {
+    pending_remote_map_.erase(local);
+  }
+  const bool empty = pending_remote_map_.empty() && !empty_before;
+
+  if (conv.isWriter() && empty && this->syn_watchdog_) {
+    this->syn_watchdog_->cancel();
+  }
 }
 
 } // namespace DCPS

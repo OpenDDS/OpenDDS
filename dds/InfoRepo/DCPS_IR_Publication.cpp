@@ -122,31 +122,6 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
   return status;
 }
 
-void
-DCPS_IR_Publication::association_complete(const OpenDDS::DCPS::RepoId& remote)
-{
-  typedef DCPS_IR_Subscription_Set::ITERATOR iter_t;
-  for (iter_t iter = associations_.begin(); iter != associations_.end(); ++iter) {
-    if ((*iter)->get_id() == remote) {
-      (*iter)->call_association_complete(get_id());
-    }
-  }
-}
-
-void
-DCPS_IR_Publication::call_association_complete(const OpenDDS::DCPS::RepoId& remote)
-{
-  try {
-    writer_->association_complete(remote);
-  } catch (const CORBA::Exception& ex) {
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ex._tao_print_exception(
-        "(%P|%t) ERROR: Exception caught in DCPS_IR_Publication::call_association_complete:");
-    }
-    participant_->mark_dead();
-  }
-}
-
 int DCPS_IR_Publication::remove_associated_subscription(DCPS_IR_Subscription* sub,
                                                         CORBA::Boolean sendNotify,
                                                         CORBA::Boolean notify_lost,
