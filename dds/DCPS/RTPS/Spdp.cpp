@@ -2958,11 +2958,11 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       ACE_TCHAR buff[256];
       multicast_address_.addr_to_string(buff, 256);
       ACE_DEBUG((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::join_multicast_group() - ")
-                ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
-                buff,
-                all_interfaces ? "all interfaces" : nic.name().c_str(),
-                ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::join_multicast_group() - ")
+                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str(),
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 
@@ -2993,11 +2993,11 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       ACE_TCHAR buff[256];
       multicast_ipv6_address_.addr_to_string(buff, 256);
       ACE_DEBUG((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::join_multicast_group() - ")
-                ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
-                buff,
-                all_interfaces ? "all interfaces" : nic.name().c_str(),
-                ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::join_multicast_group() - ")
+                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str(),
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 #endif
