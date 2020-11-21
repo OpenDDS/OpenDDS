@@ -192,16 +192,17 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   if (local_peer != this->link_->local_peer()) return;
 
   bool call_passive_connection = false;
+  bool call_send_synack = true;
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
     PendingRemoteMap::const_iterator pos1 = pending_remote_map_.find(local_reader);
     if (pos1 == pending_remote_map_.end()) {
-      return;
-    }
-
-    RepoIdSet::const_iterator pos2 = pos1->second.find(remote_writer);
-    if (pos2 == pos1->second.end()) {
-      return;
+      call_send_synack = false;
+    } else {
+      RepoIdSet::const_iterator pos2 = pos1->second.find(remote_writer);
+      if (pos2 == pos1->second.end()) {
+        call_send_synack = false;
+      }
     }
 
     VDBG_LVL((LM_DEBUG,
@@ -229,7 +230,9 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
 
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
-  send_synack(local_reader, remote_writer);
+  if (call_send_synack) {
+    send_synack(local_reader, remote_writer);
+  }
 }
 
 void
