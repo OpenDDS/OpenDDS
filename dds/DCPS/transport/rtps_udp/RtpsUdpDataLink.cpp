@@ -3007,7 +3007,7 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   SequenceNumber seq;
   seq.setValue(nackfrag.writerSN.high, nackfrag.writerSN.low);
   ri->second->requested_frags_[seq] = nackfrag.fragmentNumberState;
-  readers_expecting_data_.insert(reader);
+  readers_expecting_data_.insert(ri->second);
 
   link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
 }
