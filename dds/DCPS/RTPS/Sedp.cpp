@@ -3572,7 +3572,7 @@ Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& 
   DCPS::EncapsulationHeader encap;
   if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << pmd) {
-    send_sample(payload, size, reader, sequence);
+    send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
