@@ -92,28 +92,33 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_TARGET_SOURCES")
   endif()
 
+  set(arglist ${ARGN})
+
+  if ("FILENAME_ONLY_INCLUDES" IN_LIST arglist)
+    foreach(extra ${arglist})
+      if("${extra}" MATCHES "\\.idl$")
+        get_filename_component(dir ${extra} DIRECTORY)
+        if (NOT dir STREQUAL "")
+          list(APPEND _extra_idl_paths "-I${dir}")
+        endif()
+      endif()
+    endforeach()
+
+    list(REMOVE_ITEM arglist "FILENAME_ONLY_INCLUDES")
+  endif()
+
+  if(_extra_idl_paths)
+    list(REMOVE_DUPLICATES _extra_idl_paths)
+    list(APPEND _extra_idl_flags "--filename-only-includes")
+  endif()
+
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
     _idl_sources
     _libs
     _tao_options
     _opendds_options
-    ${ARGN})
-
-  foreach(extra ${ARGN})
-    if("${extra}" MATCHES "\\.idl$")
-      get_filename_component(dir ${extra} DIRECTORY)
-      if (NOT dir STREQUAL "")
-        if (NOT "-I${dir}" IN_LIST extra_idl_paths)
-          list(APPEND extra_idl_paths "-I${dir}")
-        endif()
-      endif()
-    endif()
-  endforeach()
-
-  if(extra_idl_paths)
-    list(APPEND extra_idl_flags "--filename-only-includes")
-  endif()
+    ${arglist})
 
   if(NOT _opendds_options MATCHES "--(no-)?default-nested")
     if (OPENDDS_DEFAULT_NESTED)
@@ -170,8 +175,8 @@ macro(OPENDDS_TARGET_SOURCES target)
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}
-        TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${extra_idl_paths}
-        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${extra_idl_flags} ${extra_idl_paths}
+        TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${_extra_idl_paths}
+        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${_extra_idl_paths} ${_extra_idl_flags}
         IDL_FILES ${_idl_sources_${scope}}
         SCOPE ${scope})
     endif()

@@ -44,7 +44,8 @@ OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl
   ./engine/engine_specs.idl
   ./engine/engine_stats/fuel_stats.idl
   ./transmission/transmission_specs.idl
-  ./transmission/transmission_states.idl)
+  ./transmission/transmission_states.idl
+  FILENAME_ONLY_INCLUDES)
 
 target_link_libraries(ecu_lib ${opendds_libs})
 
