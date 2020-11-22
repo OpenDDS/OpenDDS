@@ -20,6 +20,7 @@ namespace
 {
   size_t num_threads = 1;
   size_t samples_per_thread = 1024;
+  bool durable = false;
 
   void
   parse_args(int& argc, ACE_TCHAR** argv)
@@ -38,6 +39,11 @@ namespace
       else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
       {
         num_threads = ACE_OS::atoi(arg);
+        shifter.consume_arg();
+      }
+      else if (ACE_OS::strcmp(shifter.get_current(), ACE_TEXT("-d")) == 0)
+      {
+        durable = true;
         shifter.consume_arg();
       }
       else
@@ -60,7 +66,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> PUBLISHER STARTED\n")));
 
     // Spawn Participant threads
-    ParticipantTask task(samples_per_thread);
+    ParticipantTask task(samples_per_thread, durable);
 
     task.activate(DEFAULT_FLAGS, static_cast<int>(num_threads));
     task.wait();
