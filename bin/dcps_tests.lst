@@ -278,14 +278,14 @@ tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_
 tests/DCPS/WaitForAck/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitForAck/run_test.pl rtps --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl triangle: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN !LYNXOS
+tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Thrasher/run_test.pl single rtps: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl double rtps: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl triangle rtps: !DCPS_MIN RTPS !LYNXOS
@@ -332,7 +332,7 @@ tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPI
 tests/DCPS/RtiSerialization/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/MultiDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST !TARGET
 tests/DCPS/DomainRange/run_test.pl: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/InternalThreadStatus/run_test.pl: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !NO_BUILT_IN_TOPICS
+tests/DCPS/InternalThreadStatus/run_test.pl: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/StaticDiscovery/run_test.pl mp: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/StaticDiscovery/run_test.pl mp delay: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP_PROFILE
