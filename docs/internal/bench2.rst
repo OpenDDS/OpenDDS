@@ -809,10 +809,10 @@ Usage
 .. option:: --name STRING
 
     Human friendly name for the node. Will be used by the test controller for
-    referring to the node. During allocation of ``node_controller``'s, the name
+    referring to the node. During allocation of node controllers, the name
     is used to match against the “name_wildcard” fields of the node configs.
-    Only ``node_controller``'s whose names match the “name_wildcard” of a given
-    node config can be allocated to that node config. Multiple nodes could even
+    Only node controllers whose names match the “name_wildcard” of a given
+    node config can be allocated to that node config. Multiple nodes could
     have the same name.
 
 worker
