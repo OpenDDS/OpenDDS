@@ -37,11 +37,6 @@ void TAO_DDS_DCPSDataReader_i::add_association (
   ));
 
   received_.received(DiscReceivedCalls::ADD_ASSOC);
-
-  if (disco_)
-    {
-      disco_->association_complete(domainId_, participantId_, yourId, writer.writerId);
-    }
 }
 
 

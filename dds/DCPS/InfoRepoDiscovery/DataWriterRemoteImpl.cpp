@@ -52,16 +52,6 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
 }
 
 void
-DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
-{
-  // the local copy of parent_ is necessary to prevent race condition
-  RcHandle<DataWriterCallbacks> parent = parent_.lock();
-  if (parent.in()) {
-    parent->association_complete(remote_id);
-  }
-}
-
-void
 DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 {
