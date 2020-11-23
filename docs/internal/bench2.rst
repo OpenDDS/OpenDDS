@@ -239,9 +239,9 @@ and vice-versa. They may also wind up all together on the same node, depending
 on the number of available nodes. And finally, one “master” process will be
 started wherever there is room available.
 
-The “name_wildcard” field is used to filter the ``node_controller``s that can
+The “name_wildcard” field is used to filter the ``node_controller``'s that can
 be used to host the nodes in the current node config - only the
-``node_controller``s with names matched the wildcard can be used. If the
+``node_controller``'s with names matched the wildcard can be used. If the
 “name_wildcard” is omitted or its value is empty, any ``node_controller`` can
 be used. If node “prototypes” are marked exclusive, the test controller will
 attempt to allocate them exclusively to their own node controllers. If not enough
@@ -809,9 +809,9 @@ Usage
 .. option:: --name STRING
 
     Human friendly name for the node. Will be used by the test controller for
-    referring to the node. During allocation of ``node_controller``s, the name
+    referring to the node. During allocation of ``node_controller``'s, the name
     is used to match against the “name_wildcard” fields of the node configs.
-    Only ``node_controller``s whose names match the “name_wildcard” of a given
+    Only ``node_controller``'s whose names match the “name_wildcard” of a given
     node config can be allocated to that node config. Multiple nodes could even
     have the same name.
 
