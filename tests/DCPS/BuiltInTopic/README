@@ -1,10 +1,9 @@
 This simple test is to test the builtin topics on the client side.
 The test application creates participant, publisher, datawriter,
 subscriber and datareader and looks for the builtin topic data via
-the builtin subsciber in participant.
+the builtin subscriber in participant.
 
 It also tests the ignore* interface in DomainParticipant.
-
 
 Builtin topic basic function test:
 

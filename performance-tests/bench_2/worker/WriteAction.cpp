@@ -130,7 +130,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   }
   filter_class_increment_ = filter_class_increment;
 
-  data_.filter_class = filter_class_start_value_;
+  data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
 
   handler_.reset(new MemFunHandler<WriteAction>(&WriteAction::do_write, *this));
 
@@ -173,13 +173,13 @@ void WriteAction::do_write()
       }
 
       data_.created_time = data_.sent_time = Builder::get_sys_time();
-      DDS::ReturnCode_t result = data_dw_->write(data_, 0);
+      const DDS::ReturnCode_t result = data_dw_->write(data_, 0);
       if (result != DDS::RETCODE_OK) {
         --(data_.msg_count);
         std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
       } else {
-        if ((data_.filter_class += filter_class_increment_) > filter_class_stop_value_) {
-          data_.filter_class = filter_class_start_value_;
+        if ((data_.filter_class += static_cast<CORBA::ULong>(filter_class_increment_)) > static_cast<CORBA::ULong>(filter_class_stop_value_)) {
+          data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
         }
       }
     }
