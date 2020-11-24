@@ -3,7 +3,7 @@
 namespace Bench {
 
 bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report,
-  Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, const Builder::ContentFilteredTopicMap& cft_map)
+  Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, const Builder::ContentFilteredTopicMap&)
 {
   config_ = &config;
   report_ = &report;
