@@ -154,7 +154,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                         -1);
       }
 
-      DDS::ReturnCode_t retcode4 = participant->delete_topic (topic.in ());
+      const DDS::ReturnCode_t retcode4 = participant->delete_topic (topic.in ());
       if (retcode4 != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
@@ -163,7 +163,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       }
       topic = DDS::Topic::_nil ();
 
-      DDS::ReturnCode_t retcode6 = participant->delete_topic (topic2.in ());
+      const DDS::ReturnCode_t retcode6 = participant->delete_topic (topic2.in ());
       if (retcode6 != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
