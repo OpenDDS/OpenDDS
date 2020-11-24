@@ -1710,7 +1710,7 @@ DomainParticipantImpl::enable()
 
 #ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security() && !security_config_) {
-    if (DCPS_debug_level > 0) {
+    if (DCPS::security_debug.auth_warn) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                  ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
@@ -1731,7 +1731,7 @@ DomainParticipantImpl::enable()
 
     /* TODO - Handle VALIDATION_PENDING_RETRY */
     if (val_res != DDS::Security::VALIDATION_OK) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.auth_warn) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                    ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
@@ -1963,7 +1963,7 @@ DomainParticipantImpl::create_new_topic(
 
     DDS::Security::TopicSecurityAttributes sec_attr;
     if (!access->get_topic_sec_attributes(perm_handle_, topic_name, sec_attr, se)) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.auth_warn) {
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
@@ -1975,7 +1975,7 @@ DomainParticipantImpl::create_new_topic(
 
     if ((sec_attr.is_write_protected || sec_attr.is_read_protected) &&
         !access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.auth_warn) {
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
