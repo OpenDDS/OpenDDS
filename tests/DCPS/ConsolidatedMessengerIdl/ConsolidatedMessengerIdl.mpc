@@ -8,4 +8,3 @@ project: dcps_test_idl_only_lib {
     Messenger.idl
   }
 }
-

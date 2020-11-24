@@ -482,4 +482,3 @@ Monitor::GraphGenerator::nodeName(int offset)
 
   return s.str();
 }
-

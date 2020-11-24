@@ -3,10 +3,10 @@
 
 project(*publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = publisher
-  
+
   after    += DcpsFooType
   libs     += DcpsFooType
-  
+
   includes += ../FooType
   libpaths += ../FooType
 
@@ -19,10 +19,10 @@ project(*publisher): dcpsexe, dcps_test, dcps_transports_for_test {
 
 project(*subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = subscriber
-  
+
   after    += DcpsFooType
   libs     += DcpsFooType
-  
+
   includes += ../FooType
   libpaths += ../FooType
 

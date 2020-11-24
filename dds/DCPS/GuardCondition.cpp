@@ -71,4 +71,3 @@ TAO::Objref_Traits<DDS::GuardCondition>::marshal(
 {
   return CORBA::Object::marshal(p, cdr);
 }
-

@@ -17,7 +17,6 @@
 
 using namespace Bench;
 using namespace Bench::TestController;
-using namespace Bench::NodeController;
 
 ScenarioManager::ScenarioManager(
   const std::string& bench_root,
@@ -76,10 +75,10 @@ namespace {
   void add_single_worker_to_node(
     const WorkerPrototype& protoworker,
     const std::map<std::string, std::string>& worker_configs,
-    Config& node)
+    NodeController::Config& node)
   {
     unsigned worker_i = node.workers.length();
-    WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
+    NodeController::WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
     node.workers.length(node.workers.length() + 1);
     auto& worker = node.workers[worker_i];
     worker.config = worker_configs.find(protoworker.config.in())->second.c_str();
@@ -90,7 +89,7 @@ namespace {
   unsigned add_protoworkers_to_node(
     const WorkerPrototypes& protoworkers,
     const std::map<std::string, std::string>& worker_configs,
-    Config& node)
+    NodeController::Config& node)
   {
     unsigned new_worker_total = 0;
     for (unsigned i = 0; i < protoworkers.length(); i++) {
@@ -98,7 +97,7 @@ namespace {
     }
 
     unsigned worker_i = node.workers.length();
-    WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
+    NodeController::WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
     node.workers.length(node.workers.length() + protoworkers.length());
     for (unsigned i = 0; i < protoworkers.length(); i++) {
       auto& protoworker = protoworkers[i];
@@ -317,7 +316,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   return allocated_scenario;
 }
 
-std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allocated_scenario)
+void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& allocated_scenario, Bench::TestController::Report& report)
 {
   using namespace std::chrono;
   // Write Configs
@@ -369,7 +368,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   }
 
   // Wait for reports
-  std::vector<WorkerReport> parsed_reports;
+  size_t parsed_report_count = 0;
   size_t parse_failures = 0;
   size_t worker_failures = 0;
   while (true) {
@@ -395,7 +394,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
       }
     }
 
-    ReportSeq reports;
+    NodeController::ReportSeq reports;
     DDS::SampleInfoSeq info;
     rc = dds_entities_.report_reader_impl_->take(
       reports, info,
@@ -409,41 +408,50 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 
     for (CORBA::ULong r = 0; r < reports.length(); r++) {
       if (info[r].valid_data) {
-        if (reports[r].failed) {
-          ++worker_failures;
-          std::stringstream ss;
-          ss << "Worker " << reports[r].worker_id << " of node "
-            << reports[r].node_id << " failed with log:\n===\n"
-            << std::string(reports[r].log.in()) + "\n===\n";
-          std::cerr << ss.str() << std::flush;
-        } else {
-          WorkerReport report{};
-          std::stringstream ss;
-          ss << reports[r].details << std::flush;
-          if (json_2_idl(ss, report)) {
-            parsed_reports.push_back(report);
+        report.node_reports.length(report.node_reports.length() + 1);
+        Bench::TestController::NodeReport& node_report = report.node_reports[report.node_reports.length() - 1];
+        const NodeController::WorkerReports& worker_reports = reports[r].worker_reports;
+        for (CORBA::ULong wr = 0; wr < worker_reports.length(); wr++) {
+          if (worker_reports[wr].failed) {
+            ++worker_failures;
+            std::stringstream ss;
+            ss << "Worker " << worker_reports[wr].worker_id << " of node "
+              << reports[r].node_id << " failed with log:\n===\n"
+              << std::string(worker_reports[wr].log.in()) + "\n===\n";
+            std::cerr << ss.str() << std::flush;
           } else {
-            ++parse_failures;
-            std::stringstream ess;
-            ess << "Error parsing report details from Worker " << reports[r].worker_id
-              << " of node " << reports[r].node_id;
-            std::cerr << ess.str() + "\n" << std::flush;
+            WorkerReport report{};
+            std::stringstream ss;
+            ss << worker_reports[wr].details << std::flush;
+            if (json_2_idl(ss, report)) {
+              node_report.worker_reports.length(node_report.worker_reports.length() + 1);
+              node_report.worker_reports[node_report.worker_reports.length() - 1] = report;
+              ++parsed_report_count;
+            } else {
+              ++parse_failures;
+              std::stringstream ess;
+              ess << "Error parsing report details from Worker " << worker_reports[wr].worker_id
+                << " of node " << reports[r].node_id;
+              std::cerr << ess.str() + "\n" << std::flush;
+            }
           }
+          std::stringstream ss;
+          ss << "Got " << parsed_report_count << " out of "
+            << allocated_scenario.expected_reports << " expected reports";
+          if (worker_failures != 0 || parse_failures != 0) {
+            ss << " (with " << worker_failures << " worker failures and "
+              << parse_failures << " parse failures)";
+          }
+          ss << std::endl;
+          std::cerr << ss.str() << std::flush;
         }
-        std::stringstream ss;
-        ss << "Got " << parsed_reports.size() << " out of "
-          << allocated_scenario.expected_reports << " expected reports";
-        if (worker_failures != 0 || parse_failures != 0) {
-          ss << " (with " << worker_failures << " worker failures and "
-            << parse_failures << " parse failures)";
-        }
-        ss << std::endl;
-        std::cerr << ss.str() << std::flush;
+        node_report.node_id = reports[r].node_id;
+        node_report.properties = reports[r].properties;
       }
     }
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
-      reports_left = static_cast<size_t>(allocated_scenario.expected_reports) - parsed_reports.size() - worker_failures - parse_failures;
+      reports_left = static_cast<size_t>(allocated_scenario.expected_reports) - parsed_report_count - worker_failures - parse_failures;
       if (reports_left == 0) {
         break;
       }
@@ -460,6 +468,4 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   wait_set->detach_condition(read_condition);
   dds_entities_.report_reader_impl_->delete_readcondition(read_condition);
   wait_set->detach_condition(guard_condition);
-
-  return parsed_reports;
 }

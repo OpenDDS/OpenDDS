@@ -23,6 +23,7 @@ module Bench {
     Builder::TimeStamp created_time;
     Builder::TimeStamp sent_time;
     OctetSeq buffer;
+    unsigned long filter_class;
   };
 
 // ---
@@ -118,6 +119,8 @@ module Bench {
     unsigned long long round_trip_jitter_weighted_median_overflow;
   };
 
+  typedef sequence<WorkerReport> WorkerReportSeq;
+
   /*
    * Interface between the Test Controller and the Node Controllers
    */
@@ -163,14 +166,20 @@ module Bench {
     const string allocated_scenario_topic_name = "Allocated_Scenario_Config";
     typedef sequence<Config> Configs;
 
-    @topic
-    struct Report {
-      NodeId node_id;
+    struct WorkerReport {
       WorkerId worker_id;
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
       string log;
+    };
+    typedef sequence<WorkerReport> WorkerReports;
+
+    @topic
+    struct Report {
+      NodeId node_id;
+      WorkerReports worker_reports;
+      Builder::PropertySeq properties;
     };
     const string report_topic_name = "Node_Controller_Report";
   };
@@ -220,6 +229,21 @@ module Bench {
       unsigned long expected_reports;
       unsigned long timeout;
       Builder::TimeStamp launch_time;
+    };
+
+    struct NodeReport {
+      NodeController::NodeId node_id;
+      WorkerReportSeq worker_reports;
+      Builder::PropertySeq properties;
+    };
+
+    typedef sequence<NodeReport> NodeReportSeq;
+
+    struct Report {
+      string scenario_name;
+      Builder::TimeStamp time;
+      NodeReportSeq node_reports;
+      Builder::PropertySeq properties;
     };
   };
 };

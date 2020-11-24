@@ -7,6 +7,7 @@
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/GuidBuilder.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/SString.h"
@@ -21,6 +22,7 @@ SimpleDataWriter::SimpleDataWriter(const OpenDDS::DCPS::RepoId& pub_id)
   : pub_id_(pub_id)
   , num_messages_sent_(0)
   , num_messages_delivered_(0)
+  , associated_(false)
 {
   DBG_ENTRY("SimpleDataWriter","SimpleDataWriter");
 }
@@ -253,3 +255,10 @@ DDS_TEST::run(int num_messages, int msg_size)
   return 0;
 }
 
+void
+SimpleDataWriter::transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote)
+{
+  ACE_DEBUG((LM_INFO,
+             "(%P|%t) DataWriter association with %C is done flags=%d.\n", OpenDDS::DCPS::LogGuid(remote).c_str(), flags));
+  associated_ = true;
+}

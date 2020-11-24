@@ -234,7 +234,7 @@ struct GeneratorBase
             }
             first_label << prefix;
             UTL_ScopedName* default_name;
-            if (dv.u.enum_val < e->member_count()) {
+            if (dv.u.enum_val < static_cast<ACE_CDR::ULong>(e->member_count())) {
               default_name = e->value_to_name(dv.u.enum_val);
             } else {
               const Fields fields(the_union);

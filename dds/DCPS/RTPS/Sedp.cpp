@@ -2558,10 +2558,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         LocalPublicationIter lp = local_publications_.find(writerGuid);
         if (lp != local_publications_.end()) {
           // If the local writer is not fully associated with the reader
-          if (lp->second.remote_expectant_opendds_associations_.insert(guid).second) {
-            // This is a new association
-            lp->second.publication_->association_complete(guid);
-          }
+          lp->second.remote_expectant_opendds_associations_.insert(guid);
         }
       }
     }
@@ -2859,14 +2856,6 @@ Sedp::is_expectant_opendds(const GUID_t& endpoint) const
 }
 
 void
-Sedp::association_complete(const RepoId& localId,
-                           const RepoId& remoteId)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  association_complete_i(localId, remoteId);
-}
-
-void
 Sedp::association_complete_i(const RepoId& localId,
                              const RepoId& remoteId)
 {
@@ -3056,8 +3045,8 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
   }
 
   if (is_reliable()) {
-    // Message from transport.  Get the lock.
-    sedp_.association_complete(repo_id_, remote);
+    ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
+    sedp_.association_complete_i(repo_id_, remote);
   } else {
     sedp_.association_complete_i(repo_id_, remote);
   }
@@ -3132,7 +3121,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
   // Build RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
                             ACE_Message_Block::MB_DATA,
-                            new ACE_Message_Block(size));
+                            new ACE_Message_Block(size + padding));
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
@@ -3142,7 +3131,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
             (ser << plist);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
+    send_sample(payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
 
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3167,7 +3156,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
   // Build RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
                             ACE_Message_Block::MB_DATA,
-                            new ACE_Message_Block(size));
+                            new ACE_Message_Block(size + padding));
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
@@ -3177,7 +3166,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
             (ser << pmd);
 
   if (ok) {
-      send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence, reader != GUID_UNKNOWN);
 
   } else {
       result = DDS::RETCODE_ERROR;
@@ -3215,7 +3204,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   ok &= (ser << msg);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence);
 
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3252,7 +3241,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   ok &= (ser << msg);
 
   if (ok) {
-    send_sample(payload, size, reader, sequence);
+    send_sample(payload, size + padding, reader, sequence);
 
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3907,9 +3896,8 @@ Sedp::write_durable_dcps_participant_secure(const DCPS::RepoId& reader)
     return;
   }
 
-  const Security::SPDPdiscoveredParticipantData& pdata = spdp_.build_local_pdata(Security::DPDK_SECURE);
-
-  write_dcps_participant_secure(pdata, reader);
+  write_dcps_participant_secure(
+    spdp_.build_local_pdata(false, Security::DPDK_SECURE), reader);
   dcps_participant_secure_writer_->end_historic_samples(reader);
 }
 

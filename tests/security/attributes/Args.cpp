@@ -177,4 +177,3 @@ void Args::partition_to_qos(DDS::PartitionQosPolicy& policy)
 }
 
 }
-

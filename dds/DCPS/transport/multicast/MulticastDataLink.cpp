@@ -241,6 +241,36 @@ MulticastDataLink::reassemble(ReceivedDataSample& data,
   return false;
 }
 
+int
+MulticastDataLink::make_reservation(const RepoId& rpi,
+                                    const RepoId& lsi,
+                                    const TransportReceiveListener_wrch& trl,
+                                    bool reliable)
+{
+  int result = DataLink::make_reservation(rpi, lsi, trl, reliable);
+  if (reliable) {
+    const MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(rpi).federationId() << 32
+      | RepoIdConverter(rpi).participantId();
+    MulticastSession_rch session = find_session(remote_peer);
+    if (session) {
+      session->add_remote(lsi, rpi);
+    }
+  }
+  return result;
+}
+
+void
+MulticastDataLink::release_reservations_i(const RepoId& remote_id,
+                                          const RepoId& local_id)
+{
+  const MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote_id).federationId() << 32
+    | RepoIdConverter(remote_id).participantId();
+  MulticastSession_rch session = find_session(remote_peer);
+  if (session) {
+    session->remove_remote(local_id, remote_id);
+  }
+}
+
 void
 MulticastDataLink::sample_received(ReceivedDataSample& sample)
 {

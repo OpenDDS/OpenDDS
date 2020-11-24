@@ -9,11 +9,12 @@ PublisherManager::PublisherManager(const PublisherConfigSeq& configs, PublisherR
   }
 }
 
-void PublisherManager::enable() {
+bool PublisherManager::enable(bool throw_on_error) {
+  bool result = true;
   for (auto it = publishers_.begin(); it != publishers_.end(); ++it) {
-    (*it)->enable();
+    result &= (*it)->enable(throw_on_error);
   }
+  return result;
 }
 
 }
-

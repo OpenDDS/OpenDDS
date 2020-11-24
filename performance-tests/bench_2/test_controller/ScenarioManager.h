@@ -40,7 +40,8 @@ public:
    * Execute a Scenario by sending out the node configurations and wait for the
    * worker reports to come back.
    */
-  std::vector<Bench::WorkerReport> execute(const Bench::TestController::AllocatedScenario& allocated_scenario);
+  void execute(const Bench::TestController::AllocatedScenario& allocated_scenario,
+    Bench::TestController::Report& report);
 
 private:
   void customize_configs(std::map<std::string, std::string>& worker_configs);

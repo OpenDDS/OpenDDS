@@ -22,4 +22,3 @@ if [ ! -f ${1} ]; then
 fi
 
 openssl smime -sign -in ${1} -text -out ${PREFIX}_signed.p7s -signer ${DDS_ROOT}/tests/security/certs/permissions/permissions_ca_cert.pem -inkey ${DDS_ROOT}/tests/security/certs/permissions/permissions_ca_private_key.pem
-

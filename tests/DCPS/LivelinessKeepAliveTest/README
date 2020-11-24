@@ -3,4 +3,3 @@ reset when a write occurs.
 
 run_test.pl
   Run a separate publisher and subscriber process.
-

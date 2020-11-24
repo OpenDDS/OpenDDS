@@ -7,7 +7,8 @@
 
 namespace Builder {
 
-Participant::Participant(const ParticipantConfig& config, ParticipantReport& report, ReaderMap& reader_map, WriterMap& writer_map)
+Participant::Participant(const ParticipantConfig& config, ParticipantReport& report,
+  ReaderMap& reader_map, WriterMap& writer_map, ContentFilteredTopicMap& cft_map)
   : name_(config.name.in())
   , domain_(config.domain)
   , listener_type_name_(config.listener_type_name.in())
@@ -79,8 +80,8 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
     }
   }
 
-  topics_.reset(new TopicManager(config.topics, participant_));
-  subscribers_.reset(new SubscriberManager(config.subscribers, report.subscribers, participant_, topics_, reader_map));
+  topics_.reset(new TopicManager(config.topics, participant_, cft_map));
+  subscribers_.reset(new SubscriberManager(config.subscribers, report.subscribers, participant_, topics_, reader_map, cft_map));
   publishers_.reset(new PublisherManager(config.publishers, report.publishers, participant_, topics_, writer_map));
 }
 
@@ -97,10 +98,16 @@ Participant::~Participant() {
   }
 }
 
-void Participant::enable() {
-  participant_->enable();
-  subscribers_->enable();
-  publishers_->enable();
+bool Participant::enable(bool throw_on_error) {
+  bool success = (participant_->enable() == DDS::RETCODE_OK);
+  if (!success && throw_on_error) {
+    std::stringstream ss;
+    ss << "failed to enable participant '" << name_ << "'" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+  return success && topics_->enable(throw_on_error) &&
+    subscribers_->enable(throw_on_error) &&
+    publishers_->enable(throw_on_error);
 }
 
 }

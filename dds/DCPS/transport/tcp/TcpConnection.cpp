@@ -171,7 +171,7 @@ OpenDDS::DCPS::TcpConnection::passive_open(void* arg)
 
   // Now we need to ask the TcpAcceptor object to provide us with
   // a pointer to the TcpTransport object that "owns" the acceptor.
-  TcpTransport* transport = acceptor->transport();
+  RcHandle<TcpTransport> transport = acceptor->transport();
 
   if (!transport) {
     // The acceptor gave us a nil transport (smart) pointer.
@@ -183,7 +183,7 @@ OpenDDS::DCPS::TcpConnection::passive_open(void* arg)
 
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
-  tcp_config_ =  &acceptor->get_configuration();
+  tcp_config_ = &transport->config();
   local_address_ = tcp_config_->local_address();
 
   set_sock_options(tcp_config_);
@@ -193,7 +193,7 @@ OpenDDS::DCPS::TcpConnection::passive_open(void* arg)
   // message it sends to the socket.  This is a one-way connection
   // establishment protocol message.
   passive_setup_ = true;
-  transport_during_setup_ = transport;
+  transport_during_setup_ = transport.get();
   passive_setup_buffer_.size(sizeof(ACE_UINT32));
 
   if (reactor()->register_handler(this, READ_MASK) == -1) {
@@ -326,7 +326,7 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 {
   DBG_ENTRY_LVL("TcpConnection","close",6);
 
-  ACE_DEBUG((LM_DEBUG, "TcpConnection::close, reconnect_state_=%C\n", reconnect_state_string()));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::close, reconnect_state_=%C\n", reconnect_state_string()));
 
   if (this->reconnect_state_ == ACTIVE_RECONNECTING_STATE) {
     // This would be called when using ACE_Connector to initiate an async connect and

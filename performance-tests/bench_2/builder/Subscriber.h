@@ -6,10 +6,11 @@ namespace Builder {
 
 class Subscriber : public ListenerFactory<DDS::SubscriberListener> {
 public:
-  explicit Subscriber(const SubscriberConfig& config, SubscriberReport& report, DDS::DomainParticipant_var& participant, const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map);
+  explicit Subscriber(const SubscriberConfig& config, SubscriberReport& report, DDS::DomainParticipant_var& participant,
+    const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map, const ContentFilteredTopicMap& cft_map);
   ~Subscriber();
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
   SubscriberReport& get_report() { return report_; }
   const SubscriberReport& get_report() const { return report_; }
@@ -28,4 +29,3 @@ protected:
 };
 
 }
-

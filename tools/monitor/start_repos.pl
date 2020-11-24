@@ -131,4 +131,3 @@ for my $index ( 1 .. $repoCount) {
 unlink @repo_ior;
 
 exit $status;
-

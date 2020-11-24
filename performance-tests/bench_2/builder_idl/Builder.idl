@@ -1,4 +1,5 @@
 #include <tao/DoubleSeq.pidl>
+#include <tao/StringSeq.pidl>
 #include "dds/DdsDcpsCore.idl"
 
 module Builder {
@@ -14,15 +15,20 @@ module Builder {
   };
 
   typedef sequence<string> StringSeq;
+  typedef sequence<StringSeq> StringSeqSeq;
 
   typedef sequence<double> DoubleSeq;
 
-  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
+  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_STRING_SEQ, PVK_STRING_SEQ_SEQ, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
   union PropertyValue switch (PropertyValueKind) {
     case PVK_TIME:
       TimeStamp time_prop;
     case PVK_STRING:
       string string_prop;
+    case PVK_STRING_SEQ:
+      StringSeq string_seq_prop;
+    case PVK_STRING_SEQ_SEQ:
+      StringSeqSeq string_seq_seq_prop;
     case PVK_DOUBLE:
       double double_prop;
     case PVK_DOUBLE_SEQ:
@@ -303,6 +309,7 @@ module Builder {
     string transport_config_name;
     DDS::DataReaderQos qos;
     DataReaderQosMask qos_mask;
+    StringSeq tags;
   };
 
   typedef sequence<DataReaderConfig> DataReaderConfigSeq;
@@ -339,6 +346,14 @@ module Builder {
 
   // Topic
 
+  struct ContentFilteredTopic {
+    string cft_name;
+    string cft_expression;
+    DDS::StringSeq cft_parameters;
+  };
+
+  typedef sequence<ContentFilteredTopic> ContentFilteredTopicSeq;
+
   struct TopicConfig {
     string name;
     string type_name;
@@ -348,6 +363,7 @@ module Builder {
     unsigned long listener_status_mask;
     PropertySeq listener_properties;
     string transport_config_name;
+    ContentFilteredTopicSeq content_filtered_topics;
   };
 
   typedef sequence<TopicConfig> TopicConfigSeq;
@@ -408,6 +424,7 @@ module Builder {
 
   struct DataReaderReport {
     PropertySeq properties;
+    StringSeq tags;
   };
 
   typedef sequence<DataReaderReport> DataReaderReportSeq;
@@ -442,4 +459,3 @@ module Builder {
   };
 
 };
-

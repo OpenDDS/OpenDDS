@@ -8,6 +8,8 @@
 
 namespace Bench {
 
+constexpr size_t DEFAULT_STAT_BLOCK_BUFFER_SIZE = 1000u;
+
 struct Bench_Common_Export SimpleStatBlock {
   SimpleStatBlock();
 
@@ -31,9 +33,9 @@ Bench_Common_Export SimpleStatBlock consolidate(const SimpleStatBlock& sb1, cons
 class Bench_Common_Export PropertyStatBlock {
 public:
   // Constructor for initializing / writing PropertyStatBlock
-  PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size);
+  PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size, bool timestamps = false);
 
-  void update(double value);
+  void update(double value, const Builder::TimeStamp& time = Builder::ZERO);
   void finalize();
 
   SimpleStatBlock to_simple_stat_block() const;
@@ -47,6 +49,7 @@ private:
   Builder::PropertyIndex var_x_sample_count_;
 
   std::vector<double> median_buffer_;
+  std::vector<Builder::TimeStamp> timestamp_buffer_;
   Builder::PropertyIndex median_sample_count_;
   Builder::PropertyIndex median_;
   Builder::PropertyIndex median_absolute_deviation_;

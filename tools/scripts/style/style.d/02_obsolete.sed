@@ -29,4 +29,3 @@ s/\([ (,;]\{1,\}\)::\(OpenDDS\)/\1\2/g
 # Replace obsolete uses of void for empty parameter lists.
 # NOTE: This may break C-style casts.
 s/\([^ ]\)(void)/\1()/
-

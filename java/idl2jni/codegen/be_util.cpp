@@ -106,4 +106,3 @@ be_util::generator_init (void)
   ACE_NEW_RETURN(gen, AST_Generator, 0);
   return gen;
 }
-

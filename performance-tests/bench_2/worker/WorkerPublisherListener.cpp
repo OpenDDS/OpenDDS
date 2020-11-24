@@ -37,4 +37,3 @@ void WorkerPublisherListener::set_publisher(Builder::Publisher& publisher) {
 }
 
 }
-

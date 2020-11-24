@@ -96,8 +96,7 @@ private:
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const TcpConnection_rch& connection);
 
-  bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                       const TransportClient_rch& client, const RepoId& remote_id);
+  bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().

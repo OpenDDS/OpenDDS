@@ -77,4 +77,3 @@ close($f);
 chdir($ENV{"DDS_ROOT"});
 push(@doxygen, $dest);
 system(@doxygen) == 0 or die "ERROR: DDS Doxygen failed ($?)\n";
-

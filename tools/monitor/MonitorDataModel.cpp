@@ -454,4 +454,3 @@ MonitorDataModel::addData( int row, QList< QVariant> list, const QModelIndex& pa
 }
 
 } // End of namespace Monitor
-

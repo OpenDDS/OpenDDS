@@ -67,9 +67,9 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 
   DataLink::pre_stop_i();
 
-  TcpReceiveStrategy_rch rs = this->receive_strategy();
+  TcpReceiveStrategy_rch rs = receive_strategy();
 
-  TcpConnection_rch connection(this->connection_.lock());
+  TcpConnection_rch connection(connection_.lock());
 
   if (rs) {
     // If we received the GRACEFUL_DISCONNECT message from peer before we
@@ -77,10 +77,9 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
     // the GRACEFUL_DISCONNECT message to the peer.
     bool disconnected = rs->gracefully_disconnected();
 
-    if (connection && !this->graceful_disconnect_sent_
-        && !disconnected && !this->impl().is_shut_down()) {
-      this->send_graceful_disconnect_message();
-      this->graceful_disconnect_sent_ = true;
+    if (connection && !graceful_disconnect_sent_ && !disconnected) {
+      graceful_disconnect_sent_ = true;
+      send_graceful_disconnect_message();
     }
   }
 
@@ -449,9 +448,14 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 void
 OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
+  if (!connection_ || !send_strategy_) {
+    return;
+  }
+
+  // We have a connection.
+  // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
-  PairVec to_send;
-  PairVec to_call;
+  PairVec to_call_and_send;
 
   {
     GuardType guard(strategy_lock_);
@@ -459,9 +463,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
         GuidConverter conv(it2->first);
-        to_send.push_back(std::make_pair(it2->first, it->first));
-        if (!conv.isWriter()) {
-          to_call.push_back(std::make_pair(it2->first, it->first));
+        if (conv.isReader()) {
+          to_call_and_send.push_back(std::make_pair(it2->first, it->first));
         }
       }
     }
@@ -469,11 +472,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
   send_strategy_->link_released(false);
 
-  for (PairVec::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
+  for (PairVec::const_iterator it = to_call_and_send.begin(); it != to_call_and_send.end(); ++it) {
     invoke_on_start_callbacks(it->first, it->second, true);
-  }
-
-  for (PairVec::const_iterator it = to_send.begin(); it != to_send.end(); ++it) {
     send_association_msg(it->first, it->second);
   }
 }
@@ -554,6 +554,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
 {
   const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener, reliable);
   send_association_msg(local_subscription_id, remote_publication_id);
+
   return result;
 }
 

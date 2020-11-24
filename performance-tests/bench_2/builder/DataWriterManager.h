@@ -10,11 +10,10 @@ class DataWriterManager {
 public:
   explicit DataWriterManager(const DataWriterConfigSeq& configs, DataWriterReportSeq& reports, DDS::Publisher_var& publisher, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map);
 
-  void enable();
+  bool enable(bool throw_on_error = false);
 
 protected:
   std::vector<std::shared_ptr<DataWriter>> datawriters_;
 };
 
 }
-

@@ -12,4 +12,3 @@ Run the test by:
 Or
 
   run_test.pl
-

@@ -37,6 +37,8 @@ class SimpleDataReader
       { return 0; }
     CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const
       { return 0; }
+    void transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote);
+
 
     void transport_lost();
 

@@ -17,4 +17,3 @@ template<typename QosType>
 QString QosToQString( const QosType& value);
 
 #endif /* QOSFORMATTER_H */
-

@@ -197,4 +197,3 @@ TestConfig::domainToRepoSize() const
 }
 
 #endif // TESTCONFIG_H
-

@@ -45,6 +45,7 @@
 #include "WriteAction.h"
 #include "DataReader.h"
 #include "DataWriter.h"
+#include "SetCftParametersAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -218,6 +219,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     forward_action_registration("forward", [&](){
       return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor));
     });
+  Bench::ActionManager::Registration
+    set_cft_parameters_action_registration("set_cft_parameters", [&]() {
+      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(proactor));
+    });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;
@@ -229,7 +234,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   set_global_properties(config.properties);
 
-  Bench::WorkerReport worker_report;
+  Bench::WorkerReport worker_report{};
   Builder::ProcessReport& process_report = worker_report.process_report;
 
   const size_t THREAD_POOL_SIZE = 4;
@@ -253,7 +258,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning action construction / initialization." << std::endl;
 
-    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map());
+    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map(), process.get_cft_map());
 
     Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 
@@ -262,7 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
 
     process_enable_begin_time = Builder::get_hr_time();
-    process.enable_dds_entities();
+    process.enable_dds_entities(true);
     process_enable_end_time = Builder::get_hr_time();
 
     Log::log() << "DDS entities enabled." << std::endl << std::endl;
@@ -287,10 +292,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             dtRdrPtr = it->second;
             Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
 
-            if (wdrl->wait_for_expected_match(timeout_time)) {
-              Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
-            }
-            else {
+            if (!wdrl->wait_for_expected_match(timeout_time)) {
               Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
             }
           }
@@ -305,10 +307,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             dtWtrPtr = it->second;
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
-            if (wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << it->first << "Found expected writers." << std::endl << std::endl;
-            }
-            else {
+            if (!wdwl->wait_for_expected_match(timeout_time)) {
               Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
             }
           }
@@ -356,7 +355,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
-    std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
+    std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
@@ -365,7 +364,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     TheServiceParticipant->shutdown();
     return 1;
   } catch (...) {
-    std::cerr << "Unknown exception caught trying to build process object" << std::endl;
+    std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
@@ -475,10 +474,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
         Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+
         const Builder::TimeStamp dw_enable_time =
           get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
         const Builder::TimeStamp dw_last_discovery_time =
           get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+
         if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
           auto delta = dw_last_discovery_time - dw_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {
@@ -629,4 +630,3 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   return 0;
 }
-

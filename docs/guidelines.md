@@ -380,7 +380,7 @@ classes that wrap `ACE_Time_Value` to fill these roles: `TimeDuration`,
 `dds/DCPS/TimeTypes.h`. Using `ACE_Time_Value` is discouraged unless directly
 dealing with ACE code which requires it and using `ACE_OS::gettimeofday()` or
 `ACE_Time_Value().now()` in C++ code in `dds/DCPS` treated as an error by the
-`dds_fuzz.pl` linter script.
+`lint.pl` linter script.
 
 `MonotonicTimePoint` should be used when tracking time elapsed internally and
 when dealing with `ACE_Time_Value`s being given by the `ACE_Reactor` in

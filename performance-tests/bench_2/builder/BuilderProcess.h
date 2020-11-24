@@ -13,7 +13,7 @@ public:
   explicit BuilderProcess(const ProcessConfig& config);
   ~BuilderProcess();
 
-  void enable_dds_entities();
+  bool enable_dds_entities(bool throw_on_error = false);
 
   void detach_listeners();
 
@@ -26,10 +26,14 @@ public:
   WriterMap& get_writer_map() { return writer_map_; }
   const WriterMap& get_writer_map() const { return writer_map_; }
 
+  ContentFilteredTopicMap& get_cft_map() { return cft_map_; }
+  const ContentFilteredTopicMap& get_cft_map() const { return cft_map_; }
+
 protected:
   ProcessReport report_;
   ReaderMap reader_map_;
   WriterMap writer_map_;
+  ContentFilteredTopicMap cft_map_;
   std::shared_ptr<ConfigSectionManager> config_sections_;
   std::shared_ptr<DiscoveryManager> discoveries_;
   std::shared_ptr<TransportInstanceManager> instances_;
@@ -37,4 +41,3 @@ protected:
 };
 
 }
-

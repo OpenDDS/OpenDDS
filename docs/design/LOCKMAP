@@ -1,24 +1,24 @@
 
 remote calls examined:
   DCPSInfo::attach_participant
-  DCPSInfo::assert_topic 
-  DCPSInfo::find_topic 
-  DCPSInfo::remove_topic 
-  DCPSInfo::enable_topic 
-  DCPSInfo::add_publication 
-  DCPSInfo::remove_publication 
-  DCPSInfo::add_subscription 
-  DCPSInfo::remove_subscription 
-  DCPSInfo::add_domain_participant 
-  DCPSInfo::remove_domain_participant 
-  DCPSInfo::ignore_domain_participant 
-  DCPSInfo::ignore_topic 
-  DCPSInfo::ignore_subscription 
-  DCPSInfo::ignore_publication 
-  DCPSInfo::update_domain_participant_qos 
-  DCPSInfo::update_topic_qos 
-  DCPSInfo::update_publication_qos 
-  DCPSInfo::update_subscription_qos 
+  DCPSInfo::assert_topic
+  DCPSInfo::find_topic
+  DCPSInfo::remove_topic
+  DCPSInfo::enable_topic
+  DCPSInfo::add_publication
+  DCPSInfo::remove_publication
+  DCPSInfo::add_subscription
+  DCPSInfo::remove_subscription
+  DCPSInfo::add_domain_participant
+  DCPSInfo::remove_domain_participant
+  DCPSInfo::ignore_domain_participant
+  DCPSInfo::ignore_topic
+  DCPSInfo::ignore_subscription
+  DCPSInfo::ignore_publication
+  DCPSInfo::update_domain_participant_qos
+  DCPSInfo::update_topic_qos
+  DCPSInfo::update_publication_qos
+  DCPSInfo::update_subscription_qos
   DCPSInfo::shutdown
 
 paths examined:
@@ -43,76 +43,76 @@ Remote Calls:
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  assert_topic 
+  assert_topic
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  find_topic 
+  find_topic
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  remove_topic 
+  remove_topic
     LOCKS HELD DURING REMOTE CALL:
       DomainParticipantImpl::topics_protector_
 
   --------------------------------------
-  enable_topic 
+  enable_topic
     OBSOLETE -- remove this method
 
   --------------------------------------
-  add_publication 
+  add_publication
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  remove_publication 
+  remove_publication
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  add_subscription 
+  add_subscription
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  remove_subscription 
+  remove_subscription
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  add_domain_participant 
+  add_domain_participant
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  remove_domain_participant 
+  remove_domain_participant
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  ignore_domain_participant 
+  ignore_domain_participant
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  ignore_topic 
+  ignore_topic
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  ignore_subscription 
+  ignore_subscription
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  ignore_publication 
+  ignore_publication
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  update_domain_participant_qos 
+  update_domain_participant_qos
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  update_topic_qos 
+  update_topic_qos
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  update_publication_qos 
+  update_publication_qos
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
-  update_subscription_qos 
+  update_subscription_qos
     NO LOCKS HELD DURING THIS CALL
 
   --------------------------------------
@@ -584,7 +584,7 @@ NOTES:
       DataReaderImpl::remove_associations()
 *L      ACQUIRE DataReaderImpl::publication_handle_lock_
         NOTE 25
-*W	ACQUIRE/RELEASE DataReaderImpl::writers_lock_
+*W      ACQUIRE/RELEASE DataReaderImpl::writers_lock_
 *       RELEASE DataReaderImpl::publication_handle_lock_
 
 NOTES:

@@ -2,4 +2,3 @@ project(*pubsub): dcpsexe, dcps_test, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename  = pubsub
 }
-

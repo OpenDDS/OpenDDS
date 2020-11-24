@@ -25,6 +25,3 @@ return false;
 
 -----------------------------------------------------
 generate_export_file.pl FooLib > foolib_export.h
-
-
-

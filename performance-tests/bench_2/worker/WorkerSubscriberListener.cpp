@@ -2,15 +2,7 @@
 
 namespace Bench {
 
-WorkerSubscriberListener::WorkerSubscriberListener()
-{
-}
-
 WorkerSubscriberListener::WorkerSubscriberListener(const Builder::PropertySeq&)
-{
-}
-
-WorkerSubscriberListener::~WorkerSubscriberListener()
 {
 }
 
@@ -49,4 +41,3 @@ void WorkerSubscriberListener::set_subscriber(Builder::Subscriber& subscriber) {
 }
 
 }
-
