@@ -191,12 +191,15 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult();
   }
 
-  if (this->config().is_reliable()) {
+  if (config().is_reliable()) {
     session->add_remote(attribs.local_id_, remote.repo_id_);
-    return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
-  } else {
-    return AcceptConnectResult(link);
+    if (remote_peer != local_peer) {
+      return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
+    }
   }
+
+  link->remove_on_start_callback(client, remote.repo_id_);
+  return AcceptConnectResult(link);
 }
 
 TransportImpl::AcceptConnectResult

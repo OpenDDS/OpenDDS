@@ -266,6 +266,8 @@ PubDriver::run()
     std::memcpy(subscription.remote_data_[0].data.get_buffer(),
                 str.c_str(), str.size());
 
+    ACE_OS::sleep(2); // wait for assoc (shmem doesn't support notification-based association)
+
   } else { // tcp
     subscription.remote_data_[0].transport_type = "tcp";
 
