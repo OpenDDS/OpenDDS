@@ -1641,7 +1641,9 @@ AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(DCPS::Rea
 { }
 
 AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
-{ }
+{
+  cancel_and_wait();
+}
 
 namespace {
   // Some platforms cannot schedule timers far enough into the future
