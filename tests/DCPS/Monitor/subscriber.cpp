@@ -31,7 +31,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
-    sleep(1);
+    ACE_OS::sleep(1);
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(111,

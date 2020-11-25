@@ -61,7 +61,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (parse_args (argc, argv) != 0) {
       return 1;
     }
-    sleep(1);
+    ACE_OS::sleep(1);
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(111,
