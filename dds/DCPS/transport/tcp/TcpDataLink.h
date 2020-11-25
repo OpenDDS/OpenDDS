@@ -70,6 +70,8 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  void do_association_actions();
+
 protected:
 
   /// Called when the DataLink is self-releasing because all of its
@@ -80,7 +82,6 @@ protected:
 private:
   bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
-  void do_association_actions();
   void send_association_msg(const RepoId& local, const RepoId& remote);
 
   ACE_INET_Addr           remote_address_;

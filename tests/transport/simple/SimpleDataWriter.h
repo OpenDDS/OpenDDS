@@ -57,6 +57,9 @@ class SimpleDataWriter
       { return 0; }
     CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const
       { return 0; }
+    void transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote);
+
+    bool associated() const { return associated_; }
 
     int delivered_test_message();
 
@@ -68,6 +71,7 @@ class SimpleDataWriter
     const OpenDDS::DCPS::RepoId& pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;
+    bool associated_;
 };
 
 class DDS_TEST : public SimpleDataWriter

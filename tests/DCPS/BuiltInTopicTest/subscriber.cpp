@@ -265,6 +265,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       TheServiceParticipant->shutdown ();
+
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) subscriber main done\n"));
     }
   catch (CORBA::Exception& e) {
     e._tao_print_exception(
