@@ -1745,7 +1745,7 @@ DomainParticipantImpl::enable()
     perm_handle_ = access->validate_local_permissions(auth, id_handle_, domain_id_, qos_, se);
 
     if (perm_handle_ == DDS::HANDLE_NIL) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.new_entity_error) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                    ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
@@ -1754,9 +1754,9 @@ DomainParticipantImpl::enable()
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
     }
 
-    bool check_create = access->check_create_participant(perm_handle_, domain_id_, qos_, se);
+    const bool check_create = access->check_create_participant(perm_handle_, domain_id_, qos_, se);
     if (!check_create) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.new_entity_error) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                    ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
@@ -1766,10 +1766,10 @@ DomainParticipantImpl::enable()
     }
 
     DDS::Security::ParticipantSecurityAttributes part_sec_attr;
-    bool check_part_sec_attr = access->get_participant_sec_attributes(perm_handle_, part_sec_attr, se);
+    const bool check_part_sec_attr = access->get_participant_sec_attributes(perm_handle_, part_sec_attr, se);
 
     if (!check_part_sec_attr) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.new_entity_error) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable,")
                    ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
@@ -1780,7 +1780,7 @@ DomainParticipantImpl::enable()
 
     if (part_sec_attr.is_rtps_protected) { // DDS-Security v1.1 8.4.2.4 Table 27 is_rtps_protected
       if (part_sec_attr.allow_unauthenticated_participants) {
-        if (DCPS_debug_level > 0) {
+        if (DCPS::security_debug.new_entity_error) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                      ACE_TEXT("allow_unauthenticated_participants is not possible with is_rtps_protected\n")));
@@ -1792,7 +1792,7 @@ DomainParticipantImpl::enable()
       part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
         Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
       if (part_crypto_handle_ == DDS::HANDLE_NIL) {
-        if (DCPS_debug_level > 0) {
+        if (DCPS::security_debug.new_entity_error) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                      ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
@@ -1808,7 +1808,7 @@ DomainParticipantImpl::enable()
     value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
-      if (DCPS_debug_level > 0) {
+      if (DCPS::security_debug.new_entity_error) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                    ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
