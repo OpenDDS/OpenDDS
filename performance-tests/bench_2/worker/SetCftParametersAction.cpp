@@ -136,10 +136,10 @@ void SetCftParametersAction::do_set_expression_parameters()
     if (max_count_ == 0 || set_call_count_ < max_count_) {
       ++set_call_count_;
 
-      DDS::StringSeq params(param_count_);
-      params.length(param_count_);
-      for (size_t i = 0; i < param_count_; i++) {
-        int index = random_order_ ? mt_() % acceptable_param_values_[i].length() : current_acceptable_param_values_index_[i]++;
+      DDS::StringSeq params;
+      params.length(static_cast<CORBA::ULong>(param_count_));
+      for (CORBA::ULong i = 0; i < params.length(); ++i) {
+        const int index = random_order_ ? mt_() % acceptable_param_values_[i].length() : current_acceptable_param_values_index_[i]++;
         params[i] = acceptable_param_values_[i][index];
       }
 
@@ -153,4 +153,3 @@ void SetCftParametersAction::do_set_expression_parameters()
 }
 
 }
-

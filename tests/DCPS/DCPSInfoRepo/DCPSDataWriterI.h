@@ -32,8 +32,6 @@ public:
       const OpenDDS::DCPS::ReaderAssociation& reader,
       bool active);
 
-  virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
-
   virtual void remove_associations (
       const OpenDDS::DCPS::ReaderIdSeq & readers,
       ::CORBA::Boolean notify_lost);
