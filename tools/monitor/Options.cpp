@@ -82,5 +82,3 @@ Monitor::Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
     }
   }
 }
-
-

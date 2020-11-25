@@ -356,5 +356,3 @@ operator<<( std::ostream& str, Test::Options::TransportType value)
     case Test::Options::TRANSPORT_NONE: return str << "NONE";
   }
 }
-
-

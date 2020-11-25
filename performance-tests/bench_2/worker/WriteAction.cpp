@@ -1,26 +1,7 @@
 #include "WriteAction.h"
 
 #include "MemFunHandler.h"
-
-namespace {
-
-uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
-  size_t i = 0;
-  uint32_t hash = 0;
-  while (i != length) {
-    hash += key[i++];
-    hash += hash << 10;
-    hash ^= hash >> 6;
-  }
-  hash += hash << 3;
-  hash ^= hash >> 11;
-  hash += hash << 15;
-  return hash;
-}
-
-const ACE_Time_Value ZERO(0, 0);
-
-}
+#include "util.h"
 
 namespace Bench {
 
@@ -30,10 +11,12 @@ WriteAction::WriteAction(ACE_Proactor& proactor)
 {
 }
 
-bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
+bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
+  Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map)
+{
 
   std::unique_lock<std::mutex> lock(mutex_);
-  Action::init(config, report, readers, writers);
+  Action::init(config, report, readers, writers, cft_map);
 
   if (writers_by_index_.empty()) {
     std::stringstream ss;
@@ -125,21 +108,47 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
   }
 
+  // Filter class parameters
+  size_t filter_class_start_value = 0;
+  auto filter_class_start_value_prop = get_property(config.params, "filter_class_start_value", Builder::PVK_ULL);
+  if (filter_class_start_value_prop) {
+    filter_class_start_value = static_cast<size_t>(filter_class_start_value_prop->value.ull_prop());
+  }
+  filter_class_start_value_ = filter_class_start_value;
+
+  size_t filter_class_stop_value = 0;
+  auto filter_class_stop_value_prop = get_property(config.params, "filter_class_stop_value", Builder::PVK_ULL);
+  if (filter_class_stop_value_prop) {
+    filter_class_stop_value = static_cast<size_t>(filter_class_stop_value_prop->value.ull_prop());
+  }
+  filter_class_stop_value_ = filter_class_stop_value;
+
+  size_t filter_class_increment = 0;
+  auto filter_class_increment_prop = get_property(config.params, "filter_class_increment", Builder::PVK_ULL);
+  if (filter_class_increment_prop) {
+    filter_class_increment = static_cast<size_t>(filter_class_increment_prop->value.ull_prop());
+  }
+  filter_class_increment_ = filter_class_increment;
+
+  data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
+
   handler_.reset(new MemFunHandler<WriteAction>(&WriteAction::do_write, *this));
 
   return true;
 }
 
-void WriteAction::start() {
+void WriteAction::start()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO, write_period_);
+    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, write_period_);
   }
 }
 
-void WriteAction::stop() {
+void WriteAction::stop()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
@@ -151,7 +160,8 @@ void WriteAction::stop() {
   }
 }
 
-void WriteAction::do_write() {
+void WriteAction::do_write()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     if (max_count_ == 0 || data_.msg_count < max_count_) {
@@ -161,15 +171,19 @@ void WriteAction::do_write() {
         data_.id.high = mt_();
         data_.id.low = mt_();
       }
+
       data_.created_time = data_.sent_time = Builder::get_sys_time();
-      DDS::ReturnCode_t result = data_dw_->write(data_, 0);
+      const DDS::ReturnCode_t result = data_dw_->write(data_, 0);
       if (result != DDS::RETCODE_OK) {
         --(data_.msg_count);
         std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
+      } else {
+        if ((data_.filter_class += static_cast<CORBA::ULong>(filter_class_increment_)) > static_cast<CORBA::ULong>(filter_class_stop_value_)) {
+          data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
+        }
       }
     }
   }
 }
 
 }
-

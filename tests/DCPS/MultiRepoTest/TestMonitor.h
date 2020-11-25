@@ -83,4 +83,3 @@ class TestMonitor {
 };
 
 #endif // TESTMONITOR_H
-

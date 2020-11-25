@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+import DDS.ALIVE_INSTANCE_STATE;
 import DDS.ANY_INSTANCE_STATE;
 import DDS.ANY_SAMPLE_STATE;
 import DDS.ANY_VIEW_STATE;
@@ -77,14 +78,30 @@ public class BuiltinTopicsTest {
                                          TOPIC_QOS_DEFAULT.get(), null, 0);
     }
 
+    private static boolean waitForSample(DataReader dr) {
+        DDS.ReadCondition dr_rc = dr.create_readcondition(ANY_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
+        DDS.WaitSet ws = new DDS.WaitSet();
+        ws.attach_condition(dr_rc);
+        DDS.Duration_t infinite = new DDS.Duration_t(DDS.DURATION_INFINITE_SEC.value, DDS.DURATION_INFINITE_NSEC.value);
+        DDS.Condition[] active = {};
+        int ret = ws.wait(new DDS.ConditionSeqHolder(active), infinite);
+        ws.detach_condition(dr_rc);
+        dr.delete_readcondition(dr_rc);
+        if (ret != RETCODE_OK.value) {
+            System.err.println("ERROR: wait(rc) failed");
+            return false;
+        }
+        return true;
+    }
+
     protected static void testParticipantBIT() throws Exception {
         //NOTE: We do not need to do anything special to verify that the
         //      Participant BIT is functioning (a DomainParticipant already exists).
 
-        Thread.sleep(2500); // Wait for repo to settle
-
         DataReader dr =
             builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_TOPIC);
+
+        waitForSample(dr);
 
         ParticipantBuiltinTopicDataDataReader reader =
             ParticipantBuiltinTopicDataDataReaderHelper.narrow(dr);
@@ -105,10 +122,10 @@ public class BuiltinTopicsTest {
         //NOTE: We do not need to do anything special to verify that the
         //      Topic BIT is functioning (a Topic already exists).
 
-        Thread.sleep(2500); // Wait for repo to settle
-
         DataReader dr =
             builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_TOPIC_TOPIC);
+
+        waitForSample(dr);
 
         TopicBuiltinTopicDataDataReader reader =
             TopicBuiltinTopicDataDataReaderHelper.narrow(dr);
@@ -134,12 +151,12 @@ public class BuiltinTopicsTest {
 
         subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(), null, 0);
 
-        Thread.sleep(2500); // Wait for repo to settle
-
         //
 
         DataReader dr =
             builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_SUBSCRIPTION_TOPIC);
+
+        waitForSample(dr);
 
         SubscriptionBuiltinTopicDataDataReader reader =
             SubscriptionBuiltinTopicDataDataReaderHelper.narrow(dr);
@@ -165,12 +182,12 @@ public class BuiltinTopicsTest {
 
         publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(), null, 0);
 
-        Thread.sleep(2500); // Wait for repo to settle
-
         //
 
         DataReader dr =
             builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PUBLICATION_TOPIC);
+
+        waitForSample(dr);
 
         PublicationBuiltinTopicDataDataReader reader =
             PublicationBuiltinTopicDataDataReaderHelper.narrow(dr);

@@ -4,4 +4,3 @@ The sample data contains various CORBA sequence supported in TAO.
 
 This test based on the DevGuideExamples/DDS/Messenger example
 and added various new CORBA sequences in the Message struct.
-

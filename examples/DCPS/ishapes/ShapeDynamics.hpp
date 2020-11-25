@@ -29,4 +29,3 @@ protected:
 };
 
 #endif /* _SHAPEDYNAMICS_HPP */
-

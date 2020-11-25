@@ -156,9 +156,6 @@ public:
   bool update_subscription_params(const DCPS::RepoId& subId,
                                   const DDS::StringSeq& params);
 
-  // Managing reader/writer associations
-  void association_complete(const DCPS::RepoId& localId,
-                            const DCPS::RepoId& remoteId);
   void association_complete_i(const DCPS::RepoId& localId,
                               const DCPS::RepoId& remoteId);
 

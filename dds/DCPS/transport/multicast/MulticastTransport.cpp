@@ -152,7 +152,7 @@ get_remote_reliability(const TransportImpl::RemoteTransport& remote)
 TransportImpl::AcceptConnectResult
 MulticastTransport::connect_datalink(const RemoteTransport& remote,
                                      const ConnectionAttribs& attribs,
-                                     const TransportClient_rch&)
+                                     const TransportClient_rch& client)
 {
   // Check that the remote reliability matches.
   if (get_remote_reliability(remote) != this->config().is_reliable()) {
@@ -175,6 +175,10 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
   MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote.repo_id_).federationId() << 32
                             | RepoIdConverter(remote.repo_id_).participantId();
 
+  if (this->config().is_reliable()) {
+    link->add_on_start_callback(client, remote.repo_id_);
+  }
+
   MulticastSession_rch session(
     this->start_session(link, remote_peer, true /*active*/));
 
@@ -183,8 +187,18 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     if (to_remove != this->client_links_.end()) {
       this->client_links_.erase(to_remove);
     }
+    link->remove_on_start_callback(client, remote.repo_id_);
     return AcceptConnectResult();
   }
+
+  if (config().is_reliable()) {
+    session->add_remote(attribs.local_id_, remote.repo_id_);
+    if (remote_peer != local_peer) {
+      return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
+    }
+  }
+
+  link->remove_on_start_callback(client, remote.repo_id_);
   return AcceptConnectResult(link);
 }
 

@@ -316,11 +316,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   return allocated_scenario;
 }
 
-void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& allocated_scenario, std::vector<Bench::WorkerReport>& worker_reports, NodeController::ReportSeq& nc_reports)
+void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& allocated_scenario, Bench::TestController::Report& report)
 {
-  worker_reports.clear();
-  nc_reports.length(0);
-
   using namespace std::chrono;
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(allocated_scenario, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
@@ -371,7 +368,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   }
 
   // Wait for reports
-  std::vector<WorkerReport> parsed_reports;
+  size_t parsed_report_count = 0;
   size_t parse_failures = 0;
   size_t worker_failures = 0;
   while (true) {
@@ -411,6 +408,8 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
 
     for (CORBA::ULong r = 0; r < reports.length(); r++) {
       if (info[r].valid_data) {
+        report.node_reports.length(report.node_reports.length() + 1);
+        Bench::TestController::NodeReport& node_report = report.node_reports[report.node_reports.length() - 1];
         const NodeController::WorkerReports& worker_reports = reports[r].worker_reports;
         for (CORBA::ULong wr = 0; wr < worker_reports.length(); wr++) {
           if (worker_reports[wr].failed) {
@@ -425,7 +424,9 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
             std::stringstream ss;
             ss << worker_reports[wr].details << std::flush;
             if (json_2_idl(ss, report)) {
-              parsed_reports.push_back(report);
+              node_report.worker_reports.length(node_report.worker_reports.length() + 1);
+              node_report.worker_reports[node_report.worker_reports.length() - 1] = report;
+              ++parsed_report_count;
             } else {
               ++parse_failures;
               std::stringstream ess;
@@ -435,7 +436,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
             }
           }
           std::stringstream ss;
-          ss << "Got " << parsed_reports.size() << " out of "
+          ss << "Got " << parsed_report_count << " out of "
             << allocated_scenario.expected_reports << " expected reports";
           if (worker_failures != 0 || parse_failures != 0) {
             ss << " (with " << worker_failures << " worker failures and "
@@ -444,14 +445,13 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
           ss << std::endl;
           std::cerr << ss.str() << std::flush;
         }
-        reports[r].worker_reports.length(0);
-        nc_reports.length(nc_reports.length() + 1);
-        nc_reports[nc_reports.length() - 1] = reports[r];
+        node_report.node_id = reports[r].node_id;
+        node_report.properties = reports[r].properties;
       }
     }
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
-      reports_left = static_cast<size_t>(allocated_scenario.expected_reports) - parsed_reports.size() - worker_failures - parse_failures;
+      reports_left = static_cast<size_t>(allocated_scenario.expected_reports) - parsed_report_count - worker_failures - parse_failures;
       if (reports_left == 0) {
         break;
       }
@@ -468,6 +468,4 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   wait_set->detach_condition(read_condition);
   dds_entities_.report_reader_impl_->delete_readcondition(read_condition);
   wait_set->detach_condition(guard_condition);
-
-  worker_reports = parsed_reports;
 }

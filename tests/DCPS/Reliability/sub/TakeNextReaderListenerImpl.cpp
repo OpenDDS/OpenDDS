@@ -36,4 +36,3 @@ TakeNextReaderListenerImpl::take_samples(
     ACE_TEXT(" take_next_sample failed!\n")));
   }
 }
-

@@ -138,6 +138,10 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" create_datareader failed!\n")), 7);
 
+      OpenDDS::DCPS::DataReaderImpl* impl =
+        dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
+      ACE_DEBUG((LM_INFO, "(%P|%t)    SUBSCRIBER is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+
       Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
       listener_p->wait_received(OpenDDS::DCPS::TimeDuration(280, 0), expected_samples);
       Utils::wait_match(reader, 0);
@@ -187,4 +191,3 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
   return 0;
 }
-

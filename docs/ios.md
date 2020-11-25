@@ -12,7 +12,7 @@
       - [Xerces](#xerces)
   - [Cross-Compiling IDL Libraries](#cross-compiling-idl-libraries)
   - [Using OpenDDS in an iOS App](#using-opendds-in-an-ios-app)
-   
+
 ## Variables
 
 The following table describes some of the variables of paths that are
@@ -30,9 +30,9 @@ are mostly for shorthand.
 To build the core OpenDDS native libraries for iOS you will need:
 
  - A macOS development system with Xcode and Xcode command-line tools.
- - Some knowledge about OpenDDS development and iOS development. 
+ - Some knowledge about OpenDDS development and iOS development.
 
-Building OpenDDS with optional dependencies has additional requirements 
+Building OpenDDS with optional dependencies has additional requirements
 listed in their own sections.
 
 The [\"Using OpenDDS in an iOS App\"](#using-opendds-in-an-ios-app) section assumes the use of Xcode.
@@ -42,11 +42,11 @@ The [\"Using OpenDDS in an iOS App\"](#using-opendds-in-an-ios-app) section assu
 This version of OpenDDS has been tested on iOS using Xcode 11, arm64
 iPhones (iPhone 5s and later), and x86_64 iOS simulators.
 
-The OpenDDS configure scripts support simulator and hardware builds through 
+The OpenDDS configure scripts support simulator and hardware builds through
 the `IPHONE_TARGET` environment variable.
 
 **NOTE**: OpenDDS Java bindings are not supported on iOS, since iOS does not
-have a Java runtime. To use [DDS Security](#openssl) with iOS, read the [OpenDDS's 
+have a Java runtime. To use [DDS Security](#openssl) with iOS, read the [OpenDDS's
 Optional Dependencies](#openddss-optional-dependencies) sections before configuring and building OpenDDS.
 
 To configure OpenDDS for an iOS simulator build, run the configure script in
@@ -85,7 +85,7 @@ the OpenDDS source code.
 
 This should be done with the same version of OpenDDS and ACE/TAO as what you
 want to build iOS. Pass `--host-tools-only` to the configure script to
-generate static host tools. 
+generate static host tools.
 
 If you want to just the minimum needed for host OpenDDS tools and get rid of
 the rest of the source files, you can. These are the binaries that make up the
@@ -103,7 +103,7 @@ for iOS, pass `--host-tools $HOST_DDS` to the configure script.
 
 #### OpenSSL
 
-OpenSSL is required for OpenDDS Security. To configure and build OpenSSL for 
+OpenSSL is required for OpenDDS Security. To configure and build OpenSSL for
 iPhone targets, use the `ios64-cross` configuration flag, and set the following
 environment variables:
 
@@ -114,7 +114,7 @@ export CROSS_SDK=iPhoneOS.sdk
 export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
 ```
 Run the configure script:
-  
+
 ```Shell
 ./Configure ios64-cross no-shared no-dso no-hw no-engine --prefix=/usr/local/ios/openssl
 ```
@@ -138,10 +138,10 @@ export OPENSSL_ROOT=/usr/local/ios/openssl
 ```
 
 Note that the directory given by `--prefix=` will be created by `make install`
-and will have `include` and `lib` subdirectories that will be used by the 
-OpenSSL build. 
+and will have `include` and `lib` subdirectories that will be used by the
+OpenSSL build.
 
-OpenSSL builds for iOS simulators are not as well-supported, and require 
+OpenSSL builds for iOS simulators are not as well-supported, and require
 a minor modification to the generated makefile. To build OpenSSL for iOS
 simulators, set the following environment variables:
 
@@ -181,19 +181,19 @@ export OPENSSL_ROOT=/usr/local/ios/openssl
 ```
 
 Note that the directory given by `--prefix=` will be created by `make install`
-and will have `include` and `lib` subdirectories that will be used by the 
-OpenSSL build. 
+and will have `include` and `lib` subdirectories that will be used by the
+OpenSSL build.
 
 OpenDDS security builds need the location of OpenSSL installed headers and
-static libraries. This location can be passed to the OpenDDS configure script 
+static libraries. This location can be passed to the OpenDDS configure script
 with the `--openssl=\${OPENSSL_ROOT}` flag.
 
 #### Xerces
 
-Xerces C++ is also required for OpenDDS Security. Xerces builds for iOS use 
-cmake and require passing the cross-compile flags needed by the macOS C and 
+Xerces C++ is also required for OpenDDS Security. Xerces builds for iOS use
+cmake and require passing the cross-compile flags needed by the macOS C and
 C++ compilers as well as setting the iOS SDK root and other build flags.
-All setting can be passed on the command line. 
+All setting can be passed on the command line.
 
 A representative simulator build can be configured as:
 
@@ -221,10 +221,10 @@ export XERCES_ROOT=/usr/local/ios/xerces3
 
 Note that the directory given by `--prefix=` will be created by `make install`
 and will have `include` and `lib` subdirectories that will be used by the Xerces
-build. 
+build.
 
-Configuring Xerces for a iPhone hardware build is similar to the simulator 
-build. The `--arch` flag changes to `arm64` and the `CMAKE_OS_SYSROOT` changes to 
+Configuring Xerces for a iPhone hardware build is similar to the simulator
+build. The `--arch` flag changes to `arm64` and the `CMAKE_OS_SYSROOT` changes to
 the location of the iPhone SDK.
 
 ```Shell
@@ -253,8 +253,8 @@ native library files.
 
 ## Using OpenDDS in an iOS App
 
-Copy the static libraries in `$ACE_ROOT/lib`, `$DDS_ROOT/lib`, and the 
-cross-compiled IDL libraries (and optionally `$OPENSSL_ROOT/lib` and 
+Copy the static libraries in `$ACE_ROOT/lib`, `$DDS_ROOT/lib`, and the
+cross-compiled IDL libraries (and optionally `$OPENSSL_ROOT/lib` and
 `$XERCES_ROOT/lib`) to the Xcode project or framework directory.
 
 In the Xcode project, add `$ACE_ROOT` and `$DDS_ROOT` the header search paths.

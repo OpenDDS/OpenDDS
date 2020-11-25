@@ -421,7 +421,7 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
 
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
-  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());

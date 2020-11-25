@@ -993,4 +993,3 @@ Monitor::MonitorTask::getBuiltinTopicData(
              id, data, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC
            );
 }
-

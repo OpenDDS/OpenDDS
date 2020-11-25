@@ -42,4 +42,3 @@ OpenDDS::DCPS::ReactorSynch::work_available()
   // Schedule queued data to be sent by the reactor.
   scheduleOutputHandler_->schedule_output();
 }
-

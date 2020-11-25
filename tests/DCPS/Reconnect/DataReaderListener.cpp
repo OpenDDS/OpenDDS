@@ -164,5 +164,3 @@ void DataReaderListenerImpl::on_budget_exceeded (
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
 }
-
-

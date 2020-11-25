@@ -44,8 +44,6 @@ public:
                                const WriterAssociation& writer,
                                bool active) = 0;
 
-  virtual void association_complete(const RepoId& remote_id) = 0;
-
   virtual void remove_associations(const WriterIdSeq& writers,
                                    CORBA::Boolean callback) = 0;
 

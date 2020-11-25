@@ -275,13 +275,6 @@ StaticEndpointManager::update_subscription_params(const RepoId& /*subId*/,
   return false;
 }
 
-void
-StaticEndpointManager::association_complete(const RepoId& /*localId*/,
-                                            const RepoId& /*remoteId*/)
-{
-  // Do nothing.
-}
-
 bool
 StaticEndpointManager::disassociate(StaticDiscoveredParticipantData& /*pdata*/)
 {
@@ -325,7 +318,6 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
       {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
 #endif
     pub.publication_->add_association(writerid, ra, true);
-    pub.publication_->association_complete(readerid);
   }
 
   for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
@@ -491,7 +483,6 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
 
 #endif
     dwr->add_association(writerid, ra, true);
-    dwr->association_complete(readerid);
   }
 }
 
