@@ -1,4 +1,5 @@
 #include "ScenarioManager.h"
+#include "AllocationHelper.h"
 
 #include <util.h>
 #include <json_conversion.h>
@@ -15,9 +16,6 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <unordered_map>
-#include <queue>
-#include <set>
 
 using namespace Bench;
 using namespace Bench::TestController;
@@ -46,73 +44,6 @@ Nodes ScenarioManager::discover_nodes(unsigned wait_for_nodes)
     throw std::runtime_error("no available nodes discovered during wait");
   }
   return available_nodes;
-}
-
-namespace {
-  std::string read_file(const std::string& name)
-  {
-    std::stringstream ss;
-    std::ifstream file(name);
-    if (file.is_open()) {
-      ss << file.rdbuf();
-    } else {
-      throw std::runtime_error("Couldn't open " + name);
-    }
-    return ss.str();
-  }
-
-  void read_protoworker_configs(const std::string& test_context,
-    const WorkerPrototypes& protoworkers,
-    std::map<std::string, std::string>& worker_configs,
-    bool debug_alloc)
-  {
-    for (unsigned i = 0; i < protoworkers.length(); i++) {
-      const std::string filename = protoworkers[i].config.in();
-      if (!worker_configs.count(filename)) {
-        worker_configs[filename] = debug_alloc ?
-          filename : read_file(join_path(test_context, "config", "worker", filename));
-      }
-    }
-  }
-
-  void add_single_worker_to_node(const WorkerPrototype& protoworker,
-    const std::map<std::string, std::string>& worker_configs,
-    NodeController::Config& node)
-  {
-    unsigned worker_i = node.workers.length();
-    NodeController::WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
-    node.workers.length(node.workers.length() + 1);
-    auto& worker = node.workers[worker_i];
-    worker.config = worker_configs.find(protoworker.config.in())->second.c_str();
-    worker.count = 1;
-    worker.worker_id = worker_id;
-  }
-
-  unsigned add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
-    const std::map<std::string, std::string>& worker_configs,
-    NodeController::Config& node)
-  {
-    unsigned new_worker_total = 0;
-    for (unsigned i = 0; i < protoworkers.length(); i++) {
-      new_worker_total += protoworkers[i].count;
-    }
-
-    unsigned worker_i = node.workers.length();
-    NodeController::WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
-    node.workers.length(node.workers.length() + protoworkers.length());
-    for (unsigned i = 0; i < protoworkers.length(); i++) {
-      auto& protoworker = protoworkers[i];
-      auto& worker = node.workers[worker_i];
-      worker.config = worker_configs.find(protoworker.config.in())->second.c_str();
-      worker.count = protoworker.count;
-      worker.worker_id = worker_id;
-      worker_id += protoworker.count;
-      worker_i++;
-    }
-
-    return new_worker_total;
-  }
-
 }
 
 void ScenarioManager::customize_configs(std::map<std::string, std::string>& worker_configs)
@@ -231,32 +162,6 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
     }
   }
 
-  struct NcMetaData {
-    NcMetaData() : max_prob{0.0},
-                   overlap_count{0},
-                   exclusive_occupied{false}
-    {
-    }
-
-    NodeController::NodeId id;
-
-    // Maximum probabilty that it is used for an exclusive node
-    double max_prob;
-
-    // Number of node prototypes that can assign a node to it
-    unsigned overlap_count;
-
-    // Whether it is occupied by an exclusive node
-    bool exclusive_occupied;
-
-    bool operator()(const NcMetaData& a, const NcMetaData& b) const
-    {
-      return (a.max_prob > b.max_prob) ||
-        (a.max_prob == b.max_prob && a.overlap_count > b.overlap_count);
-    }
-  };
-  typedef std::priority_queue<NcMetaData, std::vector<NcMetaData>, NcMetaData> MinNcQueue;
-
   // Each of the matched node controllers has an entry in this map
   typedef std::map<NodeController::NodeId, NcMetaData, OpenDDS::DCPS::GUID_tKeyLessThan> NodeControllerWeights;
   NodeControllerWeights nc_weights;
@@ -300,6 +205,10 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   allocated_scenario.timeout = scenario_prototype.timeout;
   allocated_scenario.configs.length(0);
 
+  // Allocate exclusive node configs first
+  AllocationHelper::alloc_exclusive_node_configs();
+
+  /*
   // Node controllers allocated to exclusive nodes
   std::set<NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan> exclusive_ncs;
 
@@ -307,10 +216,6 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
     if (nodeproto.exclusive && nodeproto.count > 0) {
-      // Node controllers that are less likely to be used by some other node prototypes
-      // are considered first. This is done by taking the ones with smaller max_prob values.
-      // If there are multiple node controllers with equal max_prob, the ones with smaller
-      // overlap_count are considered first.
       MinNcQueue my_queue;
       for (auto nc_id : matched_ncs[i]) {
         my_queue.push(nc_weights[nc_id]);
@@ -347,7 +252,12 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
       }
     }
   }
+  */
 
+  // Then allocate non-exclusive node configs
+  AllocationHelper::alloc_nonexclusive_node_configs();
+
+  /*
   // Map from node controller to its index in the allocated scenario
   typedef std::map<NodeController::NodeId, unsigned, OpenDDS::DCPS::GUID_tKeyLessThan> ConfigIndexMap;
   // For node controllers that will be used for non-exclusive nodes
@@ -394,6 +304,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
       }
     }
   }
+  */
 
   // Node controllers that haven't been used at all
   std::vector<NodeController::NodeId> any_ncs;
@@ -407,6 +318,10 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
     }
   }
 
+  // Finally, allocate any_node workers
+  AllocationHelper::alloc_anynode_workers();
+
+  /*
   // Finally, allocate any_node workers
   unsigned worker_count = 0;
   for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
@@ -451,6 +366,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   } else if (worker_count > 0) {
     throw std::runtime_error("No node left for any_node workers!");
   }
+  */
 
   char host[256];
   ACE_OS::hostname(host, sizeof(host));
