@@ -339,7 +339,7 @@ private:
     void execute()
     {
       if (action_ == CMG_JOIN) {
-        success_->tport_multicast_group(nic_, all_interfaces_);
+        tport_->join_multicast_group(nic_, all_interfaces_);
       } else {
         tport_->leave_multicast_group(nic_);
       }
