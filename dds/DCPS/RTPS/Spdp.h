@@ -253,7 +253,7 @@ private:
     bool open_unicast_ipv6_socket(u_short port);
 #endif
 
-    bool join_multicast_group(const DCPS::NetworkInterface& nic,
+    void join_multicast_group(const DCPS::NetworkInterface& nic,
                               bool all_interfaces = false);
     void leave_multicast_group(const DCPS::NetworkInterface& nic);
     void add_address(const DCPS::NetworkInterface& interface,
@@ -339,15 +339,7 @@ private:
     void execute()
     {
       if (action_ == CMG_JOIN) {
-        bool success = false;
-        for (int count = 0; count <= 1 && !success; ++count) {
-          success = tport_->join_multicast_group(nic_, all_interfaces_);
-        }
-        if (!success) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: Spdp::ChangeMultiCastGroup::execute() - ")
-            ACE_TEXT("multiple attempts to join multicast group failed\n")));
-        }
+        success_->tport_multicast_group(nic_, all_interfaces_);
       } else {
         tport_->leave_multicast_group(nic_);
       }
