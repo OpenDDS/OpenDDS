@@ -2944,7 +2944,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
     static ACE_Thread_Mutex ipv4_static_lock;
     {
-      ACE_GUARD(ACE_Thread_mutex, g2, ipv4_static_lock);
+      ACE_GUARD(ACE_Thread_Mutex, g2, ipv4_static_lock);
       if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
         joined_interfaces_.insert(nic.name());
 
