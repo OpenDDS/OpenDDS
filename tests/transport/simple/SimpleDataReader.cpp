@@ -3,6 +3,7 @@
 #include "SimpleDataReader.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/GuidBuilder.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_sys_time.h"
@@ -92,4 +93,11 @@ SimpleDataReader::print_time()
     "(%P|%t) Total time required is %d.%d seconds.\n",
              total.sec(),
              total.usec() % 1000000));
+}
+
+void
+SimpleDataReader::transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote)
+{
+  ACE_DEBUG((LM_INFO,
+             "(%P|%t) DataReader association with %C is done flags=%d.\n", OpenDDS::DCPS::LogGuid(remote).c_str(), flags));
 }

@@ -129,8 +129,7 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
-  dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
-  dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   dw = pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   if (!dw) {
     cerr << "ERROR: complex_test_setup: create_datawriter failed" << endl;
@@ -159,8 +158,17 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   ws->attach_condition(dw_sc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
-    return false;
+  PublicationMatchedStatus status;
+  while (true) {
+    if (dw->get_publication_matched_status(status) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (status.current_count >= 2) {
+      break;
+    }
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
   return true;
