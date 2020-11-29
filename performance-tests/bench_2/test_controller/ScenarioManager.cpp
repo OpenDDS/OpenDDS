@@ -151,8 +151,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   }
 
   // Get a set of matched node controllers for each node prototype
-  typedef std::vector<NodeController::NodeId> MatchedNodeControllers;
-  std::vector<MatchedNodeControllers> matched_ncs(scenario_prototype.nodes.length());
+  std::vector<AllocationHelper::MatchedNodeControllers> matched_ncs(scenario_prototype.nodes.length());
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
     for (Nodes::const_iterator it = available_nodes.begin(); it != available_nodes.end(); ++it) {
@@ -162,9 +161,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
     }
   }
 
-  // Each of the matched node controllers has an entry in this map
-  typedef std::map<NodeController::NodeId, NcMetaData, OpenDDS::DCPS::GUID_tKeyLessThan> NodeControllerWeights;
-  NodeControllerWeights nc_weights;
+  AllocationHelper::NodeControllerWeights nc_weights;
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
     // Probability that a matched node controller is allocated to a node in this prototype
@@ -195,18 +192,24 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   // Read in worker config files
   std::map<std::string, std::string> worker_configs;
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
-    read_protoworker_configs(test_context_, scenario_prototype.nodes[i].workers,
+    AllocationHelper::read_protoworker_configs(test_context_, scenario_prototype.nodes[i].workers,
       worker_configs, debug_alloc);
   }
-  read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
+  AllocationHelper::read_protoworker_configs(test_context_, scenario_prototype.any_node,
+    worker_configs, debug_alloc);
 
   AllocatedScenario allocated_scenario;
   allocated_scenario.expected_reports = 0;
   allocated_scenario.timeout = scenario_prototype.timeout;
   allocated_scenario.configs.length(0);
 
+  // Node controllers allocated to exclusive nodes
+  std::set<NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan> exclusive_ncs;
+
   // Allocate exclusive node configs first
-  AllocationHelper::alloc_exclusive_node_configs();
+  AllocationHelper::alloc_exclusive_node_configs(allocated_scenario, exclusive_ncs,
+                                                 nc_weights, matched_ncs,
+                                                 scenario_prototype, worker_configs);
 
   /*
   // Node controllers allocated to exclusive nodes
@@ -254,8 +257,13 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   }
   */
 
+  // For node controllers that will be used for non-exclusive nodes
+  AllocationHelper::ConfigIndexMap nonexclusive_ncs;
+
   // Then allocate non-exclusive node configs
-  AllocationHelper::alloc_nonexclusive_node_configs();
+  AllocationHelper::alloc_nonexclusive_node_configs(allocated_scenario, nonexclusive_ncs,
+                                                    nc_weights, matched_ncs,
+                                                    scenario_prototype, worker_configs);
 
   /*
   // Map from node controller to its index in the allocated scenario
@@ -319,7 +327,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   }
 
   // Finally, allocate any_node workers
-  AllocationHelper::alloc_anynode_workers();
+  AllocationHelper::alloc_anynode_workers(allocated_scenario, any_ncs, nonexclusive_ncs,
+                                          scenario_prototype, worker_configs);
 
   /*
   // Finally, allocate any_node workers

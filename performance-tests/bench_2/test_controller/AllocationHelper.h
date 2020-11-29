@@ -1,37 +1,24 @@
 #ifndef ALLOCATION_HELPER_HEADER
 #define ALLOCATION_HELPER_HEADER
 
+#include "BenchTypeSupportImpl.h"
+
+#include <dds/DCPS/GuidUtils.h>
+
 #include <queue>
 #include <set>
+#include <vector>
+#include <map>
 
 class AllocationHelper {
-public:
-  void alloc_exclusive_node_configs();
-  void alloc_nonexclusive_node_configs();
-  void alloc_anynode_workers();
-
 private:
-  std::string read_file(const std::string& name);
-
-  void read_protoworker_configs(const std::string& test_context,
-    const WorkerPrototypes& protoworkers,
-    std::map<std::string, std::string>& worker_configs,
-    bool debug_alloc);
-
-  void add_single_worker_to_node(const WorkerPrototype& protoworker,
-    const std::map<std::string, std::string>& worker_configs,
-    NodeController::Config& node);
-
-  unsigned add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
-    const std::map<std::string, std::string>& worker_configs,
-    NodeController::Config& node);
-
+  // Internal meta data used to compute allocation of nodes
   struct NcMetaData {
     NcMetaData() : max_prob{0.0},
                    overlap_count{0},
                    exclusive_occupied{false} {}
 
-    NodeController::NodeId id;
+    Bench::NodeController::NodeId id;
 
     // Maximum probabilty that it is used for an exclusive node
     double max_prob;
@@ -52,7 +39,53 @@ private:
         (a.max_prob == b.max_prob && a.overlap_count > b.overlap_count);
     }
   };
+
+public:
+  typedef std::vector<Bench::NodeController::NodeId> MatchedNodeControllers;
+
+  // Each of the matched node controllers has an entry in this map
+  typedef std::map<Bench::NodeController::NodeId, NcMetaData, OpenDDS::DCPS::GUID_tKeyLessThan> NodeControllerWeights;
+
   typedef std::priority_queue<NcMetaData, std::vector<NcMetaData>, NcMetaData> MinNcQueue;
+
+  // Map from node controller to its index in the allocated scenario
+  typedef std::map<Bench::NodeController::NodeId, uint32_t, OpenDDS::DCPS::GUID_tKeyLessThan> ConfigIndexMap;
+
+  static void alloc_exclusive_node_configs(Bench::TestController::AllocatedScenario& allocated_scenario,
+    std::set<Bench::NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan>& exclusive_ncs,
+    NodeControllerWeights& nc_weights,
+    const std::vector<MatchedNodeControllers>& matched_ncs,
+    const Bench::TestController::ScenarioPrototype& scenario_prototype,
+    const std::map<std::string, std::string>& worker_configs);
+
+  static void alloc_nonexclusive_node_configs(Bench::TestController::AllocatedScenario& allocated_scenario,
+    ConfigIndexMap& nonexclusive_ncs,
+    const NodeControllerWeights& nc_weights,
+    const std::vector<MatchedNodeControllers>& matched_ncs,
+    const Bench::TestController::ScenarioPrototype& scenario_prototype,
+    const std::map<std::string, std::string>& worker_configs);
+
+  static void alloc_anynode_workers(Bench::TestController::AllocatedScenario& allocated_scenario,
+    const std::vector<Bench::NodeController::NodeId>& any_ncs,
+    const ConfigIndexMap& nonexclusive_ncs,
+    const Bench::TestController::ScenarioPrototype& scenario_prototype,
+    const std::map<std::string, std::string>& worker_configs);
+
+  static void read_protoworker_configs(const std::string& test_context,
+    const Bench::TestController::WorkerPrototypes& protoworkers,
+    std::map<std::string, std::string>& worker_configs,
+    bool debug_alloc);
+
+private:
+  static std::string read_file(const std::string& name);
+
+  static void add_single_worker_to_node(const Bench::TestController::WorkerPrototype& protoworker,
+    const std::map<std::string, std::string>& worker_configs,
+    Bench::NodeController::Config& node);
+
+  static unsigned add_protoworkers_to_node(const Bench::TestController::WorkerPrototypes& protoworkers,
+    const std::map<std::string, std::string>& worker_configs,
+    Bench::NodeController::Config& node);
 };
 
 #endif

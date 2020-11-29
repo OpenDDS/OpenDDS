@@ -1,12 +1,20 @@
 #include "AllocationHelper.h"
 
-void AllocationHelper::alloc_exclusive_node_configs()
-{
-  // Node controllers allocated to exclusive nodes
-  std::set<NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan> exclusive_ncs;
+#include <util.h>
 
-  // Allocate exclusive node configs first
-  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+#include <sstream>
+
+using namespace Bench;
+using namespace Bench::TestController;
+
+void AllocationHelper::alloc_exclusive_node_configs(AllocatedScenario& allocated_scenario,
+  std::set<NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan>& exclusive_ncs,
+  NodeControllerWeights& nc_weights,
+  const std::vector<MatchedNodeControllers>& matched_ncs,
+  const ScenarioPrototype& scenario_prototype,
+  const std::map<std::string, std::string>& worker_configs)
+{
+  for (uint32_t i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
     if (nodeproto.exclusive && nodeproto.count > 0) {
       MinNcQueue my_queue;
@@ -14,7 +22,7 @@ void AllocationHelper::alloc_exclusive_node_configs()
         my_queue.push(nc_weights[nc_id]);
       }
 
-      for (unsigned j = 0; j < nodeproto.count; ++j) {
+      for (uint32_t j = 0; j < nodeproto.count; ++j) {
         bool found = false;
         while (!my_queue.empty()) {
           const NcMetaData& top = my_queue.top();
@@ -47,21 +55,20 @@ void AllocationHelper::alloc_exclusive_node_configs()
   }
 }
 
-void AllocationHelper::alloc_nonexclusive_node_configs()
+void AllocationHelper::alloc_nonexclusive_node_configs(AllocatedScenario& allocated_scenario,
+  ConfigIndexMap& nonexclusive_ncs,
+  const NodeControllerWeights& nc_weights,
+  const std::vector<MatchedNodeControllers>& matched_ncs,
+  const ScenarioPrototype& scenario_prototype,
+  const std::map<std::string, std::string>& worker_configs)
 {
-  // Map from node controller to its index in the allocated scenario
-  typedef std::map<NodeController::NodeId, unsigned, OpenDDS::DCPS::GUID_tKeyLessThan> ConfigIndexMap;
-  // For node controllers that will be used for non-exclusive nodes
-  ConfigIndexMap nonexclusive_ncs;
-
-  // Then allocate non-exclusive node configs
-  for (unsigned i = 0; i < scenario_prototype.nodes.length(); ++i) {
+  for (uint32_t i = 0; i < scenario_prototype.nodes.length(); ++i) {
     const NodePrototype& nodeproto = scenario_prototype.nodes[i];
     if (!nodeproto.exclusive && nodeproto.count > 0) {
       ConfigIndexMap my_ncs;
-      for (unsigned j = 0; j < matched_ncs[i].size(); ++j) {
+      for (uint32_t j = 0; j < matched_ncs[i].size(); ++j) {
         const NodeController::NodeId& id = matched_ncs[i][j];
-        if (!nc_weights[id].exclusive_occupied) {
+        if (!nc_weights.at(id).exclusive_occupied) {
           if (nonexclusive_ncs.find(id) != nonexclusive_ncs.end()) {
             my_ncs.insert(std::make_pair(id, nonexclusive_ncs[id]));
           } else {
@@ -86,7 +93,7 @@ void AllocationHelper::alloc_nonexclusive_node_configs()
       }
 
       ConfigIndexMap::const_iterator it = my_ncs.begin();
-      for (unsigned j = 0; j < nodeproto.count; ++j) {
+      for (uint32_t j = 0; j < nodeproto.count; ++j) {
         allocated_scenario.expected_reports += add_protoworkers_to_node(
           nodeproto.workers, worker_configs, allocated_scenario.configs[it->second]);
         if (++it == my_ncs.end()) {
@@ -97,29 +104,33 @@ void AllocationHelper::alloc_nonexclusive_node_configs()
   }
 }
 
-void AllocationHelper::alloc_anynode_workers()
+void AllocationHelper::alloc_anynode_workers(AllocatedScenario& allocated_scenario,
+  const std::vector<NodeController::NodeId>& any_ncs,
+  const ConfigIndexMap& nonexclusive_ncs,
+  const ScenarioPrototype& scenario_prototype,
+  const std::map<std::string, std::string>& worker_configs)
 {
   // Finally, allocate any_node workers
-  unsigned worker_count = 0;
-  for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
+  uint32_t worker_count = 0;
+  for (uint32_t i = 0; i < scenario_prototype.any_node.length(); ++i) {
     worker_count += scenario_prototype.any_node[i].count;
   }
 
   if (!any_ncs.empty()) { // Assign to the empty node controllers
-    unsigned node_count = std::min(static_cast<unsigned>(any_ncs.size()), worker_count);
-    unsigned start_id = allocated_scenario.configs.length();
+    uint32_t node_count = std::min(static_cast<uint32_t>(any_ncs.size()), worker_count);
+    uint32_t start_id = allocated_scenario.configs.length();
     allocated_scenario.configs.length(start_id + node_count);
-    for (unsigned i = 0; i < node_count; ++i) {
+    for (uint32_t i = 0; i < node_count; ++i) {
       allocated_scenario.configs[start_id + i].node_id = any_ncs[i];
       allocated_scenario.configs[start_id + i].timeout = scenario_prototype.timeout;
       allocated_scenario.configs[start_id + i].workers.length(0);
     }
 
-    unsigned running_id = start_id;
-    for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
+    uint32_t running_id = start_id;
+    for (uint32_t i = 0; i < scenario_prototype.any_node.length(); ++i) {
       const WorkerPrototype& workerproto = scenario_prototype.any_node[i];
       allocated_scenario.expected_reports += workerproto.count;
-      for (unsigned j = 0; j < workerproto.count; ++j) {
+      for (uint32_t j = 0; j < workerproto.count; ++j) {
         add_single_worker_to_node(workerproto, worker_configs,
           allocated_scenario.configs[running_id++]);
         if (running_id >= start_id + node_count) {
@@ -129,10 +140,10 @@ void AllocationHelper::alloc_anynode_workers()
     }
   } else if (!nonexclusive_ncs.empty()) { // Assign to the nonexlusive node controllers
     ConfigIndexMap::const_iterator it = nonexclusive_ncs.begin();
-    for (unsigned i = 0; i < scenario_prototype.any_node.length(); ++i) {
+    for (uint32_t i = 0; i < scenario_prototype.any_node.length(); ++i) {
       const WorkerPrototype& workerproto = scenario_prototype.any_node[i];
       allocated_scenario.expected_reports += workerproto.count;
-      for (unsigned j = 0; j < workerproto.count; ++j) {
+      for (uint32_t j = 0; j < workerproto.count; ++j) {
         add_single_worker_to_node(workerproto, worker_configs,
           allocated_scenario.configs[it->second]);
         if (++it == nonexclusive_ncs.end()) {
