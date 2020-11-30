@@ -294,14 +294,14 @@ tests/DCPS/Thrasher/run_test.pl low rtps: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl medium rtps: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN RTPS !LYNXOS
-tests/DCPS/Thrasher/run_test.pl single durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl double durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl triangle durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl default durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl low durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl medium durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl high durable: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS
+tests/DCPS/Thrasher/run_test.pl single durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl double durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl default durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl low durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl medium durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl high durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Thrasher/run_test.pl single rtps durable: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl double rtps durable: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl triangle rtps durable: !DCPS_MIN RTPS !LYNXOS
