@@ -71,6 +71,10 @@ public:
   bool auth_debug;
   bool auth_warn;
 
+  /// New entity creating
+  bool new_entity_error;
+  bool new_entity_warn;
+
   /// Permissions and Governance
   bool access_warn;
 
