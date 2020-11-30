@@ -2,6 +2,7 @@
 
 #include <util.h>
 
+#include <fstream>
 #include <sstream>
 
 using namespace Bench;
