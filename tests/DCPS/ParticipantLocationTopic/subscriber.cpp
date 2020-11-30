@@ -36,8 +36,6 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include "ParticipantLocationListenerImpl.h"
 
-#include <iostream>
-
 bool reliable = false;
 bool no_ice = false;
 bool ipv6 = false;
@@ -161,8 +159,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
     if (0 == pub_loc_dr) {
-      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
-                << " DataReader." << std::endl;
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: Could not get %C DataReader\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
 
@@ -173,7 +173,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       pub_loc_dr->set_listener(listener,
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (retcode != DDS::RETCODE_OK) {
-      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: set_listener for %C failed\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
 
@@ -182,15 +185,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // check that all locations received
     if (!listener->check(no_ice, ipv6)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: Check for all locations failed\n")));
       status = EXIT_FAILURE;
     }
 
     // Clean-up!
-    std::cerr << "subscriber deleting contained entities" << std::endl;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" participant deleting contained entities\n")));
     participant->delete_contained_entities();
-    std::cerr << "subscriber deleting participant" << std::endl;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" domain participant factory deleting participant\n")));
     dpf->delete_participant(participant.in());
-    std::cerr << "subscriber shutdown" << std::endl;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" shutdown service participant\n")));
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
