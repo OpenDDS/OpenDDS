@@ -233,19 +233,20 @@ jobs:
   pool:
     vmImage: ubuntu-18.04
   variables:
-    TEST_MESSENGER: false
+    TEST_MESSENGER: true
   strategy:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
-        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
         DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
+        TEST_MESSENGER: false
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
+        TEST_MESSENGER: false
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
@@ -254,6 +255,7 @@ jobs:
           --security --no-inline --no-debug
           --no-built-in-topics --no-content-subscription --no-ownership-profile
           --no-object-model-profile --no-persistence-profile
+        TEST_MESSENGER: false
         PackageDeps: libxerces-c-dev libssl-dev cmake
       WChar:
         ConfigOpts: --features=uses_wchar=1 --no-inline
@@ -367,13 +369,12 @@ jobs:
   pool:
     vmImage: macOS-latest
   variables:
-    TEST_MESSENGER: false
+    TEST_MESSENGER: true
   strategy:
     maxParallel: 2
     matrix:
       Debug:
         ConfigOpts: --no-inline
-        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize
   steps:
