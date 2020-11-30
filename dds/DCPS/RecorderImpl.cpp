@@ -6,7 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "tao/ORB_Core.h"
+
+#include "RecorderImpl.h"
+
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
 #include "DomainParticipantImpl.h"
@@ -14,7 +16,6 @@
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "TopicImpl.h"
 #include "Serializer.h"
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
@@ -23,22 +24,24 @@
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-#include "RecorderImpl.h"
 #include "PoolAllocator.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
+#endif
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
 
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
+
+#include <tao/ORB_Core.h>
+
+#include <ace/Reactor.h>
 
 #include <stdexcept>
 

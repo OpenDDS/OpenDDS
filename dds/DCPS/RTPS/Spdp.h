@@ -29,6 +29,7 @@
 #endif
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/TimeTypes.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -37,7 +38,7 @@
 #include <ace/Atomic_Op.h>
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
-#include <ace/Condition_Thread_Mutex.h>
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -405,7 +406,7 @@ private:
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
-  ACE_Condition_Thread_Mutex shutdown_cond_;
+  DCPS::Condition<ACE_Thread_Mutex> shutdown_cond_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
 
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;

@@ -6,11 +6,12 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "WaitSet.h"
+
 #include "ConditionImpl.h"
 #include "Time_Helper.h"
-
-#include "ace/OS_NS_sys_time.h"
+#include "TimeTypes.h"
 
 namespace {
 
@@ -110,25 +111,20 @@ ReturnCode_t WaitSet::get_conditions(ConditionSeq& conds)
 ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
                            const Duration_t& timeout)
 {
-  using OpenDDS::DCPS::TimeDuration;
-  using OpenDDS::DCPS::MonotonicTimePoint;
-  using OpenDDS::DCPS::MonotonicClock;
+  using namespace OpenDDS::DCPS;
 
   if (waiting_.value()) {
     return RETCODE_PRECONDITION_NOT_MET;
   }
 
-  if (!OpenDDS::DCPS::non_negative_duration(timeout)) {
+  if (!non_negative_duration(timeout)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  const TimeDuration deadline(timeout);
-  MonotonicTimePoint timeout_at;
-  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
-
-  if (timeout.sec != DURATION_INFINITE_SEC || timeout.nanosec != DURATION_INFINITE_NSEC) {
-    timeout_at = MonotonicTimePoint::now() + deadline;
-    timeout_ptr = &timeout_at.value();
+  MonotonicTimePoint deadline;
+  const bool use_deadline = !is_infinite(timeout);
+  if (use_deadline) {
+    deadline = MonotonicTimePoint::now() + TimeDuration(timeout);
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
@@ -143,11 +139,13 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
     }
   }
 
-  int error = 0;
-
-  while ((attached_conditions_.empty() || signaled_conditions_.empty()) && !error) {
-    if (cond_.wait(timeout_ptr) == -1) {
-      error = errno;
+  ConditionType::WaitStatus status = ConditionType::NoTimeout;
+  while ((attached_conditions_.empty() || signaled_conditions_.empty()) &&
+      status == ConditionType::NoTimeout) {
+    if (use_deadline) {
+      status = cond_.wait_until(deadline);
+    } else {
+      status = cond_.wait();
     }
   }
 
@@ -155,11 +153,12 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   signaled_conditions_.clear();
   waiting_ = false;
 
-  switch (error) {
-  case 0:
+  switch (status) {
+  case ConditionType::NoTimeout:
     return RETCODE_OK;
-  case ETIME:
+  case ConditionType::Timeout:
     return RETCODE_TIMEOUT;
+  case ConditionType::WaitError:
   default:
     return RETCODE_ERROR;
   }
@@ -172,7 +171,7 @@ void WaitSet::signal(Condition_ptr condition)
 
   if (attached_conditions_.find(condv) != attached_conditions_.end()) {
     signaled_conditions_.insert(condv);
-    cond_.signal();
+    cond_.notify_one();
   }
 }
 

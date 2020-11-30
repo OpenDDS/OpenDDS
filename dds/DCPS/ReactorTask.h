@@ -8,18 +8,17 @@
 #ifndef OPENDDS_DCPS_REACTORTASK_H
 #define OPENDDS_DCPS_REACTORTASK_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/TimeTypes.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "ace/Task.h"
-#include "ace/Barrier.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Condition_T.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Timer_Heap_T.h"
-#include "ace/Event_Handler_Handle_Timeout_Upcall.h"
+#include "dcps_export.h"
+#include "RcObject.h"
+#include "TimeTypes.h"
+#include "ReactorInterceptor.h"
+#include "SafetyProfileStreams.h"
+
+#include <ace/Task.h>
+#include <ace/Barrier.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Timer_Heap_T.h>
+#include <ace/Event_Handler_Handle_Timeout_Upcall.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
@@ -73,9 +72,9 @@ public:
 
 private:
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef Condition<LockType> ConditionType;
   typedef ACE_Timer_Heap_T<
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;

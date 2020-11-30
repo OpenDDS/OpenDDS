@@ -385,10 +385,9 @@ dealing with ACE code which requires it and using `ACE_OS::gettimeofday()` or
 `MonotonicTimePoint` should be used when tracking time elapsed internally and
 when dealing with `ACE_Time_Value`s being given by the `ACE_Reactor` in
 OpenDDS. `ACE_Condition`s, like all ACE code, will default to using system
-time. They must modified to use monotonic time using by passing
-`ConditionAttributesMonotonic()` as the second argument in the constructor. An
-example of this can be seen `wait_messages_pending()` in
-`dds/DCPS/MessageTracker.cpp`.
+time. Therefore the `Condition` class wraps it and makes it so it always uses
+monotonic time like it should. Like `ACE_OS::gettimeofday()`, referencing
+`ACE_Condition` in dds/DCPS will be treated as an error by `lint.pl`.
 
 More information on using monotonic time with ACE can be found
 [here](http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/docs/ACE-monotonic-timer.html).

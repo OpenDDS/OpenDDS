@@ -10,10 +10,10 @@
 
 #include "ThreadSynch.h"
 
-#include "ace/Condition_T.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Task.h"
+#include <dds/DCPS/Condition.h>
+
+#include <ace/Synch_Traits.h>
+#include <ace/Task.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,9 +42,9 @@ protected:
 
 private:
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef Condition<LockType> ConditionType;
 
   LockType      lock_;
   ConditionType condition_;
