@@ -1545,7 +1545,8 @@ void
 RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, const WriterInfo_rch& info,
                                    bool durable)
 {
-  if (durable && (info->recvd_.empty() || info->recvd_.low() > 1)) return;
+  ACE_UNUSED_ARG(durable);
+  if (info->recvd_.empty()) return;
   held_data_delivery_handler_.notify_delivery(readerId, info);
 }
 
@@ -1763,8 +1764,15 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
         info->recvd_.insert(zero);
       }
       wi_first = hb_last; // non-durable reliable connections ignore previous data
+      while (!info->held_.empty() && info->held_.begin()->first <= hb_last) {
+        info->held_.erase(info->held_.begin());
+      }
     } else {
       info->recvd_.insert(zero);
+    }
+    typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
+    for (iter it = info->held_.begin(); it != info->held_.end(); ++it) {
+      info->recvd_.insert(it->first);
     }
   }
 
