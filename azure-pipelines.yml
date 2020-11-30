@@ -204,12 +204,11 @@ jobs:
   pool:
     vmImage: ubuntu-18.04
   variables:
-    TEST_MESSENGER: false
+    TEST_MESSENGER: true
   strategy:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
-        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
         DoMakeInstall: true
@@ -338,13 +337,12 @@ jobs:
   pool:
     vmImage: macOS-latest
   variables:
-    TEST_MESSENGER: false
+    TEST_MESSENGER: true
   strategy:
     maxParallel: 2
     matrix:
       Debug:
         ConfigOpts: --no-inline
-        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize
   steps:
