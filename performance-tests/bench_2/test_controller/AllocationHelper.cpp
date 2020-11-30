@@ -195,7 +195,7 @@ void AllocationHelper::add_single_worker_to_node(const WorkerPrototype& protowor
   worker.worker_id = worker_id;
 }
 
-unsigned add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
+unsigned AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
   const std::map<std::string, std::string>& worker_configs,
   NodeController::Config& node)
 {
