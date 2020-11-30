@@ -214,8 +214,10 @@ jobs:
         DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
+        TEST_MESSENGER: false
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
+        TEST_MESSENGER: false
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
@@ -224,6 +226,7 @@ jobs:
           --security --no-inline --no-debug
           --no-built-in-topics --no-content-subscription --no-ownership-profile
           --no-object-model-profile --no-persistence-profile
+        TEST_MESSENGER: false
         PackageDeps: libxerces-c-dev libssl-dev cmake
       WChar:
         ConfigOpts: --features=uses_wchar=1 --no-inline
