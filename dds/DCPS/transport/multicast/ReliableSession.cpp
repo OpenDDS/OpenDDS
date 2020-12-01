@@ -698,20 +698,6 @@ ReliableSession::start(bool active, bool acked)
                          false);
       }
     }
-
-    // Active peers schedule a watchdog timer to initiate a 2-way
-    // handshake to verify that passive endpoints can send/receive
-    // data reliably. This process must be executed using the
-    // transport reactor thread to prevent blocking.
-    // Only publisher send syn so just schedule for pub role.
-    if (active && !this->start_syn()) {
-      this->nak_watchdog_->cancel();
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("ReliableSession::start: ")
-                        ACE_TEXT("failed to schedule SYN watchdog!\n")),
-                       false);
-    }
   } //Reacquire start_lock_ after releasing unlock_guard with release_start_lock_
 
   return this->started_ = true;

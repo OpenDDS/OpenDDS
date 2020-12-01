@@ -107,6 +107,8 @@ public:
   virtual const RepoId& get_repo_id() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
+  SequenceNumber get_max_sn() const { return sequence_number_; }
+
 
   // Implement TransportSendListener
   virtual void data_delivered(const DataSampleElement* sample);
@@ -132,8 +134,6 @@ public:
   virtual void add_association(const RepoId&            yourId,
                                const ReaderAssociation& reader,
                                bool                     active);
-
-  virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq& readers,
                                    CORBA::Boolean     callback);
@@ -310,8 +310,6 @@ private:
   RepoIdToSequenceMap;
 
   RepoIdToSequenceMap idToSequence_;
-
-  RepoIdSet pending_readers_, assoc_complete_readers_;
 
   ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
   int pending_write_count_;
