@@ -94,7 +94,21 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   set(arglist ${ARGN})
 
-  if ("FILENAME_ONLY_INCLUDES" IN_LIST arglist)
+  foreach(fullname ${arglist})
+    get_filename_component(basename ${fullname} NAME)
+    list(APPEND the_idl_files ${basename})
+  endforeach()
+
+  list(LENGTH the_idl_files idl_file_count)
+  list(REMOVE_DUPLICATES the_idl_files)
+  list(LENGTH the_idl_files unique_idl_file_count)
+
+  if(NOT ${idl_file_count} EQUAL ${unique_idl_file_count})
+    message(WARNING "OPENDDS_TARGET_SOURCES has 2 or more IDL files with \
+    the same name. ${the_idl_files}")
+  endif()
+
+  if(NOT "NO_FILENAME_ONLY_INCLUDES" IN_LIST arglist)
     foreach(extra ${arglist})
       if("${extra}" MATCHES "\\.idl$")
         get_filename_component(dir ${extra} DIRECTORY)
@@ -103,8 +117,8 @@ macro(OPENDDS_TARGET_SOURCES target)
         endif()
       endif()
     endforeach()
-
-    list(REMOVE_ITEM arglist "FILENAME_ONLY_INCLUDES")
+  else()
+    list(REMOVE_ITEM arglist "NO_FILENAME_ONLY_INCLUDES")
   endif()
 
   if(_extra_idl_paths)
@@ -133,7 +147,7 @@ macro(OPENDDS_TARGET_SOURCES target)
   endif()
 
   get_target_property(_target_type ${target} TYPE)
-  if (_target_type STREQUAL "SHARED_LIBRARY")
+  if(_target_type STREQUAL "SHARED_LIBRARY")
 
     get_target_property(_export_generated ${target} OPENDDS_EXPORT_GENERATED)
     if(NOT _export_generated)
