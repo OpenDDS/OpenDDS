@@ -32,16 +32,18 @@ file(MAKE_DIRECTORY ${dst}/transmission)
 configure_file(${src}/transmission/transmission_specs.idl ${dst}/transmission COPYONLY)
 configure_file(${src}/transmission/transmission_states.idl ${dst}/transmission COPYONLY)
 
+file(MAKE_DIRECTORY ${dst}/extra)
+configure_file(${src}/engine/engine_specs.idl ${dst}/extra COPYONLY)
+
 add_executable(${the_ecu} "ecu.cpp")
 
 add_library(ecu_lib SHARED)
 
-OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl
+OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl extra/engine_specs.idl
   ./engine/engine_specs.idl
   ./engine/engine_stats/fuel_stats.idl
   ./transmission/transmission_specs.idl
-  ./transmission/transmission_states.idl
-  FILENAME_ONLY_INCLUDES)
+  ./transmission/transmission_states.idl)
 
 target_link_libraries(ecu_lib ${opendds_libs})
 
