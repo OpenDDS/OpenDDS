@@ -1428,12 +1428,14 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   SequenceNumber seq;
   seq.setValue(data.writerSN.high, data.writerSN.low);
 
+  DeliverHeldData dhd;
   bool on_start = false;
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end()) {
     const WriterInfo_rch& writer = wi->second;
 
-    DeliverHeldData dhd(link, id_, writer);
+    DeliverHeldData dhd2(link, id_, writer);
+    std::swap(dhd, dhd2);
 
     if (writer->first_activity_) {
       on_start = true;
