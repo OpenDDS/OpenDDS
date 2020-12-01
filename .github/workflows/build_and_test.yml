@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - master
+      - branch-DDS-3.15
       - branch-DDS-3.14
       - branch-DDS-3.13
       - gh_workflow
   pull_request:
     branches:
       - master
+      - branch-DDS-3.15
       - branch-DDS-3.14
       - branch-DDS-3.13
       - gh_workflow
