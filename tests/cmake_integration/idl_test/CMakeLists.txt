@@ -10,11 +10,7 @@ set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
 
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
-  OpenDDS::Rtps OpenDDS::Rtps_Udp # For run_test.pl --rtps
 )
-
-## debugging
-set(CMAKE_VERBOSE_MAKEFILE on)
 
 set(the_ecu "ecu")
 

@@ -39,8 +39,6 @@ fuel_statsTypeSupportImpl.cpp
 fuel_statsTypeSupportImpl.h
 fuel_statsTypeSupportS.cpp
 fuel_statsTypeSupportS.h
-GNUmakefile
-GNUmakefile.ECU
 transmission_specsC.cpp
 transmission_specsC.h
 transmission_specsC.inl
