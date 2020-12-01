@@ -219,7 +219,6 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
 
   // Node controllers that haven't been used at all
   std::vector<NodeController::NodeId> any_ncs;
-
   for (Nodes::const_iterator it = available_nodes.begin(); it != available_nodes.end(); ++it) {
     const NodeController::NodeId& nid = it->first;
     if ((nc_weights.find(nid) == nc_weights.end()) ||
