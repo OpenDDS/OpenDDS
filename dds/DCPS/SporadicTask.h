@@ -107,7 +107,7 @@ private:
 
   void schedule_i(const TimeDuration& delay)
   {
-    if (!scheduled_) {
+    if (!scheduled_ && reactor()) {
       const long timer = reactor()->schedule_timer(this, 0, delay.value());
 
       if (timer == -1) {
@@ -124,7 +124,7 @@ private:
   void
   cancel_i()
   {
-    if (scheduled_) {
+    if (scheduled_ && reactor()) {
       reactor()->cancel_timer(this);
       scheduled_ = false;
     }
