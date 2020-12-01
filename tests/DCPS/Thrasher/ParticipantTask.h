@@ -13,8 +13,8 @@
 class ParticipantTask : public ACE_Task_Base
 {
 public:
-  explicit ParticipantTask(std::size_t samples_per_thread,
-                           bool durable);
+  ParticipantTask(std::size_t samples_per_thread,
+                  bool durable);
 
   ~ParticipantTask();
 
