@@ -18,7 +18,7 @@ set(src "${CMAKE_CURRENT_BINARY_DIR}/..")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 
 foreach(file
-  ecu.cpp ecu.idl)
+  ecu.cpp ecu.idl run_test.pl)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
 
