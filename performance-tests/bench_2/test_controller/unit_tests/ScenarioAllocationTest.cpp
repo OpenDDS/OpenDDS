@@ -1,7 +1,5 @@
 #include "../ScenarioManager.h"
 
-#include "dds/DCPS/Service_Participant.h"
-
 #include <gtest/gtest.h>
 
 DdsEntities dds_entities;
