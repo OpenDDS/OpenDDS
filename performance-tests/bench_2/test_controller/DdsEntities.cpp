@@ -118,8 +118,14 @@ DdsEntities::DdsEntities(
 
 
 DdsEntities::~DdsEntities() {
-  status_reader_->set_listener(0, 0);
-  participant_->delete_contained_entities();
-  dpf_->delete_participant(participant_);
-  TheServiceParticipant->shutdown();
+  if (status_reader_) {
+    status_reader_->set_listener(0, 0);
+  }
+  if (participant_) {
+    participant_->delete_contained_entities();
+  }
+  if (dpf_) {
+    dpf_->delete_participant(participant_);
+    TheServiceParticipant->shutdown();
+  }
 }

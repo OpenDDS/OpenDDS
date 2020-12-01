@@ -13,6 +13,8 @@
 class DdsEntities {
 public:
   DdsEntities(DDS::DomainParticipantFactory_var dpf, int domain);
+  DdsEntities() : dpf_{nullptr}, participant_{nullptr}, status_reader_{nullptr} {}
+
   ~DdsEntities();
 
   DDS::DomainParticipantFactory_var dpf_;
