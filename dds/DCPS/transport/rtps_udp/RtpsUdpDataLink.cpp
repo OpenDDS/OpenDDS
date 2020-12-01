@@ -177,7 +177,15 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
     return REMOVE_NOT_FOUND;
   }
 
-  RemoveResult result = link->send_strategy()->remove_sample(sample);
+  RemoveResult result;
+  {
+    GuardType guard(link->strategy_lock_);
+    if (link->send_strategy_) {
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rg(rev_lock);
+      result = link->send_strategy_->remove_sample(sample);
+    }
+  }
 
   ACE_Guard<ACE_Thread_Mutex> g2(elems_not_acked_mutex_);
 
@@ -228,7 +236,14 @@ RtpsUdpDataLink::RtpsWriter::remove_all_msgs()
 
   send_buff_->retain_all(id_);
 
-  link->send_strategy()->remove_all_msgs(id_);
+  {
+    GuardType guard(link->strategy_lock_);
+    if (link->send_strategy_) {
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rg(rev_lock);
+      link->send_strategy_->remove_all_msgs(id_);
+    }
+  }
 
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
