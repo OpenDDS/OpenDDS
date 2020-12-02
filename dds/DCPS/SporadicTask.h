@@ -86,7 +86,9 @@ private:
 
     virtual void execute()
     {
-      sporadic_task_->schedule_i(delay_);
+      if (sporadic_task_) {
+        sporadic_task_->schedule_i(delay_);
+      }
     }
 
     SporadicTask* const sporadic_task_;
@@ -100,7 +102,9 @@ private:
 
     virtual void execute()
     {
-      sporadic_task_->cancel_i();
+      if (sporadic_task_) {
+        sporadic_task_->cancel_i();
+      }
     }
 
     SporadicTask* const sporadic_task_;
