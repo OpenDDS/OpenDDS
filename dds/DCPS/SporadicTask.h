@@ -29,38 +29,47 @@ public:
 
   void schedule(const TimeDuration& delay)
   {
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    if (interceptor_) {
+      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+      if (interceptor) {
+        interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
+      }
+      else if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
+          ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+      }
     }
   }
 
   void cancel()
   {
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(new CancelCommand(this));
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    if (interceptor_) {
+      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+      if (interceptor) {
+        interceptor->execute_or_enqueue(new CancelCommand(this));
+      }
+      else if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
+          ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+      }
     }
   }
 
   void cancel_and_wait()
   {
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
-      command->wait();
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    if (interceptor_) {
+      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+      if (interceptor) {
+        ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
+        command->wait();
+      }
+      else if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
+          ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+      }
     }
   }
 
