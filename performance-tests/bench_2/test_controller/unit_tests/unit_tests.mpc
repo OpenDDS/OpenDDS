@@ -1,9 +1,4 @@
-project (*ScenarioAllocationTest): dcps, dcpsexe, dcps_test, dcps_rapidjson, googletest {
-  requires += no_opendds_safety_profile
-  exename = *
-  libs += Bench_Builder Bench_Builder_Idl Bench_Builder_Idl_Json Bench_Common Bench_Idl Bench_Core_Idl_Json
-  after += Bench_Builder Bench_Builder_Idl Bench_Builder_Idl_Json Bench_Common Bench_Idl Bench_Core_Idl_Json
-
+project (*ScenarioAllocationTest): ../../bench_exe, googletest {
   Source_Files {
     ../ScenarioManager.cpp
     ../DdsEntities.cpp
@@ -13,5 +8,5 @@ project (*ScenarioAllocationTest): dcps, dcpsexe, dcps_test, dcps_rapidjson, goo
   }
 
   libpaths += $(BENCH_ROOT)/lib
-  includes += $(BENCH_ROOT)/idl $(BENCH_ROOT)/common $(BENCH_ROOT)/builder_idl $(BENCH_ROOT)/builder
+  includes += $(BENCH_ROOT)/builder_idl $(BENCH_ROOT)/builder
 }
