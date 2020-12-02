@@ -25,8 +25,10 @@
 
 #include "tests/Utils/StatusMatching.h"
 
-ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
+ParticipantTask::ParticipantTask(std::size_t samples_per_thread,
+                                 bool durable)
   : samples_per_thread_(samples_per_thread)
+  , durable_(durable)
   , thread_index_(0)
 {
 }
@@ -136,7 +138,9 @@ ParticipantTask::svc()
     DDS::DataWriterQos writer_qos;
     publisher->get_default_datawriter_qos(writer_qos);
     writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-    writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    if (durable_) {
+      writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     writer_qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
 #endif
@@ -156,12 +160,16 @@ ParticipantTask::svc()
     OpenDDS::DCPS::DataWriterImpl* impl =
       dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
 
+    const bool wait_early = durable_ ? rand() % 2 == 0 : true;
+
     ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d is %C\n", this_thread_index, OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
+    if (wait_early) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
 
-    Utils::wait_match(writer, 1);
+      Utils::wait_match(writer, 1);
 
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+    }
 
     writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i)) {
@@ -191,6 +199,14 @@ ParticipantTask::svc()
                           ACE_TEXT(" write failed!\n")), 1);
       }
       ++progress;
+    }
+
+    if (!wait_early) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
+
+      Utils::wait_match(writer, 1);
+
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
     }
 
     DDS::Duration_t interval = { 30, 0 };

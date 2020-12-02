@@ -548,8 +548,6 @@ private:
 
   WriterToSeqReadersMap writer_to_seq_best_effort_readers_;
 
-  void deliver_held_data(const RepoId& readerId, const WriterInfo_rch& info, bool durable);
-
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
   /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
   ///   writer_to_seq_best_effort_readers_ along with anything else that fits the 'reader side activity' of the datalink
@@ -753,30 +751,32 @@ private:
   typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
   InterestingAckNackSetType interesting_ack_nacks_;
 
-  class HeldDataDeliveryHandler : public RcEventHandler {
-  public:
-    HeldDataDeliveryHandler(RtpsUdpDataLink* link)
-      : link_(link) {
-      }
-
-    /// Reactor invokes this after being notified in schedule_stop or cancel_release
-    int handle_exception(ACE_HANDLE /* fd */);
-
-    void notify_delivery(const RepoId& readerId, const WriterInfo_rch& info);
-
-    virtual ACE_Event_Handler::Reference_Count add_reference();
-    virtual ACE_Event_Handler::Reference_Count remove_reference();
-  private:
-    RtpsUdpDataLink* link_;
-    typedef std::pair<ReceivedDataSample, RepoId> HeldDataEntry;
-    typedef OPENDDS_VECTOR(HeldDataEntry) HeldData;
-    HeldData held_data_;
-  };
-  HeldDataDeliveryHandler held_data_delivery_handler_;
   const size_t max_bundle_size_;
   TimeDuration quick_heartbeat_delay_;
   TimeDuration normal_heartbeat_response_delay_;
   TimeDuration quick_heartbeat_response_delay_;
+
+  class DeliverHeldData {
+  public:
+    DeliverHeldData()
+      : reader_id_(GUID_UNKNOWN)
+    {}
+
+    DeliverHeldData(const RtpsUdpDataLink_rch& link,
+                    const RepoId& reader_id,
+                    const WriterInfo_rch& writer)
+      : link_(link)
+      , reader_id_(reader_id)
+      , writer_(writer)
+    {}
+
+    ~DeliverHeldData();
+
+  private:
+    RtpsUdpDataLink_rch link_;
+    RepoId reader_id_;
+    WriterInfo_rch writer_;
+  };
 
 #ifdef OPENDDS_SECURITY
   mutable ACE_Thread_Mutex ch_lock_;
