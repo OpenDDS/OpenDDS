@@ -94,7 +94,14 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   set(arglist ${ARGN})
 
-  foreach(fullname ${arglist})
+  foreach(the_file ${arglist})
+    list(APPEND check_for_dups_list ${the_file})
+  endforeach()
+
+  list(REMOVE_DUPLICATES check_for_dups_list)
+  unset(the_idl_files)
+
+  foreach(fullname ${check_for_dups_list})
     get_filename_component(basename ${fullname} NAME)
     list(APPEND the_idl_files ${basename})
   endforeach()
@@ -105,7 +112,7 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   if(NOT ${idl_file_count} EQUAL ${unique_idl_file_count})
     message(WARNING "OPENDDS_TARGET_SOURCES has 2 or more IDL files with \
-    the same name. ${the_idl_files}")
+    the same name. ${check_for_dups_list}")
   endif()
 
   if(NOT "NO_FILENAME_ONLY_INCLUDES" IN_LIST arglist)
