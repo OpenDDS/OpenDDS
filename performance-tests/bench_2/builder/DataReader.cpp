@@ -70,9 +70,9 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
         << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
-      DataReaderListener* savvy_listener_ = dynamic_cast<DataReaderListener*>(listener_.in());
-      if (savvy_listener_) {
-        savvy_listener_->set_datareader(*this);
+      DataReaderListener* savvy_listener = dynamic_cast<DataReaderListener*>(listener_.in());
+      if (savvy_listener) {
+        savvy_listener->set_datareader(*this);
       }
     }
   }
@@ -120,6 +120,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
 }
 
 DataReader::~DataReader() {
+  detach_listener();
   Log::log() << "Deleting datareader: " << name_ << std::endl;
   if (!CORBA::is_nil(datareader_.in())) {
     if (subscriber_->delete_datareader(datareader_) != DDS::RETCODE_OK) {
@@ -148,9 +149,9 @@ void DataReader::detach_listener() {
       savvy_listener_->unset_datareader(*this);
     }
     if (datareader_) {
-      datareader_->set_listener(DDS::DataReaderListener::_nil(), 0);
+      datareader_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
     }
-    listener_ = DDS::DataReaderListener::_nil();
+    listener_ = 0;
   }
 }
 

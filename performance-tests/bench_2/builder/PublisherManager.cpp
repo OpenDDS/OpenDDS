@@ -17,4 +17,11 @@ bool PublisherManager::enable(bool throw_on_error) {
   return result;
 }
 
+void PublisherManager::detach_listeners()
+{
+  for (auto it = publishers_.begin(); it != publishers_.end(); ++it) {
+    (*it)->detach_listeners();
+  }
+}
+
 }

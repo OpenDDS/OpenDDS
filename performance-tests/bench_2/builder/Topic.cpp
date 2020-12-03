@@ -107,8 +107,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
 }
 
 Topic::~Topic() {
-  if (topic_) {
-  }
+  detach_listener();
 }
 
 const std::string& Topic::get_name() const {
@@ -127,6 +126,19 @@ bool Topic::enable(bool throw_on_error) {
     throw std::runtime_error(ss.str());
   }
   return result;
+}
+
+void Topic::detach_listener() {
+  if (listener_) {
+    TopicListener* savvy_listener_ = dynamic_cast<TopicListener*>(listener_.in());
+    if (savvy_listener_) {
+      savvy_listener_->unset_topic(*this);
+    }
+    if (topic_) {
+      topic_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
+    }
+    listener_ = 0;
+  }
 }
 
 }

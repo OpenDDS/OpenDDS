@@ -25,4 +25,11 @@ bool DataWriterManager::enable(bool throw_on_error) {
   return result;
 }
 
+void DataWriterManager::detach_listeners()
+{
+  for (auto it = datawriters_.begin(); it != datawriters_.end(); ++it) {
+    (*it)->detach_listener();
+  }
+}
+
 }

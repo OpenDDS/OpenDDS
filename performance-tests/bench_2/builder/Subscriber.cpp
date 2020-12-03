@@ -43,9 +43,9 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
       ss << "subscriber listener creation failed for subscriber '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
-      SubscriberListener* savvy_listener_ = dynamic_cast<SubscriberListener*>(listener_.in());
-      if (savvy_listener_) {
-        savvy_listener_->set_subscriber(*this);
+      SubscriberListener* savvy_listener = dynamic_cast<SubscriberListener*>(listener_.in());
+      if (savvy_listener) {
+        savvy_listener->set_subscriber(*this);
       }
     }
   }
@@ -64,6 +64,7 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
 }
 
 Subscriber::~Subscriber() {
+  detach_listeners();
   datareaders_.reset();
   Log::log() << "Deleting subscriber: " << name_ << std::endl;
   if (!CORBA::is_nil(subscriber_.in())) {
@@ -81,6 +82,20 @@ bool Subscriber::enable(bool throw_on_error) {
     throw std::runtime_error(ss.str());
   }
   return success && datareaders_->enable(throw_on_error);
+}
+
+void Subscriber::detach_listeners() {
+  if (listener_) {
+    SubscriberListener* savvy_listener = dynamic_cast<SubscriberListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_subscriber(*this);
+    }
+    if (subscriber_) {
+      subscriber_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
+    }
+    listener_ = 0;
+  }
+  datareaders_->detach_listeners();
 }
 
 }
