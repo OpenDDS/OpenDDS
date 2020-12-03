@@ -1,8 +1,20 @@
 {
   "name": "Simple Scenario with Tags",
-  "desc": "This is used to test tag-based stats.",
+  "desc": "This is used to test tag-based stats and nodes allocation using wildcards.",
   "nodes": [
     {
+      "name_wildcard": "test_nc_*",
+      "workers": [
+        {
+          "config": "tagged_raw.json",
+          "count": 1
+        }
+      ],
+      "count": 1,
+      "exclusive": true
+    },
+    {
+      "name_wildcard": "test_nc_*",
       "workers": [
         {
           "config": "tagged_raw.json",
