@@ -176,7 +176,7 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
     return REMOVE_NOT_FOUND;
   }
 
-  RemoveResult result;
+  RemoveResult result = REMOVE_NOT_FOUND;
   {
     GuardType guard(link->strategy_lock_);
     if (link->send_strategy_) {
