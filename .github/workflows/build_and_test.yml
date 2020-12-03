@@ -317,7 +317,6 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
-      uses: lukka/run-vcpkg@v6
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -357,7 +356,7 @@ jobs:
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
-        configure --no-tests --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=C:\vcpkg\installed\x64-windows --openssl=C:\vcpkg\installed\x64-windows
+        configure --no-tests --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -385,7 +384,7 @@ jobs:
     needs: windows-2019_defaults_artifact
 
     steps:
-    - name: install openssl-windows, xerces-c
+    - name: install openssl-windows & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
         vcpkgGitCommitId: ec6fe06
@@ -427,7 +426,7 @@ jobs:
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
-        configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=C:\vcpkg\installed\x64-windows --openssl=C:\vcpkg\installed\x64-windows
+        configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -508,7 +507,11 @@ jobs:
 
     steps:
     - name: install xerces-c
-      run: vcpkg install xerces-c:x64-windows
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse xerces-c
+        vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -545,7 +548,7 @@ jobs:
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=C:\vcpkg\installed\x64-windows
+        configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
