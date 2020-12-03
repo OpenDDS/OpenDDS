@@ -149,7 +149,7 @@ module Bench {
       string config;
       // Number of workers to spawn using this config (Must be >=1)
       unsigned long count;
-      // If count > 1, then this is were the range of worker ids start
+      // If count > 1, then this is where the range of worker ids start
       WorkerId worker_id;
     };
     typedef sequence<WorkerConfig> WorkerConfigs;
@@ -197,6 +197,8 @@ module Bench {
     typedef sequence<WorkerPrototype> WorkerPrototypes;
 
     struct NodePrototype {
+      // Assign to a node controller with a name that matches this wildcard
+      string name_wildcard;
       WorkerPrototypes workers;
       // Number of Nodes to spawn using this prototype (Must be >=1)
       unsigned long count;
