@@ -312,7 +312,12 @@ jobs:
 
     steps:
     - name: install openssl-windows & xerces-c
-      run: vcpkg install openssl-windows:x64-windows xerces-c:x64-windows
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgTriplet: x64-windows
+      uses: lukka/run-vcpkg@v6
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -381,7 +386,11 @@ jobs:
 
     steps:
     - name: install openssl-windows, xerces-c
-      run: vcpkg install openssl-windows:x64-windows xerces-c:x64-windows
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
