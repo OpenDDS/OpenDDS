@@ -351,16 +351,16 @@ jobs:
         sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/Naming_Service\/Naming_Service.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
         echo "-----"
         cat OpenDDS/DDS_TAOv2.mwc
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         configure --no-tests --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: build OpenDDS
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS_TAOv2.sln
@@ -421,23 +421,22 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
@@ -474,7 +473,6 @@ jobs:
     - name: run OpenDDS tests
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         cd workspace
@@ -543,23 +541,22 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
@@ -596,7 +593,6 @@ jobs:
     - name: run OpenDDS tests
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cd OpenDDS
         call setenv.cmd
         cd workspace
