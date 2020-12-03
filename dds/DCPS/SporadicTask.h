@@ -25,52 +25,45 @@ public:
     reactor(interceptor->reactor());
   }
 
-  virtual ~SporadicTask() {}
+  virtual ~SporadicTask() {
+    scheduled_ = false;
+  }
 
   void schedule(const TimeDuration& delay)
   {
-    if (interceptor_) {
-      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-      if (interceptor) {
-        interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
-      }
-      else if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
-          ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
-      }
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
+    } else if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
+        ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
     }
   }
 
   void cancel()
   {
-    if (interceptor_) {
-      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-      if (interceptor) {
-        interceptor->execute_or_enqueue(new CancelCommand(this));
-      }
-      else if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
-          ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
-      }
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(new CancelCommand(this));
+    } else if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
+        ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
     }
   }
 
   void cancel_and_wait()
   {
-    if (interceptor_) {
       RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
       if (interceptor) {
         ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
         command->wait();
-      }
-      else if (DCPS_debug_level >= 1) {
+      } else if (DCPS_debug_level >= 1) {
         ACE_ERROR((LM_WARNING,
           ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
           ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
       }
-    }
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
@@ -86,9 +79,7 @@ private:
 
     virtual void execute()
     {
-      if (sporadic_task_) {
-        sporadic_task_->schedule_i(delay_);
-      }
+      sporadic_task_->schedule_i(delay_);
     }
 
     SporadicTask* const sporadic_task_;
@@ -102,9 +93,7 @@ private:
 
     virtual void execute()
     {
-      if (sporadic_task_) {
-        sporadic_task_->cancel_i();
-      }
+      sporadic_task_->cancel_i();
     }
 
     SporadicTask* const sporadic_task_;
@@ -120,7 +109,7 @@ private:
 
   void schedule_i(const TimeDuration& delay)
   {
-    if (!scheduled_ && reactor()) {
+    if (!scheduled_) {
       const long timer = reactor()->schedule_timer(this, 0, delay.value());
 
       if (timer == -1) {
@@ -137,7 +126,7 @@ private:
   void
   cancel_i()
   {
-    if (scheduled_ && reactor()) {
+    if (scheduled_) {
       reactor()->cancel_timer(this);
       scheduled_ = false;
     }
