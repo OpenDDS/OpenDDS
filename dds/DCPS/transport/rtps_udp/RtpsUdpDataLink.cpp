@@ -1371,6 +1371,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
           for (RepoIdSet::const_iterator it = pending_reliable_readers_.begin();
                it != pending_reliable_readers_.end(); ++it)
           {
+            OPENDDS_ASSERT(false);
             trs->withhold_data_from(*it);
           }
         }
@@ -1383,6 +1384,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
         GuardType guard(strategy_lock_);
         RtpsUdpReceiveStrategy* trs = receive_strategy();
         if (trs) {
+          OPENDDS_ASSERT(false);
           trs->withhold_data_from(local);
         }
       }
@@ -1922,6 +1924,18 @@ RtpsUdpDataLink::RtpsReader::has_writer(const RepoId& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   return remote_writers_.count(id) != 0;
+}
+
+bool
+RtpsUdpDataLink::RtpsReader::has_preassociation_writer(const RepoId& id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  WriterInfoMap::const_iterator pos = remote_writers_.find(id);
+  if (pos == remote_writers_.end()) {
+    return false;
+  }
+
+  return preassociation_writers_.count(pos->second) != 0;
 }
 
 bool
@@ -4254,6 +4268,19 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 ICE::Endpoint*
 RtpsUdpDataLink::get_ice_endpoint() const {
   return impl().get_ice_endpoint();
+}
+
+void
+RtpsUdpDataLink::dropped(const ReceivedDataSample& sample) const
+{
+#ifndef NDEBUG
+  typedef std::pair<RtpsReaderMultiMap::const_iterator, RtpsReaderMultiMap::const_iterator> RRMM_IterRange;
+  for (RRMM_IterRange iters = readers_of_writer_.equal_range(sample.header_.publication_id_);
+       iters.first != iters.second; ++iters.first) {
+    const RtpsReader_rch& reader = iters.first->second;
+    OPENDDS_ASSERT(reader->has_preassociation_writer(sample.header_.publication_id_));
+  }
+#endif
 }
 
 } // namespace DCPS

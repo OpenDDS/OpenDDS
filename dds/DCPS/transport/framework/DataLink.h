@@ -286,6 +286,8 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
 
+  virtual void dropped(const ReceivedDataSample& /* sample */) const { }
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class

@@ -243,6 +243,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
     iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
+    pending_history_.push_back(PH(1, remote_copy, 1));
 
     GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -251,7 +252,7 @@ TransportClient::associate(const AssociationData& data, bool active)
               OPENDDS_STRING(tc_assoc).c_str(),
               OPENDDS_STRING(remote_new).c_str()), 0);
   } else {
-
+    OPENDDS_ASSERT(false);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
                ACE_TEXT("already associating with remote.\n")));
@@ -536,6 +537,8 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                         this,
                         link.in(),
                         OPENDDS_STRING(peerId_conv).c_str()), 0);
+    ACE_DEBUG((LM_DEBUG, "### alpha\n"));
+    OPENDDS_ASSERT(false);
     return;
   }
 
@@ -551,8 +554,12 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                           this,
                           link.in(),
                           OPENDDS_STRING(peerId_conv).c_str()), 0);
+      ACE_DEBUG((LM_DEBUG, "### beta\n"));
+      OPENDDS_ASSERT(false);
       return;
     }
+
+    OPENDDS_ASSERT(false);
 
   } else { // link is ready to use
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
@@ -576,6 +583,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   iter->second->reset_client();
   pending_assoc_timer_->cancel_timer(pend);
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
+  pending_history_.push_back(PH(-1, remote_id, 1));
   pending_.erase(iter);
 
   guard.release();
@@ -625,6 +633,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
         iter->second->reset_client();
         pending_assoc_timer_->cancel_timer(iter->second);
         prev_pending_.insert(std::make_pair(iter->first, iter->second));
+        pending_history_.push_back(PH(-1, iter->first, 2));
         pending_.erase(iter);
       }
     }
@@ -653,6 +662,7 @@ TransportClient::disassociate(const RepoId& peerId)
     iter->second->reset_client();
     pending_assoc_timer_->cancel_timer(iter->second);
     prev_pending_.insert(std::make_pair(iter->first, iter->second));
+    pending_history_.push_back(PH(-1, iter->first, 3));
     pending_.erase(iter);
     return;
   }

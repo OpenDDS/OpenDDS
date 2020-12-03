@@ -292,6 +292,19 @@ private:
   TransportConfig_rch config_;
   ImplsType impls_;
   PendingMap pending_;
+  struct PH {
+    int mode;
+    RepoId remote;
+    int site;
+
+    PH() {}
+    PH(int m, const RepoId& id, int s)
+      : mode(m)
+      , remote(id)
+      , site(s)
+    {}
+  };
+  std::vector<PH> pending_history_;
   PrevPendingMap prev_pending_;
   DataLinkSet links_;
 

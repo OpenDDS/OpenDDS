@@ -718,6 +718,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
                    ACE_TEXT(" discarding sample from publication %C due to no listeners.\n"),
                    OPENDDS_STRING(converter).c_str()));
       }
+      dropped(sample);
     }
     return;
   }
