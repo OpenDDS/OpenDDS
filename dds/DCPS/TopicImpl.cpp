@@ -194,7 +194,7 @@ TopicImpl::transport_config(const TransportConfig_rch&)
 }
 
 void
-TopicImpl::inconsistent_topic(int count)
+TopicImpl::inconsistent_topic(CORBA::Long count)
 {
   inconsistent_topic_status_.total_count_change += count - inconsistent_topic_status_.total_count;
   inconsistent_topic_status_.total_count = count;

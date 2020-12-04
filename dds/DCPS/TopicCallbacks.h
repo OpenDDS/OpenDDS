@@ -33,7 +33,7 @@ public:
   virtual ~TopicCallbacks() {}
 
   // Report the current number of inconsistent topics.
-  virtual void inconsistent_topic(int count) = 0;
+  virtual void inconsistent_topic(CORBA::Long count) = 0;
 };
 
 } // namespace DCPS

@@ -117,8 +117,6 @@ namespace OpenDDS {
         RepoId participant_id = guid;
         participant_id.entityId = ENTITYID_PARTICIPANT;
 
-        endpoints_.insert(guid);
-
         RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
         bool inconsistent_before;
         if (remote_topic_iter == remote_topics_.end()) {
@@ -136,7 +134,6 @@ namespace OpenDDS {
         if (topic_callbacks_ && !remote.inconsistent_) {
           remote.data_type_name_.clear();
         }
-        remote.endpoints_.insert(guid);
 
         if (!inconsistent_before && remote.inconsistent_) {
           ++inconsistent_topic_count_;
@@ -166,8 +163,9 @@ namespace OpenDDS {
           }
         }
 
-        if (remote.inconsistent_) {
-          endpoints_.erase(guid);
+        if (!remote.inconsistent_) {
+          remote.endpoints_.insert(guid);
+          endpoints_.insert(guid);
         }
       }
 
@@ -221,7 +219,7 @@ namespace OpenDDS {
       RepoIdSet endpoints_;
 
       RemoteTopicMap remote_topics_;
-      int inconsistent_topic_count_;
+      CORBA::Long inconsistent_topic_count_;
     };
 
   } // namespace DCPS
