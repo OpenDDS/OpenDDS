@@ -3733,6 +3733,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     if (leading_readers_.empty() && remote_readers_.size() > 1
 #ifdef OPENDDS_SECURITY
         && !is_pvs_writer_
+        && !is_ps_writer_
 #endif
         ) {
       // Every reader is lagging and there is more than one.
@@ -4018,6 +4019,7 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
  , heartbeat_count_(heartbeat_count)
 #ifdef OPENDDS_SECURITY
  , is_pvs_writer_(id_.entityId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER)
+ , is_ps_writer_(id_.entityId == RTPS::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER)
 #endif
 {
   send_buff_->bind(link->send_strategy());

@@ -379,6 +379,7 @@ private:
     CORBA::Long heartbeat_count_;
 #ifdef OPENDDS_SECURITY
     const bool is_pvs_writer_; // Participant Volatile Secure writer
+    const bool is_ps_writer_; // Partcicipant Secure (Reliable SPDP) writer
 #endif
     mutable ACE_Thread_Mutex mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
