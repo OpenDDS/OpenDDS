@@ -1382,7 +1382,7 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
     case CvStatus_Error:
     default:
       if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) WriteDataContainer::wait_ack_of_seq: "
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
           "error in wait_until\n"));
       }
       break;
@@ -1443,7 +1443,7 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const Se
       case CvStatus_Error:
       default:
         if (DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) WriteDataContainer::wait_ack_of_seq: "
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
             "error in wait_until\n"));
         }
         ret = DDS::RETCODE_ERROR;

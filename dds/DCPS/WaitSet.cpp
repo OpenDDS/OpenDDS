@@ -159,7 +159,7 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   case CvStatus_Error:
   default:
     if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) WaitSet::wait: wait_until failed\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WaitSet::wait: wait_until failed\n"));
     }
     return RETCODE_ERROR;
   }

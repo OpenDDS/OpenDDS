@@ -106,7 +106,8 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
     case CvStatus_Error:
     default:
       if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) MessageTracker::wait_messages_pending: Wait error\n"));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MessageTracker::wait_messages_pending: "
+          "error in wait_until\n"));
       }
       loop = false;
       return;

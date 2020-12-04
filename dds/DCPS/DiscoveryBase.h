@@ -143,9 +143,12 @@ namespace OpenDDS {
           cnd_.notify_one();
           while (!writer_done_) {
             if (use_expire) {
-              cnd_.wait_until(expire);
-              const MonotonicTimePoint now = MonotonicTimePoint::now();
-              if (now > expire) {
+              switch (cnd_.wait_until(expire)) {
+              case CvStatus_NoTimeout:
+                break;
+
+              case CvStatus_Timeout: {
+                const MonotonicTimePoint now = MonotonicTimePoint::now();
                 expire = now + interval_;
                 if (status_) {
                   if (DCPS_debug_level > 4) {
@@ -155,9 +158,21 @@ namespace OpenDDS {
                   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
                   status_->map[key_] = now;
                 }
+                break;
               }
-            } else {
-              cnd_.wait();
+
+              case CvStatus_Error:
+              default:
+                if (DCPS_debug_level) {
+                  ACE_ERROR((LM_ERROR, "(%P|t) ERROR: DcpsUpcalls::svc: error in wait_utill\n"));
+                }
+                return -1;
+              }
+            } else if (cnd_.wait() == CvStatus_Error) {
+              if (DCPS_debug_level) {
+                ACE_ERROR((LM_ERROR, "(%P|t) ERROR: DcpsUpcalls::svc: error in wait\n"));
+              }
+              return -1;
             }
           }
         }
@@ -172,27 +187,20 @@ namespace OpenDDS {
           cnd_.notify_one();
         }
 
-        // TODO: Remove?
-        //ACE_Time_Value expire;
-
-        //if (has_timeout()) {
-        //  expire = MonotonicTimePoint::now().value() + interval_.value();
-        //}
+        const MonotonicTimePoint expire = has_timeout() ?
+          MonotonicTimePoint::now() + interval_ : MonotonicTimePoint();
 
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
-        /* const MonotonicTimePoint now = MonotonicTimePoint::now(); */
-        /* if (has_timeout() && now.value() > expire) { */
-        /*   expire = now.value() + interval_.value(); */
-        /*   if (status_) { */
-        /*     if (DCPS_debug_level > 4) { */
-        /*       ACE_DEBUG((LM_DEBUG, */
-        /*                 "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n")); */
-        /*     } */
-        /*     ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock); */
-        /*     status_->map[key_] = now; */
-        /*   } */
-        /* } */
+        const MonotonicTimePoint now = MonotonicTimePoint::now();
+        if (status_ && has_timeout() && now > expire) {
+          if (DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+                       "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
+          }
+          ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock);
+          status_->map[key_] = now;
+        }
       }
 
       DataReaderCallbacks* const drr_;
