@@ -1174,10 +1174,9 @@ namespace OpenDDS {
         }
       }
 
-      void
-      match_continue(OpenDDS::DCPS::SequenceNumber rpc_sequence_number)
+      /// This assumes that lock_ is being held
+      void match_continue(SequenceNumber rpc_sequence_number)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         MatchingDataIter it;
         for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
           if (it->second.rpc_sequence_number == rpc_sequence_number) {
