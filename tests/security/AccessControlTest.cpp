@@ -519,6 +519,8 @@ TEST_F(AccessControlTest, check_create_datawriter_default_Success)
   ::DDS::Security::PermissionsHandle out_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
 
+  partition.name.length(0);
+
   EXPECT_TRUE(get_inst().check_create_datawriter(
       out_handle,
       domain_id,
