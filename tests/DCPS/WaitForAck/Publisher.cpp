@@ -270,6 +270,10 @@ Publisher::run()
     this->publications_[ index]->start();
   }
 
+  // Allow some traffic to occur before making any wait() calls.
+  ACE_Time_Value ms(0, 500);
+  ACE_OS::sleep(ms);
+
   ::DDS::Duration_t delay = { 15, 0 }; // Wait for up to 15 seconds.
   if (this->options_.publisher())
   {
