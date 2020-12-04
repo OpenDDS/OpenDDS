@@ -308,7 +308,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
             if (!wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+              Log::log() << "Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
             }
           }
         }

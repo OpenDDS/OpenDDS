@@ -146,6 +146,8 @@ public:
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
 
+  void disassociated(const RepoId& local, const RepoId& remote);
+
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
                            const ACE_INET_Addr& address,
