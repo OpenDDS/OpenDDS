@@ -13,6 +13,7 @@
 #include "TimeTypes.h"
 #include "ReactorInterceptor.h"
 #include "SafetyProfileStreams.h"
+#include "ConditionVariable.h"
 
 #include <ace/Task.h>
 #include <ace/Barrier.h>
@@ -74,7 +75,7 @@ private:
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
-  typedef Condition<LockType> ConditionType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
   typedef ACE_Timer_Heap_T<
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
@@ -99,7 +100,7 @@ private:
   ACE_Barrier   barrier_;
   LockType      lock_;
   State         state_;
-  ConditionType condition_;
+  ConditionVariableType condition_;
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;

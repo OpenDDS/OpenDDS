@@ -86,17 +86,30 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
                 ACE_TEXT("from source=%C will wait with no timeout.\n")));
     }
   }
-  while (pending_messages()) {
-    if (done_condition_.wait_until(deadline) != ConditionType::NoTimeout &&
-        pending_messages()) {
-      if (DCPS_debug_level) {
+  bool loop = true;
+  while (loop && pending_messages()) {
+    switch (done_condition_.wait_until(deadline)) {
+    case CvStatus_Timeout:
+      if (DCPS_debug_level && pending_messages()) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %T ")
                    ACE_TEXT("(Redmine Issue# 1446) (caller: %C)\n"),
                    ACE_TEXT("Timed out waiting for messages to be transported"),
                    caller));
       }
+      loop = false;
       break;
+
+    case CvStatus_NoTimeout:
+      break;
+
+    case CvStatus_Error:
+    default:
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) MessageTracker::wait_messages_pending: Wait error\n"));
+      }
+      loop = false;
+      return;
     }
   }
   if (report) {

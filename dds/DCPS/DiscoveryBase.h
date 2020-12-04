@@ -19,7 +19,7 @@
 #include "SubscriberImpl.h"
 #include "SporadicTask.h"
 #include "TimeTypes.h"
-#include "Condition.h"
+#include "ConditionVariable.h"
 #ifdef OPENDDS_SECURITY
 #  include "Ice.h"
 #endif
@@ -202,7 +202,7 @@ namespace OpenDDS {
       DataWriterCallbacks* const dwr_;
       bool reader_done_, writer_done_;
       ACE_Thread_Mutex mtx_;
-      Condition<ACE_Thread_Mutex> cnd_;
+      ConditionVariable<ACE_Thread_Mutex> cnd_;
 
       // thread reporting
       TimeDuration interval_;

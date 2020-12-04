@@ -13,7 +13,7 @@
 
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DCPS/PoolAllocationBase.h>
-#include <dds/DCPS/Condition.h>
+#include <dds/DCPS/ConditionVariable.h>
 
 #include <ace/Synch_Traits.h>
 #include <ace/Task.h>
@@ -84,7 +84,7 @@ private:
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
-  typedef Condition<LockType> ConditionType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
   typedef BasicQueue<SendRequest> QueueType;
 
@@ -98,7 +98,7 @@ private:
   /// find a request in the queue_ that needs to be executed.
   /// This condition will be signal()'ed each time a request is
   /// added to the queue_, and also when this task is shutdown.
-  ConditionType work_available_;
+  ConditionVariableType work_available_;
 
   /// Flag used to initiate a shutdown request to all worker threads.
   bool shutdown_initiated_;

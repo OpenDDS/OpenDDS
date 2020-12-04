@@ -1,7 +1,8 @@
-#ifndef OPENDDS_DCPS_CONDITION_H
-#define OPENDDS_DCPS_CONDITION_H
+#ifndef OPENDDS_DCPS_CONDITIONVARIABLE_H
+#define OPENDDS_DCPS_CONDITIONVARIABLE_H
 
 #include "TimeTypes.h"
+#include "debug.h"
 
 #include <ace/Condition_Thread_Mutex.h>
 #include <ace/Condition_Recursive_Thread_Mutex.h>
@@ -19,6 +20,18 @@ namespace OpenDDS {
 namespace DCPS {
 
 /**
+ * This is the return type of ConditionVariable::wait* functions.
+ */
+enum CvStatus {
+  CvStatus_NoTimeout, ///< The wait has returned because it was woken up
+  CvStatus_Timeout, ///< The wait has returned because of a timeout
+  CvStatus_Error /**<
+    * The wait has returned because of an error.
+    * The errno-given reason was logged.
+    */
+};
+
+/**
  * ACE_Condition wrapper based on std::condition_variable that enforces
  * monotonic time behavior.
  *
@@ -28,40 +41,38 @@ namespace DCPS {
  * argument, where the std::condition_variables take them as method arguments.
  */
 template <typename Mutex>
-class Condition {
+class ConditionVariable {
 public:
-  Condition(Mutex& mutex)
+  ConditionVariable(Mutex& mutex)
   : impl_(mutex, ACE_Condition_Attributes_T<MonotonicClock>())
   {
   }
 
-  enum WaitStatus {
-    NoTimeout,
-    Timeout,
-    WaitError
-  };
-
-  WaitStatus wait()
+  CvStatus wait()
   {
     if (impl_.wait() == 0) {
-      return NoTimeout;
+      return CvStatus_NoTimeout;
     }
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Condition::wait: %p\n"));
-    return WaitError;
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ConditionVariable::wait: %p\n"));
+    }
+    return CvStatus_Error;
   }
 
-  WaitStatus wait_until(const MonotonicTimePoint& expire_at)
+  CvStatus wait_until(const MonotonicTimePoint& expire_at)
   {
     if (impl_.wait(&expire_at.value()) == 0) {
-      return NoTimeout;
+      return CvStatus_NoTimeout;
     } else if (errno == ETIME) {
-      return Timeout;
+      return CvStatus_Timeout;
     }
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Condition::wait_until: %p\n"));
-    return WaitError;
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ConditionVariable::wait_until: %p\n"));
+    }
+    return CvStatus_Error;
   }
 
-  WaitStatus wait_for(const TimeDuration& expire_in)
+  CvStatus wait_for(const TimeDuration& expire_in)
   {
     return wait_until(MonotonicTimePoint::now() + expire_in);
   }
@@ -71,7 +82,9 @@ public:
     if (impl_.signal() == 0) {
       return true;
     }
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Condition::notify_one: %p\n"));
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ConditionVariable::notify_one: %p\n"));
+    }
     return false;
   }
 
@@ -80,7 +93,9 @@ public:
     if (impl_.broadcast() == 0) {
       return true;
     }
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Condition::notify_all: %p\n"));
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ConditionVariable::notify_all: %p\n"));
+    }
     return false;
   }
 
@@ -93,4 +108,4 @@ protected:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_CONDITION_H
+#endif // OPENDDS_DCPS_CONDITIONVARIABLE_H

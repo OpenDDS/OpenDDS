@@ -4,9 +4,13 @@
 #ifndef DATAWRITER_LISTENER_IMPL
 #define DATAWRITER_LISTENER_IMPL
 
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/LocalObject.h"
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/ConditionVariable.h>
+
+#include <dds/DdsDcpsPublicationC.h>
+
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -55,7 +59,7 @@ protected:
 
 private:
   mutable ACE_Thread_Mutex mutex_;
-  mutable ACE_Condition<ACE_Thread_Mutex> matched_condition_;
+  mutable  matched_condition_;
   long matched_;
   CORBA::Long offered_deadline_total_count_;
 };

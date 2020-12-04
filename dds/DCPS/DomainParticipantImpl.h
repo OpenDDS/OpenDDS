@@ -17,6 +17,7 @@
 #include "PoolAllocator.h"
 #include "Recorder.h"
 #include "Replayer.h"
+#include "ConditionVariable.h"
 #include "TimeTypes.h"
 #include "XTypes/TypeLookupService.h"
 #include "transport/framework/TransportImpl_rch.h"
@@ -479,7 +480,7 @@ private:
   ACE_Recursive_Thread_Mutex handle_protector_;
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
-  Condition<ACE_Thread_Mutex> shutdown_condition_;
+  ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
   DDS::ReturnCode_t shutdown_result_;
   bool shutdown_complete_;
 

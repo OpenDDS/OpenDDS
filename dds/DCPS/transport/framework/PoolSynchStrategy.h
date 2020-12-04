@@ -11,7 +11,7 @@
 #include "ThreadSynchStrategy.h"
 
 #include <dds/DCPS/dcps_export.h>
-#include <dds/DCPS/Condition.h>
+#include <dds/DCPS/ConditionVariable.h>
 
 #include <ace/Synch_Traits.h>
 #include <ace/Task.h>
@@ -42,10 +42,10 @@ private:
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
-  typedef Condition<LockType> ConditionType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
   LockType      lock_;
-  ConditionType condition_;
+  ConditionVariableType condition_;
 };
 
 } // namespace DCPS

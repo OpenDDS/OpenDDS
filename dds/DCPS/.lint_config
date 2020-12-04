@@ -1,1 +1,1 @@
-ignore check ace_condition path Condition.h
+ignore check ace_condition path ConditionVariable.h

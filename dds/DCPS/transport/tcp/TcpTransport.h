@@ -120,7 +120,7 @@ private:
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
-  typedef Condition<LockType> ConditionType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
 // TBD SOON - Something needs to protect the tcp_config_ reference
 //            because it gets set in our configure() method, and

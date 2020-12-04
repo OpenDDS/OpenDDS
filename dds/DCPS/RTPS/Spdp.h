@@ -406,7 +406,7 @@ private:
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
-  DCPS::Condition<ACE_Thread_Mutex> shutdown_cond_;
+  DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
 
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;

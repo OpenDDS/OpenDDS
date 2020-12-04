@@ -10,7 +10,7 @@
 
 #include "ThreadSynch.h"
 
-#include <dds/DCPS/Condition.h>
+#include <dds/DCPS/ConditionVariable.h>
 
 #include <ace/Synch_Traits.h>
 #include <ace/Task.h>
@@ -44,14 +44,14 @@ private:
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
-  typedef Condition<LockType> ConditionType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
-  LockType      lock_;
-  ConditionType condition_;
-  int           work_available_;
-  int           shutdown_;
-  long          dds_priority_;
-  long          scheduler_;
+  LockType lock_;
+  ConditionVariableType condition_;
+  int work_available_;
+  int shutdown_;
+  long dds_priority_;
+  long scheduler_;
 };
 
 } // namespace DCPS

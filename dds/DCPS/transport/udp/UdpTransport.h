@@ -14,6 +14,7 @@
 #include "UdpDataLink_rch.h"
 
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ConditionVariable.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/transport/framework/PriorityKey.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
@@ -65,7 +66,7 @@ private:
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
-  typedef Condition<LockType> ConditionType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
   /// This lock is used to protect the client_links_ data member.
   LockType client_links_lock_;

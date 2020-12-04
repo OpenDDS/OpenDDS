@@ -11,7 +11,7 @@
 #include "LocalObject.h"
 #include "Definitions.h"
 #include "PoolAllocator.h"
-#include "Condition.h"
+#include "ConditionVariable.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 
@@ -80,8 +80,8 @@ private:
   friend class OpenDDS::DCPS::ConditionImpl;
 
   ACE_Recursive_Thread_Mutex lock_;
-  typedef OpenDDS::DCPS::Condition<ACE_Recursive_Thread_Mutex> ConditionType;
-  ConditionType cond_;
+  typedef OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
+  ConditionVariableType cond_;
   // Treat as a boolean value.
   ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
 

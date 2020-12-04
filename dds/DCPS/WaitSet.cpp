@@ -139,14 +139,10 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
     }
   }
 
-  ConditionType::WaitStatus status = ConditionType::NoTimeout;
+  CvStatus status = CvStatus_NoTimeout;
   while ((attached_conditions_.empty() || signaled_conditions_.empty()) &&
-      status == ConditionType::NoTimeout) {
-    if (use_deadline) {
-      status = cond_.wait_until(deadline);
-    } else {
-      status = cond_.wait();
-    }
+      status == CvStatus_NoTimeout) {
+    status = use_deadline ? cond_.wait_until(deadline) : cond_.wait();
   }
 
   copyInto(active_conditions, signaled_conditions_);
@@ -154,12 +150,17 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   waiting_ = false;
 
   switch (status) {
-  case ConditionType::NoTimeout:
+  case CvStatus_NoTimeout:
     return RETCODE_OK;
-  case ConditionType::Timeout:
+
+  case CvStatus_Timeout:
     return RETCODE_TIMEOUT;
-  case ConditionType::WaitError:
+
+  case CvStatus_Error:
   default:
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) WaitSet::wait: wait_until failed\n"));
+    }
     return RETCODE_ERROR;
   }
 }

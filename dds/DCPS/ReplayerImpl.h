@@ -21,7 +21,7 @@
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #  include "FilterEvaluator.h"
 #endif
-#include "Condition.h"
+#include "ConditionVariable.h"
 #include "transport/framework/TransportSendListener.h"
 #include "transport/framework/TransportClient.h"
 
@@ -311,7 +311,7 @@ private:
 
   RepoIdToSequenceMap idToSequence_;
 
-  Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
+  ConditionVariable<ACE_Recursive_Thread_Mutex> empty_condition_;
   int pending_write_count_;
 };
 

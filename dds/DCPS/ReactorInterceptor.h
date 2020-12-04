@@ -14,7 +14,7 @@
 #include "dcps_export.h"
 #include "unique_ptr.h"
 #include "RcHandle_T.h"
-#include "Condition.h"
+#include "ConditionVariable.h"
 
 #include <ace/Reactor.h>
 #include <ace/Thread.h>
@@ -66,7 +66,7 @@ public:
 
     bool executed_;
     mutable ACE_Thread_Mutex mutex_;
-    mutable Condition<ACE_Thread_Mutex> condition_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;

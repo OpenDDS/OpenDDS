@@ -11,7 +11,7 @@
 #include "dcps_export.h"
 #include "PoolAllocator.h"
 #include "TimeTypes.h"
-#include "Condition.h"
+#include "ConditionVariable.h"
 
 #include <ace/Thread_Mutex.h>
 
@@ -74,8 +74,8 @@ namespace DCPS {
     ACE_Thread_Mutex lock_;
 
     /// All messages have been transported condition variable.
-    typedef Condition<ACE_Thread_Mutex> ConditionType;
-    ConditionType done_condition_;
+    typedef ConditionVariable<ACE_Thread_Mutex> ConditionVariableType;
+    ConditionVariableType done_condition_;
   };
 
 } // namespace DCPS

@@ -26,7 +26,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                TimeDuration sleep_duration)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
-  condition_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic()),
+  condition_(lock_),
   associated_(false),
   dwl_servant_(0),
   instance_handle_(::DDS::HANDLE_NIL),
@@ -73,7 +73,7 @@ Writer::svc()
     {
       GuardType guard(this->lock_);
       this->associated_ = true;
-      this->condition_.broadcast();
+      condition_.notify_all();
     }
 
     Messenger::MessageDataWriter_var message_dw =
@@ -113,8 +113,8 @@ Writer::svc()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                    ACE_TEXT("%dth write() returned %d.\n"),
-                   i,
-                   -1));
+                   i, ret));
+        return 1;
       }
 
       // Sleep for half a second between writes to allow some deadline
@@ -147,11 +147,6 @@ bool Writer::wait_for_start()
 {
   GuardType guard(this->lock_);
 
-  if (!associated_) {
-    const MonotonicTimePoint abs(MonotonicTimePoint::now() + TimeDuration(10));
-    if (condition_.wait(&abs.value()) == -1) {
-      return false;
-    }
-  }
-  return true;
+  return associated_ ||
+    condition_.wait_for(TimeDuration(10)) == OpenDDS::DCPS::CvStatus_NoTimeout;
 }

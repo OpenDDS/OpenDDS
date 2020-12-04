@@ -16,7 +16,7 @@
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
 #include "SporadicTask.h"
-#include "Condition.h"
+#include "ConditionVariable.h"
 #include "TimeTypes.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
@@ -488,16 +488,16 @@ private:
   /// the datawriter the data is delivered. Other internal
   /// operations will not lock.
   ACE_Recursive_Thread_Mutex lock_;
-  typedef Condition<ACE_Recursive_Thread_Mutex> ConditionType;
-  ConditionType condition_;
-  ConditionType empty_condition_;
+  typedef ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
+  ConditionVariableType condition_;
+  ConditionVariableType empty_condition_;
 
   /// Lock used for wait_for_acks() processing.
   ACE_Thread_Mutex wfa_lock_;
 
-  typedef Condition<ACE_Thread_Mutex> WfaConditionType;
+  typedef ConditionVariable<ACE_Thread_Mutex> WfaConditionVariableType;
   /// Used to block in wait_for_acks().
-  WfaConditionType wfa_condition_;
+  WfaConditionVariableType wfa_condition_;
 
   /// The number of chunks that sample_list_element_allocator_
   /// needs initialize.

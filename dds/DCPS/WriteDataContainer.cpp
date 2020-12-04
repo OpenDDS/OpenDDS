@@ -1067,11 +1067,11 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
         waiting_on_release_ = true;
         switch (condition_.wait_until(timeout)) {
-        case ConditionType::NoTimeout:
+        case CvStatus_NoTimeout:
           remove_excess_durable();
           break;
 
-        case ConditionType::Timeout:
+        case CvStatus_Timeout:
           if (DCPS_debug_level >= 2) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
               ACE_TEXT(" instance %d timed out waiting for samples to be released by transport\n"),
@@ -1080,10 +1080,14 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
           ret = DDS::RETCODE_TIMEOUT;
           break;
 
-        case ConditionType::WaitError:
+        case CvStatus_Error:
         default:
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::obtain_buffer condition_.wait()")));
+          if (DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::obtain_buffer: "
+              "error in wait_until\n"));
+          }
           ret = DDS::RETCODE_ERROR;
+          break;
         }
 
       } else {
@@ -1361,12 +1365,25 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
   }
 
   while (pending_data()) {
-    if (empty_condition_.wait_until(deadline) == ConditionType::Timeout && pending_data()) {
+    switch (empty_condition_.wait_until(deadline)) {
+    case CvStatus_NoTimeout:
+      break;
+
+    case CvStatus_Timeout:
+      if (pending_data()) {
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::wait_pending: "
+            "Timed out waiting for messages to be transported\n"));
+          log_send_state_lists("WriteDataContainer::wait_pending - wait timedout: ");
+        }
+      }
+      break;
+
+    case CvStatus_Error:
+    default:
       if (DCPS_debug_level) {
-        ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending "),
-                   ACE_TEXT("Timed out waiting for messages to be transported")));
-        this->log_send_state_lists("WriteDataContainer::wait_pending - wait failed: ");
+        ACE_ERROR((LM_ERROR, "(%P|%t) WriteDataContainer::wait_ack_of_seq: "
+          "error in wait_until\n"));
       }
       break;
     }
@@ -1411,10 +1428,10 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const Se
       // lock is released while waiting and acquired before returning
       // from wait.
       switch (wfa_condition_.wait_until(deadline)) {
-      case WfaConditionType::NoTimeout:
+      case CvStatus_NoTimeout:
         break;
 
-      case WfaConditionType::Timeout:
+      case CvStatus_Timeout:
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq: ")
             ACE_TEXT("timed out waiting for sequence %q to be acked\n"),
@@ -1423,8 +1440,12 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const Se
         ret = DDS::RETCODE_TIMEOUT;
         break;
 
-      case WfaConditionType::WaitError:
+      case CvStatus_Error:
       default:
+        if (DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) WriteDataContainer::wait_ack_of_seq: "
+            "error in wait_until\n"));
+        }
         ret = DDS::RETCODE_ERROR;
         break;
       }
