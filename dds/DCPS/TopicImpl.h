@@ -83,7 +83,7 @@ public:
 
   virtual void transport_config(const TransportConfig_rch& cfg);
 
-  void inconsistent_topic(int count);
+  virtual void inconsistent_topic(int count);
 
 private:
   /// The topic qos
