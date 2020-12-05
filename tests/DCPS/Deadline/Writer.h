@@ -19,7 +19,7 @@ public:
 
   Writer(::DDS::DataWriter_ptr writer,
          CORBA::Long key,
-         TimeDuration sleep_duration);
+         OpenDDS::DCPS::TimeDuration sleep_duration);
 
   void start ();
 
@@ -45,7 +45,7 @@ private:
   DataWriterListenerImpl* dwl_servant_;
   ::DDS::InstanceHandle_t instance_handle_;
   CORBA::Long key_;
-  TimeDuration sleep_duration_;
+  OpenDDS::DCPS::TimeDuration sleep_duration_;
 };
 
 #endif /* WRITER_H */

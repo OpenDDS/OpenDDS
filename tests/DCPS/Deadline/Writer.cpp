@@ -2,25 +2,21 @@
 //
 
 #include "Writer.h"
-#include "dds/DCPS/Service_Participant.h"
 
+#include <tests/Utils/ExceptionStreams.h>
+
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Qos_Helper.h>
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
-#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
 using namespace std;
+using OpenDDS::DCPS::TimeDuration;
 
 static const int num_messages = 10;
 static const TimeDuration write_interval(0, 500000);
-
-// Wait for up to 10 seconds for subscription matched status.
-static const DDS::Duration_t MATCHED_WAIT_MAX_DURATION = {
-  10, // seconds
-  0   // nanoseconds
-};
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
@@ -64,8 +60,7 @@ Writer::svc()
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
   try {
-    const MonotonicTimePoint connect_deadline(MonotonicTimePoint::now() + TimeDuration(MATCHED_WAIT_MAX_DURATION));
-    if (dwl_servant_->wait_matched(2, &connect_deadline.value()) != 0) {
+    if (!dwl_servant_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
       cerr << "ERROR: wait for subscription matching failed." << endl;
       exit(1);
     }
