@@ -56,8 +56,6 @@ DataReaderListenerImpl::on_liveliness_changed(
 void
 DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  DDS::DomainId_t domain = reader->get_subscriber()->get_participant()->get_domain_id();
-
   Messenger::MessageDataReader_var reader_i =
     Messenger::MessageDataReader::_narrow(reader);
 
@@ -75,7 +73,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Domain: %d. %C received message %d from %C.\n", domain, id_.c_str(), message.count, std::string(message.from).c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Domain: %d. %C received message %d from %C.\n", domain_, id_.c_str(), message.count, std::string(message.from).c_str()));
 
       if (++received_samples_ == expected_samples_) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C has received expected number of samples\n", id_.c_str()));
