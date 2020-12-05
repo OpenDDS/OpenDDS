@@ -339,6 +339,32 @@ DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumb
   return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
 }
 
+void
+DisjointSequence::erase(const SequenceNumber value)
+{
+  RangeSet::iterator iter =
+    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
+  if (iter != sequences_.end()) {
+    if (iter->first == value &&
+        iter->second == value) {
+      sequences_.erase(iter);
+    } else if (iter->first == value) {
+      SequenceRange x(value + 1, iter->second);
+      sequences_.erase(iter);
+      sequences_.insert(x);
+    } else if (iter->second == value) {
+      SequenceRange x(iter->first, value.previous());
+      sequences_.erase(iter);
+      sequences_.insert(x);
+    } else {
+      SequenceRange x(iter->first, value.previous());
+      SequenceRange y(value + 1, iter->second);
+      sequences_.erase(iter);
+      sequences_.insert(x);
+      sequences_.insert(y);
+    }
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
