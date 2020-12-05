@@ -149,7 +149,10 @@ DomainParticipantFactoryImpl::delete_participant(
 
   RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
 
-  TheTransportRegistry->delete_dynamically_created_transport(servant_rch->dynamic_instance_config_name());
+  OPENDDS_STRING dyn_inst_name = servant_rch->dynamic_instance_config_name();
+  if (!dyn_inst_name.empty()) {
+    TheTransportRegistry->delete_dynamically_created_transport(dyn_inst_name);
+  }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (!the_servant->is_clean()) {
