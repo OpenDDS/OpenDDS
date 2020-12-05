@@ -11,22 +11,23 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "DataWriterListenerImpl.h"
+
+#include <tests/Utils/ExceptionStreams.h>
+
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/unique_ptr.h>
-
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include <ace/streams.h>
 #include <ace/OS_NS_unistd.h>
-#include "tests/Utils/ExceptionStreams.h"
-#include "ace/Get_Opt.h"
+#include <ace/Get_Opt.h>
 
 #include <memory>
 #include <assert.h>
@@ -44,7 +45,7 @@ static DDS::Duration_t const DEADLINE_PERIOD =
 static int NUM_EXPIRATIONS = 2;
 
 // Time to sleep waiting for deadline periods to expire
-const static TimeDuration SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
+const static OpenDDS::DCPS::TimeDuration SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
 
 static int NUM_WRITE_THREADS = 2;
 

@@ -9,45 +9,41 @@
 #define OPENDDS_RTPS_SEDP_H
 
 #include "TypeLookup.h"
-#include "RtpsRpcTypeSupportImpl.h"
-
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-
-#include "dds/DCPS/RTPS/ICE/Ice.h"
-
-#include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/DiscoveryBase.h"
-#include "dds/DCPS/JobQueue.h"
-
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
-
-#include "dds/DCPS/PoolAllocator.h"
-
+#include "BaseMessageTypes.h"
+#include "BaseMessageUtils.h"
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/RtpsSecurityC.h"
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#  include "SecurityHelpers.h"
+#endif
+#include "ICE/Ice.h"
+#include "RtpsRpcTypeSupportImpl.h"
+#include "RtpsCoreTypeSupportImpl.h"
+#ifdef OPENDDS_SECURITY
+#  include "RtpsSecurityC.h"
 #endif
 
-#include "ace/Atomic_Op.h"
-#include "ace/Task_Ex_T.h"
-#include "ace/Thread_Mutex.h"
-#include "ace/Condition_Thread_Mutex.h"
+#include <dds/DCPS/RcHandle_T.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/DataReaderCallbacks.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/DiscoveryBase.h>
+#include <dds/DCPS/JobQueue.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportSendListener.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportInst_rch.h>
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+
+#include <ace/Atomic_Op.h>
+#include <ace/Task_Ex_T.h>
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

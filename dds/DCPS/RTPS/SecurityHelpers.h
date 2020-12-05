@@ -8,8 +8,11 @@
 #ifndef OPENDDS_SECURITY_HELPERS_H
 #define OPENDDS_SECURITY_HELPERS_H
 
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DdsDcpsGuidC.h"
+#include <dds/DCPS/Ice.h>
+#include <dds/DCPS/XTypes/TypeObject.h>
+
+#include <dds/DdsSecurityCoreC.h>
+#include <dds/DdsDcpsGuidC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
