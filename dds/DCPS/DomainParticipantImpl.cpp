@@ -2526,6 +2526,18 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   return result;
 }
 
+void
+DomainParticipantImpl::dynamic_instance_config_name(const OPENDDS_STRING& name)
+{
+  dynamic_instance_config_name_ = name;
+}
+
+OPENDDS_STRING&
+DomainParticipantImpl::dynamic_instance_config_name()
+{
+  return dynamic_instance_config_name_;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

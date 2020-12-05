@@ -113,6 +113,8 @@ DomainParticipantFactoryImpl::create_participant(
       }
       return DDS::DomainParticipant::_nil();
     }
+
+    dp->dynamic_instance_config_name(instance_config_name);
   }
 
   participants_[domainId].insert(dp);
@@ -146,6 +148,8 @@ DomainParticipantFactoryImpl::delete_participant(
   }
 
   RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
+
+  TheTransportRegistry->delete_dynamically_created_transport(servant_rch->dynamic_instance_config_name());
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (!the_servant->is_clean()) {
