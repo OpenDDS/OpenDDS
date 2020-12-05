@@ -162,7 +162,6 @@ namespace OpenDDS {
               }
 
               case CvStatus_Error:
-              default:
                 if (DCPS_debug_level) {
                   ACE_ERROR((LM_ERROR, "(%P|t) ERROR: DcpsUpcalls::svc: error in wait_utill\n"));
                 }

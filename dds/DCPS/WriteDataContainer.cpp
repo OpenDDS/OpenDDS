@@ -1081,7 +1081,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
           break;
 
         case CvStatus_Error:
-        default:
           if (DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::obtain_buffer: "
               "error in wait_until\n"));
@@ -1380,7 +1379,6 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
       break;
 
     case CvStatus_Error:
-    default:
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
           "error in wait_until\n"));
@@ -1441,7 +1439,6 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const Se
         break;
 
       case CvStatus_Error:
-      default:
         if (DCPS_debug_level) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
             "error in wait_until\n"));
