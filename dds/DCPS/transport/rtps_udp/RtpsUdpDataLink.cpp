@@ -677,6 +677,13 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 }
 
 void
+RtpsUdpDataLink::disassociated(const RepoId& local_id,
+                               const RepoId& remote_id)
+{
+  release_reservations_i(local_id, remote_id);
+}
+
+void
 RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      const RepoId& readerid,
                                      const ACE_INET_Addr& address,
