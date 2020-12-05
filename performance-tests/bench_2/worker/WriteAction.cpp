@@ -6,8 +6,15 @@
 namespace Bench {
 
 WriteAction::WriteAction(ACE_Proactor& proactor)
- : proactor_(proactor), started_(false), stopped_(false)
- , write_period_(1, 0), max_count_(0), new_key_count_(0), new_key_probability_(0)
+ : proactor_(proactor)
+ , started_(false)
+ , stopped_(false)
+ , manual_rescheduling_(false)
+ , write_period_(1, 0)
+ , last_scheduled_time_(0, 0)
+ , max_count_(0)
+ , new_key_count_(0)
+ , new_key_probability_(0)
 {
 }
 
@@ -60,6 +67,13 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     new_key_count = static_cast<size_t>(new_key_count_prop->value.ull_prop());
   }
   new_key_count_ = new_key_count;
+
+  bool relative_scheduling = false;
+  auto manual_rescheduling_prop = get_property(config.params, "relative_scheduling", Builder::PVK_ULL);
+  if (manual_rescheduling_prop) {
+    relative_scheduling = manual_rescheduling_prop->value.ull_prop() != 0u;
+  }
+  manual_rescheduling_ = relative_scheduling;
 
   double new_key_probability = 0.0;
   auto new_key_probability_prop = get_property(config.params, "new_key_probability", Builder::PVK_DOUBLE);
@@ -143,7 +157,13 @@ void WriteAction::start()
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, write_period_);
+    if (manual_rescheduling_) {
+      const auto now = Builder::get_hr_time();
+      last_scheduled_time_ = ACE_Time_Value(now.sec, static_cast<suseconds_t>(now.nsec / 1000u));
+      proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
+    } else {
+      proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, write_period_);
+    }
   }
 }
 
@@ -180,6 +200,21 @@ void WriteAction::do_write()
       } else {
         if ((data_.filter_class += static_cast<CORBA::ULong>(filter_class_increment_)) > static_cast<CORBA::ULong>(filter_class_stop_value_)) {
           data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
+        }
+      }
+
+      if (manual_rescheduling_) {
+        const auto now = Builder::get_hr_time();
+        const ACE_Time_Value atv_now(now.sec, static_cast<suseconds_t>(now.nsec / 1000u));
+        const ACE_Time_Value diff = atv_now - last_scheduled_time_;
+
+        if (diff < write_period_) {
+          const ACE_Time_Value remaining = write_period_ - diff;
+          last_scheduled_time_ = atv_now + remaining;
+          proactor_.schedule_timer(*handler_, nullptr, remaining, ZERO_TIME);
+        } else {
+          last_scheduled_time_ = atv_now;
+          proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
         }
       }
     }
