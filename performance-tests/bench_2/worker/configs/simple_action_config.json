@@ -83,7 +83,7 @@
           "value": { "_d": "PVK_ULL", "ull_prop": 0 }
         },
         { "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 4000.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
         }
       ]
     }
