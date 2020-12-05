@@ -255,7 +255,7 @@ public:
     }
   }
 
-  void run_workers(ReportDataWriter_var report_writer_impl)
+  bool run_workers(ReportDataWriter_var report_writer_impl)
   {
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
     // Spawn Workers
@@ -354,19 +354,22 @@ public:
     mem_block->finalize();
     virtual_mem_block->finalize();
 
-    if (!sigint_.load()) {
-      std::cout << "Writing report for node " << node_id_ << std::endl;
-      if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
-        std::cerr << "Write report failed" << std::endl;
-      }
-
-      DDS::Duration_t timeout = { 30, 0 };
-      if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-        std::cerr << "Waiting for report acknowledgment failed" << std::endl;
-      } else {
-        std::cout << "All reports written and acknowledged." << std::endl;
-      }
+    if (sigint_.load()) {
+      return false;
     }
+
+    std::cout << "Writing report for node " << node_id_ << std::endl;
+    if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
+      std::cerr << "Write report failed" << std::endl;
+    }
+
+    DDS::Duration_t timeout = { 30, 0 };
+    if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+      std::cerr << "Waiting for report acknowledgment failed" << std::endl;
+    } else {
+      std::cout << "All reports written and acknowledged." << std::endl;
+    }
+    return true;
   }
 
   /// Used to the Handle Exit of a Worker
@@ -806,15 +809,16 @@ int run_cycle(
   }
 
   // Run Workers and Wait for Them to Finish
-  worker_manager.run_workers(report_writer_impl);
+  if (!worker_manager.run_workers(report_writer_impl)) {
+    std::cerr << "Running workers failed (likely because we received a SIGINT)" << std::endl;
+    return 1;
+  }
 
   const DDS::Duration_t timeout = { 10, 0 };
   if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
     std::cerr << "Waiting for report acknowledgment failed" << std::endl;
     return 1;
   }
-
-  std::this_thread::sleep_for(std::chrono::seconds(3));
 
   return 0;
 }
