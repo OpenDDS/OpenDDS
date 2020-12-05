@@ -146,6 +146,8 @@ public:
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
 
+  void disassociated(const RepoId& local, const RepoId& remote);
+
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
                            const ACE_INET_Addr& address,
@@ -379,6 +381,7 @@ private:
     CORBA::Long heartbeat_count_;
 #ifdef OPENDDS_SECURITY
     const bool is_pvs_writer_; // Participant Volatile Secure writer
+    const bool is_ps_writer_; // Partcicipant Secure (Reliable SPDP) writer
 #endif
     mutable ACE_Thread_Mutex mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;

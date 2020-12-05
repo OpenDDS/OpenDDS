@@ -244,16 +244,29 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                               const RepoId& remote_id)
+                                               const RepoId& remote_id,
+                                               bool disassociate)
 {
-  GuardType guard(pending_connections_lock_);
-  typedef PendConnMap::iterator iter_t;
-  const std::pair<iter_t, iter_t> range =
-        pending_connections_.equal_range(client);
-  for (iter_t iter = range.first; iter != range.second; ++iter) {
-     iter->second->remove_on_start_callback(client, remote_id);
+  if (disassociate) {
+    GuardThreadType guard_links(links_lock_);
+    if (link_) {
+      TransportClient_rch c = client.lock();
+      if (c) {
+        link_->disassociated(c->get_repo_id(), remote_id);
+      }
+    }
   }
-  pending_connections_.erase(range.first, range.second);
+
+  {
+    GuardType guard(pending_connections_lock_);
+    typedef PendConnMap::iterator iter_t;
+    const std::pair<iter_t, iter_t> range =
+      pending_connections_.equal_range(client);
+    for (iter_t iter = range.first; iter != range.second; ++iter) {
+      iter->second->remove_on_start_callback(client, remote_id);
+    }
+    pending_connections_.erase(range.first, range.second);
+  }
 }
 
 bool

@@ -197,7 +197,8 @@ protected:
   /// The TransportClient* passed in to accept or connect is not
   /// valid after this method is called.
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id) = 0;
+                                            const RepoId& remote_id,
+                                            bool disassociate) = 0;
 
 
   /// Called during the shutdown() method in order to give the

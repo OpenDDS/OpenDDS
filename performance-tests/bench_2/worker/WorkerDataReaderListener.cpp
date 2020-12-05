@@ -388,10 +388,11 @@ bool WorkerDataReaderListener::wait_for_expected_match(const std::chrono::system
 
   while (expected_match_count_ > match_count_) {
     if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
-      return match_count_ <= expected_match_count_;
+      return match_count_ >= expected_match_count_;
     }
   }
-  return true;
+
+  return match_count_ >= expected_match_count_;
 }
 
 }
