@@ -43,7 +43,7 @@ enum CvStatus {
 template <typename Mutex>
 class ConditionVariable {
 public:
-  ConditionVariable(Mutex& mutex)
+  explicit ConditionVariable(Mutex& mutex)
   : impl_(mutex, ACE_Condition_Attributes_T<MonotonicClock>())
   {
   }
