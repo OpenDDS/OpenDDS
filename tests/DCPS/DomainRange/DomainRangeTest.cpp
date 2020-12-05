@@ -142,12 +142,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     int num_readers = num_participants == 1 ? 1 : num_participants - 1;
 
-    OPENDDS_VECTOR(DDS::Subscriber_var) subscribers;
-    OPENDDS_VECTOR(DDS::Topic_var) topics;
-
     for (OPENDDS_VECTOR(DDS::DomainId_t)::const_iterator it = domains.begin(); it != domains.end(); ++it)
     {
       DDS::DomainId_t domain = *it;
+
+      DDS::DomainParticipant_var participants[num_readers];
 
       // Create DomainParticipant
       DDS::DomainParticipantQos dr_dp_qos;
@@ -194,8 +193,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           -1);
         }
 
-        topics.push_back(topic);
-
         // Create Subscriber
         DDS::Subscriber_var subscriber =
           sub_participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
@@ -208,14 +205,34 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT(" create_subscriber failed!\n")), -1);
         }
 
-        subscribers.push_back(subscriber);
+        char buffer[10];
+        // Create DataReaders
+        DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id + ACE_OS::itoa(x, buffer, 10), domain, MSGS_PER_WRITER, reader_done_callback));
+
+        DDS::DataReaderQos dr_qos;
+        subscriber->get_default_datareader_qos(dr_qos);
+        dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+        DDS::DataReader_var reader =
+          subscriber->create_datareader(topic,
+                                        dr_qos,
+                                        listener,
+                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+        if (!reader) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("ERROR: %N:%l: main() -")
+                            ACE_TEXT(" create_datareader failed!\n")), -1);
+        }
+
+        participants[x] = sub_participant;
       }
 
       DDS::DomainParticipant_var pub_participant;
 
       if (num_participants == 1) {
         // writer uses same participant
-        pub_participant = subscribers.at(0)->get_participant();
+        pub_participant = participants[0];
       } else {
         DDS::DomainParticipantQos dw_dp_qos;
         dpf->get_default_participant_qos(dw_dp_qos);
@@ -298,44 +315,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         -1);
       }
 
-      char buffer[10];
-
-      int i = 0;
-      for (OPENDDS_VECTOR(DDS::Subscriber_var)::const_iterator it = subscribers.begin(); it != subscribers.end(); ++it) {
-        DDS::Subscriber_var subscriber = *it;
-
-        // Create DataReaders
-        DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id + ACE_OS::itoa(i, buffer, 10), MSGS_PER_WRITER, reader_done_callback));
-
-        DDS::DataReaderQos dr_qos;
-        subscriber->get_default_datareader_qos(dr_qos);
-        dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-
-        DDS::DataReader_var reader =
-          subscriber->create_datareader(topics[i],
-                                        dr_qos,
-                                        listener,
-                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-        if (!reader) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: %N:%l: main() -")
-                            ACE_TEXT(" create_datareader failed!\n")), -1);
-        }
-
-        Messenger::MessageDataReader_var reader_i =
-          Messenger::MessageDataReader::_narrow(reader);
-
-        if (!reader_i) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: %N:%l: main() -")
-                            ACE_TEXT(" _narrow failed!\n")),
-                          -1);
-        }
-
-        ++i;
-      }
-
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n", writer_id.c_str()));
       WriterTask task(writer_id, writer, num_readers);
       task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
@@ -351,15 +330,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Clean-up!
-      for (OPENDDS_VECTOR(DDS::Subscriber_var)::const_iterator it = subscribers.begin(); it != subscribers.end(); ++it) {
-        DDS::Subscriber_var subscriber = *it;
-        DDS::DomainParticipant_var s_part = subscriber->get_participant();
-        s_part->delete_contained_entities();
-        dpf->delete_participant(s_part);
+      for (int x = 0; x < num_readers; ++x) {
+        participants[x]->delete_contained_entities();
+        dpf->delete_participant(participants[x]);
       }
-
-      topics.clear();
-      subscribers.clear();
 
       if (num_participants > 1) {
         pub_participant->delete_contained_entities();
@@ -368,7 +342,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // reset for next domain
       readers_done = 0;
-
     }
 
     TheServiceParticipant->shutdown();
