@@ -297,7 +297,7 @@ private:
   struct ReaderInfo : public RcObject {
     const RepoId id_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
-    OPENDDS_VECTOR(RTPS::SequenceNumberSet) requested_changes_;
+    DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
     SequenceNumber cur_cumulative_ack_;
     const bool durable_;
@@ -392,15 +392,10 @@ private:
                                 ACE_Message_Block* body);
     void send_heartbeats_manual_i(MetaSubmessageVec& meta_submessages);
 
-    void gather_gaps_i(const RepoId& reader,
+    void gather_gaps_i(const ReaderInfo_rch& reader,
                        const DisjointSequence& gaps,
                        MetaSubmessageVec& meta_submessages);
     void acked_by_all_helper_i(TqeSet& to_deliver);
-    void send_directed_nack_replies_i(const RepoId& readerId,
-                                      const ReaderInfo_rch& reader,
-                                      MetaSubmessageVec& meta_submessages);
-    void process_requested_changes_i(DisjointSequence& requests, const ReaderInfo_rch& reader);
-    void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
     SequenceNumber expected_max_sn(const ReaderInfo_rch& reader) const;
     static void snris_insert(RtpsUdpDataLink::SNRIS& snris, const ReaderInfo_rch& reader);
     static void snris_erase(RtpsUdpDataLink::SNRIS& snris, const SequenceNumber sn, const ReaderInfo_rch& reader);
@@ -501,13 +496,17 @@ private:
     bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src, MetaSubmessageVec& meta_submessages);
     bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, MetaSubmessageVec& meta_submessages);
     bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src, MetaSubmessageVec& meta_submessages);
-    bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_heartbeat_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
 
-    void gather_ack_nacks(MetaSubmessageVec& meta_submessages);
+    void gather_preassociation_ack_nacks(MetaSubmessageVec& meta_submessages);
     const RepoId& id() const { return id_; }
 
   private:
-    void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages);
+    void gather_preassociation_ack_nacks_i(MetaSubmessageVec& meta_submessages);
+    void gather_ack_nacks_i(const WriterInfo_rch& writer,
+                            const RtpsUdpDataLink_rch& link,
+                            bool heartbeat_was_non_final,
+                            MetaSubmessageVec& meta_submessages);
     void generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
                                MetaSubmessage& meta_submessage,
                                const WriterInfo_rch& wi,
@@ -520,8 +519,6 @@ private:
     const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
-    WriterInfoSet writers_expecting_nack_;
-    WriterInfoSet writers_expecting_ack_;
     bool stopping_;
     CORBA::Long acknack_count_;
   };
