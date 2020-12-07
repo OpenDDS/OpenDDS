@@ -99,12 +99,17 @@ DomainParticipantFactoryImpl::create_participant(
 
   if (TheTransportRegistry->config_has_transport_template(transport_base_config_name)) {
     ACE_TString transport_config_name = transport_base_config_name;
-    OPENDDS_STRING instance_config_name = dp->get_unique_id();
+    OPENDDS_STRING transport_instance_name = dp->get_unique_id();
 
-    const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
+    // unique and config and instance names are returned in transport_config_name and transport_instance_name
+    const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, transport_instance_name);
+    const OPENDDS_STRING cfg_name = ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str());
 
     if (ret) {
-      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()), dp.in());
+      TheTransportRegistry->bind_config(cfg_name, dp.in());
+
+      dp->dyn_transport_config_name(cfg_name);
+      dp->dyn_transport_inst_name(transport_instance_name);
     } else {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
@@ -114,11 +119,6 @@ DomainParticipantFactoryImpl::create_participant(
       }
       return DDS::DomainParticipant::_nil();
     }
-
-    const OPENDDS_STRING cfg_name = transport_config_name.c_str();
-
-    dp->dyn_transport_config_name(cfg_name);
-    dp->dyn_transport_inst_name(instance_config_name);
   }
 
   participants_[domainId].insert(dp);

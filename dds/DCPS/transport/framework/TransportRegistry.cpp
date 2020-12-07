@@ -662,7 +662,7 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   OPENDDS_STRING config_name = "transport_config_" + transport_instance_name;
 
   // assign new config and inst names
-  transport_config_name = config_name.c_str();
+  transport_config_name = ACE_TEXT_CHAR_TO_TCHAR(config_name.c_str());
   transport_instance_name = inst_name;
 
   OpenDDS::DCPS::TransportConfig_rch config = create_config(config_name);
