@@ -480,6 +480,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::PropertySeq& properties = participant_qos.property.value;
   append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
+  append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, "false");
 
 #ifdef OPENDDS_SECURITY
   if (secure) {
