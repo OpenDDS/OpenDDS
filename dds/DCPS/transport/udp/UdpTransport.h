@@ -8,15 +8,17 @@
 #ifndef DCPS_UDPTRANSPORT_H
 #define DCPS_UDPTRANSPORT_H
 
-#include "Udp_Export.h"
-
 #include "UdpDataLink.h"
+
+#include "Udp_Export.h"
 #include "UdpDataLink_rch.h"
 
-#include "dds/DCPS/transport/framework/PriorityKey.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/transport/framework/PriorityKey.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -63,9 +65,9 @@ private:
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           Priority priority, ACE_INET_Addr local_addr, bool active);
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
   /// This lock is used to protect the client_links_ data member.
   LockType client_links_lock_;

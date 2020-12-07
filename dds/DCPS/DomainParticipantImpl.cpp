@@ -2606,7 +2606,7 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
   shutdown_mutex_.acquire();
   shutdown_result_ = ret;
   shutdown_complete_ = true;
-  shutdown_condition_.signal();
+  shutdown_condition_.notify_one();
   shutdown_mutex_.release();
 
   return 0;

@@ -10,7 +10,7 @@ using namespace std;
 
 DataWriterListenerImpl::DataWriterListenerImpl()
   : mutex_()
-  , matched_condition_(mutex_, OpenDDS::DCPS::ConditionAttributesMonotonic())
+  , matched_condition_(mutex_)
   , matched_(0)
   , offered_deadline_total_count_ (0)
 {
@@ -67,7 +67,7 @@ DataWriterListenerImpl::on_publication_matched(
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   matched_ = status.current_count;
-  matched_condition_.broadcast();
+  matched_condition_.notify_all();
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched\n")));
 }
 
@@ -95,15 +95,31 @@ DataWriterListenerImpl::on_publication_lost(
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_lost\n")));
 }
 
-int DataWriterListenerImpl::wait_matched(long count, const ACE_Time_Value *abstime) const
+bool DataWriterListenerImpl::wait_matched(
+  long count, const OpenDDS::DCPS::TimeDuration& max_wait) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
+  using namespace OpenDDS::DCPS;
 
-  int result = 0;
-  while (count != matched_ && result == 0) {
-    result = matched_condition_.wait(abstime);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, false);
+
+  const MonotonicTimePoint deadline = MonotonicTimePoint::now() + max_wait;
+  while (count != matched_) {
+    switch (matched_condition_.wait_until(deadline)) {
+    case CvStatus_NoTimeout:
+      break;
+
+    case CvStatus_Timeout:
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterListenerImpl::wait_matched: Timeout\n"));
+      return false;
+
+    case CvStatus_Error:
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterListenerImpl::wait_matched: "
+        "Error in wait_until\n"));
+      return false;
+    }
   }
-  return count == matched_ ? 0 : result;
+
+  return true;
 }
 
 CORBA::Long DataWriterListenerImpl::offered_deadline_total_count (void) const

@@ -8,12 +8,13 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "WriteDataContainer.h"
+
 #include "DataSampleHeader.h"
 #include "InstanceDataSampleList.h"
 #include "DataWriterImpl.h"
 #include "MessageTracker.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-#include "DataDurabilityCache.h"
+#  include "DataDurabilityCache.h"
 #endif
 #include "PublicationInstance.h"
 #include "Util.h"
@@ -22,8 +23,6 @@
 #include "transport/framework/TransportSendElement.h"
 #include "transport/framework/TransportCustomizedElement.h"
 #include "transport/framework/TransportRegistry.h"
-
-#include <ace/Condition_Recursive_Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -95,9 +94,9 @@ WriteDataContainer::WriteDataContainer(
     max_num_samples_(max_total_samples),
     max_blocking_time_(max_blocking_time),
     waiting_on_release_(false),
-    condition_(lock_, ConditionAttributesMonotonic()),
-    empty_condition_(lock_, ConditionAttributesMonotonic()),
-    wfa_condition_(wfa_lock_, ConditionAttributesMonotonic()),
+    condition_(lock_),
+    empty_condition_(lock_),
+    wfa_condition_(wfa_lock_),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     shutdown_(false),
@@ -606,7 +605,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       }
 
       if (!pending_data())
-        empty_condition_.broadcast();
+        empty_condition_.notify_all();
     }
 
     return;
@@ -677,12 +676,13 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("broadcasting wait_for_acknowledgments update.\n")));
     }
 
-    wfa_condition_.broadcast();
+    wfa_condition_.notify_all();
   }
 
   // Signal if there is no pending data.
-  if (!pending_data())
-    empty_condition_.broadcast();
+  if (!pending_data()) {
+    empty_condition_.notify_all();
+  }
 }
 
 void
@@ -781,8 +781,9 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
       if (containing_list == &this->orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
-        if (!pending_data())
-          empty_condition_.broadcast();
+        if (!pending_data()) {
+          empty_condition_.notify_all();
+        }
 
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
@@ -796,8 +797,9 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
 
   this->wakeup_blocking_writers (stale);
 
-  if (!pending_data())
-    empty_condition_.broadcast();
+  if (!pending_data()) {
+    empty_condition_.notify_all();
+  }
 }
 
 void
@@ -967,7 +969,7 @@ WriteDataContainer::remove_oldest_sample(
   }
 
   if (!pending_data()) {
-    empty_condition_.broadcast();
+    empty_condition_.notify_all();
   }
 
   if (result == false) {
@@ -1028,8 +1030,8 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   InstanceDataSampleList& instance_list = instance->samples_;
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
-  bool need_to_set_abs_timeout = true;
-  MonotonicTimePoint abs_timeout;
+  bool set_timeout = true;
+  MonotonicTimePoint timeout;
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
@@ -1052,11 +1054,11 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         }
       }
       // Reliable writers can wait
-      if (need_to_set_abs_timeout) {
-        abs_timeout = MonotonicTimePoint(MonotonicTimePoint::now() + TimeDuration(max_blocking_time_));
-        need_to_set_abs_timeout = false;
+      if (set_timeout) {
+        timeout = MonotonicTimePoint::now() + TimeDuration(max_blocking_time_);
+        set_timeout = false;
       }
-      if (!shutdown_ && MonotonicTimePoint::now() < abs_timeout) {
+      if (!shutdown_ && MonotonicTimePoint::now() < timeout) {
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
@@ -1064,25 +1066,27 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         }
 
         waiting_on_release_ = true;
-        const int wait_result = condition_.wait(&abs_timeout.value());
-
-        if (wait_result == 0) {
+        switch (condition_.wait_until(timeout)) {
+        case CvStatus_NoTimeout:
           remove_excess_durable();
+          break;
 
-        } else {
-          if (errno == ETIME) {
-            if (DCPS_debug_level >= 2) {
-              ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
-                                    ACE_TEXT(" instance %d timed out waiting for samples to be released by transport\n"),
-                          handle));
-            }
-            ret = DDS::RETCODE_TIMEOUT;
-
-          } else {
-            ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::obtain_buffer condition_.wait()")
-                                  ACE_TEXT("%p\n")));
-            ret = DDS::RETCODE_ERROR;
+        case CvStatus_Timeout:
+          if (DCPS_debug_level >= 2) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
+              ACE_TEXT(" instance %d timed out waiting for samples to be released by transport\n"),
+              handle));
           }
+          ret = DDS::RETCODE_TIMEOUT;
+          break;
+
+        case CvStatus_Error:
+          if (DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::obtain_buffer: "
+              "error in wait_until\n"));
+          }
+          ret = DDS::RETCODE_ERROR;
+          break;
         }
 
       } else {
@@ -1198,7 +1202,7 @@ WriteDataContainer::unregister_all()
 
     // Broadcast to wake up all waiting threads.
     if (waiting_on_release_) {
-      condition_.broadcast();
+      condition_.notify_all();
     }
   }
   DDS::ReturnCode_t ret;
@@ -1346,28 +1350,38 @@ WriteDataContainer::persist_data()
 
 void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
 {
-  const bool indefinite = deadline.is_zero();
-  const ACE_Time_Value_T<MonotonicClock>* deadline_ptr = indefinite ? 0 : &deadline.value();
-
+  const bool no_deadline = deadline.is_zero();
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
-    if (indefinite) {
+    if (no_deadline) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending no timeout\n")));
     } else {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending ")
         ACE_TEXT("timeout at %#T\n"),
-        deadline_ptr));
+        &deadline.value()));
     }
   }
 
   while (pending_data()) {
-    if (empty_condition_.wait(deadline_ptr) == -1 && pending_data()) {
+    switch (empty_condition_.wait_until(deadline)) {
+    case CvStatus_NoTimeout:
+      break;
+
+    case CvStatus_Timeout:
+      if (pending_data()) {
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::wait_pending: "
+            "Timed out waiting for messages to be transported\n"));
+          log_send_state_lists("WriteDataContainer::wait_pending - wait timedout: ");
+        }
+      }
+      break;
+
+    case CvStatus_Error:
       if (DCPS_debug_level) {
-        ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
-                   ACE_TEXT("Timed out waiting for messages to be transported")));
-        this->log_send_state_lists("WriteDataContainer::wait_pending - wait failed: ");
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
+          "error in wait_until\n"));
       }
       break;
     }
@@ -1392,9 +1406,8 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence)
+WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const SequenceNumber& sequence)
 {
-  const MonotonicTimePoint deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_, DDS::RETCODE_ERROR);
@@ -1412,20 +1425,28 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, cons
     if (!sequence_acknowledged(sequence)) {
       // lock is released while waiting and acquired before returning
       // from wait.
-      int const wait_result = wfa_condition_.wait(&deadline.value());
+      switch (wfa_condition_.wait_until(deadline)) {
+      case CvStatus_NoTimeout:
+        break;
 
-      if (wait_result != 0) {
-        if (errno == ETIME) {
-          if (DCPS_debug_level >= 2) {
-            ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq")
-                                  ACE_TEXT(" timed out waiting for sequence %q to be acked\n"),
-                                  sequence.getValue()));
-          }
-          ret = DDS::RETCODE_TIMEOUT;
-        } else {
-          ret = DDS::RETCODE_ERROR;
+      case CvStatus_Timeout:
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq: ")
+            ACE_TEXT("timed out waiting for sequence %q to be acked\n"),
+            sequence.getValue()));
         }
+        ret = DDS::RETCODE_TIMEOUT;
+        break;
+
+      case CvStatus_Error:
+        if (DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
+            "error in wait_until\n"));
+        }
+        ret = DDS::RETCODE_ERROR;
+        break;
       }
+
     } else {
       ret = DDS::RETCODE_OK;
       break;
@@ -1462,7 +1483,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
   if (!stale && waiting_on_release_) {
     waiting_on_release_ = false;
 
-    condition_.broadcast();
+    condition_.notify_all();
   }
 }
 

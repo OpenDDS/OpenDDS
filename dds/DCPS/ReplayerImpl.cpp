@@ -796,8 +796,8 @@ ReplayerImpl::data_delivered(const DataSampleElement* sample)
 
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    if ((--pending_write_count_) == 0) {
-      empty_condition_.broadcast();
+    if (--pending_write_count_ == 0) {
+      empty_condition_.notify_all();
     }
   }
 }
@@ -821,7 +821,7 @@ ReplayerImpl::data_dropped(const DataSampleElement* sample,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     if ((--pending_write_count_) == 0) {
-      empty_condition_.broadcast();
+      empty_condition_.notify_all();
     }
   }
 }

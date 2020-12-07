@@ -8,38 +8,35 @@
 #ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsSubscriptionExtC.h"
-#include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "XTypes/TypeLookupService.h"
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DdsDcpsCoreTypeSupportC.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
 #include "EntityImpl.h"
 #include "Definitions.h"
 #include "TopicImpl.h"
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
 #include "GuidBuilder.h"
-
-#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-
-#include "dds/DCPS/PoolAllocator.h"
-
+#include "PoolAllocator.h"
 #include "Recorder.h"
 #include "Replayer.h"
+#include "ConditionVariable.h"
+#include "TimeTypes.h"
+#include "XTypes/TypeLookupService.h"
+#include "transport/framework/TransportImpl_rch.h"
+#include "security/framework/SecurityConfig_rch.h"
 
-#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DdsDcpsInfrastructureC.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
 
-#include "ace/Null_Mutex.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Recursive_Thread_Mutex.h"
+#include <ace/Null_Mutex.h>
+#include <ace/Thread_Mutex.h>
+#include <ace/Recursive_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -483,7 +480,7 @@ private:
   ACE_Recursive_Thread_Mutex handle_protector_;
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
-  ACE_Condition<ACE_Thread_Mutex> shutdown_condition_;
+  ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
   DDS::ReturnCode_t shutdown_result_;
   bool shutdown_complete_;
 

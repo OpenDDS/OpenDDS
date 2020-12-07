@@ -2239,7 +2239,7 @@ Spdp::SpdpTransport::~SpdpTransport()
     ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
     outer_->eh_shutdown_ = true;
   }
-  outer_->shutdown_cond_.signal();
+  outer_->shutdown_cond_.notify_one();
 
   unicast_socket_.close();
   multicast_socket_.close();
