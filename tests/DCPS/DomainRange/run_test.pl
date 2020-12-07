@@ -22,16 +22,13 @@ sub runTest {
     $test->enable_console_logging();
 
     print "*********************************\n";
-    print "DomainRangeTest creates a single process with one or more \n";
-    print "participants. In the one participant case, the DW and DR \n";
-    print "share the same participant. In the n participant case, one \n";
-    print "DW communicates with n-1 DRs.\n\n";
+    print "DomainRangeTest creates a single process with 1 DW and 4 DRs.\n\n";
     print "Domains and transports are dynamically configured from the \n";
     print "templates in config.ini. The DW in each domain sends 10 \n";
     print "messages to its DRs.\n";
     print "*********************************\n";
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -participants 3 -domain 2 -domain 4 -domain 7 -domain 15");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -domain 2 -domain 10 -domain 20 -domain 50");
 
     $test->start_process("alpha");
 
