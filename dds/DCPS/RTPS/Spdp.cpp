@@ -131,21 +131,29 @@ namespace {
 #endif
 }
 
+namespace {
+  inline bool prop_to_bool(const DDS::Property_t& prop)
+  {
+    const char* const value = prop.value.in();
+    return std::strcmp(value, "0") && ACE_OS::strcasecmp(value, "false");
+  }
+}
+
 void Spdp::init(DDS::DomainId_t /*domain*/,
                 DCPS::RepoId& guid,
                 const DDS::DomainParticipantQos& qos,
                 RtpsDiscovery* disco)
 {
-  bool enable_writers = true;
+  bool enable_endpoint_announcements = true;
+  bool enable_type_lookup_service = config_->use_xtypes();
 
   const DDS::PropertySeq& properties = qos.property.value;
   for (unsigned int idx = 0; idx != properties.length(); ++idx) {
-    const char* name = properties[idx].name.in();
-    if (std::strcmp(RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, name) == 0) {
-      if (ACE_OS::strcasecmp(properties[idx].value.in(), "0") == 0 ||
-          ACE_OS::strcasecmp(properties[idx].value.in(), "false") == 0) {
-        enable_writers = false;
-      }
+    const DDS::Property_t& prop = properties[idx];
+    if (std::strcmp(RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, prop.name.in()) == 0) {
+      enable_endpoint_announcements = prop_to_bool(prop);
+    } else if (std::strcmp(RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, prop.name.in()) == 0) {
+      enable_type_lookup_service = prop_to_bool(prop);
     }
   }
 
@@ -156,37 +164,50 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER;
 
-  if (enable_writers) {
+  if (enable_endpoint_announcements) {
     available_builtin_endpoints_ |=
       DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
       DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
       BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER;
   }
 
+  if (enable_type_lookup_service) {
+    available_builtin_endpoints_ |=
+      BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER |
+      BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER |
+      BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER |
+      BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER;
+  }
+
 #ifdef OPENDDS_SECURITY
   if (is_security_enabled()) {
+    using namespace DDS::Security;
+
     available_builtin_endpoints_ |=
-      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
-      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
-      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
-      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
+      SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
+      SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
+      BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
+      BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
+      BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
+      BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
+      BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
+      SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
+      SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
-    available_extended_builtin_endpoints_ =
-      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
-      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
-
-    if (enable_writers) {
+    if (enable_endpoint_announcements) {
       available_builtin_endpoints_ |=
-        DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
-        DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
-        DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+        SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
+        SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
+        BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+
+    }
+
+    if (enable_type_lookup_service) {
+      available_extended_builtin_endpoints_ =
+        TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+        TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE |
+        TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
+        TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE;
     }
   }
 #endif
@@ -1987,7 +2008,8 @@ ParticipantData_t Spdp::build_local_pdata(
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     },
-    0 // associated_endpoints_
+    0, // associated_endpoints_
+    0 // extended_associated_endpoints_
   };
 
   return pdata;
