@@ -63,71 +63,50 @@ namespace
 
 } // namespace
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try
   {
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
-
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> SUBSCRIBER STARTED\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)->Subscriber started\n")));
 
     // Create Participant
-    DDS::DomainParticipant_var participant =
-      dpf->create_participant(42,
-                              PARTICIPANT_QOS_DEFAULT,
-                              DDS::DomainParticipantListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DomainParticipant_var participant = dpf->create_participant(42, PARTICIPANT_QOS_DEFAULT,
+      DDS::DomainParticipantListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(participant.in())) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() create_participant failed!\n")), 1);
+    }
 
-    if (CORBA::is_nil(participant.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_participant failed!\n")), 1);
-    { // Scope for contained entities
+    // Scope for contained entities
+    {
       // Create Subscriber
-      DDS::Subscriber_var subscriber =
-        participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                       DDS::SubscriberListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(subscriber.in()))
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" create_subscriber failed!\n")), 2);
+      DDS::Subscriber_var subscriber = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+        DDS::SubscriberListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil(subscriber.in())) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() create_subscriber failed!\n")), 2);
+      }
 
       // Register Type (FooType)
       FooTypeSupport_var ts = new FooTypeSupportImpl;
-      if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" register_type failed!\n")), 5);
+      if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() register_type failed!\n")), 5);
+      }
 
       // Create Topic (FooTopic)
-      DDS::Topic_var topic =
-        participant->create_topic("FooTopic",
-                                  CORBA::String_var(ts->get_type_name()),
-                                  TOPIC_QOS_DEFAULT,
-                                  DDS::TopicListener::_nil(),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(topic.in()))
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" create_topic failed!\n")), 6);
+      DDS::Topic_var topic = participant->create_topic("FooTopic", CORBA::String_var(ts->get_type_name()),
+        TOPIC_QOS_DEFAULT, DDS::TopicListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil(topic.in())) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() create_topic failed!\n")), 6);
+      }
 
       // Create DataReader
-      ProgressIndicator progress =
-        ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
-                          expected_samples);
-
+      ProgressIndicator progress("(%P|%t)  Subscriber %d%% (%d samples received)\n", expected_samples);
       DataReaderListenerImpl* listener_p = new DataReaderListenerImpl(received_samples, progress);
       DDS::DataReaderListener_var listener = listener_p;
 
       DDS::DataReaderQos reader_qos;
       subscriber->get_default_datareader_qos(reader_qos);
-
       reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       if (durable) {
         reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
@@ -136,20 +115,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #endif
 
-      DDS::DataReader_var reader =
-        subscriber->create_datareader(topic.in(),
-                                      reader_qos,
-                                      listener.in(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::DataReader_var reader = subscriber->create_datareader(topic.in(),
+        reader_qos, listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil(reader.in())) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() create_datareader failed!\n")), 7);
+      }
 
-      if (CORBA::is_nil(reader.in()))
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" create_datareader failed!\n")), 7);
-
-      OpenDDS::DCPS::DataReaderImpl* impl =
-        dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
-      ACE_DEBUG((LM_INFO, "(%P|%t)    SUBSCRIBER is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+      OpenDDS::DCPS::DataReaderImpl* impl = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
+      ACE_DEBUG((LM_INFO, "(%P|%t)  Subscriber is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
 
       Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
       listener_p->wait_received(OpenDDS::DCPS::TimeDuration(280, 0), expected_samples);
@@ -158,27 +131,25 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       for (size_t x = 0; x < n_publishers; ++x) {
         OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->task_sample_set_map.find(x);
         if (xit == listener_p->task_sample_set_map.end()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: MISSING ALL SAMPLES FROM PUBLISHER %d\n"), x));
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) ERROR: missing all samples from Publisher%d\n"), x));
           break;
         }
         for (size_t y = 0; y < expected_samples / n_publishers; ++y) {
           if (xit->second.count(y) == 0) {
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: PUBLISHER %d MISSING SAMPLE %d\n"), x, y));
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) ERROR: missing Sample%d from Publisher%d\n"), y, x));
           }
         }
-    }
-
+      }
     } // End scope for contained entities
+    ACE_OS::sleep(2);
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER PARTICIPANT DEL CONT ENTITIES\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)<-Subscriber delete_contained_entities\n")));
     participant->delete_contained_entities();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER DELETE PARTICIPANT\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)<-Subscriber delete_participant\n")));
     dpf->delete_participant(participant.in());
-
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER SHUTDOWN\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)<-Subscriber shutdown\n")));
     TheServiceParticipant->shutdown();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER VARS GOING OUT OF SCOPE\n")));
   }
   catch (const CORBA::Exception& e)
   {
@@ -186,17 +157,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     return 9;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- SUBSCRIBER FINISHED\n")));
-
   if (received_samples != expected_samples) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) ERROR: subscriber - ")
-      ACE_TEXT("received %d of expected %d samples.\n"),
-      received_samples,
-      expected_samples
-    ));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: Subscriber received %d of expected %d samples.\n"),
+      received_samples, expected_samples));
     return 10;
   }
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)<-Subscriber done\n")));
   return 0;
 }

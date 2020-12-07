@@ -60,36 +60,33 @@ namespace
   }
 } // namespace
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
+  int ret = 0;
   try
   {
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
-
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> PUBLISHER STARTED\n")));
-
     srand(seed);
 
     // Spawn Participant threads
+    ACE_DEBUG((LM_INFO,
+      ACE_TEXT("(%P|%t)->Publisher: %d threads, %d samples/thread, durable %d\n"),
+      num_threads, samples_per_thread, durable));
     ParticipantTask task(samples_per_thread, durable);
-
     task.activate(DEFAULT_FLAGS, static_cast<int>(num_threads));
     task.wait();
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- PUBLISHER SHUTDOWN\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)<-Publisher shutdown\n")));
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)
   {
     e._tao_print_exception("caught in main()");
-    return 1;
+    ret = 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- PUBLISHER FINISHED\n")));
-
-  return 0;
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)<-Publisher returns %d\n"), ret));
+  return ret;
 }
