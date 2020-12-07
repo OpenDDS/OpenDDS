@@ -24,13 +24,9 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_stdlib.h"
 
-/*
-  NOTE: The messages may not be processed by the reader in this test.
-  This behavior is not an error.
-*/
-
-const int /*DOMAIN_ID = 100,*/ MSGS_PER_WRITER = 10;
+const int MSGS_PER_WRITER = 10;
 const int TOTAL_WRITERS = 1;
+const int TOTAL_READERS = 5;
 
 #define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
 
@@ -68,8 +64,11 @@ public:
     message.subject_id = 1;
     message.text = "Testing...";
     message.count = 0;
+
+    DDS::InstanceHandle_t handle = message_writer->register_instance(message);
+
     for (int i = 0; i < MSGS_PER_WRITER; ++i) {
-      DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
+      DDS::ReturnCode_t error = message_writer->write(message, handle);
       ++message.count;
 
       if (error != DDS::RETCODE_OK) {
@@ -119,8 +118,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     OPENDDS_STRING reader_id = "Reader";
     const OPENDDS_STRING writer_id = "Writer";
 
-    int num_participants = 1;
-
     {
       // New scope.
       ACE_Arg_Shifter shifter (argc, argv);
@@ -131,28 +128,21 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           domains.push_back(ACE_OS::atoi(x));
           ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - domain: %d added to test\n", ACE_OS::atoi(x)));
         }
-        x = shifter.get_the_parameter (ACE_TEXT("-participants"));
-        if (x != NULL) {
-          num_participants = ACE_OS::atoi(x);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - using %d participants in each domain\n", num_participants));
-        }
         shifter.consume_arg ();
       }
     }
-
-    int num_readers = num_participants == 1 ? 1 : num_participants - 1;
 
     for (OPENDDS_VECTOR(DDS::DomainId_t)::const_iterator it = domains.begin(); it != domains.end(); ++it)
     {
       DDS::DomainId_t domain = *it;
 
-      DDS::DomainParticipant_var participants[num_readers];
+      DDS::DomainParticipant_var participants[TOTAL_READERS];
 
       // Create DomainParticipant
       DDS::DomainParticipantQos dr_dp_qos;
       dpf->get_default_participant_qos(dr_dp_qos);
 
-      for (int x = 0; x < num_readers; ++x) {
+      for (int x = 0; x < TOTAL_READERS; ++x) {
         DDS::DomainParticipant_var sub_participant =
           dpf->create_participant(domain,
                                   dr_dp_qos,
@@ -228,27 +218,21 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         participants[x] = sub_participant;
       }
 
-      DDS::DomainParticipant_var pub_participant;
+      // Create publisher participant
+      DDS::DomainParticipantQos dw_dp_qos;
+      dpf->get_default_participant_qos(dw_dp_qos);
 
-      if (num_participants == 1) {
-        // writer uses same participant
-        pub_participant = participants[0];
-      } else {
-        DDS::DomainParticipantQos dw_dp_qos;
-        dpf->get_default_participant_qos(dw_dp_qos);
+      DDS::DomainParticipant_var pub_participant =
+        dpf->create_participant(domain,
+                                dw_dp_qos,
+                                0,
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-        pub_participant =
-          dpf->create_participant(domain,
-                                  dw_dp_qos,
-                                  0,
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-        if (!pub_participant) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: %N:%l: main() -")
-                            ACE_TEXT(" create_participant failed!\n")),
-                          -1);
-        }
+      if (!pub_participant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" create_participant failed!\n")),
+                         -1);
       }
 
       // Register TypeSupport
@@ -259,7 +243,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() dw -")
                           ACE_TEXT(" register_type failed!\n")),
-                        -1);
+                         -1);
       }
 
       // Create Topic
@@ -275,20 +259,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_topic failed!\n")),
-                        -1);
+                         -1);
       }
 
       // Create Publisher
       DDS::Publisher_var publisher =
-          pub_participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                      0,
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        pub_participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                          0,
+                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (!publisher) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_publisher failed!\n")),
-                        -1);
+                         -1);
       }
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writer_id.c_str()));
@@ -316,12 +300,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n", writer_id.c_str()));
-      WriterTask task(writer_id, writer, num_readers);
+      WriterTask task(writer_id, writer, TOTAL_READERS);
       task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
       task.wait();
 
       ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
-      while (readers_done != num_readers)
+      while (readers_done != TOTAL_READERS)
         readers_done_cond.wait();
 
       DDS::Duration_t timeout = { 3, 0 };
@@ -330,15 +314,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Clean-up!
-      for (int x = 0; x < num_readers; ++x) {
+      for (int x = 0; x < TOTAL_READERS; ++x) {
         participants[x]->delete_contained_entities();
         dpf->delete_participant(participants[x]);
       }
 
-      if (num_participants > 1) {
-        pub_participant->delete_contained_entities();
-        dpf->delete_participant(pub_participant);
-      }
+      pub_participant->delete_contained_entities();
+      dpf->delete_participant(pub_participant);
 
       // reset for next domain
       readers_done = 0;
