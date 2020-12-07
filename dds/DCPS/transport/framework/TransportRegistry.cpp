@@ -642,7 +642,7 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 }
 
 bool
-TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name)
+TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& transport_config_name, OPENDDS_STRING& transport_instance_name)
 {
   // check per_participant
   TransportTemplate templ;
@@ -658,10 +658,14 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 
   TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()));
 
-  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + instance_config_name;
-  instance_config_name = "transport_config_" + instance_config_name;
+  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + transport_instance_name;
+  OPENDDS_STRING config_name = "transport_config_" + transport_instance_name;
 
-  OpenDDS::DCPS::TransportConfig_rch config = create_config(instance_config_name);
+  // assign new config and inst names
+  transport_config_name = config_name.c_str();
+  transport_instance_name = inst_name;
+
+  OpenDDS::DCPS::TransportConfig_rch config = create_config(config_name);
   OpenDDS::DCPS::TransportInst_rch inst = create_inst(inst_name, "rtps_udp");
 
   ACE_Configuration_Heap ach;
@@ -715,40 +719,37 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   inst->load(ach, sect_key);
   config->instances_.push_back(inst);
 
-  dynamically_created_config_map_[instance_config_name] = config;
-  dynamically_created_instance_map_[instance_config_name] = inst;
-
   return true;
 }
 
-void TransportRegistry::delete_dynamically_created_transport(const OPENDDS_STRING& name)
+void TransportRegistry::delete_dynamically_created_transport(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name)
 {
-  if (dynamically_created_config_map_.count(name) == 0) {
+  if (config_map_.count(config_name) == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
                ACE_TEXT("delete_dynamically_created_transport ")
-               ACE_TEXT("could not find a transport config for%C\n"),
-               name.c_str()));
+               ACE_TEXT("could not find a transport config for %C\n"),
+               config_name.c_str()));
     return;
   }
 
-  if (dynamically_created_instance_map_.count(name) == 0) {
+  if (inst_map_.count(inst_name) == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
                ACE_TEXT("delete_dynamically_created_transport ")
-               ACE_TEXT("could not find a transport instance for%C\n"),
-               name.c_str()));
+               ACE_TEXT("could not find a transport instance for %C\n"),
+               inst_name.c_str()));
     return;
   }
 
-  remove_config(dynamically_created_config_map_[name]);
-  remove_inst(dynamically_created_instance_map_[name]);
+  remove_config(config_name);
+  remove_inst(inst_name);
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportRegistry::")
                ACE_TEXT("delete_dynamically_created_transport() named %C\n"),
-               name.c_str()));
+               config_name.c_str()));
   }
 }
 
@@ -763,8 +764,6 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
-  dynamically_created_config_map_.clear();
-  dynamically_created_instance_map_.clear();
   transport_templates_.clear();
   transports_.clear();
   type_map_.clear();

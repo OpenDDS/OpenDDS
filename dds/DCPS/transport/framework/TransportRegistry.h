@@ -64,6 +64,7 @@ public:
   /// transport implementation (if one was started) and therefore should only
   /// be attempted after DDS Entities using this transport have been deleted.
   void remove_inst(const TransportInst_rch& inst);
+  void remove_inst(const OPENDDS_STRING& inst_name);
 
   static const char DEFAULT_CONFIG_NAME[];
   static const char DEFAULT_INST_PREFIX[];
@@ -71,6 +72,7 @@ public:
   TransportConfig_rch create_config(const OPENDDS_STRING& name);
   TransportConfig_rch get_config(const OPENDDS_STRING& name) const;
   void remove_config(const TransportConfig_rch& cfg);
+  void remove_config(const OPENDDS_STRING& config_name);
 
   TransportConfig_rch global_config() const;
   void global_config(const TransportConfig_rch& cfg);
@@ -126,9 +128,10 @@ public:
 
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
-  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name);
+  // the new config and instance names are returned by reference.
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& transport_config_name, OPENDDS_STRING& transport_instance_name);
 
-  void delete_dynamically_created_transport(const OPENDDS_STRING& name);
+  void delete_dynamically_created_transport(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -170,10 +173,6 @@ private:
   };
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
-
-  OPENDDS_MAP(OPENDDS_STRING, TransportConfig_rch) dynamically_created_config_map_;
-
-  OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) dynamically_created_instance_map_;
 
   bool get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst);
 
