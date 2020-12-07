@@ -259,6 +259,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include /**/ "ace/post.h"
-
 #endif /* OPENDDS_DCPS_QUEUE_TASK_BASE_T_H */
