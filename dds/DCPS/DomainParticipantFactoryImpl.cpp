@@ -94,16 +94,17 @@ DomainParticipantFactoryImpl::create_participant(
 
   // if the specified transport is a transport template then create a new transport
   // instance for the new participant if per_participant is set (checked before creating instance).
-  ACE_TString transport_config_name;
-  TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
+  ACE_TString transport_base_config_name;
+  TheServiceParticipant->get_transport_base_config_name(domainId, transport_base_config_name);
 
-  if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
+  if (TheTransportRegistry->config_has_transport_template(transport_base_config_name)) {
+    ACE_TString transport_config_name = transport_base_config_name;
     OPENDDS_STRING instance_config_name = dp->get_unique_id();
 
     const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
 
     if (ret) {
-      TheTransportRegistry->bind_config(instance_config_name, dp.in());
+      TheTransportRegistry->bind_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()), dp.in());
     } else {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
@@ -114,7 +115,8 @@ DomainParticipantFactoryImpl::create_participant(
       return DDS::DomainParticipant::_nil();
     }
 
-    dp->dynamic_instance_config_name(instance_config_name);
+    dp->dyn_transport_config_name(transport_config_name.c_str());
+    dp->dyn_transport_inst_name(instance_config_name);
   }
 
   participants_[domainId].insert(dp);
@@ -149,9 +151,16 @@ DomainParticipantFactoryImpl::delete_participant(
 
   RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
 
-  OPENDDS_STRING dyn_inst_name = servant_rch->dynamic_instance_config_name();
-  if (!dyn_inst_name.empty()) {
-    TheTransportRegistry->delete_dynamically_created_transport(dyn_inst_name);
+  OPENDDS_STRING dyn_cfg_name = servant_rch->dyn_transport_config_name();
+  OPENDDS_STRING dyn_inst_name = servant_rch->dyn_transport_inst_name();
+
+  if (!dyn_cfg_name.empty() && !dyn_inst_name.empty()) {
+    TheTransportRegistry->delete_dynamically_created_transport(dyn_cfg_name, dyn_inst_name);
+  } else if (dyn_cfg_name.empty() || dyn_inst_name.empty()) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Could not delete dynamically created transport.\n")));
+    }
   }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_

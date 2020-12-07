@@ -207,8 +207,11 @@ public:
 
   virtual DDS::ReturnCode_t delete_contained_entities();
 
-  virtual void dynamic_instance_config_name(const OPENDDS_STRING& name);
-  virtual OPENDDS_STRING& dynamic_instance_config_name();
+  virtual void dyn_transport_config_name(const OPENDDS_STRING& name);
+  virtual const OPENDDS_STRING& dyn_transport_config_name() const;
+
+  virtual void dyn_transport_inst_name(const OPENDDS_STRING& name);
+  virtual const OPENDDS_STRING& dyn_transport_inst_name() const;
 
   virtual CORBA::Boolean contains_entity(DDS::InstanceHandle_t a_handle);
 
@@ -391,7 +394,8 @@ private:
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
   bool validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos);
 
-  OPENDDS_STRING dynamic_instance_config_name_;
+  OPENDDS_STRING dyn_transport_config_name_;
+  OPENDDS_STRING dyn_transport_inst_name_;
 
   /** The implementation of create_topic.
    */

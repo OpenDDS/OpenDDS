@@ -2527,15 +2527,27 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
 }
 
 void
-DomainParticipantImpl::dynamic_instance_config_name(const OPENDDS_STRING& name)
+DomainParticipantImpl::dyn_transport_config_name(const OPENDDS_STRING& name)
 {
-  dynamic_instance_config_name_ = name;
+  dyn_transport_config_name_ = name;
 }
 
-OPENDDS_STRING&
-DomainParticipantImpl::dynamic_instance_config_name()
+const OPENDDS_STRING&
+DomainParticipantImpl::dyn_transport_config_name() const
 {
-  return dynamic_instance_config_name_;
+  return dyn_transport_config_name_;
+}
+
+void
+DomainParticipantImpl::dyn_transport_inst_name(const OPENDDS_STRING& name)
+{
+  dyn_transport_inst_name_ = name;
+}
+
+const OPENDDS_STRING&
+DomainParticipantImpl::dyn_transport_inst_name() const
+{
+  return dyn_transport_inst_name_;
 }
 
 } // namespace DCPS
