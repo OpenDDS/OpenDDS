@@ -169,13 +169,13 @@ int ParticipantTask::svc()
     DDS::Duration_t interval = { 90, 0 };
     ACE_DEBUG((LM_INFO, (pfx + "waiting for acknowledgments\n").c_str()));
     if (DDS::RETCODE_OK != writer->wait_for_acknowledgments(interval)) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT(("ERROR: " + pfx + "timed out waiting for acks!\n").c_str())), 1);
+      ACE_ERROR_RETURN((LM_ERROR, ("ERROR: " + pfx + "timed out waiting for acks!\n").c_str()), 1);
     }
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT((pfx2 + "delete_contained_entities\n").c_str())));
+    ACE_DEBUG((LM_INFO, (pfx2 + "delete_contained_entities\n").c_str()));
     participant->delete_contained_entities();
-    ACE_DEBUG((LM_INFO, ACE_TEXT((pfx2 + "delete_participant\n").c_str())));
+    ACE_DEBUG((LM_INFO, (pfx2 + "delete_participant\n").c_str()));
     dpf->delete_participant(participant.in());
   }
   catch (const CORBA::Exception& e)
@@ -184,6 +184,6 @@ int ParticipantTask::svc()
     return 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT((pfx2 + "done\n").c_str())));
+  ACE_DEBUG((LM_INFO, (pfx2 + "done\n").c_str()));
   return 0;
 }
