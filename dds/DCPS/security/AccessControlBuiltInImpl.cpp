@@ -1679,9 +1679,6 @@ AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::Permiss
 void
 AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  if (!isScheduled())
-    return;
-
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   const time_t current_date_time = time(0);

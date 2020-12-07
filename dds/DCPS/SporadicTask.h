@@ -25,13 +25,7 @@ public:
     reactor(interceptor->reactor());
   }
 
-  virtual ~SporadicTask() {
-    scheduled_ = false;
-  }
-
-  bool isScheduled() {
-    return scheduled_;
-  }
+  virtual ~SporadicTask() {}
 
   void schedule(const TimeDuration& delay)
   {
@@ -47,9 +41,6 @@ public:
 
   void cancel()
   {
-    if (!scheduled_)
-      return;
-
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       interceptor->execute_or_enqueue(new CancelCommand(this));
@@ -62,18 +53,15 @@ public:
 
   void cancel_and_wait()
   {
-    if (!scheduled_)
-      return;
-
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-      if (interceptor) {
-        ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
-        command->wait();
-      } else if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
-          ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
-      }
+    if (interceptor) {
+      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
+      command->wait();
+    } else if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
+        ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    }
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
@@ -89,9 +77,7 @@ private:
 
     virtual void execute()
     {
-      if (sporadic_task_) {
-        sporadic_task_->schedule_i(delay_);
-      }
+      sporadic_task_->schedule_i(delay_);
     }
 
     SporadicTask* const sporadic_task_;
@@ -105,9 +91,7 @@ private:
 
     virtual void execute()
     {
-      if (sporadic_task_ && sporadic_task_->scheduled_) {
-        sporadic_task_->cancel_i();
-      }
+      sporadic_task_->cancel_i();
     }
 
     SporadicTask* const sporadic_task_;
@@ -115,9 +99,6 @@ private:
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
-    if (!scheduled_)
-      return 0;
-
     const MonotonicTimePoint now(tv);
     scheduled_ = false;
     execute(now);
@@ -167,9 +148,6 @@ private:
 
   void execute(const MonotonicTimePoint& now)
   {
-    if (!isScheduled())
-      return;
-
     RcHandle<Delegate> handle = delegate_.lock();
     if (handle) {
       ((*handle).*function_)(now);
