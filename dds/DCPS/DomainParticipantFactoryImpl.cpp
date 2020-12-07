@@ -115,7 +115,9 @@ DomainParticipantFactoryImpl::create_participant(
       return DDS::DomainParticipant::_nil();
     }
 
-    dp->dyn_transport_config_name(transport_config_name.c_str());
+    const OPENDDS_STRING cfg_name = transport_config_name.c_str();
+
+    dp->dyn_transport_config_name(cfg_name);
     dp->dyn_transport_inst_name(instance_config_name);
   }
 
@@ -155,11 +157,14 @@ DomainParticipantFactoryImpl::delete_participant(
   OPENDDS_STRING dyn_inst_name = servant_rch->dyn_transport_inst_name();
 
   if (!dyn_cfg_name.empty() && !dyn_inst_name.empty()) {
-    TheTransportRegistry->delete_dynamically_created_transport(dyn_cfg_name, dyn_inst_name);
-  } else if (dyn_cfg_name.empty() || dyn_inst_name.empty()) {
-      if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Could not delete dynamically created transport.\n")));
+    TheTransportRegistry->remove_config(dyn_cfg_name);
+    TheTransportRegistry->remove_inst(dyn_inst_name);
+
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DomainParticipantFactoryImpl::delete_participant ")
+                 ACE_TEXT("deleted TransportRegistry's dynamically created config %C and instance %C\n"),
+                 dyn_cfg_name.c_str(), dyn_inst_name.c_str()));
     }
   }
 

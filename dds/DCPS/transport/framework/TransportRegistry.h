@@ -131,8 +131,6 @@ public:
   // the new config and instance names are returned by reference.
   bool create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& transport_config_name, OPENDDS_STRING& transport_instance_name);
 
-  void delete_dynamically_created_transport(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name);
-
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 

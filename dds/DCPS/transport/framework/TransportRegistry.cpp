@@ -722,37 +722,6 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   return true;
 }
 
-void TransportRegistry::delete_dynamically_created_transport(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name)
-{
-  if (config_map_.count(config_name) == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-               ACE_TEXT("delete_dynamically_created_transport ")
-               ACE_TEXT("could not find a transport config for %C\n"),
-               config_name.c_str()));
-    return;
-  }
-
-  if (inst_map_.count(inst_name) == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-               ACE_TEXT("delete_dynamically_created_transport ")
-               ACE_TEXT("could not find a transport instance for %C\n"),
-               inst_name.c_str()));
-    return;
-  }
-
-  remove_config(config_name);
-  remove_inst(inst_name);
-
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportRegistry::")
-               ACE_TEXT("delete_dynamically_created_transport() named %C\n"),
-               config_name.c_str()));
-  }
-}
-
 void
 TransportRegistry::release()
 {
