@@ -2119,7 +2119,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       }
 
       ACE_TString cfg_name;
-      if (get_transport_config_name(domainId, cfg_name)) {
+      if (get_transport_base_config_name(domainId, cfg_name)) {
         if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
           // create transport instance add default transport config
           TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
@@ -2211,7 +2211,7 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
 }
 
 bool
-Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
+Service_Participant::get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
 {
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
   if ( it != domain_to_transport_name_map_.end()) {
