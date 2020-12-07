@@ -3044,7 +3044,6 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
           // Non-directed gap.
           consolidated_recipients.insert(addrs.begin(), addrs.end());
           consolidated_gaps.insert(seq);
-          continue;
         }
       }
     }
@@ -3061,6 +3060,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
           consolidated_recipients.insert(addrs.begin(), addrs.end());
           consolidated_fragment_requests[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
                                                      rf->second.bitmap.get_buffer());
+          continue;
         } else if (destination != reader->id_){
           // Directed at another reader.
           gaps.insert(seq);
@@ -3085,7 +3085,6 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
         // Non-directed gap.
         consolidated_recipients.insert(addrs.begin(), addrs.end());
         consolidated_gaps.insert(seq);
-        continue;
       }
     }
 
