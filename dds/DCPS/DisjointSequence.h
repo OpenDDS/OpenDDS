@@ -74,6 +74,8 @@ public:
   /// Shorthand for "insert(SequenceRange(value, value))"
   bool insert(SequenceNumber value);
 
+  void erase(SequenceNumber value);
+
   /// Insert using the RTPS compact representation of a set.  The three
   /// parameters, taken together, describe a set with each 1 bit starting
   /// at the msb of bits[0] and extending through num_bits (which are located at

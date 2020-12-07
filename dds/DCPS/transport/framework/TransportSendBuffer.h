@@ -99,6 +99,7 @@ public:
   SequenceNumber high() const;
   bool empty() const;
   bool contains(const SequenceNumber& seq) const;
+  bool contains(const SequenceNumber& seq, RepoId& destination) const;
 
   void retain_all(const RepoId& pub_id);
   void insert(SequenceNumber sequence,
