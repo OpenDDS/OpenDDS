@@ -1,16 +1,15 @@
-#ifdef OPENDDS_SECURITY
-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+
+#ifdef OPENDDS_SECURITY
+
 #include "HandleRegistry.h"
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,8 +19,9 @@ namespace Security {
 HandleRegistry::~HandleRegistry()
 {
   if (DCPS::security_debug.bookkeeping) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-               ACE_TEXT("HandleRegistry::~HandleRegistry local datareader %B local datawriter %B remote participant %B remote datareader %B remote datawriter %B\n"),
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {bookkeeping} "
+               "HandleRegistry::~HandleRegistry local datareader %B local datawriter %B "
+               "remote participant %B remote datareader %B remote datawriter %B\n",
                local_datareader_crypto_handles_.size(),
                local_datawriter_crypto_handles_.size(),
                remote_participant_crypto_handles_.size(),
@@ -32,8 +32,8 @@ HandleRegistry::~HandleRegistry()
 
 void
 HandleRegistry::insert_local_datareader_crypto_handle(const DCPS::RepoId& id,
-                                                          DDS::Security::DatareaderCryptoHandle handle,
-                                                          DDS::Security::EndpointSecurityAttributes attributes)
+                                                      DDS::Security::DatareaderCryptoHandle handle,
+                                                      DDS::Security::EndpointSecurityAttributes attributes)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -87,8 +87,8 @@ HandleRegistry::erase_local_datareader_crypto_handle(const DCPS::RepoId& id)
 
 void
 HandleRegistry::insert_local_datawriter_crypto_handle(const DCPS::RepoId& id,
-                                                          DDS::Security::DatawriterCryptoHandle handle,
-                                                          DDS::Security::EndpointSecurityAttributes attributes)
+                                                      DDS::Security::DatawriterCryptoHandle handle,
+                                                      DDS::Security::EndpointSecurityAttributes attributes)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -142,7 +142,7 @@ HandleRegistry::erase_local_datawriter_crypto_handle(const DCPS::RepoId& id)
 
 void
 HandleRegistry::insert_remote_participant_crypto_handle(const DCPS::RepoId& id,
-                                                            DDS::Security::ParticipantCryptoHandle handle)
+                                                        DDS::Security::ParticipantCryptoHandle handle)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -185,8 +185,8 @@ HandleRegistry::erase_remote_participant_crypto_handle(const DCPS::RepoId& id)
 
 void
 HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
-                                                           DDS::Security::DatareaderCryptoHandle handle,
-                                                           DDS::Security::EndpointSecurityAttributes attributes)
+                                                       DDS::Security::DatareaderCryptoHandle handle,
+                                                       DDS::Security::EndpointSecurityAttributes attributes)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -255,8 +255,8 @@ HandleRegistry::erase_remote_datareader_crypto_handle(const DCPS::RepoId& id)
 
 void
 HandleRegistry::insert_remote_datawriter_crypto_handle(const DCPS::RepoId& id,
-                                                           DDS::Security::DatawriterCryptoHandle handle,
-                                                           DDS::Security::EndpointSecurityAttributes attributes)
+                                                       DDS::Security::DatawriterCryptoHandle handle,
+                                                       DDS::Security::EndpointSecurityAttributes attributes)
 {
   OPENDDS_ASSERT(id.entityId != DCPS::ENTITYID_UNKNOWN);
   if (handle != DDS::HANDLE_NIL) {

@@ -1,11 +1,9 @@
-#ifdef OPENDDS_SECURITY
-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.OpenDDS.org/license.html
  */
+
+#ifdef OPENDDS_SECURITY
 
 #ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
 #define OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
@@ -71,7 +69,7 @@ public:
   DatawriterCryptoHandleList get_all_remote_datawriters(const DCPS::RepoId& prefix) const;
   void erase_remote_datawriter_crypto_handle(const DCPS::RepoId& id);
 
- private:
+private:
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::ParticipantCryptoHandle, DCPS::GUID_tKeyLessThan)
     ParticipantCryptoHandleMap;
   typedef std::pair<DDS::Security::DatareaderCryptoHandle, DDS::Security::EndpointSecurityAttributes> P1;
