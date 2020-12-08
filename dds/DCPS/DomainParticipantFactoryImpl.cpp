@@ -107,9 +107,7 @@ DomainParticipantFactoryImpl::create_participant(
 
     if (ret) {
       TheTransportRegistry->bind_config(cfg_name, dp.in());
-
-      dp->dyn_transport_config_name(cfg_name);
-      dp->dyn_transport_inst_name(transport_instance_name);
+      TheTransportRegistry->update_config_template_instance_info(cfg_name, transport_instance_name);
     } else {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
@@ -153,33 +151,26 @@ DomainParticipantFactoryImpl::delete_participant(
 
   RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
 
-  OPENDDS_STRING dyn_cfg_name = servant_rch->dyn_transport_config_name();
-  OPENDDS_STRING dyn_inst_name = servant_rch->dyn_transport_inst_name();
+  TransportConfig_rch tr_cfg = servant_rch->transport_config();
 
-  if (!dyn_cfg_name.empty() && !dyn_inst_name.empty()) {
-    TheTransportRegistry->remove_config(dyn_cfg_name);
-    TheTransportRegistry->remove_inst(dyn_inst_name);
+  if (tr_cfg) {
+    // check for and remove tranport template instance
+    OPENDDS_STRING dyn_cfg_name = tr_cfg->name();
+    TheTransportRegistry->remove_transport_template_instance(dyn_cfg_name);
 
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DomainParticipantFactoryImpl::delete_participant ")
-                 ACE_TEXT("deleted TransportRegistry's dynamically created config %C and instance %C\n"),
-                 dyn_cfg_name.c_str(), dyn_inst_name.c_str()));
+    //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
+    if (!the_servant->is_clean()) {
+      RepoId id = the_servant->get_id();
+      GuidConverter converter(id);
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
+                  ACE_TEXT("(%P|%t) WARNING: ")
+                  ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+                  ACE_TEXT("the participant %C is not empty.\n"),
+                  OPENDDS_STRING(converter).c_str()));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-  }
-
-  //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
-  if (!the_servant->is_clean()) {
-    RepoId id = the_servant->get_id();
-    GuidConverter converter(id);
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                ACE_TEXT("the participant %C is not empty.\n"),
-                OPENDDS_STRING(converter).c_str()));
-    }
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
   const DDS::DomainId_t domain_id = the_servant->get_domain_id();

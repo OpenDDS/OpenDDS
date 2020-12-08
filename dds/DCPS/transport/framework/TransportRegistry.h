@@ -74,6 +74,8 @@ public:
   void remove_config(const TransportConfig_rch& cfg);
   void remove_config(const OPENDDS_STRING& config_name);
 
+  void remove_transport_template_instance(const OPENDDS_STRING& config_name);
+
   TransportConfig_rch global_config() const;
   void global_config(const TransportConfig_rch& cfg);
 
@@ -131,6 +133,8 @@ public:
   // the new config and instance names are returned by reference.
   bool create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& transport_config_name, OPENDDS_STRING& transport_instance_name);
 
+  void update_config_template_instance_info(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name);
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
@@ -142,6 +146,7 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) InstMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) LibDirectiveMap;
   typedef OPENDDS_MAP(DDS::DomainId_t, TransportConfig_rch) DomainConfigMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) ConfigTemplateToInstanceMap;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -151,6 +156,7 @@ private:
   InstMap inst_map_;
   LibDirectiveMap lib_directive_map_;
   DomainConfigMap domain_default_config_map_;
+  ConfigTemplateToInstanceMap config_template_to_instance_map;
 
   TransportConfig_rch global_config_;
   bool released_;
