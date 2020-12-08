@@ -9,21 +9,21 @@
 #define OPENDDS_TCPTRANSPORT_H
 
 #include "Tcp_export.h"
-
-#include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "TcpInst_rch.h"
 #include "TcpDataLink_rch.h"
 #include "TcpConnection.h"
 #include "TcpConnection_rch.h"
 
-#include "dds/DCPS/ReactorTask_rch.h"
-#include "dds/DCPS/transport/framework/PriorityKey.h"
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/transport/framework/PriorityKey.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/TimeTypes.h>
 
-#include "ace/INET_Addr.h"
-#include "ace/Hash_Map_Manager.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Connector.h"
-#include "ace/SOCK_Connector.h"
+#include <ace/INET_Addr.h>
+#include <ace/Hash_Map_Manager.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Connector.h>
+#include <ace/SOCK_Connector.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -67,7 +67,8 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id);
+                                            const RepoId& remote_id,
+                                            bool disassociate);
 
   virtual bool configure_i(TcpInst& config);
 
@@ -113,14 +114,14 @@ private:
             TcpDataLink_rch,
             ACE_Hash<PriorityKey>,
             ACE_Equal_To<PriorityKey>,
-            ACE_Null_Mutex>              AddrLinkMap;
+            ACE_Null_Mutex> AddrLinkMap;
 
   typedef OPENDDS_MAP(PriorityKey, TcpDataLink_rch)   LinkMap;
   typedef OPENDDS_MAP(PriorityKey, TcpConnection_rch) ConnectionMap;
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
 // TBD SOON - Something needs to protect the tcp_config_ reference
 //            because it gets set in our configure() method, and

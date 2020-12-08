@@ -6,29 +6,31 @@
 #ifndef OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 #define OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 
-#include "dds/DCPS/TopicDetails.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DataReaderImpl_T.h"
-#include "dds/DCPS/DCPS_Utils.h"
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DCPS/SubscriberImpl.h"
+#include "TopicDetails.h"
+#include "BuiltInTopicUtils.h"
+#include "DataReaderImpl_T.h"
+#include "DCPS_Utils.h"
+#include "Discovery.h"
+#include "DomainParticipantImpl.h"
+#include "GuidUtils.h"
+#include "Marked_Default_Qos.h"
+#include "PoolAllocationBase.h"
+#include "Registered_Data_Types.h"
+#include "SubscriberImpl.h"
 #include "SporadicTask.h"
-
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-
+#include "TimeTypes.h"
+#include "ConditionVariable.h"
+#ifdef OPENDDS_SECURITY
+#  include "Ice.h"
+#endif
 #include "XTypes/TypeAssignability.h"
 
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/Ice.h"
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "ace/Condition_Thread_Mutex.h"
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -108,11 +110,12 @@ namespace OpenDDS {
         status_ = TheServiceParticipant->get_thread_statuses();
 #ifdef ACE_HAS_MAC_OSX
         uint64_t osx_tid;
-        if (!pthread_threadid_np(NULL, &osx_tid)) {
+        if (!pthread_threadid_np(0, &osx_tid)) {
           tid_ = static_cast<unsigned long>(osx_tid);
         } else {
           tid_ = 0;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls: "
+            "Error getting OSX thread id: %p\n")));
         }
 #else
         tid_ = ACE_OS::thr_self();
@@ -127,28 +130,48 @@ namespace OpenDDS {
 
       int svc()
       {
-        ACE_Time_Value expire = MonotonicTimePoint::now().value() + interval_.value();
-        const ACE_Time_Value* expire_ptr = has_timeout() ? &expire : 0;
+        MonotonicTimePoint expire;
+        const bool use_expire = has_timeout();
+        if (use_expire) {
+          expire = MonotonicTimePoint::now() + interval_;
+        }
 
         drr_->add_association(reader_, wa_, active_);
         {
           ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);
           reader_done_ = true;
-          cnd_.signal();
+          cnd_.notify_one();
           while (!writer_done_) {
-            cnd_.wait(expire_ptr);
+            if (use_expire) {
+              switch (cnd_.wait_until(expire)) {
+              case CvStatus_NoTimeout:
+                break;
 
-            const MonotonicTimePoint now = MonotonicTimePoint::now();
-            if (expire_ptr && now.value() > expire) {
-              expire = now.value() + interval_.value();
-              if (status_) {
-                if (DCPS_debug_level > 4) {
-                  ACE_DEBUG((LM_DEBUG,
-                            "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+              case CvStatus_Timeout: {
+                const MonotonicTimePoint now = MonotonicTimePoint::now();
+                expire = now + interval_;
+                if (status_) {
+                  if (DCPS_debug_level > 4) {
+                    ACE_DEBUG((LM_DEBUG, "(%P|%t) DcpsUpcalls::svc: "
+                      "Updating thread status.\n"));
+                  }
+                  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
+                  status_->map[key_] = now;
                 }
-                ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
-                status_->map[key_] = now;
+                break;
               }
+
+              case CvStatus_Error:
+                if (DCPS_debug_level) {
+                  ACE_ERROR((LM_ERROR, "(%P|t) ERROR: DcpsUpcalls::svc: error in wait_utill\n"));
+                }
+                return -1;
+              }
+            } else if (cnd_.wait() == CvStatus_Error) {
+              if (DCPS_debug_level) {
+                ACE_ERROR((LM_ERROR, "(%P|t) ERROR: DcpsUpcalls::svc: error in wait\n"));
+              }
+              return -1;
             }
           }
         }
@@ -160,28 +183,22 @@ namespace OpenDDS {
         {
           ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
           writer_done_ = true;
-          cnd_.signal();
+          cnd_.notify_one();
         }
 
-        ACE_Time_Value expire;
-
-        if (has_timeout()) {
-          expire = MonotonicTimePoint::now().value() + interval_.value();
-        }
+        const MonotonicTimePoint expire = has_timeout() ?
+          MonotonicTimePoint::now() + interval_ : MonotonicTimePoint();
 
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
         const MonotonicTimePoint now = MonotonicTimePoint::now();
-        if (has_timeout() && now.value() > expire) {
-          expire = now.value() + interval_.value();
-          if (status_) {
-            if (DCPS_debug_level > 4) {
-              ACE_DEBUG((LM_DEBUG,
-                        "%T (%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
-            }
-            ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock);
-            status_->map[key_] = now;
+        if (status_ && has_timeout() && now > expire) {
+          if (DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+                       "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
+          ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock);
+          status_->map[key_] = now;
         }
       }
 
@@ -192,7 +209,7 @@ namespace OpenDDS {
       DataWriterCallbacks* const dwr_;
       bool reader_done_, writer_done_;
       ACE_Thread_Mutex mtx_;
-      ACE_Condition_Thread_Mutex cnd_;
+      ConditionVariable<ACE_Thread_Mutex> cnd_;
 
       // thread reporting
       TimeDuration interval_;
@@ -550,7 +567,7 @@ namespace OpenDDS {
           }
 
           if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
-            DDS::Security::DatawriterCryptoHandle handle =
+            const DDS::Security::DatawriterCryptoHandle handle =
               get_crypto_key_factory()->register_local_datawriter(
                 crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
             if (handle == DDS::HANDLE_NIL) {

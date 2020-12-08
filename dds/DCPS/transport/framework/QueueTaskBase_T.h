@@ -8,24 +8,22 @@
 #ifndef OPENDDS_DCPS_QUEUE_TASK_BASE_T_H
 #define OPENDDS_DCPS_QUEUE_TASK_BASE_T_H
 
-#include /**/ "ace/pre.h"
-
 #include "EntryExit.h"
 
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/TimeTypes.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Condition_T.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Task.h"
-#include "ace/Unbounded_Queue.h"
-#include "ace/INET_Addr.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Task.h>
+#include <ace/Unbounded_Queue.h>
+#include <ace/INET_Addr.h>
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -41,11 +39,12 @@ template <typename T>
 class QueueTaskBase : public ACE_Task_Base {
 public:
   QueueTaskBase()
-  : work_available_(lock_, ConditionAttributesMonotonic()),
-      shutdown_initiated_(false),
-      opened_(false),
-      thr_id_(ACE_OS::NULL_thread),
-      name_("QueueTaskBase") {
+  : work_available_(lock_)
+  , shutdown_initiated_(false)
+  , opened_(false)
+  , thr_id_(ACE_OS::NULL_thread)
+  , name_("QueueTaskBase")
+  {
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
 
@@ -66,7 +65,7 @@ public:
     int result = this->queue_.enqueue_tail(req);
 
     if (result == 0) {
-      this->work_available_.signal();
+      work_available_.notify_one();
 
     } else
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::add %p\n",
@@ -114,11 +113,11 @@ public:
 #ifdef ACE_HAS_MAC_OSX
     unsigned long tid = 0;
     uint64_t osx_tid;
-    if (!pthread_threadid_np(NULL, &osx_tid)) {
+    if (!pthread_threadid_np(0, &osx_tid)) {
       tid = static_cast<unsigned long>(osx_tid);
     } else {
       tid = 0;
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
+      ACE_ERROR((LM_ERROR, "(%P|%t) QueueTaskBase::svc: Error getting OSX thread id: %p\n"));
     }
 #elif !defined (OPENDDS_SAFETY_PROFILE)
     ACE_thread_t tid = thr_id_;
@@ -146,7 +145,7 @@ public:
             MonotonicTimePoint expire = MonotonicTimePoint::now() + interval;
 
             do {
-              this->work_available_.wait(&expire.value());
+              work_available_.wait_until(expire);
 
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
@@ -154,7 +153,7 @@ public:
                 if (status) {
                   if (DCPS_debug_level > 4) {
                     ACE_DEBUG((LM_DEBUG,
-                              "%T (%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                              "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                   }
                   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
                   status->map[key] = now;
@@ -204,7 +203,7 @@ public:
 
       // Set the shutdown flag to true.
       this->shutdown_initiated_ = true;
-      this->work_available_.signal();
+      work_available_.notify_one();
     }
 
     if (this->opened_ && !ACE_OS::thr_equal(this->thr_id_, ACE_OS::thr_self()))
@@ -224,11 +223,11 @@ public:
 
 private:
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
-  typedef ACE_Unbounded_Queue<T>  Queue;
+  typedef ACE_Unbounded_Queue<T> Queue;
 
   /// Lock to protect the "state" (all of the data members) of this object.
   mutable LockType lock_;
@@ -240,7 +239,7 @@ private:
   /// find a request in the queue_ that needs to be executed.
   /// This condition will be signal()'ed each time a request is
   /// added to the queue_, and also when this task is shutdown.
-  ConditionType work_available_;
+  ConditionVariableType work_available_;
 
   /// Flag used to initiate a shutdown request to all worker threads.
   bool shutdown_initiated_;
@@ -259,7 +258,5 @@ private:
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-#include /**/ "ace/post.h"
 
 #endif /* OPENDDS_DCPS_QUEUE_TASK_BASE_T_H */

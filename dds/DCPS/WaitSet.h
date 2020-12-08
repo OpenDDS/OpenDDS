@@ -8,20 +8,20 @@
 #ifndef OPENDDS_DCPS_WAITSET_H
 #define OPENDDS_DCPS_WAITSET_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "LocalObject.h"
+#include "Definitions.h"
+#include "PoolAllocator.h"
+#include "ConditionVariable.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <ace/Thread_Mutex.h>
+#include <ace/Atomic_Op.h>
+#include <ace/Recursive_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "dds/DCPS/LocalObject.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/TimeTypes.h"
-
-#include "ace/Thread_Mutex.h"
-#include "ace/Atomic_Op.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,8 +51,8 @@ public:
   typedef WaitSet_var _var_type;
 
   WaitSet()
-    : lock_(),
-      cond_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic())
+    : lock_()
+    , cond_(lock_)
   {}
 
   virtual ~WaitSet() {}
@@ -72,8 +72,7 @@ public:
 
   static WaitSet_ptr _duplicate(WaitSet_ptr obj);
 
-  typedef OPENDDS_SET_CMP(Condition_var,
-  OpenDDS::DCPS::VarLess<Condition> ) ConditionSet;
+  typedef OPENDDS_SET_CMP(Condition_var, OpenDDS::DCPS::VarLess<Condition>) ConditionSet;
 
 private:
   ReturnCode_t detach_i(const Condition_ptr cond);
@@ -81,7 +80,8 @@ private:
   friend class OpenDDS::DCPS::ConditionImpl;
 
   ACE_Recursive_Thread_Mutex lock_;
-  ACE_Condition_Recursive_Thread_Mutex cond_;
+  typedef OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
+  ConditionVariableType cond_;
   // Treat as a boolean value.
   ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
 
