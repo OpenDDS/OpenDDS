@@ -482,7 +482,7 @@ namespace OpenDDS {
           }
 
           if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
-            DDS::Security::DatawriterCryptoHandle handle =
+            const DDS::Security::DatawriterCryptoHandle handle =
               get_crypto_key_factory()->register_local_datawriter(
                 crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
             if (handle == DDS::HANDLE_NIL) {

@@ -171,6 +171,8 @@ IDL Definition
   typedef sequence<WorkerPrototype> WorkerPrototypes;
 
   struct NodePrototype {
+    // Assign to a node controller with a name that matches this wildcard
+    string name_wildcard;
     WorkerPrototypes workers;
     // Number of Nodes to spawn using this prototype (Must be >=1)
     unsigned long count;
@@ -205,6 +207,7 @@ Annotated Example
     "desc": "This shows the structure of the scenario configuration",
     "nodes": [
       {
+        "name_wildcard": "example_nc_*",
         "workers": [
           {
             "config": "daemon.json",
@@ -236,9 +239,13 @@ and vice-versa. They may also wind up all together on the same node, depending
 on the number of available nodes. And finally, one “master” process will be
 started wherever there is room available.
 
-If node “prototypes” are marked exclusive, the test controller will attempt to
-allocate them exclusively to their own node controller. If not enough node
-controllers exist to honor all the exclusive nodes, the test controller will
+The “name_wildcard” field is used to filter the ``node_controller`` instances
+that can be used to host the nodes in the current node config - only the
+``node_controller`` instances with names matching the wildcard can be used. If
+the “name_wildcard” is omitted or its value is empty, any ``node_controller``
+can be used. If node “prototypes” are marked exclusive, the test controller will
+attempt to allocate them exclusively to their own node controllers. If not enough
+node controllers exist to honor all the exclusive nodes, the test controller will
 fail with an error message.
 
 Worker Configuration Files
@@ -893,8 +900,11 @@ Usage
 .. option:: --name STRING
 
     Human friendly name for the node. Will be used by the test controller for
-    referring to the node, but otherwise has no effect on behavior. Multiple
-    nodes could even have the same name.
+    referring to the node. During allocation of node controllers, the name
+    is used to match against the “name_wildcard” fields of the node configs.
+    Only node controllers whose names match the “name_wildcard” of a given
+    node config can be allocated to that node config. Multiple nodes could
+    have the same name.
 
 worker
 ======
