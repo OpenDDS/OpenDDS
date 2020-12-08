@@ -7,6 +7,7 @@
 
 #include "dds/DCPS/RTPS/ICE/Stun.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
+#include "tools/rtpsrelay/utility.h"
 
 #include "ace/ACE.h"
 #include "ace/SOCK_Dgram.h"
@@ -81,9 +82,10 @@ bool recv(int& status,
 
 bool test_success(int& status,
                   ACE_SOCK_Dgram& socket,
-                  const ACE_INET_Addr& remote)
+                  const ACE_INET_Addr& remote,
+                  const char* test_name = 0)
 {
-  std::cerr << __func__ << std::endl;
+  std::cerr << (test_name ? test_name : __func__) << std::endl;
   bool retval = true;
   OpenDDS::STUN::Message request;
   request.class_ = OpenDDS::STUN::REQUEST;
@@ -268,32 +270,64 @@ bool test_no_fingerprint(int& status,
 
   return retval;
 }
-#endif
+
+void usage()
+{
+  std::cout <<
+    "StunClient [-ipv6 0|1]\n"
+    "\tTest the server running on localhost:4444 (used for automated testing)\n\n"
+    "StunClient -server <host:port> [-local_port <p>] [-server_port_count <n>]\n"
+    "\tPing the server at <host:port> to check STUN connectivity\n"
+    "\t<p> = local UDP port to use, defaults to 0 (pick an unused port)\n"
+    "\t<n> = number of consecutive server ports to check starting at <port>, defaults to 3\n"
+    ;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-#ifdef OPENDDS_SECURITY
-    bool ipv6 = false;
-#endif
+  bool ipv6 = false;
+  std::string server;
+  u_short local_port = 0;
+  int server_port_count = 3;
 
   ACE_Argv_Type_Converter atc(argc, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
   while (args.is_anything_left()) {
     const char* arg = nullptr;
-    if ((arg = args.get_the_parameter("ipv6"))) {
-#ifdef OPENDDS_SECURITY
-        ipv6 = ACE_OS::atoi(arg);
-#endif
-        args.consume_arg();
+    if ((arg = args.get_the_parameter("-ipv6"))) {
+      ipv6 = std::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-server"))) {
+      server = arg;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-local_port"))) {
+      local_port = static_cast<u_short>(std::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-server_port_count"))) {
+      server_port_count = std::atoi(arg);
+      args.consume_arg();
+    } else if (args.cur_arg_strncasecmp("-help") >= 0) {
+      usage();
+      return EXIT_SUCCESS;
     } else {
       args.ignore_arg();
     }
   }
 
   int status = EXIT_SUCCESS;
-#ifdef OPENDDS_SECURITY
-  ACE_INET_Addr local(0, ipv6 ? "::" : "0.0.0.0", ipv6 ? AF_INET6 : AF_INET);
+  ACE_INET_Addr local(local_port, ipv6 ? "::" : "0.0.0.0", ipv6 ? AF_INET6 : AF_INET);
   ACE_SOCK_Dgram socket(local, ipv6 ? AF_INET6 : AF_INET);
+
+  if (!server.empty()) {
+    const ACE_INET_Addr server_addr_base(server.c_str());
+    for (int i = 0; i < server_port_count; ++i) {
+      ACE_INET_Addr server_addr(server_addr_base);
+      server_addr.set_port_number(server_addr.get_port_number() + i);
+      std::string name = "pinging server at " + RtpsRelay::addr_to_string(server_addr);
+      test_success(status, socket, server_addr, name.c_str());
+    }
+    return status;
+  }
 
   ACE_INET_Addr remote(4444, ipv6 ? "::1" : "127.0.0.1");
 
@@ -306,6 +340,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (!test_no_fingerprint(status, socket, remote)) {
     std::cerr << "ERROR: test_no_fingerprint failed" << std::endl;
   }
-#endif
   return status;
 }
+#else
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
+  ACE_ERROR((LM_ERROR, "ERROR: No IETF STUN support in this build\n"));
+  return EXIT_FAILURE;
+}
+#endif
