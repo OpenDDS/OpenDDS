@@ -131,7 +131,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
         x = shifter.get_the_parameter (ACE_TEXT("-bind"));
         if (x != NULL) {
-          new_config = x;
+          new_config = ACE_TEXT_ALWAYS_CHAR(x);
           ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - test will bind to a different config\n"));
         }
         shifter.consume_arg ();
