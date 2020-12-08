@@ -26,7 +26,7 @@
 
 const int MSGS_PER_WRITER = 10;
 const int TOTAL_WRITERS = 1;
-const int TOTAL_READERS = 5;
+const int TOTAL_READERS = 1;
 
 #define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
 
@@ -108,6 +108,7 @@ void reader_done_callback()
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  OPENDDS_STRING new_config;
   OPENDDS_VECTOR(DDS::DomainId_t) domains;
 
   try {
@@ -127,6 +128,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         if (x != NULL) {
           domains.push_back(ACE_OS::atoi(x));
           ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - domain: %d added to test\n", ACE_OS::atoi(x)));
+        }
+        x = shifter.get_the_parameter (ACE_TEXT("-bind"));
+        if (x != NULL) {
+          new_config = x;
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - test will bind to a different config\n"));
         }
         shifter.consume_arg ();
       }
@@ -154,6 +160,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("ERROR: %N:%l: main() -")
                             ACE_TEXT(" create_participant failed!\n")),
                           -1);
+        }
+
+        // bind participants to the secondary config
+        if (!new_config.empty()) {
+          TheTransportRegistry->bind_config(new_config, sub_participant);
         }
 
         // Register TypeSupport
@@ -233,6 +244,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_participant failed!\n")),
                          -1);
+      }
+
+      // bind pub participant to the secondary config
+      if (!new_config.empty()) {
+        TheTransportRegistry->bind_config(new_config, pub_participant);
       }
 
       // Register TypeSupport
