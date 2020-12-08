@@ -781,16 +781,16 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
 
     } else {
       for (WriterToSeqReadersMap::iterator w = writer_to_seq_best_effort_readers_.begin();
-          w != writer_to_seq_best_effort_readers_.end(); ++w) {
-        if (w != writer_to_seq_best_effort_readers_.end()) {
-          RepoIdSet::iterator r = w->second.readers.find(localId);
-          if (r != w->second.readers.end()) {
-            w->second.readers.erase(r);
-            if (w->second.readers.empty()) {
-              writer_to_seq_best_effort_readers_.erase(w);
-            }
+          w != writer_to_seq_best_effort_readers_.end();) {
+        RepoIdSet::iterator r = w->second.readers.find(localId);
+        if (r != w->second.readers.end()) {
+          w->second.readers.erase(r);
+          if (w->second.readers.empty()) {
+            writer_to_seq_best_effort_readers_.erase(w++);
+            continue;
           }
         }
+        ++w;
       }
     }
 
