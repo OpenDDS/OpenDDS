@@ -2007,9 +2007,11 @@ ParticipantData_t Spdp::build_local_pdata(
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    },
-    0, // associated_endpoints_
-    0 // extended_associated_endpoints_
+    }
+    , 0 // associated_endpoints
+#ifdef OPENDDS_SECURITY
+    , 0 // extended_associated_endpoints
+#endif
   };
 
   return pdata;
