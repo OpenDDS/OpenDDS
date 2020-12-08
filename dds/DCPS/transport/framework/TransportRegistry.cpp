@@ -11,6 +11,7 @@
 #include "TransportInst.h"
 #include "TransportExceptions.h"
 #include "TransportType.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/EntityImpl.h"
