@@ -157,20 +157,20 @@ DomainParticipantFactoryImpl::delete_participant(
     // check for and remove tranport template instance
     OPENDDS_STRING dyn_cfg_name = tr_cfg->name();
     TheTransportRegistry->remove_transport_template_instance(dyn_cfg_name);
+  }
 
-    //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
-    if (!the_servant->is_clean()) {
-      RepoId id = the_servant->get_id();
-      GuidConverter converter(id);
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
-                  ACE_TEXT("(%P|%t) WARNING: ")
-                  ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                  ACE_TEXT("the participant %C is not empty.\n"),
-                  OPENDDS_STRING(converter).c_str()));
-      }
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
+  //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
+  if (!the_servant->is_clean()) {
+    RepoId id = the_servant->get_id();
+    GuidConverter converter(id);
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+                ACE_TEXT("the participant %C is not empty.\n"),
+                OPENDDS_STRING(converter).c_str()));
     }
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
   const DDS::DomainId_t domain_id = the_servant->get_domain_id();
