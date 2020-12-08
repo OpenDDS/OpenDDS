@@ -106,19 +106,23 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
   }
 }
 
-Topic::~Topic() {
+Topic::~Topic()
+{
   detach_listener();
 }
 
-const std::string& Topic::get_name() const {
+const std::string& Topic::get_name() const
+{
   return name_;
 }
 
-DDS::Topic_var& Topic::get_dds_topic() {
+DDS::Topic_var& Topic::get_dds_topic()
+{
   return topic_;
 }
 
-bool Topic::enable(bool throw_on_error) {
+bool Topic::enable(bool throw_on_error)
+{
   bool result = (topic_->enable() == DDS::RETCODE_OK);
   if (!result && throw_on_error) {
     std::stringstream ss;
@@ -128,7 +132,8 @@ bool Topic::enable(bool throw_on_error) {
   return result;
 }
 
-void Topic::detach_listener() {
+void Topic::detach_listener()
+{
   if (listener_) {
     TopicListener* savvy_listener_ = dynamic_cast<TopicListener*>(listener_.in());
     if (savvy_listener_) {

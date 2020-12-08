@@ -62,7 +62,8 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   datawriters_.reset(new DataWriterManager(config.datawriters, report.datawriters, publisher_, topics, writer_map));
 }
 
-Publisher::~Publisher() {
+Publisher::~Publisher()
+{
   detach_listeners();
   datawriters_.reset();
   Log::log() << "Deleting publisher: " << name_ << std::endl;
@@ -73,7 +74,8 @@ Publisher::~Publisher() {
   }
 }
 
-bool Publisher::enable(bool throw_on_error) {
+bool Publisher::enable(bool throw_on_error)
+{
   bool success = (publisher_->enable() == DDS::RETCODE_OK);
   if (!success && throw_on_error) {
     std::stringstream ss;
@@ -83,7 +85,8 @@ bool Publisher::enable(bool throw_on_error) {
   return success && datawriters_->enable(throw_on_error);
 }
 
-void Publisher::detach_listeners() {
+void Publisher::detach_listeners()
+{
   if (listener_) {
     PublisherListener* savvy_listener = dynamic_cast<PublisherListener*>(listener_.in());
     if (savvy_listener) {

@@ -8,7 +8,8 @@
 
 namespace Builder {
 
-ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq) {
+ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq)
+{
   ACE_Configuration_Heap ach;
   ach.open();
   for (CORBA::ULong i = 0; i < seq.length(); ++i) {

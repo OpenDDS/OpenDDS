@@ -119,7 +119,8 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   }
 }
 
-DataReader::~DataReader() {
+DataReader::~DataReader()
+{
   detach_listener();
   Log::log() << "Deleting datareader: " << name_ << std::endl;
   if (!CORBA::is_nil(datareader_.in())) {
@@ -129,7 +130,8 @@ DataReader::~DataReader() {
   }
 }
 
-bool DataReader::enable(bool throw_on_error) {
+bool DataReader::enable(bool throw_on_error)
+{
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
   }
@@ -142,7 +144,8 @@ bool DataReader::enable(bool throw_on_error) {
   return result;
 }
 
-void DataReader::detach_listener() {
+void DataReader::detach_listener()
+{
   if (listener_) {
     DataReaderListener* savvy_listener_ = dynamic_cast<DataReaderListener*>(listener_.in());
     if (savvy_listener_) {

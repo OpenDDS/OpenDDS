@@ -2,7 +2,8 @@
 
 namespace Builder {
 
-DataWriterManager::DataWriterManager(const DataWriterConfigSeq& configs, DataWriterReportSeq& reports, DDS::Publisher_var& publisher, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map) {
+DataWriterManager::DataWriterManager(const DataWriterConfigSeq& configs, DataWriterReportSeq& reports, DDS::Publisher_var& publisher, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map)
+{
   reports.length(configs.length());
   for (CORBA::ULong i = 0; i < configs.length(); ++i) {
     auto it = writer_map.find(configs[i].name.in());
@@ -17,7 +18,8 @@ DataWriterManager::DataWriterManager(const DataWriterConfigSeq& configs, DataWri
   }
 }
 
-bool DataWriterManager::enable(bool throw_on_error) {
+bool DataWriterManager::enable(bool throw_on_error)
+{
   bool result = true;
   for (auto it = datawriters_.begin(); it != datawriters_.end(); ++it) {
     result &= (*it)->enable(throw_on_error);

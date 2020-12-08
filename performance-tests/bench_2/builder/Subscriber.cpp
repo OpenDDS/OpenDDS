@@ -63,7 +63,8 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
   datareaders_.reset(new DataReaderManager(config.datareaders, report.datareaders, subscriber_, topics, reader_map, cft_map));
 }
 
-Subscriber::~Subscriber() {
+Subscriber::~Subscriber()
+{
   detach_listeners();
   datareaders_.reset();
   Log::log() << "Deleting subscriber: " << name_ << std::endl;
@@ -74,7 +75,8 @@ Subscriber::~Subscriber() {
   }
 }
 
-bool Subscriber::enable(bool throw_on_error) {
+bool Subscriber::enable(bool throw_on_error)
+{
   bool success = (subscriber_->enable() == DDS::RETCODE_OK);
   if (!success && throw_on_error) {
     std::stringstream ss;
@@ -84,7 +86,8 @@ bool Subscriber::enable(bool throw_on_error) {
   return success && datareaders_->enable(throw_on_error);
 }
 
-void Subscriber::detach_listeners() {
+void Subscriber::detach_listeners()
+{
   if (listener_) {
     SubscriberListener* savvy_listener = dynamic_cast<SubscriberListener*>(listener_.in());
     if (savvy_listener) {

@@ -112,7 +112,8 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   }
 }
 
-DataWriter::~DataWriter() {
+DataWriter::~DataWriter()
+{
   detach_listener();
   Log::log() << "Deleting datawriter: " << name_ << std::endl;
   if (!CORBA::is_nil(datawriter_.in())) {
@@ -122,7 +123,8 @@ DataWriter::~DataWriter() {
   }
 }
 
-bool DataWriter::enable(bool throw_on_error) {
+bool DataWriter::enable(bool throw_on_error)
+{
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
   }
@@ -135,7 +137,8 @@ bool DataWriter::enable(bool throw_on_error) {
   return result;
 }
 
-void DataWriter::detach_listener() {
+void DataWriter::detach_listener()
+{
   if (listener_) {
     DataWriterListener* savvy_listener = dynamic_cast<DataWriterListener*>(listener_.in());
     if (savvy_listener) {
