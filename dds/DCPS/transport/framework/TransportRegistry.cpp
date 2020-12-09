@@ -614,7 +614,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 
         if (success) {
           // update config
-          TransportConfig_rch new_cfg = get_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()));
+          TransportConfig_rch new_cfg = get_config(transport_config_name);
           update_config_template_instance_info(new_cfg->name(), transport_inst_name);
           ei->transport_config(new_cfg);
           return;

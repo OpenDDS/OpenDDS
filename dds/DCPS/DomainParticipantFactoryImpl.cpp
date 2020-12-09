@@ -103,11 +103,10 @@ DomainParticipantFactoryImpl::create_participant(
 
     // unique and config and instance names are returned in transport_config_name and transport_instance_name
     const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, transport_instance_name);
-    const OPENDDS_STRING cfg_name = ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str());
 
     if (ret) {
-      TheTransportRegistry->bind_config(cfg_name, dp.in());
-      TheTransportRegistry->update_config_template_instance_info(cfg_name, transport_instance_name);
+      TheTransportRegistry->bind_config(transport_config_name, dp.in());
+      TheTransportRegistry->update_config_template_instance_info(transport_config_name, transport_instance_name);
     } else {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
