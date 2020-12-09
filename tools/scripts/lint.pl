@@ -90,8 +90,9 @@ my $help_message = $usage_message .
   "--list-default      List all default checks\n" .
   "--list-non-default  List all non-default checks\n" .
   "--all | -a          Run all checks\n" .
-  "--fix               Attempt to fix issues that support fixing. Don't try\n" .
-  "                    this unless your work is commited.\n" .
+  "--try-fix           ATTEMPT to fix issues that support fixing. THIS IS POWERED\n" .
+  "                    BY REGEX, NOT MAGIC. Don't try this unless your existing\n" .
+  "                    work is commited or otherwise safe from this script.\n" .
   "\n" .
   "If run with DDS_ROOT being defined, it will use that path. If not it will\n" .
   "use the OpenDDS source tree the script is in.\n" .
@@ -121,7 +122,7 @@ if (!GetOptions(
   'list-default' => \$list_default_checks,
   'list-non-default' => \$list_non_default_checks,
   'a|all' => \$all,
-  'fix' => \$fix,
+  'try-fix' => \$fix,
 )) {
   print STDERR $usage_message;
   exit 1;
@@ -479,6 +480,7 @@ my %all_checks = (
       'File is missing include guard with correct name',
     ],
     default => 1, # TODO: Make Default
+    can_fix => 1,
     path_matches_all_of => ['needs_include_guard'],
     file_matches => sub {
       my $filename = shift;
@@ -624,6 +626,11 @@ if ($listing_checks) {
     if (defined $all_checks{$name}->{default} && !$all_checks{$name}->{default}) {
       print(
         "    - Disabled by default\n");
+    }
+    if ((defined $all_checks{$name}->{can_fix} && $all_checks{$name}->{can_fix}) ||
+        (defined $all_checks{$name}->{strip_fix} && $all_checks{$name}->{strip_fix})) {
+      print(
+        "    - May be fixed by running with --try-fix\n");
     }
   }
   exit 0;
