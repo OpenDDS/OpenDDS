@@ -635,15 +635,15 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 void
 TransportRegistry::remove_transport_template_instance(const OPENDDS_STRING& config_name)
 {
-  ConfigTemplateToInstanceMap::const_iterator i = config_template_to_instance_map.find(config_name);
+  ConfigTemplateToInstanceMap::iterator i = config_template_to_instance_map.find(config_name);
   if (i == config_template_to_instance_map.end()) {
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportRegistry::remove_transport_template_instance: ")
                ACE_TEXT("%C is not a transport template instance.\n"),
                config_name.c_str()));
-      return;
     }
+    return;
   }
 
   OPENDDS_STRING inst_name = i->second;
@@ -817,6 +817,7 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
+  config_template_to_instance_map.clear();
   transport_templates_.clear();
   transports_.clear();
   type_map_.clear();
