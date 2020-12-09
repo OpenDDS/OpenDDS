@@ -4,9 +4,14 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/RcHandle_T.h"
 
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
@@ -26,7 +31,7 @@
 
 const int MSGS_PER_WRITER = 10;
 const int TOTAL_WRITERS = 1;
-const int TOTAL_READERS = 1;
+const int TOTAL_READERS = 5;
 
 #define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
 
@@ -108,6 +113,8 @@ void reader_done_callback()
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  using namespace OpenDDS::DCPS;
+
   OPENDDS_STRING new_config;
   OPENDDS_VECTOR(DDS::DomainId_t) domains;
 
@@ -153,7 +160,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           dpf->create_participant(domain,
                                   dr_dp_qos,
                                   0,
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                  DEFAULT_STATUS_MASK);
 
         if (!sub_participant) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -164,7 +171,32 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         // bind participants to the secondary config
         if (!new_config.empty()) {
-          TheTransportRegistry->bind_config(new_config, sub_participant);
+          OPENDDS_STRING cfg_name = new_config;
+          if (domain == 50) {
+            // not part of a domain range
+            // create a new transport instance since once is not created automatically
+            OPENDDS_STRING inst_name = "sub_inst_d50_" + to_dds_string(x);
+            // cfg_name and inst_name will be updated with the unique names of the new config and inst
+            TheTransportRegistry->create_new_transport_instance_for_participant(50, cfg_name, inst_name);
+
+            // check that the instance has the correct mcast group
+            TransportInst_rch inst = TheTransportRegistry->get_inst(inst_name);
+            RtpsUdpInst_rch rtps_inst = dynamic_rchandle_cast<RtpsUdpInst>(inst);
+
+            ACE_INET_Addr mcga = rtps_inst->multicast_group_address();
+            const char test_address[] = "239.255.20.0";
+
+            if(ACE_OS::strncmp(mcga.get_host_addr(), test_address, 12)) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("ERROR: %N:%l: main() -")
+                            ACE_TEXT(" multicast group address is does not match!\n")),
+                          -1);
+            }
+            else {
+                  ACE_DEBUG((LM_DEBUG, "(%P|%t) multicast group address is correct\n"));
+            }
+          }
+          TheTransportRegistry->bind_config(cfg_name, sub_participant);
         }
 
         // Register TypeSupport
@@ -185,7 +217,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                         type_name,
                                         TOPIC_QOS_DEFAULT,
                                         0,
-                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                        DEFAULT_STATUS_MASK);
 
         if (!topic) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -198,7 +230,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         DDS::Subscriber_var subscriber =
           sub_participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                              0,
-                                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                             DEFAULT_STATUS_MASK);
 
         if (!subscriber) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -218,7 +250,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           subscriber->create_datareader(topic,
                                         dr_qos,
                                         listener,
-                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                        DEFAULT_STATUS_MASK);
 
         if (!reader) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -237,7 +269,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpf->create_participant(domain,
                                 dw_dp_qos,
                                 0,
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                DEFAULT_STATUS_MASK);
 
       if (!pub_participant) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -248,7 +280,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // bind pub participant to the secondary config
       if (!new_config.empty()) {
-        TheTransportRegistry->bind_config(new_config, pub_participant);
+        OPENDDS_STRING cfg_name = new_config;
+        if (domain == 50) {
+          // not part of a domain range
+          // create a new transport instance since once is not created automatically
+          OPENDDS_STRING inst_name = "pub_inst_d50";
+          // cfg_name and inst_name will be updated with the unique names of the new config and inst
+          TheTransportRegistry->create_new_transport_instance_for_participant(50, cfg_name, inst_name);
+        }
+          TheTransportRegistry->bind_config(cfg_name, pub_participant);
       }
 
       // Register TypeSupport
@@ -269,7 +309,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                   dw_type_name,
                                   TOPIC_QOS_DEFAULT,
                                   0,
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                  DEFAULT_STATUS_MASK);
 
       if (!dw_topic) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -282,7 +322,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::Publisher_var publisher =
         pub_participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                           0,
-                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                          DEFAULT_STATUS_MASK);
 
       if (!publisher) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -306,7 +346,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         publisher->create_datawriter(dw_topic,
                                      dw_qos,
                                      0,
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                     DEFAULT_STATUS_MASK);
 
       if (!writer) {
         ACE_ERROR_RETURN((LM_ERROR,

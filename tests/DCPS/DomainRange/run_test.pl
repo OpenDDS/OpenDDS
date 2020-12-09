@@ -13,10 +13,10 @@ use warnings;
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $result = 0;
-my $dcps_debug_lvl = 1;
+my $dcps_debug_lvl = 10;
 
 sub runTest {
-    my $delay = shift;
+    my $arg = shift;
 
     my $test = new PerlDDS::TestFramework();
     $test->enable_console_logging();
@@ -28,11 +28,9 @@ sub runTest {
     print "messages to its DRs.\n";
     print "*********************************\n";
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -domain 2 -domain 10 -domain 20 -domain 50");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 10 -domain 20 -domain 50 -domain 10");
 
     $test->start_process("alpha");
-
-    sleep $delay;
 
     my $res = $test->finish(150);
     if ($res != 0) {
@@ -41,6 +39,8 @@ sub runTest {
     }
 }
 
-runTest(0);
+runTest();
+
+runTest("-bind secondary_config");
 
 exit $result;
