@@ -1642,7 +1642,6 @@ AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(DCPS::Rea
 
 AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
 {
-  cancel_and_wait();
 }
 
 namespace {
