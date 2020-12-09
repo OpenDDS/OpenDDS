@@ -88,11 +88,12 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   {
     GuardType guard(links_lock_);
 
-    if (find_datalink_i(key, link, client, remote.repo_id_)) {
+    if (find_datalink_i(key, link)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink link[%@]\n", link.in()), 0);
-      return link.is_nil()
-        ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
-        : AcceptConnectResult(link);
+      link->add_on_start_callback(client, remote.repo_id_);
+      add_pending_connection(client, link);
+      link->do_association_actions();
+      return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     }
 
     link = make_rch<TcpDataLink>(key.address(), ref(*this), attribs.priority_,
@@ -104,6 +105,9 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
                  "TcpTransport in links_ map.\n", link.in()));
       return AcceptConnectResult();
     }
+
+    link->add_on_start_callback(client, remote.repo_id_);
+    add_pending_connection(client, link);
   }
 
   TcpConnection_rch connection(
@@ -150,17 +154,9 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     // connect() completed synchronously and called TcpConnection::active_open().
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink "
               "completed synchronously.\n"), 0);
-    return AcceptConnectResult(link);
+    return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
 
-  if (!link->add_on_start_callback(client, remote.repo_id_)) {
-    // link was started by the reactor thread before we could add a callback
-
-    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 0);
-    return AcceptConnectResult(link);
-  }
-
-  add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 0);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }
@@ -182,27 +178,12 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
 
 //Called with links_lock_ held
 bool
-TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                              const TransportClient_rch& client, const RepoId& remote_id)
+TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link)
 {
   DBG_ENTRY_LVL("TcpTransport", "find_datalink_i", 6);
 
   if (links_.find(key, link) == 0 /*OK*/) {
-    if (!link->add_on_start_callback(client, remote_id)) {
-      VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-                ACE_TEXT("link[%@] found, already started.\n"), link.in()), 0);
-      // Since the link was already started, we won't get an "on start"
-      // callback, and the link is immediately usable.
-      return true;
-    }
-
-    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-              ACE_TEXT("link[%@] found, add to pending connections.\n"), link.in()), 0);
-
-    add_pending_connection(client, link);
-    link.reset(); // don't return link to TransportClient
     return true;
-
   } else if (pending_release_links_.find(key, link) == 0 /*OK*/) {
     if (link->cancel_release()) {
       link->set_release_pending(false);
@@ -251,23 +232,27 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   {
     GuardType guard(links_lock_);
 
-    if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      return link.is_nil()
-        ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
-        : AcceptConnectResult(link);
-
-    } else {
-      link = make_rch<TcpDataLink>(key.address(), ref(*this), key.priority(),
-                                  key.is_loopback(), key.is_active());
-
-      if (links_.bind(key, link) != 0 /*OK*/) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: TcpTransport::accept_datalink "
-                   "Unable to bind new TcpDataLink to "
-                   "TcpTransport in links_ map.\n"));
-        return AcceptConnectResult();
-      }
+    if (find_datalink_i(key, link)) {
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink link[%@]\n", link.in()), 0);
+      link->add_on_start_callback(client, remote.repo_id_);
+      add_pending_connection(client, link);
+      link->do_association_actions();
+      return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     }
+
+    link = make_rch<TcpDataLink>(key.address(), ref(*this), key.priority(),
+                                 key.is_loopback(), key.is_active());
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink create new link[%@]\n", link.in()), 0);
+    if (links_.bind(key, link) != 0 /*OK*/) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: TcpTransport::accept_datalink "
+                 "Unable to bind new TcpDataLink[%@] to "
+                 "TcpTransport in links_ map.\n", link.in()));
+      return AcceptConnectResult();
+    }
+
+    link->add_on_start_callback(client, remote.repo_id_);
+    add_pending_connection(client, link);
   }
 
   TcpConnection_rch connection;
@@ -282,18 +267,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   }
 
   if (connection.is_nil()) {
-    if (!link->add_on_start_callback(client, remote.repo_id_)) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
-                "got started link %@.\n", link.in()), 0);
-      return AcceptConnectResult(link);
-    }
-
-    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
-              "no existing TcpConnection.\n"), 0);
-
-    add_pending_connection(client, link);
-
-    // no link ready, passive_connection will complete later
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
 
@@ -305,12 +278,13 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
             "connected link %@.\n", link.in()), 2);
-  return AcceptConnectResult(link);
+  return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }
 
 void
 TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                           const RepoId& remote_id)
+                                           const RepoId& remote_id,
+                                           bool /*disassociate*/)
 {
   GuidConverter remote_converted(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::stop_accepting_or_connecting "

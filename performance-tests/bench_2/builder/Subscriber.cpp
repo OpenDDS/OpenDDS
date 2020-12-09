@@ -7,7 +7,8 @@
 
 namespace Builder {
 
-Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report, DDS::DomainParticipant_var& participant, const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map)
+Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report, DDS::DomainParticipant_var& participant,
+  const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map, const ContentFilteredTopicMap& cft_map)
   : name_(config.name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
@@ -59,7 +60,7 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), subscriber_);
   }
 
-  datareaders_.reset(new DataReaderManager(config.datareaders, report.datareaders, subscriber_, topics, reader_map));
+  datareaders_.reset(new DataReaderManager(config.datareaders, report.datareaders, subscriber_, topics, reader_map, cft_map));
 }
 
 Subscriber::~Subscriber() {

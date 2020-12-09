@@ -302,9 +302,10 @@ public:
           mem_sum += it->second->get_mem_usage();
           virtual_mem_sum += it->second->get_virtual_mem_usage();
         }
-        cpu_block->update(cpu_sum);
-        mem_block->update(mem_sum);
-        virtual_mem_block->update(virtual_mem_sum);
+        const auto time = Builder::get_sys_time();
+        cpu_block->update(cpu_sum, time);
+        mem_block->update(mem_sum, time);
+        virtual_mem_block->update(virtual_mem_sum, time);
       }
     });
 
@@ -353,16 +354,18 @@ public:
     mem_block->finalize();
     virtual_mem_block->finalize();
 
-    std::cout << "Writing report for node " << node_id_ << std::endl;
-    if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
-      std::cerr << "Write report failed" << std::endl;
-    }
+    if (!sigint_.load()) {
+      std::cout << "Writing report for node " << node_id_ << std::endl;
+      if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
+        std::cerr << "Write report failed" << std::endl;
+      }
 
-    DDS::Duration_t timeout = { 30, 0 };
-    if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-      std::cerr << "Waiting for report acknowledgment failed" << std::endl;
-    } else {
-      std::cout << "All reports written and acknowledged." << std::endl;
+      DDS::Duration_t timeout = { 30, 0 };
+      if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+        std::cerr << "Waiting for report acknowledgment failed" << std::endl;
+      } else {
+        std::cout << "All reports written and acknowledged." << std::endl;
+      }
     }
   }
 
@@ -757,8 +760,6 @@ int run_cycle(
 {
   const NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
-  WorkerManager worker_manager(this_node_id, process_manager);
-
   // Wait for Status Publication with Test Controller and Write Status
   if (!write_status(name, this_node_id, AVAILABLE, *status_writer_impl)) {
     std::cerr << "Write status (available) failed\n" << std::flush;
@@ -767,6 +768,9 @@ int run_cycle(
 
   Bench::TestController::AllocatedScenario scenario;
   wait_for_full_scenario(name, this_node_id, status_writer_impl, allocated_scenario_reader_impl, scenario);
+
+  // This constructor traps signals, wait until we really need it.
+  WorkerManager worker_manager(this_node_id, process_manager);
 
   Bench::NodeController::Configs& configs = scenario.configs;
   for (CORBA::ULong node = 0; node < configs.length(); ++node) {

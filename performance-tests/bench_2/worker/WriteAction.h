@@ -12,7 +12,8 @@ class WriteAction : public Action {
 public:
   WriteAction(ACE_Proactor& proactor);
 
-  bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) override;
+  bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
+    Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
 
   void start() override;
   void stop() override;
@@ -32,6 +33,9 @@ protected:
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;
+  size_t filter_class_start_value_;
+  size_t filter_class_stop_value_;
+  size_t filter_class_increment_;
 };
 
 }

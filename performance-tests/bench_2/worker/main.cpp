@@ -45,6 +45,7 @@
 #include "WriteAction.h"
 #include "DataReader.h"
 #include "DataWriter.h"
+#include "SetCftParametersAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -218,6 +219,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     forward_action_registration("forward", [&](){
       return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor));
     });
+  Bench::ActionManager::Registration
+    set_cft_parameters_action_registration("set_cft_parameters", [&]() {
+      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(proactor));
+    });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;
@@ -253,7 +258,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning action construction / initialization." << std::endl;
 
-    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map());
+    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map(), process.get_cft_map());
 
     Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 
@@ -303,7 +308,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
             if (!wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+              Log::log() << "Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
             }
           }
         }

@@ -181,11 +181,11 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 {
   bit_sub_ = client->get_builtin_subscriber();
 
+  GuardThreadType guard_links(links_lock_);
+
   if (is_shut_down_) {
     return AcceptConnectResult();
   }
-
-  GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
     link_ = make_datalink(attribs.local_id_.guidPrefix);
@@ -196,21 +196,11 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   RtpsUdpDataLink_rch link = link_;
 
-
-  use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
-               attribs.local_reliable_, remote.reliable_,
-               attribs.local_durable_, remote.durable_);
-
-  if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
-                       sizeof(GuidPrefix_t))) {
-    return AcceptConnectResult(link); // "loopback" connection return link right away
-  }
-
-  if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
+                   attribs.local_reliable_, remote.reliable_,
+                   attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
     return AcceptConnectResult(link);
   }
-
-  link->add_on_start_callback(client, remote.repo_id_);
 
   GuardType guard(connections_lock_);
   add_pending_connection(client, link);
@@ -239,20 +229,11 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   }
   RtpsUdpDataLink_rch link = link_;
 
-  use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
-               attribs.local_reliable_, remote.reliable_,
-               attribs.local_durable_, remote.durable_);
-
-  if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
-                       sizeof(GuidPrefix_t))) {
-    return AcceptConnectResult(link); // "loopback" connection return link right away
-  }
-
-  if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
+                   attribs.local_reliable_, remote.reliable_,
+                   attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
     return AcceptConnectResult(link);
   }
-
-  link->add_on_start_callback(client, remote.repo_id_);
 
   GuardType guard(connections_lock_);
   add_pending_connection(client, link);
@@ -263,24 +244,39 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                               const RepoId& remote_id)
+                                               const RepoId& remote_id,
+                                               bool disassociate)
 {
-  GuardType guard(pending_connections_lock_);
-  typedef PendConnMap::iterator iter_t;
-  const std::pair<iter_t, iter_t> range =
-        pending_connections_.equal_range(client);
-  for (iter_t iter = range.first; iter != range.second; ++iter) {
-     iter->second->remove_on_start_callback(client, remote_id);
+  if (disassociate) {
+    GuardThreadType guard_links(links_lock_);
+    if (link_) {
+      TransportClient_rch c = client.lock();
+      if (c) {
+        link_->disassociated(c->get_repo_id(), remote_id);
+      }
+    }
   }
-  pending_connections_.erase(range.first, range.second);
+
+  {
+    GuardType guard(pending_connections_lock_);
+    typedef PendConnMap::iterator iter_t;
+    const std::pair<iter_t, iter_t> range =
+      pending_connections_.equal_range(client);
+    for (iter_t iter = range.first; iter != range.second; ++iter) {
+      iter->second->remove_on_start_callback(client, remote_id);
+    }
+    pending_connections_.erase(range.first, range.second);
+  }
 }
 
-void
+bool
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
                                bool local_reliable, bool remote_reliable,
-                               bool local_durable, bool remote_durable)
+                               bool local_durable, bool remote_durable,
+                               SequenceNumber max_sn,
+                               const TransportClient_rch& client)
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
@@ -298,9 +294,11 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     }
 #endif
 
-    link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                      local_durable, remote_durable);
+    return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
+                             local_durable, remote_durable, max_sn, client);
   }
+
+  return true;
 }
 
 std::pair<ACE_INET_Addr, ACE_INET_Addr>

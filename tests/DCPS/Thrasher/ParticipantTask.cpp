@@ -25,8 +25,10 @@
 
 #include "tests/Utils/StatusMatching.h"
 
-ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
+ParticipantTask::ParticipantTask(std::size_t samples_per_thread,
+                                 bool durable)
   : samples_per_thread_(samples_per_thread)
+  , durable_(durable)
   , thread_index_(0)
 {
 }
@@ -39,7 +41,7 @@ ParticipantTask::svc()
 {
   try
   {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PARTICIPANT STARTED\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PUBLISHER STARTED\n")));
 
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     DDS::DomainParticipant_var participant;
@@ -72,7 +74,7 @@ ParticipantTask::svc()
         ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
 
         ACE_DEBUG((LM_INFO,
-          "(%P|%t)    -> PARTICIPANT %d creating transport config %C\n",
+          "(%P|%t)    -> PUBLISHER %d creating transport config %C\n",
           this_thread_index, config_name));
         OpenDDS::DCPS::TransportConfig_rch config =
           TheTransportRegistry->create_config(config_name);
@@ -136,7 +138,9 @@ ParticipantTask::svc()
     DDS::DataWriterQos writer_qos;
     publisher->get_default_datawriter_qos(writer_qos);
     writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-    writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    if (durable_) {
+      writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     writer_qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
 #endif
@@ -153,11 +157,19 @@ ParticipantTask::svc()
                         ACE_TEXT(" create_datawriter failed!\n")), 1);
     }
 
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PARTICIPANT %d waiting for match\n", this_thread_index));
+    OpenDDS::DCPS::DataWriterImpl* impl =
+      dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
 
-    Utils::wait_match(writer, 1);
+    const bool wait_early = durable_ ? rand() % 2 == 0 : true;
 
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PARTICIPANT %d match found!\n", this_thread_index));
+    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d is %C\n", this_thread_index, OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+    if (wait_early) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
+
+      Utils::wait_match(writer, 1);
+
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+    }
 
     writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i)) {
@@ -170,7 +182,7 @@ ParticipantTask::svc()
     // pathways related to publication; we should be especially dull
     // and write only one sample at a time per writer.
 
-    ProgressIndicator progress("(%P|%t)       PARTICIPANT %d%% (%d samples sent)\n",
+    ProgressIndicator progress("(%P|%t)       PUBLISHER %d%% (%d samples sent)\n",
                                samples_per_thread_);
 
     for (std::size_t i = 0; i < samples_per_thread_; ++i)
@@ -189,7 +201,16 @@ ParticipantTask::svc()
       ++progress;
     }
 
+    if (!wait_early) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
+
+      Utils::wait_match(writer, 1);
+
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+    }
+
     DDS::Duration_t interval = { 30, 0 };
+    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for acknowledgments\n", this_thread_index));
     if (DDS::RETCODE_OK != writer->wait_for_acknowledgments(interval)) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P:%t) ERROR: svc() - ")
@@ -198,11 +219,11 @@ ParticipantTask::svc()
     }
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT DEL CONT ENTITIES\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d DEL CONT ENTITIES\n"), this_thread_index));
     participant->delete_contained_entities();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER DELETE PARTICIPANT\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d DELETE PARTICIPANT\n"), this_thread_index));
     dpf->delete_participant(participant.in());
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT VARS GOING OUT OF SCOPE\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d VARS GOING OUT OF SCOPE\n"), this_thread_index));
   }
   catch (const CORBA::Exception& e)
   {

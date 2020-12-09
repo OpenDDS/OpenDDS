@@ -79,6 +79,14 @@ public:
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
+  int make_reservation(const RepoId& remote_publication_id,
+                       const RepoId& local_subscription_id,
+                       const TransportReceiveListener_wrch& receive_listener,
+                       bool reliable);
+  void release_reservations_i(const RepoId& remote_id,
+                              const RepoId& local_id);
+
+
 private:
 
   MulticastSessionFactory_rch session_factory_;

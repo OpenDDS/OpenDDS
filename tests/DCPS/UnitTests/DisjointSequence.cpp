@@ -922,6 +922,29 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_CHECK(bitmap[0] == 0x0402007F);
       TEST_CHECK(bitmap[1] == (int) 0xFFFFFFFF);
     }
+
+    {
+      const size_t values_size = 7;
+      const int values[values_size] = { 1, 2, 4, 5, 6, 8, 9 };
+      for (size_t remove_idx = 0; remove_idx != values_size; ++remove_idx) {
+        // Construct the sets.
+        std::set<SequenceNumber> plain_set;
+        DisjointSequence ds_set;
+        for (size_t idx = 0; idx != values_size; ++idx) {
+          plain_set.insert(values[idx]);
+          ds_set.insert(values[idx]);
+        }
+        // Remove the designated value.
+        plain_set.erase(values[remove_idx]);
+        ds_set.erase(values[remove_idx]);
+        // Check.
+        TEST_CHECK(!ds_set.contains(values[remove_idx]));
+        for (std::set<SequenceNumber>::const_iterator pos = plain_set.begin(), limit = plain_set.end();
+             pos != limit; ++pos) {
+          TEST_CHECK(ds_set.contains(*pos));
+        }
+      }
+    }
   }
   catch (std::runtime_error& err)
   {

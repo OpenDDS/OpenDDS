@@ -39,8 +39,6 @@ public:
                                const ReaderAssociation& readers,
                                bool active);
 
-  virtual void association_complete(const RepoId& remote_id);
-
   virtual void remove_associations(const ReaderIdSeq& readers,
                                    CORBA::Boolean callback);
 

@@ -1,19 +1,21 @@
 #ifndef OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
 #define OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
 
-#include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "PoolAllocator.h"
 
-#include "ace/OS_NS_stdio.h"
-#include "ace/INET_Addr.h"
-#include "tao/Basic_Types.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <tao/Basic_Types.h>
+
+#include <ace/OS_NS_stdio.h>
+#include <ace/INET_Addr.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+#  include <fstream>
+#  include <iostream>
+#  include <iomanip>
+#  include <sstream>
 #endif //OPENDDS_SAFETY_PROFILE
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -44,6 +46,8 @@ OpenDDS_Dcps_Export OPENDDS_STRING to_hex_dds_string(
   const unsigned char* data, size_t size, char delim = '\0', size_t delim_every = 1);
 OpenDDS_Dcps_Export OPENDDS_STRING to_hex_dds_string(
   const char* data, size_t size, char delim = '\0', size_t delim_every = 1);
+OpenDDS_Dcps_Export OPENDDS_STRING to_hex_dds_string(
+  const DDS::OctetSeq& data, char delim = '\0', size_t delim_every = 1);
 //@}
 
 /// Convert Pointer to OPENDDS_STRING
@@ -63,4 +67,4 @@ to_dds_string(const T* to_convert)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //SAFETY_PROFILE_STREAMS_H
+#endif // OPENDDS_DCPS_SAFETYPROFILESTREAMS_H

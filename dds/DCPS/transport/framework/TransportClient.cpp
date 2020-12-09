@@ -61,7 +61,7 @@ TransportClient::~TransportClient()
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_);
+        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_, false);
       }
     }
   }
@@ -269,6 +269,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   pend->attribs_.priority_ = get_priority_value(data);
   pend->attribs_.local_reliable_ = reliable_;
   pend->attribs_.local_durable_ = durable_;
+  pend->attribs_.max_sn_ = get_max_sn();
 
   if (active) {
     pend->impls_.reserve(impls_.size());
@@ -568,7 +569,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   for (size_t i = 0; i < pend->impls_.size(); ++i) {
     RcHandle<TransportImpl> impl = pend->impls_[i].lock();
     if (impl) {
-      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
+      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_, false);
     }
   }
 
@@ -649,6 +650,13 @@ TransportClient::disassociate(const RepoId& peerId)
 
   PendingMap::iterator iter = pending_.find(peerId);
   if (iter != pending_.end()) {
+    // The transport impl may have resource for a pending connection.
+    for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+      RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
+      if (impl) {
+        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true);
+      }
+    }
     iter->second->reset_client();
     pending_assoc_timer_->cancel_timer(iter->second);
     prev_pending_.insert(std::make_pair(iter->first, iter->second));

@@ -8,7 +8,8 @@ namespace Builder {
 
 class DataReader : public ListenerFactory<DDS::DataReaderListener> {
 public:
-  explicit DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber, const std::shared_ptr<TopicManager>& topics);
+  DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber,
+    const std::shared_ptr<TopicManager>& topics, const ContentFilteredTopicMap& cft_map);
   ~DataReader();
 
   bool enable(bool throw_on_error = false);
@@ -32,13 +33,13 @@ public:
 protected:
   std::string name_;
   std::string topic_name_;
+  std::string cft_name_;
   std::string listener_type_name_;
   const uint32_t listener_status_mask_;
   Builder::PropertySeq listener_properties_;
   const std::string transport_config_name_;
   DataReaderReport& report_;
   DDS::Subscriber_var subscriber_;
-  DDS::Topic_var topic_;
   DDS::DataReaderListener_var listener_;
   DDS::DataReader_var datareader_;
   PropertyIndex create_time_;

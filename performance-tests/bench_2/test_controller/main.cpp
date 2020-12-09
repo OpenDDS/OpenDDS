@@ -1,18 +1,9 @@
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
+#include "ScenarioOverrides.h"
+#include "ScenarioManager.h"
 
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Service_Participant.h>
-
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
+#include <PropertyStatBlock.h>
+#include <util.h>
+#include <json_conversion.h>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -23,13 +14,21 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "PropertyStatBlock.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/Service_Participant.h>
 
-#include <util.h>
-#include <json_conversion.h>
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
-#include "ScenarioOverrides.h"
-#include "ScenarioManager.h"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace Bench;
 using namespace Bench::NodeController;
@@ -37,8 +36,7 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
-int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
-  const std::vector<Bench::WorkerReport>& parsed_reports,
+int handle_report(const Bench::TestController::Report& report,
   const std::unordered_set<std::string>& tags,
   std::ostringstream& result_out);
 
@@ -139,10 +137,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
    * not just a number.
    */
   std::string result_id;
-  bool overwrite_result = false;
+  bool overwrite_result = false, json_result = false;
 
   // List of tags
-  unsigned num_tags = 0;
   std::unordered_set<std::string> tags;
 
   ScenarioOverrides overrides;
@@ -207,7 +204,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "--override-destruction-time N                Override the system-wide destruction time." << std::endl
           << "--tag TAG                    Specify a tag for which the user wants to collect" << std::endl
           << "                             the statistics information. User can specify multiple" << std::endl
-          << "                             --tag options, each with a single tag." << std::endl;
+          << "                             --tag options, each with a single tag." << std::endl
+          << "--json                       Output full JSON report as '<resuld-id>.json' in the test conext." << std::endl
+          << "                             By default, this not enabled. This report will contain" << std::endl
+          << "                             the full raw Bench::TestController report, including all" << std::endl
+          << "                             node controller and worker reports (and DDS entity reports)" << std::endl;
 //            ################################################################################
         return 0;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-out"))) {
@@ -236,6 +237,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tag"))) {
         tags.insert(get_option_argument(i, argc, argv));
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json"))) {
+        json_result = true;
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -293,6 +296,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
   const std::string result_path = join_path(results_path, result_id);
+  const std::string json_result_path = json_result ? result_path + ".json" : "";
 
   // Check to see if the Result Already Exists
   try {
@@ -302,6 +306,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else {
         std::stringstream ss;
         ss << "would overwrite " << result_path << ". Pass --overwrite-result to force it to.";
+        throw std::runtime_error(ss.str());
+      }
+    }
+    if (!json_result_path.empty() && file_exists(json_result_path)) {
+      if (overwrite_result) {
+        std::cerr << "Warning: overwriting " << json_result_path << std::endl;
+      } else {
+        std::stringstream ss;
+        ss << "would overwrite " << json_result_path << ". Pass --overwrite-result to force it to.";
         throw std::runtime_error(ss.str());
       }
     }
@@ -379,17 +392,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::string scenario_start;
       {
         std::ostringstream ss;
-        ss
-          << "Results will be stored in " << result_path << std::endl
-          << std::endl
-          << "Started at " << iso8601() << std::endl;
+        ss << "Results will be stored in " << result_path << std::endl;
+        if (!json_result_path.empty()) {
+          ss << "JSON Results will be stored in " << json_result_path << std::endl;
+        }
+        ss << std::endl << "Started at " << iso8601() << std::endl;
         scenario_start = ss.str();
       }
       std::cout << scenario_start;
 
-      std::vector<Bench::WorkerReport> worker_reports;
-      Bench::NodeController::ReportSeq nc_reports;
-      scenario_manager.execute(allocated_scenario, worker_reports, nc_reports);
+      Bench::TestController::Report report{};
+      report.scenario_name = scenario_id.c_str();
+      report.time = Builder::get_sys_time();
+      scenario_manager.execute(allocated_scenario, report);
 
       std::ofstream result_file(result_path);
       if (!result_file.is_open()) {
@@ -411,7 +426,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << std::endl
           << "Ended at " << iso8601() << std::endl
           << std::endl;
-        result = handle_reports(nc_reports, worker_reports, tags, ss);
+        result = handle_report(report, tags, ss);
         scenario_end = ss.str();
       }
       result_file << scenario_end;
@@ -419,12 +434,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       std::cout << "Wrote results to " << result_path << std::endl;
 
-      if (worker_reports.size() != allocated_scenario.expected_reports) {
-        std::string log_msg = "ERROR: Only received " + std::to_string(worker_reports.size()) +
+      size_t total_worker_reports = 0;
+      for (CORBA::ULong i = 0; i < report.node_reports.length(); ++i) {
+        total_worker_reports += report.node_reports[i].worker_reports.length();
+      }
+
+      if (total_worker_reports != allocated_scenario.expected_reports) {
+        std::string log_msg = "ERROR: Only received " + std::to_string(total_worker_reports) +
           " out of " + std::to_string(allocated_scenario.expected_reports) + " valid reports!\n";
         result_file << log_msg;
         std::cerr << log_msg;
         result = EXIT_FAILURE;
+      }
+
+      if (!json_result_path.empty()) {
+        std::ofstream json_result_file(json_result_path);
+        if (!json_result_file.is_open()) {
+          std::stringstream error;
+          error << "Could not open " << json_result_path;
+          throw std::runtime_error(error.str());
+        }
+        idl_2_json(report, json_result_file, false);
+        std::cout << "Wrote JSON results to " << json_result_path << std::endl;
       }
     }
   } catch (const std::runtime_error& e) {
@@ -437,8 +468,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   return result;
 };
 
-int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
-  const std::vector<Bench::WorkerReport>& parsed_reports,
+int handle_report(const Bench::TestController::Report& report,
   const std::unordered_set<std::string>& tags,
   std::ostringstream& result_out)
 {
@@ -449,8 +479,9 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
   Bench::SimpleStatBlock consolidated_mem_percent_stats;
   Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
 
-  for (CORBA::ULong n = 0; n < nc_reports.length(); ++n) {
-    const Bench::NodeController::Report& nc_report = nc_reports[n];
+  std::vector<const Bench::WorkerReport*> parsed_reports;
+  for (CORBA::ULong n = 0; n < report.node_reports.length(); ++n) {
+    const Bench::TestController::NodeReport& nc_report = report.node_reports[n];
 
     Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
     Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
@@ -459,6 +490,9 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
     consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
     consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
     consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
+    for (CORBA::ULong w = 0; w < nc_report.worker_reports.length(); ++w) {
+      parsed_reports.push_back(&nc_report.worker_reports[w]);
+    }
   }
 
   Builder::TimeStamp max_construction_time = ZERO;
@@ -492,7 +526,7 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
     tagged_jitter_stats, tagged_round_trip_latency_stats, tagged_round_trip_jitter_stats;
 
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
-    const Bench::WorkerReport& worker_report = parsed_reports[r];
+    const Bench::WorkerReport& worker_report = *(parsed_reports[r]);
 
     max_construction_time = std::max(max_construction_time, worker_report.construction_time);
     max_enable_time = std::max(max_enable_time, worker_report.enable_time);
@@ -622,7 +656,6 @@ int handle_reports(const Bench::NodeController::ReportSeq& nc_reports,
     "Total Undermatched Readers: " << total_undermatched_readers <<
     (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
     "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
-  //result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
   result_out << std::endl;
 
   consolidated_discovery_delta_stats.pretty_print(result_out, "discovery time delta");
