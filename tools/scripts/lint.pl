@@ -307,6 +307,11 @@ sub valid_include_guard_names {
 #   message => Array of strings to print when a failure happens
 #     - If left out no message is printed
 #   default => do not run this check unless told to explicitly. default is true.
+#   strip_fix => If line_matched is being used with a regex with capture groups
+#     around error and it can be fixed by simply omited the contents of the
+#     capture groups, allow --try-fix to do that.
+#   can_fix => Simply indicate that this check **could** be fixed by running
+#     --try-fix. This just inserts a messsage during --list.
 # }
 my %all_checks = (
 
@@ -350,7 +355,6 @@ my %all_checks = (
     message => [
       'Text file has tabs'
     ],
-    strip_fix => 1,
   },
 
   not_exactly_one_eof_newline => {
