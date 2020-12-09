@@ -1092,6 +1092,8 @@ sub process_path {
   }
 }
 
+note("Running OpenDDS Lint Checks: " . join(' ', @checks));
+
 foreach my $path (@paths) {
   find({
     preprocess => \&process_directory,
@@ -1116,8 +1118,9 @@ if ($ace) {
     # check_for_long_file_names
     @ace_args = ('-t', $tests);
   }
-  $ace_result = system(catfile($ENV{'ACE_ROOT'}, 'bin', 'fuzz.pl') . ' ' .
-    join(' ', @ace_args)) >> 8;
+  my $ace_args = join(' ', @ace_args);
+  note("Running ACE Lint Checks: " . $ace_args);
+  $ace_result = system(catfile($ENV{'ACE_ROOT'}, 'bin', 'fuzz.pl') . ' ' .  $ace_args) >> 8;
 }
 
 exit(($ace_result || $opendds_checks_failed) ? 1 : 0);
