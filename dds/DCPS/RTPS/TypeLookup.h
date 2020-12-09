@@ -2,10 +2,11 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#ifndef OPENDDS_RTPS_TYPE_LOOKUP_H_
-#define OPENDDS_RTPS_TYPE_LOOKUP_H_
+#ifndef OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H
+#define OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H
 
 #include "RtpsRpcTypeSupportImpl.h"
+
 #include <dds/DCPS/XTypes/TypeObject.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -185,4 +186,4 @@ bool operator>>(Serializer& strm, XTypes::OctetSeq32& seq);
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* ifndef OPENDDS_RTPS_TYPE_LOOKUP_H_ */
+#endif /* ifndef OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H */

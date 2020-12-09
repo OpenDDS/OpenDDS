@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_ASSIGNABILITY_H
-#define OPENDDS_DCPS_TYPE_ASSIGNABILITY_H
+#ifndef OPENDDS_DCPS_XTYPES_TYPE_ASSIGNABILITY_H
+#define OPENDDS_DCPS_XTYPES_TYPE_ASSIGNABILITY_H
 
 #include "TypeObject.h"
 #include "TypeLookupService.h"
@@ -102,4 +102,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_DCPS_TYPE_ASSIGNABILITY_H */
+#endif /* OPENDDS_DCPS_XTYPES_TYPE_ASSIGNABILITY_H */

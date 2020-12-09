@@ -3,10 +3,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_RPC_IDL
-#define OPENDDS_RTPS_RPC_IDL
+#ifndef OPENDDS_DCPS_RTPS_RTPS_RPC_IDL
+#define OPENDDS_DCPS_RTPS_RTPS_RPC_IDL
 
 #include "RtpsCore.idl"
+
 #include <dds/DdsDcpsGuid.idl>
 
 // Types from DDS-RPC 1.0 section 7.5.1.1.1 reused in XTypes
@@ -50,4 +51,4 @@ struct ResponseHeader {
 }; // module RPC
 }; // module DDS
 
-#endif /* OPENDDS_RTPS_RPC_IDL */
+#endif /* OPENDDS_DCPS_RTPS_RTPS_RPC_IDL */

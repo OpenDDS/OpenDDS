@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
-#define OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
+#ifndef OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
+#define OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 
 #include "TypeObject.h"
 
@@ -67,4 +67,4 @@ typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 
-#endif /* ifndef OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H */
+#endif /* ifndef OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H */
