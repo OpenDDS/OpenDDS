@@ -98,7 +98,7 @@ DomainParticipantFactoryImpl::create_participant(
   TheServiceParticipant->get_transport_base_config_name(domainId, transport_base_config_name);
 
   if (TheTransportRegistry->config_has_transport_template(transport_base_config_name)) {
-    ACE_TString transport_config_name = transport_base_config_name;
+    OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(transport_base_config_name.c_str());
     OPENDDS_STRING transport_instance_name = dp->get_unique_id();
 
     // unique and config and instance names are returned in transport_config_name and transport_instance_name

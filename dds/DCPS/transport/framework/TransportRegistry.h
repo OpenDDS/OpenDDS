@@ -131,7 +131,7 @@ public:
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
   // the new config and instance names are returned by reference.
-  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& transport_config_name, OPENDDS_STRING& transport_instance_name);
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& transport_config_name, OPENDDS_STRING& transport_instance_name);
 
   void update_config_template_instance_info(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name);
 

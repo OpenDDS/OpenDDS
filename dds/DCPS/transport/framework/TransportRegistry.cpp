@@ -608,7 +608,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
           throw Transport::UnableToCreate();
         }
         OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
-        ACE_TString transport_config_name = cfg_name;
+        OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
 
         bool success = create_new_transport_instance_for_participant(ei->get_domain_id(), transport_config_name, transport_inst_name);
 
@@ -720,11 +720,11 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 }
 
 bool
-TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, ACE_TString& transport_config_name, OPENDDS_STRING& transport_instance_name)
+TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& transport_config_name, OPENDDS_STRING& transport_instance_name)
 {
   // check per_participant
   TransportTemplate templ;
-  if(get_transport_template_info(transport_config_name, templ)) {
+  if(get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()), templ)) {
     if (!templ.instantiate_per_participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
@@ -734,13 +734,13 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
     }
   }
 
-  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()));
+  TransportConfig_rch cfg = get_config(transport_config_name);
 
   OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + transport_instance_name;
   OPENDDS_STRING config_name = cfg->name() + "_" + transport_instance_name;
 
   // assign new config and inst names
-  transport_config_name = ACE_TEXT_CHAR_TO_TCHAR(config_name.c_str());
+  transport_config_name = config_name;
   transport_instance_name = inst_name;
 
   OpenDDS::DCPS::TransportConfig_rch config = create_config(config_name);
@@ -752,7 +752,8 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   ach.open();
   ach.open_section(ach.root_section(), ACE_TEXT("the_transport_setup"), 1, sect_key);
 
-  if (TheServiceParticipant->belongs_to_domain_range(id) || config_has_transport_template(transport_config_name)) {
+  if (TheServiceParticipant->belongs_to_domain_range(id) ||
+      config_has_transport_template(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()))) {
     TransportTemplate tr_inst;
 
     if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str()), tr_inst)) {
