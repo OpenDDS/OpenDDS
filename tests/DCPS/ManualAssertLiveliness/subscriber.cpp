@@ -151,7 +151,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
-      ACE_OS::sleep(2);
+      ACE_OS::sleep(10);
 
       ACE_DEBUG((LM_INFO,
                  "Subscriber got %d of %d messages, "
@@ -168,6 +168,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(2);
 
       TheServiceParticipant->shutdown ();
+
+      // delete_contained_entities results in another 4 liveliness callbacks
+      num_liveliness_change_callbacks += 4;
 
       if (listener_servant.num_liveliness_change_callbacks () != num_liveliness_change_callbacks)
       {
