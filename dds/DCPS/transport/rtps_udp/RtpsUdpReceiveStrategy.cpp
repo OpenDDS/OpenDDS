@@ -991,7 +991,8 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
 // MessageReceiver nested class
 
 RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(const GuidPrefix_t& local)
-  : have_timestamp_(false)
+  : directed_(false)
+  , have_timestamp_(false)
 {
   RTPS::assign(local_, local);
   source_version_.major = source_version_.minor = 0;
@@ -1000,7 +1001,6 @@ RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(const GuidPrefix_t& loc
     source_guid_prefix_[i] = 0;
     dest_guid_prefix_[i] = 0;
   }
-  directed_ = false;
   timestamp_.seconds = 0;
   timestamp_.fraction = 0;
 }

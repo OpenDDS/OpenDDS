@@ -1619,8 +1619,6 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
 
   const WriterInfo_rch& writer = wi->second;
 
-  // TODO: Compare and update counts?
-
   if (writer->recvd_.empty()) {
     return false;
   }
@@ -3706,14 +3704,10 @@ RtpsUdpDataLink::send_heartbeats_manual_i(const TransportSendControlElement* tsc
 
   const RepoId pub_id = tsce->publication_id();
 
-  SequenceNumber firstSN, lastSN;
-  CORBA::Long counter;
+  const CORBA::Long counter = ++best_effort_heartbeat_count_;
 
-  // TODO: firstSN doesn't seem to be initialized properly.
-  firstSN = 1;
-  lastSN = tsce->sequence();
-
-  counter = ++best_effort_heartbeat_count_;
+  // This liveliness heartbeat is from a best-effort Writer, the sequence numbers are not used
+  const SequenceNumber firstSN = 1, lastSN = tsce->sequence();
 
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
@@ -3742,24 +3736,9 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
     return;
   }
 
-  const bool has_data = !send_buff_.is_nil() && !send_buff_->empty();
-  SequenceNumber durable_max;
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
-  for (ReaderInfoMap::const_iterator ri = remote_readers_.begin(), end = remote_readers_.end();
-       ri != end;
-       ++ri) {
-    if (!ri->second->durable_data_.empty()) {
-      const MonotonicTimePoint expiration = ri->second->durable_timestamp_ + link->config().durable_data_timeout_;
-      if (now <= expiration &&
-          ri->second->durable_data_.rbegin()->first > durable_max) {
-        durable_max = ri->second->durable_data_.rbegin()->first;
-      }
-    }
-  }
-
-  // TODO: Make sure these are initialized properly.
-  const SequenceNumber firstSN = (durable_ || !has_data) ? 1 : send_buff_->low();
-  const SequenceNumber lastSN = std::max(durable_max, has_data ? send_buff_->high() : 1);
+  const bool has_data = send_buff_ && !send_buff_->empty();
+  const SequenceNumber firstSN = durable_ ? 1 : has_data ? send_buff_->low() : (max_sn_ + 1);
+  const SequenceNumber lastSN = max_sn_;
   const int counter = ++heartbeat_count_;
 
   const HeartBeatSubmessage hb = {
