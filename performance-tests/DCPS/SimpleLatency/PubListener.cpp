@@ -175,7 +175,7 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 
   if (sample_num_ ==  total_samples + TOTAL_PRIMER_SAMPLES) {
     time_t clock = ACE_OS::time(NULL);
-    std::cout << "# MY Pub Sub measurements (in us) \n";
+    std::cout << "# MY Pub Sub measurements (in us)\n";
     std::cout << "# Executed at:" << ACE_OS::ctime(&clock);
     std::cout << "#       Roundtrip time [us]\n";
     std::cout << "Count     mean      min      max   std_dev\n";

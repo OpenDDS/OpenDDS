@@ -131,22 +131,22 @@ $Publisher2Result = $Publisher2->WaitKill (10);
 $Publisher3Result = $Publisher3->WaitKill (10);
 
 if ($Publisher1Result != 0) {
-    print STDERR "ERROR: publisher 1 returned $PublisherResult1 \n";
+    print STDERR "ERROR: publisher 1 returned $PublisherResult1\n";
     $status = 1;
 }
 if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher 2 returned $PublisherResult2 \n";
+    print STDERR "ERROR: publisher 2 returned $PublisherResult2\n";
     $status = 1;
 }
 if ($Publisher3Result != 0) {
-    print STDERR "ERROR: publisher 3 returned $PublisherResult3 \n";
+    print STDERR "ERROR: publisher 3 returned $PublisherResult3\n";
     $status = 1;
 }
 
 $SubscriberResult = $Subscriber->WaitKill (30);
 
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 

@@ -554,7 +554,7 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
-          "Couldn't Dissect Payload: No Topic Found for %s \n",
+          "Couldn't Dissect Payload: No Topic Found for %s\n",
           std::string(converter).c_str()
         );
 #endif
@@ -579,7 +579,7 @@ namespace OpenDDS
         ACE_DEBUG ((LM_DEBUG,
                     "DDS_Dissector::dissect_sample_payload: "
                     "couldn't dissect payload: "
-                    "no dissector found for %C \n",
+                    "no dissector found for %C\n",
                     data_name));
 
         // Mark Packet
@@ -592,7 +592,7 @@ namespace OpenDDS
           offset,
           (gint) header.message_length_,
           "Couldn't Dissect Payload: "
-          "No Dissector Found for %s \n",
+          "No Dissector Found for %s\n",
           data_name
         );
 #endif

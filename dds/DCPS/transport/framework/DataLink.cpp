@@ -870,7 +870,7 @@ DataLink::notify(ConnectionNotice notice)
         GuidConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
-                   ACE_TEXT("not notify pub %C %C \n"),
+                   ACE_TEXT("not notify pub %C %C\n"),
                    OPENDDS_STRING(converter).c_str(),
                    connection_notice_as_str(notice)));
       }

@@ -106,7 +106,7 @@ OpenDDS::DCPS::TcpSendStrategy::send_bytes_i(const iovec iov[], int n)
     return -1;
   ssize_t result = connection->peer().sendv(iov, n);
   if (DCPS_debug_level > 4)
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpSendStrategy::send_bytes_i sent %d bytes \n", result));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpSendStrategy::send_bytes_i sent %d bytes\n", result));
 
   return result;
 }

@@ -160,7 +160,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: instance_handle_to_repo_id,")
-                        ACE_TEXT(" timeout. \n")),
+                        ACE_TEXT(" timeout.\n")),
                        DDS::RETCODE_ERROR);
       return DDS::RETCODE_TIMEOUT;
     }

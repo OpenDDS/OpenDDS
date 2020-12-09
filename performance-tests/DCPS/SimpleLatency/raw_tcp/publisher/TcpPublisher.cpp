@@ -126,7 +126,7 @@ TcpPublisher::connect()
       && errno != ENOTSUP)
   {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) Publisher failed to set the receive buffer size to %d errno %m \n",
+               "(%P|%t) Publisher failed to set the receive buffer size to %d errno %m\n",
                rcv_size));
   }
 #  endif /* !ACE_LACKS_SOCKET_BUFSIZ */
@@ -192,7 +192,7 @@ void
 TcpPublisher::dump_stats ()
 {
   time_t clock = ACE_OS::time (NULL);
-  cout << "# MY Pub Sub measurements (in us) \n";
+  cout << "# MY Pub Sub measurements (in us)\n";
   cout << "# Executed at:" << ACE_OS::ctime(&clock);
   cout << "#       Roundtrip time [us]\n";
   cout << "Count     mean      min      max   std_dev\n";

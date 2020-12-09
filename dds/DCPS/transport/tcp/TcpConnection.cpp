@@ -446,7 +446,7 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst* tcp_config)
                               sizeof(int)) == -1
       && errno != ENOTSUP) {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) TcpConnection failed to set the receive buffer size to %d errno %m \n",
+               "(%P|%t) TcpConnection failed to set the receive buffer size to %d errno %m\n",
                rcv_size));
     return;
   }
@@ -720,7 +720,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::handle_timeout, ")
-               ACE_TEXT(" unknown state or it should not be in state=%d \n"),
+               ACE_TEXT(" unknown state or it should not be in state=%d\n"),
                reconnect_state_));
     break;
   }
@@ -776,7 +776,7 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
-               ACE_TEXT(" unknown state or it should not be in state=%i \n"),
+               ACE_TEXT(" unknown state or it should not be in state=%i\n"),
                reconnect_state_));
     break;
   }
@@ -785,7 +785,7 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
   if (this->is_connector_ || connection->is_connector_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
-               ACE_TEXT(" should NOT be called by the connector side \n")));
+               ACE_TEXT(" should NOT be called by the connector side\n")));
   }
 
   connection->remote_address_ = this->remote_address_;
@@ -796,7 +796,7 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "transfer(%C:%d->%C:%d) passive reconnected. new con %@   "
-        " old con %@ \n",
+        " old con %@\n",
         this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
         this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
         connection, this));

@@ -514,7 +514,7 @@ sub message_git_remote {
   my $settings = shift;
   my $remote = $settings->{remote};
   my $alt_url = $settings->{alt_url};
-  my $start = "Remote $remote has url $alt_url, \n" .
+  my $start = "Remote $remote has url $alt_url,\n" .
          "which does not match expected URL $settings->{git_url}";
 }
 

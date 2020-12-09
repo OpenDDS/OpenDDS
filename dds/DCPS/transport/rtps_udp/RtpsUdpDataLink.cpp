@@ -350,7 +350,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
         && errno != ENOTSUP) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
                         rcv_size),
                        false);
     }
@@ -362,7 +362,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
         && errno != ENOTSUP) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
                         rcv_size),
                        false);
     }

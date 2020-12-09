@@ -188,7 +188,7 @@ Aggregator::run ()
   catch (const CORBA::Exception&)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-                         "(%P|%t) ERROR: Error in run \n"),
+                         "(%P|%t) ERROR: Error in run\n"),
                         -1);
     }
 

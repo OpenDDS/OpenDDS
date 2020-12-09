@@ -128,7 +128,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
         && errno != ENOTSUP) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("UdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                        ACE_TEXT("UdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
                         rcv_size),
                        false);
     }

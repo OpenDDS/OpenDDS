@@ -43,7 +43,7 @@ void DataWriterListenerImpl::on_liveliness_lost (
               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %@ %d\n"),
               writer, (int) num_liveliness_lost_callbacks_.value()));
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
+              ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d\n"),
               status.total_count, status.total_count_change));
 }
 
@@ -56,7 +56,7 @@ void DataWriterListenerImpl::on_publication_matched (
   ACE_UNUSED_ARG(status);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched \n")));
+    ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched\n")));
 }
 
 void DataWriterListenerImpl::on_publication_disconnected (

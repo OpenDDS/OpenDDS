@@ -31,7 +31,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer)
 void
 Writer::start ()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
   // Launch threads.
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1)
   {
@@ -44,7 +44,7 @@ void
 Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end \n")));
+             ACE_TEXT("(%P|%t) Writer::end\n")));
   wait ();
 }
 
@@ -84,7 +84,7 @@ Writer::svc ()
          << e << endl;
   }
 
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t) Done writing. \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) Done writing.\n"));
 
   // After first thread sends all samples, the datareader started.
 

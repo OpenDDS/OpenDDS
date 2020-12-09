@@ -25,7 +25,7 @@ bool
 Writer::start ()
 {
   if (this->verbose_) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
   }
 
   // Lanuch num_instances_per_writer threads.

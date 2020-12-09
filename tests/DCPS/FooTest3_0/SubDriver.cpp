@@ -240,7 +240,7 @@ SubDriver::run()
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) SubDriver::run, ")
-              ACE_TEXT(" Wait for publisher. \n")));
+              ACE_TEXT(" Wait for publisher.\n")));
 
   while (this->listener_->samples_read() != num_writes_) {
     ACE_OS::sleep(1);

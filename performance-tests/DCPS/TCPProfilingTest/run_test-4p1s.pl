@@ -90,28 +90,28 @@ $Pub4->Spawn ();
 
 $Pub1Result = $Pub1->WaitKill (1200);
 if ($Pub1Result != 0) {
-    print STDERR "ERROR: publisher 1 returned $Pub1Result \n";
+    print STDERR "ERROR: publisher 1 returned $Pub1Result\n";
     $status = 1;
 }
 
 
 $Pub2Result = $Pub2->WaitKill (1200);
 if ($Pub2Result != 0) {
-    print STDERR "ERROR: publisher 2 returned $Pub2Result \n";
+    print STDERR "ERROR: publisher 2 returned $Pub2Result\n";
     $status = 1;
 }
 
 
 $Pub3Result = $Pub3->WaitKill (1200);
 if ($Pub3Result != 0) {
-    print STDERR "ERROR: publisher 3 returned $Pub3Result \n";
+    print STDERR "ERROR: publisher 3 returned $Pub3Result\n";
     $status = 1;
 }
 
 
 $Pub4Result = $Pub4->WaitKill (1200);
 if ($Pub4Result != 0) {
-    print STDERR "ERROR: publisher 4 returned $Pub4Result \n";
+    print STDERR "ERROR: publisher 4 returned $Pub4Result\n";
     $status = 1;
 }
 

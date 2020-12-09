@@ -530,7 +530,7 @@ struct GeneratorBase
     struct_decls(name, u->size_type(), "class");
     be_global->lang_header_ <<
       "\n"
-      "class " << exporter() << nm << " \n"
+      "class " << exporter() << nm << "\n"
       "{\n"
       " public:\n"
       "  typedef " << nm << "_var _var_type;\n"
@@ -1220,7 +1220,7 @@ struct SafetyProfileGenerator : GeneratorBase
     struct_decls(name, size);
     be_global->lang_header_ <<
       "\n"
-      "struct " << exporter() << nm << " \n"
+      "struct " << exporter() << nm << "\n"
       "{\n"
       "  typedef " << nm << "_var _var_type;\n"
       "  typedef " << nm << "_out _out_type;\n\n";

@@ -108,7 +108,7 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
-                 "usage: %s \n",
+                 "usage: %s\n",
                  argv[0]));
 
       arg_shifter.consume_arg();
@@ -370,12 +370,12 @@ PubDriver::run()
   // Write the publication id to a file.
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) PubDriver::run, ")
-              ACE_TEXT(" pub_id=%C. \n"),
+              ACE_TEXT(" pub_id=%C.\n"),
               buffer.str().c_str()));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) PubDriver::run, ")
-              ACE_TEXT(" Wait for subscriber start. \n")));
+              ACE_TEXT(" Wait for subscriber start.\n")));
 
   // Wait for the sub to be ready.
   FILE* sub_ready = 0;

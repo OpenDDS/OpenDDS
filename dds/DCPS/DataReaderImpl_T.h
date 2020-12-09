@@ -1631,7 +1631,7 @@ void store_instance_data(
                     ACE_TEXT("(%P|%t) ")
                     ACE_TEXT("%CDataReaderImpl::")
                     ACE_TEXT("store_instance_data, ")
-                    ACE_TEXT("acquire instance_lock failed. \n"), TraitsType::type_name()));
+                    ACE_TEXT("acquire instance_lock failed.\n"), TraitsType::type_name()));
         return;
       }
 
@@ -1696,7 +1696,7 @@ void store_instance_data(
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("insert to participant scope %C failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
+                      ACE_TEXT("insert to participant scope %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
           return;
         }
       }
@@ -1706,7 +1706,7 @@ void store_instance_data(
                     ACE_TEXT("(%P|%t) ")
                     ACE_TEXT("%CDataReaderImpl::")
                     ACE_TEXT("store_instance_data, ")
-                    ACE_TEXT("release instance_lock failed. \n"), TraitsType::type_name()));
+                    ACE_TEXT("release instance_lock failed.\n"), TraitsType::type_name()));
         return;
       }
     }
@@ -1721,7 +1721,7 @@ void store_instance_data(
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("%CDataReaderImpl::")
                   ACE_TEXT("store_instance_data, ")
-                  ACE_TEXT("insert %C failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
+                  ACE_TEXT("insert %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
       return;
     }
   }

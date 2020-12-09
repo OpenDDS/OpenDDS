@@ -645,7 +645,7 @@ DomainParticipantImpl::delete_topic_i(
           if (DCPS_debug_level > 0) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                       ACE_TEXT("%p \n"),
+                       ACE_TEXT("%p\n"),
                        ACE_TEXT("erase")));
           }
           return DDS::RETCODE_ERROR;
@@ -660,7 +660,7 @@ DomainParticipantImpl::delete_topic_i(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                 ACE_TEXT(" Caught Unknown Exception \n")));
+                 ACE_TEXT(" Caught Unknown Exception\n")));
     }
     ret = DDS::RETCODE_ERROR;
   }
@@ -754,7 +754,7 @@ DomainParticipantImpl::find_topic(
     // timed out
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::find_topic, ")
-               ACE_TEXT("timed out. \n")));
+               ACE_TEXT("timed out.\n")));
   }
 
   return DDS::Topic::_nil();
@@ -1158,7 +1158,7 @@ DomainParticipantImpl::set_qos(
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
-                     ACE_TEXT("failed on compatibility check. \n")));
+                     ACE_TEXT("failed on compatibility check.\n")));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -1206,7 +1206,7 @@ DomainParticipantImpl::ignore_participant(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
-                 ACE_TEXT("Entity is not enabled. \n")));
+                 ACE_TEXT("Entity is not enabled.\n")));
     }
     return DDS::RETCODE_NOT_ENABLED;
   }
@@ -1268,7 +1268,7 @@ DomainParticipantImpl::ignore_topic(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_topic, ")
-                 ACE_TEXT(" Entity is not enabled. \n")));
+                 ACE_TEXT(" Entity is not enabled.\n")));
     }
     return DDS::RETCODE_NOT_ENABLED;
   }
@@ -1320,7 +1320,7 @@ DomainParticipantImpl::ignore_publication(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_publication, ")
-                 ACE_TEXT(" Entity is not enabled. \n")));
+                 ACE_TEXT(" Entity is not enabled.\n")));
     }
     return DDS::RETCODE_NOT_ENABLED;
   }
@@ -1342,7 +1342,7 @@ DomainParticipantImpl::ignore_publication(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_publication, ")
-                 ACE_TEXT(" could not ignore publication in discovery. \n")));
+                 ACE_TEXT(" could not ignore publication in discovery.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -1364,7 +1364,7 @@ DomainParticipantImpl::ignore_subscription(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_subscription, ")
-                 ACE_TEXT(" Entity is not enabled. \n")));
+                 ACE_TEXT(" Entity is not enabled.\n")));
     }
     return DDS::RETCODE_NOT_ENABLED;
   }
@@ -1386,7 +1386,7 @@ DomainParticipantImpl::ignore_subscription(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_subscription, ")
-                 ACE_TEXT(" could not ignore subscription in discovery. \n")));
+                 ACE_TEXT(" could not ignore subscription in discovery.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
@@ -2013,7 +2013,7 @@ DomainParticipantImpl::create_new_topic(
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
-                 ACE_TEXT("%p \n"),
+                 ACE_TEXT("%p\n"),
                  ACE_TEXT("bind")));
     }
     return DDS::Topic::_nil();

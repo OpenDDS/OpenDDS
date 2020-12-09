@@ -10,7 +10,7 @@
 #include <openssl/err.h>
 
 #define OPENDDS_SSL_LOG_ERR(MSG)                                  \
-  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: '%C' %C \n"), \
+  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: '%C' %C\n"), \
              ERR_reason_error_string(ERR_get_error()), (MSG)))
 
 #endif

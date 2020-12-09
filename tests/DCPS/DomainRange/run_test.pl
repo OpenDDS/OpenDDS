@@ -22,12 +22,12 @@ sub runTest {
     $test->enable_console_logging();
 
     print "*********************************\n";
-    print "DomainRangeTest creates a single process with one or more \n";
-    print "participants. In the one participant case, the DW and DR \n";
-    print "share the same participant. In the n participant case, one \n";
+    print "DomainRangeTest creates a single process with one or more\n";
+    print "participants. In the one participant case, the DW and DR\n";
+    print "share the same participant. In the n participant case, one\n";
     print "DW communicates with n-1 DRs.\n\n";
-    print "Domains and transports are dynamically configured from the \n";
-    print "templates in config.ini. The DW in each domain sends 10 \n";
+    print "Domains and transports are dynamically configured from the\n";
+    print "templates in config.ini. The DW in each domain sends 10\n";
     print "messages to its DRs.\n";
     print "*********************************\n";
 

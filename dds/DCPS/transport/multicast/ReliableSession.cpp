@@ -311,7 +311,7 @@ ReliableSession::send_naks()
 
   if (DCPS_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
-                         ACE_TEXT("remote %#08x%08x nak request size %d \n"),
+                         ACE_TEXT("remote %#08x%08x nak request size %d\n"),
                          (unsigned int)(this->link()->local_peer() >> 32),
                          (unsigned int) this->link()->local_peer(),
                          (unsigned int)(this->remote_peer_ >> 32),
@@ -322,7 +322,7 @@ ReliableSession::send_naks()
   if (!(this->nak_sequence_.low() > 1) && !this->nak_sequence_.disjoint()) {
     if (DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
-                           ACE_TEXT("remote %#08x%08x nak sequence not disjoint, don't send naks \n"),
+                           ACE_TEXT("remote %#08x%08x nak sequence not disjoint, don't send naks\n"),
                            (unsigned int)(this->link()->local_peer() >> 32),
                            (unsigned int) this->link()->local_peer(),
                            (unsigned int)(this->remote_peer_ >> 32),
@@ -497,7 +497,7 @@ ReliableSession::send_naks()
 
   if (!sending_naks && DCPS_debug_level > 5){
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
-                         ACE_TEXT("remote %#08x%08x received sequence not disjoint, don't send naks \n"),
+                         ACE_TEXT("remote %#08x%08x received sequence not disjoint, don't send naks\n"),
                          (unsigned int)(this->link()->local_peer() >> 32),
                          (unsigned int) this->link()->local_peer(),
                          (unsigned int)(this->remote_peer_ >> 32),

@@ -53,7 +53,7 @@ if ($ZCTest->Spawn () != 0) {
 $result = $ZCTest->WaitKill (60);
 
 if ($result != 0) {
-    print STDERR "ERROR: main returned $result \n";
+    print STDERR "ERROR: main returned $result\n";
     $status = 1;
 }
 
