@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_SECURITY_BUILTIN_PLUGINS_INITIALIZER_H
-#define DCPS_SECURITY_BUILTIN_PLUGINS_INITIALIZER_H
+#ifndef OPENDDS_DCPS_SECURITY_BUILTINPLUGINS_H
+#define OPENDDS_DCPS_SECURITY_BUILTINPLUGINS_H
 
 #include "DdsSecurity_Export.h"
 #include "dds/Versioned_Namespace.h"

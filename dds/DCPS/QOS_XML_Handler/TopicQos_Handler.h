@@ -3,8 +3,8 @@
  *
  *
  */
-#ifndef TOPIC_QOS_HANDLER_H
-#define TOPIC_QOS_HANDLER_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_TOPICQOS_HANDLER_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_TOPICQOS_HANDLER_H
 
 #include /**/ "ace/pre.h"
 

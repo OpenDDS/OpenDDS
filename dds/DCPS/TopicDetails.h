@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_TOPICDETAILS_H
-#define OPENDDS_DDS_DCPS_TOPICDETAILS_H
+#ifndef OPENDDS_DCPS_TOPICDETAILS_H
+#define OPENDDS_DCPS_TOPICDETAILS_H
 
 #include "dds/DCPS/TopicCallbacks.h"
 #include "dds/DCPS/GuidUtils.h"

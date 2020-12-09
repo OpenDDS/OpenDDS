@@ -1,8 +1,8 @@
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl OpenDDS_Rtps
 // ------------------------------
-#ifndef OPENDDS_RTPS_EXPORT_H
-#define OPENDDS_RTPS_EXPORT_H
+#ifndef OPENDDS_DCPS_RTPS_RTPS_EXPORT_H
+#define OPENDDS_DCPS_RTPS_RTPS_EXPORT_H
 
 #include "ace/config-all.h"
 

@@ -28,7 +28,7 @@ Writer::Writer(::DDS::DataReader_ptr reader,
 void
 Writer::start()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
 
   try {
     OpenDDS::DCPS::DataReaderImpl* dr_servant =

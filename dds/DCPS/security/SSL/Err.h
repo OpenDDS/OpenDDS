@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_ERR_H
-#define OPENDDS_SECURITY_SSL_ERR_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_ERR_H
+#define OPENDDS_DCPS_SECURITY_SSL_ERR_H
 
 #include <ace/Log_Msg.h>
 #include <openssl/err.h>

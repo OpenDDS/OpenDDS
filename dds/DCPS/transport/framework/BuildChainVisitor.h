@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_BUILDCHAINVISTOR_H
-#define OPENDDS_DCPS_BUILDCHAINVISTOR_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_BUILDCHAINVISITOR_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_BUILDCHAINVISITOR_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "BasicQueueVisitor_T.h"

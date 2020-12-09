@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSTRANSPORTHEADER_H
-#define DCPS_RTPSTRANSPORTHEADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSTRANSPORTHEADER_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSTRANSPORTHEADER_H
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/SequenceNumber.h"

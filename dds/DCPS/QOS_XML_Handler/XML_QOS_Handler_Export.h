@@ -3,8 +3,8 @@
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl XML_QOS_Handler
 // ------------------------------
-#ifndef XML_QOS_HANDLER_EXPORT_H
-#define XML_QOS_HANDLER_EXPORT_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_XML_QOS_HANDLER_EXPORT_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_XML_QOS_HANDLER_EXPORT_H
 
 #include "ace/config-all.h"
 

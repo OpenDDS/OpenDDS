@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DATA_COLLECTOR_H
-#define DATA_COLLECTOR_H
+#ifndef OPENDDS_DCPS_DATACOLLECTOR_T_H
+#define OPENDDS_DCPS_DATACOLLECTOR_T_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"

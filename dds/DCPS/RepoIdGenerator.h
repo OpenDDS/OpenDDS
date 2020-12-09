@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef REPOIDGENERATOR_H
-#define REPOIDGENERATOR_H
+#ifndef OPENDDS_DCPS_REPOIDGENERATOR_H
+#define OPENDDS_DCPS_REPOIDGENERATOR_H
 
 #include "tao/Basic_Types.h"
 

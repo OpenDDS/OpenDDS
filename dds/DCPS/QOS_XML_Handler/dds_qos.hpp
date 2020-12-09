@@ -8,8 +8,8 @@
  * please report this to the XSC project at
  * https://github.com/DOCGroup/XSC
  */
-#ifndef DDS_QOS_HPP
-#define DDS_QOS_HPP
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
+#define OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
 
 #include "XML_QOS_Handler_Export.h"
 // Forward declarations.

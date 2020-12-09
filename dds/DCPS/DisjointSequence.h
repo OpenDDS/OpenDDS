@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_DISJOINTSEQUENCE_H
-#define DCPS_DISJOINTSEQUENCE_H
+#ifndef OPENDDS_DCPS_DISJOINTSEQUENCE_H
+#define OPENDDS_DCPS_DISJOINTSEQUENCE_H
 
 #include "dcps_export.h"
 #include "Definitions.h"

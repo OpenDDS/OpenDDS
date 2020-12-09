@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SUBJECT_NAME_H
-#define OPENDDS_SECURITY_SUBJECT_NAME_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_SUBJECTNAME_H
+#define OPENDDS_DCPS_SECURITY_SSL_SUBJECTNAME_H
 
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/security/DdsSecurity_Export.h"

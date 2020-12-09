@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef ZEROCOPYSEQ_H
-#define ZEROCOPYSEQ_H
+#ifndef OPENDDS_DCPS_ZEROCOPYSEQ_T_H
+#define OPENDDS_DCPS_ZEROCOPYSEQ_T_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

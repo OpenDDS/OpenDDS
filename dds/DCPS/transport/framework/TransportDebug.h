@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TRANSPORT_DEBUG_H
-#define OPENDDS_TRANSPORT_DEBUG_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEBUG_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEBUG_H
 
 #include "dds/DCPS/dcps_export.h"
 

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAWRITERREMOTE_H
-#define OPENDDS_DCPS_DATAWRITERREMOTE_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_DATAWRITERREMOTEIMPL_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_DATAWRITERREMOTEIMPL_H
 
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteS.h"
 #include "dds/DCPS/Definitions.h"

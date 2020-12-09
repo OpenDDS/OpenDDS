@@ -5,8 +5,8 @@
  * Starting point for QOS XML parsing library.
  *
  */
-#ifndef QOS_XML_LOADER_H
-#define QOS_XML_LOADER_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h"

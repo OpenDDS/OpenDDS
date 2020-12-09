@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
-#define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTQUEUEELEMENT_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTQUEUEELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"

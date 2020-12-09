@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_UTILITY_IMPL_H
-#define OPENDDS_UTILITY_IMPL_H
+#ifndef OPENDDS_DCPS_SECURITY_UTILITYIMPL_H
+#define OPENDDS_DCPS_SECURITY_UTILITYIMPL_H
 
 #include "DdsSecurity_Export.h"
 #include "dds/DCPS/security/Utility.h"

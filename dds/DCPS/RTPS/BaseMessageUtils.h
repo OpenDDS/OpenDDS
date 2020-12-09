@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef RTPS_BASEMESSAGEUTILS_H
-#define RTPS_BASEMESSAGEUTILS_H
+#ifndef OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H
+#define OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H
 
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"

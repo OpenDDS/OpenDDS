@@ -1,5 +1,5 @@
-#ifndef dds_DCPS_DataReaderImpl_T_h
-#define dds_DCPS_DataReaderImpl_T_h
+#ifndef OPENDDS_DCPS_DATAREADERIMPL_T_H
+#define OPENDDS_DCPS_DATAREADERIMPL_T_H
 #include "dds/DCPS/MultiTopicImpl.h"
 #include "dds/DCPS/RakeResults_T.h"
 #include "dds/DCPS/SubscriberImpl.h"

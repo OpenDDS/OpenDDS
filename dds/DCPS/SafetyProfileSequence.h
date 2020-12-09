@@ -1,5 +1,5 @@
-#ifndef dds_DCPS_SafetyProfileSequence_h
-#define dds_DCPS_SafetyProfileSequence_h
+#ifndef OPENDDS_DCPS_SAFETYPROFILESEQUENCE_H
+#define OPENDDS_DCPS_SAFETYPROFILESEQUENCE_H
 
 #include "dds/DCPS/SafetyProfilePool.h"
 #include "dds/DCPS/PoolAllocationBase.h"

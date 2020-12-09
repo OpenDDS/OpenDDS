@@ -5,8 +5,8 @@
 * See: http://www.OpenDDS.org/license.html
 */
 
-#ifndef DDS_DCPS_UTILITY_H
-#define DDS_DCPS_UTILITY_H
+#ifndef OPENDDS_DCPS_SECURITY_UTILITY_H
+#define OPENDDS_DCPS_SECURITY_UTILITY_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/SequenceIterator.h"

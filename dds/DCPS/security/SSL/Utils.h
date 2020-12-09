@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_UTILS_H
-#define OPENDDS_SECURITY_SSL_UTILS_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_UTILS_H
+#define OPENDDS_DCPS_SECURITY_SSL_UTILS_H
 
 #include "Certificate.h"
 #include "PrivateKey.h"

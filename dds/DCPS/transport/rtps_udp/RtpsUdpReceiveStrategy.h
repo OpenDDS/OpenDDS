@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSUDPRECEIVESTRATEGY_H
-#define DCPS_RTPSUDPRECEIVESTRATEGY_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPRECEIVESTRATEGY_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPRECEIVESTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
 #include "RtpsTransportHeader.h"

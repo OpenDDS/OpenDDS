@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_WATCHDOG_H
-#define OPENDDS_WATCHDOG_H
+#ifndef OPENDDS_DCPS_WATCHDOG_H
+#define OPENDDS_DCPS_WATCHDOG_H
 
 #include "ace/config-all.h"
 

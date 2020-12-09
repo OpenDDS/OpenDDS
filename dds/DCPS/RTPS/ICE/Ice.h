@@ -6,8 +6,8 @@
  */
 
 #ifdef OPENDDS_SECURITY
-#ifndef OPENDDS_RTPS_ICE_H
-#define OPENDDS_RTPS_ICE_H
+#ifndef OPENDDS_DCPS_RTPS_ICE_ICE_H
+#define OPENDDS_DCPS_RTPS_ICE_ICE_H
 
 #include "dds/DCPS/Ice.h"
 #include "dds/DCPS/RTPS/ICE/Stun.h"

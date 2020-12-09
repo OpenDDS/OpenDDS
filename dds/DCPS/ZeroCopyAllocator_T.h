@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef ZEROCOPYALLOCATOR_H
-#define ZEROCOPYALLOCATOR_H
+#ifndef OPENDDS_DCPS_ZEROCOPYALLOCATOR_T_H
+#define OPENDDS_DCPS_ZEROCOPYALLOCATOR_T_H
 
 #include /**/ "ace/pre.h"
 #include "ace/Malloc_Base.h"          /* Need ACE_Allocator */

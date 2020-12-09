@@ -7,8 +7,8 @@
 
 
 
-#ifndef DDS_DCPS_TOKEN_WRITER_IMPL_H
-#define DDS_DCPS_TOKEN_WRITER_IMPL_H
+#ifndef OPENDDS_DCPS_SECURITY_TOKENWRITER_H
+#define OPENDDS_DCPS_SECURITY_TOKENWRITER_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/SequenceIterator.h"

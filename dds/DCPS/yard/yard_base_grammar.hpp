@@ -14,8 +14,8 @@
 // any single rule from a set of rules, or "Seq" which attempts to match a sequence
 // of rules.
 
-#ifndef YARD_BASE_GRAMMAR_HPP
-#define YARD_BASE_GRAMMAR_HPP
+#ifndef OPENDDS_DCPS_YARD_YARD_BASE_GRAMMAR_HPP
+#define OPENDDS_DCPS_YARD_YARD_BASE_GRAMMAR_HPP
 
 namespace yard
 {
@@ -397,4 +397,4 @@ namespace yard
     { };
 }
 
-#endif // #ifndef YARD_BASE_GRAMMAR_HPP
+#endif // OPENDDS_DCPS_YARD_YARD_BASE_GRAMMAR_HPP

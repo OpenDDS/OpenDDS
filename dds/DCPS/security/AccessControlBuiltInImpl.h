@@ -5,31 +5,31 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H
+#define OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H
 
+#include "DdsSecurity_Export.h"
+#include "AccessControl/LocalAccessCredentialData.h"
+#include "AccessControl/Governance.h"
+#include "AccessControl/Permissions.h"
+#include "SSL/SubjectName.h"
 
-#ifndef DDS_ACCESS_CONTROL_BUILTIN_IMPL_H
-#define DDS_ACCESS_CONTROL_BUILTIN_IMPL_H
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/SporadicTask.h>
+#include <dds/Versioned_Namespace.h>
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/TimeTypes.h"
-#include "dds/DCPS/SporadicTask.h"
+#include <dds/DdsSecurityCoreC.h>
 
-#include "ace/Thread_Mutex.h"
-#include "ace/Reactor.h"
+#include <ace/Thread_Mutex.h>
+#include <ace/Reactor.h>
+
 #include <map>
 #include <set>
 #include <list>
 #include <vector>
 #include <string>
 #include <memory>
-
-#include "AccessControl/LocalAccessCredentialData.h"
-#include "AccessControl/Governance.h"
-#include "AccessControl/Permissions.h"
-#include "SSL/SubjectName.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -322,4 +322,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
+#endif // OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H

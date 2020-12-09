@@ -1,5 +1,5 @@
-#ifndef RCOBJECT_H_E92AD5BB
-#define RCOBJECT_H_E92AD5BB
+#ifndef OPENDDS_DCPS_RCOBJECT_H
+#define OPENDDS_DCPS_RCOBJECT_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

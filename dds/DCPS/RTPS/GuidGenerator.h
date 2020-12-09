@@ -4,8 +4,8 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#ifndef OPENDDS_RTPS_GUIDGENERATOR_H
-#define OPENDDS_RTPS_GUIDGENERATOR_H
+#ifndef OPENDDS_DCPS_RTPS_GUIDGENERATOR_H
+#define OPENDDS_DCPS_RTPS_GUIDGENERATOR_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

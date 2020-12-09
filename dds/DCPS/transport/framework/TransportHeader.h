@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTHEADER_H
-#define OPENDDS_DCPS_TRANSPORTHEADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTHEADER_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTHEADER_H
 
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"

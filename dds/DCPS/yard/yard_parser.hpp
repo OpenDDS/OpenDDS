@@ -4,8 +4,8 @@
 // Contains definitions for sample parser management classes
 // to be used with the YARD framework
 
-#ifndef YARD_PARSER_HPP
-#define YARD_PARSER_HPP
+#ifndef OPENDDS_DCPS_YARD_YARD_PARSER_HPP
+#define OPENDDS_DCPS_YARD_YARD_PARSER_HPP
 
 namespace yard
 {
@@ -170,4 +170,4 @@ namespace yard
 
  }
 
-#endif
+#endif // OPENDDS_DCPS_YARD_YARD_PARSER_HPP

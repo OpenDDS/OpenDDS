@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_HELPERS_H
-#define OPENDDS_SECURITY_HELPERS_H
+#ifndef OPENDDS_DCPS_RTPS_SECURITYHELPERS_H
+#define OPENDDS_DCPS_RTPS_SECURITYHELPERS_H
 
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DdsDcpsGuidC.h"

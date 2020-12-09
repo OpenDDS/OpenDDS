@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_ACCESS_PERMISSIONS_H
-#define OPENDDS_ACCESS_PERMISSIONS_H
+#ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROL_PERMISSIONS_H
+#define OPENDDS_DCPS_SECURITY_ACCESSCONTROL_PERMISSIONS_H
 
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/SubjectName.h"

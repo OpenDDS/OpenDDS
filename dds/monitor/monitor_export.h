@@ -3,8 +3,8 @@
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl -s OpenDDS_monitor
 // ------------------------------
-#ifndef OPENDDS_MONITOR_EXPORT_H
-#define OPENDDS_MONITOR_EXPORT_H
+#ifndef OPENDDS_MONITOR_MONITOR_EXPORT_H
+#define OPENDDS_MONITOR_MONITOR_EXPORT_H
 
 #include "ace/config-all.h"
 

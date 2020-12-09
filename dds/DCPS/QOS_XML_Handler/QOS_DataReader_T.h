@@ -4,8 +4,8 @@
  *
  * Starting point for parsing the DataReader QOS settings.
  */
-#ifndef QOS_DATAREADER_T_H_
-#define QOS_DATAREADER_T_H_
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_DATAREADER_T_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_DATAREADER_T_H
 
 #include "QOS_DwDrTp_Base_T.h"
 

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_BUILTIN_SECURITY_INST_H
-#define OPENDDS_DCPS_BUILTIN_SECURITY_INST_H
+#ifndef OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
+#define OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/security/framework/SecurityPluginInst.h"

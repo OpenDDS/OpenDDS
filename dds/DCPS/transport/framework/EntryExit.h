@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef ENTRYEXIT_H
-#define ENTRYEXIT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_ENTRYEXIT_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_ENTRYEXIT_H
 
 #include "TransportDebug.h"
 #include "ace/Log_Msg.h"

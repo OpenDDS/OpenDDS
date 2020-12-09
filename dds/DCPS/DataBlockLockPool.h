@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DATABLOCKLOCKPOOL_H
-#define DATABLOCKLOCKPOOL_H
+#ifndef OPENDDS_DCPS_DATABLOCKLOCKPOOL_H
+#define OPENDDS_DCPS_DATABLOCKLOCKPOOL_H
 
 #include "ace/Lock_Adapter_T.h"
 #include "ace/Thread_Mutex.h"

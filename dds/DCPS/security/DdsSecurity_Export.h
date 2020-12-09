@@ -4,8 +4,8 @@
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl DdsSecurity
 // ------------------------------
-#ifndef DDSSECURITY_EXPORT_H
-#define DDSSECURITY_EXPORT_H
+#ifndef OPENDDS_DCPS_SECURITY_DDSSECURITY_EXPORT_H
+#define OPENDDS_DCPS_SECURITY_DDSSECURITY_EXPORT_H
 
 #include "ace/config-all.h"
 

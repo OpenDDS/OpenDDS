@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTIMPL_H
-#define OPENDDS_DCPS_TRANSPORTIMPL_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"

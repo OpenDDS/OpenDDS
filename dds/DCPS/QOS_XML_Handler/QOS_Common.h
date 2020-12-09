@@ -5,8 +5,8 @@
  * Converting most common QOS XML settings to IDL QOS.
  *
  */
-#ifndef QOS_COMMON_H
-#define QOS_COMMON_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_COMMON_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_COMMON_H
 
 #include /**/ "ace/pre.h"
 

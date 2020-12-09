@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_CRYPTO_BUILTIN_IMPL_H
-#define OPENDDS_CRYPTO_BUILTIN_IMPL_H
+#ifndef OPENDDS_DCPS_SECURITY_CRYPTOBUILTINIMPL_H
+#define OPENDDS_DCPS_SECURITY_CRYPTOBUILTINIMPL_H
 
 #include "DdsSecurity_Export.h"
 #include "CryptoBuiltInC.h"

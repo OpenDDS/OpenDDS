@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_SEDP_H
-#define OPENDDS_RTPS_SEDP_H
+#ifndef OPENDDS_DCPS_RTPS_SEDP_H
+#define OPENDDS_DCPS_RTPS_SEDP_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

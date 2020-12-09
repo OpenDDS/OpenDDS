@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTLOADER_H
-#define DCPS_MULTICASTLOADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTLOADER_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTLOADER_H
 
 #include "Multicast_Export.h"
 

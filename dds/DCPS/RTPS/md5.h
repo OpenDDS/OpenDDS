@@ -24,9 +24,10 @@
  */
 
 #ifdef HAVE_OPENSSL
-#include <openssl/md5.h>
-#elif !defined(_MD5_H)
-#define _MD5_H
+#  include <openssl/md5.h>
+#else
+#  ifndef OPENDDS_DCPS_RTPS_MD5_H
+#  define OPENDDS_DCPS_RTPS_MD5_H
 
 #include "rtps_export.h"
 
@@ -44,4 +45,5 @@ OpenDDS_Rtps_Export void MD5_Init(MD5_CTX *ctx);
 OpenDDS_Rtps_Export void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size);
 OpenDDS_Rtps_Export void MD5_Final(unsigned char *result, MD5_CTX *ctx);
 
+#  endif // OPENDDS_DCPS_RTPS_MD5_H
 #endif

@@ -3,8 +3,8 @@
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl OpenDDS_Shmem
 // ------------------------------
-#ifndef OPENDDS_SHMEM_EXPORT_H
-#define OPENDDS_SHMEM_EXPORT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEM_EXPORT_H
+#define OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEM_EXPORT_H
 
 #include "ace/config-all.h"
 

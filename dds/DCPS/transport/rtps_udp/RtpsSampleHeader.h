@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSSAMPLEHEADER_H
-#define DCPS_RTPSSAMPLEHEADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSSAMPLEHEADER_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSSAMPLEHEADER_H
 
 #include "Rtps_Udp_Export.h"
 

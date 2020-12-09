@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef RAKEDATA_H
-#define RAKEDATA_H
+#ifndef OPENDDS_DCPS_RAKEDATA_H
+#define OPENDDS_DCPS_RAKEDATA_H
 
 #include /**/ "ace/pre.h"
 #include "dcps_export.h"

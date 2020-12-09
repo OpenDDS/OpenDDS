@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H
-#define OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H
+#ifndef OPENDDS_DCPS_NETWORKCONFIGMONITOR_H
+#define OPENDDS_DCPS_NETWORKCONFIGMONITOR_H
 
 #include "dcps_export.h"
 
@@ -170,4 +170,4 @@ typedef RcHandle<NetworkConfigMonitor> NetworkConfigMonitor_rch;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H
+#endif // OPENDDS_DCPS_NETWORKCONFIGMONITOR_H

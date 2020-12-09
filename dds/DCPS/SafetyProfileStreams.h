@@ -1,5 +1,5 @@
-#ifndef SAFETY_PROFILE_STREAMS_H
-#define SAFETY_PROFILE_STREAMS_H
+#ifndef OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
+#define OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"

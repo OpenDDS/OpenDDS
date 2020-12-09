@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_RECEIVELISTENERSET_H
-#define OPENDDS_DCPS_RECEIVELISTENERSET_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_RECEIVELISTENERSET_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_RECEIVELISTENERSET_H
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

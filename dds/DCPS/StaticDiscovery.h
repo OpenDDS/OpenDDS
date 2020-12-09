@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H
-#define OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H
+#ifndef OPENDDS_DCPS_STATICDISCOVERY_H
+#define OPENDDS_DCPS_STATICDISCOVERY_H
 
 #include "dcps_export.h"
 

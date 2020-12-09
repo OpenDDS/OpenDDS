@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SUBSCRIBER_H
-#define OPENDDS_DCPS_SUBSCRIBER_H
+#ifndef OPENDDS_DCPS_SUBSCRIBERIMPL_H
+#define OPENDDS_DCPS_SUBSCRIBERIMPL_H
 
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

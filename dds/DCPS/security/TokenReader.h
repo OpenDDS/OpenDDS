@@ -7,8 +7,8 @@
 
 
 
-#ifndef DDS_DCPS_TOKEN_READER_IMPL_H
-#define DDS_DCPS_TOKEN_READER_IMPL_H
+#ifndef OPENDDS_DCPS_SECURITY_TOKENREADER_H
+#define OPENDDS_DCPS_SECURITY_TOKENREADER_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 

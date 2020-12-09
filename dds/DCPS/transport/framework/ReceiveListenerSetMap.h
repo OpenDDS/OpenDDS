@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_RECEIVELISTENERSETMAP_H
-#define OPENDDS_DCPS_RECEIVELISTENERSETMAP_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_RECEIVELISTENERSETMAP_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_RECEIVELISTENERSETMAP_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ReceiveListenerSet.h"

@@ -7,8 +7,8 @@
  */
 //================================================================
 
-#ifndef DCPS_CONFIG_XML_FILE_INTF_H
-#define DCPS_CONFIG_XML_FILE_INTF_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_XML_FILE_INTF_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_XML_FILE_INTF_H
 #include /**/ "ace/pre.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

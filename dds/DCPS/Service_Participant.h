@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
-#define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
+#ifndef OPENDDS_DCPS_SERVICE_PARTICIPANT_H
+#define OPENDDS_DCPS_SERVICE_PARTICIPANT_H
 
 #include "Definitions.h"
 #include "MonitorFactory.h"

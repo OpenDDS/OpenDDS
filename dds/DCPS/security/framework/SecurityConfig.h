@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SECURTIY_CONFIG_H
-#define OPENDDS_DCPS_SECURTIY_CONFIG_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

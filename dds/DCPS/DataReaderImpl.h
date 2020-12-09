@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADER_H
-#define OPENDDS_DCPS_DATAREADER_H
+#ifndef OPENDDS_DCPS_DATAREADERIMPL_H
+#define OPENDDS_DCPS_DATAREADERIMPL_H
 
 #include "dcps_export.h"
 #include "EntityImpl.h"

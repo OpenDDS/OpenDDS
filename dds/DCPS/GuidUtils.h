@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef GUIDUTILS_H
-#define GUIDUTILS_H
+#ifndef OPENDDS_DCPS_GUIDUTILS_H
+#define OPENDDS_DCPS_GUIDUTILS_H
 
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

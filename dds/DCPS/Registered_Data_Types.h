@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef REGISTERED_DATA_TYPES_H_
-#define REGISTERED_DATA_TYPES_H_
+#ifndef OPENDDS_DCPS_REGISTERED_DATA_TYPES_H
+#define OPENDDS_DCPS_REGISTERED_DATA_TYPES_H
 
 #include "dcps_export.h"
 #include "dds/DdsDcpsDomainC.h"

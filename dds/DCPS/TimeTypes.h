@@ -4,8 +4,8 @@
  * for these types.
  */
 
-#ifndef OPENDDS_DCPS_TIME_TYPES_HEADER
-#define OPENDDS_DCPS_TIME_TYPES_HEADER
+#ifndef OPENDDS_DCPS_TIMETYPES_H
+#define OPENDDS_DCPS_TIMETYPES_H
 
 #include "TimeDuration.h"
 #include "TimePoint_T.h"

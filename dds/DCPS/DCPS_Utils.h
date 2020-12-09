@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UTILS_H
-#define DCPS_UTILS_H
+#ifndef OPENDDS_DCPS_DCPS_UTILS_H
+#define OPENDDS_DCPS_DCPS_UTILS_H
 
 #include "dcps_export.h"
 #include "dds/DdsDcpsInfrastructureC.h"

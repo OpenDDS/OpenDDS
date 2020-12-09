@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
-#define OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
 
 #include "dds/DCPS/Discovery.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

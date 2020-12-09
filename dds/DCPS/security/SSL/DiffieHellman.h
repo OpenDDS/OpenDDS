@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
-#define OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_DIFFIEHELLMAN_H
+#define OPENDDS_DCPS_SECURITY_SSL_DIFFIEHELLMAN_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/unique_ptr.h"
