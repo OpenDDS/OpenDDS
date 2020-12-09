@@ -2,7 +2,8 @@
 
 namespace Builder {
 
-PublisherManager::PublisherManager(const PublisherConfigSeq& configs, PublisherReportSeq& reports, DDS::DomainParticipant_var& participant, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map)
+PublisherManager::PublisherManager(const PublisherConfigSeq& configs, PublisherReportSeq& reports,
+  DDS::DomainParticipant_var& participant, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map)
 {
   reports.length(configs.length());
   for (CORBA::ULong i = 0; i < configs.length(); ++i) {

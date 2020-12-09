@@ -2,7 +2,8 @@
 
 namespace Builder {
 
-DataWriterManager::DataWriterManager(const DataWriterConfigSeq& configs, DataWriterReportSeq& reports, DDS::Publisher_var& publisher, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map)
+DataWriterManager::DataWriterManager(const DataWriterConfigSeq& configs, DataWriterReportSeq& reports,
+  DDS::Publisher_var& publisher, const std::shared_ptr<TopicManager>& topics, WriterMap& writer_map)
 {
   reports.length(configs.length());
   for (CORBA::ULong i = 0; i < configs.length(); ++i) {

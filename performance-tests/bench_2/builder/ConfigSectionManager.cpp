@@ -32,7 +32,7 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq)
       if (!std::string(section.properties[j].name).empty()) {
         Log::log()
           << "Adding '" << section.properties[j].name
-          <<"' = '" << section.properties[j].value
+          << "' = '" << section.properties[j].value
           << "' to [" << section.name << "] configuration section" << std::endl;
         ACE_TString tname(ACE_TEXT_CHAR_TO_TCHAR(section.properties[j].name.in()));
         ACE_TString tvalue(ACE_TEXT_CHAR_TO_TCHAR(section.properties[j].value.in()));

@@ -135,9 +135,9 @@ bool Topic::enable(bool throw_on_error)
 void Topic::detach_listener()
 {
   if (listener_) {
-    TopicListener* savvy_listener_ = dynamic_cast<TopicListener*>(listener_.in());
-    if (savvy_listener_) {
-      savvy_listener_->unset_topic(*this);
+    TopicListener* savvy_listener = dynamic_cast<TopicListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_topic(*this);
     }
     if (topic_) {
       topic_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
