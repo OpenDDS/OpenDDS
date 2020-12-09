@@ -119,6 +119,8 @@ module DDS {
       PermissionsToken  permissions_token;
       PropertyQosPolicy property;
       ParticipantSecurityInfo  security_info;
+      // https://issues.omg.org/browse/DDSSEC12-87
+      ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
     };
 
     //@extensibility(MUTABLE)

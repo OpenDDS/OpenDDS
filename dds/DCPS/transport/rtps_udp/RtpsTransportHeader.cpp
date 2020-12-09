@@ -29,7 +29,7 @@ RtpsTransportHeader::init(ACE_Message_Block& mb)
 {
   // Byte order doesn't matter for RTPS::Header, since it's
   // exclusively structs/arrays of octet.
-  Serializer ser(&mb, false, Serializer::ALIGN_CDR);
+  Serializer ser(&mb, Encoding::KIND_XCDR1);
   valid_ = (ser >> header_);
 
   if (valid_) {
@@ -37,7 +37,7 @@ RtpsTransportHeader::init(ACE_Message_Block& mb)
     // length_ started as the total number of bytes in the datagram's payload.
     // When we return to the TransportReceiveStrategy it must be the number
     // of bytes remaining after processing this RTPS::Header.
-    length_ -= max_marshaled_size();
+    length_ -= get_max_serialized_size();
 
     // RTPS spec v2.1 section 8.3.6.3
     valid_ = std::equal(header_.prefix, header_.prefix + sizeof(header_.prefix),

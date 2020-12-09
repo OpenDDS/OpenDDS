@@ -31,7 +31,8 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
                                            const DDS::SubscriberQos& subscriberQos,
                                            const char* filterClassName,
                                            const char* filterExpression,
-                                           const DDS::StringSeq& exprParams)
+                                           const DDS::StringSeq& exprParams,
+                                           const DDS::OctetSeq& serializedTypeInfo)
   : id_(id),
     participant_(participant),
     topic_(topic),
@@ -42,7 +43,8 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
     subscriberQos_(subscriberQos),
     filterClassName_(filterClassName),
     filterExpression_(filterExpression),
-    exprParams_(exprParams)
+    exprParams_(exprParams),
+    serializedTypeInfo_(serializedTypeInfo)
 {
   reader_ =  OpenDDS::DCPS::DataReaderRemote::_duplicate(reader);
 
@@ -68,7 +70,7 @@ int DCPS_IR_Subscription::add_associated_publication(DCPS_IR_Publication* pub,
     association.writerId = pub->get_id();
     association.pubQos = *(pub->get_publisher_qos());
     association.writerQos = *(pub->get_datawriter_qos());
-
+    association.serializedTypeInfo = pub->get_serialized_type_info();
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -780,6 +782,12 @@ DCPS_IR_Subscription::dump_to_string(const std::string& prefix, int depth) const
 
 #endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
   return str;
+}
+
+const DDS::OctetSeq&
+DCPS_IR_Subscription::get_serialized_type_info() const
+{
+  return serializedTypeInfo_;
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -742,7 +742,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
-  DCPS::Serializer serializer(&block, DCPS::Serializer::SWAP_BE);
+  DCPS::Serializer serializer(&block, STUN::encoding);
   const_cast<STUN::Message&>(message).block = &block;
   serializer << message;
 

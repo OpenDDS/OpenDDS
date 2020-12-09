@@ -35,8 +35,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 using namespace DDS::Security;
 using namespace OpenDDS::Security::CommonUtilities;
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Encoding;
+using OpenDDS::DCPS::ENDIAN_BIG;
+using OpenDDS::DCPS::align;
+using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 using OpenDDS::DCPS::security_debug;
+
+const Encoding common_encoding(Encoding::KIND_XCDR1, ENDIAN_BIG);
 
 namespace OpenDDS {
 namespace Security {
@@ -634,13 +640,15 @@ namespace {
       DDS::BinaryProperty_t& p = t.binary_properties[0];
       p.name = Token_KeyMat_Name;
       p.propagate = true;
-      size_t size = 0, padding = 0;
-      DCPS::gen_find_size(keys[i], size, padding);
-      p.value.length(static_cast<unsigned int>(size + padding));
-      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size + padding);
-      Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+      const size_t size = serialized_size(common_encoding, keys[i]);
+      p.value.length(static_cast<unsigned int>(size));
+      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size);
+      Serializer ser(&mb, common_encoding);
       if (ser << keys[i]) {
         push_back(tokens, t);
+      } else {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: keys_to_tokens: Failed to serialize\n"));
       }
     }
     return tokens;
@@ -657,10 +665,13 @@ namespace {
           if (Token_KeyMat_Name == p.name) {
             ACE_Message_Block mb(to_mb(p.value.get_buffer()), p.value.length());
             mb.wr_ptr(p.value.length());
-            Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+            Serializer ser(&mb, common_encoding);
             KeyMaterial_AES_GCM_GMAC key;
             if (ser >> key) {
               push_back(keys, key);
+            } else {
+              ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: tokens_to_keys: Failed to deserialize\n"));
             }
             break;
           }
@@ -896,20 +907,18 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
-  using DCPS::gen_find_size;
-  gen_find_size(header, size, padding);
+  size_t size = serialized_size(common_encoding, header);
 
   if (pOut != &plain_buffer) {
     size += CRYPTO_CONTENT_ADDED_LENGTH;
   }
 
   size += pOut->length();
-  gen_find_size(footer, size, padding);
+  serialized_size(common_encoding, size, footer);
 
-  encoded_buffer.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_buffer.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size);
+  Serializer ser(&mb, common_encoding);
   ser << header;
 
   if (pOut != &plain_buffer) {
@@ -918,7 +927,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
 
   ser << footer;
-  return true;
+  return ser.good_bit();
 }
 
 void CryptoBuiltInImpl::Session::create_key(const KeyMaterial& master)
@@ -1082,15 +1091,6 @@ namespace {
     return 0;
   }
 
-  // Update 'size' and 'padding' in the same way that gen_find_size does, but for aligning to 'alignment'
-  void align(size_t alignment, size_t& size, size_t& padding)
-  {
-    const size_t offset = (size + padding) % alignment;
-    if (offset) {
-      padding += alignment - offset;
-    }
-  }
-
   unsigned int roundUp(unsigned int length, unsigned int alignment)
   {
     const unsigned int offset = length % alignment;
@@ -1113,7 +1113,7 @@ namespace {
     ACE_Message_Block mb_in(to_mb(original.get_buffer() + offset), origLength);
     mb_in.wr_ptr(origLength);
 
-    Serializer ser_in(&mb_in);
+    Serializer ser_in(&mb_in, common_encoding);
     ser_in.skip(1); // submessageId
 
     unsigned char flags;
@@ -1184,27 +1184,26 @@ bool CryptoBuiltInImpl::encode_submessage(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
+  size_t size = 0;
+
   size += RTPS::SMHDR_SZ; // prefix submessage header
-  using DCPS::gen_find_size;
-  gen_find_size(header, size, padding);
-  const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size + padding - RTPS::SMHDR_SZ);
+  serialized_size(common_encoding, size, header);
+  const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size - RTPS::SMHDR_SZ);
 
   if (!authOnly) {
     size += RTPS::SMHDR_SZ + SEQLEN_SZ;
   }
 
   size += pOut->length(); // submessage inside wrapper
-  align(RTPS::SM_ALIGN, size, padding);
+  align(size, RTPS::SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // postfix submessage header
-  const size_t preFooter = size + padding;
-  gen_find_size(footer, size, padding);
+  const size_t preFooter = size;
+  serialized_size(common_encoding, size, footer);
 
-  encoded_rtps_submessage.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()),
-                       size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_rtps_submessage.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()), size);
+  Serializer ser(&mb, common_encoding);
   RTPS::SubmessageHeader smHdr = {RTPS::SEC_PREFIX, 0, hdrLen};
   ser << smHdr;
   ser << header;
@@ -1220,11 +1219,11 @@ bool CryptoBuiltInImpl::encode_submessage(
   ser.align_w(RTPS::SM_ALIGN);
 
   smHdr.submessageId = RTPS::SEC_POSTFIX;
-  smHdr.submessageLength = static_cast<ACE_UINT16>(size + padding - preFooter);
+  smHdr.submessageLength = static_cast<ACE_UINT16>(size - preFooter);
   ser << smHdr;
   ser << footer;
 
-  return true;
+  return ser.good_bit();
 }
 
 bool CryptoBuiltInImpl::encode_datawriter_submessage(
@@ -1383,25 +1382,24 @@ bool CryptoBuiltInImpl::encode_rtps_message(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
-  size += RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ; // RTPS Header, SRTPS Prefix
-  using DCPS::gen_find_size;
-  gen_find_size(cryptoHdr, size, padding);
-  const ACE_UINT16 cryptoHdrLen = static_cast<ACE_UINT16>(size + padding - RTPS::RTPSHDR_SZ - RTPS::SMHDR_SZ);
+  size_t size = RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ; // RTPS Header, SRTPS Prefix
+  serialized_size(common_encoding, size, cryptoHdr);
+  const ACE_UINT16 cryptoHdrLen =
+    static_cast<ACE_UINT16>(size - RTPS::RTPSHDR_SZ - RTPS::SMHDR_SZ);
 
   if (addSecBody) {
     size += RTPS::SMHDR_SZ + SEQLEN_SZ;
   }
 
   size += pOut->length();
-  align(RTPS::SM_ALIGN, size, padding);
+  align(size, RTPS::SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // SRTPS Postfix
-  gen_find_size(cryptoFooter, size, padding);
+  serialized_size(common_encoding, size, cryptoFooter);
 
-  encoded_rtps_message.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_rtps_message.get_buffer()), size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_rtps_message.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_rtps_message.get_buffer()), size);
+  Serializer ser(&mb, common_encoding);
 
   ser.write_octet_array(plain_rtps_message.get_buffer(), RTPS::RTPSHDR_SZ);
 
@@ -1424,7 +1422,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   ser << smHdr;
   ser << cryptoFooter;
 
-  return true;
+  return ser.good_bit();
 }
 
 namespace {
@@ -1456,10 +1454,13 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
-  Serializer de_ser(&mb_in, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
-  de_ser.skip(RTPS::SMHDR_SZ);
+  Serializer de_ser(&mb_in, common_encoding);
   CryptoHeader ch;
-  de_ser >> ch;
+  if (!(de_ser.skip(RTPS::SMHDR_SZ) && (de_ser >> ch))) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) CryptoBuiltInImpl::preprocess_secure_submsg: "
+      "Could not deserializer CyptoHeader\n"));
+  }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
@@ -1730,7 +1731,7 @@ bool CryptoBuiltInImpl::decode_rtps_message(
       return CommonUtilities::set_security_error(ex, -3, i, "Failed to deserialize SubmessageHeader");
     }
 
-    parser.serializer().swap_bytes(Serializer::SWAP_BE);
+    parser.serializer().endianness(ENDIAN_BIG);
     const int type = parser.submessageHeader().submessageId;
 
     if (i == 0 && type == RTPS::SRTPS_PREFIX) {
@@ -1747,7 +1748,8 @@ bool CryptoBuiltInImpl::decode_rtps_message(
       if (!(parser >> sizeOfEncrypted)) {
         return CommonUtilities::set_security_error(ex, -13, i, "Failed to deserialize CryptoContent length");
       }
-      const unsigned short sz = static_cast<unsigned short>(DCPS::max_marshaled_size_ulong());
+      const unsigned short sz =
+        static_cast<unsigned short>(DCPS::uint32_cdr_size);
       if (sizeOfEncrypted + sz > parser.submessageHeader().submessageLength) {
         return CommonUtilities::set_security_error(ex, -14, i, "CryptoContent length out of bounds");
       }
@@ -1851,7 +1853,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
-  Serializer de_ser(&mb_in, false, Serializer::ALIGN_CDR);
+  Serializer de_ser(&mb_in, common_encoding);
   ACE_CDR::Octet type, flags;
   // SEC_PREFIX
   de_ser >> ACE_InputCDR::to_octet(type);
@@ -1860,26 +1862,46 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
   CryptoHeader ch;
-  de_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   de_ser >> ch;
   de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
+  if (!de_ser.good_bit()) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+      "Failed to deserialize SEC_PREFIX\n"));
+    return false;
+  }
+
   // Next submessage, SEC_BODY if encrypted
   de_ser >> ACE_InputCDR::to_octet(type);
   de_ser >> ACE_InputCDR::to_octet(flags);
   de_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
   de_ser >> octetsToNext;
+  if (!de_ser.good_bit()) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+      "Failed to deserialize next submessage\n"));
+    return false;
+  }
+
   Message_Block_Ptr mb_footer(mb_in.duplicate());
   mb_footer->rd_ptr(octetsToNext);
   // SEC_POSTFIX
-  Serializer post_ser(mb_footer.get(), false, Serializer::ALIGN_CDR);
+  Serializer post_ser(mb_footer.get(), common_encoding);
   post_ser >> ACE_InputCDR::to_octet(type);
   post_ser >> ACE_InputCDR::to_octet(flags);
   post_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
   ACE_CDR::UShort postfixOctetsToNext;
   post_ser >> postfixOctetsToNext;
   CryptoFooter cf;
-  post_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   post_ser >> cf;
+  if (!post_ser.good_bit()) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+      "Failed to deserialize SEC_POST\n"));
+    return false;
+  }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeySeq& keyseq = keys_[sender_handle];
@@ -1888,9 +1910,14 @@ bool CryptoBuiltInImpl::decode_submessage(
       const KeyId_t sKey = std::make_pair(sender_handle, i);
 
       if (encrypts(keyseq[i])) {
-        de_ser.swap_bytes(Serializer::SWAP_BE);
+        de_ser.endianness(ENDIAN_BIG);
         ACE_CDR::ULong n;
-        de_ser >> n;
+        if (!(de_ser >> n)) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+            "Failed to deserialize content size(?)\n"));
+          return false;
+        }
         return decrypt(keyseq[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
                        plain_rtps_submessage, ex);
 
@@ -1998,7 +2025,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   ACE_Message_Block mb_in(to_mb(encoded_buffer.get_buffer()),
                           encoded_buffer.length());
   mb_in.wr_ptr(encoded_buffer.length());
-  Serializer de_ser(&mb_in, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  Serializer de_ser(&mb_in, common_encoding);
   CryptoHeader ch;
   if (!(de_ser >> ch)) {
     return CommonUtilities::set_security_error(ex, -3, 4, "Failed to deserialize CryptoHeader");

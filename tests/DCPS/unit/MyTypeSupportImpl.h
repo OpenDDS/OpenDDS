@@ -65,6 +65,8 @@ public:
 #endif
 
   bool has_dcps_key() { return false; }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 };
 
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
@@ -126,10 +128,17 @@ public:
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
-  virtual ::DDS::ReturnCode_t enable_specific (
-      ) {return ::DDS::RETCODE_OK;};
+  ::DDS::ReturnCode_t enable_specific()
+  {
+    return ::DDS::RETCODE_OK;
+  }
 
   virtual void unregistered(DDS::InstanceHandle_t /* instance_handle */) {};
+
+  DDS::ReturnCode_t setup_serialization()
+  {
+    return DDS::RETCODE_OK;
+  }
 };
 
 #endif /* MYTYPESUPPORTIMPL_H_  */

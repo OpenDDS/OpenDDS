@@ -52,8 +52,7 @@ TransportHeader::operator=(ACE_Message_Block& buffer)
 }
 
 ACE_INLINE
-size_t
-TransportHeader::max_marshaled_size()
+size_t TransportHeader::get_max_serialized_size()
 {
   // Representation takes no extra space for encoding.
   TransportHeader hdr(no_init);
@@ -91,7 +90,7 @@ TransportHeader::init(ACE_Message_Block* buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","init",6);
 
-  Serializer reader(buffer);
+  Serializer reader(buffer, Encoding::KIND_UNALIGNED_CDR);
 
   if (!reader.read_octet_array(this->protocol_, sizeof(this->protocol_)))
     return false;

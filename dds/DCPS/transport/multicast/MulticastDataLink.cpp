@@ -34,6 +34,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+}
+
 MulticastDataLink::MulticastDataLink(MulticastTransport& transport,
                                      const MulticastSessionFactory_rch& session_factory,
                                      MulticastPeer local_peer,
@@ -370,7 +374,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     const Message_Block_Ptr& data,
     bool swap_bytes)
 {
-  Serializer serializer_read(data.get(), swap_bytes);
+  Serializer serializer_read(data.get(), encoding_kind, swap_bytes);
 
   MulticastPeer local_peer;
   serializer_read >> local_peer;
@@ -389,7 +393,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
 
   Message_Block_Ptr synack_data(new ACE_Message_Block(sizeof(MulticastPeer)));
 
-  Serializer serializer_write(synack_data.get());
+  Serializer serializer_write(synack_data.get(), encoding_kind);
   serializer_write << source;
 
   DataSampleHeader header;

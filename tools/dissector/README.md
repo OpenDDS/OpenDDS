@@ -123,7 +123,7 @@ only library). If RapidJSON is not installed on the system, it must be
 downloaded using: `git submodule update --init --recursive` or equivalent for
 your git client. If OpenDDS isn't a git repository (such as if it was
 downloaded from opendds.org) You can download RapidJSON source and pass it to
-the cofnigure script using `--rapidjson`.
+the configure script using `--rapidjson`.
 
 ### Build
 

@@ -137,4 +137,16 @@ protected:
   composite_generator gen_target_;
 };
 
+template <typename T>
+void scope2vector(std::vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
+{
+  UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
+  for (; !it.is_done(); it.next()) {
+    AST_Decl* item = it.item();
+    if (item->node_type() == nt) {
+      v.push_back(dynamic_cast<T*>(item));
+    }
+  }
+}
+
 #endif /* dds_visitor_H */

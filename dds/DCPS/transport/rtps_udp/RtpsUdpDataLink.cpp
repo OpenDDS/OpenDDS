@@ -976,24 +976,20 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
 namespace {
   ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm)
   {
-    size_t size = 0, padding = 0;
+    // byte swapping is handled in the operator<<() implementation
+    const Encoding encoding(Encoding::KIND_XCDR1);
+    size_t size = 0;
     for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-      if ((size + padding) % 4) {
-        padding += 4 - ((size + padding) % 4);
-      }
-      gen_find_size(subm[i], size, padding);
+      encoding.align(size, RTPS::SMHDR_SZ);
+      serialized_size(encoding, size, subm[i]);
     }
 
-    ACE_Message_Block* hdr = new ACE_Message_Block(size + padding);
+    ACE_Message_Block* hdr = new ACE_Message_Block(size);
 
     for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-      // byte swapping is handled in the operator<<() implementation
-      Serializer ser(hdr, false, Serializer::ALIGN_CDR);
+      Serializer ser(hdr, encoding);
       ser << subm[i];
-      const size_t len = hdr->length();
-      if (len % 4) {
-        hdr->wr_ptr(4 - (len % 4));
-      }
+      ser.align_w(RTPS::SMHDR_SZ);
     }
     return hdr;
   }
@@ -1338,10 +1334,9 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
     {gapListBase, 0, bitmap}
   };
 
-  size_t size = 0, padding = 0;
-  gen_find_size(gap, size, padding);
+    size_t size = serialized_size(Encoding(Encoding::KIND_XCDR1), gap);
   gap.smHeader.submessageLength =
-    static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+      static_cast<CORBA::UShort>(size) - SMHDR_SZ;
 
   const CORBA::ULong i = msg.length();
   msg.length(i + 1);
@@ -2176,6 +2171,8 @@ bool RtpsUdpDataLink::separate_message(EntityId_t entity)
 
 namespace {
 
+typedef OPENDDS_VECTOR(size_t) SizeVec;
+
 struct BundleHelper {
   static const size_t initial_size =
 #ifdef OPENDDS_SECURITY
@@ -2184,15 +2181,11 @@ struct BundleHelper {
     0;
 #endif
 
-  static const size_t max_size_handicap =
-#ifdef OPENDDS_SECURITY
-    RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
-#else
-    0;
-#endif
-
-  BundleHelper(size_t max_bundle_size, OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
-  : max_bundle_size_(max_bundle_size - max_size_handicap)
+  BundleHelper(
+    const Encoding& encoding, size_t max_bundle_size,
+    SizeVec& meta_submessage_bundle_sizes)
+  : encoding_(encoding)
+  , max_bundle_size_(max_bundle_size)
   , size_(initial_size)
   , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
   {
@@ -2205,46 +2198,52 @@ struct BundleHelper {
   }
 
   template <typename T>
-  bool add_to_bundle(const T& val, size_t& submessage_length)
+  bool add_to_bundle(T& submessage)
   {
-    submessage_length = 0;
-
-    const size_t prev_prev_size = size_;
-
+    const size_t prev_size = size_;
 #ifdef OPENDDS_SECURITY
     // Could be an encoded submessage (encoding happens later)
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageLeadingSize;
 #endif
-    const size_t prev_size = size_;
-    size_t padding = 0;
-    gen_find_size(val, size_, padding);
-    submessage_length = size_ - prev_size;
-    size_ += padding;
+    const size_t submessage_size = serialized_size(encoding_, submessage);
+    submessage.smHeader.submessageLength = static_cast<CORBA::UShort>(submessage_size - RTPS::SMHDR_SZ);
+    align(size_, RTPS::SM_ALIGN);
+    size_ += submessage_size;
 #ifdef OPENDDS_SECURITY
     // Could be an encoded submessage (encoding happens later)
+    align(size_, RTPS::SM_ALIGN);
     size_ += RtpsUdpSendStrategy::MaxSecureSubmessageFollowingSize;
 #endif
-    if (size_ > max_bundle_size_) {
-      const size_t chunk_size = size_ - prev_prev_size;
-      meta_submessage_bundle_sizes_.push_back(prev_prev_size);
+    size_t compare_size = size_;
+#ifdef OPENDDS_SECURITY
+    // Could be an encoded rtps message (encoding happens later)
+    align(compare_size, RTPS::SM_ALIGN);
+    compare_size += RtpsUdpSendStrategy::MaxSecureFullMessageFollowingSize;
+#endif
+    if (compare_size > max_bundle_size_) {
+      const size_t chunk_size = size_ - prev_size;
+      meta_submessage_bundle_sizes_.push_back(prev_size);
       size_ = initial_size + chunk_size;
       return false;
     }
     return true;
   }
 
-  size_t max_bundle_size_;
+  const Encoding& encoding_;
+  const size_t max_bundle_size_;
   size_t size_;
-  OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes_;
+  SizeVec& meta_submessage_bundle_sizes_;
 };
 
 }
 
 void
-RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_map,
-                                                MetaSubmessageIterVecVec& meta_submessage_bundles,
-                                                OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
-                                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
+RtpsUdpDataLink::bundle_mapped_meta_submessages(
+  const Encoding& encoding,
+  AddrDestMetaSubmessageMap& adr_map,
+  MetaSubmessageIterVecVec& meta_submessage_bundles,
+  OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+  SizeVec& meta_submessage_bundle_sizes)
 {
   using namespace RTPS;
 
@@ -2254,7 +2253,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
 
-  BundleHelper helper(max_bundle_size_, meta_submessage_bundle_sizes);
+  BundleHelper helper(encoding, max_bundle_size_, meta_submessage_bundle_sizes);
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
 
@@ -2272,8 +2271,6 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
 
     prev_dst = GUID_UNKNOWN;
 
-    size_t submessage_length = 0;
-
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
@@ -2281,7 +2278,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep
           // going
-          if (!helper.add_to_bundle(idst, submessage_length)) {
+          if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addrs);
           }
@@ -2291,26 +2288,19 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
         MetaSubmessage& res = **resp_it;
         switch (res.sm_._d()) {
           case HEARTBEAT: {
-            result = helper.add_to_bundle(res.sm_.heartbeat_sm(), submessage_length);
-            res.sm_.heartbeat_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.heartbeat_sm());
             break;
           }
           case ACKNACK: {
-            result = helper.add_to_bundle(res.sm_.acknack_sm(), submessage_length);
-            res.sm_.acknack_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.acknack_sm());
             break;
           }
           case GAP: {
-            result = helper.add_to_bundle(res.sm_.gap_sm(), submessage_length);
-            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.gap_sm());
             break;
           }
           case NACK_FRAG: {
-            result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
-            res.sm_.nack_frag_sm().smHeader.submessageLength =
-              static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.nack_frag_sm());
             break;
           }
           default: {
@@ -2346,11 +2336,15 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   AddrDestMetaSubmessageMap adr_map;
   build_meta_submessage_map(meta_submessages, adr_map);
 
+  const Encoding encoding(Encoding::KIND_XCDR1);
+
   // Build reasonably-sized submessage bundles based on our destination map
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
   OPENDDS_VECTOR(AddrSet) meta_submessage_bundle_addrs; // for a bundle's address set
-  OPENDDS_VECTOR(size_t) meta_submessage_bundle_sizes; // for allocating the bundle's buffer
-  bundle_mapped_meta_submessages(adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes);
+  SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
+  bundle_mapped_meta_submessages(
+    encoding, adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs,
+    meta_submessage_bundle_sizes);
 
   // Reusable INFO_DST
   InfoDestinationSubmessage idst = {
@@ -2363,8 +2357,9 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   for (size_t i = 0; i < meta_submessage_bundles.size(); ++i) {
     prev_dst = GUID_UNKNOWN;
     ACE_Message_Block mb_bundle(meta_submessage_bundle_sizes[i]); //FUTURE: allocators?
-    Serializer ser(&mb_bundle, false, Serializer::ALIGN_CDR);
-    for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin(); it != meta_submessage_bundles[i].end(); ++it) {
+    Serializer ser(&mb_bundle, encoding);
+    for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin();
+        it != meta_submessage_bundles[i].end(); ++it) {
       MetaSubmessage& res = **it;
       RepoId dst = res.dst_guid_;
       dst.entityId = ENTITYID_UNKNOWN;
@@ -3779,7 +3774,7 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
-  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+  DCPS::Serializer ser(&mb, Encoding::KIND_XCDR1, ENDIAN_BIG);
 
   const bool local_is_writer = GuidConverter(local_id).isWriter();
   const RepoId& writer_id = local_is_writer ? local_id : remote_id;
@@ -3839,7 +3834,7 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
       }
 
     } else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_ENDPOINT_SEC_ATTR) == 0
-               && prop.value.length() >= max_marshaled_size_ulong()) {
+               && prop.value.length() >= int32_cdr_size) {
       DDS::Security::EndpointSecurityAttributesMask esa;
       std::memcpy(&esa, prop.value.get_buffer(), prop.value.length());
       endpoint_security_attributes_[writer_id] = endpoint_security_attributes_[reader_id] = esa;

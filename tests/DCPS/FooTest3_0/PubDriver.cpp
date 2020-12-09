@@ -33,6 +33,8 @@ long lease_duration_sec = 5;
 
 using namespace ::OpenDDS::DCPS;
 
+const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+
 int offered_incompatible_qos_called_on_dp = 0;
 int offered_incompatible_qos_called_on_pub = 0;
 int offered_incompatible_qos_called_on_dw = 0;
@@ -934,52 +936,42 @@ PubDriver::allocator_test ()
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
   foo2.handle_value = handle;
-  foo2.writer_id =0;
+  foo2.writer_id = 0;
+
+  const SerializedSizeBound bound = MarshalTraits< ::Xyz::Foo>::serialized_size_bound(encoding);
 
   // Allocate serialized foo data from pre-allocated pool
-  for (size_t i = 1; i <= n_chunks; i ++)
-  {
+  for (size_t i = 1; i <= n_chunks; i ++) {
     foo2.sample_sequence = static_cast<CORBA::Long>(i);
 
-    ret = foo_datawriter_->write(foo2,
-                                 handle);
+    ret = foo_datawriter_->write(foo2, handle);
 
-    TEST_CHECK (ret == ::DDS::RETCODE_OK);
+    TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (MarshalTraits< ::Xyz::Foo>::gen_is_bounded_size ())
-    {
-      TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(i));
-    }
-    else
-    {
-       TEST_CHECK (foo_datawriter_servant_->data_allocator() == 0);
+    if (bound) {
+      TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
+      TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
+      TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(i));
+    } else {
+      TEST_CHECK(foo_datawriter_servant_->data_allocator() == 0);
     }
   }
 
-  {
   // The pre-allocated pool is full, now the foo data is allocated from heap
-  for (size_t i = 1; i <= 2; i ++)
-  {
+  for (size_t i = 1; i <= 2; i ++) {
     foo2.sample_sequence = static_cast<CORBA::Long>(i + n_chunks);
 
-    ret = foo_datawriter_->write(foo2,
-                                 handle);
+    ret = foo_datawriter_->write(foo2, handle);
 
-    TEST_CHECK (ret == ::DDS::RETCODE_OK);
+    TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (MarshalTraits< ::Xyz::Foo>::gen_is_bounded_size ())
-    {
-      TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(n_chunks));
+    if (bound) {
+      TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
+      TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));
+      TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(n_chunks));
+    } else {
+      TEST_CHECK(foo_datawriter_servant_->data_allocator() == 0);
     }
-    else
-    {
-       TEST_CHECK (foo_datawriter_servant_->data_allocator() == 0);
-    }
-  }
   }
 }
 

@@ -89,7 +89,8 @@ module OpenDDS {
                               in DataWriterRemote publication,
                               in ::DDS::DataWriterQos qos,
                               in TransportLocatorSeq transInfo,
-                              in ::DDS::PublisherQos publisherQos)
+                              in ::DDS::PublisherQos publisherQos,
+                              in ::DDS::OctetSeq serializedTypeInfo)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -117,7 +118,8 @@ module OpenDDS {
                                in ::DDS::SubscriberQos subscriberQos,
                                in string filterClassName,
                                in string filterExpression,
-                               in ::DDS::StringSeq exprParams)
+                               in ::DDS::StringSeq exprParams,
+                               in ::DDS::OctetSeq serializedTypeInfo)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);

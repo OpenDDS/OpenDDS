@@ -12,7 +12,6 @@
 
 #include <ace/Monotonic_Time_Policy.h>
 #include <ace/Time_Policy.h>
-#include <ace/Condition_Attributes.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
@@ -50,13 +49,6 @@ typedef SystemClock MonotonicClock;
 #endif
 typedef TimePoint_T<MonotonicClock> MonotonicTimePoint;
 ///@}
-
-/**
- * ConditionAttributesMonotonic() will have to be passed as the second argument
- * in an ACE_Condition constructor for it to interpret argument of
- * wait(ACE_Time_Value*) as monotonic time.
- */
-typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionAttributesMonotonic;
 
 } // namespace DCPS
 } // namespace OpenDDS

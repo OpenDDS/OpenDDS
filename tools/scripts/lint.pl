@@ -324,6 +324,15 @@ my %all_checks = (
     ],
   },
 
+  ace_condition => {
+    path_matches_all_of => ['cpp_file', 'in_dds_dcps'],
+    line_matches => qr/(?:ACE_|ace\/)Condition(?:(?:_Recursive)?_Thread_Mutex)?/,
+    message => [
+      'Except for in Condition.h, ACE_Condition and related types are forbidden in the core libraries.',
+      'See the "Time" section in docs/guidelines.md.',
+    ],
+  },
+
   trailing_whitespace => {
     path_matches_all_of => [
       'text_file',

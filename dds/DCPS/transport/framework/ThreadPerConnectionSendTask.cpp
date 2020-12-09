@@ -59,7 +59,7 @@ int ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
     result = queue_.put(req.get());
 
     if (result == 0 && op == SEND_STOP) {
-      work_available_.signal();
+      work_available_.notify_one();
     }
   }
 
@@ -202,7 +202,7 @@ int ThreadPerConnectionSendTask::close(u_long flag)
 
     // Set the shutdown flag to true.
     shutdown_initiated_ = true;
-    work_available_.broadcast();
+    work_available_.notify_all();
   }
 
   if (opened_ && !ACE_OS::thr_equal(thr_id_, ACE_OS::thr_self())) {

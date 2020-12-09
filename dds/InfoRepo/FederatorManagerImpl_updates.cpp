@@ -123,6 +123,7 @@ ManagerImpl::create(const Update::URActor& reader)
   sample.filter_class_name = reader.contentSubscriptionProfile.filterClassName;
   sample.filter_expression = reader.contentSubscriptionProfile.filterExpr;
   sample.expression_params = reader.contentSubscriptionProfile.exprParams;
+  sample.serialized_type_info = reader.serializedTypeInfo;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 9) {
     OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
@@ -159,6 +160,7 @@ ManagerImpl::create(const Update::UWActor& writer)
   sample.datawriter_qos = writer.drdwQos;
   sample.publisher_qos  = writer.pubsubQos;
   sample.transport_info = writer.transportInterfaceInfo;
+  sample.serialized_type_info = writer.serializedTypeInfo;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 9) {
     OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
@@ -633,6 +635,7 @@ ManagerImpl::processCreate(const PublicationUpdate* sample, const DDS::SampleInf
                                             sample->datawriter_qos,
                                             sample->transport_info,
                                             sample->publisher_qos,
+                                            sample->serialized_type_info,
                                             true)) {
     {
       ACE_GUARD(ACE_Thread_Mutex,
@@ -677,6 +680,7 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
                                              sample->filter_class_name,
                                              sample->filter_expression,
                                              sample->expression_params,
+                                             sample->serialized_type_info,
                                              true)) {
     {
       ACE_GUARD(ACE_Thread_Mutex,
@@ -843,6 +847,7 @@ ManagerImpl::processDeferred()
                                                current->datawriter_qos,
                                                current->transport_info,
                                                current->publisher_qos,
+                                               current->serialized_type_info,
                                                true)) {
         if (OpenDDS::DCPS::DCPS_debug_level > 9) {
           OpenDDS::DCPS::RepoIdConverter part_converter(current->participant);
@@ -880,6 +885,7 @@ ManagerImpl::processDeferred()
                                                 current->filter_class_name,
                                                 current->filter_expression,
                                                 current->expression_params,
+                                                current->serialized_type_info,
                                                 true)) {
         if (OpenDDS::DCPS::DCPS_debug_level > 9) {
           OpenDDS::DCPS::RepoIdConverter part_converter(current->participant);

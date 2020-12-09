@@ -84,11 +84,17 @@ MyTypeSupportImpl::get_type_name (
     return reader_impl;
   }
 
+void MyTypeSupportImpl::representations_allowed_by_type(
+  DDS::DataRepresentationIdSeq& seq)
+{
+  seq.length(0); // Let OpenDDS Default
+}
+
 #ifndef OPENDDS_NO_MULTI_TOPIC
 ::DDS::DataReader_ptr
 MyTypeSupportImpl::create_multitopic_datareader()
 {
-  return NULL;
+  return 0;
 }
 #endif
 

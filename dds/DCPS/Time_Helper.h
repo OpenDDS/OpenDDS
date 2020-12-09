@@ -8,8 +8,9 @@
 #ifndef OPENDDS_DCPS_TIME_HELPER_H
 #define OPENDDS_DCPS_TIME_HELPER_H
 
-#include "dds/DdsDcpsCoreC.h"
-#include "ace/OS_NS_sys_time.h"
+#include <dds/DdsDcpsCoreC.h>
+
+#include <ace/OS_NS_sys_time.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -106,6 +107,9 @@ ACE_UINT32 uint32_fractional_seconds_to_microseconds(ACE_UINT32 fraction);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool is_infinite(const DDS::Duration_t& value);
 
 } // namespace DCPS
 } // namespace OpenDDS

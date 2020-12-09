@@ -1,33 +1,58 @@
 #include "FixedTypeSupportImpl.h"
 
-#include "ace/OS_main.h"
-#include "ace/CDR_Base.h"
+#include <dds/DCPS/Serializer.h>
+
+#include <ace/OS_main.h>
+#include <ace/CDR_Base.h>
+
 #include <sstream>
 
-int ACE_TMAIN(int, ACE_TCHAR*[])
-{
-  int ret = 0;
 #ifdef ACE_HAS_CDR_FIXED
-  try {
-    // Check opendds_idl-generated code.
+bool serialization_test()
+{
+    using OpenDDS::DCPS::Encoding;
+    using OpenDDS::DCPS::Serializer;
+
     M1::FixedSeq seq;
     seq.length(2);
     seq[0] = "-1236124.47";
     seq[1] = "314612157238794.12";
     M1::S1 str = {1, M1::f1, {"123.45", 678.90, 123}, seq};
 
-    size_t size = 0, padding = 0;
-    OpenDDS::DCPS::gen_find_size(str, size, padding);
+    const Encoding encoding(Encoding::KIND_XCDR1);
+    size_t size = 0;
+    OpenDDS::DCPS::serialized_size(encoding, size, str);
     ACE_Message_Block mb(size);
-    OpenDDS::DCPS::Serializer ser(&mb);
-    ser << str;
-    OpenDDS::DCPS::Serializer ser2(&mb);
-    M1::S1 str2;
-    ser2 >> str2;
-    if (!(str == str2)) {
-      ++ret;
-      ACE_ERROR((LM_ERROR, "Serializer round-trip failed\n"));
+
+    Serializer ser(&mb, encoding);
+    if (!(ser << str)) {
+      ACE_ERROR((LM_ERROR, "Serializer round-trip failed on serialization\n"));
+      return true;
     }
+
+    Serializer ser2(&mb, encoding);
+    M1::S1 str2;
+    if (!(ser2 >> str2)) {
+      ACE_ERROR((LM_ERROR, "Serializer round-trip failed on deserialization\n"));
+      return true;
+    }
+
+    if (!(str == str2)) {
+      ACE_ERROR((LM_ERROR, "Serializer round-trip failed on result comparison\n"));
+      return true;
+    }
+
+    return false;
+}
+#endif // ACE_HAS_CDR_FIXED
+
+int ACE_TMAIN(int, ACE_TCHAR*[])
+{
+  bool failed = false;
+#ifdef ACE_HAS_CDR_FIXED
+  try {
+    // Check opendds_idl-generated code.
+    failed |= serialization_test();
 
     // Check that these compile, actual functionality is tested
     // in ACE's CDR_Fixed_Text.cpp.
@@ -89,9 +114,9 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   } catch (const CORBA::Exception& e) {
     ACE_ERROR((LM_ERROR, "Caught exception: %C\n", e._info().c_str()));
-    ++ret;
+    failed = true;
   }
-
 #endif // ACE_HAS_CDR_FIXED
-  return ret;
+
+  return failed;
 }

@@ -29,6 +29,8 @@ TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
     return UnionType;
   case AST_Decl::NT_array:
     return ArrayType;
+  case AST_Decl::NT_sequence:
+    return SequenceType;
   default:
     return InvalidType;
   }
@@ -272,14 +274,17 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       AST_Union* union_node = dynamic_cast<AST_Union*>(root_);
-      if (be_global->has_key(union_node)) {
+      if (be_global->union_discriminator_is_key(union_node)) {
         current_value_ = root_;
         return *this;
-      } else {
+      } else if (level_ > 0) {
         throw Error(union_node, "union type is marked as key, "
           "but its discriminator isn't");
       }
     }
+
+  } else if (root_type_ == SequenceType) {
+    throw Error(root_, "sequence types are not supported as keys");
 
   // If we are a primitive type, use self
   } else if (root_type_ == PrimitiveType) {
@@ -421,6 +426,8 @@ AST_Type* TopicKeys::Iterator::get_ast_type() const
     }
     break;
   case ArrayType:
+    return dynamic_cast<AST_Type*>(current_value_);
+  case SequenceType:
     return dynamic_cast<AST_Type*>(current_value_);
   default:
     break;

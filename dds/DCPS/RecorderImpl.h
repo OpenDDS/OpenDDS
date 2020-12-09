@@ -8,19 +8,23 @@
 #ifndef OPENDDS_DCPS_RECORDERIMPL_H
 #define OPENDDS_DCPS_RECORDERIMPL_H
 
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/WriterInfo.h"
-#include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionExtC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsTopicC.h"
+#include "RcObject.h"
+#include "WriterInfo.h"
 #include "Definitions.h"
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
+#include "DataReaderCallbacks.h"
 #include "Recorder.h"
 #include "RemoveAssociationSweeper.h"
+#include "EntityImpl.h"
+#include "TopicImpl.h"
+#include "OwnershipManager.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/TransportReceiveListener.h"
+#include "transport/framework/TransportClient.h"
+
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsTopicC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -152,8 +156,8 @@ private:
   /// lock protecting sample container as well as statuses.
   ACE_Recursive_Thread_Mutex sample_lock_;
 
-  DomainParticipantImpl*       participant_servant_;
-  TopicDescriptionPtr<TopicImpl>              topic_servant_;
+  DomainParticipantImpl* participant_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;

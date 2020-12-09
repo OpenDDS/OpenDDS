@@ -6,7 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "tao/ORB_Core.h"
+
+#include "RecorderImpl.h"
+
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
 #include "DomainParticipantImpl.h"
@@ -14,7 +16,6 @@
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "TopicImpl.h"
 #include "Serializer.h"
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
@@ -23,21 +24,24 @@
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-#include "RecorderImpl.h"
+#include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
 #include "PoolAllocator.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
+#endif
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
 
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
+
+#include <tao/ORB_Core.h>
+
+#include <ace/Reactor.h>
 
 #include <stdexcept>
 
@@ -975,6 +979,12 @@ RecorderImpl::enable()
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
 
+    XTypes::TypeInformation type_info;
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+    type_info.minimal.dependent_typeid_count = 0;
+    type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
+    type_info.complete.dependent_typeid_count = 0;
+
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
@@ -985,7 +995,8 @@ RecorderImpl::enable()
                               this->subqos_,
                               filterClassName,
                               filterExpression,
-                              exprParams);
+                              exprParams,
+                              type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,

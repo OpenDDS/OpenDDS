@@ -32,11 +32,11 @@ class DisjointSequence;
 class OpenDDS_Rtps_Udp_Export RtpsSampleHeader {
 public:
 
-  // This is not really the max_marshaled_size, but it's used for determining
+  // This is not really the max_serialized_size, but it's used for determining
   // how much of the submessage to show in debugging hexdumps.  Since we don't
   // know which kind of submessage we have, we can only count on the 4-byte
   // SubmessageHeader being present.
-  static size_t max_marshaled_size() { return 4; }
+  static size_t get_max_serialized_size() { return 4; }
 
   // We never have partial "sample" headers since this is UDP.
   // (The header could fail to parse in init(), but unlike the TCP case we
@@ -55,7 +55,7 @@ public:
   RtpsSampleHeader& operator=(ACE_Message_Block& mn);
 
   void pdu_remaining(size_t size);
-  size_t marshaled_size();
+  size_t get_serialized_size();
   ACE_UINT32 message_length();
 
   bool valid() const;
@@ -72,7 +72,7 @@ private:
   void init(ACE_Message_Block& mb);
 
   bool valid_, frag_;
-  size_t marshaled_size_, message_length_;
+  size_t serialized_size_, message_length_;
 
 public:
   // Unlike the rest of this class, which is used with the

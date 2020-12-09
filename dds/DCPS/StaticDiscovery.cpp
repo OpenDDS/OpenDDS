@@ -78,7 +78,9 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
   : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
   , registry_(registry)
   , participant_(participant)
-{}
+{
+  type_lookup_init(TheServiceParticipant->interceptor());
+}
 
 void StaticEndpointManager::init_bit()
 {
@@ -119,6 +121,8 @@ void StaticEndpointManager::init_bit()
       // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = writer.publisher_qos.group_data;
+      data.representation = writer.qos.representation;
+
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
@@ -161,6 +165,7 @@ void StaticEndpointManager::init_bit()
       // // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = reader.subscriber_qos.group_data;
+      data.representation = reader.qos.representation;
 
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
@@ -315,7 +320,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
+      {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0};
 #endif
     pub.publication_->add_association(writerid, ra, true);
   }
@@ -376,16 +381,10 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     const RepoId& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
-#ifdef __SUNPRO_CC
-    WriterAssociation wa;
-    wa.writerTransInfo = writer.trans_info;
-    wa.writerId = writerid;
-    wa.pubQos = writer.publisher_qos;
-    wa.writerQos = writer.qos;
-#else
-    const WriterAssociation wa =
-      {writer.trans_info, writerid, writer.publisher_qos, writer.qos};
-#endif
+    DDS::OctetSeq type_info;
+    const WriterAssociation wa = {
+      writer.trans_info, writerid, writer.publisher_qos, writer.qos, type_info
+    };
     sub.subscription_->add_association(readerid, wa, false);
   }
 
@@ -479,7 +478,7 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
+      {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0, 0};
 
 #endif
     dwr->add_association(writerid, ra, true);
@@ -519,7 +518,7 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     wa.writerQos = writer_pos->second.qos;
 #else
     const WriterAssociation wa =
-      {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
+      {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, 0};
 #endif
     drr->add_association(readerid, wa, false);
   }
@@ -539,6 +538,13 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
     ids[0] = writerid;
     drr->remove_associations(ids, true);
   }
+}
+
+void StaticEndpointManager::cleanup_type_lookup_data(const GuidPrefix_t& /*guid_prefix*/,
+                                                     const XTypes::TypeIdentifier& /*ti*/,
+                                                     bool /*secure*/)
+{
+  // Do nothing.
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT

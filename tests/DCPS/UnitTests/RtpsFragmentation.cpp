@@ -5,20 +5,19 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
-
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/Service_Participant.h"
-
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-
-#include "dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h"
-
 #include "../common/TestSupport.h"
+
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/RepoIdConverter.h>
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h>
+
+#include <ace/OS_main.h>
 
 #include <cstring>
 
@@ -29,13 +28,6 @@ struct Fragments {
   Message_Block_Ptr head_;
   Message_Block_Ptr tail_;
 };
-
-const bool SWAP =
-#ifdef ACE_LITTLE_ENDIAN
-  false;
-#else
-  true;
-#endif
 
 void matches(const DataFragSubmessage& df, const DataFragSubmessage& expected)
 {
@@ -94,11 +86,13 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       ds.inlineQos[0]._d(PID_TOPIC_NAME);
       ds.inlineQos[1].string_data("my_type_name");
       ds.inlineQos[1]._d(PID_TYPE_NAME);
-      size_t size = 0, padding = 0;
-      gen_find_size(ts, size, padding);
-      gen_find_size(ds, size, padding);
-      before_fragmentation.head_ .reset(new ACE_Message_Block(size + padding));
-      Serializer ser(before_fragmentation.head_.get(), SWAP, Serializer::ALIGN_CDR);
+
+      const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+      size_t size = 0;
+      serialized_size(encoding, size, ts);
+      serialized_size(encoding, size, ds);
+      before_fragmentation.head_ .reset(new ACE_Message_Block(size));
+      Serializer ser(before_fragmentation.head_.get(), encoding);
       TEST_CHECK((ser << ts) && (ser << ds));
     }
     ACE_Message_Block& header_mb = *before_fragmentation.head_;

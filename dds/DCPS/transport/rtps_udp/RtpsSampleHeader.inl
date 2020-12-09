@@ -14,7 +14,7 @@ ACE_INLINE
 RtpsSampleHeader::RtpsSampleHeader()
   : valid_(false)
   , frag_(false)
-  , marshaled_size_(0)
+  , serialized_size_(0)
   , message_length_(0)
 {
 }
@@ -23,7 +23,7 @@ ACE_INLINE
 RtpsSampleHeader::RtpsSampleHeader(ACE_Message_Block& mb)
   : valid_(false)
   , frag_(false)
-  , marshaled_size_(0)
+  , serialized_size_(0)
   , message_length_(0)
 {
   init(mb);
@@ -35,7 +35,7 @@ RtpsSampleHeader::operator=(ACE_Message_Block& mb)
   frag_ = false;
   valid_ = false;
   // message_length_ should not be reset here
-  // marshaled_size_ doesn't need to be reset, init() will set it (if valid_)
+  // serialized_size_ doesn't need to be reset, init() will set it (if valid_)
   init(mb);
   return *this;
 }
@@ -53,9 +53,9 @@ RtpsSampleHeader::pdu_remaining(size_t size)
 }
 
 ACE_INLINE size_t
-RtpsSampleHeader::marshaled_size()
+RtpsSampleHeader::get_serialized_size()
 {
-  return marshaled_size_;
+  return serialized_size_;
 }
 
 ACE_INLINE ACE_UINT32

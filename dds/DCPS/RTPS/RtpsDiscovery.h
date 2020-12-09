@@ -30,6 +30,7 @@ namespace OpenDDS {
 namespace RTPS {
 
 const char RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS[] = "OpenDDS.RtpsDiscovery.EndpointAnnouncements";
+const char RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE[] = "OpenDDS.RtpsDiscovery.TypeLookupService";
 
 class OpenDDS_Rtps_Export RtpsDiscoveryConfig : public OpenDDS::DCPS::RcObject {
 public:
@@ -470,6 +471,28 @@ public:
     secure_participant_user_data_ = value;
   }
 
+  DCPS::TimeDuration max_type_lookup_service_reply_period() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return max_type_lookup_service_reply_period_;
+  }
+  void max_type_lookup_service_reply_period(const DCPS::TimeDuration& x)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    max_type_lookup_service_reply_period_ = x;
+  }
+
+  bool use_xtypes() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_;
+  }
+  void use_xtypes(bool use_xtypes)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    use_xtypes_ = use_xtypes;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -505,6 +528,8 @@ private:
   bool periodic_directed_spdp_;
   /// Should participant user data QoS only be sent when the message is secure?
   bool secure_participant_user_data_;
+  DCPS::TimeDuration max_type_lookup_service_reply_period_;
+  bool use_xtypes_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -630,6 +655,9 @@ public:
   {
     config_->secure_participant_user_data(value);
   }
+
+  bool use_xtypes() const { return config_->use_xtypes(); }
+  void use_xtypes(bool xt) { config_->use_xtypes(xt); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

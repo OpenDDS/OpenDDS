@@ -158,7 +158,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         impl->local_crypto_handle(get_crypto_handle());
 #endif
 
-        cdr_encapsulation_ |= inst->requires_cdr();
+        cdr_encapsulation_ |= inst->requires_cdr_encapsulation();
       }
     }
   }

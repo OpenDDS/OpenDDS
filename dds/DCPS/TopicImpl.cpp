@@ -6,14 +6,17 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TopicImpl.h"
+
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "DCPS_Utils.h"
+#include "transport/framework/TransportExceptions.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -45,9 +48,9 @@ TopicImpl::~TopicImpl()
 {
 }
 
-DDS::ReturnCode_t
-TopicImpl::set_qos(const DDS::TopicQos & qos)
+DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
 {
+  DDS::TopicQos qos = qos_arg;
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -212,6 +215,40 @@ TopicImpl::inconsistent_topic(int count)
   }
 
   notify_status_condition();
+}
+
+bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer)
+{
+  if (!type_support_) {
+    return true;
+  }
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  //default for blank annotation is to allow all types of data representation
+  if (type_allowed_reprs.length() == 0) {
+    return true;
+  }
+  if (qos_ids.length() == 0) {
+    return false;
+  }
+  //Data Writer will only use the 1st QoS declared
+  if (is_data_writer) {
+    DDS::DataRepresentationId_t id = qos_ids[0];
+    for (CORBA::ULong j = 0; j < type_allowed_reprs.length(); ++j) {
+      if (id == type_allowed_reprs[j]) {
+        return true;
+      }
+    }
+  } else { // if data reader compare both lists for a compatible QoS
+    for (CORBA::ULong i = 0; i < qos_ids.length(); ++i) {
+      for (CORBA::ULong j = 0; j < type_allowed_reprs.length(); ++j) {
+        if (qos_ids[i] == type_allowed_reprs[j]) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 } // namespace DCPS

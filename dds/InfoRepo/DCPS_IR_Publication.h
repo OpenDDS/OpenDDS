@@ -47,7 +47,8 @@ public:
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
                       const DDS::DataWriterQos& qos,
                       const OpenDDS::DCPS::TransportLocatorSeq& info,
-                      const DDS::PublisherQos& publisherQos);
+                      const DDS::PublisherQos& publisherQos,
+                      const DDS::OctetSeq & serializedTypeInfo);
 
   ~DCPS_IR_Publication();
 
@@ -168,6 +169,8 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
+  const DDS::OctetSeq& get_serialized_type_info() const;
+
 private:
 
   OpenDDS::DCPS::RepoId id_;
@@ -181,7 +184,7 @@ private:
   DDS::DataWriterQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::PublisherQos publisherQos_;
-
+  DDS::OctetSeq serializedTypeInfo_;
   DCPS_IR_Subscription_Set associations_;
   DCPS_IR_Subscription_Set defunct_;
 

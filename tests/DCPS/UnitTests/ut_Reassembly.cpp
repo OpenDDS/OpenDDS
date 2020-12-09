@@ -21,13 +21,13 @@ namespace {
   class Sample {
   public:
     Sample(const RepoId& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true)
-    : mb(new ACE_Message_Block(DataSampleHeader::max_marshaled_size())),
+    : mb(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size())),
       sample(mb)
     {
       sample.header_.publication_id_ = pub_id;
       sample.header_.sequence_ = msg_seq;
       sample.header_.more_fragments_ = more_fragments;
-      sample.sample_.reset(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+      sample.sample_.reset(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()));
     }
     ACE_Message_Block* mb;     // Released (deleted) by sample
     ReceivedDataSample sample;
