@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_INFRASTRUCTURE_IDL
-#define OPENDDS_DCPS_INFRASTRUCTURE_IDL
+#ifndef OPENDDS_DDSDCPSINFRASTRUCTURE_IDL
+#define OPENDDS_DDSDCPSINFRASTRUCTURE_IDL
 
 #include "dds/DdsDcpsCore.idl"
 #include "dds/DdsDcpsConditionSeq.idl"

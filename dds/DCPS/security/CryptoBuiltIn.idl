@@ -3,7 +3,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DdsDcpsCore.idl"
+#ifndef OPENDDS_DCPS_SECURITY_CRYPTOBUILTIN_IDL
+#define OPENDDS_DCPS_SECURITY_CRYPTOBUILTIN_IDL
+
+#include <dds/DdsDcpsCore.idl>
 
 module OpenDDS {
   module Security {
@@ -101,3 +104,5 @@ module OpenDDS {
     const unsigned long FLAG_IS_PAYLOAD_ENCRYPTED = 2;
   };
 };
+
+#endif // OPENDDS_DCPS_SECURITY_CRYPTOBUILTIN_IDL

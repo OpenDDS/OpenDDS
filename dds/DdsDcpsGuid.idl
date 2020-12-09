@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_GUID_IDL
-#define OPENDDS_DCPS_GUID_IDL
+#ifndef OPENDDS_DDSDCPSGUID_IDL
+#define OPENDDS_DDSDCPSGUID_IDL
 
 module OpenDDS
 {

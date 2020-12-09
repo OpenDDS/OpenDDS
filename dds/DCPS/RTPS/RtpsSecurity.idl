@@ -5,11 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#if !defined(OPENDDS_RTPS_SECURITY_IDL) && defined(OPENDDS_SECURITY)
-#define OPENDDS_RTPS_SECURITY_IDL
+#ifdef OPENDDS_SECURITY
+#ifndef OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
+#define OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
 
-#include "dds/DdsSecurityCore.idl"
-#include "dds/DCPS/RTPS/RtpsCore.idl"
+#include "RtpsCore.idl"
+
+#include <dds/DdsSecurityCore.idl>
 
 module OpenDDS {
   module Security {
@@ -32,4 +34,5 @@ module OpenDDS {
   };
 };
 
+#endif
 #endif

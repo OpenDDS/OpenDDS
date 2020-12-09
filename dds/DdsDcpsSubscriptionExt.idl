@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SUBSCRIPTION_EXT_IDL
-#define OPENDDS_DCPS_SUBSCRIPTION_EXT_IDL
+#ifndef OPENDDS_DDSDCPSSUBSCRIPTIONEXT_IDL
+#define OPENDDS_DDSDCPSSUBSCRIPTIONEXT_IDL
 
 // OpenDDS extensions to the DDS Subscription Module
 
