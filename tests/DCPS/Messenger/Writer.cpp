@@ -106,7 +106,7 @@ Writer::svc()
     message.text         = "Worst. Movie. Ever.";
     message.count        = 0;
 
-    for (int i = 0; i < num_messages; i++) {
+    for (size_t i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
       do {
         error = message_dw->write(message, handle);
@@ -125,7 +125,7 @@ Writer::svc()
     e._tao_print_exception("Exception caught in svc():");
   }
 
-  finished_instances_ ++;
+  ++finished_instances_;
 
   return 0;
 }
