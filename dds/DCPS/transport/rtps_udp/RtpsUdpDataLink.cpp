@@ -1818,6 +1818,9 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   ReaderInfoMap::const_iterator iter = remote_readers_.find(reader->id_);
   if (iter == remote_readers_.end()) {
+#ifdef OPENDDS_SECURITY
+    reader->max_pvs_sn_ = max_sn_;
+#endif
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
     return true;
