@@ -92,7 +92,12 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 #endif
 {
 #ifdef OPENDDS_SECURITY
-  handle_registry_ = security_config_->get_handle_registry(make_id(local_prefix, ENTITYID_PARTICIPANT));
+  const GUID_t guid = make_id(local_prefix, ENTITYID_PARTICIPANT);
+  handle_registry_ = security_config_->get_handle_registry(guid);
+  if (!handle_registry_) {
+    handle_registry_ = DCPS::make_rch<Security::HandleRegistry>();
+    security_config_->insert_handle_registry(guid, handle_registry_);
+  }
 #endif
 
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);

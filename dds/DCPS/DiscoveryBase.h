@@ -523,7 +523,16 @@ namespace OpenDDS {
       {
         using namespace DDS::Security;
 
-        const DatawriterCryptoHandle dwch = get_handle_registry()->get_local_datawriter_crypto_handle(publicationId);
+        Security::HandleRegistry_rch handle_registry = get_handle_registry();
+        if (!handle_registry) {
+          return;
+        }
+        const DatawriterCryptoHandle dwch =
+          handle_registry->get_local_datawriter_crypto_handle(publicationId);
+        if (dwch == DDS::HANDLE_NIL) {
+          return;
+        }
+
         SecurityException ex = {"", 0, 0};
         if (!get_crypto_key_factory()->unregister_datawriter(dwch, ex)) {
           ACE_ERROR((LM_ERROR,
@@ -531,7 +540,7 @@ namespace OpenDDS {
                      ACE_TEXT("Failure calling unregister_datawriter.")
                      ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         }
-        get_handle_registry()->erase_local_datawriter_crypto_handle(publicationId);
+        handle_registry->erase_local_datawriter_crypto_handle(publicationId);
       }
 #endif
 
@@ -688,14 +697,23 @@ namespace OpenDDS {
       {
         using namespace DDS::Security;
 
-        const DatareaderCryptoHandle drch = get_handle_registry()->get_local_datareader_crypto_handle(subscriptionId);
+        Security::HandleRegistry_rch handle_registry = get_handle_registry();
+        if (!handle_registry) {
+          return;
+        }
+        const DatareaderCryptoHandle drch =
+          handle_registry->get_local_datareader_crypto_handle(subscriptionId);
+        if (drch == DDS::HANDLE_NIL) {
+          return;
+        }
+
         SecurityException ex = {"", 0, 0};
         if (!get_crypto_key_factory()->unregister_datareader(drch, ex)) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::cleanup_secure_reader() - ")
                      ACE_TEXT("Failure calling unregister_datareader.")
                      ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         }
-        get_handle_registry()->erase_local_datareader_crypto_handle(subscriptionId);
+        handle_registry->erase_local_datareader_crypto_handle(subscriptionId);
       }
 #endif
 

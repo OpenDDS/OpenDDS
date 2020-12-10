@@ -109,11 +109,13 @@ public:
 
   T* operator->() const
   {
+    OPENDDS_ASSERT(ptr_);
     return this->ptr_;
   }
 
   T& operator*() const
   {
+    OPENDDS_ASSERT(ptr_);
     return *this->ptr_;
   }
 

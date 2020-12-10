@@ -285,33 +285,28 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
 {
 #ifdef OPENDDS_SECURITY
   using namespace DDS::Security;
-  GUID_t sendGuid;
-  std::memcpy(sendGuid.guidPrefix, receiver_.source_guid_prefix_, sizeof sendGuid.guidPrefix);
-  sendGuid.entityId = sender;
+  const GUID_t sendGuid = make_id(receiver_.source_guid_prefix_, sender);
+  const GuidConverter conv(sendGuid);
 
   if (link_->local_crypto_handle() != DDS::HANDLE_NIL
       && !encoded_rtps_ && !RtpsUdpDataLink::separate_message(sender)) {
     if (security_debug.encdec_warn) {
-      const GuidConverter conv(sendGuid);
-      ACE_ERROR((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
                  "Full message from %C requires protection, dropping\n",
                  OPENDDS_STRING(conv).c_str()));
     }
     return false;
   }
 
-  const GuidConverter conv(sendGuid);
   const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(
     conv.isReader() ?
     link_->handle_registry()->get_remote_datareader_security_attributes(sendGuid) :
     link_->handle_registry()->get_remote_datawriter_security_attributes(sendGuid));
   static const EndpointSecurityAttributesMask MASK_PROTECT_SUBMSG =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED;
-
   if ((esa & MASK_PROTECT_SUBMSG) == MASK_PROTECT_SUBMSG && !encoded_submsg_) {
     if (security_debug.encdec_warn) {
-      const GuidConverter conv(sendGuid);
-      ACE_ERROR((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
                  "Submessage from %C requires protection, dropping\n",
                  OPENDDS_STRING(conv).c_str()));
     }
@@ -700,10 +695,12 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                             const RTPS::DataSubmessage& submsg)
 {
   using namespace DDS::Security;
-  const DatawriterCryptoHandle writer_crypto_handle = link_->handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
+  const DatawriterCryptoHandle writer_crypto_handle =
+    link_->handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
-  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(link_->handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
+  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(
+    link_->handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
   static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
   const bool payload_protected = (esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD;

@@ -4,6 +4,7 @@ workspace {
   java
   tools
   DevGuideExamples
+  tests/DCPS/Messenger
 
   exclude {
     java/jms

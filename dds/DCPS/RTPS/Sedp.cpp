@@ -719,7 +719,9 @@ Sedp::~Sedp()
   cleanup_secure_reader(subscriptions_secure_reader_->get_repo_id());
   cleanup_secure_writer(dcps_participant_secure_writer_->get_repo_id());
   cleanup_secure_reader(dcps_participant_secure_reader_->get_repo_id());
-  spdp_.get_security_config()->erase_handle_registry(participant_id_);
+  if (spdp_.get_security_config()) {
+    spdp_.get_security_config()->erase_handle_registry(participant_id_);
+  }
 #endif
 
   job_queue_.reset();

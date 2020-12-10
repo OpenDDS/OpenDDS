@@ -682,7 +682,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
     // ads.id may change during Spdp constructor
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
@@ -696,17 +696,19 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 
 #if defined(OPENDDS_SECURITY)
 DCPS::AddDomainStatus
-RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
-                                      const DDS::DomainParticipantQos& qos,
-                                      const OpenDDS::DCPS::RepoId& guid,
-                                      DDS::Security::IdentityHandle id,
-                                      DDS::Security::PermissionsHandle perm,
-                                      DDS::Security::ParticipantCryptoHandle part_crypto)
+RtpsDiscovery::add_domain_participant_secure(
+  DDS::DomainId_t domain,
+  const DDS::DomainParticipantQos& qos,
+  const OpenDDS::DCPS::RepoId& guid,
+  DDS::Security::IdentityHandle id,
+  DDS::Security::PermissionsHandle perm,
+  DDS::Security::ParticipantCryptoHandle part_crypto)
 {
   DCPS::AddDomainStatus ads = {guid, false /*federated*/};
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ads.id, qos, this, id, perm, part_crypto));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(
+      domain, ads.id, qos, this, id, perm, part_crypto));
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
