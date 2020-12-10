@@ -52,4 +52,3 @@ buildHeartbeat(const OpenDDS::DCPS::EntityId_t& writer, const OpenDDS::RTPS::Hea
   }
   return mb;
 }
-
