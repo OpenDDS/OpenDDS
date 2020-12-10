@@ -10,6 +10,7 @@ public:
   ~Publisher();
 
   bool enable(bool throw_on_error = false);
+  void detach_listeners();
 
   PublisherReport& get_report() { return report_; }
   const PublisherReport& get_report() const { return report_; }

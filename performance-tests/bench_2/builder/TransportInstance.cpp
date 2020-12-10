@@ -43,7 +43,8 @@ TransportInstance::TransportInstance(const TransportInstanceConfig& config)
   }
 }
 
-TransportInstance::~TransportInstance() {
+TransportInstance::~TransportInstance()
+{
   auto it = config_->instances_.begin();
   while (it != config_->instances_.end()) {
     if (*it == inst_) {
