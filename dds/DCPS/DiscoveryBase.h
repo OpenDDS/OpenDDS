@@ -109,7 +109,7 @@ namespace OpenDDS {
           tid_ = static_cast<unsigned long>(osx_tid);
         } else {
           tid_ = 0;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
         }
 #else
         tid_ = ACE_OS::thr_self();
@@ -141,7 +141,7 @@ namespace OpenDDS {
               if (status_) {
                 if (DCPS_debug_level > 4) {
                   ACE_DEBUG((LM_DEBUG,
-                            "%T (%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+                            "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                 }
                 ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
                 status_->map[key_] = now;
@@ -174,7 +174,7 @@ namespace OpenDDS {
           if (status_) {
             if (DCPS_debug_level > 4) {
               ACE_DEBUG((LM_DEBUG,
-                        "%T (%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
+                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
             }
             ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock);
             status_->map[key_] = now;

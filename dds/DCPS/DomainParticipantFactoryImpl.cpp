@@ -34,7 +34,7 @@ DomainParticipantFactoryImpl::~DomainParticipantFactoryImpl()
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) DomainParticipantFactoryImpl::"
+               "(%P|%t) DomainParticipantFactoryImpl::"
                "~DomainParticipantFactoryImpl()\n"));
   }
 }
