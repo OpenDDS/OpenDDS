@@ -40,7 +40,7 @@ if(NOT DEFINED DDS_ROOT)
     set(OPENDDS_LIB_DIR "${DDS_ROOT}/lib")
   endif()
 
-else()
+elseif(NOT DEFINED DDS_ALLOW_ENV_REDEFINES)
   _OPENDDS_RETURN_ERR("DDS_ROOT has already been set")
 endif()
 
@@ -61,7 +61,7 @@ if (NOT DEFINED ACE_ROOT)
 
   set(ACE_BIN_DIR "${ACE_ROOT}/bin")
 
-else()
+elseif(NOT DEFINED DDS_ALLOW_ENV_REDEFINES)
   _OPENDDS_RETURN_ERR("ACE_ROOT has already been set")
 endif()
 
@@ -86,6 +86,6 @@ if (NOT DEFINED TAO_ROOT)
     "${TAO_INCLUDE_DIR}"
     "${TAO_INCLUDE_DIR}/orbsvcs"
   )
-else()
+elseif(NOT DEFINED DDS_ALLOW_ENV_REDEFINES)
   _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
 endif()

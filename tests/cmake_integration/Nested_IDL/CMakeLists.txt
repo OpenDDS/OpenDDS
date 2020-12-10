@@ -14,24 +14,6 @@ set(opendds_libs
 
 set(the_ecu "ecu")
 
-set(src "${CMAKE_CURRENT_BINARY_DIR}/..")
-set(dst ${CMAKE_CURRENT_BINARY_DIR})
-
-foreach(file
-  ecu.cpp ecu.idl run_test.pl)
-  configure_file(${src}/${file} ${dst}/${file} COPYONLY)
-endforeach()
-
-file(MAKE_DIRECTORY ${dst}/engine)
-configure_file(${src}/engine/engine_specs.idl ${dst}/engine COPYONLY)
-
-file(MAKE_DIRECTORY ${dst}/engine/engine_stats)
-configure_file(${src}/engine/engine_stats/fuel_stats.idl ${dst}/engine/engine_stats COPYONLY)
-
-file(MAKE_DIRECTORY ${dst}/transmission)
-configure_file(${src}/transmission/transmission_specs.idl ${dst}/transmission COPYONLY)
-configure_file(${src}/transmission/transmission_states.idl ${dst}/transmission COPYONLY)
-
 add_executable(${the_ecu} "ecu.cpp")
 
 add_library(ecu_lib SHARED)
