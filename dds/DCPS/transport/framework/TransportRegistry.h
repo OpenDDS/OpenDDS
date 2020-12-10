@@ -19,6 +19,7 @@
 #include "TransportConfig.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ConfigUtils.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

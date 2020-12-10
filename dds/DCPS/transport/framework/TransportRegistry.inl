@@ -77,7 +77,7 @@ TransportRegistry::remove_inst(const OPENDDS_STRING& inst_name)
   if (iter->second) {
     iter->second->shutdown();
   }
-  this->inst_map_.erase(iter);
+  inst_map_.erase(iter);
 }
 
 ACE_INLINE
@@ -92,7 +92,7 @@ void
 TransportRegistry::remove_config(const OPENDDS_STRING& config_name)
 {
   GuardType guard(this->lock_);
-  this->config_map_.erase(config_name);
+  config_map_.erase(config_name);
 }
 
 ACE_INLINE

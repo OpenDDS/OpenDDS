@@ -174,7 +174,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           OPENDDS_STRING cfg_name = new_config;
           if (domain == 50) {
             // not part of a domain range
-            // create a new transport instance since once is not created automatically
+            // create a new transport instance since one is not created automatically
             OPENDDS_STRING inst_name = "sub_inst_d50_" + to_dds_string(x);
             // cfg_name and inst_name will be updated with the unique names of the new config and inst
             TheTransportRegistry->create_new_transport_instance_for_participant(50, cfg_name, inst_name);
@@ -186,14 +186,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             ACE_INET_Addr mcga = rtps_inst->multicast_group_address();
             const char test_address[] = "239.255.20.0";
 
-            if(ACE_OS::strncmp(mcga.get_host_addr(), test_address, 12)) {
+            if (ACE_OS::strncmp(mcga.get_host_addr(), test_address, 12)) {
               ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: %N:%l: main() -")
-                            ACE_TEXT(" multicast group address is does not match!\n")),
-                          -1);
+                                ACE_TEXT("ERROR: %N:%l: main() -")
+                                ACE_TEXT(" multicast group address is does not match!\n")),
+                               -1);
             }
             else {
-                  ACE_DEBUG((LM_DEBUG, "(%P|%t) multicast group address is correct\n"));
+              ACE_DEBUG((LM_DEBUG, "(%P|%t) multicast group address is correct\n"));
             }
           }
           TheTransportRegistry->bind_config(cfg_name, sub_participant);
@@ -283,7 +283,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         OPENDDS_STRING cfg_name = new_config;
         if (domain == 50) {
           // not part of a domain range
-          // create a new transport instance since once is not created automatically
+          // create a new transport instance since one is not created automatically
           OPENDDS_STRING inst_name = "pub_inst_d50";
           // cfg_name and inst_name will be updated with the unique names of the new config and inst
           TheTransportRegistry->create_new_transport_instance_for_participant(50, cfg_name, inst_name);

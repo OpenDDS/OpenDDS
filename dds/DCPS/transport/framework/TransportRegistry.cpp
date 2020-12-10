@@ -16,6 +16,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -581,9 +583,18 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
     throw Transport::MiscProblem();
   }
 
+  DDS::DomainId_t domain_id = ei->get_domain_id();
+
+  if (domain_id == DOMAIN_UNKNOWN) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
+               ACE_TEXT("DomainId is unknown. Failed to create new transport template instance.\n")));
+    throw Transport::UnableToCreate();
+  }
+
   // if domain is in a domain range and config is a transport template,
   // get the correct config.
-  if (TheServiceParticipant->belongs_to_domain_range(ei->get_domain_id())) {
+  if (TheServiceParticipant->belongs_to_domain_range(domain_id)) {
     bool found = false;
     for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
       if (cfg->name() == i->config_name) {
@@ -596,7 +607,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
     {
       ACE_TString cfg_name = ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str());
       // create if not already created
-      int ret = create_transport_template_instance(ei->get_domain_id(), cfg_name);
+      int ret = create_transport_template_instance(domain_id, cfg_name);
 
       if (ret == 0) {
         // get guid and create unique name for transport instance
@@ -610,7 +621,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
         OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
         OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
 
-        bool success = create_new_transport_instance_for_participant(ei->get_domain_id(), transport_config_name, transport_inst_name);
+        bool success = create_new_transport_instance_for_participant(domain_id, transport_config_name, transport_inst_name);
 
         if (success) {
           // update config
@@ -620,8 +631,8 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
           return;
         } else {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
-            ACE_TEXT("Failed to create new transport template instance.\n")));
+                     ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
+                     ACE_TEXT("Failed to create new transport template instance.\n")));
           throw Transport::UnableToCreate();
         }
       }
@@ -646,7 +657,7 @@ TransportRegistry::remove_transport_template_instance(const OPENDDS_STRING& conf
     return;
   }
 
-  OPENDDS_STRING inst_name = i->second;
+  const OPENDDS_STRING inst_name = i->second;
   remove_config(config_name);
   remove_inst(inst_name);
 
@@ -724,7 +735,7 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 {
   // check per_participant
   TransportTemplate templ;
-  if(get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()), templ)) {
+  if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()), templ)) {
     if (!templ.instantiate_per_participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
