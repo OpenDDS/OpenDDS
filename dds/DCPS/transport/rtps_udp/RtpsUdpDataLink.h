@@ -300,6 +300,7 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
+    SequenceNumber preassociation_heartbeat_last_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -313,6 +314,7 @@ private:
 
     ReaderInfo(const RepoId& id, bool durable)
       : id_(id)
+      , preassociation_heartbeat_last_(SequenceNumber::ZERO())
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
@@ -417,6 +419,7 @@ private:
                SequenceNumber max_sn, int heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
+    void update_max_sn(SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     void send_delayed_notifications(const TransportQueueElement::MatchCriteria& criteria);
@@ -485,9 +488,10 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable)
       : link_(link)
       , id_(id)
+      , durable_(durable)
       , stopping_(false)
       , acknack_count_(0)
     {}
@@ -534,6 +538,7 @@ private:
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
+    const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
     bool stopping_;

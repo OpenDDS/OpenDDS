@@ -630,14 +630,12 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
         rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
       RtpsWriter_rch writer = rw->second;
-      add_on_start_callback(client, remote_id);
       g.release();
+      writer->update_max_sn(max_sn);
       writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable));
-      associated = false;
       enable_heartbeat = true;
-    } else {
-      invoke_on_start_callbacks(local_id, remote_id, true);
     }
+    invoke_on_start_callbacks(local_id, remote_id, true);
   } else if (conv.isReader()) {
     {
       GuardType guard(strategy_lock_);
@@ -651,7 +649,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       if (rr == readers_.end()) {
         pending_reliable_readers_.erase(local_id);
         RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
-        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id);
+        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable);
         rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
       }
       RtpsReader_rch reader = rr->second;
@@ -1769,11 +1767,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
       preassociation_writers_.erase(writer);
 
-      SequenceNumber x = std::min(hb_first, hb_last);
-      if (x > 0) {
-        x = x.previous();
-      }
-      const SequenceRange sr(zero, x);
+      const SequenceNumber x = durable_ ? 1 : std::max(hb_first, hb_last);
+      const SequenceRange sr(zero, x.previous());
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
         writer->held_.erase(writer->held_.begin());
@@ -1821,6 +1816,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 #ifdef OPENDDS_SECURITY
     reader->max_pvs_sn_ = max_sn_;
 #endif
+    reader->preassociation_heartbeat_last_ = expected_max_sn(reader);
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
     return true;
@@ -2706,7 +2702,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
-  if (!compare_and_update_counts(acknack.count.value, ri->second->acknack_recvd_count_)) {
+  const ReaderInfo_rch& reader = ri->second;
+
+  if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING Count indicates duplicate, dropping\n"));
     return;
@@ -2719,30 +2717,14 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     !(acknack.readerSNState.bitmapBase.high == 0 &&
       acknack.readerSNState.bitmapBase.low == 1);
 
-  if (preassociation_readers_.count(ri->second) && is_postassociation) {
-    preassociation_readers_.erase(ri->second);
+  if (preassociation_readers_.count(reader) && is_postassociation) {
+    preassociation_readers_.erase(reader);
 
-    const SequenceNumber max_sn = expected_max_sn(ri->second);
-    const SequenceNumber acked_sn = ri->second->acked_sn();
-    snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, ri->second);
+    const SequenceNumber max_sn = expected_max_sn(reader);
+    const SequenceNumber acked_sn = reader->acked_sn();
+    snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
     check_leader_lagger();
-
-    {
-      // Queue up durable data.
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
-      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-      link->invoke_on_start_callbacks(id_, remote, true);
-    }
-
-    ri = remote_readers_.find(remote);
-    if (ri == remote_readers_.end()) {
-      VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
-            "WARNING ReaderInfo not found\n"));
-      return;
-    }
   }
-
-  const ReaderInfo_rch& reader = ri->second;
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
 
@@ -3586,8 +3568,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
       // Initialize first and last for the specific reader.
-      const SequenceNumber first_sn = reader->durable_ ? 1 : nonDurableFirstSN;
-      const SequenceNumber last_sn = expected_max_sn(reader);
+      const SequenceNumber first_sn = reader->durable_ ? 1 : (reader->preassociation_heartbeat_last_ + 1);
+      const SequenceNumber last_sn = reader->preassociation_heartbeat_last_;
       meta_submessage.dst_guid_ = reader->id_;
       meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
       meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
@@ -3917,6 +3899,12 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo_rch& ri) const
   const SequenceNumber data_max =
     send_buff_.is_nil() ? 0 : (send_buff_->empty() ? 0 : send_buff_->high());
   return std::max(durable_max, data_max);
+}
+
+void
+RtpsUdpDataLink::RtpsWriter::update_max_sn(SequenceNumber seq)
+{
+  max_sn_ = std::max(max_sn_, seq);
 }
 
 void

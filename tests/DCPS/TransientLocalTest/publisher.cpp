@@ -105,7 +105,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status\n")));
         break;
       } else if (pubmatched.current_count == 0 && pubmatched.total_count == 4) {
-        // subscriber has come and gone
+        // subscribers have come and gone.
         break;
       }
 
