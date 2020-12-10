@@ -10,7 +10,7 @@
 
 #include "ace/config.h"
 
-#if defined(ACE_HAS_GETIFADDRS) && !defined(OPENDDS_SAFETY_PROFILE) && !defined (ACE_LINUX)
+#if defined(ACE_HAS_GETIFADDRS) && !defined(OPENDDS_SAFETY_PROFILE)
 
 #define OPENDDS_NETWORK_CONFIG_MODIFIER
 
