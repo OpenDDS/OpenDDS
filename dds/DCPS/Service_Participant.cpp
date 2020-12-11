@@ -20,6 +20,7 @@
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "../Version.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
@@ -36,6 +37,7 @@
 #include <ace/Sched_Params.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_unistd.h>
+#include <ace/Version.h>
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -417,6 +419,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
+
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - ")
+                   ACE_TEXT("This is OpenDDS %C%C using ACE %C.\n"),
+                   DDS_VERSION, OPENDDS_VERSION_METADATA, ACE_VERSION));
+      }
 
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already

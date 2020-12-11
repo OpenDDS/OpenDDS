@@ -68,7 +68,6 @@ public:
  */
 class OpenDDS_Dcps_Export Service_Participant {
 public:
-
   /// Domain value for the default repository IOR.
   enum { ANY_DOMAIN = -1 };
 
