@@ -670,7 +670,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Hex Dump of transport header block "
-                "(%d bytes):\n%s\n", xbytes, xbuffer));
+                "(%d bytes):\n%s", xbytes, xbuffer));
         }
 
         //
