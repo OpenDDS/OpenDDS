@@ -3979,8 +3979,8 @@ RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
   const SequenceNumber ca = writer_->recvd_.cumulative_ack();
   const WriterInfo::HeldMap::iterator end = writer_->held_.upper_bound(ca);
 
-    if (Transport_debug_level > 5) {
   for (WriterInfo::HeldMap::iterator it = writer_->held_.begin(); it != end; /*increment in loop body*/) {
+    if (Transport_debug_level > 5) {
       GuidConverter reader(reader_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData -")
                  ACE_TEXT(" deliver sequence: %q to %C\n"),
