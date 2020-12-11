@@ -950,7 +950,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
-              "== %u ",
+              "== %u.\n",
               this->receive_buffers_[this->buffer_index_]->rd_ptr()));
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
