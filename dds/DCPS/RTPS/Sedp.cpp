@@ -1121,9 +1121,11 @@ void Sedp::remove_remote_crypto_handle(const RepoId& participant, const EntityId
       return;
     }
     if (!key_factory->unregister_datareader(drch, se)) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::remove_remote_crypto_handle() - ")
-                 ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
-                 se.code, se.minor_code, se.message.in()));
+      if (DCPS::security_debug.cleanup_error) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::remove_remote_crypto_handle() - ")
+                   ACE_TEXT("Failure calling unregister_datareader() (ch %d). Security Exception[%d.%d]: %C\n"),
+                   drch, se.code, se.minor_code, se.message.in()));
+      }
     }
     get_handle_registry()->erase_remote_datareader_crypto_handle(remote);
   } else if (traits.isWriter()) {
@@ -1133,9 +1135,11 @@ void Sedp::remove_remote_crypto_handle(const RepoId& participant, const EntityId
       return;
     }
     if (!key_factory->unregister_datawriter(dwch, se)) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::remove_remote_crypto_handle() - ")
-                 ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
-                 se.code, se.minor_code, se.message.in()));
+      if (DCPS::security_debug.cleanup_error) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::remove_remote_crypto_handle() - ")
+                   ACE_TEXT("Failure calling unregister_datawriter() (ch %d). Security Exception[%d.%d]: %C\n"),
+                   dwch, se.code, se.minor_code, se.message.in()));
+      }
     }
     get_handle_registry()->erase_remote_datawriter_crypto_handle(remote);
   }
@@ -1461,9 +1465,11 @@ Sedp::disassociate(ParticipantData_t& pdata)
     for (DatareaderCryptoHandleList::const_iterator pos = drlist.begin(), limit = drlist.end();
          pos != limit; ++pos) {
       if (!key_factory->unregister_datareader(pos->second, se)) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::disassociate() - ")
-                   ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
+        if (DCPS::security_debug.cleanup_error) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::disassociate() - ")
+                     ACE_TEXT("Failure calling unregister_datareader() (ch %d). Security Exception[%d.%d]: %C\n"),
+                     pos->second, se.code, se.minor_code, se.message.in()));
+        }
       }
       get_handle_registry()->erase_remote_datareader_crypto_handle(pos->first);
     }
@@ -1471,9 +1477,11 @@ Sedp::disassociate(ParticipantData_t& pdata)
     for (DatawriterCryptoHandleList::const_iterator pos = dwlist.begin(), limit = dwlist.end();
          pos != limit; ++pos) {
       if (!key_factory->unregister_datawriter(pos->second, se)) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::disassociate() - ")
-                   ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
+        if (DCPS::security_debug.cleanup_error) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::disassociate() - ")
+                     ACE_TEXT("Failure calling unregister_datawriter() (ch %d). Security Exception[%d.%d]: %C\n"),
+                     pos->second, se.code, se.minor_code, se.message.in()));
+        }
       }
       get_handle_registry()->erase_remote_datawriter_crypto_handle(pos->first);
     }

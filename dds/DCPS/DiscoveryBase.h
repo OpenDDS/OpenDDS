@@ -535,10 +535,13 @@ namespace OpenDDS {
 
         SecurityException ex = {"", 0, 0};
         if (!get_crypto_key_factory()->unregister_datawriter(dwch, ex)) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Sedp::cleanup_secure_writer() - ")
-                     ACE_TEXT("Failure calling unregister_datawriter.")
-                     ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+          if (security_debug.cleanup_error) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) {cleanup_error} Sedp::cleanup_secure_writer() - ")
+                       ACE_TEXT("Failure calling unregister_datawriter. (ch %d)")
+                       ACE_TEXT(" Security Exception[%d.%d]: %C\n"),
+                       dwch, ex.code, ex.minor_code, ex.message.in()));
+          }
         }
         handle_registry->erase_local_datawriter_crypto_handle(publicationId);
       }
@@ -709,9 +712,13 @@ namespace OpenDDS {
 
         SecurityException ex = {"", 0, 0};
         if (!get_crypto_key_factory()->unregister_datareader(drch, ex)) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::cleanup_secure_reader() - ")
-                     ACE_TEXT("Failure calling unregister_datareader.")
-                     ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
+          if (security_debug.cleanup_error) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) {cleanup_error} Sedp::cleanup_secure_reader() - ")
+                       ACE_TEXT("Failure calling unregister_datareader (ch %d).")
+                       ACE_TEXT(" Security Exception[%d.%d]: %C\n"),
+                       drch, ex.code, ex.minor_code, ex.message.in()));
+          }
         }
         handle_registry->erase_local_datareader_crypto_handle(subscriptionId);
       }
