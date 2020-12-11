@@ -89,7 +89,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_TString command_line = stubCmd + ACE_TEXT(" ") + stubArgs;
       ACE_DEBUG((LM_INFO, ACE_TEXT("stub command line: %s\n"), command_line.c_str()));
 
-      if (options.command_line(ACE_TEXT("%s"), command_line.c_str()) != 0)
+      if (options.command_line("%s", ACE_TEXT_ALWAYS_CHAR(command_line.c_str())) != 0)
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT("set options")) ,-1);
 
       if (stub_ready_filename.empty())
