@@ -78,12 +78,12 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
   if (report) {
     if (deadline_ptr) {
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
+                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait until %#T.\n"),
                 msg_src_.c_str(), deadline_ptr));
     } else {
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
+                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait with no timeout.\n")));
     }
   }
@@ -104,7 +104,7 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
   }
   if (report) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) MessageTracker::wait_messages_pending done\n"));
+               "(%P|%t) MessageTracker::wait_messages_pending done\n"));
   }
 }
 

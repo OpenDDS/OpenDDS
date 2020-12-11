@@ -216,7 +216,7 @@ Service_Participant::~Service_Participant()
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
+               "(%P|%t) Service_Participant::~Service_Participant()\n"));
   }
 }
 
@@ -2764,13 +2764,13 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
     }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
     }
     network_config_monitor_ = make_rch<NetworkConfigModifier>();
 #endif
