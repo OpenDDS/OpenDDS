@@ -483,15 +483,14 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     if (!check_encoded(submessage.gap_sm().writerId)) {
       break;
     }
-    link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_);
+    link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
     break;
 
   case HEARTBEAT:
     if (!check_encoded(submessage.heartbeat_sm().writerId)) {
       break;
     }
-    link_->received(submessage.heartbeat_sm(),
-                    receiver_.source_guid_prefix_);
+    link_->received(submessage.heartbeat_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
     if (submessage.heartbeat_sm().smHeader.flags & FLAG_L) {
       // Liveliness has been asserted.  Create a DATAWRITER_LIVELINESS message.
       sample.header_.message_id_ = DATAWRITER_LIVELINESS;
@@ -513,8 +512,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     if (!check_encoded(submessage.hb_frag_sm().writerId)) {
       break;
     }
-    link_->received(submessage.hb_frag_sm(),
-                    receiver_.source_guid_prefix_);
+    link_->received(submessage.hb_frag_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
     break;
 
   case NACK_FRAG:
@@ -992,7 +990,8 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
 // MessageReceiver nested class
 
 RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(const GuidPrefix_t& local)
-  : have_timestamp_(false)
+  : directed_(false)
+  , have_timestamp_(false)
 {
   RTPS::assign(local_, local);
   source_version_.major = source_version_.minor = 0;
@@ -1016,6 +1015,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
 
   assign(source_guid_prefix_, hdr.guidPrefix);
   assign(dest_guid_prefix_, local_);
+  directed_ = false;
 
   unicast_reply_locator_list_.length(1);
   unicast_reply_locator_list_[0].kind = address_to_kind(addr);
@@ -1070,10 +1070,12 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   for (size_t i = 0; i < sizeof(GuidPrefix_t); ++i) {
     if (id.guidPrefix[i]) { // if some byte is > 0, it's not UNKNOWN
       RTPS::assign(dest_guid_prefix_, id.guidPrefix);
+      directed_ = true;
       return;
     }
   }
   RTPS::assign(dest_guid_prefix_, local_);
+  directed_ = false;
 }
 
 void

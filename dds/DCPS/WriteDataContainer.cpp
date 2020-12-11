@@ -1406,7 +1406,9 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const SequenceNumber& sequence)
+WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
+                                    bool deadline_is_infinite,
+                                    const SequenceNumber& sequence)
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
@@ -1420,12 +1422,13 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline, const Se
 
   guard.release();
 
-  while (MonotonicTimePoint::now() < deadline) {
+  while (deadline_is_infinite || MonotonicTimePoint::now() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {
       // lock is released while waiting and acquired before returning
       // from wait.
-      switch (wfa_condition_.wait_until(deadline)) {
+      const CvStatus wait_result = deadline_is_infinite ? wfa_condition_.wait() : wfa_condition_.wait_until(deadline);
+      switch (wait_result) {
       case CvStatus_NoTimeout:
         break;
 

@@ -3461,12 +3461,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
     return;
   }
 
-  if (is_reliable()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
-    sedp_.association_complete_i(repo_id_, remote);
-  } else {
-    sedp_.association_complete_i(repo_id_, remote);
-  }
+  sedp_.association_complete_i(repo_id_, remote);
 }
 
 void
