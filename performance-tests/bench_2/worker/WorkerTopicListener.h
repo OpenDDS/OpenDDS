@@ -14,7 +14,9 @@ public:
   virtual ~WorkerTopicListener() = default;
 
   void on_inconsistent_topic(DDS::Topic_ptr the_topic, const DDS::InconsistentTopicStatus& status) override;
+
   void set_topic(Builder::Topic& topic) override;
+  void unset_topic(Builder::Topic& topic) override;
 
 protected:
   Builder::Topic* topic_{};

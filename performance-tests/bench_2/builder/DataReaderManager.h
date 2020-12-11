@@ -12,6 +12,7 @@ public:
     const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map, const ContentFilteredTopicMap& cft_map);
 
   bool enable(bool throw_on_error = false);
+  void detach_listeners();
 
 protected:
   std::vector<std::shared_ptr<DataReader>> datareaders_;

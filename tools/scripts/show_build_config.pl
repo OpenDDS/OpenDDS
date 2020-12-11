@@ -32,6 +32,9 @@ sub show_config {
   my $user_macros = ($dds_root eq '.' ? '' : "$dds_root/") . 'user_macros.GNU';
   show_file($user_macros);
 
+  my $opendds_version = ($dds_root eq '.' ? '' : "$dds_root/") . 'VERSION.txt';
+  show_file($opendds_version);
+
   show_file("$ace_root/bin/MakeProjectCreator/config/default.features");
   show_file("$ace_root/include/makeinclude/platform_macros.GNU");
   show_file("$ace_root/ace/config.h");

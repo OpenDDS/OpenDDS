@@ -14,6 +14,7 @@ public:
   std::shared_ptr<Topic> get_topic_by_name(const std::string& name) const;
 
   bool enable(bool throw_on_error = false);
+  void detach_listeners();
 
 protected:
   std::map<std::string, std::shared_ptr<Topic>> topics_;

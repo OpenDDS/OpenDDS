@@ -45,7 +45,8 @@ protected:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id);
+                                            const RepoId& remote_id,
+                                            bool disassociate);
 
   bool configure_i(MulticastInst& config);
 

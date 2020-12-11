@@ -271,6 +271,10 @@ public:
     EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
   }
 
+  void TearDown() {
+    TheServiceParticipant->shutdown();
+  }
+
   ~AccessControlTest()
   {
   }
