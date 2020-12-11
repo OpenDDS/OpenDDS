@@ -205,8 +205,8 @@ bool DataReaderListenerImpl::is_valid() const
     valid_count = false;
   }
   // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if ((int)counts_.size() < num_messages &&
-           (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
+  else if (counts_.size() < num_messages &&
+           (reliable_ || (counts_.size() * 4) < num_messages)) {
     std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
     valid_count = false;
   }
