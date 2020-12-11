@@ -10,6 +10,7 @@ file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
 
 option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package" OFF)
 option(OPENDDS_DEFAULT_NESTED "Require topic types to be declared explicitly" ON)
+option(OPENDDS_ALLOW_ENV_CHANGE "Projects may reset OpenDDS env vars." OFF)
 
 set(_OPENDDS_RELATIVE_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
 set(_OPENDDS_RELATIVE_PREFIX_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")
@@ -40,7 +41,7 @@ if(NOT DEFINED DDS_ROOT)
     set(OPENDDS_LIB_DIR "${DDS_ROOT}/lib")
   endif()
 
-elseif(NOT DEFINED DDS_ALLOW_ENV_REDEFINES)
+elseif(NOT OPENDDS_ALLOW_ENV_CHANGE)
   _OPENDDS_RETURN_ERR("DDS_ROOT has already been set")
 endif()
 
@@ -61,7 +62,7 @@ if (NOT DEFINED ACE_ROOT)
 
   set(ACE_BIN_DIR "${ACE_ROOT}/bin")
 
-elseif(NOT DEFINED DDS_ALLOW_ENV_REDEFINES)
+elseif(NOT OPENDDS_ALLOW_ENV_CHANGE)
   _OPENDDS_RETURN_ERR("ACE_ROOT has already been set")
 endif()
 
@@ -86,6 +87,6 @@ if (NOT DEFINED TAO_ROOT)
     "${TAO_INCLUDE_DIR}"
     "${TAO_INCLUDE_DIR}/orbsvcs"
   )
-elseif(NOT DEFINED DDS_ALLOW_ENV_REDEFINES)
+elseif(NOT OPENDDS_ALLOW_ENV_CHANGE)
   _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
 endif()
