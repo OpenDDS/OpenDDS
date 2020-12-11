@@ -24,17 +24,16 @@ sub error {
   print STDERR (ERROR . " " . shift . "\n");
 }
 
-use constant WARNING => color('yellow') . "WARNING:" . color('reset');
 sub warning {
-  print STDERR (WARNING . " " . shift . "\n");
+  print STDERR (color('yellow') . "WARNING:" . color('reset') . " " . shift . "\n");
 }
 
-use constant NOTE => color('blue') . "NOTE" . color('reset');
 sub note {
-  print STDERR (NOTE. " " . shift . "\n");
+  print (color('blue') . "NOTE" . color('reset') . " " . shift . "\n");
 }
 
-my $line_length_limit = 100;
+use constant line_length_limit => 100;
+use constant eof_newline_limit => 2;
 
 my $debug = 0;
 my $ace = 1;
@@ -149,7 +148,9 @@ if (not $listing_checks and !defined $ace_root) {
     }
   }
   if ($ace and !defined $ace_root) {
-    die("${\ERROR} Couldn't find ACE, so ACE_ROOT must be defined if --no-ace isn't passed");
+    warning("ACE_ROOT wasn't defined and we couldn't find ACE on our own, so not running " .
+      "ACE's fuzz.pl. Pass --no-ace to silence this warning.");
+    $ace = 0;
   }
 }
 
@@ -366,13 +367,14 @@ my %all_checks = (
     ],
   },
 
-  not_exactly_one_eof_newline => {
+  eof_newline_count => {
     path_matches_all_of => [
       'text_file',
       '!p7s_file',
     ],
     message => [
-      'Text file must end with one and only one newline'
+      "Test file must end in at least one newline, but not more than " .
+      "${\eof_newline_limit}",
     ],
     file_matches => sub {
       my $filename = shift;
@@ -382,22 +384,29 @@ my %all_checks = (
       open(my $fd, $full_filename);
       my $count = 0;
       while (my $line = <$fd>) {
-        if ($line =~ /^\n$/) {
-          $count += 1;
-        } else {
+        if ($line =~ /^(.*)?\n$/) {
+          if ($1) {
+            $count = 1;
+          }
+          else {
+            $count += 1;
+          }
+        }
+        else {
           $count = 0;
         }
       }
       close($fd);
 
-      return $count == 1;
+      return $count == 0 || $count > eof_newline_limit;
     }
   },
 
   line_length => {
     # Converts to UTF-32 for the proper length length, checking for valid UTF-8 along the way
     message => [
-      'Text file either has extremely long lines or has invalid UTF-8'
+      "Source code either has a line longer than ${\line_length_limit} Unicode " .
+      "code points or has invalid UTF-8",
     ],
     default => 0, # TODO: Make Default
     path_matches_any_of => ['source_code'],
@@ -406,7 +415,7 @@ my %all_checks = (
       my $result;
       eval '$result = encode("UTF-32", decode("UTF-8", $line, FB_CROAK), FB_CROAK)';
       print("    decode says: $@") if ($@ && $debug);
-      return $@ || (length($result) / 4) > $line_length_limit;
+      return $@ || (length($result) / 4) > line_length_limit;
     },
   },
 
@@ -492,7 +501,6 @@ my %all_checks = (
     message => [
       'File is missing include guard with correct name',
     ],
-    default => 1, # TODO: Make Default
     can_fix => 1,
     path_matches_all_of => ['needs_include_guard'],
     file_matches => sub {
