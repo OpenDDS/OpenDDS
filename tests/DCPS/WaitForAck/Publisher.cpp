@@ -271,7 +271,8 @@ Publisher::run()
   }
 
   // Allow some traffic to occur before making any wait() calls.
-  ACE_OS::sleep( 2);
+  ACE_Time_Value ms(0, 500);
+  ACE_OS::sleep(ms);
 
   ::DDS::Duration_t delay = { 15, 0 }; // Wait for up to 15 seconds.
   if (this->options_.publisher())

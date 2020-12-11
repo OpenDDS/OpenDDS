@@ -27,4 +27,4 @@ $test->process('pub', 'publisher', ($verbose ? '-v ' : '') .
 $test->start_process('sub');
 $test->start_process('pub');
 
-exit $test->finish(300);
+exit $test->finish(600);
