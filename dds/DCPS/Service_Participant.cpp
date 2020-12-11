@@ -406,6 +406,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else {
           ACE_OS::fclose(in);
 
+          if (DCPS_debug_level > 1) {
+            ACE_DEBUG((LM_NOTICE,
+                        ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory ")
+                        ACE_TEXT("Going to load configuration from <%s>\n"),
+                        config_fname.c_str()));
+          }
+
           if (this->load_configuration() != 0) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
