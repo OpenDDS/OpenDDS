@@ -1075,7 +1075,7 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_specific_ack(const AckToken& token)
 {
-  return this->data_container_->wait_ack_of_seq(token.deadline(), token.sequence_);
+  return this->data_container_->wait_ack_of_seq(token.deadline(), token.deadline_is_infinite(), token.sequence_);
 }
 
 DDS::Publisher_ptr
