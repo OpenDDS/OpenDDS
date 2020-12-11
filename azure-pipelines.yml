@@ -211,15 +211,19 @@ jobs:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
+        TEST_JAVA_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
+        TEST_JAVA_MESSENGER: true
         DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
         TEST_MESSENGER: false
+        TEST_FACE_MESSENGER: true
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
         TEST_MESSENGER: false
+        TEST_FACE_MESSENGER: true
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
