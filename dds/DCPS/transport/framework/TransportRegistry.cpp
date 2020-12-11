@@ -585,13 +585,6 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 
   DDS::DomainId_t domain_id = ei->get_domain_id();
 
-  if (domain_id == DOMAIN_UNKNOWN) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
-               ACE_TEXT("DomainId is unknown. Failed to create new transport template instance.\n")));
-    throw Transport::UnableToCreate();
-  }
-
   // if domain is in a domain range and config is a transport template,
   // get the correct config.
   if (TheServiceParticipant->belongs_to_domain_range(domain_id)) {
