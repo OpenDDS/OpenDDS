@@ -27,12 +27,7 @@ BuilderProcess::~BuilderProcess()
 
 void BuilderProcess::detach_listeners()
 {
-  for (auto it = reader_map_.begin(); it != reader_map_.end(); ++it) {
-    it->second->detach_listener();
-  }
-  for (auto it = writer_map_.begin(); it != writer_map_.end(); ++it) {
-    it->second->detach_listener();
-  }
+  participants_->detach_listeners();
 }
 
 bool BuilderProcess::enable_dds_entities(bool throw_on_error)

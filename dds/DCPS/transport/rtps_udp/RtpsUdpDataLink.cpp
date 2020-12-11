@@ -762,7 +762,37 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
 
   if (conv.isReader()) {
     ACE_GUARD(ACE_Thread_Mutex, gr, readers_lock_);
-    readers_.erase(localId);
+    RtpsReaderMap::iterator rr = readers_.find(localId);
+    if (rr != readers_.end()) {
+      for (RtpsReaderMultiMap::iterator iter = readers_of_writer_.begin();
+          iter != readers_of_writer_.end();) {
+        if (iter->second->id() == localId) {
+          readers_of_writer_.erase(iter++);
+        } else {
+          ++iter;
+        }
+      }
+
+      RtpsReader_rch reader = rr->second;
+      readers_.erase(rr);
+      gr.release();
+
+      reader->pre_stop_helper();
+
+    } else {
+      for (WriterToSeqReadersMap::iterator w = writer_to_seq_best_effort_readers_.begin();
+          w != writer_to_seq_best_effort_readers_.end();) {
+        RepoIdSet::iterator r = w->second.readers.find(localId);
+        if (r != w->second.readers.end()) {
+          w->second.readers.erase(r);
+          if (w->second.readers.empty()) {
+            writer_to_seq_best_effort_readers_.erase(w++);
+            continue;
+          }
+        }
+        ++w;
+      }
+    }
 
   } else {
     ACE_GUARD(ACE_Thread_Mutex, gw, writers_lock_);

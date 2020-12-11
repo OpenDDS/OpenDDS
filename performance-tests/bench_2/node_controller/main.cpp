@@ -255,7 +255,7 @@ public:
     }
   }
 
-  void run_workers(ReportDataWriter_var report_writer_impl)
+  bool run_workers(ReportDataWriter_var report_writer_impl)
   {
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
     // Spawn Workers
@@ -354,19 +354,22 @@ public:
     mem_block->finalize();
     virtual_mem_block->finalize();
 
-    if (!sigint_.load()) {
-      std::cout << "Writing report for node " << node_id_ << std::endl;
-      if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
-        std::cerr << "Write report failed" << std::endl;
-      }
-
-      DDS::Duration_t timeout = { 30, 0 };
-      if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-        std::cerr << "Waiting for report acknowledgment failed" << std::endl;
-      } else {
-        std::cout << "All reports written and acknowledged." << std::endl;
-      }
+    if (sigint_.load()) {
+      return false;
     }
+
+    std::cout << "Writing report for node " << node_id_ << std::endl;
+    if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
+      std::cerr << "Write report failed" << std::endl;
+    }
+
+    DDS::Duration_t timeout = { 30, 0 };
+    if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+      std::cerr << "Waiting for report acknowledgment failed" << std::endl;
+    } else {
+      std::cout << "All reports written and acknowledged." << std::endl;
+    }
+    return true;
   }
 
   /// Used to the Handle Exit of a Worker
@@ -770,18 +773,18 @@ int run_cycle(
   wait_for_full_scenario(name, this_node_id, status_writer_impl, allocated_scenario_reader_impl, scenario);
 
   // This constructor traps signals, wait until we really need it.
-  WorkerManager worker_manager(this_node_id, process_manager);
+  auto worker_manager = std::make_shared<WorkerManager>(this_node_id, process_manager);
 
   Bench::NodeController::Configs& configs = scenario.configs;
   for (CORBA::ULong node = 0; node < configs.length(); ++node) {
     if (configs[node].node_id == this_node_id) {
-      worker_manager.timeout(configs[node].timeout);
+      worker_manager->timeout(configs[node].timeout);
       const CORBA::ULong allocated_scenario_count = configs[node].workers.length();
       for (CORBA::ULong config = 0; config < allocated_scenario_count; config++) {
         WorkerId& id = configs[node].workers[config].worker_id;
         const WorkerId end = id + configs[node].workers[config].count;
         for (; id < end; id++) {
-          if (worker_manager.add_worker(configs[node].workers[config])) {
+          if (worker_manager->add_worker(configs[node].workers[config])) {
             return 1;
           }
         }
@@ -806,15 +809,17 @@ int run_cycle(
   }
 
   // Run Workers and Wait for Them to Finish
-  worker_manager.run_workers(report_writer_impl);
+  if (!worker_manager->run_workers(report_writer_impl)) {
+    std::cerr << "Running workers failed (likely because we received a SIGINT)" << std::endl;
+    return 1;
+  }
+  worker_manager.reset();
 
   const DDS::Duration_t timeout = { 10, 0 };
   if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
     std::cerr << "Waiting for report acknowledgment failed" << std::endl;
     return 1;
   }
-
-  std::this_thread::sleep_for(std::chrono::seconds(3));
 
   return 0;
 }
