@@ -733,7 +733,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
       //  As new sample headers are read, the are read into a message
       //  buffer member variable and demarshaled directly.  The values are
       //  retained for the lifetime of the sample and are passed as part
-      //  of the recieve data sample itself.  The member message buffer
+      //  of the receive data sample itself.  The member message buffer
       //  allows us to retain partially read sample headers until we can
       //  read more data.
       //
@@ -805,7 +805,6 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
           //
           // Check the DataSampleHeader.
           //
-
           this->good_pdu_ = check_header(data_sample_header_);
 
           //
@@ -857,7 +856,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         //   the lifetime of this data will last until the DataReader
         //   components demarshal the sample data.  A reference to the
         //   current sample being built is retained as a member to allow us
-        //   to hold partialy read samples until they are completed.
+        //   to hold partially read samples until they are completed.
         //
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Determine amount of data for the next block in the chain\n"));
