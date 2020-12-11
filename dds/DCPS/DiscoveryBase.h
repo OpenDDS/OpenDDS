@@ -109,7 +109,7 @@ namespace OpenDDS {
           tid_ = static_cast<unsigned long>(osx_tid);
         } else {
           tid_ = 0;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n.")));
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n")));
         }
 #else
         tid_ = ACE_OS::thr_self();
