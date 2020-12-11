@@ -791,7 +791,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
              ebuffer, sizeof(ebuffer));
 
             VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                  "Hex Dump:\n%s\n", ebuffer));
+                  "Hex Dump:\n%s", ebuffer));
           }
 
           this->data_sample_header_.pdu_remaining(this->pdu_remaining_);
