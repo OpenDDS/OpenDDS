@@ -12,6 +12,11 @@ set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
 )
 
+# copy run_test.pl to build/
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/run_test.pl"
+               "${CMAKE_CURRENT_BINARY_DIR}/run_test.pl"
+               COPYONLY)
+
 set(the_ecu "ecu")
 
 add_executable(${the_ecu} "ecu.cpp")
