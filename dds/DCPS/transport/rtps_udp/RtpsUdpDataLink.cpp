@@ -1628,7 +1628,7 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   gaps.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   if (!gaps.empty()) {
-    for (OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator pos = writer->held_.lower_bound(gaps.low()),
+    for (WriterInfo::HeldMap::iterator pos = writer->held_.lower_bound(gaps.low()),
            limit = writer->held_.upper_bound(gaps.high()); pos != limit;) {
       if (gaps.contains(pos->first)) {
         writer->held_.erase(pos++);
@@ -1767,6 +1767,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
         writer->held_.erase(writer->held_.begin());
+      }
+      for (WriterInfo::HeldMap::const_iterator it = writer->held_.begin(); it != writer->held_.end(); ++it) {
+        writer->recvd_.insert(it->first);
       }
       link->receive_strategy()->remove_fragments(sr, writer->id_);
     }
@@ -3969,10 +3972,9 @@ RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
   }
 
   const SequenceNumber ca = writer_->recvd_.cumulative_ack();
-  typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
-  const iter end = writer_->held_.upper_bound(ca);
+  const WriterInfo::HeldMap::iterator end = writer_->held_.upper_bound(ca);
 
-  for (iter it = writer_->held_.begin(); it != end; /*increment in loop body*/) {
+  for (WriterInfo::HeldMap::iterator it = writer_->held_.begin(); it != end; /*increment in loop body*/) {
     if (Transport_debug_level > 5) {
       GuidConverter reader(reader_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData -")

@@ -464,7 +464,8 @@ private:
   struct WriterInfo : RcObject {
     const RepoId id_;
     DisjointSequence recvd_;
-    OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
+    typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
+    HeldMap held_;
     SequenceNumber hb_last_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool first_activity_, first_valid_hb_;
