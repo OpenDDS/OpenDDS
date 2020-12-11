@@ -405,7 +405,7 @@ public:
    */
   bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
-  bool get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
+  bool get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
