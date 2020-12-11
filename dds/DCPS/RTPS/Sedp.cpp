@@ -4155,7 +4155,7 @@ Sedp::write_subscription_data_unsecure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(drd, plist, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -4166,7 +4166,7 @@ Sedp::write_subscription_data_unsecure(
       ai_map["DATA"] = ls.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -4177,7 +4177,7 @@ Sedp::write_subscription_data_unsecure(
       result = subscriptions_writer_->write_parameter_list(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_unsecure - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
@@ -4208,7 +4208,7 @@ Sedp::write_subscription_data_secure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(drd, plist, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -4218,7 +4218,7 @@ Sedp::write_subscription_data_secure(
       ai_map["DATA"] = ls.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -4231,7 +4231,7 @@ Sedp::write_subscription_data_secure(
       result = subscriptions_secure_writer_->write_parameter_list(plist, effective_reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_secure - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
