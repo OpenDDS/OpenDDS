@@ -466,11 +466,11 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   //
   ACE_INET_Addr remote_address;
   bool stop = false;
-  ssize_t bytes_remaining = this->receive_bytes(iov,
-                                                static_cast<int>(vec_index),
-                                                remote_address,
-                                                fd,
-                                                stop);
+  const ssize_t bytes_remaining = this->receive_bytes(iov,
+                                                      static_cast<int>(vec_index),
+                                                      remote_address,
+                                                      fd,
+                                                      stop);
 
   if (stop) {
     return 0;
