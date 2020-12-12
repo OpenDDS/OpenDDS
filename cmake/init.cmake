@@ -11,6 +11,7 @@ file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
 option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package" OFF)
 option(OPENDDS_DEFAULT_NESTED "Require topic types to be declared explicitly" ON)
 option(OPENDDS_ALLOW_ENV_CHANGE "Projects may reset OpenDDS env vars." OFF)
+option(OPENDDS_FILENAME_ONLY_INCLUDES "No directory info in generated #includes." OFF)
 
 set(_OPENDDS_RELATIVE_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
 set(_OPENDDS_RELATIVE_PREFIX_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")

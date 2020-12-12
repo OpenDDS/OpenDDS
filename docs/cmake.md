@@ -30,6 +30,7 @@ which simplifies IDL compilation.
     * [Build-Related Options](#build-related-options)
   * [`OPENDDS_DEFAULT_NESTED`](#opendds_default_nested)
   * [`OPENDDS_ALLOW_ENV_REDEFINES`](#opendds_allow_env_redefines)
+  * [`OPENDDS_FILENAME_ONLY_INCLUDES`](#opendds_filename_only_includes)
   * [`OPENDDS_LANGUAGE_MAPPINGS`](#opendds_language_mappings)
 
 ## Requirements
@@ -98,11 +99,12 @@ control the behavior of the OpenDDS CMake package.
 
 ### Cache Variables/Options Understood by OpenDDS
 
-| Cache Variable             | Description                                                         | Default |
-| -------------------------- | ------------------------------------------------------------------- | ------- |
-| `OPENDDS_CMAKE_VERBOSE`    | Print detailed status information at CMake-Generation time          | `OFF`   |
-| `OPENDDS_DEFAULT_NESTED`   | [Topic types must be declared explicitly.](#opendds_default_nested) | `ON`    |
-| `OPENDDS_ALLOW_ENV_CHANGE` | [Ignore OpenDDS environment variable changes.](#opendds_allow_env_change)   | `OFF`   |
+| Cache Variable                   | Description                                                                  | Default |
+| -------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| `OPENDDS_CMAKE_VERBOSE`          | Print detailed status information at CMake-Generation time                   | `OFF`   |
+| `OPENDDS_DEFAULT_NESTED`         | [Topic types must be declared explicitly.](#opendds_default_nested)          | `ON`    |
+| `OPENDDS_ALLOW_ENV_CHANGE`       | [Ignore environment variable changes.](#opendds_allow_env_change)            | `OFF`   |
+| `OPENDDS_FILENAME_ONLY_INCLUDES` | [No directory info in generated #includes.](#opendds_filename_only_includes) | `OFF`   |
 
 ### Libraries
 
@@ -201,10 +203,6 @@ built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_s
     using `TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default
     behavior is not suitable).
     - Add `OPENDDS_IDL_OPTIONS -Lc++11` to use the C++11 IDL Mapping.
-  - `NO_FILENAME_ONLY_INCLUDES` disables OpenDDS's IDL compiler option
-   `--filename-only-includes`. This feature strips the path information from
-   IDL compiler-generated `#include` lines, which can make it easier to
-   specify build rules for IDL files that include other IDL files.
 
 When IDL sources are supplied, custom commands are generated which will
 be invoked to compile the IDL sources into their component cpp/h files.
@@ -362,6 +360,11 @@ unintentionally if a project's libraries and executable both require OpenDDS wit
 `find_package(OpenDDS REQUIRED)`. Setting `OPENDDS_ALLOW_ENV_CHANGE` to `ON`
 disables the environment variable check.
 
+### `OPENDDS_FILENAME_ONLY_INCLUDES`
+
+This setting tells OpenDDS's IDL compiler to strip path information from `#include`
+lines in generated files. Turning the option on can make it easier to specify build
+rules for IDL files that include other IDL files.
 
 ### `OPENDDS_LANGUAGE_MAPPINGS`
 

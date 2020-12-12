@@ -8,6 +8,8 @@ find_package(OpenDDS REQUIRED)
 
 set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
 
+set(OPENDDS_FILENAME_ONLY_INCLUDES ON CACHE BOOL "IDL files include other IDL files" FORCE)
+
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
 )
