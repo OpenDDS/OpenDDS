@@ -1474,9 +1474,7 @@ struct Cxx11Generator : GeneratorBase
       }
     } else {
       if (af.cls_ & CL_ARRAY) {
-        // With array no initialize, gives a warning with gcc 4.8.5, for example
-        // warning: missing initializer for member ‘std::array<std::basic_string<char>, 5ul>::_M_elems’ [-Wmissing-field-initializers]
-        initializer = "";
+        initializer = "{{}}";
       }
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
