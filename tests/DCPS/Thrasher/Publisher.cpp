@@ -28,32 +28,22 @@ namespace
   {
     ACE_Arg_Shifter shifter(argc, argv);
 
-    while (shifter.is_anything_left())
-    {
+    while (shifter.is_anything_left()) {
       const ACE_TCHAR* arg;
 
-      if ((arg = shifter.get_the_parameter(ACE_TEXT("-s"))))
-      {
+      if ((arg = shifter.get_the_parameter(ACE_TEXT("-s")))) {
         samples_per_thread = ACE_OS::atoi(arg);
         shifter.consume_arg();
-      }
-      else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
-      {
+      } else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t")))) {
         num_threads = ACE_OS::atoi(arg);
         shifter.consume_arg();
-      }
-      else if (ACE_OS::strcmp(shifter.get_current(), ACE_TEXT("-d")) == 0)
-      {
+      } else if (ACE_OS::strcmp(shifter.get_current(), ACE_TEXT("-d")) == 0) {
         durable = true;
         shifter.consume_arg();
-      }
-      else if ((arg = shifter.get_the_parameter(ACE_TEXT("-e"))))
-      {
+      } else if ((arg = shifter.get_the_parameter(ACE_TEXT("-e")))) {
         seed = ACE_OS::atoi(arg);
         shifter.consume_arg();
-      }
-      else
-      {
+      } else {
         shifter.ignore_arg();
       }
     }
@@ -63,8 +53,7 @@ namespace
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  try
-  {
+  try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
@@ -82,9 +71,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Clean-up!
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- PUBLISHER SHUTDOWN\n")));
     TheServiceParticipant->shutdown();
-  }
-  catch (const CORBA::Exception& e)
-  {
+  } catch (const CORBA::Exception& e) {
     e._tao_print_exception("caught in main()");
     return 1;
   }
