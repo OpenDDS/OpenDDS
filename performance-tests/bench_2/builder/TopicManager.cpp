@@ -31,4 +31,11 @@ bool TopicManager::enable(bool throw_on_error)
   return result;
 }
 
+void TopicManager::detach_listeners()
+{
+  for (auto it = topics_.begin(); it != topics_.end(); ++it) {
+    it->second->detach_listener();
+  }
+}
+
 }

@@ -14,4 +14,10 @@ void WorkerTopicListener::set_topic(Builder::Topic& topic) {
   topic_ = &topic;
 }
 
+void WorkerTopicListener::unset_topic(Builder::Topic& topic) {
+  if (topic_ == &topic) {
+    topic_ = nullptr;
+  }
+}
+
 }

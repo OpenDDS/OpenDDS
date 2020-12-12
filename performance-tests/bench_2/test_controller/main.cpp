@@ -224,7 +224,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--overwrite-result"))) {
         overwrite_result = true;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-bench-partition-suffix"))) {
-        overrides.bench_partition_suffix = get_option_argument(i, argc, argv);
+        std::string suffix = get_option_argument(i, argc, argv);
+        overrides.bench_partition_suffix = suffix == "none" ? "" : suffix;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-create-time"))) {
         overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-enable-time"))) {

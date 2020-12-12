@@ -77,12 +77,12 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
   if (report) {
     if (use_deadline) {
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %T ")
+                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait until %#T.\n"),
                 msg_src_.c_str(), &deadline.value()));
     } else {
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %T ")
+                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait with no timeout.\n")));
     }
   }

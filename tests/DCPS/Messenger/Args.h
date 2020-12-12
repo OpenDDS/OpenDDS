@@ -21,7 +21,7 @@
 #include <iostream>
 #include <cstdlib>
 
-const int num_messages = 40;
+const size_t num_messages = 40;
 extern bool reliable;
 
 inline int

@@ -314,7 +314,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg.send_buffer_size_ > 0) {
-    int snd_size = cfg.send_buffer_size_;
+    const int snd_size = cfg.send_buffer_size_;
     if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
@@ -342,7 +342,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg.rcv_buffer_size_ > 0) {
-    int rcv_size = cfg.rcv_buffer_size_;
+    const int rcv_size = cfg.rcv_buffer_size_;
     if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,

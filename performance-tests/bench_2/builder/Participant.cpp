@@ -85,7 +85,9 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
   publishers_.reset(new PublisherManager(config.publishers, report.publishers, participant_, topics_, writer_map));
 }
 
-Participant::~Participant() {
+Participant::~Participant()
+{
+  detach_listeners();
   publishers_.reset();
   subscribers_.reset();
   topics_.reset();
@@ -98,7 +100,8 @@ Participant::~Participant() {
   }
 }
 
-bool Participant::enable(bool throw_on_error) {
+bool Participant::enable(bool throw_on_error)
+{
   bool success = (participant_->enable() == DDS::RETCODE_OK);
   if (!success && throw_on_error) {
     std::stringstream ss;
@@ -108,6 +111,23 @@ bool Participant::enable(bool throw_on_error) {
   return success && topics_->enable(throw_on_error) &&
     subscribers_->enable(throw_on_error) &&
     publishers_->enable(throw_on_error);
+}
+
+void Participant::detach_listeners()
+{
+  if (listener_) {
+    ParticipantListener* savvy_listener = dynamic_cast<ParticipantListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_participant(*this);
+    }
+    if (participant_) {
+      participant_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
+    }
+    listener_ = 0;
+  }
+  topics_->detach_listeners();
+  subscribers_->detach_listeners();
+  publishers_->detach_listeners();
 }
 
 }

@@ -114,8 +114,7 @@ namespace OpenDDS {
           tid_ = static_cast<unsigned long>(osx_tid);
         } else {
           tid_ = 0;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls: "
-            "Error getting OSX thread id: %p\n")));
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n")));
         }
 #else
         tid_ = ACE_OS::thr_self();
@@ -148,12 +147,12 @@ namespace OpenDDS {
                 break;
 
               case CvStatus_Timeout: {
-                const MonotonicTimePoint now = MonotonicTimePoint::now();
+            const MonotonicTimePoint now = MonotonicTimePoint::now();
                 expire = now + interval_;
-                if (status_) {
-                  if (DCPS_debug_level > 4) {
-                    ACE_DEBUG((LM_DEBUG, "(%P|%t) DcpsUpcalls::svc: "
-                      "Updating thread status.\n"));
+              if (status_) {
+                if (DCPS_debug_level > 4) {
+                  ACE_DEBUG((LM_DEBUG,
+                            "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                   }
                   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
                   status_->map[key_] = now;
