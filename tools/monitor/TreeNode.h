@@ -363,8 +363,8 @@ void
 Monitor::TreeNode::sort( int column, Qt::SortOrder order)
 {
   CompareByColumn compare( column, order);
-  std::stable_sort( this->children_.begin(), this->children_.end(), compare);
-  for(int index = 0; index < this->size(); ++index) {
+  std::stable_sort(this->children_.begin(), this->children_.end(), compare);
+  for (int index = 0; index < this->size(); ++index) {
     (*this)[ index]->sort( column, order);
   }
 }
