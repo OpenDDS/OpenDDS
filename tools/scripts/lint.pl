@@ -13,31 +13,13 @@ use Cwd qw/abs_path/;
 use Getopt::Long qw/GetOptions/;
 use Term::ANSIColor;
 
-sub mark_error {
-  my $s = shift;
-  $s =~ s/\t/        /g; # Tabs might not be colored
-  return color('white') . color('on_red') . $s . color('reset');
-}
-
-use constant ERROR => color('red') . "ERROR:" . color('reset');
-sub error {
-  print STDERR (ERROR . " " . shift . "\n");
-}
-
-sub warning {
-  print STDERR (color('yellow') . "WARNING:" . color('reset') . " " . shift . "\n");
-}
-
-sub note {
-  print (color('blue') . "NOTE" . color('reset') . " " . shift . "\n");
-}
-
 use constant line_length_limit => 100;
 use constant eof_newline_limit => 2;
 
 my $debug = 0;
 my $ace = 1;
 my @paths = ();
+my @ext_paths = ();
 my $simple_output = 0;
 my $files_only = 0;
 my $help = 0;
@@ -46,6 +28,55 @@ my $list_default_checks = 0;
 my $list_non_default_checks = 0;
 my $all = 0;
 my $fix = 0;
+my @includes = ();
+my $isatty = -t STDOUT && -t STDERR;
+my $color = $isatty;
+my $no_color_arg = 0;
+my $color_arg = 0;
+
+# Term::ANSIColor doesn't seem to give real control over color, so provide our
+# own.
+sub colour {
+  my $rv = '';
+  if ($color) {
+    foreach my $arg (@_) {
+      $rv .= color($arg);
+    }
+  }
+  return $rv;
+}
+
+sub colour_else {
+  my $not_color = shift;
+  if ($color) {
+    return colour(@_);
+  }
+  else{
+    return $not_color;
+  }
+}
+
+sub mark_error {
+  my $s = shift;
+  $s =~ s/\t/        /g;
+  return colour_else('>>>', 'white', 'on_red') .  $s . colour_else('<<<', 'reset');
+}
+
+sub error {
+  return colour('red') . "ERROR:" . colour('reset');
+}
+
+sub print_error {
+  print STDERR (error() . " " . shift . "\n");
+}
+
+sub print_warning {
+  print STDERR (colour('yellow') . "WARNING:" . colour('reset') . " " . shift . "\n");
+}
+
+sub print_note {
+  print(colour('blue') . "NOTE" . colour('reset') . " " . shift . "\n");
+}
 
 # Try to Find ACE_ARGS
 my @ace_args = ();
@@ -83,6 +114,7 @@ my $help_message = $usage_message .
   "--path | -p PATH    Restrict to PATH instead of everything in OpenDDS. Can be\n" .
   "                    a directory or a file. Can be specified multiple times.\n" .
   "                    PATH must be relative to the root of OpenDDS.\n" .
+  "--ext-path PATH     Path outside the OpenDDS source tree to check.\n" .
   "--simple-output     Print individual errors as single lines\n" .
   "--files-only        Just print the files that failed\n" .
   "--list | -l         List all checks\n" .
@@ -92,6 +124,11 @@ my $help_message = $usage_message .
   "--try-fix           ATTEMPT to fix issues that support fixing. THIS IS POWERED\n" .
   "                    BY REGEX, NOT MAGIC. Don't try this unless your existing\n" .
   "                    work is commited or otherwise safe from this script.\n" .
+  "--include PATH      Add PATH to preproccessor include paths for the sake of\n" .
+  "                    checks that care about them. Can be specified multiple\n" .
+  "                    times. Default is root of OpenDDS source tree.\n" .
+  "--[no-]color        Force disable or enable ANSI escape code color output\n" .
+  "                    Can also be done with NO_COLOR enviroment variable\n" .
   "\n" .
   "If run with DDS_ROOT being defined, it will use that path. If not it will\n" .
   "use the OpenDDS source tree the script is in.\n" .
@@ -115,6 +152,7 @@ if (!GetOptions(
   'debug' => \$debug,
   'ace!' => \$ace,
   'path=s' => \@paths,
+  'ext-path=s' => \@ext_paths,
   'simple-output' => \$simple_output,
   'files-only' => \$files_only,
   'l|list' => \$list_checks,
@@ -122,6 +160,9 @@ if (!GetOptions(
   'list-non-default' => \$list_non_default_checks,
   'a|all' => \$all,
   'try-fix' => \$fix,
+  'include=s' => \@includes,
+  'color' => \$color_arg,
+  'no-color' => \$no_color_arg,
 )) {
   print STDERR $usage_message;
   exit 1;
@@ -131,11 +172,31 @@ if ($help) {
   exit 0;
 }
 
+if ($no_color_arg) {
+  $color = 0;
+}
+elsif ($color_arg) {
+  $color = 1;
+  # Override these because we don't have a way to tell Term::ANSIColor to
+  # ignore them.
+  if (defined($ENV{NO_COLOR}) || defined($ENV{ANSI_COLORS_DISABLED})) {
+    undef($ENV{NO_COLOR});
+    undef($ENV{ANSI_COLORS_DISABLED});
+  }
+}
+elsif (defined($ENV{NO_COLOR}) || defined($ENV{ANSI_COLORS_DISABLED})) {
+  $color = 0;
+}
+
 my $listing_checks = $list_checks || $list_default_checks ||  $list_non_default_checks;
 $all = 1 if $list_checks;
 
 my $root = $ENV{'DDS_ROOT'} || dirname(dirname(dirname(abs_path(__FILE__))));
-my $root_len = length($root);
+# Make sure root has / at the end to make string ops eaiser.
+$root =~ s@(?<!/)$@/@;
+push(@includes, "$root");
+my $root_re = quotemeta($root);
+
 my $ace_root = $ENV{'ACE_ROOT'};
 if (not $listing_checks and !defined $ace_root) {
   my @possible_ace_roots = (
@@ -148,28 +209,32 @@ if (not $listing_checks and !defined $ace_root) {
     }
   }
   if ($ace and !defined $ace_root) {
-    warning("ACE_ROOT wasn't defined and we couldn't find ACE on our own, so not running " .
-      "ACE's fuzz.pl. Pass --no-ace to silence this warning.");
+    print_warning("ACE_ROOT wasn't defined and we couldn't find ACE on our own, " .
+      "so not running ACE's fuzz.pl. Pass --no-ace to silence this warning.");
     $ace = 0;
   }
 }
 
-if (scalar(@paths) == 0) {
+if (scalar(@paths) == 0 && scalar(@ext_paths) == 0) {
   push(@paths, $root);
 }
 else {
   my @full_paths;
   foreach my $path (@paths) {
     my $full_path = catfile($root, $path);
-    die("${\ERROR} $path does not exist in DDS_ROOT") if (not -e $full_path);
+    die("${\error()} $path does not exist in DDS_ROOT") if (not -e $full_path);
     push(@full_paths, $full_path);
   }
   @paths = @full_paths;
 }
 
+foreach my $path (@ext_paths) {
+  push(@paths, $path);
+}
+
 sub is_elf_file {
   my $full_filename = shift;
-  open(my $fd, $full_filename) or die("${\ERROR} Could not open $full_filename: $!");
+  open(my $fd, $full_filename) or die("${\error()} Could not open $full_filename: $!");
   binmode($fd);
   my $is_elf = 0;
   my $b;
@@ -182,7 +247,7 @@ sub is_elf_file {
 
 sub is_empty_file {
   my $full_filename = shift;
-  open(my $fd, $full_filename) or die("${\ERROR} Could not open $full_filename: $!");
+  open(my $fd, $full_filename) or die("${\error()} Could not open $full_filename: $!");
   binmode($fd);
   my $b;
   my $eof = read($fd, $b, 1) == 0;
@@ -291,6 +356,22 @@ sub valid_include_guard_names {
   $x =~ s/([a-z])([A-Z])/$1_$2/g;
   push(@list, $x);
   return map {'OPENDDS_' . uc($_)} @list;
+}
+
+sub startswith {
+  my $str = shift;
+  my $prefix = shift;
+  return rindex($str, $prefix, 0) == 0;
+}
+
+sub match_prefix_get_suffix {
+  my $str = shift;
+  my $prefix = shift;
+  my $suffix;
+  if (startswith($str, $prefix)) {
+    $suffix = substr($str, length($prefix));
+  }
+  return $suffix;
 }
 
 # <name> => {
@@ -512,7 +593,7 @@ my %all_checks = (
       my @lines;
       my $ifndef = '';
       my $fixed = 0;
-      open(my $fd, $full_filename) or die("${\ERROR} $filename: $!");;
+      open(my $fd, $full_filename) or die("${\error()} $filename: $!");
       while (my $line = <$fd>) {
         if (length($ifndef)) {
           if ($line =~ /^#(\s*)define (\w+)$/) {
@@ -554,12 +635,67 @@ my %all_checks = (
         if ($fixed) {
           write_for_fix($filename, $full_filename, 'missing_include_guard', \@lines);
         } else {
-          warning("Tried to fix include guard for $filename, but it doesn't have " .
-            "an existing include guard to modify");
+          print_warning("Tried to fix include guard for $filename, but it " .
+            "doesn't have an existing include guard to modify");
         }
       }
       return 1;
     }
+  },
+
+  'nonrelative_include_path' => {
+    message => [
+      'Path for include is non-relative when it should be relative',
+    ],
+    can_fix => 1,
+    path_matches_all_of => ['preprocessor_file'],
+    file_matches => sub {
+      my $filename = shift;
+      my $full_filename = shift;
+      my $line_numbers = shift;
+      my ($vol, $dir, $file) = File::Spec->splitpath($full_filename);
+
+      my @included_in = ();
+      foreach my $include_path (@includes) {
+        my $suffix = match_prefix_get_suffix($dir, $include_path);
+        if (defined($suffix)) {
+          $suffix =~ s@^/@@;
+          push(@included_in, $suffix);
+        }
+      }
+
+      my $failed = 0;
+      my @lines = ();
+      open(my $fd, $full_filename);
+      while (my $line = <$fd>) {
+        my $line_failed = 0;
+        if ($line =~ /^(\s*#\s*include\s*(?:\/\*\s*\*\/\s*)?)["<]([^"]*)[">](.*)$/) {
+          my $before = $1;
+          my $what = $2;
+          my $after = $3;
+          foreach my $find (@included_in) {
+            my $suffix = match_prefix_get_suffix($what, $find);
+            if (defined($suffix)) {
+              $failed = 1;
+              $line_failed = 1;
+              push(@{${$line_numbers}}, $.);
+              if ($fix) {
+                push(@lines, "$before\"$suffix\"$after\n");
+              }
+            }
+          }
+        }
+        if ($fix && !$line_failed) {
+          push(@lines, $line);
+        }
+      }
+      close($fd);
+      if ($failed && $fix) {
+        write_for_fix($filename, $full_filename, 'nonrelative_include_path', \@lines);
+      }
+
+      return $failed;
+    },
   },
 );
 
@@ -598,8 +734,8 @@ sub write_for_fix {
   my $check = shift;
   my $lines = shift;
 
-  note("writing fixed version of $filename for $check");
-  open(my $fd, '>', $full_filename) or die("${\ERROR} $filename: $!");
+  print_note("writing fixed version of $filename for $check");
+  open(my $fd, '>', $full_filename) or die("${\error()} $filename: $!");
   foreach my $line (@{$lines}) {
     print $fd $line;
   }
@@ -625,6 +761,11 @@ if ($all) {
 }
 elsif (scalar(@ARGV)) {
   @checks = @ARGV;
+  foreach my $name (@checks) {
+    if (!exists $all_checks{$name}) {
+      die("${\error()} Invalid check: $name");
+    }
+  }
 }
 else { # Default
   foreach my $name (keys(%all_checks)) {
@@ -635,6 +776,7 @@ else { # Default
     push(@checks, $name);
   }
 }
+@checks = sort(@checks);
 
 if ($listing_checks) {
   foreach my $name (@checks) {
@@ -701,14 +843,14 @@ sub process_path_condition {
   }
 
   if ($path_condition_expr !~ /^(\!)?(\w+)$/) {
-    die("${\ERROR} Invalid path condition: $path_condition_expr");
+    die("${\error()} Invalid path condition: $path_condition_expr");
   }
 
   my $invert = $1;
   my $path_condition = $2;
 
   if (!defined $path_conditions{$path_condition}) {
-    die("${\ERROR} Invalid path condition: $path_condition_expr");
+    die("${\error()} Invalid path condition: $path_condition_expr");
   }
 
   $ref_type = ref($path_conditions{$path_condition});
@@ -724,7 +866,7 @@ sub process_path_condition {
       $filename, $full_filename, $path_conditions{$path_condition});
   }
   else {
-    die("${\ERROR} Invalid type for $path_condition: $ref_type");
+    die("${\error()} Invalid type for $path_condition: $ref_type");
   }
 
   if ($invert) {
@@ -748,7 +890,7 @@ sub check_lint_config {
   $lint_config =~ s/^\///g;
   print("Config: $lint_config\n") if $debug;
 
-  open(my $fd, $full_lint_config) or die("${\ERROR} Could not open $full_lint_config $!");
+  open(my $fd, $full_lint_config) or die("${\error()} Could not open $full_lint_config $!");
   while (my $line = <$fd>) {
     $line =~ s/\n$//g;
     $line =~ s/#.*$//g;
@@ -768,7 +910,7 @@ sub check_lint_config {
             last;
           }
           if (!exists($all_checks{$check})) {
-            die("${\ERROR} $full_lint_config:$.: Invalid check: \"$check\"");
+            die("${\error()} $full_lint_config:$.: Invalid check: \"$check\"");
           }
           push(@{$checks_to_ignore}, $check);
         }
@@ -799,13 +941,13 @@ sub check_lint_config {
         }
       }
       else {
-        die("${\ERROR} $full_lint_config:$.: Unexpected word: \"$what\"");
+        die("${\error()} $full_lint_config:$.: Unexpected word: \"$what\"");
       }
     }
     else {
-      die("${\ERROR} $full_lint_config:$.: Unexpected word: \"$what\"");
+      die("${\error()} $full_lint_config:$.: Unexpected word: \"$what\"");
     }
-    die("${\ERROR} $full_lint_config:$.: Leftover words") if (scalar(@parts));
+    die("${\error()} $full_lint_config:$.: Leftover words") if (scalar(@parts));
   }
   close($fd);
 
@@ -814,7 +956,8 @@ sub check_lint_config {
 
 sub process_directory {
   my $full_dir_path = $File::Find::dir;
-  my $dir_path = substr($full_dir_path, $root_len);
+  my $dir_path = $full_dir_path;
+  $dir_path =~ s/$root_re//;
   my @dir_contents = sort(@_);
 
   print("process_directory: $dir_path\n") if($debug);
@@ -842,9 +985,8 @@ my $opendds_checks_failed = 0;
 my %checks_map = map {$_ => 1} @checks;
 sub process_path {
   my $full_filename = $_;
-  $full_filename = shift if (!defined $full_filename); # Needed for direct invoke for some reason...
-  my $filename = substr($full_filename, $root_len);
-  $filename =~ s/^\///g;
+  my $filename = $full_filename;
+  $filename =~ s/$root_re//;
 
   print("process_path: $filename\n") if ($debug);
 
@@ -968,7 +1110,7 @@ sub process_path {
         $check_sub = $all_checks{$check}->{line_matches};
       }
       else {
-        die("${\ERROR} Invalid line_matches type for $check: $type");
+        die("${\error()} Invalid line_matches type for $check: $type");
       }
 
       # TODO: Read each file just once for line_matches checks
@@ -990,7 +1132,7 @@ sub process_path {
             $line_numbers{$check} = [$.];
           }
           if (length $marked_line) {
-            error("$filename:$.: $marked_line");
+            print_error("$filename:$.: $marked_line");
             if ($fix_file && defined($fixed_line)) {
               push(@lines, $fixed_line);
               $added_line = 1;
@@ -998,14 +1140,14 @@ sub process_path {
           }
         }
         elsif (!$line_failed and $expect_failure) {
-          die "${\ERROR} $filename:$.: $check was expected to fail on this line";
+          die "${\error()} $filename:$.: $check was expected to fail on this line";
         }
         $expect_failure = 0;
 
         if ($line =~ /lint\.pl ignores (\w+(?: \w+)*) on next line/) {
           foreach my $skip_check_name (split(/ /, $1)) {
             if (!defined $all_checks{$skip_check_name}) {
-              die "${\ERROR} $full_filename:$.: $skip_check_name is not a valid check";
+              die "${\error()} $full_filename:$.: $skip_check_name is not a valid check";
             }
             if ($skip_check_name eq $check) {
               $expect_failure = 1;
@@ -1039,11 +1181,11 @@ sub process_path {
         if (defined $line_numbers{$check}) {
           if (scalar @{$line_numbers{$check}}) {
             foreach my $ln (@{$line_numbers{$check}}) {
-              error("$filename:$ln failed $check check");
+              print_error("$filename:$ln failed $check check");
             }
           }
           else {
-            error("$filename failed $check check");
+            print_error("$filename failed $check check");
           }
         }
       }
@@ -1052,7 +1194,7 @@ sub process_path {
       print "$filename\n";
     }
     else {
-      error("$filename has failed the following checks:");
+      print_error("$filename has failed the following checks:");
       foreach my $check (@checks_for_this_file) {
         if (defined $line_numbers{$check}) {
           print_check($check, *STDERR);
@@ -1100,7 +1242,7 @@ sub process_path {
   }
 }
 
-note("Running OpenDDS Lint Checks: " . join(' ', @checks));
+print_note("Running OpenDDS Lint Checks: " . join(' ', @checks));
 
 foreach my $path (@paths) {
   find({
@@ -1127,7 +1269,7 @@ if ($ace) {
     @ace_args = ('-t', $tests);
   }
   my $ace_args = join(' ', @ace_args);
-  note("Running ACE Lint Checks: " . $ace_args);
+  print_note("Running ACE Lint Checks: " . $ace_args);
   $ace_result = system(catfile($ENV{'ACE_ROOT'}, 'bin', 'fuzz.pl') . ' ' .  $ace_args) >> 8;
 }
 
