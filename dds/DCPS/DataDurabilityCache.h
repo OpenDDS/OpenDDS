@@ -16,11 +16,11 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/DurabilityArray.h"
-#include "dds/DCPS/DurabilityQueue.h"
-#include "dds/DCPS/FileSystemStorage.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/unique_ptr.h"
+#include "DurabilityArray.h"
+#include "DurabilityQueue.h"
+#include "FileSystemStorage.h"
+#include "PoolAllocator.h"
+#include "unique_ptr.h"
 
 
 #include "ace/Hash_Map_With_Allocator_T.h"

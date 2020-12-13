@@ -26,8 +26,8 @@
 #include "GroupRakeData.h"
 #include "MultiTopicDataReaderBase.h"
 #include "Util.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
+#include "transport/framework/DataLinkSet.h"
 #include "DCPS_Utils.h"
 
 #include "tao/debug.h"

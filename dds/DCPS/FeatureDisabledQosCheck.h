@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_FEATURE_DISABLED_QOS_CHECK_H
 #define OPENDDS_DCPS_FEATURE_DISABLED_QOS_CHECK_H
 
-#include "dds/DCPS/Qos_Helper.h"
+#include "Qos_Helper.h"
 
 #ifdef  OPENDDS_NO_OWNERSHIP_PROFILE
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value) \

@@ -8,8 +8,8 @@
 #ifndef OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
 #define OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/security/framework/SecurityPluginInst.h"
+#include "DdsSecurity_Export.h"
+#include "framework/SecurityPluginInst.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

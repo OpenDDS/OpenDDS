@@ -5,9 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tools/dissector/packet-opendds.h"
-#include "tools/dissector/packet-repo.h"
-#include "tools/dissector/sample_manager.h"
+#include "packet-opendds.h"
+#include "packet-repo.h"
+#include "sample_manager.h"
 
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Serializer.h"

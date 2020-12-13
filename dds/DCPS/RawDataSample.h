@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_RAWDATASAMPLE_H
 #define OPENDDS_DCPS_RAWDATASAMPLE_H
 
-#include "dds/DCPS/DataSampleHeader.h"
+#include "DataSampleHeader.h"
 
 #include "ace/Basic_Types.h"
 

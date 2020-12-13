@@ -7,7 +7,7 @@
 #define OPENDDS_DCPS_SECURITY_UTILITYIMPL_H
 
 #include "DdsSecurity_Export.h"
-#include "dds/DCPS/security/Utility.h"
+#include "Utility.h"
 
 #include "dds/Versioned_Namespace.h"
 

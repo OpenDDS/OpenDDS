@@ -1,7 +1,7 @@
 #ifndef OPENDDS_FACE_STRINGMANAGER_HEADER
 #define OPENDDS_FACE_STRINGMANAGER_HEADER
 
-#include "FACE/types.hpp"
+#include "types.hpp"
 #include "dds/DCPS/Definitions.h"
 
 #include <cstring>

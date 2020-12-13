@@ -16,8 +16,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "PoolAllocator.h"
+#include "SafetyProfileStreams.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

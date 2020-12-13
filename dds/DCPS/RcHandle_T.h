@@ -7,7 +7,7 @@
 #define OPENDDS_DCPS_RCHANDLE_T_H
 
 #include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/Definitions.h"
+#include "Definitions.h"
 #include "unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

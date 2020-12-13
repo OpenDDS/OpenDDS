@@ -12,7 +12,7 @@
 #include "ace/Thread_Mutex.h"
 #include "ace/Containers_T.h"
 #include "dcps_export.h"
-#include "dds/DCPS/PoolAllocationBase.h"
+#include "PoolAllocationBase.h"
 
 /**
  * @class DataBlockLockPool

@@ -12,8 +12,8 @@
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
-#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl"
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl"
+#include "DataWriterRemote.idl"
+#include "DataReaderRemote.idl"
 
 module OpenDDS {
   module DCPS {

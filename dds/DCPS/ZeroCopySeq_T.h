@@ -14,8 +14,8 @@
 
 #include /**/ "ace/pre.h"
 
-#include "dds/DCPS/ZeroCopySeqBase.h"
-#include "dds/DCPS/ZeroCopyAllocator_T.h"
+#include "ZeroCopySeqBase.h"
+#include "ZeroCopyAllocator_T.h"
 #include <ace/Vector_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -219,11 +219,11 @@ private:
 TAO_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
-#include "dds/DCPS/ZeroCopySeq_T.inl"
+#include "ZeroCopySeq_T.inl"
 #endif /* __ACE_INLINE__ */
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
-#include "dds/DCPS/ZeroCopySeq_T.cpp"
+#include "ZeroCopySeq_T.cpp"
 #endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
 #if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)

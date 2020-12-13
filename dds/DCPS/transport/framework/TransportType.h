@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/transport/framework/TransportInst.h"
+#include "TransportInst.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Synch_Traits.h"

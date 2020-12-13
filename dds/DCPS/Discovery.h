@@ -15,13 +15,13 @@
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
 
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/DataWriterCallbacks.h"
-#include "dds/DCPS/TopicCallbacks.h"
+#include "DataReaderCallbacks.h"
+#include "DataWriterCallbacks.h"
+#include "TopicCallbacks.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/PoolAllocationBase.h"
+#include "PoolAllocator.h"
+#include "PoolAllocationBase.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"

@@ -31,6 +31,6 @@ public:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include "dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.cpp"
+#include "QOS_PubSub_T.cpp"
 
 #endif /* QOS_PUBSUB_T_H_ */

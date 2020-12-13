@@ -4,7 +4,7 @@
 * Distributed under the OpenDDS License.
 * See: http://www.OpenDDS.org/license.html
 */
-#include "dds/DCPS/security/TokenWriter.h"
+#include "TokenWriter.h"
 #include <cstring>
 #include <sstream>
 

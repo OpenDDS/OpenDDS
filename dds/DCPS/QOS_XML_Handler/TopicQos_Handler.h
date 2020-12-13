@@ -8,7 +8,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include "dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h"
+#include "XML_QOS_Handler_Export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

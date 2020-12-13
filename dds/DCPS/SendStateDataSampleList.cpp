@@ -11,7 +11,7 @@
 #include "Definitions.h"
 #include "PublicationInstance.h"
 
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
+#include "transport/framework/TransportSendListener.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SendStateDataSampleList.inl"

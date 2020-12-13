@@ -10,7 +10,7 @@
 
 #include "ace/Configuration.h"
 #include "dcps_export.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 #include <sstream>
 #include <cstdlib>

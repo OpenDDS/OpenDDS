@@ -10,7 +10,7 @@
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
-#include "dds/DCPS/MultiTopicDataReaderBase.h"
+#include "MultiTopicDataReaderBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -187,7 +187,7 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef ACE_TEMPLATES_REQUIRE_SOURCE
-#include "dds/DCPS/MultiTopicDataReader_T.cpp"
+#include "MultiTopicDataReader_T.cpp"
 #endif
 
 #endif

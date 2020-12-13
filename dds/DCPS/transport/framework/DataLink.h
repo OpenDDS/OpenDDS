@@ -23,7 +23,7 @@
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "QueueTaskBase_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/TimeTypes.h"
 

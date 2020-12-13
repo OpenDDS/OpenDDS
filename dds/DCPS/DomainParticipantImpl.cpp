@@ -24,13 +24,13 @@
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "transport/framework/TransportRegistry.h"
+#include "transport/framework/TransportExceptions.h"
 
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
-#include "dds/DCPS/security/framework/SecurityConfig.h"
-#include "dds/DCPS/security/framework/Properties.h"
+#include "security/framework/SecurityRegistry.h"
+#include "security/framework/SecurityConfig.h"
+#include "security/framework/Properties.h"
 #endif
 
 #include "RecorderImpl.h"

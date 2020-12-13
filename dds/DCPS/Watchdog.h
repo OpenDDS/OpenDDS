@@ -14,8 +14,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/TimeDuration.h"
+#include "ReactorInterceptor.h"
+#include "TimeDuration.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -8,6 +8,6 @@
 #ifndef OPENDDS_DDSDCPS_IDL
 #define OPENDDS_DDSDCPS_IDL
 
-#include "dds/DdsDcpsDomain.idl"
+#include "DdsDcpsDomain.idl"
 
 #endif /* OPENDDS_DCPS_IDL */

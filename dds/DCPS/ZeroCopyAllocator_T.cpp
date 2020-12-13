@@ -12,10 +12,10 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/ZeroCopyAllocator_T.h"
+#include "ZeroCopyAllocator_T.h"
 
 #if !defined (__ACE_INLINE__)
-#include "dds/DCPS/ZeroCopyAllocator_T.inl"
+#include "ZeroCopyAllocator_T.inl"
 #endif /* __//ACE_INLINE__ */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

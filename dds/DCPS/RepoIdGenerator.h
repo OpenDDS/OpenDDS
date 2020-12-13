@@ -13,7 +13,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsGuidC.h"
 
-#include "dds/DCPS/GuidUtils.h"
+#include "GuidUtils.h"
 
 #include "dcps_export.h"
 

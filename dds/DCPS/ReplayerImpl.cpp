@@ -32,10 +32,10 @@
 
 #include "Util.h"
 
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "transport/framework/TransportSendElement.h"
+#include "transport/framework/TransportCustomizedElement.h"
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"

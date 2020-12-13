@@ -20,9 +20,9 @@ extern "C" {
 #include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
-#include "tools/dissector/dissector_export.h"
-#include "tools/dissector/giop_base.h"
-#include "tools/dissector/ws_common.h"
+#include "dissector_export.h"
+#include "giop_base.h"
+#include "ws_common.h"
 
 #include "ace/Synch.h"
 #include "ace/Hash_Map_Manager.h"

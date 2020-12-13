@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_INFOREPODISCOVERY_DATAWRITERREMOTEIMPL_H
 #define OPENDDS_DCPS_INFOREPODISCOVERY_DATAWRITERREMOTEIMPL_H
 
-#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteS.h"
+#include "DataWriterRemoteS.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/DataWriterCallbacks.h"

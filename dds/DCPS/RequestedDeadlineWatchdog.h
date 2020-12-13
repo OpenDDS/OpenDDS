@@ -14,8 +14,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/Watchdog.h"
-#include "dds/DCPS/SubscriptionInstance.h"
+#include "Watchdog.h"
+#include "SubscriptionInstance.h"
 
 #include "ace/Reverse_Lock_T.h"
 

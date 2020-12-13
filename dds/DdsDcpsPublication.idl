@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DDSDCPSPUBLICATION_IDL
 #define OPENDDS_DDSDCPSPUBLICATION_IDL
 
-#include "dds/DdsDcpsInfrastructure.idl"
+#include "DdsDcpsInfrastructure.idl"
 
 #pragma ciao lem "dds/DdsDcpsPublicationE.idl"
 

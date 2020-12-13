@@ -17,7 +17,7 @@
 
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h"
+#include "XML_QOS_Handler_Export.h"
 
 namespace XML
 {

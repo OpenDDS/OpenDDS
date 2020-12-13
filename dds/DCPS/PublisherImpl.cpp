@@ -17,9 +17,9 @@
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/DataLinkSet.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
 #include "tao/debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

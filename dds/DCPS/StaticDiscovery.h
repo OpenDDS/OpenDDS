@@ -8,17 +8,17 @@
 
 #include "dcps_export.h"
 
-#include "dds/DCPS/WaitSet.h"
-#include "dds/DCPS/DiscoveryBase.h"
+#include "WaitSet.h"
+#include "DiscoveryBase.h"
 
 #ifdef DDS_HAS_MINIMUM_BIT
-#include "dds/DCPS/DataReaderImpl_T.h"
-#include "dds/DCPS/DataWriterImpl_T.h"
+#include "DataReaderImpl_T.h"
+#include "DataWriterImpl_T.h"
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 #include "ace/Configuration.h"
 
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

@@ -22,7 +22,7 @@
 
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
+#include "SecurityConfigPropertyList.h"
 
 #include "ace/Synch_Traits.h"
 

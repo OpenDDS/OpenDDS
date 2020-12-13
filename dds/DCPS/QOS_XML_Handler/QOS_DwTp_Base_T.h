@@ -36,6 +36,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include "dds/DCPS/QOS_XML_Handler/QOS_DwTp_Base_T.cpp"
+#include "QOS_DwTp_Base_T.cpp"
 
 #endif /* QOS_DWTP_BASE_T_H_ */

@@ -11,7 +11,7 @@
 #include <ace/Unbounded_Queue.h>
 
 #include <algorithm>
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

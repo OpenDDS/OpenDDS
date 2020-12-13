@@ -72,11 +72,11 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
-#include "dds/DCPS/ZeroCopyAllocator_T.inl"
+#include "ZeroCopyAllocator_T.inl"
 #endif /* __ACE_INLINE__ */
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
-#include "dds/DCPS/ZeroCopyAllocator_T.cpp"
+#include "ZeroCopyAllocator_T.cpp"
 #endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
 #if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)

@@ -15,9 +15,9 @@
 #include "GuidUtils.h"
 
 #include "dcps_export.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "Definitions.h"
+#include "SafetyProfileStreams.h"
+#include "PoolAllocator.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -10,7 +10,7 @@
 #ifndef OPENDDS_DCPS_SECURITY_AUTHENTICATIONBUILTINIMPL_H
 #define OPENDDS_DCPS_SECURITY_AUTHENTICATIONBUILTINIMPL_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
+#include "DdsSecurity_Export.h"
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"

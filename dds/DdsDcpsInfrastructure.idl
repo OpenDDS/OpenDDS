@@ -8,8 +8,8 @@
 #ifndef OPENDDS_DDSDCPSINFRASTRUCTURE_IDL
 #define OPENDDS_DDSDCPSINFRASTRUCTURE_IDL
 
-#include "dds/DdsDcpsCore.idl"
-#include "dds/DdsDcpsConditionSeq.idl"
+#include "DdsDcpsCore.idl"
+#include "DdsDcpsConditionSeq.idl"
 
 #define DOMAINID_TYPE_NATIVE long
 #define HANDLE_NIL_NATIVE 0

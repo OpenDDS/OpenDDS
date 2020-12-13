@@ -17,9 +17,9 @@ extern "C" {
 #include <dds/Version.h>
 #include "dissector_export.h"
 
-#include "tools/dissector/packet-opendds.h"
-#include "tools/dissector/packet-repo.h"
-#include "tools/dissector/packet-datawriter.h"
+#include "packet-opendds.h"
+#include "packet-repo.h"
+#include "packet-datawriter.h"
 
 #include <fstream>
 

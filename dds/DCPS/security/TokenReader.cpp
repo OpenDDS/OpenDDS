@@ -5,7 +5,7 @@
 * See: http://www.OpenDDS.org/license.html
 */
 
-#include "dds/DCPS/security/TokenReader.h"
+#include "TokenReader.h"
 #include "dds/DCPS/SequenceIterator.h"
 #include <algorithm>
 

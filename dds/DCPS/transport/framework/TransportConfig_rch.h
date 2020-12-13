@@ -14,7 +14,7 @@
 #endif
 
 #include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/transport/framework/TransportConfig.h"
+#include "TransportConfig.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

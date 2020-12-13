@@ -7,7 +7,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "EntityImpl.h"
 #include "StatusConditionImpl.h"
-#include "dds/DCPS/transport/framework/TransportConfig.h"
+#include "transport/framework/TransportConfig.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

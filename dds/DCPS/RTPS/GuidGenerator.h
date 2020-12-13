@@ -13,7 +13,7 @@
 
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/RTPS/rtps_export.h"
+#include "rtps_export.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/Thread_Mutex.h"

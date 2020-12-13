@@ -27,6 +27,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include "dds/DCPS/QOS_XML_Handler/QOS_DataReader_T.cpp"
+#include "QOS_DataReader_T.cpp"
 
 #endif /* QOS_DATAREADER_T_H_ */

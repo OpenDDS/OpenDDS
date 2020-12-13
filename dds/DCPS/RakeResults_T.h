@@ -116,7 +116,7 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
-#include "dds/DCPS/RakeResults_T.cpp"
+#include "RakeResults_T.cpp"
 #endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
 #include /**/ "ace/post.h"

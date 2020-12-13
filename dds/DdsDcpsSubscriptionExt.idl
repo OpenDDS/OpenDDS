@@ -10,8 +10,8 @@
 
 // OpenDDS extensions to the DDS Subscription Module
 
-#include "dds/DdsDcpsSubscription.idl"
-#include "dds/DdsDcpsGuid.idl"
+#include "DdsDcpsSubscription.idl"
+#include "DdsDcpsGuid.idl"
 
 module OpenDDS
 {

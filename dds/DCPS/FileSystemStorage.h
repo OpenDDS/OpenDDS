@@ -10,9 +10,9 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/RcObject.h"
+#include "dcps_export.h"
+#include "RcHandle_T.h"
+#include "RcObject.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/SString.h"
@@ -23,7 +23,7 @@ class ACE_Dirent;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include <iosfwd>
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 #include <iterator>
 

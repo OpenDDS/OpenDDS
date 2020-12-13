@@ -9,7 +9,7 @@
 #include "dds/Versioned_Namespace.h"
 #include "ace/Atomic_Op.h"
 #include "ace/Synch_Traits.h"
-#include "dds/DCPS/PoolAllocationBase.h"
+#include "PoolAllocationBase.h"
 #include "RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

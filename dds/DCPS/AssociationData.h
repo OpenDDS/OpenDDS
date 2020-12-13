@@ -9,8 +9,8 @@
 #define OPENDDS_DCPS_ASSOCIATIONDATA_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "transport/framework/NetworkAddress.h"
+#include "transport/framework/TransportDefs.h"
 #include "ace/INET_Addr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

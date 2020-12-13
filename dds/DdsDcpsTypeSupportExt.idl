@@ -6,9 +6,9 @@
 #ifndef OPENDDS_DDSDCPSTYPESUPPORTEXT_IDL
 #define OPENDDS_DDSDCPSTYPESUPPORTEXT_IDL
 
-#include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
+#include "DdsDcpsTopic.idl"
+#include "DdsDcpsPublication.idl"
+#include "DdsDcpsSubscription.idl"
 
 
 module OpenDDS {
