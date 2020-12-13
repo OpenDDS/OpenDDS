@@ -24,6 +24,7 @@
 #include "FooTypeTypeSupportImpl.h"
 
 #include "tests/Utils/StatusMatching.h"
+#include <string>
 
 ParticipantTask::ParticipantTask(std::size_t samples_per_thread,
                                  bool durable)
@@ -39,10 +40,9 @@ ParticipantTask::~ParticipantTask()
 int
 ParticipantTask::svc()
 {
+  std::string pfx("%T pub");
   try
   {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PUBLISHER STARTED\n")));
-
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     DDS::DomainParticipant_var participant;
     DDS::Publisher_var publisher;
@@ -54,6 +54,9 @@ ParticipantTask::svc()
       GuardType guard(lock_);
 
       this_thread_index = thread_index_++;
+      char pub_i[8];
+      ACE_OS::snprintf(pub_i, 8, "%d", this_thread_index);
+      pfx += pub_i;
 
       // Create Participant
       participant =
@@ -73,9 +76,7 @@ ParticipantTask::svc()
         // The 2 is a safety factor to allow for control messages.
         ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
 
-        ACE_DEBUG((LM_INFO,
-          "(%P|%t)    -> PUBLISHER %d creating transport config %C\n",
-          this_thread_index, config_name));
+        ACE_DEBUG((LM_INFO, (pfx + "->transport %C\n").c_str(), config_name));
         OpenDDS::DCPS::TransportConfig_rch config =
           TheTransportRegistry->create_config(config_name);
         OpenDDS::DCPS::TransportInst_rch inst =
@@ -162,13 +163,11 @@ ParticipantTask::svc()
 
     const bool wait_early = durable_ ? rand() % 2 == 0 : true;
 
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d is %C\n", this_thread_index, OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+    ACE_DEBUG((LM_INFO, (pfx + "  %C\n").c_str(), OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
     if (wait_early) {
-      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
-
+      ACE_DEBUG((LM_INFO, (pfx + "->wait_match() early\n").c_str()));
       Utils::wait_match(writer, 1);
-
-      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+      ACE_DEBUG((LM_INFO, (pfx + "<-match found! early\n").c_str()));
     }
 
     writer_i = FooDataWriter::_narrow(writer);
@@ -182,8 +181,8 @@ ParticipantTask::svc()
     // pathways related to publication; we should be especially dull
     // and write only one sample at a time per writer.
 
-    ProgressIndicator progress("(%P|%t)       PUBLISHER %d%% (%d samples sent)\n",
-                               samples_per_thread_);
+    const std::string fmt(pfx + "  %d%% (%d samples sent)\n");
+    ProgressIndicator progress(fmt.c_str(), samples_per_thread_);
 
     for (std::size_t i = 0; i < samples_per_thread_; ++i)
     {
@@ -202,28 +201,22 @@ ParticipantTask::svc()
     }
 
     if (!wait_early) {
-      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
-
+      ACE_DEBUG((LM_INFO, (pfx + "->wait_match()\n").c_str()));
       Utils::wait_match(writer, 1);
-
-      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+      ACE_DEBUG((LM_INFO, (pfx + "<-match found!\n").c_str()));
     }
 
     DDS::Duration_t interval = { 30, 0 };
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for acknowledgments\n", this_thread_index));
+    ACE_DEBUG((LM_INFO, (pfx + "  waiting for acks\n").c_str()));
     if (DDS::RETCODE_OK != writer->wait_for_acknowledgments(interval)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P:%t) ERROR: svc() - ")
-        ACE_TEXT("timed out waiting for acks!\n")
-      ), 1);
+      ACE_ERROR_RETURN((LM_ERROR, (pfx + " ERROR: timed out waiting for acks!\n").c_str()), 1);
     }
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d DEL CONT ENTITIES\n"), this_thread_index));
+    ACE_DEBUG((LM_INFO, (pfx + "<-delete_contained_entities\n").c_str()));
     participant->delete_contained_entities();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d DELETE PARTICIPANT\n"), this_thread_index));
+    ACE_DEBUG((LM_INFO, (pfx + "<-delete_participant\n").c_str()));
     dpf->delete_participant(participant.in());
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d VARS GOING OUT OF SCOPE\n"), this_thread_index));
   }
   catch (const CORBA::Exception& e)
   {
@@ -231,7 +224,6 @@ ParticipantTask::svc()
     return 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- PARTICIPANT FINISHED\n")));
-
+  ACE_DEBUG((LM_INFO, (pfx + "<-done\n").c_str()));
   return 0;
 }

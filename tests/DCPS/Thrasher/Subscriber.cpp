@@ -72,7 +72,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> SUBSCRIBER STARTED\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("%D(%t) Subscriber started\n")));
 
     // Create Participant
     DDS::DomainParticipant_var participant =
@@ -118,9 +118,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT(" create_topic failed!\n")), 6);
 
       // Create DataReader
-      ProgressIndicator progress =
-        ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
-                          expected_samples);
+      ProgressIndicator progress("%T(%t) sub %d%% (%d samples received)\n", expected_samples);
 
       DataReaderListenerImpl* listener_p = new DataReaderListenerImpl(received_samples, progress);
       DDS::DataReaderListener_var listener = listener_p;
@@ -149,21 +147,22 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       OpenDDS::DCPS::DataReaderImpl* impl =
         dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
-      ACE_DEBUG((LM_INFO, "(%P|%t)    SUBSCRIBER is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+      ACE_DEBUG((LM_INFO, "%T(%t) sub is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
 
       Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
       listener_p->wait_received(OpenDDS::DCPS::TimeDuration(280, 0), expected_samples);
-      Utils::wait_match(reader, 0);
+      int w = Utils::wait_match(reader, 0);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub wait_match(reader, 0) == %d\n"), w));
 
       for (size_t x = 0; x < n_publishers; ++x) {
         OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->task_sample_set_map.find(x);
         if (xit == listener_p->task_sample_set_map.end()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: MISSING ALL SAMPLES FROM PUBLISHER %d\n"), x));
+          ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) ERROR: missing all samples from pub%d\n"), x));
           break;
         }
         for (size_t y = 0; y < expected_samples / n_publishers; ++y) {
           if (xit->second.count(y) == 0) {
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: PUBLISHER %d MISSING SAMPLE %d\n"), x, y));
+            ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) ERROR: missing pub%d sample%d\n"), x, y));
           }
         }
     }
@@ -171,14 +170,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     } // End scope for contained entities
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER PARTICIPANT DEL CONT ENTITIES\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub delete_contained_entities\n")));
     participant->delete_contained_entities();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER DELETE PARTICIPANT\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub delete_participant\n")));
     dpf->delete_participant(participant.in());
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER SHUTDOWN\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub shutdown\n")));
     TheServiceParticipant->shutdown();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER VARS GOING OUT OF SCOPE\n")));
   }
   catch (const CORBA::Exception& e)
   {
@@ -186,17 +184,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     return 9;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- SUBSCRIBER FINISHED\n")));
-
   if (received_samples != expected_samples) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) ERROR: subscriber - ")
-      ACE_TEXT("received %d of expected %d samples.\n"),
-      received_samples,
-      expected_samples
-    ));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T(%t) ERROR: sub received %d of expected %d samples.\n"),
+      received_samples, expected_samples));
     return 10;
   }
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) Subscriber done\n")));
   return 0;
 }

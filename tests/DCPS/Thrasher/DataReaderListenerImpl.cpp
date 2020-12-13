@@ -87,10 +87,12 @@ DataReaderListenerImpl::on_sample_lost(
 bool
 DataReaderListenerImpl::wait_received(const OpenDDS::DCPS::TimeDuration& duration, size_t target)
 {
+  ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub->wait received_samples %d\n"), received_samples_));
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   const OpenDDS::DCPS::MonotonicTimePoint deadline(OpenDDS::DCPS::MonotonicTimePoint::now() + duration);
   while (received_samples_ < target && OpenDDS::DCPS::MonotonicTimePoint::now() < deadline) {
     condition_.wait(&deadline.value());
   }
+  ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub<-wait received_samples %d\n"), received_samples_));
   return received_samples_ >= target;
 }
