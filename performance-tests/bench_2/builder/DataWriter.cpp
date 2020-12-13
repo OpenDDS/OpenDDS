@@ -112,7 +112,9 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   }
 }
 
-DataWriter::~DataWriter() {
+DataWriter::~DataWriter()
+{
+  detach_listener();
   Log::log() << "Deleting datawriter: " << name_ << std::endl;
   if (!CORBA::is_nil(datawriter_.in())) {
     if (publisher_->delete_datawriter(datawriter_) != DDS::RETCODE_OK) {
@@ -121,7 +123,8 @@ DataWriter::~DataWriter() {
   }
 }
 
-bool DataWriter::enable(bool throw_on_error) {
+bool DataWriter::enable(bool throw_on_error)
+{
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
   }
@@ -134,16 +137,17 @@ bool DataWriter::enable(bool throw_on_error) {
   return result;
 }
 
-void DataWriter::detach_listener() {
+void DataWriter::detach_listener()
+{
   if (listener_) {
-    DataWriterListener* savvy_listener_ = dynamic_cast<DataWriterListener*>(listener_.in());
-    if (savvy_listener_) {
-      savvy_listener_->unset_datawriter(*this);
+    DataWriterListener* savvy_listener = dynamic_cast<DataWriterListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_datawriter(*this);
     }
     if (datawriter_) {
-      datawriter_->set_listener(DDS::DataWriterListener::_nil(), 0);
+      datawriter_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
     }
-    listener_ = DDS::DataWriterListener::_nil();
+    listener_ = 0;
   }
 }
 

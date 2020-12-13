@@ -28,7 +28,8 @@ public:
   using listener_factory = std::function<Listener_var(const Builder::PropertySeq&)>;
   using listener_factory_map = std::map<std::string, listener_factory>;
 
-  static bool register_listener_factory(const std::string& name, const listener_factory& factory) {
+  static bool register_listener_factory(const std::string& name, const listener_factory& factory)
+  {
     std::unique_lock<std::mutex> lock(s_mutex);
     bool result = false;
 
@@ -40,7 +41,8 @@ public:
     return result;
   }
 
-  static Listener_var create_listener(const std::string& name) {
+  static Listener_var create_listener(const std::string& name)
+  {
     std::unique_lock<std::mutex> lock(s_mutex);
     Listener_var result = Listener::_nil();
 
@@ -51,7 +53,8 @@ public:
     return result;
   }
 
-  static Listener_var create_listener(const std::string& name, const Builder::PropertySeq& properties) {
+  static Listener_var create_listener(const std::string& name, const Builder::PropertySeq& properties)
+  {
     std::unique_lock<std::mutex> lock(s_mutex);
     Listener_var result = Listener::_nil();
 
@@ -64,7 +67,8 @@ public:
 
   class Registration {
   public:
-    Registration(const std::string& name, const listener_factory& factory) {
+    Registration(const std::string& name, const listener_factory& factory)
+    {
       Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
       if (!register_listener_factory(name, factory)) {
         std::stringstream ss;

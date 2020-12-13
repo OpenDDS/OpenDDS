@@ -21,9 +21,8 @@
 #include <iostream>
 #include <cstdlib>
 
-const int num_messages = 40;
+const size_t num_messages = 40;
 extern bool reliable;
-extern bool wait_for_acks;
 
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
@@ -53,9 +52,6 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'r':
       reliable = true;
-      break;
-    case 'w':
-      wait_for_acks = true;
       break;
     case '?':
     default:

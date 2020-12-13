@@ -238,7 +238,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
 
     ACE_OS::memcpy(&nlen, passive_setup_buffer_.rd_ptr(), sizeof(nlen));
     passive_setup_buffer_.rd_ptr(sizeof(nlen));
-    ACE_UINT32 hlen = ntohl(nlen);
+    const ACE_UINT32 hlen = ntohl(nlen);
     passive_setup_buffer_.size(hlen + 2 * sizeof(nlen));
 
     ACE_UINT32 nprio = 0;
@@ -378,7 +378,6 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   GuardType guard(reconnect_lock_);
   TcpDataLink_rch link = link_;
 
-
   if (!link) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_close() link is null.\n"));
@@ -389,7 +388,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   TcpReceiveStrategy_rch receive_strategy = link->receive_strategy();
   TcpSendStrategy_rch send_strategy = link->send_strategy();
 
-  bool graceful = receive_strategy && receive_strategy->gracefully_disconnected();
+  const bool graceful = receive_strategy && receive_strategy->gracefully_disconnected();
 
   if (send_strategy) {
     if (graceful) {

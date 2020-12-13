@@ -117,7 +117,7 @@ public:
       tid = static_cast<unsigned long>(osx_tid);
     } else {
       tid = 0;
-      ACE_ERROR((LM_ERROR, "(%P|%t) QueueTaskBase::svc: Error getting OSX thread id: %p\n"));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n")));
     }
 #elif !defined (OPENDDS_SAFETY_PROFILE)
     ACE_thread_t tid = thr_id_;

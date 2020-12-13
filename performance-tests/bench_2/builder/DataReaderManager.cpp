@@ -28,4 +28,11 @@ bool DataReaderManager::enable(bool throw_on_error)
   return result;
 }
 
+void DataReaderManager::detach_listeners()
+{
+  for (auto it = datareaders_.begin(); it != datareaders_.end(); ++it) {
+    (*it)->detach_listener();
+  }
+}
+
 }

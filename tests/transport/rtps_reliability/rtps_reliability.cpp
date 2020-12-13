@@ -6,6 +6,8 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
+#include "../RtpsUtils.h"
+
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
@@ -197,8 +199,7 @@ struct TestParticipant: ACE_Event_Handler {
   {
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
-      {prefix[0], prefix[1], prefix[2], prefix[3], prefix[4], prefix[5],
-       prefix[6], prefix[7], prefix[8], prefix[9], prefix[10], prefix[11]}
+      {INITIALIZE_GUID_PREFIX(prefix)}
     };
     std::memcpy(&hdr_, &hdr, sizeof(Header));
     for (CORBA::ULong i = 0; i < FRAG_SIZE; ++i) {
@@ -355,34 +356,16 @@ struct TestParticipant: ACE_Event_Handler {
 
   bool send_hb(const OpenDDS::DCPS::EntityId_t& writer,
                const SequenceNumber_t& firstSN, const SequenceNumber_t& lastSN,
-               const ACE_INET_Addr& send_to)
+               const ACE_INET_Addr& send_to, const RepoId& reader = GUID_UNKNOWN)
   {
-#ifdef __SUNPRO_CC
-    HeartBeatSubmessage hb;
-    hb.smHeader.submessageId = HEARTBEAT;
-    hb.smHeader.flags = FLAG_E;
-    hb.smHeader.submessageLength = 0;
-    hb.readerId = ENTITYID_UNKNOWN;
-    hb.writerId = writer;
-    hb.firstSN = firstSN;
-    hb.lastSN = lastSN;
-    hb.count.value = ++heartbeat_count_;
-#else
-    const HeartBeatSubmessage hb = {
-      {HEARTBEAT, FLAG_E, 0},
-      ENTITYID_UNKNOWN, writer, firstSN, lastSN, {++heartbeat_count_}
-    };
-#endif
-    size_t size = 0;
-    serialized_size(encoding, size, hdr_);
-    serialized_size(encoding, size, hb);
-    ACE_Message_Block mb(size);
-    Serializer ser(&mb, encoding);
-    if (!(ser << hdr_ && ser << hb)) {
+    const Message_Block_Ptr mb(buildHeartbeat(writer, hdr_,
+                                              std::make_pair(firstSN, lastSN),
+                                              heartbeat_count_, reader));
+    if (!mb) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize heartbeat\n"));
       return false;
     }
-    return send(mb, send_to);
+    return send(*mb, send_to);
   }
 
   bool send_hbfrag(const OpenDDS::DCPS::EntityId_t& writer,
@@ -865,6 +848,10 @@ bool run_test()
 
   TestParticipant part1(part1_sock, reader1.guidPrefix, reader1.entityId);
   SequenceNumber_t first_seq = {0, 1}, seq = first_seq;
+  if (!part1.send_hb(writer1.entityId, seq, seq, part2_addr, reader2)) {
+    return false;
+  }
+
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
     return false;
   }

@@ -147,6 +147,7 @@ private:
     RTPS::VendorId_t source_vendor_;
     GuidPrefix_t source_guid_prefix_;
     GuidPrefix_t dest_guid_prefix_;
+    bool directed_;
     DCPS::LocatorSeq unicast_reply_locator_list_;
     DCPS::LocatorSeq multicast_reply_locator_list_;
     bool have_timestamp_;

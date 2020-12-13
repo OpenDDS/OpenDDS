@@ -19,6 +19,7 @@
 #include "TransportConfig.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ConfigUtils.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -64,6 +65,7 @@ public:
   /// transport implementation (if one was started) and therefore should only
   /// be attempted after DDS Entities using this transport have been deleted.
   void remove_inst(const TransportInst_rch& inst);
+  void remove_inst(const OPENDDS_STRING& inst_name);
 
   static const char DEFAULT_CONFIG_NAME[];
   static const char DEFAULT_INST_PREFIX[];
@@ -71,6 +73,9 @@ public:
   TransportConfig_rch create_config(const OPENDDS_STRING& name);
   TransportConfig_rch get_config(const OPENDDS_STRING& name) const;
   void remove_config(const TransportConfig_rch& cfg);
+  void remove_config(const OPENDDS_STRING& config_name);
+
+  void remove_transport_template_instance(const OPENDDS_STRING& config_name);
 
   TransportConfig_rch global_config() const;
   void global_config(const TransportConfig_rch& cfg);
@@ -126,7 +131,10 @@ public:
 
   OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
 
-  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name);
+  // the new config and instance names are returned by reference.
+  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& transport_config_name, OPENDDS_STRING& transport_instance_name);
+
+  void update_config_template_instance_info(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -139,6 +147,7 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) InstMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) LibDirectiveMap;
   typedef OPENDDS_MAP(DDS::DomainId_t, TransportConfig_rch) DomainConfigMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) ConfigTemplateToInstanceMap;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -148,6 +157,7 @@ private:
   InstMap inst_map_;
   LibDirectiveMap lib_directive_map_;
   DomainConfigMap domain_default_config_map_;
+  ConfigTemplateToInstanceMap config_template_to_instance_map;
 
   TransportConfig_rch global_config_;
   bool released_;

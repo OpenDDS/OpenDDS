@@ -314,6 +314,8 @@ module OpenDDS
   // DomainIds used by the implementation will be larger than this constant:
   const ::DDS::DomainId_t MAX_USER_DOMAINID = 0x7fffffff;
 
+  const ::DDS::DomainId_t DOMAIN_UNKNOWN = -1;
+
   module DCPS
   {
     const DDS::StatusMask ALL_STATUS_MASK = 0xffffffff;
