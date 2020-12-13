@@ -21,7 +21,7 @@ inline OpenDDS::RTPS::SequenceNumber_t toSN(unsigned int n)
   return sn;
 }
 
-inline OpenDDS::DCPS::Message_Block_Ptr
+inline ACE_Message_Block*
 buildHeartbeat(const OpenDDS::DCPS::EntityId_t& writer, const OpenDDS::RTPS::Header& header,
                const SequencePair& sequenceRange, int& count,
                const OpenDDS::DCPS::RepoId& reader = OpenDDS::DCPS::GUID_UNKNOWN)
@@ -50,5 +50,5 @@ buildHeartbeat(const OpenDDS::DCPS::EntityId_t& writer, const OpenDDS::RTPS::Hea
   if (!ok) {
     mb.reset();
   }
-  return mb;
+  return mb.release();
 }
