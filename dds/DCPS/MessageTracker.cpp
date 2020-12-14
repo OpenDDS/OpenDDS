@@ -30,10 +30,7 @@ MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 bool
 MessageTracker::pending_messages()
 {
-  if (sent_count_ > delivered_count_ + dropped_count_) {
-    return true;
-  }
-  return false;
+  return sent_count_ > delivered_count_ + dropped_count_;
 }
 
 void
