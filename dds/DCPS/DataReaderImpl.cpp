@@ -374,7 +374,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     if (!participant)
       return;
 
-    DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
 
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.

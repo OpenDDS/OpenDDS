@@ -25,7 +25,6 @@ Args::Args()
  , domain_(0)
  , topic_name_("OD_OA_OM_OD")
  , reliable_(false)
- , wait_for_acks_(false)
  , num_messages_(DEFAULT_NUM_MESSAGES)
  , expected_result_(0)
  , timeout_(0)
@@ -124,9 +123,6 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
       break;
     case 'r':
       args.reliable_ = true;
-      break;
-    case 'w':
-      args.wait_for_acks_ = true;
       break;
     case '?':
     default:

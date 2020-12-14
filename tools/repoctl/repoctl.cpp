@@ -102,7 +102,7 @@ public:
 
   virtual ~Options() { }
 
-  /// Access the commmand line invocation name.
+  /// Access the command line invocation name.
   const std::string& name() const {
     return this->name_;
   }

@@ -52,6 +52,10 @@ public:
 
   virtual DDS::InstanceHandle_t get_instance_handle() = 0;
 
+  virtual DDS::DomainId_t get_domain_id() { return DOMAIN_UNKNOWN; }
+
+  virtual RepoId get_id() const { return GUID_UNKNOWN; }
+
   void set_status_changed_flag(DDS::StatusKind status,
                                bool status_changed_flag);
 

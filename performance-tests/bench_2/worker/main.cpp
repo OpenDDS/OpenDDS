@@ -1,6 +1,9 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include <ace/Proactor.h>
+#ifdef ACE_HAS_AIO_CALLS
+#include <ace/POSIX_CB_Proactor.h>
+#endif
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -208,20 +211,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   // Disable some Proactor debug chatter to stdout (eventually make this configurable?)
   ACE_Log_Category::ace_lib().priority_mask(0);
 
-  ACE_Proactor proactor;
+#ifdef ACE_HAS_AIO_CALLS
+  Builder::ConstPropertyIndex use_aio_proactor_prop =
+    get_property(config.properties, "use_aio_proactor", Builder::PVK_ULL);
+#endif
+
+  std::shared_ptr<ACE_Proactor> proactor;
+#ifdef ACE_HAS_AIO_CALLS
+  if (use_aio_proactor_prop && use_aio_proactor_prop->value.ull_prop()) {
+    proactor.reset(new ACE_Proactor(new ACE_POSIX_AIOCB_Proactor()));
+  } else {
+#endif
+    proactor.reset(new ACE_Proactor());
+#ifdef ACE_HAS_AIO_CALLS
+  }
+#endif
 
   // Register actions
   Bench::ActionManager::Registration
     write_action_registration("write", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(*proactor));
     });
   Bench::ActionManager::Registration
     forward_action_registration("forward", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(*proactor));
     });
   Bench::ActionManager::Registration
     set_cft_parameters_action_registration("set_cft_parameters", [&]() {
-      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(*proactor));
     });
 
   // Timestamps used to measure method call durations
@@ -240,7 +257,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   const size_t THREAD_POOL_SIZE = 4;
   std::vector<std::shared_ptr<std::thread> > thread_pool;
   for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
-    thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor.proactor_run_event_loop(); }));
+    thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor->proactor_run_event_loop(); }));
   }
 
   try {
@@ -308,7 +325,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
             if (!wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+              Log::log() << "Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
             }
           }
         }
@@ -339,7 +356,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Process tests stopped." << std::endl << std::endl;
 
-    proactor.proactor_end_event_loop();
+    proactor->proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
@@ -356,7 +373,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
-    proactor.proactor_end_event_loop();
+    proactor->proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
@@ -365,7 +382,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return 1;
   } catch (...) {
     std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
-    proactor.proactor_end_event_loop();
+    proactor->proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }

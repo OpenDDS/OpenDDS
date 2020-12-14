@@ -339,7 +339,9 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  DDS::ReturnCode_t wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence);
+  DDS::ReturnCode_t wait_ack_of_seq(const MonotonicTimePoint& abs_deadline,
+                                    bool deadline_is_infinite,
+                                    const SequenceNumber& sequence);
 
   bool sequence_acknowledged(const SequenceNumber sequence);
 

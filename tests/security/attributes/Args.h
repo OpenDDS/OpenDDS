@@ -35,7 +35,6 @@ struct Args {
   std::vector<std::string> partition_;
 
   bool reliable_;
-  bool wait_for_acks_;
 
   int num_messages_;
 

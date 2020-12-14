@@ -210,17 +210,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       std::cerr << "Writer finished " << std::endl;
       writer->end();
 
-      if (my_args.wait_for_acks_) {
-        std::cerr << "Writer wait for ACKS" << std::endl;
-        ACE_Time_Value difference = deadline - ACE_OS::gettimeofday();
-        DDS::Duration_t ack_timeout = {static_cast<CORBA::Long>(difference.sec()), static_cast<CORBA::ULong>(difference.usec() * 1000)};
-        dw->wait_for_acknowledgments(ack_timeout);
-      } else {
-        // let any missed multicast/rtps messages get re-delivered
-        std::cerr << "Writer wait small time" << std::endl;
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
-      }
+      std::cerr << "Writer wait for ACKS" << std::endl;
+      ACE_Time_Value difference = deadline - ACE_OS::gettimeofday();
+      DDS::Duration_t ack_timeout = {static_cast<CORBA::Long>(difference.sec()), static_cast<CORBA::ULong>(difference.usec() * 1000)};
+      dw->wait_for_acknowledgments(ack_timeout);
 
       std::cerr << "deleting DW" << std::endl;
       delete writer;

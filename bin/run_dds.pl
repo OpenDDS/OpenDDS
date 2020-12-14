@@ -162,7 +162,7 @@ print "DDS will execute continuously and not terminate\n"
                                           if $verbose and not $duration;
 print "ProjectRoot==$projectRoot\n"       if $verbose;
 print "RepoHost==$repoHost\n"             if $verbose;
-print scalar(@commmands) . " procspecs==" . join(', ', @commmands) . "\n"
+print scalar(@commands) . " procspecs==" . join(', ', @commands) . "\n"
                                           if $verbose;
 print "Process Statistics will be collected.\n"
                                           if $verbose and $collectStats =~ /p/;
