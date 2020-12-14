@@ -111,7 +111,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
       // found the [transport/*] or [transport_template/*] section,
       // now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
+      if (cf.open_section(root, sect_name.c_str(), false, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("failed to open section %C\n"),
@@ -190,7 +190,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
     } else if (ACE_OS::strcmp(sect_name.c_str(), CONFIG_SECTION_NAME) == 0) {
       // found the [config/*] section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
+      if (cf.open_section(root, sect_name.c_str(), false, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("failed to open section [%C]\n"),
@@ -351,7 +351,7 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key transport_sect;
 
-  if (cf.open_section(root, TRANSPORT_TEMPLATE_SECTION_NAME, 0, transport_sect) != 0) {
+  if (cf.open_section(root, TRANSPORT_TEMPLATE_SECTION_NAME, false, transport_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
@@ -428,7 +428,7 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
           }
 
           ACE_Configuration_Section_Key custom_sect;
-          if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
+          if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, false, custom_sect) == 0) {
             ValueMap vcm;
 
             if (pullValues(cf, custom_sect, vcm) > 0) {
@@ -754,7 +754,7 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   ACE_Configuration_Section_Key sect_key;
 
   ach.open();
-  ach.open_section(ach.root_section(), ACE_TEXT("the_transport_setup"), 1, sect_key);
+  ach.open_section(ach.root_section(), ACE_TEXT("the_transport_setup"), true, sect_key);
 
   if (TheServiceParticipant->belongs_to_domain_range(id) ||
       config_has_transport_template(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()))) {
@@ -877,16 +877,16 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 
       // create config
       ACE_Configuration_Section_Key csect;
-      tcf.open_section(root, ACE_TEXT("config"), 1 /* create */, csect);
+      tcf.open_section(root, ACE_TEXT("config"), true /* create */, csect);
       ACE_Configuration_Section_Key csub_sect;
-      tcf.open_section(csect, ACE_TEXT_CHAR_TO_TCHAR(config_inst_name.c_str()), 1 /* create */, csub_sect);
+      tcf.open_section(csect, ACE_TEXT_CHAR_TO_TCHAR(config_inst_name.c_str()), true /* create */, csub_sect);
       tcf.set_string_value(csub_sect, ACE_TEXT("transports"), ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()));
 
       // create matching transport section
       ACE_Configuration_Section_Key tsect;
-      tcf.open_section(root, ACE_TEXT("transport"), 1 /* create */, tsect);
+      tcf.open_section(root, ACE_TEXT("transport"), true /* create */, tsect);
       ACE_Configuration_Section_Key tsub_sect;
-      tcf.open_section(tsect, ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()), 1 /* create */, tsub_sect);
+      tcf.open_section(tsect, ACE_TEXT_CHAR_TO_TCHAR(transport_inst_name.c_str()), true /* create */, tsub_sect);
 
       ValueMap customs;
 

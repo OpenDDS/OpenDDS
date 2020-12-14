@@ -356,6 +356,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   foo2.ushrtseq()[1] = 11;
   foo2.theString() = "four";
 
+  // Check that all array members are value initialized
+  Xyz::Foo foo;
+  uint8_t oai {};
+  for (const auto& oamember : foo.ooo()) {
+    if (oamember != oai) {
+      ACE_ERROR((LM_ERROR, "OctetArray member not value initialized, %d instead of %d\n", oamember, oai));
+      failed = true;
+    }
+  }
+
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
 
   if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
