@@ -106,13 +106,17 @@ public:
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
 
-  void received(const RTPS::GapSubmessage& gap, const GuidPrefix_t& src_prefix);
+  void received(const RTPS::GapSubmessage& gap,
+                const GuidPrefix_t& src_prefix,
+                bool directed);
 
   void received(const RTPS::HeartBeatSubmessage& heartbeat,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                bool directed);
 
   void received(const RTPS::HeartBeatFragSubmessage& hb_frag,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                bool directed);
 
   void received(const RTPS::AckNackSubmessage& acknack,
                 const GuidPrefix_t& src_prefix);
@@ -296,6 +300,7 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
+    SequenceNumber preassociation_heartbeat_last_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -309,6 +314,7 @@ private:
 
     ReaderInfo(const RepoId& id, bool durable)
       : id_(id)
+      , preassociation_heartbeat_last_(SequenceNumber::ZERO())
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
@@ -413,6 +419,7 @@ private:
                SequenceNumber max_sn, int heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
+    void update_max_sn(SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     void send_delayed_notifications(const TransportQueueElement::MatchCriteria& criteria);
@@ -457,20 +464,22 @@ private:
   struct WriterInfo : RcObject {
     const RepoId id_;
     DisjointSequence recvd_;
-    OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
-    SequenceRange hb_range_;
+    typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
+    HeldMap held_;
+    SequenceNumber hb_last_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
 
     WriterInfo(const RepoId& id)
       : id_(id)
+      , hb_last_(SequenceNumber::ZERO())
       , first_activity_(true)
       , first_valid_hb_(true)
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , nackfrag_count_(0)
-    { hb_range_.second = SequenceNumber::ZERO(); }
+    { }
 
     bool should_nack() const;
   };
@@ -480,23 +489,37 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false), acknack_count_(0) {}
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable)
+      : link_(link)
+      , id_(id)
+      , durable_(durable)
+      , stopping_(false)
+      , acknack_count_(0)
+    {}
 
     bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;
     bool remove_writer(const RepoId& id);
     size_t writer_count() const;
 
-    bool should_nack_durable(const WriterInfo_rch& info);
     bool should_nack_fragments(const RcHandle<RtpsUdpDataLink>& link,
                                const WriterInfo_rch& info);
 
     void pre_stop_helper();
 
-    bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
+                             const RepoId& src,
+                             bool directed,
+                             MetaSubmessageVec& meta_submessages);
     bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, MetaSubmessageVec& meta_submessages);
-    bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src, MetaSubmessageVec& meta_submessages);
-    bool process_heartbeat_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_gap_i(const RTPS::GapSubmessage& gap,
+                       const RepoId& src,
+                       bool directed,
+                       MetaSubmessageVec& meta_submessages);
+    bool process_heartbeat_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
+                                  const RepoId& src,
+                                  bool directed,
+                                  MetaSubmessageVec& meta_submessages);
 
     void gather_preassociation_ack_nacks(MetaSubmessageVec& meta_submessages);
     const RepoId& id() const { return id_; }
@@ -603,7 +626,9 @@ private:
   }
 
   template<typename T, typename FN>
-  void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
+  void datareader_dispatch(const T& submessage,
+                           const GuidPrefix_t& src_prefix,
+                           bool directed,
                            const FN& func)
   {
     RepoId local;
@@ -634,7 +659,7 @@ private:
     MetaSubmessageVec meta_submessages;
     for (OPENDDS_VECTOR(RtpsReader_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
       RtpsReader& reader = **it;
-      schedule_timer |= (reader.*func)(submessage, src, meta_submessages);
+      schedule_timer |= (reader.*func)(submessage, src, directed, meta_submessages);
     }
     send_bundled_submessages(meta_submessages);
     if (schedule_timer) {
