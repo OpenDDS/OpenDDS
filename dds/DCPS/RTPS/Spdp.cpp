@@ -3597,7 +3597,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
 #ifndef DDS_HAS_MINIMUM_BIT
   if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
+               "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }
 
   const DCPS::RepoId guid = outer_->guid();
@@ -3620,7 +3620,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
     } else {
       // Not necessarily and error. App could be shutting down.
       ACE_DEBUG((LM_DEBUG,
-                 "%T (%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
+                 "(%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
     }
   }
 #endif /* DDS_HAS_MINIMUM_BIT */

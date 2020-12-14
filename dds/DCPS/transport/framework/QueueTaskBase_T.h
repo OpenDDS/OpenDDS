@@ -118,7 +118,7 @@ public:
       tid = static_cast<unsigned long>(osx_tid);
     } else {
       tid = 0;
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n")));
     }
 #elif !defined (OPENDDS_SAFETY_PROFILE)
     ACE_thread_t tid = thr_id_;
@@ -154,7 +154,7 @@ public:
                 if (status) {
                   if (DCPS_debug_level > 4) {
                     ACE_DEBUG((LM_DEBUG,
-                              "%T (%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                              "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                   }
                   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
                   status->map[key] = now;

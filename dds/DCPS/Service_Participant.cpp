@@ -20,6 +20,7 @@
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "../Version.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
@@ -36,6 +37,7 @@
 #include <ace/Sched_Params.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_unistd.h>
+#include <ace/Version.h>
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -216,7 +218,7 @@ Service_Participant::~Service_Participant()
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
+               "(%P|%t) Service_Participant::~Service_Participant()\n"));
   }
 }
 
@@ -404,6 +406,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else {
           ACE_OS::fclose(in);
 
+          if (DCPS_debug_level > 1) {
+            ACE_DEBUG((LM_NOTICE,
+                        ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory ")
+                        ACE_TEXT("Going to load configuration from <%s>\n"),
+                        config_fname.c_str()));
+          }
+
           if (this->load_configuration() != 0) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
@@ -417,6 +426,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
+
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - ")
+                   ACE_TEXT("This is OpenDDS %C%C using ACE %C.\n"),
+                   DDS_VERSION, OPENDDS_VERSION_METADATA, ACE_VERSION));
+      }
 
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already
@@ -2119,7 +2135,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       }
 
       ACE_TString cfg_name;
-      if (get_transport_config_name(domainId, cfg_name)) {
+      if (get_transport_base_config_name(domainId, cfg_name)) {
         if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
           // create transport instance add default transport config
           TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
@@ -2211,7 +2227,7 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
 }
 
 bool
-Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
+Service_Participant::get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
 {
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
   if ( it != domain_to_transport_name_map_.end()) {
@@ -2764,13 +2780,13 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
     }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
     }
     network_config_monitor_ = make_rch<NetworkConfigModifier>();
 #endif

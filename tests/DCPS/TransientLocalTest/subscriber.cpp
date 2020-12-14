@@ -113,12 +113,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       cerr << "create_datareader durable success." << endl;
     }
 
-    const int expected = 50;
-    while (listener_servant->num_reads() < expected) {
+    while (listener_servant->durable_reads() < 50 ||
+           listener_servant->volatile_reads() < 10) {
       ACE_OS::sleep(1);
     }
 
-    ok = listener_servant->ok_;
+    ok = listener_servant->ok();
 
     if (!CORBA::is_nil(participant)) {
       participant->delete_contained_entities();
