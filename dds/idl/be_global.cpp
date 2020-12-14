@@ -555,16 +555,16 @@ namespace {
 
         if (filename_only_includes) {
           size_t loc = rel.rfind('/', rel.length());
-		      size_t locw = rel.rfind('\\', rel.length());
+          size_t locw = rel.rfind('\\', rel.length());
 
-		      if (loc != string::npos && locw != string::npos) {
-      			// path may contain both '/' and '\'. choose the last one.
+          if (loc != string::npos && locw != string::npos) {
+            // path may contain both '/' and '\'. choose the last one.
             loc = loc > locw ? loc : locw;
-		      } else if (loc == string::npos) {
-			      loc = locw;
-		      }
+          } else if (loc == string::npos) {
+            loc = locw;
+          }
 
-		      if (loc != string::npos) {
+          if (loc != string::npos) {
             rel = rel.substr(loc + 1, rel.length() - loc);
           }
         }
