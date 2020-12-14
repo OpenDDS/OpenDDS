@@ -651,7 +651,7 @@ DomainParticipantImpl::delete_topic_i(
           return DDS::RETCODE_OK;
         }
       } else {
-        if (DCPS_debug_level >= 1) {
+        if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
             ACE_TEXT("Didn't remove topic from the map, remove_objref %d client_refs %d\n"),
