@@ -371,6 +371,12 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       break;
     }
 
+#ifdef OPENDDS_SECURITY
+    if (!decode_payload(sample, data)) {
+      break;
+    }
+#endif
+
     RepoIdSet directedWriteReaders;
     getDirectedWriteReaders(directedWriteReaders, data);
 
@@ -398,13 +404,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
             this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
         }
-#ifdef OPENDDS_SECURITY
-        if (decode_payload(sample, data)) {
-          link_->data_received(sample, reader);
-        }
-#else
         link_->data_received(sample, reader);
-#endif
       }
     } else {
       if (Transport_debug_level > 5) {
@@ -431,50 +431,38 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       }
 
       if (readers_withheld_.empty() && readers_selected_.empty()) {
-#ifdef OPENDDS_SECURITY
-        if (decode_payload(sample, data)) {
-#endif
-          if (directedWriteReaders.empty()) {
-            if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
-                ACE_TEXT("calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n"),
-                this, sample.header_.sequence_.getValue()));
-            }
-            link_->data_received(sample);
-          } else {
-            if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
-                ACE_TEXT("calling DataLink::data_received_include for seq: %q to directedWriteReaders\n"),
-                this, sample.header_.sequence_.getValue()));
-            }
-            link_->data_received_include(sample, directedWriteReaders);
+        if (directedWriteReaders.empty()) {
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
+              ACE_TEXT("calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n"),
+              this, sample.header_.sequence_.getValue()));
           }
-#ifdef OPENDDS_SECURITY
-        }
-#endif
-      } else {
-#ifdef OPENDDS_SECURITY
-        if (decode_payload(sample, data)) {
-#endif
-          if (directedWriteReaders.empty()) {
-            if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
-                ACE_TEXT("calling DataLink::data_received_include for seq: %q to readers_selected_\n"),
-                this, sample.header_.sequence_.getValue()));
-            }
-            link_->data_received_include(sample, readers_selected_);
-          } else {
-            if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
-                ACE_TEXT("calling DataLink::data_received_include for seq: %q to intersection of readers\n"),
-                this, sample.header_.sequence_.getValue()));
-            }
-            set_intersect(directedWriteReaders, readers_selected_, GUID_tKeyLessThan());
-            link_->data_received_include(sample, directedWriteReaders);
+          link_->data_received(sample);
+        } else {
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
+              ACE_TEXT("calling DataLink::data_received_include for seq: %q to directedWriteReaders\n"),
+              this, sample.header_.sequence_.getValue()));
           }
-#ifdef OPENDDS_SECURITY
+          link_->data_received_include(sample, directedWriteReaders);
         }
-#endif
+     } else {
+        if (directedWriteReaders.empty()) {
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
+              ACE_TEXT("calling DataLink::data_received_include for seq: %q to readers_selected_\n"),
+              this, sample.header_.sequence_.getValue()));
+          }
+          link_->data_received_include(sample, readers_selected_);
+        } else {
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
+              ACE_TEXT("calling DataLink::data_received_include for seq: %q to intersection of readers\n"),
+              this, sample.header_.sequence_.getValue()));
+          }
+          set_intersect(directedWriteReaders, readers_selected_, GUID_tKeyLessThan());
+          link_->data_received_include(sample, directedWriteReaders);
+        }
       }
     }
     break;
