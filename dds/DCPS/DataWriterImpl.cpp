@@ -2003,7 +2003,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.message_id_ = message_id;
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
-  header_data.coherent_change_ = 0;
+  header_data.coherent_change_ = false;
 
   if (data) {
     header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
