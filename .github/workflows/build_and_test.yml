@@ -8,6 +8,12 @@ on:
       - branch-DDS-3.14
       - branch-DDS-3.13
       - gh_workflow
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!README.md'
+      - '!INSTALL.md'
+      - '!NEWS.md'
   pull_request:
     branches:
       - master
@@ -15,6 +21,12 @@ on:
       - branch-DDS-3.14
       - branch-DDS-3.13
       - gh_workflow
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!README.md'
+      - '!INSTALL.md'
+      - '!NEWS.md'
 
 jobs:
 
