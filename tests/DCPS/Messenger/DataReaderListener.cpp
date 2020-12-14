@@ -163,7 +163,7 @@ void DataReaderListenerImpl::on_sample_lost(
 
 bool DataReaderListenerImpl::is_valid() const
 {
-  CORBA::Long expected = 0;
+  size_t expected = 0;
   Counts::const_iterator count = counts_.begin();
   bool valid_count = true;
   while (count != counts_.end() && expected < num_messages) {
