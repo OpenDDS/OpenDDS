@@ -23,10 +23,11 @@ public:
 protected:
   std::mutex mutex_;
   ACE_Proactor& proactor_;
-  bool started_, stopped_;
+  bool started_, stopped_, manual_rescheduling_;
   DataDataWriter_var data_dw_;
   Data data_;
   ACE_Time_Value write_period_;
+  ACE_Time_Value last_scheduled_time_;
   size_t max_count_;
   size_t new_key_count_;
   uint64_t new_key_probability_;

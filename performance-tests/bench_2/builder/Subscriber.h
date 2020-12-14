@@ -11,6 +11,7 @@ public:
   ~Subscriber();
 
   bool enable(bool throw_on_error = false);
+  void detach_listeners();
 
   SubscriberReport& get_report() { return report_; }
   const SubscriberReport& get_report() const { return report_; }

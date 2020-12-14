@@ -1,18 +1,9 @@
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
+#include "ScenarioOverrides.h"
+#include "ScenarioManager.h"
 
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Service_Participant.h>
-
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
+#include <PropertyStatBlock.h>
+#include <util.h>
+#include <json_conversion.h>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -23,13 +14,21 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "PropertyStatBlock.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/Service_Participant.h>
 
-#include <util.h>
-#include <json_conversion.h>
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
-#include "ScenarioOverrides.h"
-#include "ScenarioManager.h"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace Bench;
 using namespace Bench::NodeController;
@@ -225,7 +224,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--overwrite-result"))) {
         overwrite_result = true;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-bench-partition-suffix"))) {
-        overrides.bench_partition_suffix = get_option_argument(i, argc, argv);
+        std::string suffix = get_option_argument(i, argc, argv);
+        overrides.bench_partition_suffix = suffix == "none" ? "" : suffix;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-create-time"))) {
         overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-enable-time"))) {

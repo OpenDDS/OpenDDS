@@ -410,7 +410,7 @@ foreach my $gov_file (@gov_files) {
           $test->{dcps_security_debug} = join(',', qw/
             access_warn auth_warn auth_debug
             encdec_warn encdec_debug
-            bookkeeping
+            bookkeeping new_entity_warn new_entity_error
           /);
         }
 

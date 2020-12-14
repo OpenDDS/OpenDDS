@@ -16,6 +16,8 @@ public:
   ~AppConfig();
 
   const OpenDDS::DCPS::RepoId& getPubWtrId() const { return pubWtrId; }
+
+  size_t nReaders() const { return sizeof subRdrId / sizeof subRdrId[0]; }
   const OpenDDS::DCPS::RepoId& getSubRdrId(int i) const { return subRdrId[i]; }
 
   ACE_INET_Addr getHostAddress() const;
