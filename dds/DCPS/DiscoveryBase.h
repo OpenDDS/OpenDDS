@@ -71,9 +71,6 @@ namespace OpenDDS {
       // Requester and replier should call process handshake
       HANDSHAKE_STATE_PROCESS_HANDSHAKE,
 
-      // Requester is waiting to see a token from replier.
-      HANDSHAKE_STATE_WAITING_FOR_TOKEN,
-
       // Handshake concluded or timed out
       HANDSHAKE_STATE_DONE
     };
