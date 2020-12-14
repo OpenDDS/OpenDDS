@@ -3283,7 +3283,6 @@ Sedp::association_complete_i(const RepoId& localId,
   } else if (remoteId.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER) {
     write_durable_dcps_participant_secure(remoteId);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER) {
-    spdp_.volatile_association_complete(remoteId);
     spdp_.send_participant_crypto_tokens(remoteId);
     send_builtin_crypto_tokens(remoteId);
     resend_user_crypto_tokens(remoteId);
