@@ -614,7 +614,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
         OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
         OPENDDS_STRING transport_config_name;
 
-        if (cfg_name.c_str() != NULL) {
+        if (cfg_name.c_str() != 0) {
           transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
         } else {
           ACE_ERROR((LM_ERROR,
