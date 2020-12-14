@@ -78,7 +78,6 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), this->rcv_buffer_size_, ACE_UINT32);
 
-
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
 
   ACE_TString group_address_s;
@@ -179,6 +178,10 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
   ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.value().msec()) + '\n';
+  ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
+  ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
+  ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';
+
   return ret;
 }
 

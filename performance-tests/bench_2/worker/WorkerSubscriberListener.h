@@ -27,6 +27,7 @@ public:
   // From Builder::SubscriberListener
 
   void set_subscriber(Builder::Subscriber& subscriber) override;
+  void unset_subscriber(Builder::Subscriber& subscriber) override;
 
 protected:
   std::mutex mutex_;

@@ -11,10 +11,13 @@
 #include "TransportInst.h"
 #include "TransportExceptions.h"
 #include "TransportType.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -579,7 +582,86 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
   if (!ei) {
     throw Transport::MiscProblem();
   }
+
+  DDS::DomainId_t domain_id = ei->get_domain_id();
+
+  // if domain is in a domain range and config is a transport template,
+  // get the correct config.
+  if (TheServiceParticipant->belongs_to_domain_range(domain_id)) {
+    bool found = false;
+    for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
+      if (cfg->name() == i->config_name) {
+        found = true;
+        break;
+      }
+    }
+
+    if (found)
+    {
+      ACE_TString cfg_name = ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str());
+      // create if not already created
+      int ret = create_transport_template_instance(domain_id, cfg_name);
+
+      if (ret == 0) {
+        // get guid and create unique name for transport instance
+        GUID_t guid = ei->get_id();
+        if (guid == GUID_UNKNOWN) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
+                     ACE_TEXT("GUID_UNKNOWN. Can not bind entity to a domain template instance.\n")));
+          throw Transport::UnableToCreate();
+        }
+        OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
+        OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
+
+        bool success = create_new_transport_instance_for_participant(domain_id, transport_config_name, transport_inst_name);
+
+        if (success) {
+          // update config
+          TransportConfig_rch new_cfg = get_config(transport_config_name);
+          update_config_template_instance_info(new_cfg->name(), transport_inst_name);
+          ei->transport_config(new_cfg);
+          return;
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
+                     ACE_TEXT("Failed to create new transport template instance.\n")));
+          throw Transport::UnableToCreate();
+        }
+      }
+    }
+  }
+
   ei->transport_config(cfg);
+}
+
+
+void
+TransportRegistry::remove_transport_template_instance(const OPENDDS_STRING& config_name)
+{
+  ConfigTemplateToInstanceMap::iterator i = config_template_to_instance_map.find(config_name);
+  if (i == config_template_to_instance_map.end()) {
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportRegistry::remove_transport_template_instance: ")
+               ACE_TEXT("%C is not a transport template instance.\n"),
+               config_name.c_str()));
+    }
+    return;
+  }
+
+  const OPENDDS_STRING inst_name = i->second;
+  remove_config(config_name);
+  remove_inst(inst_name);
+
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DomainParticipantFactoryImpl::delete_participant ")
+               ACE_TEXT("deleted TransportRegistry's dynamically created config %C and instance %C\n"),
+               config_name.c_str(), inst_name.c_str()));
+  }
+
+  config_template_to_instance_map.erase(i);
 }
 
 
@@ -642,11 +724,11 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
 }
 
 bool
-TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, const ACE_TString& transport_config_name, OPENDDS_STRING& instance_config_name)
+TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& transport_config_name, OPENDDS_STRING& transport_instance_name)
 {
   // check per_participant
   TransportTemplate templ;
-  if(get_transport_template_info(transport_config_name, templ)) {
+  if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()), templ)) {
     if (!templ.instantiate_per_participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
@@ -656,15 +738,17 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
     }
   }
 
-  TransportConfig_rch cfg = get_config(ACE_TEXT_ALWAYS_CHAR(transport_config_name.c_str()));
+  TransportConfig_rch cfg = get_config(transport_config_name);
 
-  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + instance_config_name;
-  instance_config_name = "transport_config_" + instance_config_name;
+  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + transport_instance_name;
+  OPENDDS_STRING config_name = cfg->name() + "_" + transport_instance_name;
 
-  OpenDDS::DCPS::TransportConfig_rch config =
-    TheTransportRegistry->create_config(instance_config_name);
-  OpenDDS::DCPS::TransportInst_rch inst =
-    TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+  // assign new config and inst names
+  transport_config_name = config_name;
+  transport_instance_name = inst_name;
+
+  OpenDDS::DCPS::TransportConfig_rch config = create_config(config_name);
+  OpenDDS::DCPS::TransportInst_rch inst = create_inst(inst_name, "rtps_udp");
 
   ACE_Configuration_Heap ach;
   ACE_Configuration_Section_Key sect_key;
@@ -672,7 +756,8 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   ach.open();
   ach.open_section(ach.root_section(), ACE_TEXT("the_transport_setup"), 1, sect_key);
 
-  if (TheServiceParticipant->belongs_to_domain_range(id) || config_has_transport_template(transport_config_name)) {
+  if (TheServiceParticipant->belongs_to_domain_range(id) ||
+      config_has_transport_template(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()))) {
     TransportTemplate tr_inst;
 
     if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str()), tr_inst)) {
@@ -716,7 +801,14 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 
   inst->load(ach, sect_key);
   config->instances_.push_back(inst);
+
   return true;
+}
+
+void
+TransportRegistry::update_config_template_instance_info(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name)
+{
+  config_template_to_instance_map[config_name] = inst_name;
 }
 
 void
@@ -730,6 +822,7 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
+  config_template_to_instance_map.clear();
   transport_templates_.clear();
   transports_.clear();
   type_map_.clear();
@@ -768,6 +861,12 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
   OPENDDS_STRING transport_inst_name = get_transport_template_instance_name(domain);
   OPENDDS_STRING config_inst_name = get_config_instance_name(domain);
 
+  // has it already been created?
+  ConfigMap::const_iterator i = config_map_.find(config_inst_name);
+  if (i != config_map_.end()) {
+    return 0; // already created
+  }
+
   if (has_transport_templates()) {
     TransportTemplate tr_inst;
 
@@ -794,7 +893,7 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
       if (!process_customizations(domain, tr_inst, customs)) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                          ACE_TEXT("create_new_transport_instance_for_participant ")
+                          ACE_TEXT("create_transport_template_instance ")
                           ACE_TEXT("could not process_customizations\n")),
                          false);
       }
@@ -816,8 +915,8 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
-                          ACE_TEXT("load_discovery_configuration() returned %d\n"),
+                          ACE_TEXT("(%P|%t) ERROR: TransportRegistry::create_transport_template_instance ")
+                          ACE_TEXT("load_transport_configuration() returned %d\n"),
                           status),
                         -1);
       }
@@ -1020,7 +1119,7 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportRegistry::")
-                   ACE_TEXT("create_new_transport_instance_for_participant adding %C=%C\n"),
+                   ACE_TEXT("process_customizations adding %C=%C\n"),
                    it->first.c_str(), it->second.c_str()));
       }
     }

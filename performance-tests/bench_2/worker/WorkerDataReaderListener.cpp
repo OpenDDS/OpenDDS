@@ -93,7 +93,6 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
     DDS::SampleInfo si;
     DDS::ReturnCode_t status = data_dr_->take_next_sample(data, si);
     if (status == DDS::RETCODE_OK && si.valid_data) {
-
       // Calculate the stateless stuff
       const Builder::TimeStamp& now = Builder::get_sys_time();
       double latency = Builder::to_seconds_double(now - data.sent_time);
@@ -187,7 +186,7 @@ WorkerDataReaderListener::on_subscription_matched(
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (expected_match_count_ != 0) {
-    if (static_cast<size_t>(status.current_count) == expected_match_count_) {
+    if (static_cast<size_t>(status.current_count) >= expected_match_count_) {
       expected_match_cv.notify_all();
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
@@ -386,12 +385,13 @@ bool WorkerDataReaderListener::wait_for_expected_match(const std::chrono::system
 {
   std::unique_lock<std::mutex> expected_lock(mutex_);
 
-  while (expected_match_count_ > match_count_) {
+  while (match_count_ < expected_match_count_) {
     if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
-      return match_count_ <= expected_match_count_;
+      return match_count_ >= expected_match_count_;
     }
   }
-  return true;
+
+  return match_count_ >= expected_match_count_;
 }
 
 }

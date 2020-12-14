@@ -1,6 +1,8 @@
 #include "TestMsg.h"
 #include "AppConfig.h"
 
+#include "../RtpsUtils.h"
+
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h"
 
@@ -36,6 +38,12 @@ public:
   }
 
   int run() {
+    for (size_t i = 0; i < config.nReaders(); ++i) {
+      if (!writeHeartbeat(config.getSubRdrId(int(i)))) {
+        return EXIT_FAILURE;
+      }
+    }
+
     bool ret = writeHeartbeat() &&
                writeToSocket(TestMsg(10, "Msg1")) &&
                writeToSocket(TestMsg(10, "Msg2 DirectedWrite"), DEQ) &&
@@ -54,9 +62,6 @@ private:
   static const CORBA::Octet DE  = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E;
   static const CORBA::Octet DEQ = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E | OpenDDS::RTPS::FLAG_Q;
 
-  void force_inline_qos(bool val) {
-    OpenDDS::DCPS::RtpsUdpDataLink::force_inline_qos_ = val;
-  }
   void log_time(const ACE_Time_Value& t) const {
     ACE_TCHAR buffer[32];
     const std::time_t seconds = t.sec();
@@ -65,7 +70,7 @@ private:
     ACE_DEBUG((LM_INFO, ACE_TEXT("Sending with timestamp %C %q usec\n"), ts.c_str(), ACE_INT64(t.usec())));
   }
 
-  bool writeHeartbeat() const;
+  bool writeHeartbeat(const OpenDDS::DCPS::RepoId& reader = GUID_UNKNOWN) const;
   bool writeToSocket(const TestMsg& msg, const CORBA::Octet flags = DE) const;
 
   AppConfig config;
@@ -76,30 +81,16 @@ private:
 
 using namespace OpenDDS::RTPS;
 
-bool DDS_TEST::writeHeartbeat() const
+bool DDS_TEST::writeHeartbeat(const OpenDDS::DCPS::RepoId& reader) const
 {
   const OpenDDS::RTPS::GuidPrefix_t& local_prefix = config.getPubWtrId().guidPrefix;
   const Header hdr = { {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
-    {local_prefix[0], local_prefix[1], local_prefix[2], local_prefix[3],
-     local_prefix[4], local_prefix[5], local_prefix[6], local_prefix[7],
-     local_prefix[8], local_prefix[9], local_prefix[10], local_prefix[11]} };
-  const HeartBeatSubmessage hb = {
-    {HEARTBEAT, 0, HEARTBEAT_SZ},
-    ENTITYID_UNKNOWN, // any matched reader
-    config.getPubWtrId().entityId,
-    {0, 1},
-    {0, msgSeqN},
-    {++heartbeat_count_}
+    {INITIALIZE_GUID_PREFIX(local_prefix)}
   };
-
-  size_t size = 0, padding = 0;
-  gen_find_size(hdr, size, padding);
-  gen_find_size(hb, size, padding);
-
-  ACE_Message_Block mb(size + padding);
-  Serializer ser(&mb, hostIsBigEndian, Serializer::ALIGN_CDR);
-  bool ok = (ser << hdr) && (ser << hb);
-  if (!ok) {
+  Message_Block_Ptr mb(buildHeartbeat(config.getPubWtrId().entityId, hdr,
+                                      std::make_pair(toSN(1), toSN(msgSeqN)),
+                                      heartbeat_count_, reader));
+  if (!mb) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to serialize RTPS heartbeat:%m\n")), false);
   }
 
@@ -111,7 +102,7 @@ bool DDS_TEST::writeHeartbeat() const
 
   ACE_INET_Addr dest;
   locator_to_address(dest, locators[0], local_addr.get_type() != AF_INET);
-  ssize_t res = sock.send(mb.rd_ptr(), mb.length(), dest);
+  ssize_t res = sock.send(mb->rd_ptr(), mb->length(), dest);
   if (res < 0) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in sock.send()%m\n")), false);
   } else {

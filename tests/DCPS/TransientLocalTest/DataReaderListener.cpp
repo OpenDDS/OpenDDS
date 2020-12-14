@@ -11,9 +11,12 @@ using namespace Messenger;
 using namespace std;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : ok_(true), num_reads_(0), last_non_durable_(0)
+  : durable_reads_(0)
+  , volatile_reads_(0)
+  , last_volatile_(0)
+  , ok_(true)
 {
-  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl[%@]\n", this));
+  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl[%@]\n", this));
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl ()
@@ -39,19 +42,23 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
-        if (durable) ++num_reads_;
+        if (durable) {
+          ++durable_reads_;
+        } else {
+          ++volatile_reads_;
+        }
 
         ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl[%@]::on_data_available - %C count = %d\n", this,
               durable ? "Durable " : "Volatile", message.count));
-        if (durable && (message.count != num_reads_)) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data (msg count = %d and num_reads = %d)\n", message.count, num_reads_));
+        if (durable && (message.count != durable_reads_)) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data (msg count = %d and num_reads = %d)\n", message.count, durable_reads_));
           ok_ = false;
         } else if (!durable) {
-          if (last_non_durable_ && message.count != last_non_durable_ + 1) {
+          if (last_volatile_ && message.count != last_volatile_ + 1) {
             ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: volatile reader received out-of-order data\n"));
             ok_ = false;
           }
-          last_non_durable_ = message.count;
+          last_volatile_ = message.count;
         }
       }
     } else if (status == DDS::RETCODE_NO_DATA) {
@@ -92,7 +99,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
 {
-  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl::on_subscription_matched\n"));
+  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl::on_subscription_matched\n"));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(

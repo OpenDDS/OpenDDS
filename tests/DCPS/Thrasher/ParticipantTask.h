@@ -13,7 +13,8 @@
 class ParticipantTask : public ACE_Task_Base
 {
 public:
-  explicit ParticipantTask(const std::size_t& samples_per_thread);
+  ParticipantTask(std::size_t samples_per_thread,
+                  bool durable);
 
   ~ParticipantTask();
 
@@ -24,7 +25,8 @@ private:
   typedef ACE_Guard<LockType> GuardType;
 
   LockType lock_;
-  const std::size_t& samples_per_thread_;
+  const std::size_t samples_per_thread_;
+  const bool durable_;
   int thread_index_;
 };
 

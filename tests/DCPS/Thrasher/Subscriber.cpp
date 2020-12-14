@@ -28,6 +28,7 @@ namespace
   std::size_t expected_samples = 1024;
   std::size_t received_samples = 0;
   size_t n_publishers = 1;
+  bool durable = false;
 
   void
   parse_args(int& argc, ACE_TCHAR** argv)
@@ -46,6 +47,11 @@ namespace
       else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
       {
         n_publishers = static_cast<size_t>(ACE_OS::atoi(arg));
+        shifter.consume_arg();
+      }
+      else if (ACE_OS::strcmp(shifter.get_current(), ACE_TEXT("-d")) == 0)
+      {
+        durable = true;
         shifter.consume_arg();
       }
       else
@@ -123,6 +129,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       subscriber->get_default_datareader_qos(reader_qos);
 
       reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      if (durable) {
+        reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+      }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #endif

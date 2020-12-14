@@ -1,13 +1,13 @@
 #ifndef STATUS_LISTENER_HEADER
 #define STATUS_LISTENER_HEADER
 
-#include <mutex>
-#include <iostream>
-#include <map>
+#include "BenchTypeSupportImpl.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include "BenchTypeSupportImpl.h"
+#include <mutex>
+#include <iostream>
+#include <map>
 
 typedef std::map<Bench::NodeController::NodeId, Bench::NodeController::Status, OpenDDS::DCPS::GUID_tKeyLessThan> Nodes;
 std::ostream& operator<<(std::ostream& os, const Bench::NodeController::Status& node);
