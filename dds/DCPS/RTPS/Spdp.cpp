@@ -2925,14 +2925,14 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 }
 #endif /* ACE_HAS_IPV6 */
 
-void
+bool
 Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
                                           bool all_interfaces)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer_->lock_, false);
+  bool success = true;
   if (nic.exclude_from_multicast(multicast_interface_.c_str())) {
-    return;
+    return true;
   }
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
@@ -2952,19 +2952,22 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       if (reactor()->register_handler(multicast_socket_.get_handle(),
                                     this, ACE_Event_Handler::READ_MASK) != 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast input handler\n")));
-        return;
+        return false;
       }
 
       write_i(SEND_TO_LOCAL);
     } else {
+      success = false;
       ACE_TCHAR buff[256];
       multicast_address_.addr_to_string(buff, 256);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
-                 buff,
-                 all_interfaces ? "all interfaces" : nic.name().c_str(),
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::join_multicast_group() - ")
+                   ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
+                   buff,
+                   all_interfaces ? "all interfaces" : nic.name().c_str(),
+                   ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      }
     }
   }
 
@@ -2989,19 +2992,22 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       if (reactor()->register_handler(multicast_ipv6_socket_.get_handle(),
                                     this, ACE_Event_Handler::READ_MASK) != 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast ipv6 input handler\n")));
-        return;
+        return false;
       }
 
       write_i(SEND_TO_LOCAL);
     } else {
+      success = false;
       ACE_TCHAR buff[256];
       multicast_ipv6_address_.addr_to_string(buff, 256);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
-                 buff,
-                 all_interfaces ? "all interfaces" : nic.name().c_str(),
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+                   ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
+                   buff,
+                   all_interfaces ? "all interfaces" : nic.name().c_str(),
+                   ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      }
     }
   }
 #endif
