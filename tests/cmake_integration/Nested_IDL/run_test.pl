@@ -19,6 +19,10 @@ my $test = new PerlDDS::TestFramework();
 
 my $test_file_name = "ecu";
 
+if ($^O eq "MSWin32") {
+    die if not chdir "Debug";
+}
+
 $test->process("main", $test_file_name, "");
 
 $test->start_process("main");
