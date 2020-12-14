@@ -620,7 +620,7 @@ DomainParticipantImpl::delete_topic_i(
 
       const CORBA::ULong client_refs = --entry->client_refs_;
 
-      if (remove_objref == true || 0 == client_refs) {
+      if (remove_objref || 0 == client_refs) {
         //TBD - mark the TopicImpl as deleted and make it
         //      reject calls to the TopicImpl.
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
