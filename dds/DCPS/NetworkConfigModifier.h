@@ -10,8 +10,6 @@
 
 #include "ace/config.h"
 
-#if defined(ACE_HAS_GETIFADDRS) && !defined(OPENDDS_SAFETY_PROFILE)
-
 #define OPENDDS_NETWORK_CONFIG_MODIFIER
 
 #include "NetworkConfigMonitor.h"
@@ -41,7 +39,5 @@ private:
 } // OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-#endif // ACE_HAS_GETIFADDRS && ! OPENDDS_SAFETY_PROFILE
 
 #endif // OPENDDS_DCPS_NETWORKCONFIGMODIFIER_H

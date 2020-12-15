@@ -135,6 +135,69 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
   return retStr;
 }
 
+jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
+(JNIEnv * jni, jclass)
+{
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = TheServiceParticipant->network_config_modifier();
+  jclass configClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
+  jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
+  return jni->NewObject(configClazz, ctor,
+                        reinterpret_cast<jlong>(ncm));
+}
+
+// NetworkConfigModifier
+
+// NetworkConfigModifier::_jni_fini
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  // Something to do here for cleanup?
+}
+
+// NetworkConfigModifier::add_interface
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_add_1interface
+(JNIEnv * jni, jobject jthis, jstring name)
+{
+  JStringMgr jsm_name(jni, name);
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  ncm->add_interface(jsm_name.c_str());
+}
+
+// NetworkConfigModifier::remove_interface
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_remove_1interface
+(JNIEnv * jni, jobject jthis, jstring name)
+{
+  JStringMgr jsm_name(jni, name);
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  ncm->remove_interface(jsm_name.c_str());
+}
+
+// NetworkConfigModifier::add_address
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_add_1address
+(JNIEnv * jni, jobject jthis, jstring name, jstring address)
+{
+  JStringMgr jsm_name(jni, name);
+  JStringMgr jsm_address(jni, address);
+  ACE_INET_Addr addr;
+  addr.string_to_addr(jsm_address.c_str());
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  ncm->add_address(jsm_name.c_str(), addr);
+}
+
+// NetworkConfigModifier::remove_address
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_remove_1address
+(JNIEnv * jni, jobject jthis, jstring name, jstring address)
+{
+  JStringMgr jsm_name(jni, name);
+  JStringMgr jsm_address(jni, address);
+  ACE_INET_Addr addr;
+  addr.string_to_addr(jsm_address.c_str());
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  ncm->remove_address(jsm_name.c_str(), addr);
+}
+
+
 // Exception translation
 
 #define TRANSPORT_EXCEPTION(NAME)                                       \
