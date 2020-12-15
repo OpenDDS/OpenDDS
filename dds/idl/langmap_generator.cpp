@@ -1474,7 +1474,12 @@ struct Cxx11Generator : GeneratorBase
       }
     } else {
       if (af.cls_ & CL_ARRAY) {
-        initializer = "{{}}";
+        AST_Array* elem = dynamic_cast<AST_Array*>(af.act_);
+        const Classification elem_cls = classify(elem->base_type ());
+        // Only required when we have an array of pod types
+        if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
+          initializer = "{{}}";
+        }
       }
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
