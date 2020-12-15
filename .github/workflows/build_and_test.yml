@@ -36,6 +36,8 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    env:
+      JAVA_HOME: $JAVA_HOME_8_X64
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -87,6 +89,8 @@ jobs:
 
     needs: ubuntu-20_04_defaults_artifact
 
+    env:
+      JAVA_HOME: $JAVA_HOME_8_X64
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -178,7 +182,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -191,6 +195,8 @@ jobs:
 
     needs: ubuntu-20_04_defaults_artifact
 
+    env:
+      JAVA_HOME: $JAVA_HOME_8_X64
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -309,7 +315,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -464,7 +470,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -595,7 +601,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -750,7 +756,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -881,7 +887,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1074,7 +1080,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1194,7 +1200,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1387,7 +1393,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1507,7 +1513,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1538,7 +1544,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
-        ref: 61338c7 # Update to 6_5_13 when available
+        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
         path: OpenDDS/ACE_TAO
     - name: configure OpenDDS
       run: |
@@ -1590,7 +1596,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
-        ref: 61338c7 # Update to 6_5_13 when available
+        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
         path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -1664,7 +1670,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1695,7 +1701,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
-        ref: 61338c7 # Update to 6_5_13 when available
+        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
         path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -1796,7 +1802,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1953,7 +1959,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -2085,7 +2091,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v1.1.1
+      uses: simpsont-oci/action-junit-report@1.1.2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
