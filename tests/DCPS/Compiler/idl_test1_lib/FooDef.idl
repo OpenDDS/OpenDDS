@@ -40,6 +40,11 @@ module Xyz {
   typedef short ArrayOfShorts[5];
 
   typedef short ArrayOfShorts2[3];
+  typedef short MultiDimArrayOfShorts[2][3][4];
+
+  struct StructOfMultiDimArrayOfShorts {
+    MultiDimArrayOfShorts mds;
+  };
 
   typedef string MultiDimArray[2][3][4][5];
 
@@ -54,6 +59,10 @@ module Xyz {
 
   // +4
   enum ColorX { redx, greenx, bluex, yellowx };
+  typedef ColorX ArrayOfColorX[5];
+  struct StructofArrayOfColorX {
+    ArrayOfColorX x1;
+  };
 
   const ColorX c15 = greenx;
 
