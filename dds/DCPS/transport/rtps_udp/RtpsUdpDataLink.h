@@ -147,6 +147,7 @@ public:
   bool associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
+                  ACE_CDR::ULong remote_context,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
 
@@ -470,8 +471,9 @@ private:
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
+    ACE_CDR::ULong participant_flags_;
 
-    WriterInfo(const RepoId& id)
+    WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
       : id_(id)
       , hb_last_(SequenceNumber::ZERO())
       , first_activity_(true)
@@ -479,9 +481,11 @@ private:
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , nackfrag_count_(0)
+      , participant_flags_(participant_flags)
     { }
 
     bool should_nack() const;
+    bool sends_directed_hb() const;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
