@@ -1,4 +1,6 @@
 project {
+  requires += googletest
+
   expand(GTEST_ROOT) {
     $GTEST_ROOT
     $(DDS_ROOT)/tests/googletest/build/install
