@@ -97,7 +97,8 @@ public:
   bool shutting_down() { return shutdown_flag_.value(); }
 
   bool associated() const;
-  bool has_discovered_participant(const DCPS::RepoId& guid);
+  bool has_discovered_participant(const DCPS::RepoId& guid) const;
+  ACE_CDR::ULong get_participant_flags(const DCPS::RepoId& guid) const;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }

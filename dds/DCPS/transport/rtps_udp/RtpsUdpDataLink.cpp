@@ -590,6 +590,7 @@ bool
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable,
+                            ACE_CDR::ULong remote_context,
                             SequenceNumber max_sn,
                             const TransportClient_rch& client)
 {
@@ -656,7 +657,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
       add_on_start_callback(client, remote_id);
       g.release();
-      reader->add_writer(make_rch<WriterInfo>(remote_id));
+      reader->add_writer(make_rch<WriterInfo>(remote_id, remote_context));
       associated = false;
       enable_replies = true;
     } else {
@@ -1758,8 +1759,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   // Only valid heartbeats (see spec) will be "fully" applied to writer info
   if (!(hb_first < 1 || hb_last < 0 || hb_last < hb_first.previous())) {
-    // TODO: This check breaks interoperability.
-    if (writer->first_valid_hb_ && directed && heartbeat.readerId == id_.entityId) {
+    if (writer->first_valid_hb_ && (directed || !writer->sends_directed_hb())) {
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
       OPENDDS_ASSERT(writer->recvd_.empty());
 
@@ -1808,6 +1808,11 @@ RtpsUdpDataLink::WriterInfo::should_nack() const
     return recvd_.high() < hb_last_;
   }
   return false;
+}
+
+bool RtpsUdpDataLink::WriterInfo::sends_directed_hb() const
+{
+  return participant_flags_ & RTPS::PFLAGS_DIRECTED_HEARTBEAT;
 }
 
 bool
