@@ -1,0 +1,11 @@
+#ifndef TRANSMISSION_SPECS_IDL
+#define TRANSMISSION_SPECS_IDL
+
+#include "transmission_states.idl"
+
+struct TransmissionStatus {
+    FaultCode fault;
+    GearSelect gear;
+};
+
+#endif /* TRANSMISSIONS_SPECS_IDL */

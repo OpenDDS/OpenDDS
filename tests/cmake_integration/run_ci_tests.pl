@@ -48,7 +48,7 @@ exit 1 if !GetOptions(
     "no-shared" => \$no_shared,
     );
 
-my @dirs = ('Messenger_1', 'Messenger_2');
+my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, 'C++11_Messenger' unless $skip_cxx11;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
