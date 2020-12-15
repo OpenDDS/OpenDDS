@@ -237,6 +237,7 @@ namespace OpenDDS {
         explicit DiscoveredSubscription(const DiscoveredReaderData& r)
         : reader_data_(r)
         , bit_ih_(DDS::HANDLE_NIL)
+        , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
 #endif
@@ -246,6 +247,7 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
+        ACE_CDR::ULong transport_context_;
         XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
@@ -282,6 +284,7 @@ namespace OpenDDS {
         explicit DiscoveredPublication(const DiscoveredWriterData& w)
         : writer_data_(w)
         , bit_ih_(DDS::HANDLE_NIL)
+        , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
 #endif
@@ -291,6 +294,7 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
+        ACE_CDR::ULong transport_context_;
         XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
@@ -797,7 +801,10 @@ namespace OpenDDS {
 
     protected:
       struct LocalEndpoint {
-        LocalEndpoint() : topic_id_(GUID_UNKNOWN), sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+        LocalEndpoint()
+          : topic_id_(GUID_UNKNOWN)
+          , transport_context_(0)
+          , sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 #ifdef OPENDDS_SECURITY
           , have_ice_agent_info(false)
         {
@@ -816,6 +823,7 @@ namespace OpenDDS {
 
         RepoId topic_id_;
         TransportLocatorSeq trans_info_;
+        ACE_CDR::ULong transport_context_;
         RepoIdSet matched_endpoints_;
         SequenceNumber sequence_;
         RepoIdSet remote_expectant_opendds_associations_;
@@ -1221,6 +1229,7 @@ namespace OpenDDS {
         const DDS::DataWriterQos* dwQos = 0;
         const DDS::PublisherQos* pubQos = 0;
         TransportLocatorSeq* wTls = 0;
+        ACE_CDR::ULong wTransportContext = 0;
         XTypes::TypeInformation* writer_type_info = 0;
         OPENDDS_STRING topic_name;
 
@@ -1232,6 +1241,7 @@ namespace OpenDDS {
           dwQos = &lpi->second.qos_;
           pubQos = &lpi->second.publisher_qos_;
           wTls = &lpi->second.trans_info_;
+          wTransportContext = lpi->second.transport_context_;
           already_matched = lpi->second.matched_endpoints_.count(reader);
           writer_type_info = &lpi->second.type_info_;
           topic_name = topic_names_[lpi->second.topic_id_];
@@ -1239,6 +1249,7 @@ namespace OpenDDS {
         } else if ((dpi = discovered_publications_.find(writer))
                    != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
+          wTransportContext = dpi->second.transport_context_;
           writer_type_info = &dpi->second.type_info_;
           topic_name = dpi->second.get_topic_name();
         } else {
@@ -1249,6 +1260,7 @@ namespace OpenDDS {
         const DDS::DataReaderQos* drQos = 0;
         const DDS::SubscriberQos* subQos = 0;
         TransportLocatorSeq* rTls = 0;
+        ACE_CDR::ULong rTransportContext = 0;
         const ContentFilterProperty_t* cfProp = 0;
         XTypes::TypeInformation* reader_type_info = 0;
 
@@ -1260,6 +1272,7 @@ namespace OpenDDS {
           drQos = &lsi->second.qos_;
           subQos = &lsi->second.subscriber_qos_;
           rTls = &lsi->second.trans_info_;
+          rTransportContext = lsi->second.transport_context_;
           reader_type_info = &lsi->second.type_info_;
           if (lsi->second.filterProperties.filterExpression[0] != 0) {
             tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
@@ -1278,6 +1291,7 @@ namespace OpenDDS {
           rTls = &dsi->second.reader_data_.readerProxy.allLocators;
 
           populate_transport_locator_sequence(rTls, dsi, reader);
+          rTransportContext = dsi->second.transport_context_;
 
           const DDS::SubscriptionBuiltinTopicData& bit =
             dsi->second.reader_data_.ddsSubscriptionData;
@@ -1449,23 +1463,25 @@ namespace OpenDDS {
           // Copy reader and writer association data prior to releasing lock
           DDS::OctetSeq octet_seq_type_info_reader;
           XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
-          const ReaderAssociation ra = {
-            add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
+          const ReaderAssociation ra =
+            {add_security_info(*rTls, writer, reader),
+             rTransportContext,
+             reader, *subQos, *drQos,
   #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
             cfProp->filterClassName, cfProp->filterExpression,
   #else
             "", "",
   #endif
             cfProp->expressionParameters,
-            octet_seq_type_info_reader
-          };
+            octet_seq_type_info_reader};
 
           DDS::OctetSeq octet_seq_type_info_writer;
           XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
-          const WriterAssociation wa = {
-            add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos,
-            octet_seq_type_info_writer
-          };
+          const WriterAssociation wa =
+            {add_security_info(*wTls, writer, reader),
+             wTransportContext,
+             writer, *pubQos, *dwQos,
+             octet_seq_type_info_writer};
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           static const bool writer_active = true;
 

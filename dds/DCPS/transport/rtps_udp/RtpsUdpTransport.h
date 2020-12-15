@@ -99,6 +99,7 @@ private:
   bool use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
+                    ACE_CDR::ULong remote_context,
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable,
                     SequenceNumber max_sn,

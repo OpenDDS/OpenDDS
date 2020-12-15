@@ -348,7 +348,7 @@ bool run_test()
       , nonEmptyList /*defaultUnicastLocatorList*/
       , { 0 /*manualLivelinessCount*/ }
       , qos.property
-      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      , {PFLAGS_THIS_VERSION} // opendds_participant_flags
 #ifdef OPENDDS_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif

@@ -377,6 +377,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     AssociationData data;
     data.remote_id_ = writer.writerId;
     data.remote_data_ = writer.writerTransInfo;
+    data.remote_transport_context_ = writer.transportContext;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
     data.remote_reliable_ =

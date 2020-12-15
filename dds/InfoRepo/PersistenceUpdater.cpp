@@ -137,6 +137,7 @@ struct ActorStrt<QosSeq, QosSeq,
   QosSeq            pubsubQos;
   QosSeq            drdwQos;
   BinSeq            transportInterfaceInfo;
+  ACE_CDR::ULong    transportContext;
   BinSeq            serializedTypeInfo;
   ContentSubscriptionBin contentSubscriptionProfile;
 
@@ -146,6 +147,7 @@ struct ActorStrt<QosSeq, QosSeq,
       actorId(actor.actorId),
       topicId(actor.topicId),
       participantId(actor.participantId), type(actor.type)
+    , transportContext(actor.transportContext)
   {
     assign(callback, actor.callback.c_str(), allocator);
 
@@ -552,7 +554,7 @@ PersistenceUpdater::requestImage()
     DActor dActor(actor->domainId, actor->actorId, actor->topicId
                   , actor->participantId
                   , actor->type, actor->callback.c_str()
-                  , pubsub_qos, drdw_qos, in_transport_seq, in_csp_bin
+                  , pubsub_qos, drdw_qos, in_transport_seq, actor->transportContext, in_csp_bin
                   , in_type_info);
     image.actors.push_back(dActor);
   }
@@ -757,7 +759,8 @@ PersistenceUpdater::create(const URActor& actor)
   DActor actor_data(actor.domainId, actor.actorId, actor.topicId
                     , actor.participantId
                     , DataReader, actor.callback.c_str(), pubsub_qos
-                    , dwdr_qos, tr_bin, csp_bin, ti_seq);
+                    , dwdr_qos, tr_bin, actor.transportContext, csp_bin
+                    , ti_seq);
 
   // allocate memory for ActorData
   void* buffer;
@@ -861,7 +864,7 @@ PersistenceUpdater::create(const UWActor& actor)
   DActor actor_data(actor.domainId, actor.actorId, actor.topicId
                     , actor.participantId
                     , DataWriter, actor.callback.c_str(), pubsub_qos
-                    , dwdr_qos, tr_bin, ContentSubscriptionBin()
+                    , dwdr_qos, tr_bin, actor.transportContext, ContentSubscriptionBin()
                     , ti_seq);
 
   // allocate memory for ActorData

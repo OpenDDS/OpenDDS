@@ -47,6 +47,7 @@ public:
                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
                        const DDS::DataReaderQos& qos,
                        const OpenDDS::DCPS::TransportLocatorSeq& info,
+                       ACE_CDR::ULong transportContext,
                        const DDS::SubscriberQos& subscriberQos,
                        const char* filterClassName,
                        const char* filterExpression,
@@ -146,6 +147,7 @@ public:
   bool reevaluate_association(DCPS_IR_Publication* publication);
 
   OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
+  ACE_CDR::ULong get_transportContext() const { return transportContext_; }
 
   /// Return pointer to the incompatible qos status
   /// Subscription retains ownership
@@ -191,6 +193,7 @@ private:
   OpenDDS::DCPS::DataReaderRemote_var reader_;
   DDS::DataReaderQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
+  ACE_CDR::ULong transportContext_;
   DDS::SubscriberQos subscriberQos_;
   std::string filterClassName_;
   std::string filterExpression_;
