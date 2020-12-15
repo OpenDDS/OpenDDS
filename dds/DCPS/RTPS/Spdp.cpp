@@ -3129,10 +3129,10 @@ ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::RepoId& guid) const
 {
   const DiscoveredParticipantMap::const_iterator iter = participants_.find(guid);
   if (iter == participants_.end()) {
-    return 0;
+    return PFLAGS_EMPTY;
   }
   return is_opendds(iter->second.pdata_.participantProxy)
-    ? iter->second.pdata_.participantProxy.opendds_participant_flags.bits : 0;
+    ? iter->second.pdata_.participantProxy.opendds_participant_flags.bits : PFLAGS_EMPTY;
 }
 
 void
