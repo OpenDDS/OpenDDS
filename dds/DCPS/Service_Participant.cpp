@@ -939,7 +939,7 @@ Service_Participant::set_repo_ior(const char* ior,
     ACE_TString section = REPO_SECTION_NAME;
     section += ACE_TEXT('\\');
     section += ACE_TEXT_CHAR_TO_TCHAR(key.c_str());
-    cf.open_section(cf.root_section(), section.c_str(), 1 /*create*/, sect_key);
+    cf.open_section(cf.root_section(), section.c_str(), true /*create*/, sect_key);
     cf.set_string_value(sect_key, ACE_TEXT("RepositoryIor"),
                         ACE_TEXT_CHAR_TO_TCHAR(ior));
 
@@ -1275,7 +1275,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       ACE_Configuration_Heap cf;
       cf.open();
       ACE_Configuration_Section_Key k;
-      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, 1 /*create*/, k);
+      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, true /*create*/, k);
 
       int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
@@ -1595,7 +1595,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
 
-  if (cf.open_section(root, COMMON_SECTION_NAME, 0, sect) != 0) {
+  if (cf.open_section(root, COMMON_SECTION_NAME, false, sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // a common section. The code default configuration will be used.
@@ -1868,7 +1868,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_sect;
 
-  if (cf.open_section(root, DOMAIN_SECTION_NAME, 0, domain_sect) != 0) {
+  if (cf.open_section(root, DOMAIN_SECTION_NAME, false, domain_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain (sub)section. The code default configuration will be used.
@@ -2007,7 +2007,7 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_range_sect;
 
-  if (cf.open_section(root, DOMAIN_RANGE_SECTION_NAME, 0, domain_range_sect) != 0) {
+  if (cf.open_section(root, DOMAIN_RANGE_SECTION_NAME, false, domain_range_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
@@ -2118,9 +2118,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       // create domain instance
       ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, DOMAIN_SECTION_NAME, 1 /* create */, dsect);
+      dcf.open_section(root, DOMAIN_SECTION_NAME, true /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), 1 /* create */, dsub_sect);
+      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), true /* create */, dsub_sect);
       dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
       for (ValueMap::const_iterator it = dr_inst.domain_info.begin();
            it != dr_inst.domain_info.end();
@@ -2160,9 +2160,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       //create matching discovery instance
       ACE_Configuration_Section_Key sect;
-      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      dcf.open_section(root, RTPS_SECTION_NAME, true /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), true, sub_sect);
 
       ValueMap discovery_settings;
       if (process_customizations(domainId, dr_inst.discovery_template_name, discovery_settings)) {
@@ -2247,7 +2247,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
-  if (cf.open_section(root, section_name, 0, sect) == 0) {
+  if (cf.open_section(root, section_name, false, sect) == 0) {
 
     const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
     DiscoveryTypes::iterator iter =
@@ -2289,9 +2289,9 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
 
       //create discovery instance
       ACE_Configuration_Section_Key sect;
-      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      dcf.open_section(root, RTPS_SECTION_NAME, true /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), true, sub_sect);
 
       for (ValueMap::const_iterator ds_it = discovery_settings.begin(); ds_it != discovery_settings.end(); ++ds_it) {
         dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(ds_it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(ds_it->second.c_str()));
@@ -2341,7 +2341,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key rtps_sect;
 
-  if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
+  if (cf.open_section(root, RTPS_SECTION_NAME, false, rtps_sect) == 0) {
     ValueMap vm;
     if (pullValues(cf, rtps_sect, vm) > 0) {
     // There are values inside [rtps_discovery]
@@ -2379,7 +2379,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
             }
 
             ACE_Configuration_Section_Key custom_sect;
-            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
+            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, false, custom_sect) == 0) {
               ValueMap vcm;
               if (pullValues(cf, custom_sect, vcm) > 0) {
                 ACE_ERROR_RETURN((LM_ERROR,

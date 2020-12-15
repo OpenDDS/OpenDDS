@@ -732,7 +732,7 @@ RecorderImpl::remove_all_associations()
   }
 
   try {
-    CORBA::Boolean dont_notify_lost = 0;
+    CORBA::Boolean dont_notify_lost = false;
 
     if (0 < size) {
       remove_associations(writers, dont_notify_lost);

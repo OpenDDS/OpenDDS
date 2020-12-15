@@ -172,7 +172,6 @@ class TreeNode {
 
     /// display for graphviz / qt
     bool display_;
-
 };
 
 } // End of namespace Monitor
@@ -209,7 +208,6 @@ inline
 Monitor::TreeNode::TreeNode(
   const QList<QVariant>& data,
   TreeNode*              parent
-
 ) : data_( data),
     parent_( parent),
     valueSource_( 0),
@@ -365,8 +363,8 @@ void
 Monitor::TreeNode::sort( int column, Qt::SortOrder order)
 {
   CompareByColumn compare( column, order);
-  qStableSort( this->children_.begin(), this->children_.end(), compare);
-  for( int index = 0; index < this->size(); ++index) {
+  std::stable_sort(this->children_.begin(), this->children_.end(), compare);
+  for (int index = 0; index < this->size(); ++index) {
     (*this)[ index]->sort( column, order);
   }
 }
