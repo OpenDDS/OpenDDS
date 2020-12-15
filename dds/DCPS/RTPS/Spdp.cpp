@@ -1872,6 +1872,13 @@ Spdp::fini_bit()
   }
 }
 
+namespace {
+  bool is_opendds(const ParticipantProxy_t& participant)
+  {
+    return 0 == std::memcmp(&participant.vendorId, DCPS::VENDORID_OCI, sizeof(VendorId_t));
+  }
+}
+
 bool
 Spdp::is_expectant_opendds(const GUID_t& participant) const
 {
@@ -1879,9 +1886,8 @@ Spdp::is_expectant_opendds(const GUID_t& participant) const
   if (iter == participants_.end()) {
     return false;
   }
-  const bool is_opendds = 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
-                                           DCPS::VENDORID_OCI, sizeof(VendorId_t));
-  return is_opendds && ((iter->second.pdata_.participantProxy.opendds_participant_flags.bits & RTPS::PFLAGS_NO_ASSOCIATED_WRITERS) == 0);
+  return is_opendds(iter->second.pdata_.participantProxy) &&
+    (iter->second.pdata_.participantProxy.opendds_participant_flags.bits & PFLAGS_NO_ASSOCIATED_WRITERS) == 0;
 }
 
 ParticipantData_t Spdp::build_local_pdata(
@@ -1953,7 +1959,7 @@ ParticipantData_t Spdp::build_local_pdata(
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
       qos_.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS}, // opendds_participant_flags
+      {PFLAGS_THIS_VERSION}, // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
@@ -3114,9 +3120,19 @@ Spdp::associated() const
 }
 
 bool
-Spdp::has_discovered_participant(const DCPS::RepoId& guid)
+Spdp::has_discovered_participant(const DCPS::RepoId& guid) const
 {
   return participants_.find(guid) != participants_.end();
+}
+
+ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::RepoId& guid) const
+{
+  const DiscoveredParticipantMap::const_iterator iter = participants_.find(guid);
+  if (iter == participants_.end()) {
+    return 0;
+  }
+  return is_opendds(iter->second.pdata_.participantProxy)
+    ? iter->second.pdata_.participantProxy.opendds_participant_flags.bits : 0;
 }
 
 void
