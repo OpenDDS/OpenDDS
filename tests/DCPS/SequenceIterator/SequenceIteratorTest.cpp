@@ -1,5 +1,3 @@
-
-#include "gtest/gtest.h"
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/SequenceIterator.h"
 #include <vector>
@@ -7,7 +5,7 @@
 
 using namespace OpenDDS;
 
-TEST(SequenceIteratorTest, Iterator_Concept)
+int Iterator_Concept ()
 {
   DDS::OctetSeq s(1);
   s.length(1);
@@ -22,10 +20,13 @@ TEST(SequenceIteratorTest, Iterator_Concept)
   const CORBA::Octet o = *i1;
   ACE_UNUSED_ARG(o);
   ++i1;
+
+  return 0;
 }
 
-TEST(SequenceIteratorTest, StdCopy_ToVector_Success)
+int StdCopy_ToVector_Success ()
 {
+  int retval = 0;
   DDS::OctetSeq expected;
   expected.length(4);
   expected[0] = 1;
@@ -39,15 +40,28 @@ TEST(SequenceIteratorTest, StdCopy_ToVector_Success)
             DCPS::sequence_end(expected),
             std::back_inserter(result));
 
-  ASSERT_EQ(expected.length(), result.size());
+  if (expected.length() != result.size())
+  {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: StdCopy_FromVector_Success: "
+               "expected %d != result %d\n", expected.length(), result.size ()));
+    ++retval;
+  }
 
   for (CORBA::ULong i = 0; i < expected.length(); ++i) {
-    ASSERT_EQ(expected[i], result[i]);
+    if (expected[i] != result[i])
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: StdCopy_ToVector_Success: "
+                "expected %d != result %d in member %d\n", expected[i], result[i], i));
+      ++retval;
+    }
   }
+
+  return retval;
 }
 
-TEST(SequenceIteratorTest, StdCopy_FromVector_Success)
+int StdCopy_FromVector_Success ()
 {
+  int retval = 0;
   std::vector<CORBA::Octet> expected;
   for (CORBA::Octet i = 0; i < 5; ++i) expected.push_back(i);
 
@@ -57,9 +71,34 @@ TEST(SequenceIteratorTest, StdCopy_FromVector_Success)
             expected.end(),
             DCPS::back_inserter(result));
 
-  ASSERT_EQ(result.length(), expected.size());
+  if (result.length() != expected.size())
+  {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: StdCopy_FromVector_Success: "
+               "result %d != expected %d\n", result.length(), expected.size ()));
+    ++retval;
+  }
 
   for (CORBA::ULong i = 0; i < expected.size(); ++i) {
-    ASSERT_EQ(expected[i], result[i]);
+    if (expected[i] != result[i])
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: StdCopy_FromVector_Success: "
+                "expected %d != result %d in member %d\n", expected[i], result[i], i));
+      ++retval;
+    }
   }
+
+  return retval;
 }
+
+int
+ACE_TMAIN(int, ACE_TCHAR*[])
+{
+  int retval = 0;
+
+  retval += Iterator_Concept ();
+  retval += StdCopy_ToVector_Success ();
+  retval += StdCopy_FromVector_Success ();
+
+  return retval;
+}
+
