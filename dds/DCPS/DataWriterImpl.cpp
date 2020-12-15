@@ -1169,7 +1169,7 @@ DataWriterImpl::assert_liveliness()
     }
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (send_liveliness(MonotonicTimePoint::now()) == false) {
+    if (!send_liveliness(MonotonicTimePoint::now())) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -2382,14 +2382,14 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (send_liveliness(now) == false) {
+      if (!send_liveliness(now)) {
         liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       if (liveliness_asserted_) {
-        if (send_liveliness(now) == false) {
+        if (!send_liveliness(now)) {
           liveliness_lost = true;
         }
       }

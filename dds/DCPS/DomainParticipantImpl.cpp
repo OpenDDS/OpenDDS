@@ -622,7 +622,7 @@ DomainParticipantImpl::delete_topic_i(
 
       --entry->client_refs_;
 
-      if (remove_objref == true ||
+      if (remove_objref ||
           0 == entry->client_refs_) {
         //TBD - mark the TopicImpl as deleted and make it
         //      reject calls to the TopicImpl.
