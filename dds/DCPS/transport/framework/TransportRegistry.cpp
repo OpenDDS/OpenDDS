@@ -612,7 +612,16 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
           throw Transport::UnableToCreate();
         }
         OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
-        OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
+        OPENDDS_STRING transport_config_name;
+
+        if (cfg_name.c_str() != 0) {
+          transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
+                     ACE_TEXT("Config name is null.\n")));
+          throw Transport::UnableToCreate();
+        }
 
         bool success = create_new_transport_instance_for_participant(domain_id, transport_config_name, transport_inst_name);
 
@@ -1104,13 +1113,6 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
                      ACE_TEXT("process_customizations processing add_domain_id_to_port: %C=%C\n"),
                      it->first.c_str(), addr.c_str()));
         }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                          ACE_TEXT("process_customizations ")
-                          ACE_TEXT("No support for %C customization\n"),
-                          idx->second.c_str()),
-                        false);
       }
 
       customs[idx->first] = addr.c_str();
