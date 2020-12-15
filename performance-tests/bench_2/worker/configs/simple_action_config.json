@@ -84,6 +84,9 @@
         },
         { "name": "write_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+        },
+        { "name": "final_wait_for_ack",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.7 }
         }
       ]
     }

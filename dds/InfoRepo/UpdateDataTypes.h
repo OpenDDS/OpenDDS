@@ -135,6 +135,7 @@ struct ActorStrt {
   PSQ          pubsubQos;
   RWQ          drdwQos;
   T            transportInterfaceInfo;
+  ACE_CDR::ULong transportContext;
   CSP          contentSubscriptionProfile;
 
   ActorStrt(
@@ -147,6 +148,7 @@ struct ActorStrt {
     PSQ          pub,
     RWQ          drdw,
     T            trans,
+    ACE_CDR::ULong tContext,
     CSP          csProf)
     : domainId(dom),
       actorId(act),
@@ -157,6 +159,7 @@ struct ActorStrt {
       pubsubQos(pub),
       drdwQos(drdw),
       transportInterfaceInfo(trans),
+      transportContext(tContext),
       contentSubscriptionProfile(csProf)
     { };
 };

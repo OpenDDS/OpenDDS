@@ -125,6 +125,9 @@ public:
   bool no_default_gen() const;
   void no_default_gen(bool b);
 
+  bool filename_only_includes() const;
+  void filename_only_includes(bool b);
+
   bool itl() const;
   void itl(bool b);
 
@@ -211,6 +214,8 @@ private:
   bool java_, suppress_idl_, suppress_typecode_,
     no_default_gen_, generate_itl_, generate_v8_,
     generate_rapidjson_, face_ts_;
+
+  bool filename_only_includes_;
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,

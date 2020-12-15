@@ -116,10 +116,11 @@ ParticipantTask::svc()
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
+    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" register_type failed!\n")), 1);
+    }
 
     // Create Topic (FooTopic)
     DDS::Topic_var topic =
@@ -160,11 +161,9 @@ ParticipantTask::svc()
 
     OpenDDS::DCPS::DataWriterImpl* impl =
       dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
-
-    const bool wait_early = durable_ ? rand() % 2 == 0 : true;
-
     ACE_DEBUG((LM_INFO, (pfx + "  %C\n").c_str(), OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
-    if (wait_early) {
+
+    if (!durable_) {
       ACE_DEBUG((LM_INFO, (pfx + "->wait_match() early\n").c_str()));
       Utils::wait_match(writer, 1);
       ACE_DEBUG((LM_INFO, (pfx + "<-match found! early\n").c_str()));
@@ -184,8 +183,7 @@ ParticipantTask::svc()
     const std::string fmt(pfx + "  %d%% (%d samples sent)\n");
     ProgressIndicator progress(fmt.c_str(), samples_per_thread_);
 
-    for (std::size_t i = 0; i < samples_per_thread_; ++i)
-    {
+    for (std::size_t i = 0; i < samples_per_thread_; ++i) {
       Foo foo;
       foo.key = 3;
       foo.x = (float) this_thread_index;
@@ -200,7 +198,7 @@ ParticipantTask::svc()
       ++progress;
     }
 
-    if (!wait_early) {
+    if (durable_) {
       ACE_DEBUG((LM_INFO, (pfx + "->wait_match()\n").c_str()));
       Utils::wait_match(writer, 1);
       ACE_DEBUG((LM_INFO, (pfx + "<-match found!\n").c_str()));

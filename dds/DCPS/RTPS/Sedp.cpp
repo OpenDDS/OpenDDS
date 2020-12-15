@@ -2047,6 +2047,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
       { // Reduce scope of pub and td
         DiscoveredPublication prepub(wdata);
+        prepub.transport_context_ = spdp_.get_participant_flags(participant_id);
 
 #ifdef OPENDDS_SECURITY
         prepub.have_ice_agent_info_ = have_ice_agent_info;
@@ -2362,6 +2363,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     if (iter == discovered_subscriptions_.end()) { // add new
       { // Reduce scope of sub and td
         DiscoveredSubscription presub(rdata);
+        presub.transport_context_ = spdp_.get_participant_flags(participant_id);
 #ifdef OPENDDS_SECURITY
         presub.have_ice_agent_info_ = have_ice_agent_info;
         presub.ice_agent_info_ = ice_agent_info;
@@ -3069,12 +3071,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
     return;
   }
 
-  if (is_reliable()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
-    sedp_.association_complete_i(repo_id_, remote);
-  } else {
-    sedp_.association_complete_i(repo_id_, remote);
-  }
+  sedp_.association_complete_i(repo_id_, remote);
 }
 
 void
@@ -3949,6 +3946,7 @@ DDS::ReturnCode_t
 Sedp::add_publication_i(const DCPS::RepoId& rid,
                         LocalPublication& pub)
 {
+  pub.transport_context_ = PFLAGS_THIS_VERSION;
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
   if (endpoint) {
@@ -4096,6 +4094,7 @@ DDS::ReturnCode_t
 Sedp::add_subscription_i(const DCPS::RepoId& rid,
                          LocalSubscription& sub)
 {
+  sub.transport_context_ = PFLAGS_THIS_VERSION;
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
   if (endpoint) {
@@ -4378,7 +4377,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
 
       DCPS::TransportLocator tl;
       tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
+      message_block_to_sequence(mb_locator, tl.data);
       wTls->length(1);
       (*wTls)[0] = tl;
     } else {

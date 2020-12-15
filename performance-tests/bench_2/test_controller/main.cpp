@@ -6,8 +6,14 @@
 #include <json_conversion.h>
 
 #ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)
+#    if __has_warning("-Wclass-memaccess")
+#      pragma GCC diagnostic ignored "-Wclass-memaccess"
+#    endif
+#  elif __GNUC__ > 7
+#    pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  endif
 #endif
 #include "BenchTypeSupportImpl.h"
 #ifdef __GNUC__
