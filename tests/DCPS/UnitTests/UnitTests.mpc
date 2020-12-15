@@ -126,7 +126,7 @@ project(*DataSampleHeader): dcps_test, googletest {
   }
 }
 
-project(*NetworkConfig): dcps_test, googletest {
+project(*NetworkConfig): dcps_test {
   exename = *
   Source_Files {
     NetworkConfig.cpp
