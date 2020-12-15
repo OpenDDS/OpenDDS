@@ -1104,13 +1104,6 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
                      ACE_TEXT("process_customizations processing add_domain_id_to_port: %C=%C\n"),
                      it->first.c_str(), addr.c_str()));
         }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                          ACE_TEXT("process_customizations ")
-                          ACE_TEXT("No support for %C customization\n"),
-                          idx->second.c_str()),
-                        false);
       }
 
       customs[idx->first] = addr.c_str();
