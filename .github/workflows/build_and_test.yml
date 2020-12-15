@@ -36,8 +36,6 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    env:
-      JAVA_HOME: $JAVA_HOME_8_X64
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -89,8 +87,6 @@ jobs:
 
     needs: ubuntu-20_04_defaults_artifact
 
-    env:
-      JAVA_HOME: $JAVA_HOME_8_X64
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -195,8 +191,6 @@ jobs:
 
     needs: ubuntu-20_04_defaults_artifact
 
-    env:
-      JAVA_HOME: $JAVA_HOME_8_X64
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -234,7 +228,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --java --no-built-in-topics --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --java=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64 --no-built-in-topics --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
