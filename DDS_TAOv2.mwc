@@ -25,6 +25,13 @@ workspace {
   tools
   java
   DevGuideExamples
+  tests/DCPS/common
+  tests/DCPS/DelayedDurable
+  tests/DCPS/FooType
+  tests/DCPS/Thrasher
+  tests/DCPS/ManyTopicTypes
+  tests/DCPS/ManyTopicTest
+  performance-tests/bench_2
 
   exclude {
     java/jms

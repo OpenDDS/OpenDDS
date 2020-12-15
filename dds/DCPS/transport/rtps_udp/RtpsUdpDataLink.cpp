@@ -1496,7 +1496,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     writer->frags_.erase(seq);
 
     if (writer->recvd_.empty()) {
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                    ACE_TEXT(" data seq: %q from %C being from %C expecting heartbeat\n"),
@@ -1509,7 +1509,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       writer->held_.insert(std::make_pair(seq, *sample));
 
     } else if (writer->recvd_.contains(seq)) {
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
@@ -1523,15 +1523,18 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     } else if (!writer->held_.empty()) {
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::process_data_i WITHHOLD %q\n", seq.getValue()));
-        writer->recvd_.dump();
+        //for (auto it = writer->held_.begin(); it != writer->held_.end(); ++it) {
+        //  ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::process_data_i WITHHOLD %q : Held contains SN %q\n", seq.getValue(), it->first.getValue()));
+        //}
+        //writer->recvd_.dump();
       }
       writer->held_.insert(std::make_pair(seq, *sample));
       writer->recvd_.insert(seq);
 
     } else if (writer->recvd_.disjoint() || writer->recvd_.cumulative_ack() != seq.previous()) {
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
@@ -1546,7 +1549,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       writer->recvd_.insert(seq);
 
     } else {
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
@@ -1560,7 +1563,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     }
 
   } else {
-    if (Transport_debug_level > 5) {
+    { // if (Transport_debug_level > 5) {
       GuidConverter writer(src);
       GuidConverter reader(id_);
       SequenceNumber seq;
@@ -1622,9 +1625,12 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
     return false;
   }
 
+
   SequenceNumber start, base;
   start.setValue(gap.gapStart.high, gap.gapStart.low);
   base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
+
+  ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink[%@]::RtpsReader[%@]::process_gap_i() - GAP! %C -> %C with start %d, base %d, numBits %d\n", link.in(), this, OPENDDS_STRING(GuidConverter(src)).c_str(), OPENDDS_STRING(GuidConverter(id_)).c_str(), start.getValue(), base.getValue(), gap.gapList.numBits));
 
   writer->recvd_.insert(SequenceRange(start, base.previous()));
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
@@ -1769,6 +1775,13 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
       const SequenceNumber x = durable_ ? 1 : std::max(hb_first, hb_last);
       const SequenceRange sr(zero, x.previous());
+{ // if (Transport_debug_level > 5) {
+  GuidConverter local_conv(id_), remote_conv(src);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_heartbeat_i - "
+             "local %C remote %C - initializing recvd_ from %q to %q\n", OPENDDS_STRING(local_conv).c_str(),
+             OPENDDS_STRING(remote_conv).c_str(), sr.first.getValue(), sr.second.getValue()));
+}
+
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
         writer->held_.erase(writer->held_.begin());
@@ -2743,7 +2756,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   ack.setValue(acknack.readerSNState.bitmapBase.high,
                acknack.readerSNState.bitmapBase.low);
 
-  if (Transport_debug_level > 5) {
+  { // if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(remote);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                "local %C remote %C ack %q\n", OPENDDS_STRING(local_conv).c_str(),
@@ -2765,7 +2778,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       if (reader->durable_ && !reader->expecting_durable_data()) {
         // TODO: Consider how this works if the durable data has not been acked.
         // Or better, yet, just re-enqueue data as done above.
-        if (Transport_debug_level > 5) {
+        { // if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received: Enqueuing ReplayDurableData\n"));
         }
         link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
@@ -2774,7 +2787,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     }
 
     if (!reader->durable_data_.empty()) {
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         const GuidConverter local_conv(id_), remote_conv(remote);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                    "local %C has durable for remote %C\n",
@@ -2782,14 +2795,14 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                    OPENDDS_STRING(remote_conv).c_str()));
       }
       const SequenceNumber& dd_last = reader->durable_data_.rbegin()->first;
-      if (Transport_debug_level > 5) {
+      { // if (Transport_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                    "check base %q against last durable %q\n",
                    ack.getValue(), dd_last.getValue()));
       }
       if (ack > dd_last) {
         // Reader acknowledges durable data, we no longer need to store it
-        if (Transport_debug_level > 5) {
+        { // if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                      "durable data acked\n"));
         }

@@ -4,7 +4,7 @@
   "any_node": [
     {
       "config": "ci_disco.json",
-      "count": 20
+      "count": 30
     }
   ],
   "timeout": 120
