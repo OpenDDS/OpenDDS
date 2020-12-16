@@ -442,7 +442,7 @@ TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlag
 {
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address string <%C>\n",
             this->config().get_public_address().c_str()), 2);
 
   config().populate_locator(local_info, flags);
