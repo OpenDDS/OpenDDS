@@ -315,7 +315,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
+      {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
 #endif
     pub.publication_->add_association(writerid, ra, true);
   }
@@ -384,7 +384,7 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     wa.writerQos = writer.qos;
 #else
     const WriterAssociation wa =
-      {writer.trans_info, writerid, writer.publisher_qos, writer.qos};
+      {writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos};
 #endif
     sub.subscription_->add_association(readerid, wa, false);
   }
@@ -479,7 +479,7 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
+      {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
 
 #endif
     dwr->add_association(writerid, ra, true);
@@ -519,7 +519,7 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     wa.writerQos = writer_pos->second.qos;
 #else
     const WriterAssociation wa =
-      {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
+      {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
 #endif
     drr->add_association(readerid, wa, false);
   }
@@ -770,7 +770,7 @@ StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, TOPIC_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, TOPIC_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any topic (sub)section.
@@ -864,7 +864,7 @@ StaticDiscovery::parse_datawriterqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, DATAWRITERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, DATAWRITERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any datawriterqos (sub)section.
@@ -1047,7 +1047,7 @@ StaticDiscovery::parse_datareaderqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, DATAREADERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, DATAREADERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any datareaderqos (sub)section.
@@ -1222,7 +1222,7 @@ StaticDiscovery::parse_publisherqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, PUBLISHERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, PUBLISHERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any publisherqos (sub)section.
@@ -1338,7 +1338,7 @@ StaticDiscovery::parse_subscriberqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, SUBSCRIBERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, SUBSCRIBERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any subscriberqos (sub)section.
@@ -1453,7 +1453,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, ENDPOINT_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, ENDPOINT_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any endpoint (sub)section.

@@ -107,6 +107,10 @@ public:
     MonotonicTimePoint deadline() const {
       return tstamp_ + TimeDuration(max_wait_);
     }
+
+    bool deadline_is_infinite() const {
+      return max_wait_.sec == DDS::DURATION_INFINITE_SEC && max_wait_.nanosec == DDS::DURATION_INFINITE_NSEC;
+    }
   };
 
   DataWriterImpl();

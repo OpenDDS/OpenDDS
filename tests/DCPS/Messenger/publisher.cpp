@@ -197,7 +197,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cout << "Writer finished " << std::endl;
       writer->end();
 
-      if (wait_for_acks) {
+      if (dw_reliable()) {
         std::cout << "Writer wait for ACKS" << std::endl;
 
         DDS::Duration_t timeout =

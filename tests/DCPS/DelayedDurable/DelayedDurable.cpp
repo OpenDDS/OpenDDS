@@ -94,7 +94,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_DEBUG((LM_DEBUG, "writer: Count: %d\n", c));
       }
     }
-
+    DDS::Duration_t duration = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    pdw->wait_for_acknowledgments(duration);
   } else if (reader) {
     ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
 

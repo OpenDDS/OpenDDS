@@ -20,6 +20,7 @@
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "../Version.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
@@ -36,6 +37,7 @@
 #include <ace/Sched_Params.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_unistd.h>
+#include <ace/Version.h>
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -216,7 +218,7 @@ Service_Participant::~Service_Participant()
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
+               "(%P|%t) Service_Participant::~Service_Participant()\n"));
   }
 }
 
@@ -404,6 +406,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else {
           ACE_OS::fclose(in);
 
+          if (DCPS_debug_level > 1) {
+            ACE_DEBUG((LM_NOTICE,
+                        ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory ")
+                        ACE_TEXT("Going to load configuration from <%s>\n"),
+                        config_fname.c_str()));
+          }
+
           if (this->load_configuration() != 0) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
@@ -417,6 +426,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
+
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - ")
+                   ACE_TEXT("This is OpenDDS %C%C using ACE %C.\n"),
+                   DDS_VERSION, OPENDDS_VERSION_METADATA, ACE_VERSION));
+      }
 
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already
@@ -923,7 +939,7 @@ Service_Participant::set_repo_ior(const char* ior,
     ACE_TString section = REPO_SECTION_NAME;
     section += ACE_TEXT('\\');
     section += ACE_TEXT_CHAR_TO_TCHAR(key.c_str());
-    cf.open_section(cf.root_section(), section.c_str(), 1 /*create*/, sect_key);
+    cf.open_section(cf.root_section(), section.c_str(), true /*create*/, sect_key);
     cf.set_string_value(sect_key, ACE_TEXT("RepositoryIor"),
                         ACE_TEXT_CHAR_TO_TCHAR(ior));
 
@@ -1259,7 +1275,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       ACE_Configuration_Heap cf;
       cf.open();
       ACE_Configuration_Section_Key k;
-      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, 1 /*create*/, k);
+      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, true /*create*/, k);
 
       int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
@@ -1579,7 +1595,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
 
-  if (cf.open_section(root, COMMON_SECTION_NAME, 0, sect) != 0) {
+  if (cf.open_section(root, COMMON_SECTION_NAME, false, sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // a common section. The code default configuration will be used.
@@ -1852,7 +1868,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_sect;
 
-  if (cf.open_section(root, DOMAIN_SECTION_NAME, 0, domain_sect) != 0) {
+  if (cf.open_section(root, DOMAIN_SECTION_NAME, false, domain_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain (sub)section. The code default configuration will be used.
@@ -1991,7 +2007,7 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_range_sect;
 
-  if (cf.open_section(root, DOMAIN_RANGE_SECTION_NAME, 0, domain_range_sect) != 0) {
+  if (cf.open_section(root, DOMAIN_RANGE_SECTION_NAME, false, domain_range_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
@@ -2102,9 +2118,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       // create domain instance
       ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, DOMAIN_SECTION_NAME, 1 /* create */, dsect);
+      dcf.open_section(root, DOMAIN_SECTION_NAME, true /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), 1 /* create */, dsub_sect);
+      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), true /* create */, dsub_sect);
       dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
       for (ValueMap::const_iterator it = dr_inst.domain_info.begin();
            it != dr_inst.domain_info.end();
@@ -2119,7 +2135,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
       }
 
       ACE_TString cfg_name;
-      if (get_transport_config_name(domainId, cfg_name)) {
+      if (get_transport_base_config_name(domainId, cfg_name)) {
         if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
           // create transport instance add default transport config
           TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
@@ -2144,9 +2160,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       //create matching discovery instance
       ACE_Configuration_Section_Key sect;
-      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      dcf.open_section(root, RTPS_SECTION_NAME, true /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), true, sub_sect);
 
       ValueMap discovery_settings;
       if (process_customizations(domainId, dr_inst.discovery_template_name, discovery_settings)) {
@@ -2211,7 +2227,7 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
 }
 
 bool
-Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
+Service_Participant::get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
 {
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
   if ( it != domain_to_transport_name_map_.end()) {
@@ -2231,7 +2247,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
-  if (cf.open_section(root, section_name, 0, sect) == 0) {
+  if (cf.open_section(root, section_name, false, sect) == 0) {
 
     const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
     DiscoveryTypes::iterator iter =
@@ -2273,9 +2289,9 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
 
       //create discovery instance
       ACE_Configuration_Section_Key sect;
-      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      dcf.open_section(root, RTPS_SECTION_NAME, true /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), true, sub_sect);
 
       for (ValueMap::const_iterator ds_it = discovery_settings.begin(); ds_it != discovery_settings.end(); ++ds_it) {
         dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(ds_it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(ds_it->second.c_str()));
@@ -2325,7 +2341,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key rtps_sect;
 
-  if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
+  if (cf.open_section(root, RTPS_SECTION_NAME, false, rtps_sect) == 0) {
     ValueMap vm;
     if (pullValues(cf, rtps_sect, vm) > 0) {
     // There are values inside [rtps_discovery]
@@ -2363,7 +2379,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
             }
 
             ACE_Configuration_Section_Key custom_sect;
-            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
+            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, false, custom_sect) == 0) {
               ValueMap vcm;
               if (pullValues(cf, custom_sect, vcm) > 0) {
                 ACE_ERROR_RETURN((LM_ERROR,
@@ -2764,13 +2780,13 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
     }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
     }
     network_config_monitor_ = make_rch<NetworkConfigModifier>();
 #endif

@@ -165,18 +165,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = writer.write();
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Writers Done\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers Done\n")));
 
     for (Participants::iterator part = participants.begin();
          part != participants.end();
          ++part, ++ws.message.participant_id) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Cleanup Participant\n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Cleanup Participant\n")));
       // Clean-up!
       (*part)->delete_contained_entities();
       dpf->delete_participant(part->in());
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Publisher shutting down\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher shutting down\n")));
 
     TheServiceParticipant->shutdown();
 
@@ -188,6 +188,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return -1;
   }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Publisher exiting\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher exiting\n")));
   return (status ? 0 : -1);
 }

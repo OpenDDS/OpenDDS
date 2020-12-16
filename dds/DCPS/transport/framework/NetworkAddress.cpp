@@ -105,7 +105,7 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
         //Discover the fully qualified hostname
 
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
-          if (addr_array[i].is_loopback() == false && ACE_OS::strchr(hostname, '.') != 0) {
+          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
                       hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
             selected_address = addr_array[i];
@@ -136,7 +136,7 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
     OpenDDS::DCPS::HostnameInfoVector::iterator itEnd = nonFQDN.end();
 
     for (OpenDDS::DCPS::HostnameInfoVector::iterator it = itBegin; it != itEnd; ++it) {
-      if (addr_array[it->index_].is_loopback() == false) {
+      if (!addr_array[it->index_].is_loopback()) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
                    "\"%C\" as fully qualified hostname, please "
                    "correct system configuration.\n", it->hostname_.c_str()));
