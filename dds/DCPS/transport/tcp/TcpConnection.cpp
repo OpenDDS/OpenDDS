@@ -496,8 +496,8 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
                           sizeof(ACE_UINT32)) == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) TcpConnection::on_active_connection_established: "
-                      "ERROR: Unable to send address string length to "
+                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
+                      "Unable to send address string length to "
                       "the passive side to complete the active connection "
                       "establishment.\n"),
                      -1);
@@ -506,8 +506,8 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   if (this->peer().send_n(address.c_str(), len)  == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) TcpConnection::on_active_connection_established: "
-                      "ERROR: Unable to send our address to "
+                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
+                      "Unable to send our address to "
                       "the passive side to complete the active connection "
                       "establishment.\n"),
                      -1);
@@ -518,8 +518,8 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   if (this->peer().send_n(&npriority, sizeof(ACE_UINT32)) == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) TcpConnection::on_active_connection_established: "
-                      "ERROR: Unable to send publication priority to "
+                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
+                      "Unable to send publication priority to "
                       "the passive side to complete the active connection "
                       "establishment.\n"),
                      -1);
