@@ -4,6 +4,7 @@
 #include "lib/RelayC.h"
 
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/TimeDuration.h"
 
 #include <ace/INET_Addr.h>
 

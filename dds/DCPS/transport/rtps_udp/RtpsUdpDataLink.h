@@ -147,6 +147,7 @@ public:
   bool associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
+                  ACE_CDR::ULong remote_context,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
 
@@ -210,11 +211,6 @@ private:
   // Internal non-locking versions of the above
   AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
   AddrSet get_addresses_i(const RepoId& local) const;
-
-  void get_locators_i(const RepoId& local_id,
-                      AddrSet& addrs) const;
-
-  bool get_locator_i(const RepoId& remote_id, ACE_INET_Addr& addr) const;
 
   virtual void stop_i();
 
@@ -422,7 +418,6 @@ private:
     void update_max_sn(SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
-    void send_delayed_notifications(const TransportQueueElement::MatchCriteria& criteria);
     RemoveResult remove_sample(const DataSampleElement* sample);
     void remove_all_msgs();
 
@@ -470,8 +465,9 @@ private:
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
+    ACE_CDR::ULong participant_flags_;
 
-    WriterInfo(const RepoId& id)
+    WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
       : id_(id)
       , hb_last_(SequenceNumber::ZERO())
       , first_activity_(true)
@@ -479,9 +475,11 @@ private:
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , nackfrag_count_(0)
+      , participant_flags_(participant_flags)
     { }
 
     bool should_nack() const;
+    bool sends_directed_hb() const;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
@@ -670,7 +668,6 @@ private:
   void send_nack_replies();
   void send_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
-  void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
