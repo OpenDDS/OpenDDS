@@ -1890,9 +1890,7 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       {
         be_global->lang_header_ <<
           "using "  << nm << " = " << generator_->map_type(base) << ";\n";
-      }
-      else
-      {
+      } else {
         be_global->lang_header_ <<
           "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
       }
