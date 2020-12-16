@@ -73,8 +73,6 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
       if (++received_samples_ == expected_samples_) {
-        subscriber_->delete_datareader(reader);
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) datareader deleted\n"));
         done_callback_(builtin_read_error_);
       } else {
         if (static_cast<int>(writers_.size()) == total_writers_) {
