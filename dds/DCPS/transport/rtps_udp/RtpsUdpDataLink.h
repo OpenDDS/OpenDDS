@@ -549,12 +549,21 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
   typedef OPENDDS_MAP(AddrSet, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
+  typedef OPENDDS_SET(CORBA::Long) CountSet;
+  typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
+
+  struct CountKeeper {
+    IdCountSet heartbeat_counts_;
+    IdCountSet acknack_counts_;
+    IdCountSet nack_frag_counts_;
+  };
 
   void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
   void bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_map,
                                MetaSubmessageIterVecVec& meta_submessage_bundles,
                                OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
-                               OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes);
+                               OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
+                               CountKeeper& counts);
   void send_bundled_submessages(MetaSubmessageVec& meta_submessages);
 
   RepoIdSet pending_reliable_readers_;

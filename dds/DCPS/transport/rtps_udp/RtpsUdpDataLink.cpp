@@ -2240,7 +2240,8 @@ void
 RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_map,
                                                 MetaSubmessageIterVecVec& meta_submessage_bundles,
                                                 OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
-                                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
+                                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
+                                                CountKeeper& counts)
 {
   using namespace RTPS;
 
@@ -2287,12 +2288,16 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
         MetaSubmessage& res = **resp_it;
         switch (res.sm_._d()) {
           case HEARTBEAT: {
+            const EntityId_t id = res.sm_.heartbeat_sm().writerId;
+            OPENDDS_ASSERT(counts.heartbeat_counts_[id].insert(res.sm_.heartbeat_sm().count.value).second);
             result = helper.add_to_bundle(res.sm_.heartbeat_sm(), submessage_length);
             res.sm_.heartbeat_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
+            const EntityId_t id = res.sm_.acknack_sm().readerId;
+            OPENDDS_ASSERT(counts.acknack_counts_[id].insert(res.sm_.acknack_sm().count.value).second);
             result = helper.add_to_bundle(res.sm_.acknack_sm(), submessage_length);
             res.sm_.acknack_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2304,6 +2309,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
             break;
           }
           case NACK_FRAG: {
+            const EntityId_t id = res.sm_.nack_frag_sm().readerId;
+            OPENDDS_ASSERT(counts.nack_frag_counts_[id].insert(res.sm_.nack_frag_sm().count.value).second);
             result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
             res.sm_.nack_frag_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2346,7 +2353,8 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
   OPENDDS_VECTOR(AddrSet) meta_submessage_bundle_addrs; // for a bundle's address set
   OPENDDS_VECTOR(size_t) meta_submessage_bundle_sizes; // for allocating the bundle's buffer
-  bundle_mapped_meta_submessages(adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes);
+  CountKeeper counts;
+  bundle_mapped_meta_submessages(adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
 
   // Reusable INFO_DST
   InfoDestinationSubmessage idst = {
@@ -2367,6 +2375,29 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
       if (dst != prev_dst) {
         std::memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
         ser << idst;
+      }
+      switch (res.sm_._d()) {
+        case HEARTBEAT: {
+          CountSet& set = counts.heartbeat_counts_[res.sm_.heartbeat_sm().writerId];
+          res.sm_.heartbeat_sm().count.value = *(set.begin());
+          set.erase(set.begin());
+          break;
+        }
+        case ACKNACK: {
+          CountSet& set = counts.acknack_counts_[res.sm_.acknack_sm().readerId];
+          res.sm_.acknack_sm().count.value = *(set.begin());
+          set.erase(set.begin());
+          break;
+        }
+        case NACK_FRAG: {
+          CountSet& set = counts.nack_frag_counts_[res.sm_.nack_frag_sm().readerId];
+          res.sm_.nack_frag_sm().count.value = *(set.begin());
+          set.erase(set.begin());
+          break;
+        }
+        default: {
+          break;
+        }
       }
       ser << res.sm_;
       prev_dst = dst;
@@ -3570,8 +3601,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 
   // Directed, non-final.
   if (!preassociation_readers_.empty()) {
-    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
-
     for (ReaderInfoSet::const_iterator pos = preassociation_readers_.begin(), limit = preassociation_readers_.end();
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
@@ -3579,6 +3608,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       const SequenceNumber first_sn = reader->durable_ ? 1 : (reader->preassociation_heartbeat_last_ + 1);
       const SequenceNumber last_sn = reader->preassociation_heartbeat_last_;
       meta_submessage.dst_guid_ = reader->id_;
+      meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
       meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
       meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
       meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
@@ -3590,7 +3620,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   }
 
   if (!lagging_readers_.empty()) {
-    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
 
     if (leading_readers_.empty() && remote_readers_.size() > 1
 #ifdef OPENDDS_SECURITY
@@ -3599,6 +3628,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 #endif
         ) {
       // Every reader is lagging and there is more than one.
+      meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
       meta_submessage.sm_.heartbeat_sm().readerId = ENTITYID_UNKNOWN;
       meta_submessage.sm_.heartbeat_sm().firstSN.low = firstSN.getLow();
       meta_submessage.sm_.heartbeat_sm().firstSN.high = firstSN.getHigh();
@@ -3623,6 +3653,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           const SequenceNumber first_sn = (*pos)->durable_ ? 1 : nonDurableFirstSN;
           const SequenceNumber last_sn = expected_max_sn(*pos);
           meta_submessage.dst_guid_ = reader->id_;
+          meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
           meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
           meta_submessage.sm_.heartbeat_sm().lastSN.low = first_sn.getLow();
           meta_submessage.sm_.heartbeat_sm().lastSN.high = first_sn.getHigh();
@@ -3637,7 +3668,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 
   // Directed, final.
   if (readers_expecting_heartbeat_.empty()) {
-    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
     meta_submessage.sm_.heartbeat_sm().smHeader.flags |= FLAG_F;
 
     for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(),
@@ -3648,6 +3678,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         const SequenceNumber first_sn = reader->durable_ ? 1 : nonDurableFirstSN;
         const SequenceNumber last_sn = expected_max_sn(reader);
         meta_submessage.dst_guid_ = reader->id_;
+        meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
         meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
         meta_submessage.sm_.heartbeat_sm().lastSN.low = first_sn.getLow();
         meta_submessage.sm_.heartbeat_sm().lastSN.high = first_sn.getHigh();
