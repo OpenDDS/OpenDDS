@@ -2284,12 +2284,14 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           }
         }
         // Attempt to add the submessage meta_submessage to the bundle
-        bool result = false;
+        bool result = false, unique = false;
+        ACE_UNUSED_ARG(unique);
         MetaSubmessage& res = **resp_it;
         switch (res.sm_._d()) {
           case HEARTBEAT: {
             const EntityId_t id = res.sm_.heartbeat_sm().writerId;
-            OPENDDS_ASSERT(counts.heartbeat_counts_[id].insert(res.sm_.heartbeat_sm().count.value).second);
+            unique = counts.heartbeat_counts_[id].insert(res.sm_.heartbeat_sm().count.value).second;
+            OPENDDS_ASSERT(unique == true);
             result = helper.add_to_bundle(res.sm_.heartbeat_sm(), submessage_length);
             res.sm_.heartbeat_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2297,7 +2299,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           }
           case ACKNACK: {
             const EntityId_t id = res.sm_.acknack_sm().readerId;
-            OPENDDS_ASSERT(counts.acknack_counts_[id].insert(res.sm_.acknack_sm().count.value).second);
+            unique = counts.acknack_counts_[id].insert(res.sm_.acknack_sm().count.value).second;
+            OPENDDS_ASSERT(unique == true);
             result = helper.add_to_bundle(res.sm_.acknack_sm(), submessage_length);
             res.sm_.acknack_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2310,7 +2313,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           }
           case NACK_FRAG: {
             const EntityId_t id = res.sm_.nack_frag_sm().readerId;
-            OPENDDS_ASSERT(counts.nack_frag_counts_[id].insert(res.sm_.nack_frag_sm().count.value).second);
+            unique = counts.nack_frag_counts_[id].insert(res.sm_.nack_frag_sm().count.value).second;
+            OPENDDS_ASSERT(unique == true);
             result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
             res.sm_.nack_frag_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
