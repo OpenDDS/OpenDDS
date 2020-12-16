@@ -2307,7 +2307,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           case HEARTBEAT: {
             const EntityId_t id = res.sm_.heartbeat_sm().writerId;
             unique = counts.heartbeat_counts_[id].insert(res.sm_.heartbeat_sm().count.value).second;
-            OPENDDS_ASSERT(unique == true);
+            OPENDDS_ASSERT(unique);
             result = helper.add_to_bundle(res.sm_.heartbeat_sm(), submessage_length);
             res.sm_.heartbeat_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2316,7 +2316,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           case ACKNACK: {
             const EntityId_t id = res.sm_.acknack_sm().readerId;
             unique = counts.acknack_counts_[id].insert(res.sm_.acknack_sm().count.value).second;
-            OPENDDS_ASSERT(unique == true);
+            OPENDDS_ASSERT(unique);
             result = helper.add_to_bundle(res.sm_.acknack_sm(), submessage_length);
             res.sm_.acknack_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2330,7 +2330,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           case NACK_FRAG: {
             const EntityId_t id = res.sm_.nack_frag_sm().readerId;
             unique = counts.nack_frag_counts_[id].insert(res.sm_.nack_frag_sm().count.value).second;
-            OPENDDS_ASSERT(unique == true);
+            OPENDDS_ASSERT(unique);
             result = helper.add_to_bundle(res.sm_.nack_frag_sm(), submessage_length);
             res.sm_.nack_frag_sm().smHeader.submessageLength =
               static_cast<CORBA::UShort>(submessage_length) - SMHDR_SZ;
@@ -2399,19 +2399,22 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
       switch (res.sm_._d()) {
         case HEARTBEAT: {
           CountSet& set = counts.heartbeat_counts_[res.sm_.heartbeat_sm().writerId];
-          res.sm_.heartbeat_sm().count.value = *(set.begin());
+          OPENDDS_ASSERT(!set.empty());
+          res.sm_.heartbeat_sm().count.value = *set.begin();
           set.erase(set.begin());
           break;
         }
         case ACKNACK: {
           CountSet& set = counts.acknack_counts_[res.sm_.acknack_sm().readerId];
-          res.sm_.acknack_sm().count.value = *(set.begin());
+          OPENDDS_ASSERT(!set.empty());
+          res.sm_.acknack_sm().count.value = *set.begin();
           set.erase(set.begin());
           break;
         }
         case NACK_FRAG: {
           CountSet& set = counts.nack_frag_counts_[res.sm_.nack_frag_sm().readerId];
-          res.sm_.nack_frag_sm().count.value = *(set.begin());
+          OPENDDS_ASSERT(!set.empty());
+          res.sm_.nack_frag_sm().count.value = *set.begin();
           set.erase(set.begin());
           break;
         }
