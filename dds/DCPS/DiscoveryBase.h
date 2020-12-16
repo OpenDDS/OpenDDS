@@ -1199,21 +1199,6 @@ namespace OpenDDS {
 #endif
 
           // Copy reader and writer association data prior to releasing lock
-#ifdef __SUNPRO_CC
-          ReaderAssociation ra;
-          ra.readerTransInfo = *rTls;
-          ra.readerId = reader;
-          ra.subQos = *subQos;
-          ra.readerQos = *drQos;
-          ra.filterClassName = cfProp->filterClassName;
-          ra.filterExpression = cfProp->filterExpression;
-          ra.exprParams = cfProp->expressionParameters;
-          WriterAssociation wa;
-          wa.writerTransInfo = *wTls;
-          wa.writerId = writer;
-          wa.pubQos = *pubQos;
-          wa.writerQos = *dwQos;
-#else
           const ReaderAssociation ra =
             {add_security_info(*rTls, writer, reader),
              rTransportContext,
@@ -1229,7 +1214,6 @@ namespace OpenDDS {
             {add_security_info(*wTls, writer, reader),
              wTransportContext,
              writer, *pubQos, *dwQos};
-#endif
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           static const bool writer_active = true;
