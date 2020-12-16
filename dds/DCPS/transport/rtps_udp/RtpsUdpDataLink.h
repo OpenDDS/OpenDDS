@@ -181,18 +181,11 @@ public:
   Security::SecurityConfig_rch security_config() const
   { return security_config_; }
 
+  Security::HandleRegistry_rch handle_registry() const
+  { return handle_registry_; }
+
   DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
-
-  DDS::Security::ParticipantCryptoHandle peer_crypto_handle(const RepoId& peer) const;
-  DDS::Security::DatawriterCryptoHandle writer_crypto_handle(const RepoId& writer) const;
-  DDS::Security::DatareaderCryptoHandle reader_crypto_handle(const RepoId& reader) const;
-
-  void populate_security_handles(const RepoId& local_id, const RepoId& remote_id,
-                                 const unsigned char* buffer,
-                                 unsigned int buffer_size);
-
-  DDS::Security::EndpointSecurityAttributesMask security_attributes(const RepoId& endpoint) const;
 
   static bool separate_message(EntityId_t entity);
 #endif
@@ -801,19 +794,9 @@ private:
   };
 
 #ifdef OPENDDS_SECURITY
-  mutable ACE_Thread_Mutex ch_lock_;
   Security::SecurityConfig_rch security_config_;
+  Security::HandleRegistry_rch handle_registry_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
-                          GUID_tKeyLessThan) PeerHandlesMap;
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
-                          GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
-  PeerHandlesMap peer_crypto_handles_;
-
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::EndpointSecurityAttributesMask,
-                          GUID_tKeyLessThan) EndpointSecurityAttributesMap;
-  EndpointSecurityAttributesMap endpoint_security_attributes_;
 #endif
 
   void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_narrow = false) const;
