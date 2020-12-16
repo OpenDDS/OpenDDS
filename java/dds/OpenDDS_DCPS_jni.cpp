@@ -7,6 +7,7 @@
 
 #include "OpenDDS_DCPS_TheParticipantFactory.h"
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
+#include "OpenDDS_DCPS_NetworkConfigModifier.h"
 #include "OpenDDS_DCPS_transport_TheTransportRegistry.h"
 #include "OpenDDS_DCPS_transport_TransportConfig.h"
 #include "OpenDDS_DCPS_transport_TcpInst.h"
@@ -139,6 +140,9 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 (JNIEnv * jni, jclass)
 {
   OpenDDS::DCPS::NetworkConfigModifier* ncm = TheServiceParticipant->network_config_modifier();
+  if (ncm == 0) {
+    return 0;
+  }
   jclass configClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
   jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
   return jni->NewObject(configClazz, ctor,
@@ -151,12 +155,11 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
 (JNIEnv * jni, jobject jthis)
 {
-  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
-  // Something to do here for cleanup?
+  //TODO:CLAYTON Something to do here for cleanup?
 }
 
 // NetworkConfigModifier::add_interface
-void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_add_1interface
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_add_1interface
 (JNIEnv * jni, jobject jthis, jstring name)
 {
   JStringMgr jsm_name(jni, name);
@@ -165,7 +168,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_add_1interface
 }
 
 // NetworkConfigModifier::remove_interface
-void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_remove_1interface
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_remove_1interface
 (JNIEnv * jni, jobject jthis, jstring name)
 {
   JStringMgr jsm_name(jni, name);
@@ -174,7 +177,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_remove_1interface
 }
 
 // NetworkConfigModifier::add_address
-void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_add_1address
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_add_1address
 (JNIEnv * jni, jobject jthis, jstring name, jstring address)
 {
   JStringMgr jsm_name(jni, name);
@@ -186,7 +189,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_add_1address
 }
 
 // NetworkConfigModifier::remove_address
-void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_remove_1address
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_remove_1address
 (JNIEnv * jni, jobject jthis, jstring name, jstring address)
 {
   JStringMgr jsm_name(jni, name);
