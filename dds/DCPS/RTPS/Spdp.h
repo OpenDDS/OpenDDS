@@ -347,7 +347,7 @@ private:
     {
       if (action_ == CMG_JOIN) {
         bool success = false;
-        for (int count = 0; count <= && !success; ++count) {
+        for (int count = 0; count <= 1 && !success; ++count) {
           success = tport_->join_multicast_group(nic_, all_interfaces_);
         }
         if (!success) {

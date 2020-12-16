@@ -2985,7 +2985,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
     // Windows 7 has an issue with different threads concurrently calling join for ipv6
     static ACE_Thread_Mutex ipv6_static_lock;
-    ACE_GUARD(ACE_Thread_Mutex, g3, ipv6_static_lock);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g3, ipv6_static_lock, false);
     if (0 == multicast_ipv6_socket_.join(multicast_ipv6_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       joined_ipv6_interfaces_.insert(nic.name());
 
@@ -3002,7 +3002,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       multicast_ipv6_address_.addr_to_string(buff, 256);
       if (DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+                   ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::join_multicast_group() - ")
                    ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
                    buff,
                    all_interfaces ? "all interfaces" : nic.name().c_str(),
@@ -3011,6 +3011,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
     }
   }
 #endif
+  return success;
 }
 
 void
