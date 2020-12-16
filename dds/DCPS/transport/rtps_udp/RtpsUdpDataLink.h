@@ -212,11 +212,6 @@ private:
   AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
   AddrSet get_addresses_i(const RepoId& local) const;
 
-  void get_locators_i(const RepoId& local_id,
-                      AddrSet& addrs) const;
-
-  bool get_locator_i(const RepoId& remote_id, ACE_INET_Addr& addr) const;
-
   virtual void stop_i();
 
   virtual TransportQueueElement* customize_queue_element(
@@ -423,7 +418,6 @@ private:
     void update_max_sn(SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
-    void send_delayed_notifications(const TransportQueueElement::MatchCriteria& criteria);
     RemoveResult remove_sample(const DataSampleElement* sample);
     void remove_all_msgs();
 
@@ -676,7 +670,6 @@ private:
   void send_nack_replies();
   void send_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
-  void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
