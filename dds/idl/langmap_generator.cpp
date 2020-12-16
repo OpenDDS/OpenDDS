@@ -1886,8 +1886,7 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       return false;
 # endif
     default:
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11)
-      {
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
         be_global->lang_header_ <<
           "using "  << nm << " = " << generator_->map_type(base) << ";\n";
       } else {
