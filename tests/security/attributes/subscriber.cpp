@@ -147,12 +147,20 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                           ACE_TEXT("main() - create_subscriber() failed!\n")), -24);
     }
 
-    DDS::DataReader_var part_reader = participant->get_builtin_subscriber()->lookup_datareader(
-      OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    // Create DataReaderListener
+    DDS::DataReader_var part_reader =
+#ifdef DDS_HAS_MINIMUM_BIT
+      0;
+#else
+      participant->get_builtin_subscriber()->lookup_datareader(
+        OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+#endif
     DataReaderListenerImpl* const listener_servant =
       new DataReaderListenerImpl(my_args, part_reader.in());
     DDS::DataReaderListener_var listener(listener_servant);
+#ifndef DDS_HAS_MINIMUM_BIT
     part_reader->set_listener(listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+#endif
 
     // Create DataReader
     DDS::DataReaderQos dr_qos;

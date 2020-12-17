@@ -7,7 +7,6 @@
 
 #include "DataReaderListener.h"
 
-#include "Args.h"
 #include "SecurityAttributesMessageTypeSupportImpl.h"
 
 #include <dds/DCPS/Service_Participant.h>
@@ -15,7 +14,9 @@
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
-#include <dds/DdsDcpsCoreTypeSupportC.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
@@ -41,12 +42,15 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 bool DataReaderListenerImpl::is_reliable()
 {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return !(gc->instances_[0]->transport_type_ == "udp");
+  return gc->instances_[0]->transport_type_ != "udp";
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   try {
+#ifdef DDS_HAS_MINIMUM_BIT
+    ACE_UNUSED_ARG(reader);
+#else
     if (reader == part_reader_) {
       DDS::ParticipantBuiltinTopicDataDataReader_var part_reader_impl =
         DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_reader_);
@@ -91,6 +95,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       return;
     }
+#endif
 
     ++num_reads_;
 
