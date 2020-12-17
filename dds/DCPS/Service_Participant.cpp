@@ -1195,6 +1195,8 @@ Service_Participant::get_default_discovery()
 Discovery_rch
 Service_Participant::get_discovery(const DDS::DomainId_t domain)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_, Discovery_rch());
+
   // Default to the Default InfoRepo-based discovery unless the user has
   // changed defaultDiscovery_ using the API or config file
   Discovery::RepoKey repo = defaultDiscovery_;
