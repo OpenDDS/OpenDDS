@@ -1703,7 +1703,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
       if (riter == readers_.end()) {
         // Reader has no associations.
         interesting_ack_nacks_.insert(InterestingAckNack(writerid, readerid, pos->second.address));
-      } else if (riter->second->has_writer(writerid)) {
+      } else if (!riter->second->has_writer(writerid)) {
         // Reader is not associated with this writer.
         interesting_ack_nacks_.insert(InterestingAckNack(writerid, readerid, pos->second.address));
       }
