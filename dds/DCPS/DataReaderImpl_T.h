@@ -1583,13 +1583,11 @@ void store_instance_data(
 
   typename InstanceMap::const_iterator const it = instance_map_.find(*instance_data);
 
-  if ((is_dispose_msg || is_unregister_msg) && it == instance_map_.end())
-  {
-    return;
-  }
+  if (it == instance_map_.end()) {
+    if (is_dispose_msg || is_unregister_msg) {
+      return;
+    }
 
-  if (it == instance_map_.end())
-  {
     std::size_t instances_size = 0;
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
@@ -1899,8 +1897,9 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     return;
   }
 
-  OpenDDS::DCPS::ReceivedDataElement *ptr =
-    new (*rd_allocator_.get()) OpenDDS::DCPS::ReceivedDataElementWithType<MessageTypeWithAllocator>(header,instance_data.release(), &this->sample_lock_);
+  ReceivedDataElement *ptr =
+    new (*rd_allocator_.get()) ReceivedDataElementWithType<MessageTypeWithAllocator>(
+      header,instance_data.release(), &this->sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_->disposed_generation_count();

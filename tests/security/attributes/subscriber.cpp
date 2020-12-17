@@ -5,33 +5,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
-
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
-
 #include "DataReaderListener.h"
 #include "SecurityAttributesMessageTypeSupportImpl.h"
 #include "Args.h"
 
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/StaticIncludes.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  ifndef OPENDDS_SAFETY_PROFILE
+#    include <dds/DCPS/transport/udp/Udp.h>
+#    include <dds/DCPS/transport/multicast/Multicast.h>
+#    include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#    include <dds/DCPS/transport/shmem/Shmem.h>
+#  endif
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportConfig.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
 #include <dds/DCPS/security/framework/Properties.h>
+
+#include <dds/DdsDcpsInfrastructureC.h>
 
 #define CLEAN_ERROR_RETURN(stuff, val) \
 do { \
@@ -66,9 +64,8 @@ void append(DDS::PropertySeq& props, const char* name, const char* value)
   props[len] = prop;
 }
 
-using SecurityAttributes::Args;
-
-int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
+int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
+{
   int status = 0;
   try {
     // Initialize DomainParticipantFactory
@@ -84,13 +81,14 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
     dpf->get_default_participant_qos(part_qos);
 
     if (TheServiceParticipant->get_security()) {
+      using namespace DDS::Security::Properties;
       DDS::PropertySeq& props = part_qos.property.value;
-      append(props, DDS::Security::Properties::AuthIdentityCA, my_args.auth_ca_file_.data());
-      append(props, DDS::Security::Properties::AuthIdentityCertificate, my_args.id_cert_file_.data());
-      append(props, DDS::Security::Properties::AuthPrivateKey, my_args.id_key_file_.data());
-      append(props, DDS::Security::Properties::AccessPermissionsCA, my_args.perm_ca_file_.data());
-      append(props, DDS::Security::Properties::AccessGovernance, my_args.governance_file_.data());
-      append(props, DDS::Security::Properties::AccessPermissions, my_args.permissions_file_.data());
+      append(props, AuthIdentityCA, my_args.auth_ca_file_.data());
+      append(props, AuthIdentityCertificate, my_args.id_cert_file_.data());
+      append(props, AuthPrivateKey, my_args.id_key_file_.data());
+      append(props, AccessPermissionsCA, my_args.perm_ca_file_.data());
+      append(props, AccessGovernance, my_args.governance_file_.data());
+      append(props, AccessPermissions, my_args.permissions_file_.data());
     }
 
     // Create DomainParticipant
@@ -149,10 +147,14 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
                           ACE_TEXT("main() - create_subscriber() failed!\n")), -24);
     }
 
-    // Create DataReader
-    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl(my_args);
+    DDS::DataReader_var part_reader = participant->get_builtin_subscriber()->lookup_datareader(
+      OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    DataReaderListenerImpl* const listener_servant =
+      new DataReaderListenerImpl(my_args, part_reader.in());
     DDS::DataReaderListener_var listener(listener_servant);
+    part_reader->set_listener(listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+    // Create DataReader
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
     if (DataReaderListenerImpl::is_reliable()) {
@@ -236,8 +238,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
   return status;
 }
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   Args my_args;
   const int result = run_test(argc, argv, my_args);

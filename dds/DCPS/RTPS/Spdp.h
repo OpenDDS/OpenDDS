@@ -188,7 +188,7 @@ protected:
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(DiscoveredParticipantIter iter);
+  void process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish = false);
 #endif
 
   bool announce_domain_participant_qos();
@@ -216,6 +216,13 @@ private:
   DDS::ParticipantBuiltinTopicData get_part_bit_data(bool secure) const;
 
 #ifdef OPENDDS_SECURITY
+  /**
+   * If this is true participant user data should only be sent and received
+   * securely, otherwise the user data should be empty and participant bit
+   * updates should be withheld from the user.
+   */
+  bool secure_part_user_data() const;
+
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
                                            const DDS::Security::ParticipantStatelessMessage& msg);

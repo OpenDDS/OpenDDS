@@ -5,43 +5,45 @@ tests/security/unit_tests/run_test.pl OpenDDS_AuthenticationTest
 tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyFactoryTest
 tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyExchangeTest
 tests/security/unit_tests/run_test.pl OpenDDS_CryptoTransformTest
-tests/security/attributes/run_test.pl --scenario SC0_sec_off
-tests/security/attributes/run_test.pl --scenario SC0_sec_sub
-tests/security/attributes/run_test.pl --scenario SC0_sec_pub
-tests/security/attributes/run_test.pl --scenario SC0_sec_on
-tests/security/attributes/run_test.pl --scenario SC0_sec_on_ec_pub
-tests/security/attributes/run_test.pl --scenario SC0_sec_on_ec_sub
-tests/security/attributes/run_test.pl --scenario SC0_sec_on_ec_both
-#tests/security/attributes/run_test.pl --scenario SC1_sec_off_failure
-tests/security/attributes/run_test.pl --scenario SC1_sec_on_bad_cert_failure
-tests/security/attributes/run_test.pl --scenario SC1_sec_on_bad_perm_1_failure
-#tests/security/attributes/run_test.pl --scenario SC1_sec_on_bad_perm_2_failure
-tests/security/attributes/run_test.pl --scenario SC1_sec_on_success
-tests/security/attributes/run_test.pl --scenario SC2
-tests/security/attributes/run_test.pl --scenario SC3
-tests/security/attributes/run_test.pl --scenario SC4
-tests/security/attributes/run_test.pl --scenario SC5
-tests/security/attributes/run_test.pl --scenario TEST_8_8_5_FAILURE
-tests/security/attributes/run_test.pl --scenario TEST_8_8_5_SUCCESS
-tests/security/attributes/run_test.pl --scenario multiple_grants
-tests/security/attributes/run_test.pl --scenario FullMsgSign
-tests/security/attributes/run_test.pl --scenario FullMsgEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgSign
-tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgSign
-tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgSign_PayloadEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_PayloadEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgSign_PayloadEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgEncrypt_PayloadEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgSign_PayloadEncrypt
-tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt
-#tests/security/attributes/run_test.pl -scenario FullMsgSign_PayloadEncrypt_Frag
-tests/security/attributes/run_test.pl --scenario Partitions_DefaultQoS
-tests/security/attributes/run_test.pl --scenario Partitions_Denied
-tests/security/attributes/run_test.pl --scenario Partitions_Match
-tests/security/attributes/run_test.pl --scenario Partitions_Reordered
-tests/security/attributes/run_test.pl --scenario Partitions_Subset
+tests/security/attributes/run_test.pl SC0_sec_off
+tests/security/attributes/run_test.pl SC0_sec_sub
+tests/security/attributes/run_test.pl SC0_sec_pub
+tests/security/attributes/run_test.pl SC0_sec_on
+tests/security/attributes/run_test.pl SC0_sec_on_ec_pub
+tests/security/attributes/run_test.pl SC0_sec_on_ec_sub
+tests/security/attributes/run_test.pl SC0_sec_on_ec_both
+#tests/security/attributes/run_test.pl SC1_sec_off_failure
+tests/security/attributes/run_test.pl SC1_sec_on_bad_cert_failure
+tests/security/attributes/run_test.pl SC1_sec_on_bad_perm_1_failure
+#tests/security/attributes/run_test.pl SC1_sec_on_bad_perm_2_failure
+tests/security/attributes/run_test.pl SC1_sec_on_success
+tests/security/attributes/run_test.pl SC2
+tests/security/attributes/run_test.pl SC3
+tests/security/attributes/run_test.pl SC4
+tests/security/attributes/run_test.pl SC5
+tests/security/attributes/run_test.pl TEST_8_8_5_FAILURE
+tests/security/attributes/run_test.pl TEST_8_8_5_SUCCESS
+tests/security/attributes/run_test.pl multiple_grants
+tests/security/attributes/run_test.pl FullMsgSign
+tests/security/attributes/run_test.pl FullMsgEncrypt
+tests/security/attributes/run_test.pl FullMsgSign_SubMsgSign
+tests/security/attributes/run_test.pl FullMsgSign_SubMsgEncrypt
+tests/security/attributes/run_test.pl FullMsgEncrypt_SubMsgSign
+tests/security/attributes/run_test.pl FullMsgEncrypt_SubMsgEncrypt
+tests/security/attributes/run_test.pl FullMsgSign_PayloadEncrypt
+tests/security/attributes/run_test.pl FullMsgEncrypt_PayloadEncrypt
+tests/security/attributes/run_test.pl FullMsgSign_SubMsgSign_PayloadEncrypt
+tests/security/attributes/run_test.pl FullMsgSign_SubMsgEncrypt_PayloadEncrypt
+tests/security/attributes/run_test.pl FullMsgEncrypt_SubMsgSign_PayloadEncrypt
+tests/security/attributes/run_test.pl FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt
+#tests/security/attributes/run_test.pl FullMsgSign_PayloadEncrypt_Frag
+tests/security/attributes/run_test.pl Partitions_DefaultQoS
+tests/security/attributes/run_test.pl Partitions_Denied
+tests/security/attributes/run_test.pl Partitions_Match
+tests/security/attributes/run_test.pl Partitions_Reordered
+tests/security/attributes/run_test.pl Partitions_Subset
+tests/security/attributes/run_test.pl secure-part-user-data
+tests/security/attributes/run_test.pl unsecure-part-user-data
 tests/security/TopicWithoutPermissions/run_test.pl
 
 tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
