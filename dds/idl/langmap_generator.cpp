@@ -1897,8 +1897,14 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       return false;
 # endif
     default:
-      be_global->lang_header_ <<
-        "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        be_global->lang_header_ <<
+          "using "  << nm << " = " << generator_->map_type(base) << ";\n";
+      } else {
+        be_global->lang_header_ <<
+          "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      }
+
       generator_->gen_typedef_varout(nm, base);
 
       AST_Type* actual_base = resolveActualType(base);

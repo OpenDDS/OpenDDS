@@ -106,6 +106,13 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   }
 };
 
+struct OpenDDS_Dcps_Export EntityId_tKeyLessThan {
+  bool operator()(const EntityId_t& v1, const EntityId_t& v2) const
+  {
+    return std::memcmp(&v1, &v2, sizeof(EntityId_t)) < 0;
+  }
+};
+
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
 const size_t guid_cdr_size = 16;

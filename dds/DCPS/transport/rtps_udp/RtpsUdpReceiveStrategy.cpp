@@ -427,7 +427,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           first = false;
           ++iter2;
         }
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) - RtpsUdpReceiveStrategy[%@]::deliver_sample_i:")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i:")
           ACE_TEXT(" readers_selected ids: %C\n")
           ACE_TEXT(" readers_withheld ids: %C\n"),
           this, included_ids.c_str(), excluded_ids.c_str()));
