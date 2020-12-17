@@ -148,7 +148,14 @@ bool SocketWriter::serialize(ACE_Message_Block& mb, const OpenDDS::RTPS::HeartBe
 bool SocketWriter::send(const ACE_Message_Block& mb) const
 {
   for (std::set<ACE_INET_Addr>::const_iterator i = dest_addr_.begin(); i != dest_addr_.end(); ++i) {
-    ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), *i);
+    Locator_t locator;
+    locator.kind = address_to_kind(*i);
+    locator.port = i->get_port_number();
+    address_to_bytes(locator.address, *i);
+    ACE_INET_Addr dest;
+    locator_to_address(dest, locator, local_addr_.get_type() != AF_INET);
+
+    ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), dest);
     if (res >= 0) {
       ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
                  OPENDDS_STRING(GuidConverter(id_)).c_str(), i->get_host_addr(), res));
