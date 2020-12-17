@@ -341,14 +341,14 @@ if ($scenario) {
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @topic_names = ('OD_OL_OA_OM_OD');
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
-    # publisher will set and try to protect its user data
+    # The publisher will set and try to protect its participant user data.
     push(@base_pub_args, "--secure-part-user-data");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     push(@base_sub_args, $secure_sub ?
-      # If secure, subscriber will expect the non standard publisher behavior
-      # and be able to get the correct user data.
+      # If secure, subscriber will expect the non standard behavior from the
+      # publisher and be able to get the correct user data.
       "--secure-part-user-data --expect-part-user-data" :
-      # Otherwise it everything else will work, but it will expect blank user data.
+      # Otherwise it will expect blank user data.
       "-DCPSSecurity 0 --expect-blank-part-user-data");
   } else {
     print "\nERROR: invalid scenario '$scenario'\n";
