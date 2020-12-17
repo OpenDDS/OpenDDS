@@ -895,18 +895,42 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter&
 void
 Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 {
+  const RepoId guid = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+
+  if (DCPS::security_debug.auth_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
+               ACE_TEXT("%C -> %C local %C\n"),
+               DCPS::LogGuid(guid).c_str(),
+               DCPS::LogGuid(msg.destination_participant_guid).c_str(),
+               DCPS::LogGuid(guid_).c_str()));
+  }
+
   // If this message wasn't intended for us, ignore handshake message
-  if (msg.destination_participant_guid != guid_ || msg.message_data.length() == 0) {
+  if (msg.destination_participant_guid != guid_) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
+                 ACE_TEXT("Dropped not recipient\n")));
+    }
     return;
   }
 
-  const RepoId guid = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+  if (msg.message_data.length() == 0) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
+                 ACE_TEXT("Dropped no data\n")));
+    }
+    return;
+  }
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
     // asked us to ignore.
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
+                 ACE_TEXT("Explicitly ignoring\n")));
+    }
     return;
   }
 
@@ -915,6 +939,10 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 
   if (iter != participants_.end()) {
     if (msg.message_identity.sequence_number <= iter->second.auth_req_sequence_number_) {
+      if (DCPS::security_debug.auth_debug) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
+                   ACE_TEXT("Dropped due to old sequence number\n")));
+      }
       return;
     }
     iter->second.auth_req_sequence_number_ = msg.message_identity.sequence_number;
@@ -1174,12 +1202,32 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::Authentication_var auth = security_config_->get_authentication();
 
+  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+
+  if (DCPS::security_debug.auth_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - ")
+               ACE_TEXT("%C -> %C local %C\n"),
+               DCPS::LogGuid(src_participant).c_str(),
+               DCPS::LogGuid(msg.destination_participant_guid).c_str(),
+               DCPS::LogGuid(guid_).c_str()));
+  }
+
   // If this message wasn't intended for us, ignore handshake message
-  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
+  if (msg.destination_participant_guid != guid_) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - ")
+                 ACE_TEXT("Dropped not recipient\n")));
+    }
     return;
   }
 
-  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+  if (msg.message_data.length() == 0) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - ")
+                 ACE_TEXT("Dropped no data\n")));
+    }
+    return;
+  }
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -1198,7 +1246,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DiscoveredParticipant& dp = iter->second;
 
   if (DCPS::security_debug.auth_debug) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message "
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - "
       "for %C auth_state=%d handshake_state=%d\n",
       OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str(),
       dp.auth_state_, dp.handshake_state_));

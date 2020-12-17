@@ -39,6 +39,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
   , ice_endpoint_(*this)
 #endif
 {
+  assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (! (configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
@@ -112,7 +113,7 @@ RtpsUdpTransport::use_ice_now(bool after)
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  std::memcpy(local_prefix_, local_prefix, sizeof(local_prefix_));
+  assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
   relay_stun_task(DCPS::MonotonicTimePoint::now());
 #endif
@@ -830,7 +831,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 
   process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
 
-  if (stun_server_address != ACE_INET_Addr()) {
+  if (!GuidPrefixEqual()(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
     ice_endpoint_.send(stun_server_address, relay_srsm_.message());
   }
 }
