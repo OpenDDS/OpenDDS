@@ -3913,12 +3913,14 @@ Spdp::use_ice_now(bool f)
 #endif
 }
 
-#ifdef OPENDDS_SECURITY
 bool Spdp::secure_part_user_data() const
 {
+#ifdef OPENDDS_SECURITY
   return security_enabled_ && config_->secure_participant_user_data();
-}
+#else
+  return false;
 #endif
+}
 
 DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
 {

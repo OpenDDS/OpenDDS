@@ -215,7 +215,6 @@ private:
   /// security settings.
   DDS::ParticipantBuiltinTopicData get_part_bit_data(bool secure) const;
 
-#ifdef OPENDDS_SECURITY
   /**
    * If this is true participant user data should only be sent and received
    * securely, otherwise the user data should be empty and participant bit
@@ -223,6 +222,7 @@ private:
    */
   bool secure_part_user_data() const;
 
+#ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
                                            DiscoveredParticipant& dp,
                                            const DDS::Security::ParticipantStatelessMessage& msg);
