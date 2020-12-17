@@ -354,6 +354,10 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
             if (json_2_idl(ss, report)) {
               node_report.worker_reports.length(node_report.worker_reports.length() + 1);
               node_report.worker_reports[node_report.worker_reports.length() - 1] = report;
+              node_report.worker_logs.length(node_report.worker_logs.length() + 1);
+              node_report.worker_logs[node_report.worker_logs.length() - 1] = worker_reports[wr].log;
+              node_report.worker_ids.length(node_report.worker_ids.length() + 1);
+              node_report.worker_ids[node_report.worker_ids.length() - 1] = worker_reports[wr].worker_id;
               ++parsed_report_count;
             } else {
               ++parse_failures;

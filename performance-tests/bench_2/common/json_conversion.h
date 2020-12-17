@@ -23,18 +23,34 @@ bool json_2_idl(std::istream& is, IDL_Type& idl_value) {
 }
 
 template<typename IDL_Type>
-bool idl_2_json(const IDL_Type& idl_value, std::ostream& os, bool pretty = false) {
+bool idl_2_json(const IDL_Type& idl_value, std::ostream& os,
+    int max_decimal_places = rapidjson::Writer<rapidjson::OStreamWrapper>::kDefaultMaxDecimalPlaces) {
   rapidjson::Document document;
   document.SetObject();
   OpenDDS::DCPS::copyToRapidJson(idl_value, document, document.GetAllocator());
   rapidjson::OStreamWrapper osw(os);
   rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-  rapidjson::PrettyWriter<rapidjson::OStreamWrapper> pretty_writer(osw);
-  if (pretty) { // Tried this with a ternary but that doesn't work right.
-    document.Accept(pretty_writer);
-  } else {
-    document.Accept(writer);
+  if (max_decimal_places != rapidjson::Writer<rapidjson::OStreamWrapper>::kDefaultMaxDecimalPlaces) {
+    writer.SetMaxDecimalPlaces(max_decimal_places);
   }
+  document.Accept(writer);
+  osw.Flush();
+  os << std::endl;
+  return true;
+}
+
+template<typename IDL_Type>
+bool idl_2_pretty_json(const IDL_Type& idl_value, std::ostream& os,
+    int max_decimal_places = rapidjson::PrettyWriter<rapidjson::OStreamWrapper>::kDefaultMaxDecimalPlaces) {
+  rapidjson::Document document;
+  document.SetObject();
+  OpenDDS::DCPS::copyToRapidJson(idl_value, document, document.GetAllocator());
+  rapidjson::OStreamWrapper osw(os);
+  rapidjson::PrettyWriter<rapidjson::OStreamWrapper> pretty_writer(osw);
+  if (max_decimal_places != rapidjson::PrettyWriter<rapidjson::OStreamWrapper>::kDefaultMaxDecimalPlaces) {
+    pretty_writer.SetMaxDecimalPlaces(max_decimal_places);
+  }
+  document.Accept(pretty_writer);
   osw.Flush();
   os << std::endl;
   return true;
