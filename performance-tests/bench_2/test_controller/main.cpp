@@ -387,9 +387,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Saving Scenario Allocation to File..." << std::endl;
       std::ofstream file(preallocated_scenario_output_path);
       if (file.is_open()) {
-        if (pretty && !idl_2_pretty_json(allocated_scenario, file)) {
-          throw std::runtime_error("Could not encode allocated scenario");
-        } else if (!pretty && !idl_2_json(allocated_scenario, file)) {
+        if ((pretty && !idl_2_pretty_json(allocated_scenario, file)) ||
+            (!pretty && !idl_2_json(allocated_scenario, file))) {
           throw std::runtime_error("Could not encode allocated scenario");
         }
       } else {
@@ -452,9 +451,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         total_worker_reports += report.node_reports[i].worker_reports.length();
         if (show_worker_logs) {
           for (CORBA::ULong j = 0; j < report.node_reports[i].worker_logs.length(); ++j) {
-            result_file << "=== Showing Log for Node " << report.node_reports[i].node_id << " Worker #" << report.node_reports[i].worker_ids[j] << " ===" << std::endl;
+            std::stringstream header;
+            header << "=== Showing Log for Node " << report.node_reports[i].node_id << " Worker #" << report.node_reports[i].worker_ids[j] << " ===" << std::endl;
+            result_file << header.str();
             result_file << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
-            std::cout << "=== Showing Log for Node " << report.node_reports[i].node_id << " Worker #" << report.node_reports[i].worker_ids[j] << " ===" << std::endl;
+            std::cout << header.str();
             std::cout << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
           }
         }
