@@ -348,12 +348,12 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
               << std::string(worker_reports[wr].log.in()) + "\n===\n";
             std::cerr << ss.str() << std::flush;
           } else {
-            WorkerReport report{};
+            WorkerReport worker_report{};
             std::stringstream ss;
             ss << worker_reports[wr].details << std::flush;
-            if (json_2_idl(ss, report)) {
+            if (json_2_idl(ss, worker_report)) {
               node_report.worker_reports.length(node_report.worker_reports.length() + 1);
-              node_report.worker_reports[node_report.worker_reports.length() - 1] = report;
+              node_report.worker_reports[node_report.worker_reports.length() - 1] = worker_report;
               node_report.worker_logs.length(node_report.worker_logs.length() + 1);
               node_report.worker_logs[node_report.worker_logs.length() - 1] = worker_reports[wr].log;
               node_report.worker_ids.length(node_report.worker_ids.length() + 1);
