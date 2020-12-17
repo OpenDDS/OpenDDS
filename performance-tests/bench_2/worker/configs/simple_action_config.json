@@ -79,8 +79,14 @@
         { "name": "data_buffer_bytes",
           "value": { "_d": "PVK_ULL", "ull_prop": 512 }
         },
+        { "name": "manual_rescheduling",
+          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+        },
         { "name": "write_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+        },
+        { "name": "final_wait_for_ack",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.7 }
         }
       ]
     }

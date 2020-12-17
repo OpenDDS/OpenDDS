@@ -243,6 +243,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -1081,7 +1082,7 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_specific_ack(const AckToken& token)
 {
-  return this->data_container_->wait_ack_of_seq(token.deadline(), token.sequence_);
+  return this->data_container_->wait_ack_of_seq(token.deadline(), token.deadline_is_infinite(), token.sequence_);
 }
 
 DDS::Publisher_ptr
@@ -1175,7 +1176,7 @@ DataWriterImpl::assert_liveliness()
     }
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (send_liveliness(MonotonicTimePoint::now()) == false) {
+    if (!send_liveliness(MonotonicTimePoint::now())) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -2034,7 +2035,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.message_id_ = message_id;
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
-  header_data.coherent_change_ = 0;
+  header_data.coherent_change_ = false;
 
   if (data) {
     header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -2416,14 +2417,14 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (send_liveliness(now) == false) {
+      if (!send_liveliness(now)) {
         liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       if (liveliness_asserted_) {
-        if (send_liveliness(now) == false) {
+        if (!send_liveliness(now)) {
           liveliness_lost = true;
         }
       }

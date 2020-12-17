@@ -634,6 +634,7 @@ ManagerImpl::processCreate(const PublicationUpdate* sample, const DDS::SampleInf
                                             sample->callback,
                                             sample->datawriter_qos,
                                             sample->transport_info,
+                                            sample->transport_context,
                                             sample->publisher_qos,
                                             sample->serialized_type_info,
                                             true)) {
@@ -676,6 +677,7 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
                                              sample->callback,
                                              sample->datareader_qos,
                                              sample->transport_info,
+                                             sample->transport_context,
                                              sample->subscriber_qos,
                                              sample->filter_class_name,
                                              sample->filter_expression,
@@ -846,6 +848,7 @@ ManagerImpl::processDeferred()
                                                current->callback,
                                                current->datawriter_qos,
                                                current->transport_info,
+                                               current->transport_context,
                                                current->publisher_qos,
                                                current->serialized_type_info,
                                                true)) {
@@ -881,6 +884,7 @@ ManagerImpl::processDeferred()
                                                 current->callback,
                                                 current->datareader_qos,
                                                 current->transport_info,
+                                                current->transport_context,
                                                 current->subscriber_qos,
                                                 current->filter_class_name,
                                                 current->filter_expression,

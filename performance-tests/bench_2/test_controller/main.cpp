@@ -6,8 +6,14 @@
 #include <json_conversion.h>
 
 #ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)
+#    if __has_warning("-Wclass-memaccess")
+#      pragma GCC diagnostic ignored "-Wclass-memaccess"
+#    endif
+#  elif __GNUC__ > 7
+#    pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  endif
 #endif
 #include "BenchTypeSupportImpl.h"
 #ifdef __GNUC__
@@ -224,7 +230,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--overwrite-result"))) {
         overwrite_result = true;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-bench-partition-suffix"))) {
-        overrides.bench_partition_suffix = get_option_argument(i, argc, argv);
+        std::string suffix = get_option_argument(i, argc, argv);
+        overrides.bench_partition_suffix = suffix == "none" ? "" : suffix;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-create-time"))) {
         overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-enable-time"))) {

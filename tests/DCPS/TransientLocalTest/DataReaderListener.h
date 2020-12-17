@@ -44,14 +44,23 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_reads() const {
-    return num_reads_;
+  long durable_reads() const {
+    return durable_reads_;
   }
 
-  bool ok_;
+  long volatile_reads() const {
+    return volatile_reads_;
+  }
+
+  bool ok() {
+    return ok_;
+  }
 
 private:
-  long num_reads_, last_non_durable_;
+  long durable_reads_;
+  long volatile_reads_;
+  long last_volatile_;
+  bool ok_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

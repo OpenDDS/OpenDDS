@@ -48,7 +48,6 @@ const char permissions_file[] = "file:./permissions_2_signed.p7s";
 #endif
 
 bool reliable = false;
-bool wait_for_acks = false;
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {

@@ -1722,7 +1722,7 @@ bool CryptoBuiltInImpl::decode_rtps_message(
   CryptoHeader ch;
   CryptoFooter cf;
   bool haveCryptoHeader = false, haveCryptoFooter = false;
-  const char* afterSrtpsPrefix;
+  const char* afterSrtpsPrefix = 0;
   unsigned int sizeOfAuthenticated, sizeOfEncrypted;
   const char* encrypted = 0;
 

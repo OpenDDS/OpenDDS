@@ -377,6 +377,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     AssociationData data;
     data.remote_id_ = writer.writerId;
     data.remote_data_ = writer.writerTransInfo;
+    data.remote_transport_context_ = writer.transportContext;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
     data.remote_reliable_ =
@@ -736,7 +737,7 @@ RecorderImpl::remove_all_associations()
   }
 
   try {
-    CORBA::Boolean dont_notify_lost = 0;
+    CORBA::Boolean dont_notify_lost = false;
 
     if (0 < size) {
       remove_associations(writers, dont_notify_lost);

@@ -106,6 +106,13 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   }
 };
 
+struct OpenDDS_Dcps_Export EntityId_tKeyLessThan {
+  bool operator()(const EntityId_t& v1, const EntityId_t& v2) const
+  {
+    return std::memcmp(&v1, &v2, sizeof(EntityId_t)) < 0;
+  }
+};
+
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
 const size_t guid_cdr_size = 16;
@@ -131,6 +138,13 @@ struct GuidPrefixEqual {
   {
     return std::memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
   }
+
+  bool
+  operator() (const GUID_t& lhs, const GUID_t& rhs) const
+  {
+    return std::memcmp(&lhs.guidPrefix, &rhs.guidPrefix, sizeof(GuidPrefix_t)) == 0;
+  }
+
 };
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -174,13 +188,24 @@ OpenDDS_Dcps_Export std::istream&
 operator>>(std::istream& is, GUID_t& rhs);
 #endif
 
-OpenDDS_Dcps_Export inline GUID_t make_guid(
-  const GuidPrefix_t& prefix, const EntityId_t& entity)
+inline void assign(GuidPrefix_t& dest, const GuidPrefix_t& src)
 {
-  GUID_t result;
-  std::memcpy(result.guidPrefix, prefix, sizeof(GuidPrefix_t));
-  std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
-  return result;
+  std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
+}
+
+inline DCPS::RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
+{
+  DCPS::RepoId id;
+  assign(id.guidPrefix, prefix);
+  id.entityId = entity;
+  return id;
+}
+
+inline DCPS::RepoId make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
+{
+  DCPS::RepoId id = participant_id;
+  id.entityId = entity;
+  return id;
 }
 
 OpenDDS_Dcps_Export

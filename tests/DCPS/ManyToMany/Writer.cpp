@@ -33,7 +33,7 @@ Writer::write()
     const unsigned int subscribers = options_.num_sub_processes *
       options_.num_sub_participants * options_.num_readers;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%T (%P|%t) Writers wait for %d subscribers\n"),
+               ACE_TEXT("(%P|%t) Writers wait for %d subscribers\n"),
                subscribers));
 
     // Block until Subscriber is available
@@ -56,7 +56,7 @@ Writer::write()
       handles.push_back(message_dw->register_instance(writer->message));
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Writers matched\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
 
     const ACE_Time_Value delay(options_.delay_msec / 1000,
                                (options_.delay_msec % 1000) * 1000);
@@ -74,7 +74,7 @@ Writer::write()
         ++writer->message.sample_id;
 
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("%T (%P|%t) Writing Message: process_id = %d ")
+                   ACE_TEXT("(%P|%t) Writing Message: process_id = %d ")
                    ACE_TEXT("participant_id = %d ")
                    ACE_TEXT("writer_id = %d ")
                    ACE_TEXT("sample_id = %d\n"),
@@ -95,7 +95,7 @@ Writer::write()
       }
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Messages written, waiting for readers to disconnect\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Messages written, waiting for readers to disconnect\n")));
 
     // Let readers disconnect first, once they either get the data or
     // give up and time-out.  This allows the writer to be alive while

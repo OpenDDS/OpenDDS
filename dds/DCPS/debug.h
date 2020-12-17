@@ -75,6 +75,9 @@ public:
   bool new_entity_error;
   bool new_entity_warn;
 
+  /// Cleanup
+  bool cleanup_error;
+
   /// Permissions and Governance
   bool access_warn;
 

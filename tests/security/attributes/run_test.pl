@@ -13,8 +13,6 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-use Time::Piece;
-use Time::Seconds;
 use Getopt::Long;
 
 my $scenario;
@@ -486,13 +484,8 @@ foreach my $gov_file (@gov_files) {
         #if ($status != 0) {
           $current_test_num++;
 
-          my $total_test_percent = (100.0 * $current_test_num) / $total_test_count;
-          my $current_time = localtime;
-          my $elapsed_time = $current_time - $test_start_time;
-          my $estimate = $elapsed_time->seconds * ($total_test_count - $current_test_num) / ($current_test_num);
-
           if ($total_test_count != 1) {
-            print "\ntest #$current_test_num of $total_test_count. Estimating $estimate seconds remaining.\n";
+            print "\ntest #$current_test_num of $total_test_count.\n";
           }
 
           #print "$gov_file $pub_perm_file $sub_perm_file $topic_name $status\n\n-----------\n\n";

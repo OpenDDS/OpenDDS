@@ -98,7 +98,8 @@ public:
   bool shutting_down() { return shutdown_flag_.value(); }
 
   bool associated() const;
-  bool has_discovered_participant(const DCPS::RepoId& guid);
+  bool has_discovered_participant(const DCPS::RepoId& guid) const;
+  ACE_CDR::ULong get_participant_flags(const DCPS::RepoId& guid) const;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
@@ -109,7 +110,6 @@ public:
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
-  void volatile_association_complete(const DCPS::RepoId& sender);
   DDS::OctetSeq local_participant_data_as_octets() const;
 #endif
 

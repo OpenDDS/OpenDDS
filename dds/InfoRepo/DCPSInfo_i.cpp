@@ -34,6 +34,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace {
+  const ACE_CDR::ULong transportContextDefault = 0xffffffff;
+}
+
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
                                        , bool reincarnate
@@ -372,9 +376,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataWriterRemote_ptr publication,
   const DDS::DataWriterQos & qos,
-  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-  const DDS::PublisherQos & publisherQos,
-  const DDS::OctetSeq & serializedTypeInfo)
+  const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+  const DDS::PublisherQos& publisherQos,
+  const DDS::OctetSeq& serializedTypeInfo)
 {
   if (CORBA::is_nil(publication)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -439,6 +443,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                    dispatchingPublication.in(),
                    qos,
                    transInfo,
+                   transportContextDefault,
                    publisherQos,
                    serializedTypeInfo));
 
@@ -462,7 +467,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                           , const_cast<DDS::PublisherQos&>(publisherQos)
                           , const_cast<DDS::DataWriterQos&>(qos)
                           , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
-                          , csi
+                          , transportContextDefault, csi
                           , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
     this->um_->create(actor);
 
@@ -488,6 +493,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                                     const char* pub_str,
                                     const DDS::DataWriterQos & qos,
                                     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                                    ACE_CDR::ULong transportContext,
                                     const DDS::PublisherQos & publisherQos,
                                     const DDS::OctetSeq & serializedTypeInfo,
                                     bool associate)
@@ -560,6 +566,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                    publication.in(),
                    qos,
                    transInfo,
+                   transportContext,
                    publisherQos,
                    serializedTypeInfo));
 
@@ -748,6 +755,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
                      dispatchingSubscription.in(),
                      qos,
                      transInfo,
+                     transportContextDefault,
                      subscriberQos,
                      filterClassName,
                      filterExpression,
@@ -777,7 +785,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
                           , const_cast<DDS::SubscriberQos&>(subscriberQos)
                           , const_cast<DDS::DataReaderQos&>(qos)
                           , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
-                          , csi
+                          , transportContextDefault, csi
                           , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
 
     this->um_->create(actor);
@@ -806,6 +814,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const char* sub_str,
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+  ACE_CDR::ULong transportContext,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterClassName,
   const char* filterExpression,
@@ -882,6 +891,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
                    subscription.in(),
                    qos,
                    transInfo,
+                   transportContext,
                    subscriberQos,
                    filterClassName,
                    filterExpression,
@@ -2292,6 +2302,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                                 , sub->topicId, sub->actorId
                                 , sub->callback.c_str(), sub->drdwQos
                                 , sub->transportInterfaceInfo
+                                , sub->transportContext
                                 , sub->pubsubQos
                                 , sub->contentSubscriptionProfile.filterClassName
                                 , sub->contentSubscriptionProfile.filterExpr
@@ -2326,7 +2337,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
     if (!this->add_publication(pub->domainId, pub->participantId
                                , pub->topicId, pub->actorId
                                , pub->callback.c_str() , pub->drdwQos
-                               , pub->transportInterfaceInfo
+                               , pub->transportInterfaceInfo, pub->transportContext
                                , pub->pubsubQos
                                , pub->serializedTypeInfo
                                , true)) {
