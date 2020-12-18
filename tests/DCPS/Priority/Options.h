@@ -103,4 +103,3 @@ class Options  {
 #endif  /* __ACE_INLINE__ */
 
 #endif // OPTIONS_H
-

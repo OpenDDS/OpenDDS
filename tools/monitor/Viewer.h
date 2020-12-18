@@ -108,4 +108,3 @@ class Viewer : public QMainWindow {
 } // End of namespace Monitor
 
 #endif /* VIEWER_H */
-

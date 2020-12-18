@@ -148,11 +148,7 @@ bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
     }
   }
 
-  if (filter_root_->has_non_key_fields(meta)) {
-    return true;
-  }
-
-  return false;
+  return filter_root_->has_non_key_fields(meta);
 }
 
 namespace {

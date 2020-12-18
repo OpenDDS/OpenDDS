@@ -398,4 +398,3 @@ Subscriber::rawData( std::ostream& str) const
 }
 
 } // End of namespace Test
-

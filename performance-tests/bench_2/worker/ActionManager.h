@@ -8,7 +8,8 @@ namespace Bench {
 
 class ActionManager {
 public:
-  explicit ActionManager(const ActionConfigSeq& configs, ActionReportSeq& reports, Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map);
+  explicit ActionManager(const ActionConfigSeq& configs, ActionReportSeq& reports,
+    Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, Builder::ContentFilteredTopicMap& cft_map);
 
   void start();
   void stop();
@@ -32,4 +33,3 @@ protected:
 };
 
 }
-

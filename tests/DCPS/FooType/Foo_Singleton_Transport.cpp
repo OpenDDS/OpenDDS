@@ -24,5 +24,3 @@ Foo Singleton_Transport::get_foo ()
   Foo retVal = current_foo_;
   return retVal;
 }
-
-

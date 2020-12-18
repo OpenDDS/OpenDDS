@@ -373,6 +373,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     AssociationData data;
     data.remote_id_ = writer.writerId;
     data.remote_data_ = writer.writerTransInfo;
+    data.remote_transport_context_ = writer.transportContext;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
     data.remote_reliable_ =
@@ -502,23 +503,9 @@ RecorderImpl::add_association(const RepoId&            yourId,
     }
   }
 
-  if (!active) {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->association_complete(this->domain_id_,
-                                this->participant_servant_->get_id(),
-                                this->subscription_id_, writer.writerId);
-  }
-
   // if (this->monitor_) {
   //   this->monitor_->report();
   // }
-}
-
-void
-RecorderImpl::association_complete(const RepoId& /*remote_id*/)
-{
-  // For the current DCPSInfoRepo implementation, the DataReader side will
-  // always be passive, so association_complete() will not be called.
 }
 
 void
@@ -746,7 +733,7 @@ RecorderImpl::remove_all_associations()
   }
 
   try {
-    CORBA::Boolean dont_notify_lost = 0;
+    CORBA::Boolean dont_notify_lost = false;
 
     if (0 < size) {
       remove_associations(writers, dont_notify_lost);

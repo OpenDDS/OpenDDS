@@ -208,4 +208,3 @@ TcpPublisher::dump_stats ()
             << std_dev (round_trip)
             << endl;
 }
-

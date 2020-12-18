@@ -1485,4 +1485,3 @@ std::string DCPS_IR_Domain::dump_to_string(const std::string& prefix, int depth)
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-

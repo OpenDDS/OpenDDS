@@ -307,6 +307,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
   data.remote_reliable_ =
@@ -348,7 +349,6 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     return;
   }
 
-  const bool active = flags & ASSOC_ACTIVE;
   {
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
@@ -375,7 +375,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     if (!participant)
       return;
 
-    DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
 
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
@@ -438,23 +438,9 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     }
   }
 
-  if (!active) {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-
-    disco->association_complete(domain_id_, dp_id_,
-        subscription_id_, remote_id);
-  }
-
   if (monitor_) {
     monitor_->report();
   }
-}
-
-void
-DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
-{
-  // For the current DCPSInfoRepo implementation, the DataReader side will
-  // always be passive, so association_complete() will not be called.
 }
 
 void

@@ -67,7 +67,8 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id);
+                                            const RepoId& remote_id,
+                                            bool disassociate);
 
   virtual bool configure_i(TcpInst& config);
 
@@ -96,8 +97,7 @@ private:
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const TcpConnection_rch& connection);
 
-  bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                       const TransportClient_rch& client, const RepoId& remote_id);
+  bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().

@@ -236,4 +236,3 @@ Test::DataReaderListener::on_budget_exceeded (
     const ::OpenDDS::DCPS::BudgetExceededStatus&)
 {
 }
-

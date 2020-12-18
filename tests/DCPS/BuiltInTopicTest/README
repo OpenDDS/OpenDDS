@@ -22,4 +22,3 @@ prst_repo_run_test.pl does something similar with InfoRepo persistence
 enabled. The InfoRepo is shutdown in the middle of the test and new Repo
 is started. The new Repo should read the persistence data and the test
 will verify the BIT data with the second monitor.
-

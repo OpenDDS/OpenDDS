@@ -13,6 +13,8 @@
 
 #include <MultiTopicTestTypeSupportImpl.h>
 
+#include "../../Utils/WaitForSample.h"
+
 #include <stdexcept>
 #include <string>
 #include <ostream>
@@ -306,7 +308,7 @@ const Duration_t max_wait = {10, 0};
 void check_rc(ReturnCode_t ret, const char* message, const char* extra_message = 0)
 {
   if (ret != RETCODE_OK) {
-    std::string msg = std::string("Failed to") + message;
+    std::string msg = std::string("Failed to ") + message;
     if (extra_message) {
       msg += std::string(" ") + extra_message;
     }
@@ -367,6 +369,7 @@ bool check_bits(const Publisher_var& pub)
   DomainParticipant_var pub_dp = pub->get_participant();
   Subscriber_var bit_sub = pub_dp->get_builtin_subscriber();
   DataReader_var bit_dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
+  Utils::waitForSample(bit_dr);
   SubscriptionBuiltinTopicDataDataReader_var dr =
     SubscriptionBuiltinTopicDataDataReader::_narrow(bit_dr);
   SubscriptionBuiltinTopicDataSeq data;

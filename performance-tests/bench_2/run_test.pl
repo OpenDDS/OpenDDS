@@ -57,9 +57,18 @@ elsif ($test->flag('sm10')) {
   $tc_opts .= " showtime_mixed_10 --override-start-time 25";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('sm20')) {
+  $tc_opts .= " showtime_mixed_20 --override-start-time 35";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('sm30')) {
   $tc_opts .= " showtime_mixed_30 --override-start-time 45";
   $is_rtps_disc = 1;
+}
+elsif ($test->flag('tag')) {
+  $tc_opts .= " simple_tags --tag continuous --tag control --tag processed --tag unknown";
+  $is_rtps_disc = 1;
+  $test->process("node_controller2", "node_controller/node_controller", $nc_opts);
 }
 else {
   $flag_found = 0;
@@ -74,6 +83,9 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log") unless $
 $test->process("node_controller", "node_controller/node_controller", $nc_opts);
 $test->process("test_controller", "test_controller/test_controller", $tc_opts);
 
+if ($test->flag('tag')) {
+  $test->start_process("node_controller2");
+}
 $test->start_process("node_controller");
 $test->start_process("test_controller");
 

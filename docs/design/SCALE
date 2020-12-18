@@ -219,4 +219,3 @@ entities such as DomainParticipants and Topics, however bad
 configuration can result in an application creating (and
 destroying) an arbitrary number of Subscribers, Publishers,
 DataReaders, DataWriters, and Transports.
-

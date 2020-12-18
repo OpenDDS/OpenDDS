@@ -19,6 +19,7 @@
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  long stage = 0;
   std::stringstream ss;
   ss << "(" << ACE_OS::getpid() << ")";
   const std::string pid = ss.str();
@@ -26,7 +27,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   {
     try {
 
-      std::cerr << pid << "Pub Creating App\n";
+      std::cerr << pid << "Pub Stage Creating App\n";
       ::TestUtils::DDSApp dds(argc, argv);
 
       std::cerr << pid << "Pub Creating topic\n";
@@ -36,7 +37,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       args.add_long("messages", 60);
       ::TestUtils::Options options(argc, argv);
 
-      long stage = options.get<long>("stage");
+      stage = options.get<long>("stage");
       if (stage != 1 && stage != 2) {
         std::cerr << "ERROR: " << pid
                   << "Pub command line parameter \"stage\" set to "
@@ -64,7 +65,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::Xyz::FooDataWriter_var msg_writer;
       msg_writer = topic_facade.writer();
 
-      for ( ; stage < 3; ++stage, ++id) {
+      for (long stg = stage; stg < 3; ++stg, ++id) {
 
         {
           // each stage number will wait for that same number of readers readers
@@ -81,7 +82,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
           char number[20];
 
-          std::cerr << pid << "Pub Stage " << stage << " sending\n";
+          std::cerr << pid << "Pub Stage " << stage << " sending id=" << id << "\n";
           for (int i = 0; i<msg_count; ++i) {
             // Prepare next sample
             sprintf(number, "foo %d", i);
@@ -111,7 +112,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::cerr << pid << "Pub Stage " << stage
                   << " done waiting for acks from sub" << std::endl;
       }
-      std::cerr << pid << "Pub DDSTopic going out of scope" << std::endl;
+      std::cerr << pid << "Pub Stage " << stage << " DDSTopic going out of scope" << std::endl;
     } catch (const CORBA::Exception& e) {
       e._tao_print_exception("Exception caught in main():");
       return -1;
@@ -123,8 +124,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         msg.c_str()), -1);
     }
 
-    std::cerr << pid << "Pub DDSApp going out of scope (shutdown)" << std::endl;
+    std::cerr << pid << "Pub Stage " << stage << " DDSApp going out of scope (shutdown)" << std::endl;
   }
-  std::cerr << pid << "Pub returning status=0" << std::endl;
+  std::cerr << pid << "Pub Stage " << stage << " returning status=0" << std::endl;
   return 0;
 }

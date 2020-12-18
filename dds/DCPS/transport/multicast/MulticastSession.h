@@ -69,10 +69,12 @@ public:
   virtual bool is_reliable() { return false;}
 
   void syn_received(const Message_Block_Ptr& control);
-  void send_syn();
+  void send_all_syn();
+  void send_syn(const RepoId& local_writer,
+                const RepoId& remote_reader);
 
   void synack_received(const Message_Block_Ptr& control);
-  void send_synack();
+  void send_synack(const RepoId& local_reader, const RepoId& remote_writer);
   virtual void send_naks() {}
 
   virtual bool check_header(const TransportHeader& header) = 0;
@@ -88,6 +90,13 @@ public:
   virtual void stop();
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
+
+  // Reliability.
+  void add_remote(const RepoId& local,
+                  const RepoId& remote);
+
+  void remove_remote(const RepoId& local,
+                     const RepoId& remote);
 
 protected:
   MulticastDataLink* link_;
@@ -123,8 +132,18 @@ protected:
   TransportReassembly reassembly_;
 
   bool acked_;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) PendingRemoteMap;
+  // For the active side, the pending_remote_map_ is used as a work queue.
+  // The active side will send SYNs to all of the readers until it gets a SYNACK.
+  // For the passive side, the pending_remote_map_ is used as a filter.
+  // The passive side only responds to SYNs that correspond to an association.
+  PendingRemoteMap pending_remote_map_;
 
 private:
+  void remove_remote_i(const RepoId& local,
+                       const RepoId& remote);
+
+
   ACE_Thread_Mutex ack_lock_;
   RcHandle<SynWatchdog> syn_watchdog_;
 };
@@ -139,4 +158,3 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_MULTICASTSESSION_H */
-

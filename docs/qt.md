@@ -129,4 +129,3 @@ to use Qt correctly:
 | `QT5_BINDIR`  | Qt Tools Location     | `QTDIR/bin`     |
 | `QT5_LIBDIR`  | Qt Libraries Location | `QTDIR/lib`     |
 | `QT5_SUFFIX`  | Qt Tools Name Suffix  | Blank           |
-

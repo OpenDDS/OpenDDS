@@ -448,9 +448,14 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 void
 OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
+  if (!connection_ || !send_strategy_) {
+    return;
+  }
+
+  // We have a connection.
+  // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
-  PairVec to_send;
-  PairVec to_call;
+  PairVec to_call_and_send;
 
   {
     GuardType guard(strategy_lock_);
@@ -458,9 +463,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
         GuidConverter conv(it2->first);
-        to_send.push_back(std::make_pair(it2->first, it->first));
-        if (!conv.isWriter()) {
-          to_call.push_back(std::make_pair(it2->first, it->first));
+        if (conv.isReader()) {
+          to_call_and_send.push_back(std::make_pair(it2->first, it->first));
         }
       }
     }
@@ -468,11 +472,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
   send_strategy_->link_released(false);
 
-  for (PairVec::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
+  for (PairVec::const_iterator it = to_call_and_send.begin(); it != to_call_and_send.end(); ++it) {
     invoke_on_start_callbacks(it->first, it->second, true);
-  }
-
-  for (PairVec::const_iterator it = to_send.begin(); it != to_send.end(); ++it) {
     send_association_msg(it->first, it->second);
   }
 }
@@ -553,6 +554,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
 {
   const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener, reliable);
   send_association_msg(local_subscription_id, remote_publication_id);
+
   return result;
 }
 

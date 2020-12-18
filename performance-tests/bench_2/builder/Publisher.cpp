@@ -42,9 +42,9 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
       ss << "publisher listener creation failed for subscriber '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
-      PublisherListener* savvy_listener_ = dynamic_cast<PublisherListener*>(listener_.in());
-      if (savvy_listener_) {
-        savvy_listener_->set_publisher(*this);
+      PublisherListener* savvy_listener = dynamic_cast<PublisherListener*>(listener_.in());
+      if (savvy_listener) {
+        savvy_listener->set_publisher(*this);
       }
     }
   }
@@ -62,7 +62,9 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   datawriters_.reset(new DataWriterManager(config.datawriters, report.datawriters, publisher_, topics, writer_map));
 }
 
-Publisher::~Publisher() {
+Publisher::~Publisher()
+{
+  detach_listeners();
   datawriters_.reset();
   Log::log() << "Deleting publisher: " << name_ << std::endl;
   if (!CORBA::is_nil(publisher_.in())) {
@@ -72,7 +74,8 @@ Publisher::~Publisher() {
   }
 }
 
-bool Publisher::enable(bool throw_on_error) {
+bool Publisher::enable(bool throw_on_error)
+{
   bool success = (publisher_->enable() == DDS::RETCODE_OK);
   if (!success && throw_on_error) {
     std::stringstream ss;
@@ -82,5 +85,19 @@ bool Publisher::enable(bool throw_on_error) {
   return success && datawriters_->enable(throw_on_error);
 }
 
+void Publisher::detach_listeners()
+{
+  if (listener_) {
+    PublisherListener* savvy_listener = dynamic_cast<PublisherListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_publisher(*this);
+    }
+    if (publisher_) {
+      publisher_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
+    }
+    listener_ = 0;
+  }
+  datawriters_->detach_listeners();
 }
 
+}

@@ -33,6 +33,10 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
+// TODO: When the ParticipantLocationTopic is retired, then it may be
+// possible to disable the secure participant writer in the RtpsRelay.
+// If it is disabled, then the is_ps_writer_ flag in the RTPS
+// transport can be removed.
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE;
 

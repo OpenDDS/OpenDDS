@@ -1,0 +1,9 @@
+#ifndef FUEL_STATS_IDL
+#define FUEL_STATS_IDL
+
+struct FuelStats {
+    long mpg;
+    long range;
+};
+
+#endif /* FUEL_STATS_IDL */

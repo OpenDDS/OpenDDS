@@ -784,18 +784,6 @@ InfoRepoDiscovery::update_subscription_params(DDS::DomainId_t domainId,
 // Managing reader/writer associations:
 
 void
-InfoRepoDiscovery::association_complete(DDS::DomainId_t domainId,
-                                        const RepoId& participantId,
-                                        const RepoId& localId, const RepoId& remoteId)
-{
-  try {
-    get_dcps_info()->association_complete(domainId, participantId, localId, remoteId);
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("ERROR: InfoRepoDiscovery::association_complete: ");
-  }
-}
-
-void
 InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
 {
   DataReaderMap::iterator drr = dataReaderMap_.find(subscriptionId);

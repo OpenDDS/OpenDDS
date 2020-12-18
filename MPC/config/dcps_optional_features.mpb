@@ -61,4 +61,3 @@ feature (!no_opendds_security) : taoidldefaults, dcps_ts_defaults {
 
 project: dcps_optional_bidir_giop {
 }
-

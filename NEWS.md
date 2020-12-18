@@ -4,18 +4,69 @@
 OpenDDS 3.15 is currently in development, so this list might change.
 
 ### Additions:
-- Support for the C++11 mapping in the CMake module. `-Lc++11` can now be
-  passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`. (#1728)
+- Scalability and performance improvements (#1525, #1610, #1616, #1662, #1792, #1927)
+- Support for dynamic configuration of discovery and transport from config file templates (#1764)
+- Some forms of IDL4 Anonymous Types are supported, see Developer's Guide (#1754)
+- Added the Observer interface, which allows untyped access to data samples (#1851)
+- Built-In Topics with RTPS Discovery support disconnect/reconnect cycles (#1924)
+  - This feature required adopting the upcoming DDS spec (1.5) change to BuiltinTopicKey_t: it is now based on a 16-byte opaque identifier.
+- Added an OpenDDS-specific Built-In Topic for internal thread status reporting (#1906)
+- Added an option to omit DomainParticipant's USER_DATA QoS from in-the-clear messages when security is enabled (#2066)
+- Added options to the CMake module, see `docs/cmake.md` (#2075)
+
+### Platform Support and Dependencies:
+- Improved Android support (#1634, #2171)
+- Improved IPv6 support (#1639)
+- The only DOCGroup ACE/TAO versions supported are the current releases from the 6.x/2.x series (#2070)
+- Compatibility with Wireshark 3.4 (#2076)
 
 ### Fixes:
+- Fixed bugs in RtpsRelay/ICE/STUN (#1595, #1605, #1603, #1628, #1625, #1636)
+- Fixed some rtps_udp fragmentation issues (#1643, #1800, #1884)
+- Fixed an rtps_udp protocol issue (#1654)
+- Fixed bug with wrong status mask used for publication matched event (#1659)
+- Fixed a bug where SpdpLocalAddress was parsed incorrectly (#1743)
+- Improve efficiency of waiting on pending writes (#1831)
+- Reduced the chances for GUID collision in RTPS Discovery multi-domain processes (#2107)
+- Explicit initialization of reliable RTPS readers to more closely follow DDS spec (#2146)
+
+### Notes:
+- Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake module is now deprecated (#1741)
+
+## Version 3.14.1 of OpenDDS
+OpenDDS 3.14.1 was released on Nov 20 2020.
+
+### Fixes:
+- Improved robustness when using multiple secure participants in the same process (#1593)
+- Content filter fix for instance registration with non-key filters (#1596)
+- Prevent Potential Infinite Processing Loop in ReactorInterceptor (#1598)
+- Android platform improvements (#1626)
+- Network Config Modifier bugfix (#1648)
+- Fix deadlock in OfferedDeadlineWatchdog (#1567)
+- IDL-to-C++11: corrected mapping of enum constants when enum is in a module (#1661)
+- IDL-to-C++11: fix for enum-discriminated unions (#1950)
+- Fixed a corner case for IDL union code generation in Java (#1671, #1676)
+- Fixed Java code generation when an included IDL file has @topic (#1695)
+- Correctly handle duplicate underlying array types within idl2jni (#1780)
+- Participants can reauthenticate and exchange data after network partition (#1723)
+- DCPSDefaultAddress parsing and integration with NetworkConfigMonitor (#1727, #1752, #2021)
+- Security: checking permissions based on Partition QoS (#1733)
+- Allow Built-in Security Plugin to be Reloaded in a Static Build (#1737)
+- Prevent invalid access in TransportClient::PendingAssocTimer::ScheduleCommand during shutdown (#1811)
+- Additional validity check for submessage parsing (#1844)
+- Reader Data Lifecycle QoS configurability for Built-In Topics (#1940)
+- Fix NetworkInterface interaction with MulticastInterface addresses (#1956)
+- Fixed loopback interface multicast joins (#1964)
+- Fixed usage of netlink sockets for LinuxNetworkConfigMonitor (#1985)
+- Fixed bug in zero-copy sequences that grow from a nonzero length (#2039)
 - CMake Module:
   - Fixed `OPENDDS_TARGET_SOURCES` setting global include paths. (#1741)
   - Fixed situations requiring C++ source files to be passed to
     `OPENDDS_TARGET_SOURCES`. (#1741)
 
-### Notes:
-- Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake
-  module is now deprecated. (#1741)
+### Additions:
+- Support for the C++11 mapping in the CMake module. `-Lc++11` can now be
+  passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`. (#1728, #1736)
 
 ## Version 3.14 of OpenDDS
 OpenDDS 3.14 was released on Mar  5 2020.

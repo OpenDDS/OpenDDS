@@ -35,4 +35,3 @@ class RepoSelect : public QDialog {
 } // End of namespace Monitor
 
 #endif /* REPOSELECT_H */
-

@@ -171,6 +171,8 @@ IDL Definition
   typedef sequence<WorkerPrototype> WorkerPrototypes;
 
   struct NodePrototype {
+    // Assign to a node controller with a name that matches this wildcard
+    string name_wildcard;
     WorkerPrototypes workers;
     // Number of Nodes to spawn using this prototype (Must be >=1)
     unsigned long count;
@@ -205,6 +207,7 @@ Annotated Example
     "desc": "This shows the structure of the scenario configuration",
     "nodes": [
       {
+        "name_wildcard": "example_nc_*",
         "workers": [
           {
             "config": "daemon.json",
@@ -236,9 +239,13 @@ and vice-versa. They may also wind up all together on the same node, depending
 on the number of available nodes. And finally, one “master” process will be
 started wherever there is room available.
 
-If node “prototypes” are marked exclusive, the test controller will attempt to
-allocate them exclusively to their own node controller. If not enough node
-controllers exist to honor all the exclusive nodes, the test controller will
+The “name_wildcard” field is used to filter the ``node_controller`` instances
+that can be used to host the nodes in the current node config - only the
+``node_controller`` instances with names matching the wildcard can be used. If
+the “name_wildcard” is omitted or its value is empty, any ``node_controller``
+can be used. If node “prototypes” are marked exclusive, the test controller will
+attempt to allocate them exclusively to their own node controllers. If not enough
+node controllers exist to honor all the exclusive nodes, the test controller will
 fail with an error message.
 
 Worker Configuration Files
@@ -272,12 +279,16 @@ IDL Definition
   typedef sequence<string> StringSeq;
   typedef sequence<double> DoubleSeq;
 
-  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
+  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_STRING_SEQ, PVK_STRING_SEQ_SEQ, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
   union PropertyValue switch (PropertyValueKind) {
     case PVK_TIME:
       TimeStamp time_prop;
     case PVK_STRING:
       string string_prop;
+    case PVK_STRING_SEQ:
+      StringSeq string_seq_prop;
+    case PVK_STRING_SEQ_SEQ:
+      StringSeqSeq string_seq_seq_prop;
     case PVK_DOUBLE:
       double double_prop;
     case PVK_DOUBLE_SEQ:
@@ -330,6 +341,7 @@ IDL Definition
     string transport_config_name;
     DDS::DataReaderQos qos;
     DataReaderQosMask qos_mask;
+    StringSeq tags;
   };
   typedef sequence<DataReaderConfig> DataReaderConfigSeq;
 
@@ -361,6 +373,14 @@ IDL Definition
 
   // Topic
 
+  struct ContentFilteredTopic {
+    string cft_name;
+    string cft_expression;
+    DDS::StringSeq cft_parameters;
+  };
+
+  typedef sequence<ContentFilteredTopic> ContentFilteredTopicSeq;
+
   struct TopicConfig {
     string name;
     string type_name;
@@ -369,6 +389,7 @@ IDL Definition
     string listener_type_name;
     unsigned long listener_status_mask;
     string transport_config_name;
+    ContentFilteredTopicSeq content_filtered_topics;
   };
   typedef sequence<TopicConfig> TopicConfigSeq;
 
@@ -563,6 +584,19 @@ write_action below).
 
 ::
 
+              "content_filtered_topics": [
+                {
+                  "cft_name": "cft_1",
+                  "cft_expression": "filter_class > %0",
+                  "cft_parameters": ["2"]
+                }
+              ]
+
+List of content filtered topics. Note "cft_name". Its value can be used
+in DataReader "topic_name" to use the content filter.
+
+::
+
             }
           ],
          "subscribers": [
@@ -591,11 +625,19 @@ bitmask for all listener events (i.e. ``2^32 - 1``).
 ::
 
                   "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                  "qos_mask": { "reliability": { "has_kind": true } }
+                  "qos_mask": { "reliability": { "has_kind": true } },
 
 DataReaders default to best effort QoS, so here we are setting the reader to
 reliable QoS and flagging the ``qos_mask`` appropriately in order to get a
 reliable datareader.
+
+::
+
+                  "tags": [ "my_topic", "reliable_transport" ]
+
+The config can specify a list of tags associated with each data reader. The
+statistics for each tag is computed in addition to the overall statistics and
+can be printed out at the end of the run by the ``test_controller``.
 
 ::
 
@@ -643,7 +685,7 @@ A list of worker 'actions' to start once the test 'start' period begins.
         "name": "write_action_01",
         "type": "write",
 
-Current valid types are "write" and "forward"
+Current valid types are "write", "forward", and "set_cft_parameters"
 
 ::
 
@@ -672,9 +714,74 @@ case, twice a second.
 ::
 
             "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+          },
+
+::
+
+          { "name": "filter_class_start_value",
+            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+          },
+          { "name": "filter_class_stop_value",
+            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+          },
+          { "name": "filter_class_increment",
+            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+          }
+
+Value range and increment for "filter_class" data variable,
+used when writing data. This variable is an unsigned integer
+intended to be used for content filtered topics "set_cft_parameters" actions
+
+::
+
+        ]
+      },
+
+      { "name": "cft_action_01",
+        "type": "set_cft_parameters",
+        "params": [
+          { "name": "content_filtered_topic_name",
+            "value": { "_d": "PVK_STRING", "string_prop": "cft_1" }
+          },
+          { "name": "max_count",
+            "value": { "_d": "PVK_ULL", "ull_prop": 3 }
+          },
+
+Maximum count of "Set" actions to be taken
+
+::
+
+          { "name": "param_count",
+            "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+          },
+
+Number of parameters to be set
+
+::
+
+          { "name": "set_frequency",
+            "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+          },
+
+The frequency for set action, per second
+
+::
+
+          { "name": "acceptable_param_values",
+            "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
+          },
+
+Lists of allowed values to set to, for each parameter. Worker will iterate
+throught the list sequentially unless "random_order" flag (below) is specified
+
+::
+
+          { "name": "random_order",
+            "value": { "_d": "PVK_ULL", "ull_prop": 1 }
           }
         ]
-      }
+    }
+
     ]
   }
 
@@ -741,6 +848,18 @@ This is a subset of the options. Use ``--help`` option to see all the options.
     Overwrite individual worker configs to start their test actions (writes &
     forwards) N seconds from now (absolute time reference)
 
+.. option:: --tag TAG
+
+    Specify a tag for which the performance statistics will be printed out
+    (and saved to a results file). Multiple instances of this option can be
+    specified, each for a single tag.
+
+.. option:: --json-result-id ID
+
+    Specify a name to store the raw JSON report under. By default, this not
+    enabled. These results will contain the full raw Bench::TestController
+    report, including all node controller and worker reports (and DDS entity reports)
+
 node_controller
 ===============
 
@@ -781,8 +900,11 @@ Usage
 .. option:: --name STRING
 
     Human friendly name for the node. Will be used by the test controller for
-    referring to the node, but otherwise has no effect on behavior. Multiple
-    nodes could even have the same name.
+    referring to the node. During allocation of node controllers, the name
+    is used to match against the “name_wildcard” fields of the node configs.
+    Only node controllers whose names match the “name_wildcard” of a given
+    node config can be allocated to that node config. Multiple nodes could
+    have the same name.
 
 worker
 ======
@@ -806,11 +928,12 @@ timing parameters, using either absolute or relative times:
 Finally, it also allows for the configuration and execution of test “actions”
 which take place between the “start” and “stop” times indicated in
 configuration. These may make use of the created DDS entities in order to
-simulate application behavior. At the time of this writing, the two  actions
+simulate application behavior. At the time of this writing, the three  actions
 are “write”, which will write to a datawriter using data of a configurable size
-and frequency (and maximum count), as well as “forward”, which will pass along
+and frequency (and maximum count), “forward”, which will pass along
 the data read from one datareader to a datawriter, allowing for more complex
-test behaviors (including round-trip latency & jitter calculations). In
+test behaviors (including round-trip latency & jitter calculations), and "set_cft_parameters",
+which will change the content filtered topic parameter values dynamically. In
 addition to reading a JSON configuration file, the worker is capable of writing
 a JSON report file that contains various test statistics gathered from
 listeners attached to the created DDS entities. This report is read by the

@@ -325,4 +325,3 @@ int ACE_TMAIN(int, ACE_TCHAR* [] )
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
   return failed;
 }
-

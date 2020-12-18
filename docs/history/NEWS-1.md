@@ -137,8 +137,8 @@ Version 1.2 of OpenDDS.
   A new library has been introduced (libDCPSInfoRepoServ) which provides
   the neccessary hooks for running the DCPSInfoRepo within another process.
   For example usage, see: $DDS\_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
-  
-  
+
+
 - Fixed bug in DCPSInfoRepo that did not re-evaluate the compatibility and
   associations when QoS change is made.
 
@@ -286,7 +286,7 @@ Version 1.1 of OpenDDS.
   The multicast\_group\_address defaults to the ACE default multicast address
   (224.9.9.2:20001 for IPv4 and ff05:0::ff01:1:20001 for IPv6) and the
   local\_address defaults to ANY with a random port picked by the OS.
-  
+
 
 - Fixed a bug in DataReaderImpl::remove\_associations() and
   DataWriterImpl::remove\_associations() that should not attempt to remove
@@ -346,9 +346,9 @@ Version 1.0 of OpenDDS.
 
 ##### Implementation details:
   - DDS keeps copies of the $TAO\_ROOT/tao/*Seq.pidl in $DDS\_ROOT/dds/CorbaSeq
-    directory and renamed to *.idl files. These idl files are compiled with a 
-    new IDL option -Gdcpsonly to just generate the DDS specific code for built 
-    in sequences. The DDS CORBA::*Seq generated code will include the 
+    directory and renamed to *.idl files. These idl files are compiled with a
+    new IDL option -Gdcpsonly to just generate the DDS specific code for built
+    in sequences. The DDS CORBA::*Seq generated code will include the
     TAO CORBA::*Seq generated code so both TAO and DDS functions will be available.
 
 
@@ -374,7 +374,7 @@ Version 1.0 of OpenDDS.
    ***This change requires changes to DDS user code.***
 
    ##### impacts on user code
-   
+
    1. The <Foo>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq no longer exist.
         The <Foo>Seq and DDS::SampleInfoSeq have been changed
         to support both single-copy reads (as before) and zero-copy reads
@@ -391,7 +391,7 @@ Version 1.0 of OpenDDS.
         should inherit as a local object (not a servant).  DDS provides a
         helper template that adds reference counting.  Use of this template
         (as shown below) is highly recommended.
-   
+
       For example:
 
             class DataReaderListenerImpl
@@ -418,13 +418,13 @@ Version 1.0 of OpenDDS.
    3. Implementation reference counting cleanup code is no longer used
 
   For example:
-       
+
             SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
             PortableServer::ServantBase_var safe_servant = sts_servant;
-    
+
             SimpleTypeSupport_var fts =
                     TAO::DCPS::servant_to_reference (sts_servant);
-    
+
             if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
 
     becomes:
@@ -447,15 +447,15 @@ Version 1.0 of OpenDDS.
         topic.in (),
         dw_qos,
         ::DDS::DataWriterListener::_nil());
-        
+
         Test::SimpleDataWriter_var foo_dw = Test::SimpleDataWriter::_narrow(dw.in ());
-        
+
         // This is unnecessary but will still work.
         // Previously fast_dw was used to increase the
         // performance of writing samples.
-        Test::SimpleDataWriterImpl* fast_dw =  
+        Test::SimpleDataWriterImpl* fast_dw =
         TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>(foo_dw.in());
-        
+
     ```
 
  Also, a pointer to the servant is no longer needed for making calls on zero-copy
@@ -484,7 +484,7 @@ Version 1.0 of OpenDDS.
         TAO::DCPS::reference\_to\_servant()
         TAO::DCPS::deactivate() // now a no-op
 
-##### Note: 
+##### Note:
 - if you used:
     - TAO::DCPS::servant\_to\_reference()
     - TAO::DCPS::reference\_to\_servant()

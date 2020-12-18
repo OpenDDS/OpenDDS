@@ -7,7 +7,7 @@
 #include <set>
 #include <map>
 #include <stdexcept>
-#include "rapidjson/document.h"
+#include <dds/DCPS/RapidJsonWrapper.h>
 
 namespace itl {
 
