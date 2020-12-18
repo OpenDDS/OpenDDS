@@ -22,14 +22,11 @@ namespace
   size_t samples_per_thread = 1024;
   bool durable = false;
 
-  void
-  parse_args(int& argc, ACE_TCHAR** argv)
+  void parse_args(int& argc, ACE_TCHAR** argv)
   {
     ACE_Arg_Shifter shifter(argc, argv);
-
     while (shifter.is_anything_left()) {
       const ACE_TCHAR* arg;
-
       if ((arg = shifter.get_the_parameter(ACE_TEXT("-s")))) {
         samples_per_thread = ACE_OS::atoi(arg);
         shifter.consume_arg();
@@ -46,17 +43,15 @@ namespace
   }
 } // namespace
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   int ret = 0;
   try {
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
 
     // Spawn Participant threads
-    ACE_DEBUG((LM_INFO, ACE_TEXT("%T Publisher: %d threads, %d samples/thread durable %d\n"),
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher: %d threads, %d samples/thread durable %d\n"),
       num_threads, samples_per_thread, durable));
     ParticipantTask task(samples_per_thread, durable);
 
@@ -64,13 +59,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     task.wait();
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("%T Publisher shutdown\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher shutdown\n")));
     TheServiceParticipant->shutdown();
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("caught in main()");
     ret = 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("%T Publisher returns %d\n"), ret));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher returns %d\n"), ret));
   return ret;
 }

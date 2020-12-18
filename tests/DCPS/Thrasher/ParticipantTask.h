@@ -1,23 +1,17 @@
-/*
- */
-
 #ifndef DCPS_THRASHER_PARTICIPANTTASK_H
 #define DCPS_THRASHER_PARTICIPANTTASK_H
 
-#include <cstdlib>
-
 #include <ace/Task.h>
+
+#include <cstdlib>
 
 #define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
 
 class ParticipantTask : public ACE_Task_Base
 {
 public:
-  ParticipantTask(std::size_t samples_per_thread,
-                  bool durable);
-
+  ParticipantTask(std::size_t samples_per_thread, bool durable);
   ~ParticipantTask();
-
   int svc();
 
 private:

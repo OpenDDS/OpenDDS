@@ -34,10 +34,8 @@ namespace
   parse_args(int& argc, ACE_TCHAR** argv)
   {
     ACE_Arg_Shifter shifter(argc, argv);
-
     while (shifter.is_anything_left()) {
       const ACE_TCHAR* arg;
-
       if ((arg = shifter.get_the_parameter(ACE_TEXT("-n")))) {
         expected_samples = ACE_OS::atoi(arg);
         shifter.consume_arg();
@@ -55,15 +53,12 @@ namespace
 
 } // namespace
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
-
-    ACE_DEBUG((LM_INFO, ACE_TEXT("%D(%t) Subscriber started\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber started\n")));
 
     // Create Participant
     DDS::DomainParticipant_var participant =
@@ -107,7 +102,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT(" create_topic failed!\n")), 6);
 
       // Create DataReader
-      ProgressIndicator progress("%T(%t) sub %d%% (%d samples received)\n", expected_samples);
+      ProgressIndicator progress("(%P|%t) sub %d%% (%d samples received)\n", expected_samples);
 
       DataReaderListenerImpl* listener_p = new DataReaderListenerImpl(received_samples, progress);
       DDS::DataReaderListener_var listener = listener_p;
@@ -134,22 +129,22 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       OpenDDS::DCPS::DataReaderImpl* impl =
         dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
-      ACE_DEBUG((LM_INFO, "%T(%t) sub is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+      ACE_DEBUG((LM_INFO, "(%P|%t) sub is %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
 
       Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
       listener_p->wait_received(OpenDDS::DCPS::TimeDuration(280, 0), expected_samples);
       int w = Utils::wait_match(reader, 0);
-      ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub wait_match(reader, 0) == %d\n"), w));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_match(reader, 0) == %d\n"), w));
 
       for (size_t x = 0; x < n_publishers; ++x) {
         OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->task_sample_set_map.find(x);
         if (xit == listener_p->task_sample_set_map.end()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) ERROR: missing all samples from pub%d\n"), x));
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) ERROR: missing all samples from pub%d\n"), x));
           break;
         }
         for (size_t y = 0; y < expected_samples / n_publishers; ++y) {
           if (xit->second.count(y) == 0) {
-            ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) ERROR: missing pub%d sample%d\n"), x, y));
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) ERROR: missing pub%d sample%d\n"), x, y));
           }
         }
       }
@@ -157,12 +152,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     } // End scope for contained entities
 
     // Clean-up!
-    ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub delete_contained_entities\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub delete_contained_entities\n")));
     participant->delete_contained_entities();
-    ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub delete_participant\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub delete_participant\n")));
     dpf->delete_participant(participant.in());
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) sub shutdown\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub shutdown\n")));
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e) {
@@ -171,11 +166,11 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
   }
 
   if (received_samples != expected_samples) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T(%t) ERROR: sub received %d of expected %d samples.\n"),
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: sub received %d of expected %d samples.\n"),
       received_samples, expected_samples));
     return 10;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("%T(%t) Subscriber done\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber done\n")));
   return 0;
 }

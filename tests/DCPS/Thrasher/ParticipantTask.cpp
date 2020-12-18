@@ -26,8 +26,7 @@
 #include "tests/Utils/StatusMatching.h"
 #include <string>
 
-ParticipantTask::ParticipantTask(std::size_t samples_per_thread,
-                                 bool durable)
+ParticipantTask::ParticipantTask(std::size_t samples_per_thread, bool durable)
   : samples_per_thread_(samples_per_thread)
   , durable_(durable)
   , thread_index_(0)
@@ -37,10 +36,9 @@ ParticipantTask::ParticipantTask(std::size_t samples_per_thread,
 ParticipantTask::~ParticipantTask()
 {}
 
-int
-ParticipantTask::svc()
+int ParticipantTask::svc()
 {
-  std::string pfx("%T pub");
+  std::string pfx("(%P|%t) pub");
   try
   {
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
@@ -77,10 +75,8 @@ ParticipantTask::svc()
         ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
 
         ACE_DEBUG((LM_INFO, (pfx + "->transport %C\n").c_str(), config_name));
-        OpenDDS::DCPS::TransportConfig_rch config =
-          TheTransportRegistry->create_config(config_name);
-        OpenDDS::DCPS::TransportInst_rch inst =
-          TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+        OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
+        OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
         ACE_Configuration_Heap ach;
         ACE_Configuration_Section_Key sect_key;
         ach.open();
@@ -159,8 +155,7 @@ ParticipantTask::svc()
                         ACE_TEXT(" create_datawriter failed!\n")), 1);
     }
 
-    OpenDDS::DCPS::DataWriterImpl* impl =
-      dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
+    OpenDDS::DCPS::DataWriterImpl* impl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
     ACE_DEBUG((LM_INFO, (pfx + "  %C\n").c_str(), OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
 
     if (!durable_) {
@@ -179,10 +174,8 @@ ParticipantTask::svc()
     // The following is intentionally inefficient to stress various
     // pathways related to publication; we should be especially dull
     // and write only one sample at a time per writer.
-
     const std::string fmt(pfx + "  %d%% (%d samples sent)\n");
     ProgressIndicator progress(fmt.c_str(), samples_per_thread_);
-
     for (std::size_t i = 0; i < samples_per_thread_; ++i) {
       Foo foo;
       foo.key = 3;

@@ -79,8 +79,8 @@ if ($test->{'flags'}->{'rtps'}) {
   $ini_file = "thrasher_rtps.ini";
 }
 
-$pub_opts .= " -DCPSConfigFile $ini_file";
-$sub_opts .= " -DCPSConfigFile $ini_file";
+$pub_opts .= " -OrbVerboseLogging 1 -DCPSConfigFile $ini_file";
+$sub_opts .= " -OrbVerboseLogging 1 -DCPSConfigFile $ini_file";
 
 if ("thrasher.ini" eq $ini_file) {
   $test->setup_discovery();
