@@ -139,6 +139,15 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
 jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
 (JNIEnv * jni, jclass)
 {
+#ifdef ACE_ANDROID
+  jclass version = findClass(jni, "Build.VERSION");
+  jfieldID field = jni->GetFieldID(version, "SDK_INT", "I");
+  int api = jni->GetStaticIntField(version, field);
+  if (api >= 30) {
+    //setup android network detection
+    ACE_DEBUG((LM_DEBUG, "\n\n\nAPI_VERSION: %d\n\n\n", api));
+  }
+#endif
   OpenDDS::DCPS::NetworkConfigModifier* ncm = TheServiceParticipant->network_config_modifier();
   if (ncm == 0) {
     return 0;

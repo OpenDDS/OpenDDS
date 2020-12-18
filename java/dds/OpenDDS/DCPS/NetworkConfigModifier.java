@@ -27,3 +27,4 @@ public final class NetworkConfigModifier {
     public native void add_address(String name, String address);
     public native void remove_address(String name, String address);
 }
+
