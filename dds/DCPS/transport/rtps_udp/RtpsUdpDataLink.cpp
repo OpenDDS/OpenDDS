@@ -2376,6 +2376,9 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   CountKeeper counts;
   bundle_mapped_meta_submessages(adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
 
+  OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_addrs.size());
+  OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_sizes.size());
+
   // Reusable INFO_DST
   InfoDestinationSubmessage idst = {
     {INFO_DST, FLAG_E, INFO_DST_SZ},
@@ -3680,8 +3683,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           meta_submessage.dst_guid_ = reader->id_;
           meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
           meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-          meta_submessage.sm_.heartbeat_sm().lastSN.low = first_sn.getLow();
-          meta_submessage.sm_.heartbeat_sm().lastSN.high = first_sn.getHigh();
+          meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
+          meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
           meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
           meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
           meta_submessages.push_back(meta_submessage);
@@ -3705,8 +3708,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         meta_submessage.dst_guid_ = reader->id_;
         meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
         meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-        meta_submessage.sm_.heartbeat_sm().lastSN.low = first_sn.getLow();
-        meta_submessage.sm_.heartbeat_sm().lastSN.high = first_sn.getHigh();
+        meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
+        meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
         meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
         meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
         meta_submessages.push_back(meta_submessage);

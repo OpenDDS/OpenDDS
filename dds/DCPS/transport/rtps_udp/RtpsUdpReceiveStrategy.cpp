@@ -538,7 +538,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
 
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
   if (!crypto) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX no CryptoTransform\n"));
+    // security not enabled for this datalink -- this can be reached
+    // when a secure message is seen on the same multicast group
     return;
   }
 
