@@ -1501,7 +1501,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   if (wi != remote_writers_.end()) {
     const WriterInfo_rch& writer = wi->second;
 
-    DeliverHeldData dhd2(link, id_, writer);
+    DeliverHeldData dhd2(rchandle_from(this), src);
     std::swap(dhd, dhd2);
 
     if (writer->first_activity_) {
@@ -1668,7 +1668,7 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   guard.release();
   g.release();
 
-  DeliverHeldData dhd(link, id_, writer);
+  DeliverHeldData dhd(rchandle_from(this), src);
 
   return false;
 }
@@ -1808,7 +1808,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     link->invoke_on_start_callbacks(id_, src, true);
   }
 
-  DeliverHeldData dhd(link, id_, writer);
+  DeliverHeldData dhd(rchandle_from(this), src);
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
   return false;
@@ -4031,26 +4031,53 @@ RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
   }
 }
 
-RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
+void
+RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
 {
-  if (!link_ || !writer_ || writer_->recvd_.empty()) {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  if (stopping_) {
     return;
   }
 
-  const SequenceNumber ca = writer_->recvd_.cumulative_ack();
-  const WriterInfo::HeldMap::iterator end = writer_->held_.upper_bound(ca);
+  RtpsUdpDataLink_rch link = link_.lock();
 
-  for (WriterInfo::HeldMap::iterator it = writer_->held_.begin(); it != end; /*increment in loop body*/) {
+  if (!link) {
+    return;
+  }
+
+  std::vector<ReceivedDataSample> to_deliver;
+
+  const WriterInfoMap::iterator wi = remote_writers_.find(src);
+  if (wi != remote_writers_.end()) {
+    const SequenceNumber ca = wi->second->recvd_.cumulative_ack();
+    const WriterInfo::HeldMap::iterator end = wi->second->held_.upper_bound(ca);
+    for (WriterInfo::HeldMap::iterator it = wi->second->held_.begin(); it != end; /*increment in loop body*/) {
+      to_deliver.push_back(it->second);
+      wi->second->held_.erase(it++);
+    }
+  }
+
+  const RepoId dst = id_;
+
+  g.release();
+
+  for (std::vector<ReceivedDataSample>::iterator it = to_deliver.begin(); it != to_deliver.end(); ++it) {
     if (Transport_debug_level > 5) {
-      GuidConverter reader(reader_id_);
+      GuidConverter reader(dst);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData -")
                  ACE_TEXT(" deliver sequence: %q to %C\n"),
-                 it->second.header_.sequence_.getValue(),
+                 it->header_.sequence_.getValue(),
                  OPENDDS_STRING(reader).c_str()));
     }
+    link->data_received(*it, dst);
+  }
+}
 
-    link_->data_received(it->second, reader_id_);
-    writer_->held_.erase(it++);
+RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
+{
+  if (reader_) {
+    reader_->deliver_held_data(writer_id_);
   }
 }
 
