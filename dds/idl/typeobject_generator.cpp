@@ -983,13 +983,13 @@ typeobject_generator::consider(Element& v, AST_Type* type, const std::string& an
   switch (type->node_type()) {
   case AST_ConcreteType::NT_union_fwd:
     {
-      AST_UnionFwd* n = AST_UnionFwd::narrow_from_decl(type);
+      AST_UnionFwd* const n = dynamic_cast<AST_UnionFwd*>(type);
       type = n->full_definition();
       break;
     }
   case AST_ConcreteType::NT_struct_fwd:
     {
-      AST_StructureFwd* n = AST_StructureFwd::narrow_from_decl(type);
+      AST_StructureFwd* const n = dynamic_cast<AST_StructureFwd*>(type);
       type = n->full_definition();
       break;
     }
@@ -1011,13 +1011,13 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   switch (type->node_type()) {
   case AST_ConcreteType::NT_union_fwd:
     {
-      AST_UnionFwd* n = AST_UnionFwd::narrow_from_decl(type);
+      AST_UnionFwd* const n = dynamic_cast<AST_UnionFwd*>(type);
       type = n->full_definition();
       break;
     }
   case AST_ConcreteType::NT_struct_fwd:
     {
-      AST_StructureFwd* n = AST_StructureFwd::narrow_from_decl(type);
+      AST_StructureFwd* const n = dynamic_cast<AST_StructureFwd*>(type);
       type = n->full_definition();
       break;
     }
@@ -1037,7 +1037,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_union:
     {
-      AST_Union* n = AST_Union::narrow_from_decl(type);
+      AST_Union* const n = dynamic_cast<AST_Union*>(type);
       v.name = dds_generator::scoped_helper(n->name(), "::");
 
       AST_Type* discriminator = n->disc_type();
@@ -1060,7 +1060,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_struct:
     {
-      AST_Structure* n = AST_Structure::narrow_from_decl(type);
+      AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
       v.name = dds_generator::scoped_helper(n->name(), "::");
 
       // TODO: Struct inheritance.
@@ -1082,7 +1082,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_array:
     {
-      AST_Array* n = AST_Array::narrow_from_decl(type);
+      AST_Array* const n = dynamic_cast<AST_Array*>(type);
       v.name = anonymous_name + ".a";
       consider(v, n->base_type(), v.name);
       break;
@@ -1090,7 +1090,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_sequence:
     {
-      AST_Sequence* n = AST_Sequence::narrow_from_decl(type);
+      AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
       v.name = anonymous_name + ".s";
       consider(v, n->base_type(), v.name);
       break;
@@ -1098,7 +1098,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_typedef:
     {
-      AST_Typedef* n = AST_Typedef::narrow_from_decl(type);
+      AST_Typedef* const n = dynamic_cast<AST_Typedef*>(type);
       v.name = dds_generator::scoped_helper(n->name(), "::");
       // TODO: What is the member name for an anonymous type in a  typedef?
       // 7.3.4.9.2
@@ -1108,7 +1108,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_enum:
     {
-      AST_Enum* n = AST_Enum::narrow_from_decl(type);
+      AST_Enum* const n = dynamic_cast<AST_Enum*>(type);
       v.name = dds_generator::scoped_helper(n->name(), "::");
       break;
     }
@@ -1232,7 +1232,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_union:
     {
-      AST_Union* n = AST_Union::narrow_from_decl(type);
+      AST_Union* const n = dynamic_cast<AST_Union*>(type);
       AST_Type* discriminator = n->disc_type();
       const Fields fields(n);
       const Fields::Iterator fields_end = fields.end();
@@ -1319,7 +1319,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_struct:
     {
-      AST_Structure* n = AST_Structure::narrow_from_decl(type);
+      AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
 
       const Fields fields(n);
       const Fields::Iterator fields_end = fields.end();
@@ -1392,7 +1392,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_enum:
     {
-      AST_Enum* n = AST_Enum::narrow_from_decl(type);
+      AST_Enum* const n = dynamic_cast<AST_Enum*>(type);
       std::vector<AST_EnumVal*> contents;
       scope2vector(contents, n, AST_Decl::NT_enum_val);
 
@@ -1428,7 +1428,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_string:
     {
-      AST_String* n = AST_String::narrow_from_decl(type);
+      AST_String* const n = dynamic_cast<AST_String*>(type);
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING8_SMALL);
@@ -1444,7 +1444,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_wstring:
     {
-      AST_String* n = AST_String::narrow_from_decl(type);
+      AST_String* const n = dynamic_cast<AST_String*>(type);
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING16_SMALL);
@@ -1460,7 +1460,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_array:
     {
-      AST_Array* n = AST_Array::narrow_from_decl(type);
+      AST_Array* const n = dynamic_cast<AST_Array*>(type);
 
       const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
       OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
@@ -1516,7 +1516,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_sequence:
     {
-      AST_Sequence* n = AST_Sequence::narrow_from_decl(type);
+      AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
 
       ACE_CDR::ULong bound = 0;
       if (!n->unbounded()) {
@@ -1565,7 +1565,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_typedef:
     {
-      AST_Typedef* n = AST_Typedef::narrow_from_decl(type);
+      AST_Typedef* const n = dynamic_cast<AST_Typedef*>(type);
 
       OpenDDS::XTypes::TypeObject to;
       to.kind = OpenDDS::XTypes::EK_MINIMAL;
@@ -1585,7 +1585,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_pre_defined:
     {
-      AST_PredefinedType* n = AST_PredefinedType::narrow_from_decl(type);
+      AST_PredefinedType* const n = dynamic_cast<AST_PredefinedType*>(type);
       switch (n->pt()) {
       case AST_PredefinedType::PT_long:
         minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_INT32);
@@ -1697,12 +1697,12 @@ typeobject_generator::get_minimal_type_object(AST_Type* type)
   switch(type->node_type()) {
   case AST_Decl::NT_union_fwd:
     {
-      AST_UnionFwd* td = AST_UnionFwd::narrow_from_decl(type);
+      AST_UnionFwd* const td = dynamic_cast<AST_UnionFwd*>(type);
       return get_minimal_type_object(td->full_definition());
     }
   case AST_Decl::NT_struct_fwd:
     {
-      AST_StructureFwd* td = AST_StructureFwd::narrow_from_decl(type);
+      AST_StructureFwd* const td = dynamic_cast<AST_StructureFwd*>(type);
       return get_minimal_type_object(td->full_definition());
     }
   default:
@@ -1720,12 +1720,12 @@ typeobject_generator::get_minimal_type_identifier(AST_Type* type)
   switch(type->node_type()) {
   case AST_Decl::NT_union_fwd:
     {
-      AST_UnionFwd* td = AST_UnionFwd::narrow_from_decl(type);
+      AST_UnionFwd* const td = dynamic_cast<AST_UnionFwd*>(type);
       return get_minimal_type_identifier(td->full_definition());
     }
   case AST_Decl::NT_struct_fwd:
     {
-      AST_StructureFwd* td = AST_StructureFwd::narrow_from_decl(type);
+      AST_StructureFwd* const td = dynamic_cast<AST_StructureFwd*>(type);
       return get_minimal_type_identifier(td->full_definition());
     }
   default:

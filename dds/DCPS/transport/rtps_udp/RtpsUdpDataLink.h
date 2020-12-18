@@ -603,9 +603,7 @@ private:
   void datawriter_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
                            const FN& func)
   {
-    RepoId local;
-    std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-    local.entityId = submessage.writerId;
+    const RepoId local = make_id(local_prefix_, submessage.writerId);
 
     RepoId src;
     std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
@@ -634,9 +632,7 @@ private:
                            bool directed,
                            const FN& func)
   {
-    RepoId local;
-    std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-    local.entityId = submessage.readerId;
+    const RepoId local = make_id(local_prefix_, submessage.readerId);
 
     RepoId src;
     std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));

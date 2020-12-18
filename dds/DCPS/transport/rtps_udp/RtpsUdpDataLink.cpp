@@ -102,7 +102,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
   receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
-  std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
+  assign(local_prefix_, local_prefix);
 }
 
 RtpsUdpInst&
@@ -1398,9 +1398,7 @@ void
 RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
                           const GuidPrefix_t& src_prefix)
 {
-  RepoId local;
-  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-  local.entityId = data.readerId;
+  const RepoId local = make_id(local_prefix_, data.readerId);
 
   RepoId src;
   std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
@@ -2314,12 +2312,14 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
             const EntityId_t id = res.sm_.heartbeat_sm().writerId;
             unique = counts.heartbeat_counts_[id].insert(res.sm_.heartbeat_sm().count.value).second;
             OPENDDS_ASSERT(unique);
+            result = helper.add_to_bundle(res.sm_.heartbeat_sm());
             break;
           }
           case ACKNACK: {
             const EntityId_t id = res.sm_.acknack_sm().readerId;
             unique = counts.acknack_counts_[id].insert(res.sm_.acknack_sm().count.value).second;
             OPENDDS_ASSERT(unique);
+            result = helper.add_to_bundle(res.sm_.acknack_sm());
             break;
           }
           case GAP: {
@@ -2330,6 +2330,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
             const EntityId_t id = res.sm_.nack_frag_sm().readerId;
             unique = counts.nack_frag_counts_[id].insert(res.sm_.nack_frag_sm().count.value).second;
             OPENDDS_ASSERT(unique);
+            result = helper.add_to_bundle(res.sm_.nack_frag_sm());
             break;
           }
           default: {
@@ -2373,6 +2374,9 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
   CountKeeper counts;
   bundle_mapped_meta_submessages(encoding, adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
+
+  OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_addrs.size());
+  OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_sizes.size());
 
   // Reusable INFO_DST
   InfoDestinationSubmessage idst = {
@@ -3679,8 +3683,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           meta_submessage.dst_guid_ = reader->id_;
           meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
           meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-          meta_submessage.sm_.heartbeat_sm().lastSN.low = first_sn.getLow();
-          meta_submessage.sm_.heartbeat_sm().lastSN.high = first_sn.getHigh();
+          meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
+          meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
           meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
           meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
           meta_submessages.push_back(meta_submessage);
@@ -3704,8 +3708,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         meta_submessage.dst_guid_ = reader->id_;
         meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
         meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-        meta_submessage.sm_.heartbeat_sm().lastSN.low = first_sn.getLow();
-        meta_submessage.sm_.heartbeat_sm().lastSN.high = first_sn.getHigh();
+        meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
+        meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
         meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
         meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
         meta_submessages.push_back(meta_submessage);

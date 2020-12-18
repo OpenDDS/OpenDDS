@@ -3150,25 +3150,32 @@ bool Sedp::should_drop_message(const char* unsecure_topic_name)
 
 void
 Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
-                    const DDS::Security::ParticipantStatelessMessage& msg)
+                                 const DDS::Security::ParticipantStatelessMessage& msg)
 {
   if (spdp_.shutting_down()) {
     return;
   }
 
   if (should_drop_stateless_message(msg)) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Sedp::received_stateless_message() - ")
+                 ACE_TEXT("dropping\n")));
+    }
     return;
   }
 
   if (0 == std::strcmp(msg.message_class_id,
                        DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST)) {
     spdp_.handle_auth_request(msg);
-
   } else if (0 == std::strcmp(msg.message_class_id,
                               DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE)) {
     spdp_.handle_handshake_message(msg);
+  } else {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Sedp::received_stateless_message() - ")
+                 ACE_TEXT("Unknown message class id\n")));
+    }
   }
-  return;
 }
 
 void
