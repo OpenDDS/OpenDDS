@@ -464,16 +464,10 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force
 {
   // We have the global lock.
 
-  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
-    // Not in the built-in topics.
-    return;
-  }
-
-  const RepoId guid = iter->first;
-
   DiscoveredParticipant::LocationUpdateList location_updates;
   std::swap(iter->second.location_updates_, location_updates);
 
+  bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
          limit = location_updates.end(); pos != limit; ++pos) {
     DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
@@ -554,23 +548,37 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force
       location_data.relay6_timestamp = now.to_dds_time();
     }
 
-    if (old_mask != location_data.location || address_change || force_publish) {
-      DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
-      if (locbit) {
-        DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
-        {
-          const DCPS::ParticipantLocationBuiltinTopicData ld_copy(location_data);
-          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-          handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
-        }
-        iter = participants_.find(guid);
-        if (iter != participants_.end()) {
-          iter->second.location_ih_ = handle;
-        } else {
-          return;
-        }
-      }
+    if (old_mask != location_data.location || address_change) {
+      publish_location_update_i(iter);
+      published = true;
+    }
+  }
+
+  if (force_publish && !published) {
+    publish_location_update_i(iter);
+  }
+}
+
+void
+Spdp::publish_location_update_i(DiscoveredParticipantIter iter)
+{
+  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
+    return;
+  }
+
+  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+  if (locbit) {
+    const RepoId guid = iter->first;
+    DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
+    {
+      const DCPS::ParticipantLocationBuiltinTopicData ld_copy(iter->second.location_data_);
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+      handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
+    }
+    iter = participants_.find(guid);
+    if (iter != participants_.end()) {
+      iter->second.location_ih_ = handle;
     }
   }
 }
@@ -762,21 +770,26 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifndef OPENDDS_SAFETY_PROFILE
       using DCPS::operator!=;
 #endif
-      if (discoveredBit.user_data != pdataBit.user_data) {
+      if (discoveredBit.user_data != pdataBit.user_data ||
+          (from_sedp && iter->second.bit_ih_ == DDS::HANDLE_NIL)) {
         discoveredBit.user_data = pdataBit.user_data;
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+        DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
         if (bit) {
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           // If secure user data, this is the first time we should be seeing
           // the real user data.
-          bit->store_synthetic_data(pdataBit,
-            secure_part_user_data() ?
-              DDS::NEW_VIEW_STATE : DDS::NOT_NEW_VIEW_STATE);
+          bit_instance_handle =
+            bit->store_synthetic_data(pdataBit,
+                                      secure_part_user_data() ? DDS::NEW_VIEW_STATE : DDS::NOT_NEW_VIEW_STATE);
         }
 #endif /* DDS_HAS_MINIMUM_BIT */
         // Perform search again, so iterator becomes valid
         iter = participants_.find(guid);
+        if (iter != participants_.end()) {
+          iter->second.bit_ih_ = bit_instance_handle;
+        }
       }
       // Participant may have been removed while lock released
       if (iter != participants_.end()) {
@@ -1836,27 +1849,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     }
   }
 
-  // Must unlock when calling into part_bit() as it may call back into us
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-
-  DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
-#ifndef DDS_HAS_MINIMUM_BIT
-  if (!secure_part_user_data()) { // else the user data is assumed to be blank
-    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-    if (bit) {
-      DDS::ParticipantBuiltinTopicData pbtd = partBitData(iter->second.pdata_);
-      ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock, false);
-      bit_instance_handle =
-        bit->store_synthetic_data(pbtd, DDS::NEW_VIEW_STATE);
-      rg.release();
-      iter = participants_.find(guid);
-      if (iter == participants_.end()) {
-        return false;
-      }
-    }
-  }
-#endif /* DDS_HAS_MINIMUM_BIT */
-
   // notify Sedp of association Sedp may call
   // has_discovered_participant, which is the participant must be
   // added before these calls to associate.
@@ -1869,7 +1861,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   sedp_->generate_remote_crypto_handles(iter->second.pdata_);
   sedp_->associate_volatile(iter->second.pdata_);
 
-  iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
   process_location_updates_i(iter);
 #endif
