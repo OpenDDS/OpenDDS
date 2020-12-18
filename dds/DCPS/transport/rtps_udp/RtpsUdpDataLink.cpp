@@ -1089,6 +1089,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
         subm, *tsce, requires_inline_qos);
       make_leader_lagger(element->subscription_id(), previous_max_sn);
       check_leader_lagger();
+      record_directed(element->subscription_id(), seq);
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples_i(tsce->header(), msg->cont());
       g.release();
@@ -1113,6 +1114,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       subm, *dsle, requires_inline_qos);
     make_leader_lagger(element->subscription_id(), previous_max_sn);
     check_leader_lagger();
+    record_directed(element->subscription_id(), seq);
     durable = dsle->get_header().historic_sample_;
 
   } else if (tce) {  // Customized data message
@@ -1124,6 +1126,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       subm, *dsle, requires_inline_qos);
     make_leader_lagger(element->subscription_id(), previous_max_sn);
     check_leader_lagger();
+    record_directed(element->subscription_id(), seq);
     durable = dsle->get_header().historic_sample_;
 
   } else {
@@ -2929,6 +2932,26 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   TqeSet to_deliver;
   acked_by_all_helper_i(to_deliver);
 
+#ifdef OPENDDS_SECURITY
+  if (is_pvs_writer_ &&
+      !reader->pvs_outstanding_.empty() &&
+      reader->pvs_outstanding_.low() < reader->cur_cumulative_ack_) {
+    const OPENDDS_VECTOR(SequenceRange) psr = reader->pvs_outstanding_.present_sequence_ranges();
+    for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end();
+         pos != limit && pos->first < reader->cur_cumulative_ack_; ++pos) {
+      for (SequenceNumber seq = pos->first; seq <= pos->second && seq < reader->cur_cumulative_ack_; ++seq) {
+        reader->pvs_outstanding_.erase(seq);
+        OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter = elems_not_acked_.find(seq);
+        if (iter != elems_not_acked_.end()) {
+          send_buff_->release_acked(iter->first);
+          to_deliver.insert(iter->second);
+          elems_not_acked_.erase(iter);
+        }
+      }
+    }
+  }
+#endif
+
   if (!is_final) {
     link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
   }
@@ -3333,6 +3356,26 @@ RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
 }
 
 void
+RtpsUdpDataLink::RtpsWriter::record_directed(const RepoId& reader_id, SequenceNumber seq)
+{
+  ACE_UNUSED_ARG(reader_id);
+  ACE_UNUSED_ARG(seq);
+#ifdef OPENDDS_SECURITY
+  if (!is_pvs_writer_) {
+    return;
+  }
+
+  const ReaderInfoMap::iterator iter = remote_readers_.find(reader_id);
+  if (iter == remote_readers_.end()) {
+    return;
+  }
+
+  const ReaderInfo_rch& reader = iter->second;
+  reader->pvs_outstanding_.insert(seq);
+#endif
+}
+
+void
 RtpsUdpDataLink::RtpsWriter::process_acked_by_all()
 {
   TqeSet to_deliver;
@@ -3361,7 +3404,7 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
     return;
   }
 
-  // Prevent changes to the send buffer so new readers can ge
+  // Prevent changes to the send buffer so new readers can get
   // associated and find the start of their reliable range.
   if (!preassociation_readers_.empty()) {
     return;
@@ -3384,24 +3427,11 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
   if (!elems_not_acked_.empty()) {
-
-    OPENDDS_SET(SequenceNumber) sns_to_release;
-    iter_t it = elems_not_acked_.begin();
-    while (it != elems_not_acked_.end()) {
-      if (it->first < all_readers_ack) {
-        to_deliver.insert(it->second);
-        sns_to_release.insert(it->first);
-        iter_t last = it;
-        ++it;
-        elems_not_acked_.erase(last);
-      } else {
-        break;
-      }
-    }
-    OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
-    while (sns_it != sns_to_release.end()) {
-      send_buff_->release_acked(*sns_it);
-      ++sns_it;
+    for (iter_t it = elems_not_acked_.begin(), limit = elems_not_acked_.end();
+         it != limit && it->first < all_readers_ack;) {
+      send_buff_->release_acked(it->first);
+      to_deliver.insert(it->second);
+      elems_not_acked_.erase(it++);
     }
   }
 }

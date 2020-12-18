@@ -306,6 +306,7 @@ private:
     MonotonicTimePoint durable_timestamp_;
 #ifdef OPENDDS_SECURITY
     SequenceNumber max_pvs_sn_;
+    DisjointSequence pvs_outstanding_;
 #endif
 
     ReaderInfo(const RepoId& id, bool durable)
@@ -405,6 +406,7 @@ private:
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
+    void record_directed(const RepoId& reader, SequenceNumber seq);
     void expire_durable_data(const ReaderInfo_rch& reader,
                              const RtpsUdpInst& cfg,
                              const MonotonicTimePoint& now,
