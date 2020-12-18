@@ -9,6 +9,7 @@
 
 #include "SecurityAttributesMessageTypeSupportImpl.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
