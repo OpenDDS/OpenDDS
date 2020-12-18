@@ -19,6 +19,10 @@
 using namespace Bench;
 using namespace Bench::TestController;
 
+namespace {
+  const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
+}
+
 ScenarioManager::ScenarioManager(
   const std::string& bench_root,
   const std::string& test_context,
@@ -125,7 +129,7 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
 
     // Convert back to JSON
     std::stringstream oss;
-    if (!Bench::idl_2_json(wc, oss, false)) {
+    if (!Bench::idl_2_json(wc, oss, DEFAULT_MAX_DECIMAL_PLACES)) {
       throw std::runtime_error("Can't reserialize customized json configs");
     }
     it->second = oss.str();
