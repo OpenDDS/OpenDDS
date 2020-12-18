@@ -1855,9 +1855,12 @@ DDS::ReturnCode_t
 Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
 {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
+  DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
+  if (pl) {
+    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+    if (endpoint) {
+      ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
+    }
   }
 
   if (is_security_enabled() && pub.security_attribs_.base.is_discovery_protected) {
@@ -1903,9 +1906,12 @@ Sedp::remove_subscription_i(const RepoId& subscriptionId,
                             LocalSubscription& sub)
 {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
+  DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
+  if (sl) {
+    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+    if (endpoint) {
+      ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
+    }
   }
 
   if (is_security_enabled() && sub.security_attribs_.base.is_discovery_protected) {
@@ -1965,7 +1971,10 @@ Sedp::update_subscription_params(const RepoId& subId,
          i != iter->second.matched_endpoints_.end(); ++i) {
       const LocalPublicationIter lpi = local_publications_.find(*i);
       if (lpi != local_publications_.end()) {
-        lpi->second.publication_->update_subscription_params(subId, params);
+        DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
+        if (pl) {
+          pl->update_subscription_params(subId, params);
+        }
       }
     }
 
@@ -2226,7 +2235,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           if (DCPS::GuidConverter(*i).isWriter()) continue; // publication
           LocalSubscriptionIter lsi = local_subscriptions_.find(*i);
           if (lsi != local_subscriptions_.end()) {
-            lsi->second.subscription_->update_locators(guid, wdata.writerProxy.allLocators);
+            DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
+            if (sl) {
+              sl->update_locators(guid, wdata.writerProxy.allLocators);
+            }
           }
         }
       }
@@ -2551,8 +2563,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           if (DCPS::GuidConverter(*i).isReader()) continue; // subscription
           const LocalPublicationIter lpi = local_publications_.find(*i);
           if (lpi != local_publications_.end()) {
-            lpi->second.publication_->update_subscription_params(guid,
-              rdata.contentFilterProperty.expressionParameters);
+            DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
+            if (pl) {
+              pl->update_subscription_params(guid, rdata.contentFilterProperty.expressionParameters);
+            }
           }
         }
       }
@@ -2568,7 +2582,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           if (i->entityId.entityKind & 4) continue; // subscription
           LocalPublicationIter lpi = local_publications_.find(*i);
           if (lpi != local_publications_.end()) {
-            lpi->second.publication_->update_locators(guid, rdata.readerProxy.allLocators);
+            DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
+            if (pl) {
+              pl->update_locators(guid, rdata.readerProxy.allLocators);
+            }
           }
         }
       }
@@ -2705,7 +2722,10 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
       sub_pos->second.matched_endpoints_.lower_bound(prefix);
     if (pos != sub_pos->second.matched_endpoints_.end() &&
         DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
-      sub_pos->second.subscription_->signal_liveliness(guid_participant);
+      DCPS::DataReaderCallbacks_rch sl = sub_pos->second.subscription_.lock();
+      if (sl) {
+        sl->signal_liveliness(guid_participant);
+      }
     }
   }
 }
@@ -2740,7 +2760,10 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
     const DCPS::RepoIdSet::const_iterator pos = i->second.matched_endpoints_.lower_bound(prefix);
 
     if (pos != i->second.matched_endpoints_.end() && DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
-      (i->second.subscription_)->signal_liveliness(guid_participant);
+      DCPS::DataReaderCallbacks_rch sl = i->second.subscription_.lock();
+      if (sl) {
+        sl->signal_liveliness(guid_participant);
+      }
     }
   }
 }
@@ -3947,12 +3970,15 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
 {
   pub.transport_context_ = PFLAGS_THIS_VERSION;
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
-  if (endpoint) {
-    pub.have_ice_agent_info = true;
-    pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, rid, &publication_agent_info_listener_);
-    start_ice(rid, pub);
+  DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
+  if (pl) {
+    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+    if (endpoint) {
+      pub.have_ice_agent_info = true;
+      pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, rid, &publication_agent_info_listener_);
+      start_ice(rid, pub);
+    }
   }
 #else
   ACE_UNUSED_ARG(rid);
@@ -4095,12 +4121,15 @@ Sedp::add_subscription_i(const DCPS::RepoId& rid,
 {
   sub.transport_context_ = PFLAGS_THIS_VERSION;
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
-  if (endpoint) {
-    sub.have_ice_agent_info = true;
-    sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, rid, &subscription_agent_info_listener_);
-    start_ice(rid, sub);
+  DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
+  if (sl) {
+    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+    if (endpoint) {
+      sub.have_ice_agent_info = true;
+      sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, rid, &subscription_agent_info_listener_);
+      start_ice(rid, sub);
+    }
   }
 #else
   ACE_UNUSED_ARG(rid);
@@ -4832,9 +4861,12 @@ void
 Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpub,
                   const DCPS::RepoId& remote_guid, const DiscoveredSubscription& dsub) {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = lpub.publication_->get_ice_endpoint();
-  if (endpoint && dsub.have_ice_agent_info_) {
-    ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dsub.ice_agent_info_);
+  DCPS::DataWriterCallbacks_rch pl = lpub.publication_.lock();
+  if (pl) {
+    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+    if (endpoint && dsub.have_ice_agent_info_) {
+      ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dsub.ice_agent_info_);
+    }
   }
 #else
   ACE_UNUSED_ARG(local_guid);
@@ -4848,9 +4880,12 @@ void
 Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpub,
                      const DCPS::RepoId& remote_guid) {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = lpub.publication_->get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
+  DCPS::DataWriterCallbacks_rch pl = lpub.publication_.lock();
+  if (pl) {
+    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+    if (endpoint) {
+      ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
+    }
   }
 #else
   ACE_UNUSED_ARG(local_guid);
@@ -4863,9 +4898,12 @@ void
 Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& lsub,
                   const DCPS::RepoId& remote_guid, const DiscoveredPublication& dpub) {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = lsub.subscription_->get_ice_endpoint();
-  if (endpoint && dpub.have_ice_agent_info_) {
-    ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dpub.ice_agent_info_);
+  DCPS::DataReaderCallbacks_rch sl = lsub.subscription_.lock();
+  if (sl) {
+    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+    if (endpoint && dpub.have_ice_agent_info_) {
+      ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dpub.ice_agent_info_);
+    }
   }
 #else
   ACE_UNUSED_ARG(local_guid);
@@ -4879,9 +4917,12 @@ void
 Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& lsub,
                      const DCPS::RepoId& remote_guid) {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = lsub.subscription_->get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
+  DCPS::DataReaderCallbacks_rch sl = lsub.subscription_.lock();
+  if (sl) {
+    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+    if (endpoint) {
+      ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
+    }
   }
 #else
   ACE_UNUSED_ARG(local_guid);
@@ -4943,20 +4984,23 @@ Sedp::SubscriptionAgentInfoListener::remove_agent_info(const DCPS::RepoId& a_loc
 void
 Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = lpub.publication_->get_ice_endpoint();
+  DCPS::DataWriterCallbacks_rch pl = lpub.publication_.lock();
+  if (pl) {
+    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
 
-  if (!endpoint || !lpub.have_ice_agent_info) {
-    return;
-  }
+    if (!endpoint || !lpub.have_ice_agent_info) {
+      return;
+    }
 
-  for (DCPS::RepoIdSet::const_iterator it = lpub.matched_endpoints_.begin(),
-         end = lpub.matched_endpoints_.end(); it != end; ++it) {
-    const DCPS::GuidConverter conv(*it);
-    if (conv.isReader()) {
-      DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(*it);
-      if (dsi != discovered_subscriptions_.end()) {
-        if (dsi->second.have_ice_agent_info_) {
-          ICE::Agent::instance()->start_ice(endpoint, guid, dsi->first, dsi->second.ice_agent_info_);
+    for (DCPS::RepoIdSet::const_iterator it = lpub.matched_endpoints_.begin(),
+           end = lpub.matched_endpoints_.end(); it != end; ++it) {
+      const DCPS::GuidConverter conv(*it);
+      if (conv.isReader()) {
+        DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(*it);
+        if (dsi != discovered_subscriptions_.end()) {
+          if (dsi->second.have_ice_agent_info_) {
+            ICE::Agent::instance()->start_ice(endpoint, guid, dsi->first, dsi->second.ice_agent_info_);
+          }
         }
       }
     }
@@ -4970,20 +5014,23 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
 void
 Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = lsub.subscription_->get_ice_endpoint();
+  DCPS::DataReaderCallbacks_rch sl = lsub.subscription_.lock();
+  if (sl) {
+    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
 
-  if (!endpoint || !lsub.have_ice_agent_info) {
-    return;
-  }
+    if (!endpoint || !lsub.have_ice_agent_info) {
+      return;
+    }
 
-  for (DCPS::RepoIdSet::const_iterator it = lsub.matched_endpoints_.begin(),
-         end = lsub.matched_endpoints_.end(); it != end; ++it) {
-    const DCPS::GuidConverter conv(*it);
-    if (conv.isWriter()) {
-      DiscoveredPublicationIter dpi = discovered_publications_.find(*it);
-      if (dpi != discovered_publications_.end()) {
-        if (dpi->second.have_ice_agent_info_) {
-          ICE::Agent::instance()->start_ice(endpoint, guid, dpi->first, dpi->second.ice_agent_info_);
+    for (DCPS::RepoIdSet::const_iterator it = lsub.matched_endpoints_.begin(),
+           end = lsub.matched_endpoints_.end(); it != end; ++it) {
+      const DCPS::GuidConverter conv(*it);
+      if (conv.isWriter()) {
+        DiscoveredPublicationIter dpi = discovered_publications_.find(*it);
+        if (dpi != discovered_publications_.end()) {
+          if (dpi->second.have_ice_agent_info_) {
+            ICE::Agent::instance()->start_ice(endpoint, guid, dpi->first, dpi->second.ice_agent_info_);
+          }
         }
       }
     }
@@ -5009,9 +5056,12 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
       LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
       if (lsi != local_subscriptions_.end() &&
           lsi->second.matched_endpoints_.count(guid)) {
-        ICE::Endpoint* endpoint = lsi->second.subscription_->get_ice_endpoint();
-        if (endpoint) {
-          ICE::Agent::instance()->start_ice(endpoint, lsi->first, guid, dpub.ice_agent_info_);
+        DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
+        if (sl) {
+          ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+          if (endpoint) {
+            ICE::Agent::instance()->start_ice(endpoint, lsi->first, guid, dpub.ice_agent_info_);
+          }
         }
       }
     }
@@ -5037,9 +5087,12 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
       LocalPublicationIter lpi = local_publications_.find(*it);
       if (lpi != local_publications_.end() &&
           lpi->second.matched_endpoints_.count(guid)) {
-        ICE::Endpoint* endpoint = lpi->second.publication_->get_ice_endpoint();
-        if (endpoint) {
-          ICE::Agent::instance()->start_ice(endpoint, lpi->first, guid, dsub.ice_agent_info_);
+        DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
+        if (pl) {
+          ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+          if (endpoint) {
+            ICE::Agent::instance()->start_ice(endpoint, lpi->first, guid, dsub.ice_agent_info_);
+          }
         }
       }
     }
@@ -5062,9 +5115,12 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub)
       LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
       if (lsi != local_subscriptions_.end() &&
           lsi->second.matched_endpoints_.count(guid)) {
-        ICE::Endpoint* endpoint = lsi->second.subscription_->get_ice_endpoint();
-        if (endpoint) {
-          ICE::Agent::instance()->stop_ice(endpoint, lsi->first, guid);
+        DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
+        if (sl) {
+          ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+          if (endpoint) {
+            ICE::Agent::instance()->stop_ice(endpoint, lsi->first, guid);
+          }
         }
       }
     }
@@ -5087,9 +5143,12 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub)
       LocalPublicationIter lpi = local_publications_.find(*it);
       if (lpi != local_publications_.end() &&
           lpi->second.matched_endpoints_.count(guid)) {
-        ICE::Endpoint* endpoint = lpi->second.publication_->get_ice_endpoint();
-        if (endpoint) {
-          ICE::Agent::instance()->stop_ice(endpoint, lpi->first, guid);
+        DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
+        if (pl) {
+          ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+          if (endpoint) {
+            ICE::Agent::instance()->stop_ice(endpoint, lpi->first, guid);
+          }
         }
       }
     }
@@ -5126,22 +5185,28 @@ Sedp::use_ice_now(bool f)
 
   for (LocalPublicationIter pos = local_publications_.begin(), limit = local_publications_.end(); pos != limit; ++pos) {
     LocalPublication& pub = pos->second;
-    ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
-    if (endpoint) {
-      pub.have_ice_agent_info = true;
-      pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &publication_agent_info_listener_);
-      start_ice(pos->first, pub);
+    DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+      if (endpoint) {
+        pub.have_ice_agent_info = true;
+        pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &publication_agent_info_listener_);
+        start_ice(pos->first, pub);
+      }
     }
   }
   for (LocalSubscriptionIter pos = local_subscriptions_.begin(), limit = local_subscriptions_.end(); pos != limit; ++pos) {
     LocalSubscription& sub = pos->second;
-    ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
-    if (endpoint) {
-      sub.have_ice_agent_info = true;
-      sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &subscription_agent_info_listener_);
-      start_ice(pos->first, sub);
+    DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+      if (endpoint) {
+        sub.have_ice_agent_info = true;
+        sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &subscription_agent_info_listener_);
+        start_ice(pos->first, sub);
+      }
     }
   }
 #endif

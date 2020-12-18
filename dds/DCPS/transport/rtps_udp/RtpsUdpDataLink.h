@@ -521,6 +521,7 @@ private:
                                   const RepoId& src,
                                   bool directed,
                                   MetaSubmessageVec& meta_submessages);
+    void deliver_held_data(const RepoId& src);
 
     void gather_preassociation_ack_nacks(MetaSubmessageVec& meta_submessages);
     const RepoId& id() const { return id_; }
@@ -792,23 +793,19 @@ private:
   class DeliverHeldData {
   public:
     DeliverHeldData()
-      : reader_id_(GUID_UNKNOWN)
     {}
 
-    DeliverHeldData(const RtpsUdpDataLink_rch& link,
-                    const RepoId& reader_id,
-                    const WriterInfo_rch& writer)
-      : link_(link)
-      , reader_id_(reader_id)
-      , writer_(writer)
+    DeliverHeldData(RtpsReader_rch reader,
+                    const RepoId& writer_id)
+      : reader_(reader)
+      , writer_id_(writer_id)
     {}
 
     ~DeliverHeldData();
 
   private:
-    RtpsUdpDataLink_rch link_;
-    RepoId reader_id_;
-    WriterInfo_rch writer_;
+    RtpsReader_rch reader_;
+    RepoId writer_id_;
   };
 
 #ifdef OPENDDS_SECURITY

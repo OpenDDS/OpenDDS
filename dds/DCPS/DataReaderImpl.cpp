@@ -1265,7 +1265,7 @@ DataReaderImpl::enable()
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
             this->topic_servant_->get_id(),
-            this,
+            rchandle_from(this),
             this->qos_,
             trans_conf_info,
             sub_qos,
