@@ -846,10 +846,10 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  DCPS::SequenceNumber seq;
-  seq.setValue(data.writerSN.high, data.writerSN.low);
-  handle_participant_data((data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-                          pdata, seq, from, false);
+  handle_participant_data(
+    (data.inlineQos.length() && disposed(data.inlineQos)) ?
+      DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
+    pdata, to_opendds_seqnum(data.writerSN), from, false);
 
 #ifdef OPENDDS_SECURITY
   if (!is_security_enabled()) {
@@ -2345,8 +2345,7 @@ void
 Spdp::SpdpTransport::dispose_unregister()
 {
   // Send the dispose/unregister SPDP sample
-  data_.writerSN.high = seq_.getHigh();
-  data_.writerSN.low = seq_.getLow();
+  data_.writerSN = to_rtps_seqnum(seq_);
   data_.smHeader.flags = FLAG_E | FLAG_Q | FLAG_K_IN_DATA;
   data_.inlineQos.length(1);
   static const StatusInfo_t dispose_unregister = { {0, 0, 0, 3} };
@@ -2457,8 +2456,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #endif
   );
 
-  data_.writerSN.high = seq_.getHigh();
-  data_.writerSN.low = seq_.getLow();
+  data_.writerSN = to_rtps_seqnum(seq_);
   ++seq_;
 
   ParameterList plist;
@@ -2516,8 +2514,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 #endif
   );
 
-  data_.writerSN.high = seq_.getHigh();
-  data_.writerSN.low = seq_.getLow();
+  data_.writerSN = to_rtps_seqnum(seq_);
   ++seq_;
 
   ParameterList plist;

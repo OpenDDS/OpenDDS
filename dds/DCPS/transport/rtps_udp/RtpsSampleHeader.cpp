@@ -19,6 +19,7 @@
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 
@@ -243,7 +244,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     const DataSubmessage& rtps = submessage_.data_sm();
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
-    opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
+    opendds.sequence_ = to_opendds_seqnum(rtps.writerSN);
     opendds.publication_id_.entityId = rtps.writerId;
     opendds.message_id_ = SAMPLE_DATA;
 
@@ -303,7 +304,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     const DataFragSubmessage& rtps = submessage_.data_frag_sm();
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
-    opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
+    opendds.sequence_ = to_opendds_seqnum(rtps.writerSN);
     opendds.publication_id_.entityId = rtps.writerId;
     opendds.message_id_ = SAMPLE_DATA;
     opendds.key_fields_only_ = (rtps.smHeader.flags & FLAG_K_IN_FRAG);
@@ -394,7 +395,7 @@ RtpsSampleHeader::populate_data_sample_submessages(
     DATA_OCTETS_TO_IQOS,
     readerId,
     dsle.get_pub_id().entityId,
-    {dsle.get_header().sequence_.getHigh(), dsle.get_header().sequence_.getLow()},
+    RTPS::to_rtps_seqnum(dsle.get_header().sequence_),
     ParameterList()
   };
   const char message_id = dsle.get_header().message_id_;
@@ -462,7 +463,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     DATA_OCTETS_TO_IQOS,
     ENTITYID_UNKNOWN,
     header.publication_id_.entityId,
-    {header.sequence_.getHigh(), header.sequence_.getLow()},
+    RTPS::to_rtps_seqnum(header.sequence_),
     ParameterList()
   };
   switch (header.message_id_) {
