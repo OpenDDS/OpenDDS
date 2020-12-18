@@ -8,15 +8,14 @@
 #ifndef SECURITY_QOS_TEST_ARGS_H
 #define SECURITY_QOS_TEST_ARGS_H
 
-#include "dds/DdsDcpsCoreC.h"
+#include <dds/DdsDcpsCoreC.h>
 
-#include "ace/ace_wchar.h"
+#include <ace/ace_wchar.h>
 
 #include <string>
 #include <vector>
 
-namespace SecurityAttributes
-{
+const std::string part_user_data_string = "SECRET SECRET SECRET";
 
 struct Args {
 
@@ -43,14 +42,15 @@ struct Args {
 
   int extra_space_;
 
+  bool secure_part_user_data_;
+  bool expect_part_user_data_;
+  bool expect_blank_part_user_data_;
+
   Args();
 
   void partition_to_qos(DDS::PartitionQosPolicy& policy);
 
   static int parse_args(int argc, ACE_TCHAR *argv[], Args& args);
 };
-
-} // namespace SecurityAttributes
-
 
 #endif

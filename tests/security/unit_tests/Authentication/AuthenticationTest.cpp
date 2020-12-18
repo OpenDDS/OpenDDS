@@ -3,24 +3,24 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "gtest/gtest.h"
-#include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
-#include "dds/DCPS/security/OpenSSL_init.h"
-#include "dds/DCPS/GuidUtils.h"
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/security/SSL/Certificate.h>
+#include <dds/DCPS/security/SSL/SignedDocument.h>
+#include <dds/DCPS/security/SSL/Utils.h>
+#include <dds/DCPS/security/CommonUtilities.h>
+#include <dds/DCPS/security/TokenReader.h>
+#include <dds/DCPS/security/AuthenticationBuiltInImpl.h>
+#include <dds/DCPS/security/OpenSSL_init.h>
 
-#include "dds/DCPS/security/SSL/Certificate.h"
-#include "dds/DCPS/security/SSL/SignedDocument.h"
-#include "dds/DCPS/security/SSL/Utils.h"
-#include "dds/DCPS/security/CommonUtilities.h"
-#include "dds/DCPS/security/TokenReader.h"
+#include <dds/DCPS/RTPS/RtpsCoreC.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
 #include <cstring>
 #include <algorithm>
 #include <cstdio>
 
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+#include <gtest/gtest.h>
 
 using OpenDDS::DCPS::GUID_t;
 using DDS::DomainParticipantQos;
@@ -116,11 +116,11 @@ struct AuthenticationTest : public ::testing::Test
     Property_t idca, pkey, pass, idcert, cperms;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:certs/identity/identity_ca_cert.pem";
+    idca.value = "file:../certs/identity/identity_ca_cert.pem";
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:certs/identity/test_participant_01_private_key.pem";
+    pkey.value = "file:../certs/identity/test_participant_01_private_key.pem";
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -128,11 +128,11 @@ struct AuthenticationTest : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:certs/identity/test_participant_01_cert.pem";
+    idcert.value = "file:../certs/identity/test_participant_01_cert.pem";
     idcert.propagate = false;
 
     cperms.name = "dds.sec.access.permissions";
-    cperms.value = "file:permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+    cperms.value = "file:../permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
     cperms.propagate = false;
 
     mp1.add_property(idca);
@@ -151,11 +151,11 @@ struct AuthenticationTest : public ::testing::Test
     Property_t idca, pkey, pass, idcert, cperms;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:certs/identity/identity_ca_cert.pem";
+    idca.value = "file:../certs/identity/identity_ca_cert.pem";
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:certs/identity/test_participant_02_private_key.pem";
+    pkey.value = "file:../certs/identity/test_participant_02_private_key.pem";
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -163,11 +163,11 @@ struct AuthenticationTest : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:certs/identity/test_participant_02_cert.pem";
+    idcert.value = "file:../certs/identity/test_participant_02_cert.pem";
     idcert.propagate = false;
 
     cperms.name = "dds.sec.access.permissions";
-    cperms.value = "file:permissions/permissions_test_participant_02_JoinDomain_signed.p7s";
+    cperms.value = "file:../permissions/permissions_test_participant_02_JoinDomain_signed.p7s";
     cperms.propagate = false;
 
     mp2.add_property(idca);

@@ -2378,6 +2378,9 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_addrs.size());
   OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_sizes.size());
 
+  OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_addrs.size());
+  OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_sizes.size());
+
   // Reusable INFO_DST
   InfoDestinationSubmessage idst = {
     {INFO_DST, FLAG_E, INFO_DST_SZ},
