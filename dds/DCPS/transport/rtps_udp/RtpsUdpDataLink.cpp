@@ -4046,7 +4046,7 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
     return;
   }
 
-  std::vector<ReceivedDataSample> to_deliver;
+  OPENDDS_VECTOR(ReceivedDataSample) to_deliver;
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end()) {
@@ -4062,7 +4062,7 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
 
   g.release();
 
-  for (std::vector<ReceivedDataSample>::iterator it = to_deliver.begin(); it != to_deliver.end(); ++it) {
+  for (OPENDDS_VECTOR(ReceivedDataSample)::iterator it = to_deliver.begin(); it != to_deliver.end(); ++it) {
     if (Transport_debug_level > 5) {
       GuidConverter reader(dst);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData -")
