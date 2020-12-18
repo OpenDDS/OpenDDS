@@ -1481,7 +1481,7 @@ DataWriterImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
                            pub_qos,

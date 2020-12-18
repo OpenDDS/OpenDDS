@@ -371,7 +371,7 @@ ReplayerImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
                            this->publisher_qos_,

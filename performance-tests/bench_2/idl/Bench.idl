@@ -233,9 +233,12 @@ module Bench {
       Builder::TimeStamp launch_time;
     };
 
+    typedef sequence<NodeController::WorkerId> WorkerIdSeq;
     struct NodeReport {
       NodeController::NodeId node_id;
       WorkerReportSeq worker_reports;
+      Builder::StringSeq worker_logs;
+      WorkerIdSeq worker_ids;
       Builder::PropertySeq properties;
     };
 
