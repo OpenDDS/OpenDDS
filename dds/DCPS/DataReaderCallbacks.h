@@ -67,6 +67,9 @@ public:
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
 
+typedef RcHandle<DataReaderCallbacks> DataReaderCallbacks_rch;
+typedef WeakRcHandle<DataReaderCallbacks> DataReaderCallbacks_wrch;
+
 } // namespace DCPS
 } // namespace OpenDDS
 
