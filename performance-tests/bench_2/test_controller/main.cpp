@@ -387,7 +387,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Saving Scenario Allocation to File..." << std::endl;
       std::ofstream file(preallocated_scenario_output_path);
       if (file.is_open()) {
-        if ((pretty && !idl_2_pretty_json(allocated_scenario, file)) ||
+        if ((pretty && !idl_2_json<AllocatedScenario, rapidjson::PrettyWriter>(allocated_scenario, file)) ||
             (!pretty && !idl_2_json(allocated_scenario, file))) {
           throw std::runtime_error("Could not encode allocated scenario");
         }
@@ -395,7 +395,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         throw std::runtime_error("Could not open file for writing allocated scenario");
       }
     } else if (debug_alloc) {
-      if (!idl_2_pretty_json(allocated_scenario, std::cout)) {
+      if (!idl_2_json<AllocatedScenario, rapidJson::PrettyWriter>(allocated_scenario, std::cout)) {
         throw std::runtime_error("Could not encode allocated scenario");
       }
     } else {
