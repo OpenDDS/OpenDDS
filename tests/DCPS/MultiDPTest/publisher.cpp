@@ -227,8 +227,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         timeout_writes += writers[i]->get_timeout_writes();
       }
     }
-    // Indicate that the publisher is done
     timeout_writes_ready = true;
+
+    // Indicate that the publisher is done
     pub_finished = true;
     //FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
     //if (writers_completed == 0) {

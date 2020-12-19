@@ -20,8 +20,12 @@ ACE_TString pub_finished_filename = ACE_TEXT("publisher_finished.txt");
 ACE_TString sub_ready_filename = ACE_TEXT("subscriber_ready.txt");
 ACE_TString sub_finished_filename = ACE_TEXT("subscriber_finished.txt");
 
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_ready = false;
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_finished = false;
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_ready = false;
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_finished = false;
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> timeout_writes_ready = false;
+//ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_ready = false;
+//ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_finished = false;
+//ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_ready = false;
+//ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_finished = false;
+bool pub_ready = false;
+bool pub_finished = false;
+bool sub_ready = false;
+bool sub_finished = false;
+bool timeout_writes_ready = false;

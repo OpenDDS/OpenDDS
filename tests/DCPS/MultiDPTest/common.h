@@ -22,10 +22,15 @@ extern ACE_TString pub_finished_filename;
 extern ACE_TString sub_ready_filename;
 extern ACE_TString sub_finished_filename;
 
-extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_ready;
-extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_finished;
-extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_ready;
-extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_finished;
-extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> timeout_writes_ready;
+//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_ready;
+//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_finished;
+//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_ready;
+//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_finished;
+//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> timeout_writes_ready;
+extern bool pub_ready;
+extern bool pub_finished;
+extern bool sub_ready;
+extern bool sub_finished;
+extern bool timeout_writes_ready;
 
 #endif /* COMMON_H */
