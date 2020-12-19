@@ -1564,11 +1564,11 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
         pit->second.stateless_msg_deadline_ <= now) {
       const RepoId reader = make_id(pit->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
       pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
-      // Send the SPDP announcement in case it got lost.
-      tport_->write_i(pit->first, SpdpTransport::SEND_TO_RELAY | SpdpTransport::SEND_TO_LOCAL);
 
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
+        // Send the SPDP announcement in case it got lost.
+        tport_->write_i(pit->first, SpdpTransport::SEND_TO_RELAY | SpdpTransport::SEND_TO_LOCAL);
         if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")

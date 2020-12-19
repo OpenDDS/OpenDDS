@@ -113,6 +113,8 @@ RtpsUdpTransport::use_ice_now(bool after)
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
+  OPENDDS_ASSERT(!GuidPrefixEqual()(local_prefix, GUIDPREFIX_UNKNOWN));
+
   assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
   relay_stun_task(DCPS::MonotonicTimePoint::now());
