@@ -1611,10 +1611,12 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 bool
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg)
 {
+  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Spdp::handle_participant_crypto_tokens() from %C\n"),
-               DCPS::LogGuid(msg.source_endpoint_guid).c_str()));
+               DCPS::LogGuid(src_participant).c_str()));
   }
 
   DDS::Security::SecurityException se = {"", 0, 0};
@@ -1624,8 +1626,6 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
     return false;
   }
-
-  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
@@ -1727,6 +1727,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     }
 
     sedp_->disassociate_volatile(iter->second.pdata_);
+    sedp_->cleanup_volatile_crypto(iter->first);
     sedp_->associate_volatile(iter->second.pdata_);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {

@@ -99,6 +99,7 @@ public:
 #ifdef OPENDDS_SECURITY
   void associate_preauth(Security::SPDPdiscoveredParticipantData& pdata);
   void associate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
+  void cleanup_volatile_crypto(const DCPS::RepoId& remote);
   void disassociate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& pdata,
                                   const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr);
