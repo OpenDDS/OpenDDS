@@ -12,6 +12,7 @@
 #include "common.h"
 #include "Writer.h"
 #include "TestException.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -20,6 +21,8 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"
+
+#include <iostream>
 
 ::DDS::DomainParticipantFactory_var dpf;
 ::DDS::DomainParticipant_var participant;
@@ -45,7 +48,6 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -o directory of synch files used to coordinate publisher and subscriber
     //                              defaults to current directory.
     //  -v                          verbose transport debug
-
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0) {
@@ -77,9 +79,9 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 void init()
 {
   participant = dpf->create_participant(domain_id,
-					PARTICIPANT_QOS_DEFAULT,
-					::DDS::DomainParticipantListener::_nil(),
-					::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                        PARTICIPANT_QOS_DEFAULT,
+                                        ::DDS::DomainParticipantListener::_nil(),
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(participant.in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_participant failed.\n")));
     throw TestException();
@@ -96,20 +98,20 @@ void init()
   participant->get_default_topic_qos(topic_qos);
 
   topic[0] = participant->create_topic(topic_name[0],
-				       type_name,
-				       topic_qos,
-				       ::DDS::TopicListener::_nil(),
-				       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                       type_name,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(topic[0].in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_topic failed.\n")));
     throw TestException();
   }
 
   topic[1] = participant->create_topic(topic_name[1],
-				       type_name,
-				       topic_qos,
-				       ::DDS::TopicListener::_nil(),
-				       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                       type_name,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(topic[1].in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_topic failed.\n")));
     throw TestException();
@@ -117,8 +119,8 @@ void init()
 
   // Create the default publisher
   publisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-					    ::DDS::PublisherListener::_nil(),
-					    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                            ::DDS::PublisherListener::_nil(),
+                                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(publisher.in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_publisher failed.\n")));
     throw TestException();
@@ -138,9 +140,9 @@ void init()
 
   for (int i = 0; i < 2; ++i) {
     datawriter[i] = publisher->create_datawriter(topic[i].in(),
-						 dw_qos,
-						 ::DDS::DataWriterListener::_nil(),
-						 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                                 dw_qos,
+                                                 ::DDS::DataWriterListener::_nil(),
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(datawriter[i].in())) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
       throw TestException();
@@ -180,21 +182,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init();
 
     // Indicate that the publisher is ready
-    FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
-    if (writers_ready == 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
-    }
+    pub_ready = true;
+    //FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
+    //if (writers_ready == 0) {
+    //ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
+    //}
 
     const ACE_Time_Value small_time(0, 250000);
     // Wait for the subscriber to be ready.
-    FILE* readers_ready = 0;
     do {
       ACE_OS::sleep(small_time);
-      readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
-    } while (0 == readers_ready);
+    } while (sub_ready == false);
+    //FILE* readers_ready = 0;
+    //do {
+    //ACE_OS::sleep(small_time);
+      //readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
+    //} while (0 == readers_ready);
 
-    if (writers_ready) ACE_OS::fclose(writers_ready);
-    if (readers_ready) ACE_OS::fclose(readers_ready);
+      //    if (writers_ready) ACE_OS::fclose(writers_ready);
+      //    if (readers_ready) ACE_OS::fclose(readers_ready);
 
     // ensure the associations are fully established before writing.
     ACE_OS::sleep(3);
@@ -222,22 +228,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
     // Indicate that the publisher is done
-    FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
-    if (writers_completed == 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to i publisher completed file\n")));
-    } else {
-      ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
-    }
+    timeout_writes_ready = true;
+    pub_finished = true;
+    //FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
+    //if (writers_completed == 0) {
+    //ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to open publisher completed file\n")));
+    //} else {
+    //std::cout << "Number of timeout_writes: " << timeout_writes << std::endl;
+    //ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
+    //ACE_OS::fflush(writers_completed);
+    //}
 
     // Wait for the subscriber to finish.
-    FILE* readers_completed = 0;
     do {
       ACE_OS::sleep(small_time);
-      readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("r"));
-    } while (0 == readers_completed);
+    } while (sub_finished == false);
+    //FILE* readers_completed = 0;
+    //do {
+    //ACE_OS::sleep(small_time);
+    //readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("r"));
+    //} while (0 == readers_completed);
 
-    if (writers_completed) ACE_OS::fclose(writers_completed);
-    if (readers_completed) ACE_OS::fclose(readers_completed);
+    //    if (writers_completed) ACE_OS::fclose(writers_completed);
+    //    if (readers_completed) ACE_OS::fclose(readers_completed);
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; i++) {

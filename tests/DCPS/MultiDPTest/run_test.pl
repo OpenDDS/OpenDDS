@@ -39,4 +39,4 @@ $test->setup_discovery();
 $test->start_process('pub', '-o');
 $test->start_process('sub', '-o');
 
-exit $test->finish(300);
+exit $test->finish(30);
