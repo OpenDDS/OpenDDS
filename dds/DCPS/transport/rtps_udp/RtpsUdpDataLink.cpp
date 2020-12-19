@@ -2909,12 +2909,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         }
       }
     }
-
-    if (reader->durable_ && reader->durable_timestamp_.is_zero()) {
-      // The writer is not done replaying durable data.
-      // Clear the requests so send_and_gather_acknack_replies doesn't send a gap.
-      reader->requests_.reset();
-    }
   }
 
   gather_gaps_i(reader, gaps, meta_submessages);
@@ -3071,6 +3065,14 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
     const AddrSet addrs = link->get_addresses(id_, reader->id_);
 
     DisjointSequence gaps;
+
+    if (reader->expecting_durable_data()) {
+      // The writer may not be done replaying durable data.
+      // Do not send a gap.
+      // TODO: If we have all of the durable data, adjust the request so that we can answer the non-durable part.
+      reader->requests_.reset();
+      continue;
+    }
 
     if (!reader->requests_.empty() &&
         send_buff_ &&
