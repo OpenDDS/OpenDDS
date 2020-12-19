@@ -2889,8 +2889,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   DisjointSequence gaps;
 
   if (!reader->requests_.empty() && !reader->durable_data_.empty()) {
-    const SequenceNumber& dd_first = reader->durable_data_.begin()->first;
-    const SequenceNumber& dd_last = reader->durable_data_.rbegin()->first;
+    const SequenceNumber dd_first = reader->durable_data_.begin()->first;
+    const SequenceNumber dd_last = reader->durable_data_.rbegin()->first;
 
     if (reader->requests_.high() < dd_first) {
       gaps.insert(SequenceRange(reader->requests_.low(), dd_first.previous()));
@@ -2911,6 +2911,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
           }
         }
       }
+    }
+
+    if (reader->durable_ && reader->durable_timestamp_.is_zero()) {
+      // The writer is not done replaying durable data.
+      // Clear the requests so send_and_gather_acknack_replies doesn't send a gap.
+      reader->requests_.reset();
     }
   }
 
@@ -2942,6 +2948,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     const OPENDDS_VECTOR(SequenceRange) psr = reader->pvs_outstanding_.present_sequence_ranges();
     for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end();
          pos != limit && pos->first < reader->cur_cumulative_ack_; ++pos) {
+      ACE_GUARD(ACE_Thread_Mutex, g, elems_not_acked_mutex_);
       for (SequenceNumber seq = pos->first; seq <= pos->second && seq < reader->cur_cumulative_ack_; ++seq) {
         reader->pvs_outstanding_.erase(seq);
         OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter = elems_not_acked_.find(seq);
