@@ -2570,7 +2570,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.local_subscriptions();
         for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
           LocalSubscriptionIter lsi = local_subscriptions_.find(*i);
-          OPENDDS_ASSERT(lsi != local_subscriptions_.end());
           if (lsi != local_subscriptions_.end()) {
             DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
             if (sl) {
@@ -2900,7 +2899,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.local_publications();
         for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
           const LocalPublicationIter lpi = local_publications_.find(*i);
-          OPENDDS_ASSERT(lpi != local_publications_.end());
           if (lpi != local_publications_.end()) {
             DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
             if (pl) {
@@ -5726,13 +5724,10 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
 
     for (DCPS::RepoIdSet::const_iterator it = lpub.matched_endpoints_.begin(),
            end = lpub.matched_endpoints_.end(); it != end; ++it) {
-      const DCPS::GuidConverter conv(*it);
-      if (conv.isReader()) {
-        DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(*it);
-        if (dsi != discovered_subscriptions_.end()) {
-          if (dsi->second.have_ice_agent_info_) {
-            ICE::Agent::instance()->start_ice(endpoint, guid, dsi->first, dsi->second.ice_agent_info_);
-          }
+      DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(*it);
+      if (dsi != discovered_subscriptions_.end()) {
+        if (dsi->second.have_ice_agent_info_) {
+          ICE::Agent::instance()->start_ice(endpoint, guid, dsi->first, dsi->second.ice_agent_info_);
         }
       }
     }
@@ -5756,13 +5751,10 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
 
     for (DCPS::RepoIdSet::const_iterator it = lsub.matched_endpoints_.begin(),
            end = lsub.matched_endpoints_.end(); it != end; ++it) {
-      const DCPS::GuidConverter conv(*it);
-      if (conv.isWriter()) {
-        DiscoveredPublicationIter dpi = discovered_publications_.find(*it);
-        if (dpi != discovered_publications_.end()) {
-          if (dpi->second.have_ice_agent_info_) {
-            ICE::Agent::instance()->start_ice(endpoint, guid, dpi->first, dpi->second.ice_agent_info_);
-          }
+      DiscoveredPublicationIter dpi = discovered_publications_.find(*it);
+      if (dpi != discovered_publications_.end()) {
+        if (dpi->second.have_ice_agent_info_) {
+          ICE::Agent::instance()->start_ice(endpoint, guid, dpi->first, dpi->second.ice_agent_info_);
         }
       }
     }
@@ -5782,17 +5774,14 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
 
   for (DCPS::RepoIdSet::const_iterator it = dpub.matched_endpoints_.begin(),
        end = dpub.matched_endpoints_.end(); it != end; ++it) {
-    const DCPS::GuidConverter conv(*it);
-    if (conv.isReader()) {
-      LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
-      if (lsi != local_subscriptions_.end() &&
-          lsi->second.matched_endpoints_.count(guid)) {
-        DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
-        if (sl) {
-          ICE::Endpoint* endpoint = sl->get_ice_endpoint();
-          if (endpoint) {
-            ICE::Agent::instance()->start_ice(endpoint, lsi->first, guid, dpub.ice_agent_info_);
-          }
+    LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
+    if (lsi != local_subscriptions_.end() &&
+        lsi->second.matched_endpoints_.count(guid)) {
+      DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
+      if (sl) {
+        ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+        if (endpoint) {
+          ICE::Agent::instance()->start_ice(endpoint, lsi->first, guid, dpub.ice_agent_info_);
         }
       }
     }
