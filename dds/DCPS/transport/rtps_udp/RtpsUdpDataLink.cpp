@@ -3022,7 +3022,7 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   if (dd_iter != reader->durable_data_.end()) {
     link->durability_resend(dd_iter->second, nackfrag.fragmentNumberState);
   } else if ((!reader->durable_data_.empty() && seq < reader->durable_data_.begin()->first) ||
-             (send_buff_ && !send_buff_->empty() && seq < send_buff_->low())) {
+             (!reader->expecting_durable_data() && send_buff_ && !send_buff_->empty() && seq < send_buff_->low())) {
     DisjointSequence gaps;
     gaps.insert(seq);
     gather_gaps_i(reader, gaps, meta_submessages);
@@ -3071,6 +3071,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
       // Do not send a gap.
       // TODO: If we have all of the durable data, adjust the request so that we can answer the non-durable part.
       reader->requests_.reset();
+      reader->requested_frags_.clear();
       continue;
     }
 
