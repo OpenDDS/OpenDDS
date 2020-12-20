@@ -1225,7 +1225,7 @@ namespace OpenDDS {
             if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id)) {
               bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
-              is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
+              is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
               save_matching_data_and_get_typeobjects(writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
               return;
@@ -1234,7 +1234,7 @@ namespace OpenDDS {
             if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id)) {
               bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
-              is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+              is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
 #endif
               save_matching_data_and_get_typeobjects(reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
               return;
