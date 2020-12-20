@@ -784,6 +784,7 @@ private:
   class DeliverHeldData {
   public:
     DeliverHeldData()
+      : writer_id_(GUID_UNKNOWN)
     {}
 
     DeliverHeldData(RtpsReader_rch reader,
