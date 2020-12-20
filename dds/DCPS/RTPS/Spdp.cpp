@@ -787,9 +787,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif /* DDS_HAS_MINIMUM_BIT */
         // Perform search again, so iterator becomes valid
         iter = participants_.find(guid);
+#ifndef DDS_HAS_MINIMUM_BIT
         if (iter != participants_.end()) {
           iter->second.bit_ih_ = bit_instance_handle;
         }
+#endif /* DDS_HAS_MINIMUM_BIT */
       }
       // Participant may have been removed while lock released
       if (iter != participants_.end()) {
