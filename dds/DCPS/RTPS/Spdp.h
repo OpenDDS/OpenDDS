@@ -196,6 +196,7 @@ protected:
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
   void process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish = false);
+  void publish_location_update_i(DiscoveredParticipantIter iter);
 #endif
 
   bool announce_domain_participant_qos();
