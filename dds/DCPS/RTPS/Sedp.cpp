@@ -1131,6 +1131,12 @@ void Sedp::associate_volatile(Security::SPDPdiscoveredParticipantData& pdata)
   }
 }
 
+void Sedp::cleanup_volatile_crypto(const DCPS::RepoId& remote)
+{
+  remove_remote_crypto_handle(remote, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
+  remove_remote_crypto_handle(remote, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
+}
+
 void Sedp::disassociate_volatile(Security::SPDPdiscoveredParticipantData& pdata)
 {
   using namespace DDS::Security;
@@ -5244,7 +5250,7 @@ Sedp::generate_remote_matched_writer_crypto_handle(const RepoId& writer,
   Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(writer_part);
 
   if (info.first != DDS::HANDLE_NIL && info.second) {
-    const DDS::Security::DatawriterCryptoHandle drch =
+    const DDS::Security::DatareaderCryptoHandle drch =
       get_handle_registry()->get_local_datareader_crypto_handle(reader);
     const DDS::Security::EndpointSecurityAttributes attribs =
       get_handle_registry()->get_local_datareader_security_attributes(reader);
