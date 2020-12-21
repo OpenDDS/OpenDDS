@@ -1280,8 +1280,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   // we don't need to send the auth req.
   dp.have_auth_req_msg_ = false;
 
-  if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE) {
-    // Remote is still sending (reply), so resend (the final).
+  if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE && !dp.is_requester_) {
+    // Remote is still sending a reply, so resend the final.
     const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
