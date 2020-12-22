@@ -3,8 +3,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "ace/SString.h"
-#include "ace/Atomic_Op.h"
+#include <ace/SString.h>
+#include <ace/Atomic_Op.h>
+#include <ace/Malloc_T.h>
+#include <ace/MMAP_Memory_Pool.h>
+#include <ace/PI_Malloc.h>
 
 const long domain_id = 111;
 extern const char* type_name;
@@ -14,23 +17,22 @@ extern int num_samples_per_instance;
 extern const char* topic_name[2];
 extern ACE_Atomic_Op<ACE_Thread_Mutex, int> num_reads;
 
-extern ACE_TString synch_file_dir;
-// These files need to be unlinked in the run test script before and
-// after running.
-extern ACE_TString pub_ready_filename;
-extern ACE_TString pub_finished_filename;
-extern ACE_TString sub_ready_filename;
-extern ACE_TString sub_finished_filename;
+struct SharedData {
+  SharedData() : pub_ready(false)
+               , pub_finished(false)
+               , sub_ready(false)
+               , sub_finished(false)
+               , timeout_writes_ready(false) {}
 
-//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_ready;
-//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> pub_finished;
-//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_ready;
-//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> sub_finished;
-//extern ACE_Atomic_Op<ACE_Thread_Mutex, bool> timeout_writes_ready;
-extern bool pub_ready;
-extern bool pub_finished;
-extern bool sub_ready;
-extern bool sub_finished;
-extern bool timeout_writes_ready;
+  bool pub_ready;
+  bool pub_finished;
+  bool sub_ready;
+  bool sub_finished;
+  bool timeout_writes_ready;
+};
+
+extern const char* mmap_file;
+
+typedef ACE_Malloc_T<ACE_MMAP_MEMORY_POOL, ACE_Null_Mutex, ACE_PI_Control_Block> Allocator;
 
 #endif /* COMMON_H */

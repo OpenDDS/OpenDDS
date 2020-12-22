@@ -12,12 +12,12 @@
 #include "common.h"
 #include "Writer.h"
 #include "TestException.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"
@@ -41,13 +41,9 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 
   while (arg_shifter.is_anything_left()) {
     // options:
-    //  -i num_samples_per_instance    defaults to 1
-    //  -w num_datawriters          defaults to 1
-    //  -m num_instances_per_writer defaults to 1
-    //  -z length of float sequence in data type   defaults to 10
-    //  -o directory of synch files used to coordinate publisher and subscriber
-    //                              defaults to current directory.
-    //  -v                          verbose transport debug
+    //  -i num_samples_per_instance (defaults to 1)
+    //  -m num_instances_per_writer (defaults to 1)
+    //  -v verbose transport debug
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0) {
@@ -58,14 +54,6 @@ int parse_args(int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
-      arg_shifter.consume_arg();
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
-      synch_file_dir = currentArg;
-      pub_ready_filename = synch_file_dir + pub_ready_filename;
-      pub_finished_filename = synch_file_dir + pub_finished_filename;
-      sub_ready_filename = synch_file_dir + sub_ready_filename;
-      sub_finished_filename = synch_file_dir + sub_finished_filename;
-
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -181,30 +169,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     init();
 
+    Allocator* allocator;
+    ACE_NEW_RETURN(allocator, Allocator(mmap_file), -1);
+    //    std::cout << "Created the Allocator!" << std::endl;
+    void* mem = allocator->malloc(sizeof(SharedData));
+    if (mem == 0) {
+      std::cout << "Unable to malloc " << sizeof(SharedData) << " bytes" << std::endl;
+      return -1;
+    }
+    //    std::cout << "Malloc a memory for a SharedData object at address" << mem << "!" << std::endl;
+    SharedData* state = new(mem) SharedData();
+    //    std::cout << "Initialize a new SharedData object!" << std::endl;
+    allocator->sync();
+    //    std::cout << "Synchronize the shared mem into the backing file!" << std::endl;
+    allocator->bind("state", state);
+    //    std::cout << "Bind the SharedData object and its name to the shared mem!" << std::endl;
+    //    std::cout << "Based address on publisher:" << allocator->base_addr() << std::endl;
+
     // Indicate that the publisher is ready
-    pub_ready = true;
-    //FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
-    //if (writers_ready == 0) {
-    //ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
-    //}
+    state->pub_ready = true;
+    //    std::cout << "Publisher is ready!" << std::endl;
 
     const ACE_Time_Value small_time(0, 250000);
     // Wait for the subscriber to be ready.
     do {
       ACE_OS::sleep(small_time);
-    } while (sub_ready == false);
-    //FILE* readers_ready = 0;
-    //do {
-    //ACE_OS::sleep(small_time);
-      //readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
-    //} while (0 == readers_ready);
-
-      //    if (writers_ready) ACE_OS::fclose(writers_ready);
-      //    if (readers_ready) ACE_OS::fclose(readers_ready);
+    } while (state->sub_ready == false);
 
     // ensure the associations are fully established before writing.
     ACE_OS::sleep(3);
 
+    //    std::cout << "Start writing data..." << std::endl;
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; i++) {
         writers[i]->start();
@@ -227,31 +222,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         timeout_writes += writers[i]->get_timeout_writes();
       }
     }
-    timeout_writes_ready = true;
+    state->timeout_writes_ready = true;
 
     // Indicate that the publisher is done
-    pub_finished = true;
-    //FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
-    //if (writers_completed == 0) {
-    //ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to open publisher completed file\n")));
-    //} else {
-    //std::cout << "Number of timeout_writes: " << timeout_writes << std::endl;
-    //ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
-    //ACE_OS::fflush(writers_completed);
-    //}
+    state->pub_finished = true;
 
     // Wait for the subscriber to finish.
     do {
       ACE_OS::sleep(small_time);
-    } while (sub_finished == false);
-    //FILE* readers_completed = 0;
-    //do {
-    //ACE_OS::sleep(small_time);
-    //readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("r"));
-    //} while (0 == readers_completed);
-
-    //    if (writers_completed) ACE_OS::fclose(writers_completed);
-    //    if (readers_completed) ACE_OS::fclose(readers_completed);
+    } while (state->sub_finished == false);
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; i++) {

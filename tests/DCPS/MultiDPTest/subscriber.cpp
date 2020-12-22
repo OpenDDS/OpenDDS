@@ -50,16 +50,9 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 
   while (arg_shifter.is_anything_left()) {
     // options:
-    //  -d history.depth            defaults to 1
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
-    //  -z length of float sequence in data type   defaults to 10
-    //  -y read operation interval                 defaults to 0
-    //  -k data type has no key flag               defaults to 0 - has key
-    //  -f mixed transport test flag               defaults to 0 - single transport test
-    //  -o directory of synch files used to coordinate publisher and subscriber
-    //                              defaults to current directory.
-    //  -v                          verbose transport debug
+    //  -v verbose transport debug
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -71,14 +64,6 @@ int parse_args(int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
-      arg_shifter.consume_arg();
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
-      synch_file_dir = currentArg;
-      pub_ready_filename = synch_file_dir + pub_ready_filename;
-      pub_finished_filename = synch_file_dir + pub_finished_filename;
-      sub_ready_filename = synch_file_dir + sub_ready_filename;
-      sub_finished_filename = synch_file_dir + sub_finished_filename;
-
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -201,32 +186,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
+    Allocator* allocator;
+    void* ptr;
+    ACE_NEW_RETURN(allocator, Allocator(mmap_file), -1);
+    //    std::cout << "Create a new Allocator object!" << std::endl;
+    //    std::cout << "Based address on subscriber: " << allocator->base_addr() << std::endl;
+    while(allocator->find("state", ptr) != 0) {}
+    SharedData* state = reinterpret_cast<SharedData*>(ptr);
+    //    std::cout << "Found the SharedData object at address " << ptr << std::endl;
+
     // Indicate that the subscriber is ready
-    sub_ready = true;
-    //FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
-    //if (readers_ready == 0) {
-    //ACE_ERROR((LM_ERROR,
-    //              ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
-    //}
+    state->sub_ready = true;
+    //    std::cout << "Subscriber is ready!" << std::endl;
 
     // Wait for the publisher to be ready
     do {
       ACE_Time_Value small_time(0, 250000);
       ACE_OS::sleep(small_time);
-    } while (pub_ready == false);
-    //FILE* writers_ready = 0;
-    //do {
-    //ACE_Time_Value small_time(0, 250000);
-    //ACE_OS::sleep(small_time);
-    //writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("r"));
-    //} while (0 == writers_ready);
-
-    //    if (readers_ready) ACE_OS::fclose(readers_ready);
-    //    if (writers_ready) ACE_OS::fclose(writers_ready);
+    } while (state->pub_ready == false);
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 
-    //    FILE* writers_completed = 0;
+    //    std::cout << "Start reading data..." << std::endl;
     int timeout_writes = 0;
 
     int prev_reads = 0;
@@ -238,54 +219,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Get the number of the timed out writes from publisher so we
       // can re-calculate the number of expected messages. Otherwise,
       // the blocking timeout test will never exit from this loop.
-      if (timeout_writes_ready == true && timeout_writes > 0) {
+      if (state->timeout_writes_ready == true && timeout_writes > 0) {
         expected -= timeout_writes;
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
                    timeout_writes, expected));
       }
-      /*
-      if (writers_completed == 0) {
-        writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
-        if (writers_completed != 0) {
-          if (std::fscanf(writers_completed, "%d\n", &timeout_writes) != 1) {
-            //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
-          } else if (timeout_writes) {
-            expected -= timeout_writes;
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
-                       timeout_writes, expected));
-          }
-        }
-      }*/
       ACE_OS::sleep(1);
     }
 
     // Indicate that the subscriber is done
-    sub_finished = true;
-    //FILE* readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("w"));
-    //if (readers_completed == 0) {
-    //ACE_ERROR((LM_ERROR,
-    //             ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
-    //}
+    state->sub_finished = true;
 
-    std::cout << "Finish reading " << num_reads.value() << " samples. Waiting for publisher to finish..." << std::endl;
+    //    std::cout << "Finish reading " << num_reads.value() << " samples. Waiting for publisher to finish..." << std::endl;
 
     // Wait for the publisher to finish
-    while (pub_finished == false) {
+    while (state->pub_finished == false) {
       ACE_Time_Value small_time(0, 250000);
       ACE_OS::sleep(small_time);
     }
-    //while (writers_completed == 0) {
-    //ACE_Time_Value small_time(0, 250000);
-    //ACE_OS::sleep(small_time);
-    //writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
-    //}
-    std::cout << "Cleaning up ..." << std::endl;
-
-    //    if (readers_completed) ACE_OS::fclose(readers_completed);
-    //    if (writers_completed) ACE_OS::fclose(writers_completed);
 
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));

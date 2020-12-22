@@ -12,8 +12,8 @@ ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
 template<class DT, class DW, class DW_var>
 ::DDS::ReturnCode_t write(int writer_id,
-			  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int>& timeout_writes,
-			  ::DDS::DataWriter_ptr writer)
+        ACE_Atomic_Op<ACE_SYNCH_MUTEX, int>& timeout_writes,
+        ::DDS::DataWriter_ptr writer)
 {
   try {
     DT foo;
@@ -26,7 +26,7 @@ template<class DT, class DW, class DW_var>
     TEST_CHECK(!CORBA::is_nil(foo_dw.in()));
 
     ACE_DEBUG((LM_DEBUG,
-	       ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
+         ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
     ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
 
@@ -41,8 +41,8 @@ template<class DT, class DW, class DW_var>
       ::DDS::ReturnCode_t ret = foo_dw->write(foo, handle);
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
-		   ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-		   ACE_TEXT ("%dth write() returned %d.\n"), i, ret));
+       ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
+       ACE_TEXT ("%dth write() returned %d.\n"), i, ret));
         if (ret == ::DDS::RETCODE_TIMEOUT) {
           timeout_writes++;
         }
@@ -72,8 +72,8 @@ void Writer::start()
   // key value.
   if (activate(THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) {
     ACE_ERROR((LM_ERROR,
-	       ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
-	       ACE_TEXT("activate")));
+         ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
+         ACE_TEXT("activate")));
     throw TestException();
   }
 }

@@ -111,10 +111,10 @@ void DataReaderListenerImpl::on_data_available(::DDS::DataReader_ptr reader)
   num_reads++;
 
   int ret = read<Xyz::Foo,
-		 ::Xyz::FooSeq,
-		 ::Xyz::FooDataReader,
-		 ::Xyz::FooDataReader_ptr,
-		 ::Xyz::FooDataReader_var>(reader);
+     ::Xyz::FooSeq,
+     ::Xyz::FooDataReader,
+     ::Xyz::FooDataReader_ptr,
+     ::Xyz::FooDataReader_var>(reader);
   if (ret != 0) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available read failed.\n")));
