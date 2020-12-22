@@ -1658,6 +1658,80 @@ Sedp::disassociate(ParticipantData_t& pdata)
 
   associated_participants_.erase(part);
 
+#ifdef OPENDDS_SECURITY
+  if (spdp_.is_security_enabled()) {
+    static const EntityId_t secure_entities[] = {
+      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
+      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER,
+      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
+      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER,
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER,
+      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER,
+      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER,
+      ENTITYID_TL_SVC_REQ_WRITER_SECURE,
+      ENTITYID_TL_SVC_REQ_READER_SECURE,
+      ENTITYID_TL_SVC_REPLY_WRITER_SECURE,
+      ENTITYID_TL_SVC_REPLY_READER_SECURE
+    };
+    for (size_t i = 0; i < sizeof secure_entities / sizeof secure_entities[0]; ++i) {
+      remove_remote_crypto_handle(part, secure_entities[i]);
+    }
+
+    const DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+    DDS::Security::SecurityException se;
+
+    typedef Security::HandleRegistry::DatareaderCryptoHandleList DatareaderCryptoHandleList;
+    typedef Security::HandleRegistry::DatawriterCryptoHandleList DatawriterCryptoHandleList;
+
+    const RepoId key = make_id(part, ENTITYID_UNKNOWN);
+    const DatareaderCryptoHandleList drlist = get_handle_registry()->get_all_remote_datareaders(key);
+    for (DatareaderCryptoHandleList::const_iterator pos = drlist.begin(), limit = drlist.end();
+         pos != limit; ++pos) {
+      if (!key_factory->unregister_datareader(pos->second, se)) {
+        if (DCPS::security_debug.cleanup_error) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::disassociate() - ")
+                     ACE_TEXT("Failure calling unregister_datareader() (ch %d). Security Exception[%d.%d]: %C\n"),
+                     pos->second, se.code, se.minor_code, se.message.in()));
+        }
+      }
+      get_handle_registry()->erase_remote_datareader_crypto_handle(pos->first);
+    }
+    const DatawriterCryptoHandleList dwlist = get_handle_registry()->get_all_remote_datawriters(key);
+    for (DatawriterCryptoHandleList::const_iterator pos = dwlist.begin(), limit = dwlist.end();
+         pos != limit; ++pos) {
+      if (!key_factory->unregister_datawriter(pos->second, se)) {
+        if (DCPS::security_debug.cleanup_error) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::disassociate() - ")
+                     ACE_TEXT("Failure calling unregister_datawriter() (ch %d). Security Exception[%d.%d]: %C\n"),
+                     pos->second, se.code, se.minor_code, se.message.in()));
+        }
+      }
+      get_handle_registry()->erase_remote_datawriter_crypto_handle(pos->first);
+    }
+  }
+#endif
+
+  OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
+  OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
+
+  bool result = false;
+  if (spdp_.has_discovered_participant(part)) {
+    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
+    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
+    result = true;
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
   { // Release lock, so we can call into transport
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
@@ -1721,69 +1795,7 @@ Sedp::disassociate(ParticipantData_t& pdata)
 #endif
   }
 
-#ifdef OPENDDS_SECURITY
-  if (spdp_.is_security_enabled()) {
-    static const EntityId_t secure_entities[] = {
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER,
-      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER,
-      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER,
-      ENTITYID_TL_SVC_REQ_WRITER_SECURE,
-      ENTITYID_TL_SVC_REQ_READER_SECURE,
-      ENTITYID_TL_SVC_REPLY_WRITER_SECURE,
-      ENTITYID_TL_SVC_REPLY_READER_SECURE
-    };
-    for (size_t i = 0; i < sizeof secure_entities / sizeof secure_entities[0]; ++i) {
-      remove_remote_crypto_handle(part, secure_entities[i]);
-    }
-
-    const DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
-    DDS::Security::SecurityException se;
-
-    typedef Security::HandleRegistry::DatareaderCryptoHandleList DatareaderCryptoHandleList;
-    typedef Security::HandleRegistry::DatawriterCryptoHandleList DatawriterCryptoHandleList;
-
-    const RepoId key = make_id(part, ENTITYID_UNKNOWN);
-    const DatareaderCryptoHandleList drlist = get_handle_registry()->get_all_remote_datareaders(key);
-    for (DatareaderCryptoHandleList::const_iterator pos = drlist.begin(), limit = drlist.end();
-         pos != limit; ++pos) {
-      if (!key_factory->unregister_datareader(pos->second, se)) {
-        if (DCPS::security_debug.cleanup_error) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::disassociate() - ")
-                     ACE_TEXT("Failure calling unregister_datareader() (ch %d). Security Exception[%d.%d]: %C\n"),
-                     pos->second, se.code, se.minor_code, se.message.in()));
-        }
-      }
-      get_handle_registry()->erase_remote_datareader_crypto_handle(pos->first);
-    }
-    const DatawriterCryptoHandleList dwlist = get_handle_registry()->get_all_remote_datawriters(key);
-    for (DatawriterCryptoHandleList::const_iterator pos = dwlist.begin(), limit = dwlist.end();
-         pos != limit; ++pos) {
-      if (!key_factory->unregister_datawriter(pos->second, se)) {
-        if (DCPS::security_debug.cleanup_error) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) {cleanup_error} Sedp::disassociate() - ")
-                     ACE_TEXT("Failure calling unregister_datawriter() (ch %d). Security Exception[%d.%d]: %C\n"),
-                     pos->second, se.code, se.minor_code, se.message.in()));
-        }
-      }
-      get_handle_registry()->erase_remote_datawriter_crypto_handle(pos->first);
-    }
-  }
-#endif
-
-  if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part, false);
-    remove_entities_belonging_to(discovered_subscriptions_, part, true);
-    return true;
-  } else {
-    return false;
-  }
+  return result;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2039,7 +2051,7 @@ Sedp::update_locators(const ParticipantData_t& pdata)
 
 template<typename Map>
 void
-Sedp::remove_entities_belonging_to(Map& m, RepoId participant, bool subscription)
+Sedp::remove_entities_belonging_to(Map& m, RepoId participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit)
 {
   participant.entityId = ENTITYID_UNKNOWN;
   for (typename Map::iterator i = m.lower_bound(participant);
@@ -2066,7 +2078,7 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant, bool subscription
         purge_dead_topic(topic_name);
       }
     }
-    remove_from_bit(i->second);
+    to_remove_from_bit.push_back(i->second);
     m.erase(i++);
   }
 }
@@ -2521,9 +2533,9 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                       DDS::NEW_VIEW_STATE);
         }
       }
+      if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      if (spdp_.shutting_down()) { return; }
       // Publication may have been removed while lock released
       iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
@@ -2546,9 +2558,12 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
+        if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local subscription(s)
@@ -2602,12 +2617,13 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           purge_dead_topic(topic_name);
         }
       }
-      remove_from_bit(iter->second);
+      DiscoveredPublication p = iter->second;
+      discovered_publications_.erase(iter);
+      remove_from_bit(p);
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
                              ACE_TEXT("calling match_endpoints disp/unreg\n")));
       }
-      discovered_publications_.erase(iter);
     }
   }
 }
@@ -2847,9 +2863,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                       DDS::NEW_VIEW_STATE);
         }
       }
+      if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      if (spdp_.shutting_down()) { return; }
       // Subscription may have been removed while lock released
       iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
@@ -2871,10 +2887,13 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(
                 iter->second.reader_data_.ddsSubscriptionData,
                 DDS::NOT_NEW_VIEW_STATE);
         }
+        if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local publication(s)
@@ -2970,8 +2989,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
         if (spdp_.shutting_down()) { return; }
       }
-      remove_from_bit(iter->second);
+      DiscoveredSubscription s = iter->second;
       discovered_subscriptions_.erase(iter);
+      remove_from_bit(s);
     }
   }
 }
