@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.15 of OpenDDS
-OpenDDS 3.15 is currently in development, so this list might change.
+OpenDDS 3.15 was released on Dec 22 2020.
 
 ### Additions:
 - Scalability and performance improvements (#1525, #1610, #1616, #1662, #1792, #1927)
