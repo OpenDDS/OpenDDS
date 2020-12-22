@@ -742,7 +742,7 @@ private:
   void assign_bit_key(DiscoveredSubscription& sub);
 
   template<typename Map>
-  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant, bool subscription);
+  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
 
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);
