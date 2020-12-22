@@ -100,12 +100,12 @@ first -- the `configure` script will download it for you.
 
 There are two distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 17 or later
+* OCI ACE/TAO 2.2a patch 19 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.8 / TAO 2.5.8 or later
+* DOC Group ACE 6.5.12 / TAO 2.5.12 or later in the ACE 6.x / TAO 2.x series
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
@@ -124,8 +124,7 @@ Perl is used for the configure script, running the automated tests and examples
 included in this source tree, and generating Makefiles or Visual Studio project
 files.
 
-On Windows we recommend the use of [ActiveState Perl](
-https://www.activestate.com/activeperl).
+On Windows we recommend the use of [Straweberry Perl](https://strawberryperl.com).
 
 ### Optional Dependencies
 
@@ -150,12 +149,11 @@ This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
 * Red Hat EL and CentOS 6.6, 6.8, 6.9 (x86\_64)
-* Red Hat EL and CentOS 7.2, 7.3, 7.4 (x86\_64)
+* Red Hat EL and CentOS 7.2, 7.3, 7.4, 7.5 (x86\_64)
 * Fedora 24 and 31 (x86\_64)
 * Debian 9.4 (i686)
 * Ubuntu 18.04 LTS, (x86\_64)
 * openSUSE 42.1 (x86\_64)
-* [Docker](docs/docker.md)
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)
@@ -187,13 +185,13 @@ This release of OpenDDS has been tested using the following compilers:
 * Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
 * Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
 * Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27034
-* Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.24.28316
+* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27044
+* Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.28.29335
 * gcc 4.4.7, 4.8.5
 * gcc 6.3
 * gcc 7.2
-* gcc 9.2
-* Clang 6.0 (llvm.org) and 11.0 (Apple)
+* gcc 10.2
+* Clang 11.0.1 (llvm.org) and 11.0.3 (Apple)
 
 ## Building and Installing
 
