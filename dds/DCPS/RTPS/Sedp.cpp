@@ -1414,48 +1414,6 @@ Sedp::disassociate(ParticipantData_t& pdata)
 
   associated_participants_.erase(part);
 
-  { // Release lock, so we can call into transport
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-    ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
-
-    disassociate_helper(pdata.associated_endpoints,
-                        DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER,
-                        part,
-                        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER,
-                        *publications_writer_);
-    disassociate_helper(pdata.associated_endpoints,
-                        DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR,
-                        part,
-                        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER,
-                        *publications_reader_);
-    disassociate_helper(pdata.associated_endpoints,
-                        DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER,
-                        part,
-                        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER,
-                        *subscriptions_writer_);
-    disassociate_helper(pdata.associated_endpoints,
-                        DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR,
-                        part,
-                        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER,
-                        *subscriptions_reader_);
-    disassociate_helper(pdata.associated_endpoints,
-                        BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER,
-                        part,
-                        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER,
-                        *participant_message_writer_);
-    disassociate_helper(pdata.associated_endpoints,
-                        BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER,
-                        part,
-                        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER,
-                        *participant_message_reader_);
-
-    //FUTURE: if/when topic propagation is supported, add it here
-
-#ifdef OPENDDS_SECURITY
-    disassociate_security_builtins(pdata);
-#endif
-  }
-
 #ifdef OPENDDS_SECURITY
   if (spdp_.is_security_enabled()) {
     static const EntityId_t secure_entities[] = {
@@ -1503,13 +1461,67 @@ Sedp::disassociate(ParticipantData_t& pdata)
   }
 #endif
 
+  OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
+  OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
+
+  bool result = false;
   if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part);
-    remove_entities_belonging_to(discovered_subscriptions_, part);
-    return true;
-  } else {
-    return false;
+    remove_entities_belonging_to(discovered_publications_, part, pubs_to_remove_from_bit);
+    remove_entities_belonging_to(discovered_subscriptions_, part, subs_to_remove_from_bit);
+    result = true;
   }
+
+  for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  { // Release lock, so we can call into transport
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
+
+    disassociate_helper(pdata.associated_endpoints,
+                        DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER,
+                        part,
+                        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER,
+                        *publications_writer_);
+    disassociate_helper(pdata.associated_endpoints,
+                        DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR,
+                        part,
+                        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER,
+                        *publications_reader_);
+    disassociate_helper(pdata.associated_endpoints,
+                        DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER,
+                        part,
+                        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER,
+                        *subscriptions_writer_);
+    disassociate_helper(pdata.associated_endpoints,
+                        DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR,
+                        part,
+                        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER,
+                        *subscriptions_reader_);
+    disassociate_helper(pdata.associated_endpoints,
+                        BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER,
+                        part,
+                        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER,
+                        *participant_message_writer_);
+    disassociate_helper(pdata.associated_endpoints,
+                        BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER,
+                        part,
+                        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER,
+                        *participant_message_reader_);
+
+    //FUTURE: if/when topic propagation is supported, add it here
+
+#ifdef OPENDDS_SECURITY
+    disassociate_security_builtins(pdata);
+#endif
+  }
+
+  return result;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -1707,7 +1719,7 @@ Sedp::update_locators(const ParticipantData_t& pdata)
 
 template<typename Map>
 void
-Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
+Sedp::remove_entities_belonging_to(Map& m, RepoId participant, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit)
 {
   participant.entityId = ENTITYID_UNKNOWN;
   for (typename Map::iterator i = m.lower_bound(participant);
@@ -1730,7 +1742,7 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
         purge_dead_topic(topic_name);
       }
     }
-    remove_from_bit(i->second);
+    to_remove_from_bit.push_back(i->second);
     m.erase(i++);
   }
 }
@@ -2178,9 +2190,9 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                       DDS::NEW_VIEW_STATE);
         }
       }
+      if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      if (spdp_.shutting_down()) { return; }
       // Publication may have been removed while lock released
       iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
@@ -2203,9 +2215,12 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
+        if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local subscription(s)
@@ -2260,12 +2275,13 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           purge_dead_topic(topic_name);
         }
       }
-      remove_from_bit(iter->second);
+      DiscoveredPublication p = iter->second;
+      discovered_publications_.erase(iter);
+      remove_from_bit(p);
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
                              ACE_TEXT("calling match_endpoints disp/unreg\n")));
       }
-      discovered_publications_.erase(iter);
     }
   }
 }
@@ -2503,9 +2519,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                       DDS::NEW_VIEW_STATE);
         }
       }
+      if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      if (spdp_.shutting_down()) { return; }
       // Subscription may have been removed while lock released
       iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
@@ -2527,10 +2543,13 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(
                 iter->second.reader_data_.ddsSubscriptionData,
                 DDS::NOT_NEW_VIEW_STATE);
         }
+        if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local publication(s)
@@ -2627,8 +2646,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
         if (spdp_.shutting_down()) { return; }
       }
-      remove_from_bit(iter->second);
+      DiscoveredSubscription s = iter->second;
       discovered_subscriptions_.erase(iter);
+      remove_from_bit(s);
     }
   }
 }
