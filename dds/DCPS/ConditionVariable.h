@@ -59,9 +59,10 @@ public:
     return CvStatus_Error;
   }
 
+  // Blocks forever if expire_at is zero.
   CvStatus wait_until(const MonotonicTimePoint& expire_at)
   {
-    if (impl_.wait(&expire_at.value()) == 0) {
+    if (impl_.wait(expire_at.is_zero() ? 0 : &expire_at.value()) == 0) {
       return CvStatus_NoTimeout;
     } else if (errno == ETIME) {
       return CvStatus_Timeout;
