@@ -489,10 +489,9 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long an_start)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, CORBA::Long an_start)
       : link_(link)
       , id_(id)
-      , durable_(durable)
       , stopping_(false)
       , acknack_count_(an_start)
     {}
@@ -541,7 +540,6 @@ private:
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
-    const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
     bool stopping_;
