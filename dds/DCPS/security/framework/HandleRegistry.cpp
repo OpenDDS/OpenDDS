@@ -16,6 +16,18 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+HandleRegistry::HandleRegistry()
+{
+  default_endpoint_security_attributes_.base.is_read_protected = false;
+  default_endpoint_security_attributes_.base.is_write_protected = false;
+  default_endpoint_security_attributes_.base.is_discovery_protected = false;
+  default_endpoint_security_attributes_.base.is_liveliness_protected = false;
+  default_endpoint_security_attributes_.is_submessage_protected = false;
+  default_endpoint_security_attributes_.is_payload_protected = false;
+  default_endpoint_security_attributes_.is_key_protected = false;
+  default_endpoint_security_attributes_.plugin_endpoint_attributes = 0;
+}
+
 HandleRegistry::~HandleRegistry()
 {
   if (DCPS::security_debug.bookkeeping) {
@@ -33,7 +45,7 @@ HandleRegistry::~HandleRegistry()
 void
 HandleRegistry::insert_local_datareader_crypto_handle(const DCPS::RepoId& id,
                                                       DDS::Security::DatareaderCryptoHandle handle,
-                                                      DDS::Security::EndpointSecurityAttributes attributes)
+                                                      const DDS::Security::EndpointSecurityAttributes& attributes)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -60,15 +72,15 @@ HandleRegistry::get_local_datareader_crypto_handle(const DCPS::RepoId& id) const
   return DDS::HANDLE_NIL;
 }
 
-DDS::Security::EndpointSecurityAttributes
+const DDS::Security::EndpointSecurityAttributes&
 HandleRegistry::get_local_datareader_security_attributes(const DCPS::RepoId& id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::Security::EndpointSecurityAttributes());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatareaderCryptoHandleMap::const_iterator pos = local_datareader_crypto_handles_.find(id);
   if (pos != local_datareader_crypto_handles_.end()) {
     return pos->second.second;
   }
-  return DDS::Security::EndpointSecurityAttributes();
+  return default_endpoint_security_attributes_;
 }
 
 void
@@ -88,7 +100,7 @@ HandleRegistry::erase_local_datareader_crypto_handle(const DCPS::RepoId& id)
 void
 HandleRegistry::insert_local_datawriter_crypto_handle(const DCPS::RepoId& id,
                                                       DDS::Security::DatawriterCryptoHandle handle,
-                                                      DDS::Security::EndpointSecurityAttributes attributes)
+                                                      const DDS::Security::EndpointSecurityAttributes& attributes)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -115,15 +127,15 @@ HandleRegistry::get_local_datawriter_crypto_handle(const DCPS::RepoId& id) const
   return DDS::HANDLE_NIL;
 }
 
-DDS::Security::EndpointSecurityAttributes
+const DDS::Security::EndpointSecurityAttributes&
 HandleRegistry::get_local_datawriter_security_attributes(const DCPS::RepoId& id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::Security::EndpointSecurityAttributes());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatawriterCryptoHandleMap::const_iterator pos = local_datawriter_crypto_handles_.find(id);
   if (pos != local_datawriter_crypto_handles_.end()) {
     return pos->second.second;
   }
-  return DDS::Security::EndpointSecurityAttributes();
+  return default_endpoint_security_attributes_;
 }
 
 void
@@ -186,7 +198,7 @@ HandleRegistry::erase_remote_participant_crypto_handle(const DCPS::RepoId& id)
 void
 HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
                                                        DDS::Security::DatareaderCryptoHandle handle,
-                                                       DDS::Security::EndpointSecurityAttributes attributes)
+                                                       const DDS::Security::EndpointSecurityAttributes& attributes)
 {
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
@@ -213,15 +225,15 @@ HandleRegistry::get_remote_datareader_crypto_handle(const DCPS::RepoId& id) cons
   return DDS::HANDLE_NIL;
 }
 
-DDS::Security::EndpointSecurityAttributes
+const DDS::Security::EndpointSecurityAttributes&
 HandleRegistry::get_remote_datareader_security_attributes(const DCPS::RepoId& id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::Security::EndpointSecurityAttributes());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatareaderCryptoHandleMap::const_iterator pos = remote_datareader_crypto_handles_.find(id);
   if (pos != remote_datareader_crypto_handles_.end()) {
     return pos->second.second;
   }
-  return DDS::Security::EndpointSecurityAttributes();
+  return default_endpoint_security_attributes_;
 }
 
 HandleRegistry::DatareaderCryptoHandleList
@@ -256,7 +268,7 @@ HandleRegistry::erase_remote_datareader_crypto_handle(const DCPS::RepoId& id)
 void
 HandleRegistry::insert_remote_datawriter_crypto_handle(const DCPS::RepoId& id,
                                                        DDS::Security::DatawriterCryptoHandle handle,
-                                                       DDS::Security::EndpointSecurityAttributes attributes)
+                                                       const DDS::Security::EndpointSecurityAttributes& attributes)
 {
   OPENDDS_ASSERT(id.entityId != DCPS::ENTITYID_UNKNOWN);
   if (handle != DDS::HANDLE_NIL) {
@@ -284,15 +296,15 @@ HandleRegistry::get_remote_datawriter_crypto_handle(const DCPS::RepoId& id) cons
   return DDS::HANDLE_NIL;
 }
 
-DDS::Security::EndpointSecurityAttributes
+const DDS::Security::EndpointSecurityAttributes&
 HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::RepoId& id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::Security::EndpointSecurityAttributes());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatawriterCryptoHandleMap::const_iterator pos = remote_datawriter_crypto_handles_.find(id);
   if (pos != remote_datawriter_crypto_handles_.end()) {
     return pos->second.second;
   }
-  return DDS::Security::EndpointSecurityAttributes();
+  return default_endpoint_security_attributes_;
 }
 
 HandleRegistry::DatawriterCryptoHandleList

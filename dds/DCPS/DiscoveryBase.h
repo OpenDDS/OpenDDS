@@ -1717,9 +1717,9 @@ namespace OpenDDS {
       {
         DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
         if (call_reader) {
-          DDS::Security::DatareaderCryptoHandle drch =
+          const DDS::Security::DatareaderCryptoHandle drch =
             get_handle_registry()->get_local_datareader_crypto_handle(reader);
-          DDS::Security::EndpointSecurityAttributes attribs =
+          const DDS::Security::EndpointSecurityAttributes attribs =
             get_handle_registry()->get_local_datareader_security_attributes(reader);
 
           // It might not exist due to security attributes, and that's OK
@@ -1747,9 +1747,9 @@ namespace OpenDDS {
         }
 
         if (call_writer) {
-          DDS::Security::DatawriterCryptoHandle dwch =
+          const DDS::Security::DatawriterCryptoHandle dwch =
             get_handle_registry()->get_local_datawriter_crypto_handle(writer);
-          DDS::Security::EndpointSecurityAttributes attribs =
+          const DDS::Security::EndpointSecurityAttributes attribs =
             get_handle_registry()->get_local_datawriter_security_attributes(writer);
 
           // It might not exist due to security attributes, and that's OK
