@@ -456,15 +456,12 @@ private:
     HeldMap held_;
     SequenceNumber hb_last_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
-    bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
     ACE_CDR::ULong participant_flags_;
 
     WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
       : id_(id)
       , hb_last_(SequenceNumber::ZERO())
-      , first_activity_(true)
-      , first_valid_hb_(true)
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , nackfrag_count_(0)

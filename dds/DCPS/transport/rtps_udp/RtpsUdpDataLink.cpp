@@ -1501,18 +1501,12 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   seq.setValue(data.writerSN.high, data.writerSN.low);
 
   DeliverHeldData dhd;
-  bool on_start = false;
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end()) {
     const WriterInfo_rch& writer = wi->second;
 
     DeliverHeldData dhd2(rchandle_from(this), src);
     std::swap(dhd, dhd2);
-
-    if (writer->first_activity_) {
-      on_start = true;
-      writer->first_activity_ = false;
-    }
 
     writer->frags_.erase(seq);
 
@@ -1595,12 +1589,9 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     link->receive_strategy()->withhold_data_from(id_);
   }
 
+  // Release for delivering held data.
   guard.release();
   g.release();
-
-  if (on_start) {
-    link->invoke_on_start_callbacks(id_, src, true);
-  }
 
   return false;
 }
@@ -1773,19 +1764,10 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   bool first_ever_hb = false;
 
-  if (writer->first_activity_) {
-    writer->first_activity_ = false;
-    first_ever_hb = true;
-  }
-
   // Only valid heartbeats (see spec) will be "fully" applied to writer info
   if (!(hb_first < 1 || hb_last < 0 || hb_last < hb_first.previous())) {
-    if (writer->first_valid_hb_ && (directed || !writer->sends_directed_hb())) {
+    if (writer->recvd_.empty() && (directed || !writer->sends_directed_hb())) {
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
-      OPENDDS_ASSERT(writer->recvd_.empty());
-
-      writer->first_valid_hb_ = false;
-
       preassociation_writers_.erase(writer);
 
       const SequenceRange sr(zero, hb_first.previous());
@@ -1797,6 +1779,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
         writer->recvd_.insert(it->first);
       }
       link->receive_strategy()->remove_fragments(sr, writer->id_);
+
+      first_ever_hb = true;
     }
 
     if (!writer->recvd_.empty()) {
@@ -1983,15 +1967,13 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks_i(MetaSubmessageVec
   // We want a heartbeat from these writers.
   for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
        pos != limit; ++pos) {
-    const WriterInfo_rch& info = *pos;
-    const DisjointSequence& recvd = info->recvd_;
+    const WriterInfo_rch& writer = *pos;
+    const DisjointSequence& recvd = writer->recvd_;
     const CORBA::ULong num_bits = 0;
     const LongSeq8 bitmap;
     const SequenceNumber ack = recvd.empty() ? 1 : ++SequenceNumber(recvd.cumulative_ack());
     const EntityId_t reader_id = id_.entityId;
-    const EntityId_t writer_id = info->id_.entityId;
-
-    MetaSubmessage meta_submessage(id_, info->id_);
+    const EntityId_t writer_id = writer->id_.entityId;
 
     AckNackSubmessage acknack = {
       {ACKNACK,
@@ -2005,6 +1987,7 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks_i(MetaSubmessageVec
       },
       {++acknack_count_}
     };
+    MetaSubmessage meta_submessage(id_, writer->id_);
     meta_submessage.sm_.acknack_sm(acknack);
     meta_submessages.push_back(meta_submessage);
   }
@@ -2781,12 +2764,15 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
+  SequenceNumber ack;
+  ack.setValue(acknack.readerSNState.bitmapBase.high,
+               acknack.readerSNState.bitmapBase.low);
+
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation =
     is_final ||
     bitmapNonEmpty(acknack.readerSNState) ||
-    !(acknack.readerSNState.bitmapBase.high == 0 &&
-      acknack.readerSNState.bitmapBase.low == 1);
+    ack != 1;
 
   if (preassociation_readers_.count(reader) && is_postassociation) {
     preassociation_readers_.erase(reader);
@@ -2801,10 +2787,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   // Process the ack.
   SequenceNumber previous_acked_sn = reader->acked_sn();
-
-  SequenceNumber ack;
-  ack.setValue(acknack.readerSNState.bitmapBase.high,
-               acknack.readerSNState.bitmapBase.low);
 
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(remote);
