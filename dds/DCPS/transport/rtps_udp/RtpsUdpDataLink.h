@@ -296,7 +296,6 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
-    SequenceNumber preassociation_heartbeat_last_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -311,7 +310,6 @@ private:
 
     ReaderInfo(const RepoId& id, bool durable)
       : id_(id)
-      , preassociation_heartbeat_last_(SequenceNumber::ZERO())
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.

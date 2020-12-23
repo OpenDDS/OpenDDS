@@ -1059,7 +1059,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
 
   const SequenceNumber seq = element->sequence();
   if (seq != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    max_sn_ = std::max(max_sn_, seq);
+    update_max_sn(seq);
     if (!durable_ &&
         element->subscription_id() == GUID_UNKNOWN &&
         previous_max_sn != max_sn_.previous()) {
@@ -1842,7 +1842,6 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 #ifdef OPENDDS_SECURITY
     reader->max_pvs_sn_ = max_sn_;
 #endif
-    reader->preassociation_heartbeat_last_ = expected_max_sn(reader);
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
     return true;
@@ -3671,9 +3670,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     for (ReaderInfoSet::const_iterator pos = preassociation_readers_.begin(), limit = preassociation_readers_.end();
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
-      // Initialize first and last for the specific reader.
-      const SequenceNumber first_sn = reader->durable_ ? 1 : (reader->preassociation_heartbeat_last_ + 1);
-      const SequenceNumber last_sn = reader->preassociation_heartbeat_last_;
+      const SequenceNumber first_sn = reader->durable_ ? firstSN : nonDurableFirstSN;
+      const SequenceNumber last_sn = expected_max_sn(reader);
       meta_submessage.dst_guid_ = reader->id_;
       meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
       meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
@@ -3717,8 +3715,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           const ReaderInfo_rch& reader = (*pos);
           // TODO: This should be factored out in a sporadic task.
           expire_durable_data(reader, cfg, now, pendingCallbacks);
-          const SequenceNumber first_sn = (*pos)->durable_ ? 1 : nonDurableFirstSN;
-          const SequenceNumber last_sn = expected_max_sn(*pos);
+          const SequenceNumber first_sn = reader->durable_ ? firstSN : nonDurableFirstSN;
+          const SequenceNumber last_sn = expected_max_sn(reader);
           meta_submessage.dst_guid_ = reader->id_;
           meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
           meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
@@ -3742,7 +3740,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
       if (preassociation_readers_.count(reader) == 0 || !is_lagging(reader)) {
-        const SequenceNumber first_sn = reader->durable_ ? 1 : nonDurableFirstSN;
+        const SequenceNumber first_sn = reader->durable_ ? firstSN : nonDurableFirstSN;
         const SequenceNumber last_sn = expected_max_sn(reader);
         meta_submessage.dst_guid_ = reader->id_;
         meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
