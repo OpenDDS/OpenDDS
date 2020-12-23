@@ -1778,6 +1778,10 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     first_ever_hb = true;
   }
 
+  if (preassociation_writers_.count(writer)) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ### process_heartbeat_i %C -> %C count=%d first=%q last=%q\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str(), heartbeat.count.value, hb_first.getValue(), hb_last.getValue()));
+  }
+
   // Only valid heartbeats (see spec) will be "fully" applied to writer info
   if (!(hb_first < 1 || hb_last < 0 || hb_last < hb_first.previous())) {
     if (writer->first_valid_hb_ && (directed || !writer->sends_directed_hb())) {
@@ -1786,6 +1790,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
       writer->first_valid_hb_ = false;
 
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ### process_heartbeat_i %C -> %C associated\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
       preassociation_writers_.erase(writer);
 
       const SequenceNumber x = durable_ ? 1 : std::max(hb_first, hb_last);
@@ -1985,15 +1990,15 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks_i(MetaSubmessageVec
   // We want a heartbeat from these writers.
   for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
        pos != limit; ++pos) {
-    const WriterInfo_rch& info = *pos;
-    const DisjointSequence& recvd = info->recvd_;
+    const WriterInfo_rch& writer = *pos;
+    const DisjointSequence& recvd = writer->recvd_;
     const CORBA::ULong num_bits = 0;
     const LongSeq8 bitmap;
     const SequenceNumber ack = recvd.empty() ? 1 : ++SequenceNumber(recvd.cumulative_ack());
     const EntityId_t reader_id = id_.entityId;
-    const EntityId_t writer_id = info->id_.entityId;
+    const EntityId_t writer_id = writer->id_.entityId;
 
-    MetaSubmessage meta_submessage(id_, info->id_);
+    MetaSubmessage meta_submessage(id_, writer->id_);
 
     AckNackSubmessage acknack = {
       {ACKNACK,
@@ -2009,6 +2014,8 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks_i(MetaSubmessageVec
     };
     meta_submessage.sm_.acknack_sm(acknack);
     meta_submessages.push_back(meta_submessage);
+
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ### gather_preassociation_ack_nacks_i %C -> %C sending count=%d ack=%q\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str(), acknack_count_, ack.getValue()));
   }
 }
 
@@ -2783,14 +2790,22 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
+  SequenceNumber ack;
+  ack.setValue(acknack.readerSNState.bitmapBase.high,
+               acknack.readerSNState.bitmapBase.low);
+
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation =
     is_final ||
     bitmapNonEmpty(acknack.readerSNState) ||
-    !(acknack.readerSNState.bitmapBase.high == 0 &&
-      acknack.readerSNState.bitmapBase.low == 1);
+    ack != 1;
+
+  if (preassociation_readers_.count(reader)) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ### process_acknack %C -> %C count=%d is_final=%d bits=%d ack=%q\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(), acknack.count.value, is_final, bitmapNonEmpty(acknack.readerSNState), ack.getValue()));
+  }
 
   if (preassociation_readers_.count(reader) && is_postassociation) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ### process_acknack %C -> %C associated\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
     preassociation_readers_.erase(reader);
 
     const SequenceNumber max_sn = expected_max_sn(reader);
@@ -2803,10 +2818,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   // Process the ack.
   SequenceNumber previous_acked_sn = reader->acked_sn();
-
-  SequenceNumber ack;
-  ack.setValue(acknack.readerSNState.bitmapBase.high,
-               acknack.readerSNState.bitmapBase.low);
 
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(remote);
@@ -3687,6 +3698,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
       meta_submessages.push_back(meta_submessage);
       meta_submessage.reset_destination();
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ### gather_heartbeats %C -> %C sending count=%d first=%q last=%q\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(), heartbeat_count_, first_sn.getValue(), last_sn.getValue()));
     }
   }
 
