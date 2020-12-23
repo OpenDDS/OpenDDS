@@ -532,15 +532,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   bool ok = acl->get_participant_sec_attributes(perm_handle, participant_sec_attr_, ex);
   if (ok) {
 
-    EndpointSecurityAttributes default_sec_attr;
-    default_sec_attr.base.is_read_protected = false;
-    default_sec_attr.base.is_write_protected = false;
-    default_sec_attr.base.is_discovery_protected = false;
-    default_sec_attr.base.is_liveliness_protected = false;
-    default_sec_attr.is_submessage_protected = false;
-    default_sec_attr.is_payload_protected = false;
-    default_sec_attr.is_key_protected = false;
-    default_sec_attr.plugin_endpoint_attributes = 0;
+    const EndpointSecurityAttributes default_sec_attr = get_handle_registry()->default_endpoint_security_attributes();
 
     NativeCryptoHandle h = DDS::HANDLE_NIL;
 
