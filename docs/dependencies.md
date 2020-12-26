@@ -35,6 +35,11 @@ presence of any non-standard (CPAN) modules. Perl offers many facilities for
 portability. Shell scripts are by definition non-portable and should not to be
 committed to the OpenDDS repository.
 
+Perl core modules are a required part of Perl.  Some Linux distributions install
+the Perl interpreter without including core modules.  Using OpenDDS with this
+sort of partial Perl installation may fail unexpectedly when using configure,
+MPC, "make depend", or test scripts.
+
 ### MPC
 
 MPC is the build system used by OpenDDS, used to configure the build and
@@ -105,6 +110,8 @@ CMake is required to build Google Test for OpenDDS tests if a prebuilt Google
 Test is not found or provided.
 
 See [`../tests/gtest_setup.txt`](../tests/gtest_setup.txt) for details.
+
+A recent release of CMake from the 3.x series should be used.
 
 ### Google Test
 

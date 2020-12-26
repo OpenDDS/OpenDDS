@@ -98,7 +98,8 @@ public:
   bool shutting_down() { return shutdown_flag_.value(); }
 
   bool associated() const;
-  bool has_discovered_participant(const DCPS::RepoId& guid);
+  bool has_discovered_participant(const DCPS::RepoId& guid) const;
+  ACE_CDR::ULong get_participant_flags(const DCPS::RepoId& guid) const;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
@@ -109,7 +110,6 @@ public:
   void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
-  void volatile_association_complete(const DCPS::RepoId& sender);
   DDS::OctetSeq local_participant_data_as_octets() const;
 #endif
 
@@ -195,7 +195,8 @@ protected:
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(DiscoveredParticipantIter iter);
+  void process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish = false);
+  void publish_location_update_i(DiscoveredParticipantIter iter);
 #endif
 
   bool announce_domain_participant_qos();
@@ -221,6 +222,13 @@ private:
   /// Get this participant's BIT data. user_data may be omitting depending on
   /// security settings.
   DDS::ParticipantBuiltinTopicData get_part_bit_data(bool secure) const;
+
+  /**
+   * If this is true participant user data should only be sent and received
+   * securely, otherwise the user data should be empty and participant bit
+   * updates should be withheld from the user.
+   */
+  bool secure_part_user_data() const;
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,

@@ -5,36 +5,33 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
+#include "SecurityAttributesMessageTypeSupportImpl.h"
+#include "Writer.h"
+#include "Args.h"
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Time_Helper.h>
-
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-
 #ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  ifndef OPENDDS_SAFETY_PROFILE
+#    include <dds/DCPS/transport/udp/Udp.h>
+#    include <dds/DCPS/transport/multicast/Multicast.h>
+#    include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#    include <dds/DCPS/transport/shmem/Shmem.h>
+#  endif
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "SecurityAttributesMessageTypeSupportImpl.h"
-#include "Writer.h"
-#include "Args.h"
+#include <ace/Get_Opt.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <iostream>
-
-#include <dds/DCPS/security/framework/Properties.h>
 
 #define CLEAN_ERROR_RETURN(stuff, val) \
 do { \
@@ -48,9 +45,10 @@ do { \
   return val; \
 } while (0);
 
-bool dw_reliable() {
+bool dw_reliable()
+{
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return !(gc->instances_[0]->transport_type_ == "udp");
+  return gc->instances_[0]->transport_type_ != "udp";
 }
 
 void append(DDS::PropertySeq& props, const char* name, const char* value)
@@ -60,8 +58,6 @@ void append(DDS::PropertySeq& props, const char* name, const char* value)
   props.length(len + 1);
   props[len] = prop;
 }
-
-using SecurityAttributes::Args;
 
 int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 {
@@ -86,13 +82,21 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       dpf->get_default_participant_qos(part_qos);
 
       if (TheServiceParticipant->get_security()) {
+        using namespace DDS::Security::Properties;
         DDS::PropertySeq& props = part_qos.property.value;
-        append(props, DDS::Security::Properties::AuthIdentityCA, my_args.auth_ca_file_.data());
-        append(props, DDS::Security::Properties::AuthIdentityCertificate, my_args.id_cert_file_.data());
-        append(props, DDS::Security::Properties::AuthPrivateKey, my_args.id_key_file_.data());
-        append(props, DDS::Security::Properties::AccessPermissionsCA, my_args.perm_ca_file_.data());
-        append(props, DDS::Security::Properties::AccessGovernance, my_args.governance_file_.data());
-        append(props, DDS::Security::Properties::AccessPermissions, my_args.permissions_file_.data());
+        append(props, AuthIdentityCA, my_args.auth_ca_file_.data());
+        append(props, AuthIdentityCertificate, my_args.id_cert_file_.data());
+        append(props, AuthPrivateKey, my_args.id_key_file_.data());
+        append(props, AccessPermissionsCA, my_args.perm_ca_file_.data());
+        append(props, AccessGovernance, my_args.governance_file_.data());
+        append(props, AccessPermissions, my_args.permissions_file_.data());
+      }
+
+      if (my_args.secure_part_user_data_) {
+        part_qos.user_data.value.length(part_user_data_string.size());
+        for (size_t i = 0; i < part_user_data_string.size(); ++i) {
+          part_qos.user_data.value[i] = part_user_data_string[i];
+        }
       }
 
       // Create DomainParticipant
@@ -200,7 +204,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
         current_time = ACE_OS::gettimeofday();
       }
 
-      if (!(current_time < deadline)) {
+      if (current_time >= deadline) {
         CLEAN_ERROR_RETURN((LM_WARNING,
                             ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
                             ACE_TEXT("main() - timeout exceeded!\n")),
@@ -211,9 +215,8 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       writer->end();
 
       std::cerr << "Writer wait for ACKS" << std::endl;
-      ACE_Time_Value difference = deadline - ACE_OS::gettimeofday();
-      DDS::Duration_t ack_timeout = {static_cast<CORBA::Long>(difference.sec()), static_cast<CORBA::ULong>(difference.usec() * 1000)};
-      dw->wait_for_acknowledgments(ack_timeout);
+      dw->wait_for_acknowledgments(
+        OpenDDS::DCPS::time_value_to_duration(deadline - ACE_OS::gettimeofday()));
 
       std::cerr << "deleting DW" << std::endl;
       delete writer;

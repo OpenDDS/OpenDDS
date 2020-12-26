@@ -8,15 +8,16 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include <ace/Task.h>
+#include "Args.h"
+
 #include <dds/DdsDcpsPublicationC.h>
 
-#include "Args.h"
+#include <ace/Task.h>
 
 class Writer : public ACE_Task_Base {
 public:
 
-  Writer(DDS::DataWriter_ptr writer, const SecurityAttributes::Args& args);
+  Writer(DDS::DataWriter_ptr writer, const Args& args);
 
   void start();
 
@@ -29,7 +30,7 @@ public:
 
 private:
   DDS::DataWriter_var writer_;
-  const SecurityAttributes::Args args_;
+  const Args args_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
 };
 

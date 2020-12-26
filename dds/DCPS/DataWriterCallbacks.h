@@ -67,6 +67,9 @@ public:
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
 
+typedef RcHandle<DataWriterCallbacks> DataWriterCallbacks_rch;
+typedef WeakRcHandle<DataWriterCallbacks> DataWriterCallbacks_wrch;
+
 } // namespace DCPS
 } // namespace OpenDDS
 

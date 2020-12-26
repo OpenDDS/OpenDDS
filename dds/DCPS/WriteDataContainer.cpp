@@ -855,7 +855,7 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Remove the oldest sample from the instance list.
   //
-  if (instance_list.dequeue_head(stale) == false) {
+  if (!instance_list.dequeue_head(stale)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
@@ -972,7 +972,7 @@ WriteDataContainer::remove_oldest_sample(
     empty_condition_.notify_all();
   }
 
-  if (result == false) {
+  if (!result) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")

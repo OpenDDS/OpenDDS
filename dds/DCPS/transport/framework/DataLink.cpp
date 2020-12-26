@@ -1196,8 +1196,12 @@ std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {
   str << "   There are " << value.assoc_by_local_.size()
-      << " local entities currently using this link comprising following associations:"
-      << std::endl;
+      << " local entities currently using this link";
+
+  if (!value.assoc_by_local_.empty()) {
+    str << " comprising following associations:";
+  }
+  str << std::endl;
 
   typedef DataLink::AssocByLocal::const_iterator assoc_iter_t;
   const DataLink::AssocByLocal& abl = value.assoc_by_local_;

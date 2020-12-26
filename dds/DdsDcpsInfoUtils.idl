@@ -58,6 +58,7 @@ module OpenDDS
 
     struct WriterAssociation {
       TransportLocatorSeq writerTransInfo;
+      unsigned long transportContext;
       RepoId writerId;
       ::DDS::PublisherQos pubQos;
       ::DDS::DataWriterQos writerQos;
@@ -66,6 +67,7 @@ module OpenDDS
 
     struct ReaderAssociation {
       TransportLocatorSeq readerTransInfo;
+      unsigned long transportContext;
       RepoId readerId;
       ::DDS::SubscriberQos subQos;
       ::DDS::DataReaderQos readerQos;

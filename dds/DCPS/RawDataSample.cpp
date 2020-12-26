@@ -16,7 +16,7 @@ namespace DCPS {
 RawDataSample::RawDataSample()
   : message_id_(SAMPLE_DATA)
   , publication_id_(GUID_UNKNOWN)
-  , sample_byte_order_(0)
+  , sample_byte_order_(false)
 {
   source_timestamp_.sec = 0;
   source_timestamp_.nanosec = 0;

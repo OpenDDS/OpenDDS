@@ -37,7 +37,7 @@ class DDS_TEST {
 public:
   DDS_TEST(const RcHandle<Spdp>& spdp, const GUID_t& guid)
   : spdp_(spdp)
-  , guid_(make_guid(guid.guidPrefix, ENTITYID_PARTICIPANT))
+  , guid_(make_id(guid.guidPrefix, ENTITYID_PARTICIPANT))
   {
   }
 
@@ -348,7 +348,7 @@ bool run_test()
       , nonEmptyList /*defaultUnicastLocatorList*/
       , { 0 /*manualLivelinessCount*/ }
       , qos.property
-      , {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      , {PFLAGS_THIS_VERSION} // opendds_participant_flags
 #ifdef OPENDDS_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif

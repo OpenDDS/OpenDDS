@@ -371,7 +371,7 @@ ReplayerImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
                            this->publisher_qos_,
@@ -440,6 +440,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -956,7 +957,7 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
   header_data.message_id_ = SAMPLE_DATA;
   header_data.coherent_change_ = content_filter;
 
-  header_data.content_filter_ = 0;
+  header_data.content_filter_ = false;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_repair_ = need_sequence_repair();

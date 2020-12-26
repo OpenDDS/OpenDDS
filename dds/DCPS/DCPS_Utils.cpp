@@ -258,10 +258,8 @@ compatibleQOS(const DDS::PublisherQos*  pubQos,
 
   // Check the PRESENTATION_QOS_POLICY_ID
   if ((pubQos->presentation.access_scope < subQos->presentation.access_scope)
-      || ((pubQos->presentation.coherent_access == false)
-          &&(subQos->presentation.coherent_access == true))
-      || ((pubQos->presentation.ordered_access  == false)
-          &&(subQos->presentation.ordered_access  == true))) {
+      || (!pubQos->presentation.coherent_access && subQos->presentation.coherent_access)
+      || (!pubQos->presentation.ordered_access && subQos->presentation.ordered_access)) {
     compatible = false;
 
     increment_incompatibility_count(writerStatus,

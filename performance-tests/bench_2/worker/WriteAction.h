@@ -37,6 +37,7 @@ protected:
   size_t filter_class_start_value_;
   size_t filter_class_stop_value_;
   size_t filter_class_increment_;
+  DDS::Duration_t final_wait_for_ack_;
 };
 
 }

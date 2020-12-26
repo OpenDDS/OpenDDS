@@ -99,6 +99,7 @@ public:
 #ifdef OPENDDS_SECURITY
   void associate_preauth(Security::SPDPdiscoveredParticipantData& pdata);
   void associate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
+  void cleanup_volatile_crypto(const DCPS::RepoId& remote);
   void disassociate_volatile(Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& pdata,
                                   const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr);
@@ -741,7 +742,7 @@ private:
   void assign_bit_key(DiscoveredSubscription& sub);
 
   template<typename Map>
-  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant, bool subscription);
+  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
 
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);
@@ -762,12 +763,6 @@ private:
   virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,
                                                    DiscoveredPublicationIter& iter,
                                                    const DCPS::RepoId& writer);
-
-#ifdef OPENDDS_SECURITY
-  DCPS::TransportLocatorSeq
-  add_security_info(const DCPS::TransportLocatorSeq& locators,
-                    const DCPS::RepoId& writer, const DCPS::RepoId& reader);
-#endif
 
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
@@ -829,10 +824,13 @@ private:
 protected:
 
 #ifdef OPENDDS_SECURITY
-  DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(
-    const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
-  DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(
-    const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
+  DDS::Security::DatawriterCryptoHandle
+  generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer,
+                                               const DCPS::RepoId& reader);
+  DDS::Security::DatareaderCryptoHandle
+  generate_remote_matched_reader_crypto_handle(const DCPS::RepoId& reader,
+                                               const DCPS::RepoId& writer,
+                                               bool relay_only);
 
   void create_datareader_crypto_tokens(
     const DDS::Security::DatareaderCryptoHandle& drch,

@@ -958,9 +958,8 @@ inline
 void
 MonitorDataStorage::update<DDS::ParticipantBuiltinTopicData>(
   const DDS::ParticipantBuiltinTopicData& data,
-  DDS::DomainParticipant_ptr participant,
-  bool remove
-)
+  DDS::DomainParticipant_ptr /*participant*/,
+  bool remove)
 {
   //  struct ParticipantBuiltinTopicData {
   //    BuiltinTopicKey_t key;
@@ -1021,9 +1020,8 @@ inline
 void
 MonitorDataStorage::update<DDS::TopicBuiltinTopicData>(
   const DDS::TopicBuiltinTopicData& data,
-  DDS::DomainParticipant_ptr participant,
-  bool remove
-)
+  DDS::DomainParticipant_ptr /*participant*/,
+  bool remove)
 {
   //  struct TopicBuiltinTopicData {
   //    BuiltinTopicKey_t key;
@@ -1104,9 +1102,8 @@ inline
 void
 MonitorDataStorage::update<DDS::PublicationBuiltinTopicData>(
   const DDS::PublicationBuiltinTopicData& data,
-  DDS::DomainParticipant_ptr participant,
-  bool remove
-)
+  DDS::DomainParticipant_ptr /*participant*/,
+  bool remove)
 {
   //  struct PublicationBuiltinTopicData {
   //    BuiltinTopicKey_t key;
@@ -1190,9 +1187,8 @@ inline
 void
 MonitorDataStorage::update<DDS::SubscriptionBuiltinTopicData>(
   const DDS::SubscriptionBuiltinTopicData& data,
-  DDS::DomainParticipant_ptr participant,
-  bool remove
-)
+  DDS::DomainParticipant_ptr /*participant*/,
+  bool remove)
 {
   //  struct SubscriptionBuiltinTopicData {
   //    BuiltinTopicKey_t key;

@@ -64,6 +64,8 @@ using Builder::Log;
 using Builder::ZERO;
 using Bench::get_option_argument;
 
+const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
+
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
   typedef std::multiset<std::pair<double, size_t> > WMMS;
   WMMS wmms;
@@ -147,7 +149,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   std::ofstream log_file;
   if (!log_file_path.empty()) {
-    log_file.open(log_file_path);
+    log_file.open(log_file_path, ios::app);
     if (!log_file.good()) {
       std::cerr << "Unable to open log file: '" << log_file_path << "'" << std::endl;
       return 2;
@@ -226,6 +228,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 #ifdef ACE_HAS_AIO_CALLS
   }
 #endif
+
+  size_t max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
+  Builder::ConstPropertyIndex max_decimal_places_prop =
+    get_property(config.properties, "max_decimal_places", Builder::PVK_ULL);
+  if (max_decimal_places_prop) {
+    max_decimal_places = max_decimal_places_prop->value.ull_prop();
+  }
+
+  size_t redirect_ace_log = 1;
+  Builder::ConstPropertyIndex redirect_ace_log_prop =
+    get_property(config.properties, "redirect_ace_log", Builder::PVK_ULL);
+  if (redirect_ace_log_prop) {
+    redirect_ace_log = redirect_ace_log_prop->value.ull_prop();
+  }
+
+  if (redirect_ace_log && !log_file_path.empty()) {
+    std::ofstream* output_stream = new std::ofstream(log_file_path.c_str(), ios::app);
+    if (output_stream->bad()) {
+      delete output_stream;
+    } else {
+      ACE_LOG_MSG->msg_ostream(output_stream, true);
+    }
+    ACE_LOG_MSG->clr_flags(ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
+    ACE_LOG_MSG->set_flags(ACE_Log_Msg::OSTREAM);
+  }
 
   // Register actions
   Bench::ActionManager::Registration
@@ -576,7 +603,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   // If requested, write out worker report to file
 
   if (!report_file_path.empty()) {
-    idl_2_json(worker_report, report_file);
+    idl_2_json(worker_report, report_file, max_decimal_places);
   }
 
   // Log / print a few of the stats

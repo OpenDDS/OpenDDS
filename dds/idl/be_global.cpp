@@ -54,6 +54,7 @@ BE_GlobalData::BE_GlobalData()
   , generate_rapidjson_(false)
   , face_ts_(false)
   , printer_(false)
+  , filename_only_includes_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
@@ -210,6 +211,17 @@ bool BE_GlobalData::no_default_gen() const
   return this->no_default_gen_;
 }
 
+void BE_GlobalData::filename_only_includes(bool b)
+{
+  this->filename_only_includes_ = b;
+}
+
+bool BE_GlobalData::filename_only_includes() const
+{
+  return this->filename_only_includes_;
+}
+
+
 void BE_GlobalData::itl(bool b)
 {
   this->generate_itl_ = b;
@@ -345,6 +357,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
   static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
 
+  static const char FILENAME_ONLY_INCLUDES_FLAG[] = "--filename-only-includes";
+  static const size_t FILENAME_ONLY_INCLUDES_FLAG_SIZE = sizeof(FILENAME_ONLY_INCLUDES_FLAG) - 1;
+
   switch (av[i][1]) {
   case 'o':
     if (av[++i] == 0) {
@@ -427,6 +442,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       warn_about_dcps_data_type_ = false;
+    } else if (!ACE_OS::strncasecmp(av[i], FILENAME_ONLY_INCLUDES_FLAG, FILENAME_ONLY_INCLUDES_FLAG_SIZE)) {
+      filename_only_includes_ = true;
     } else if (!std::strcmp(av[i], "--default-extensibility")) {
       if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-extensibility\n")));
@@ -593,18 +610,37 @@ namespace {
     return base_name + suffix;
   }
 
-  std::string make_relative(const std::string& absolute)
+  std::string make_relative(const std::string& absolute, const bool filename_only_includes)
   {
     for (Includes_t::const_iterator iter = inc_path_.begin(),
         end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
+
         if (rel.size() && (rel[0] == '/' || rel[0] == '\\')) {
           rel.erase(0, 1);
         }
+
+        if (filename_only_includes) {
+          size_t loc = rel.rfind('/', rel.length());
+          size_t locw = rel.rfind('\\', rel.length());
+
+          if (loc != string::npos && locw != string::npos) {
+            // path may contain both '/' and '\'. choose the last one.
+            loc = loc > locw ? loc : locw;
+          } else if (loc == string::npos) {
+            loc = locw;
+          }
+
+          if (loc != string::npos) {
+            rel = rel.substr(loc + 1, rel.length() - loc);
+          }
+        }
+
         return rel;
       }
     }
+
     return absolute;
   }
 
@@ -621,15 +657,17 @@ namespace {
 
   struct InsertRefIncludes : InsertIncludes {
     const char* const suffix_;
+    bool filename_only_includes_;
 
-    InsertRefIncludes(std::ostream& ret, const char* suffix)
+    InsertRefIncludes(std::ostream& ret, const char* suffix, const bool filename_only_includes)
       : InsertIncludes(ret)
       , suffix_(suffix)
+      , filename_only_includes_(filename_only_includes)
     {}
 
     void operator()(const std::string& str) const
     {
-      InsertIncludes::operator()(transform_referenced(make_relative(str), suffix_));
+      InsertIncludes::operator()(transform_referenced(make_relative(str, filename_only_includes_), suffix_));
     }
   };
 }
@@ -666,7 +704,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   switch (which) {
   case STREAM_LANG_H:
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "C.h"));
+                  InsertRefIncludes(ret, "C.h", filename_only_includes_));
     // fall through
   case STREAM_H:
     if (!export_include().empty())
@@ -675,7 +713,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   case STREAM_CPP:
     std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "TypeSupportImpl.h"));
+                  InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
     break;
   default:
     break;
