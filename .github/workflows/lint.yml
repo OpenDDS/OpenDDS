@@ -25,4 +25,4 @@ jobs:
         path: ${{ env.DOC_ROOT }}
     - name: Run lint.pl
       run: |
-        perl $DDS_ROOT/tools/scripts/lint.pl --color
+        perl $DDS_ROOT/tools/scripts/lint.pl --color --ace

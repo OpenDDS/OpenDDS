@@ -17,7 +17,9 @@ use constant line_length_limit => 100;
 use constant eof_newline_limit => 2;
 
 my $debug = 0;
-my $ace = 1;
+my $ace = 1; # Warn if ACE not found
+my $ace_arg = 0; # Error if ACE not found
+my $no_ace_arg = 0; # Silence warning
 my @paths = ();
 my @ext_paths = ();
 my $simple_output = 0;
@@ -110,11 +112,15 @@ my $help_message = $usage_message .
   "--help | -h         Show this message\n" .
   "--debug             Print script debug information\n" .
   "--[no-]ace          Run ACE's fuzz.pl? Requires ACE to be in a usual place or\n" .
-  "                    ACE_ROOT to be defined. True by default\n" .
+  "                    ACE_ROOT to be defined. By default the script will try to\n" .
+  "                    use ACE, but issue a warning if it can't be found. Pass\n" .
+  "                    --no-ace to silence this warning. Pass --ace to turn the\n" .
+  "                    warning into an error if ACE can't be found.\n" .
   "--path | -p PATH    Restrict to PATH instead of everything in OpenDDS. Can be\n" .
   "                    a directory or a file. Can be specified multiple times.\n" .
   "                    PATH must be relative to the root of OpenDDS.\n" .
   "--ext-path PATH     Path outside the OpenDDS source tree to check.\n" .
+  "                    Can be specified multiple times.\n" .
   "--simple-output     Print individual errors as single lines\n" .
   "--files-only        Just print the files that failed\n" .
   "--list | -l         List all checks\n" .
@@ -124,11 +130,13 @@ my $help_message = $usage_message .
   "--try-fix           ATTEMPT to fix issues that support fixing. THIS IS POWERED\n" .
   "                    BY REGEX, NOT MAGIC. Don't try this unless your existing\n" .
   "                    work is commited or otherwise safe from this script.\n" .
+  "                    See --list to see what checks support this.\n" .
   "--include PATH      Add PATH to preproccessor include paths for the sake of\n" .
   "                    checks that care about them. Can be specified multiple\n" .
   "                    times. Default is root of OpenDDS source tree.\n" .
-  "--[no-]color        Force disable or enable ANSI escape code color output\n" .
-  "                    Can also be done with NO_COLOR enviroment variable\n" .
+  "--[no-]color        Force enable or disable ANSI escape code color output.\n" .
+  "                    Can also be done with NO_COLOR enviroment variable.\n" .
+  "                    By default it uses isatty like most programs\n" .
   "\n" .
   "If run with DDS_ROOT being defined, it will use that path. If not it will\n" .
   "use the OpenDDS source tree the script is in.\n" .
@@ -150,7 +158,8 @@ my $help_message = $usage_message .
 if (!GetOptions(
   'h|help' => \$help,
   'debug' => \$debug,
-  'ace!' => \$ace,
+  'ace' => \$ace_arg,
+  'no-ace' => \$no_ace_arg,
   'path=s' => \@paths,
   'ext-path=s' => \@ext_paths,
   'simple-output' => \$simple_output,
@@ -197,8 +206,9 @@ $root =~ s@(?<!/)$@/@;
 push(@includes, "$root");
 my $root_re = quotemeta($root);
 
+$ace = 0 if ($no_ace_arg && !$ace_arg);
 my $ace_root = $ENV{'ACE_ROOT'};
-if (not $listing_checks and !defined $ace_root) {
+if ($ace and not $listing_checks and !defined $ace_root) {
   my @possible_ace_roots = (
     catfile($root, 'ACE_TAO', 'ACE'),
     catfile($root, 'ACE_wrappers'),
@@ -209,8 +219,12 @@ if (not $listing_checks and !defined $ace_root) {
     }
   }
   if ($ace and !defined $ace_root) {
-    print_warning("ACE_ROOT wasn't defined and we couldn't find ACE on our own, " .
-      "so not running ACE's fuzz.pl. Pass --no-ace to silence this warning.");
+    my $common = "ACE_ROOT wasn't defined and we couldn't find ACE on our own.";
+    if ($ace_arg) {
+      die("${\error()} $common This is a fatal error since --ace was passed.");
+    }
+    print_warning("$common Not running ACE's fuzz.pl. " .
+      "Pass --no-ace to silence this warning.");
     $ace = 0;
   }
 }
