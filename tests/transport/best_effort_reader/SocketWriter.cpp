@@ -1,5 +1,7 @@
 #include "SocketWriter.h"
 
+#include "../RtpsUtils.h"
+
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/BaseMessageUtils.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
@@ -79,14 +81,14 @@ bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::D
   return false;
 }
 
-bool SocketWriter::writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount) const
+bool SocketWriter::writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount,
+                                  const OpenDDS::DCPS::RepoId& reader) const
 {
-  const OpenDDS::RTPS::HeartBeatSubmessage hb = heartBeatSubMsg(seqN, heartbeatCount);
-  ACE_Message_Block mb(hbSize(hb));
-  if (serialize(mb, hb)) {
-    return send(mb);
-  }
-  return false;
+  static const unsigned int STARTING_SEQ = 2;
+  OpenDDS::DCPS::Message_Block_Ptr mb(buildHeartbeat(id_.entityId, hdr_,
+                                                     std::make_pair(toSN(STARTING_SEQ), toSN(seqN)),
+                                                     heartbeatCount, reader));
+  return mb ? send(*mb) : false;
 }
 
 OpenDDS::RTPS::InfoTimestampSubmessage SocketWriter::timeSubMsg() const
@@ -102,15 +104,6 @@ OpenDDS::RTPS::DataSubmessage SocketWriter::dataSubMsg(CORBA::ULong seqN, const 
   CORBA::UShort sz = static_cast<CORBA::UShort>(20 + 12 + ACE_OS::strlen(msg.value) + 1);
   DataSubmessage ds = {{DATA, DE, sz}, 0, 16, ENTITYID_UNKNOWN, id_.entityId, {0, seqN}, ParameterList()};
   return ds;
-}
-
-OpenDDS::RTPS::HeartBeatSubmessage SocketWriter::heartBeatSubMsg(CORBA::ULong seqN, CORBA::Long heartbeatCount) const
-{
-  const OpenDDS::RTPS::HeartBeatSubmessage hb = {
-    {HEARTBEAT, 0, HEARTBEAT_SZ}, ENTITYID_UNKNOWN, // any matched reader
-    id_.entityId, {0, 1}, {0, seqN}, {heartbeatCount}
-  };
-  return hb;
 }
 
 size_t SocketWriter::msgSize(const OpenDDS::RTPS::InfoTimestampSubmessage& t,
@@ -155,7 +148,14 @@ bool SocketWriter::serialize(ACE_Message_Block& mb, const OpenDDS::RTPS::HeartBe
 bool SocketWriter::send(const ACE_Message_Block& mb) const
 {
   for (std::set<ACE_INET_Addr>::const_iterator i = dest_addr_.begin(); i != dest_addr_.end(); ++i) {
-    ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), *i);
+    Locator_t locator;
+    locator.kind = address_to_kind(*i);
+    locator.port = i->get_port_number();
+    address_to_bytes(locator.address, *i);
+    ACE_INET_Addr dest;
+    locator_to_address(dest, locator, local_addr_.get_type() != AF_INET);
+
+    ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), dest);
     if (res >= 0) {
       ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
                  OPENDDS_STRING(GuidConverter(id_)).c_str(), i->get_host_addr(), res));

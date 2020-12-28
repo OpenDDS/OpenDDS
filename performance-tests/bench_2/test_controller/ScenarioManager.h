@@ -1,12 +1,12 @@
 #ifndef SCENARIO_MANAGER_HEADER
 #define SCENARIO_MANAGER_HEADER
 
+#include "ScenarioOverrides.h"
+#include "DdsEntities.h"
+
 #include <string>
 #include <map>
 #include <vector>
-
-#include "ScenarioOverrides.h"
-#include "DdsEntities.h"
 
 /**
  * ScenarioManager is responsible for organizing nodes and planning and
@@ -34,7 +34,7 @@ public:
    */
   Bench::TestController::AllocatedScenario allocate_scenario(
     const Bench::TestController::ScenarioPrototype& scenario_prototype,
-    Nodes& available_nodes, bool debug_alloc);
+    const Nodes& available_nodes, bool debug_alloc);
 
   /**
    * Execute a Scenario by sending out the node configurations and wait for the
@@ -45,6 +45,7 @@ public:
 
 private:
   void customize_configs(std::map<std::string, std::string>& worker_configs);
+  bool is_matched(const std::string& str, const std::string& wildcard) const;
 
   const std::string bench_root_;
   const std::string test_context_;

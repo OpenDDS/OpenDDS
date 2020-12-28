@@ -61,7 +61,7 @@ TransportClient::~TransportClient()
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_);
+        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_, false);
       }
     }
   }
@@ -289,7 +289,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
           const TransportImpl::RemoteTransport remote = {
-            data.remote_id_, data.remote_data_[j].data,
+            data.remote_id_, data.remote_data_[j].data, data.remote_transport_context_,
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
 
@@ -439,7 +439,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
         const TransportImpl::RemoteTransport remote = {
-          data_.remote_id_, data_.remote_data_[blob_index_].data,
+          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.remote_transport_context_,
           data_.publication_transport_priority_,
           data_.remote_reliable_, data_.remote_durable_};
 
@@ -569,7 +569,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   for (size_t i = 0; i < pend->impls_.size(); ++i) {
     RcHandle<TransportImpl> impl = pend->impls_[i].lock();
     if (impl) {
-      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
+      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_, false);
     }
   }
 
@@ -650,6 +650,13 @@ TransportClient::disassociate(const RepoId& peerId)
 
   PendingMap::iterator iter = pending_.find(peerId);
   if (iter != pending_.end()) {
+    // The transport impl may have resource for a pending connection.
+    for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+      RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
+      if (impl) {
+        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true);
+      }
+    }
     iter->second->reset_client();
     pending_assoc_timer_->cancel_timer(iter->second);
     prev_pending_.insert(std::make_pair(iter->first, iter->second));

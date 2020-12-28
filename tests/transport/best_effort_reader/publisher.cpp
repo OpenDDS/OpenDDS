@@ -16,23 +16,31 @@ public:
     SocketWriter sw2(AppConfig::writerId[1], config.getHostAddress());
     SocketWriter sw3(AppConfig::writerId[2], config.getHostAddress());
 
-    bool r = sw1.writeHeartbeat(1, 1);
-    r = r && sw2.writeHeartbeat(1, 1);
-    r = r && sw3.writeHeartbeat(1, 1);
+    unsigned int seq = 2;
+    bool r = sw1.writeHeartbeat(seq, 1, AppConfig::readerId[0]);
 
-    r = r && sw1.write(2, TestMsg(10, "1-2"));
-    r = r && sw2.write(2, TestMsg(10, "2-2"));
-    r = r && sw3.write(2, TestMsg(10, "3-2"));
+    r = r && sw2.writeHeartbeat(seq, 1, AppConfig::readerId[0]);
+    r = r && sw2.writeHeartbeat(seq, 1, AppConfig::readerId[1]);
 
-    r = r && sw1.write(2, TestMsg(10, "1-2 Duplicate"));
-    r = r && sw2.write(2, TestMsg(10, "2-2 Duplicate"));
-    r = r && sw3.write(2, TestMsg(10, "3-2 Duplicate"));
+    r = r && sw3.writeHeartbeat(seq, 1, AppConfig::readerId[0]);
+    r = r && sw3.writeHeartbeat(seq, 1, AppConfig::readerId[1]);
+    r = r && sw3.writeHeartbeat(seq, 1, AppConfig::readerId[2]);
 
-    r = r && sw3.write(3, TestMsg(10, "3-3"));
+    r = r && sw1.write(seq, TestMsg(10, "1-2"));
+    r = r && sw2.write(seq, TestMsg(10, "2-2"));
+    r = r && sw3.write(seq, TestMsg(10, "3-2"));
 
-    r = r && sw1.write(4, TestMsg(99, "1-4 end"));
-    r = r && sw2.write(4, TestMsg(99, "2-4 end"));
-    r = r && sw3.write(4, TestMsg(99, "3-4 end"));
+    r = r && sw1.write(seq, TestMsg(10, "1-2 Duplicate"));
+    r = r && sw2.write(seq, TestMsg(10, "2-2 Duplicate"));
+    r = r && sw3.write(seq, TestMsg(10, "3-2 Duplicate"));
+
+    ++seq;
+    r = r && sw3.write(seq, TestMsg(10, "3-3"));
+
+    ++seq;
+    r = r && sw1.write(seq, TestMsg(99, "1-4 end"));
+    r = r && sw2.write(seq, TestMsg(99, "2-4 end"));
+    r = r && sw3.write(seq, TestMsg(99, "3-4 end"));
 
     return (r ? 0 : 1);
   }

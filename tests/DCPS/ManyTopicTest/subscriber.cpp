@@ -208,6 +208,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
 
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     dr_qos.history.depth = history_depth;
 #endif

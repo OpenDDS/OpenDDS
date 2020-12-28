@@ -853,7 +853,7 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Remove the oldest sample from the instance list.
   //
-  if (instance_list.dequeue_head(stale) == false) {
+  if (!instance_list.dequeue_head(stale)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
@@ -970,7 +970,7 @@ WriteDataContainer::remove_oldest_sample(
     empty_condition_.broadcast();
   }
 
-  if (result == false) {
+  if (!result) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
@@ -1392,47 +1392,38 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence)
+WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline,
+                                    bool deadline_is_infinite,
+                                    const SequenceNumber& sequence)
 {
   const MonotonicTimePoint deadline(abs_deadline);
-  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_, DDS::RETCODE_ERROR);
 
-  SequenceNumber last_acked = acked_sequences_.last_ack();
-  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  const SequenceNumber last_acked = acked_sequences_.last_ack();
+  const SequenceNumber acked = acked_sequences_.cumulative_ack();
   if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
     acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
   }
 
   guard.release();
 
-  while (MonotonicTimePoint::now() < deadline) {
-
-    if (!sequence_acknowledged(sequence)) {
-      // lock is released while waiting and acquired before returning
-      // from wait.
-      int const wait_result = wfa_condition_.wait(&deadline.value());
-
-      if (wait_result != 0) {
-        if (errno == ETIME) {
-          if (DCPS_debug_level >= 2) {
-            ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq")
-                                  ACE_TEXT(" timed out waiting for sequence %q to be acked\n"),
-                                  sequence.getValue()));
-          }
-          ret = DDS::RETCODE_TIMEOUT;
-        } else {
-          ret = DDS::RETCODE_ERROR;
+  while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged(sequence)) {
+    if (wfa_condition_.wait(deadline_is_infinite ? 0 : &deadline.value()) != 0) {
+      if (errno == ETIME) {
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq")
+                               ACE_TEXT(" timed out waiting for sequence %q to be acked\n"),
+                               sequence.getValue()));
         }
+        return DDS::RETCODE_TIMEOUT;
+      } else {
+        return DDS::RETCODE_ERROR;
       }
-    } else {
-      ret = DDS::RETCODE_OK;
-      break;
     }
   }
 
-  return ret;
+  return sequence_acknowledged(sequence) ? DDS::RETCODE_OK : DDS::RETCODE_TIMEOUT;
 }
 
 bool

@@ -307,6 +307,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
   data.remote_reliable_ =
@@ -374,7 +375,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     if (!participant)
       return;
 
-    DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
 
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
@@ -1264,7 +1265,7 @@ DataReaderImpl::enable()
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
             this->topic_servant_->get_id(),
-            this,
+            rchandle_from(this),
             this->qos_,
             trans_conf_info,
             sub_qos,

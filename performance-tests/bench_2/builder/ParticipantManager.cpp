@@ -20,4 +20,11 @@ bool ParticipantManager::enable(bool throw_on_error)
   return result;
 }
 
+void ParticipantManager::detach_listeners()
+{
+  for (auto it = participants_.begin(); it != participants_.end(); ++it) {
+    (*it)->detach_listeners();
+  }
+}
+
 }
