@@ -123,12 +123,11 @@ public:
         std::string str((std::istreambuf_iterator<char>(report_file)), std::istreambuf_iterator<char>());
         report.details = str.c_str();
       }
-    } else {
-      std::ifstream log_file(log_filename_);
-      if (log_file.good()) {
-        std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
-        report.log = str.c_str();
-      }
+    }
+    std::ifstream log_file(log_filename_);
+    if (log_file.good()) {
+      std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
+      report.log = str.c_str();
     }
   }
 

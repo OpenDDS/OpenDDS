@@ -8,9 +8,12 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include "Args.h"
+
+#include <dds/DCPS/LocalObject.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 
-#include "Args.h"
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -19,7 +22,7 @@
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const SecurityAttributes::Args& args);
+  DataReaderListenerImpl(const Args& args, DDS::DataReader* part_reader);
 
   virtual ~DataReaderListenerImpl();
 
@@ -61,12 +64,13 @@ public:
 private:
   typedef std::set<CORBA::Long> Counts;
 
-  DDS::DataReader_var reader_;
-  const SecurityAttributes::Args& args_;
+  const Args& args_;
   long num_reads_;
   Counts counts_;
   bool valid_;
   const bool reliable_;
+  DDS::DataReader* part_reader_;
+  bool saw_part_user_data_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

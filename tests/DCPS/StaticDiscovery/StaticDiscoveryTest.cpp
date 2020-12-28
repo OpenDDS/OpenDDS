@@ -12,6 +12,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "tests/Utils/StatusMatching.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -136,36 +137,7 @@ public:
     }
 
     // Block until Subscriber is available
-    DDS::StatusCondition_var condition = writer->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-    DDS::ConditionSeq conditions;
-
-    while (true) {
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
-      }
-
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C has %d of %d readers\n", writers_[thread_id].c_str(), matches.current_count, total_readers_));
-      if (matches.current_count >= total_readers_) {
-        break;
-      }
-
-      DDS::Duration_t timeout = { 60, 0 };
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         -1);
-      }
-    }
-
+    Utils::wait_match(writer, total_readers_, Utils::GTE);
 
     // Write samples
     TestMsg message;
@@ -182,20 +154,10 @@ public:
       }
     }
 
-    while (true) {
-      ACE_OS::sleep(1);
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
-      }
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) matches.current_count = %d\n", matches.current_count));
-      if (matches.current_count == 0) {
-        break;
-      }
-    }
-    ws->detach_condition(condition);
+    DDS::Duration_t duration = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    writer->wait_for_acknowledgments(duration);
+
+    publisher->delete_datawriter(writer);
 
     return 0;
   }
@@ -344,6 +306,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     const int n_msgs = reliable ? MSGS_PER_WRITER * total_writers : 0;
 
     // Create DataReaders
+    std::vector<DDS::DataReader_var> datareaders;
     for (std::vector<std::string>::iterator pos = readers.begin(), limit = readers.end();
          pos != limit;
          ++pos) {
@@ -396,6 +359,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" create_datareader failed!\n")), -1);
       }
 
+      datareaders.push_back(reader);
+
       TestMsgDataReader_var reader_i =
         TestMsgDataReader::_narrow(reader);
 
@@ -419,6 +384,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     task.wait();
+
+    for (size_t i = 0; i < datareaders.size(); ++i) {
+      Utils::wait_match(datareaders[i], 0);
+    }
 
     if (built_in_read_errors) {
       ACE_ERROR_RETURN((LM_ERROR,

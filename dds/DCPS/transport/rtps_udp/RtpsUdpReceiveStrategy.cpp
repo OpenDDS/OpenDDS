@@ -424,7 +424,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           first = false;
           ++iter2;
         }
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) - RtpsUdpReceiveStrategy[%@]::deliver_sample_i:")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i:")
           ACE_TEXT(" readers_selected ids: %C\n")
           ACE_TEXT(" readers_withheld ids: %C\n"),
           this, included_ids.c_str(), excluded_ids.c_str()));
@@ -538,7 +538,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
 
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
   if (!crypto) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX no CryptoTransform\n"));
+    // security not enabled for this datalink -- this can be reached
+    // when a secure message is seen on the same multicast group
     return;
   }
 
