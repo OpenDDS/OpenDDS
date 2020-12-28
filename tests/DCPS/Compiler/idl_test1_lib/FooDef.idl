@@ -242,9 +242,30 @@ struct Bar {
 typedef long B41[2][3];
 typedef long B42[2];
 typedef long B43[4];
+typedef string B44[2];
+typedef Bar B45[2];
+typedef Xyz::ColorX B46[2];
 
 union B85 switch (long) {
   case 1: B42 b_85_1;
+  case 2: B43 b_85_2;
+  case 3: B41 b_85_3;
+};
+
+union B86 switch (long) {
+  case 1: B44 b_85_1;
+  case 2: B43 b_85_2;
+  case 3: B41 b_85_3;
+};
+
+union B87 switch (long) {
+  case 1: B45 b_85_1;
+  case 2: B43 b_85_2;
+  case 3: B41 b_85_3;
+};
+
+union B88 switch (long) {
+  case 1: B46 b_85_1;
   case 2: B43 b_85_2;
   case 3: B41 b_85_3;
 };
