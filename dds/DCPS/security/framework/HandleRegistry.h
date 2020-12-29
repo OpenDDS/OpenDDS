@@ -5,20 +5,19 @@
 
 #ifdef OPENDDS_SECURITY
 
-#ifndef OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
-#define OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_HANDLEREGISTRY_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_HANDLEREGISTRY_H
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/RcObject.h>
+
+#include <dds/DdsSecurityCoreC.h>
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "dds/DCPS/dcps_export.h"
-
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DdsSecurityCoreC.h"
-
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -105,5 +104,5 @@ typedef DCPS::RcHandle<HandleRegistry> HandleRegistry_rch;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SECURITY_HANDLE_REGISTRY_IMPL_H
+#endif // OPENDDS_DCPS_SECURITY_FRAMEWORK_HANDLEREGISTRY_H
 #endif // OPENDDS_SECURITY
