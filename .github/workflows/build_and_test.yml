@@ -78,7 +78,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-20_04_defaults_ace_artifact
         path: ubuntu-20_04_defaults_ACE_TAO.tar.xz
 
   ubuntu-20_04_security:
@@ -109,7 +109,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-20_04_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -213,7 +213,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-20_04_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -364,7 +364,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-18_04_defaults_ace_artifact
         path: ubuntu-18_04_defaults_ACE_TAO.tar.xz
 
   ubuntu-18_04_security:
@@ -395,7 +395,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-18_04_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -499,7 +499,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-18_04_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -650,7 +650,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-16_04_defaults_ace_artifact
         path: ubuntu-16_04_defaults_ACE_TAO.tar.xz
 
   ubuntu-16_04_security:
@@ -681,7 +681,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-16_04_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -785,7 +785,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu_ace_artifact
+        name: ubuntu-16_04_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -958,7 +958,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: windows_ace_artifact
+        name: windows-2019_defaults_ace_artifact
         path: windows-2019_defaults_ACE_TAO.tar.xz
 
   windows-2019_defaults_security:
@@ -993,7 +993,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows_ace_artifact
+        name: windows-2019_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1113,7 +1113,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows_ace_artifact
+        name: windows-2019_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1260,7 +1260,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS_TAOv2.sln
+        msbuild -p:Configuration=Release,Platform=x64 -m DDS_TAOv2.sln
     - name: create ACE_TAO tar.xz artifact
       shell: bash
       run: |
@@ -1271,7 +1271,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: windows_ace_artifact
+        name: windows-2016_no_debug_no_inline_artifact
         path: windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
 
   windows-2016_no_debug_no_inline_security:
@@ -1306,7 +1306,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows_ace_artifact
+        name: windows-2016_no_debug_no_inline_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1336,7 +1336,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+        msbuild -p:Configuration=Release,Platform=x64 -m DDS.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -1426,7 +1426,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows_ace_artifact
+        name: windows-2016_no_debug_no_inline_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1456,7 +1456,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+        msbuild -p:Configuration=Release,Platform=x64 -m DDS.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -1563,7 +1563,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: macos_ace_artifact
+        name: macos-11_0_defaults_ace_artifact
         path: macos-11_0_defaults_ACE_TAO.tar.xz
 
   macos-11_0_security:
@@ -1595,7 +1595,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: macos_ace_artifact
+        name: macos-11_0_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1700,7 +1700,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: macos_ace_artifact
+        name: macos-11_0_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1852,7 +1852,7 @@ jobs:
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
-        name: macos_ace_artifact
+        name: macos-10_15_defaults_ace_artifact
         path: macos-10_15_defaults_ACE_TAO.tar.xz
 
   macos-10_15_security:
@@ -1884,7 +1884,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: macos_ace_artifact
+        name: macos-10_15_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
@@ -1989,7 +1989,7 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: macos_ace_artifact
+        name: macos-10_15_defaults_ace_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
