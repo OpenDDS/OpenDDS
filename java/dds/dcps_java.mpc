@@ -83,9 +83,13 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
     OpenDDS/DCPS/transport/UnableToCreateException.java
   }
 
+  verbatim (gnuace, top, 1) {
+    opendds_android_network_callback = $(if $(ANDROID_ABI),AndroidNetworkCallback.java,FakeAndroidNetworkCallback.java)
+  }
+
   Java_Files {
     commandflags += $(if $(ANDROID_ABI),-classpath $(ANDROID_SDK)/platforms/android-$(ANDROID_API)/android.jar)
-    OpenDDS/DCPS/AndroidNetworkCallback.java
+    OpenDDS/DCPS/$(opendds_android_network_callback)
   }
 
   // This list should match the Java_Files list above, but these are the .class
