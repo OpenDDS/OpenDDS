@@ -30,6 +30,7 @@ public:
   using NetworkConfigMonitor::remove_interface;
   using NetworkConfigMonitor::add_address;
   using NetworkConfigMonitor::remove_address;
+  void update_interfaces();
 
 private:
   void validate_interfaces_index();

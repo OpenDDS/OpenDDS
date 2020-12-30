@@ -83,6 +83,11 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
     OpenDDS/DCPS/transport/UnableToCreateException.java
   }
 
+  Java_Files {
+    commandflags += $(if $(ANDROID_ABI),-classpath $(ANDROID_SDK)/platforms/android-$(ANDROID_API)/android.jar)
+    OpenDDS/DCPS/AndroidNetworkCallback.java
+  }
+
   // This list should match the Java_Files list above, but these are the .class
   // files instead of the .java files.  (Only for classes with native methods.)
   JavaH_Files {

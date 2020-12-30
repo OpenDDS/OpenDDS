@@ -100,6 +100,104 @@ bool NetworkConfigModifier::close()
   return true;
 }
 
+void NetworkConfigModifier::update_interfaces()
+{
+  ifaddrs* p_ifa = 0;
+  ifaddrs* p_if = 0;
+
+  if (::getifaddrs(&p_ifa) != 0)
+    return;
+
+  // Using logic from ACE::get_ip_interfaces_getifaddrs
+  // but need ifa_name which is not returned by it
+  typedef std::map<std::string, NetworkInterface> Nics;
+  Nics nics;
+
+  std::map<std::string, ifaddrs*> net_names;
+
+  // Pull the address out of each INET interface.
+  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("NetworkConfigModifier::remove_interface(): Checking interface %s\n"), p_if->ifa_name));
+    if (p_if->ifa_addr == 0) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): address equals zero, continuing\n")));
+      continue;
+    }
+
+    // Check to see if it's up.
+    if ((p_if->ifa_flags & IFF_UP) != IFF_UP) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): IFF_UP not set, continuing\n")));
+      continue;
+    }
+
+
+
+    if (p_if->ifa_addr->sa_family == AF_INET) {
+      struct sockaddr_in* addr = reinterpret_cast<sockaddr_in*> (p_if->ifa_addr);
+
+      // Sometimes the kernel returns 0.0.0.0 as the interface
+      // address, skip those...
+      if (addr->sin_addr.s_addr != INADDR_ANY) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): Adding ipv4: %s\n"), p_if->ifa_name));
+        net_names.insert(std::make_pair(p_if->ifa_name, p_if));
+      } else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): address equals 0.0.0.0, continuing\n")));
+      }
+    }
+# if defined (ACE_HAS_IPV6)
+    else if (p_if->ifa_addr->sa_family == AF_INET6) {
+      struct sockaddr_in6 *addr = reinterpret_cast<sockaddr_in6 *> (p_if->ifa_addr);
+
+      // Skip the ANY address
+      if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): Adding ipv6: %s\n"), p_if->ifa_name));
+        net_names.insert(std::make_pair(p_if->ifa_name, p_if));
+      } else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): any address, continuing\n")));
+      }
+    }
+# endif /* ACE_HAS_IPV6 */
+    else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): not ipv4 or ipv6\n")));
+    }
+  }
+  // Remove interfaces that are no longer active
+  NetworkInterfaces nis = get_interfaces();
+  for (OpenDDS::DCPS::NetworkInterfaces::iterator iter = nis.begin(); iter < nis.end(); ++iter) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Checking NI: %s\n"), iter->name().c_str()));
+    if (net_names.find(iter->name()) == net_names.end()) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Calling remove_interface: %s\n"), iter->name().c_str()));
+      remove_interface(iter->index());
+    }
+  }
+
+  // Add interfaces that are new
+  nis = get_interfaces();
+  for (std::map<std::string, ifaddrs*>::iterator iter = net_names.begin(); iter != net_names.end(); ++iter) {
+    NetworkInterfaces::iterator pos = std::find_if(nis.begin(), nis.end(), NetworkInterfaceName(iter->first));
+    if (pos == nis.end()) {
+      ifaddrs* ifa = iter->second;
+      ACE_INET_Addr address;
+      if (ifa->ifa_addr->sa_family == AF_INET) {
+        struct sockaddr_in* addr = reinterpret_cast<sockaddr_in*> (ifa->ifa_addr);
+        address.set((u_short) 0, addr->sin_addr.s_addr, 0);
+        NetworkInterface ni(ACE_OS::if_nametoindex(ifa->ifa_name), ifa->ifa_name, ifa->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK));
+        ni.add_address(address);
+        NetworkConfigMonitor::add_interface(ni);
+      }
+# if defined (ACE_HAS_IPV6)
+      else if (ifa->ifa_addr->sa_family == AF_INET6) {
+        struct sockaddr_in6 *addr = reinterpret_cast<sockaddr_in6 *> (ifa->ifa_addr);
+        address.set(reinterpret_cast<struct sockaddr_in *> (addr), sizeof(sockaddr_in6));
+        NetworkInterface ni(ACE_OS::if_nametoindex(ifa->ifa_name), ifa->ifa_name, ifa->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK));
+        ni.add_address(address);
+        NetworkConfigMonitor::add_interface(ni);
+      }
+# endif /* ACE_HAS_IPV6 */
+    }
+  }
+  ::freeifaddrs (p_ifa);
+}
+
 void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 {
   NetworkInterface* p_nic = 0;

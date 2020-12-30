@@ -55,6 +55,19 @@
 template <typename CppClass>
 CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
 
+namespace {
+  static jobject getGlobalContext(JNIEnv *env)
+  {
+    jclass activityThread = findClass(env, "android/app/ActivityThread");
+    jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
+    jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
+
+    jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
+    jobject context = env->CallObjectMethod(at, getApplication);
+    return context;
+  }
+}
+
 // TheParticipantFactory
 
 jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
@@ -68,6 +81,16 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
       TheParticipantFactoryWithArgs(jargv.argc_, jargv.orb_argv());
     jobject j_dpf;
     copyToJava(jni, j_dpf, dpf, true);
+
+#ifdef ACE_ANDROID
+    //Context context = getApplicationContext();
+    //AndroidNetworkCallback.register(context);
+    jobject context = getGlobalContext(jni);
+    jclass anc = findClass(jni, "OpenDDS/DCPS/AndroidNetworkCallback");
+    jmethodID registerMethod = jni->GetStaticMethodID(anc, "register", "(Landroid/content/Context;)V");
+    jni->CallStaticVoidMethod(anc, registerMethod, context);
+#endif
+
     return j_dpf;
 
   } catch (const CORBA::SystemException &se) {
@@ -140,8 +163,8 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 (JNIEnv * jni, jclass)
 {
 #ifdef ACE_ANDROID
-  jclass version = findClass(jni, "Build.VERSION");
-  jfieldID field = jni->GetFieldID(version, "SDK_INT", "I");
+  jclass version = findClass(jni, "android.os.Build$VERSION");
+  jfieldID field = jni->GetStaticFieldID(version, "SDK_INT", "I");
   int api = jni->GetStaticIntField(version, field);
   if (api >= 30) {
     //setup android network detection
@@ -167,46 +190,13 @@ void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
   //TODO:CLAYTON Something to do here for cleanup?
 }
 
-// NetworkConfigModifier::add_interface
-void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_add_1interface
-(JNIEnv * jni, jobject jthis, jstring name)
+// NetworkConfigModifier::update_interfaces
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces
+(JNIEnv * jni, jobject jthis)
 {
-  JStringMgr jsm_name(jni, name);
   OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
-  ncm->add_interface(jsm_name.c_str());
-}
-
-// NetworkConfigModifier::remove_interface
-void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_remove_1interface
-(JNIEnv * jni, jobject jthis, jstring name)
-{
-  JStringMgr jsm_name(jni, name);
-  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
-  ncm->remove_interface(jsm_name.c_str());
-}
-
-// NetworkConfigModifier::add_address
-void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_add_1address
-(JNIEnv * jni, jobject jthis, jstring name, jstring address)
-{
-  JStringMgr jsm_name(jni, name);
-  JStringMgr jsm_address(jni, address);
-  ACE_INET_Addr addr;
-  addr.string_to_addr(jsm_address.c_str());
-  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
-  ncm->add_address(jsm_name.c_str(), addr);
-}
-
-// NetworkConfigModifier::remove_address
-void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_remove_1address
-(JNIEnv * jni, jobject jthis, jstring name, jstring address)
-{
-  JStringMgr jsm_name(jni, name);
-  JStringMgr jsm_address(jni, address);
-  ACE_INET_Addr addr;
-  addr.string_to_addr(jsm_address.c_str());
-  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
-  ncm->remove_address(jsm_name.c_str(), addr);
+  ACE_DEBUG((LM_DEBUG, "Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces()\n"));
+  ncm->update_interfaces();
 }
 
 

@@ -22,9 +22,6 @@ public final class NetworkConfigModifier {
         _jni_fini();
     }
 
-    public native void add_interface(String name);
-    public native void remove_interface(String name);
-    public native void add_address(String name, String address);
-    public native void remove_address(String name, String address);
+    public native void update_interfaces();
 }
 
