@@ -178,7 +178,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -309,7 +309,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -464,7 +464,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -595,7 +595,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -750,7 +750,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -881,7 +881,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -906,52 +906,38 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ACE+TAO-6_5_12
-        path: ACE_TAO
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
-    - name: tweak DDS_TAOv2.mwc to build enough for tests & examples
-      shell: bash
-      run: |
-        sed -i'.old' -e 's/  dds/  $(ACE_ROOT)\/ACEXML\/common\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(ACE_ROOT)\/ACEXML\/parser\/parser\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/utils\/nslist\/nslist.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/tests\/Hello\r\n  dds/' OpenDDS/DDS_TAOv2.mwc # used by java tests
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/tao\/PI_Server\/PI_Server.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/tao\/Strategies\/Strategies.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/CosNaming.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/CosNaming_Serv.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/CosNaming_Skel.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/FTORB.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/PortableGroup.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/ImplRepo_Service\/ImplRepo_Service.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/Naming_Service\/Naming_Service.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        echo "-----"
-        cat OpenDDS/DDS_TAOv2.mwc
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ACE+TAO-6_5_12
+        path: OpenDDS/ACE_TAO
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-tests --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
-    - name: build OpenDDS
+        configure --no-tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+    - name: build ACE & TAO
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS_TAOv2.sln
+        mwc.pl -workers 4 -hierarchy -type vs2019 DDS_TAOv2_all.mwc
+        cd ACE_TAO\ACE
+        msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
+        cd ..\TAO
+        msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../windows-2019_defaults_ACE_TAO.tar
         xz ../windows-2019_defaults_ACE_TAO.tar
@@ -1074,7 +1060,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1194,7 +1180,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1219,52 +1205,38 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ACE+TAO-6_5_12
-        path: ACE_TAO
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
-    - name: tweak DDS_TAOv2.mwc to build enough for tests & examples
-      shell: bash
-      run: |
-        sed -i'.old' -e 's/  dds/  $(ACE_ROOT)\/ACEXML\/common\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(ACE_ROOT)\/ACEXML\/parser\/parser\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/utils\/nslist\/nslist.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/tests\/Hello\r\n  dds/' OpenDDS/DDS_TAOv2.mwc # used by java tests
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/tao\/PI_Server\/PI_Server.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/tao\/Strategies\/Strategies.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/CosNaming.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/CosNaming_Serv.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/CosNaming_Skel.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/FTORB.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/orbsvcs\/PortableGroup.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/ImplRepo_Service\/ImplRepo_Service.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        sed -i'.old' -e 's/  dds/  $(TAO_ROOT)\/orbsvcs\/Naming_Service\/Naming_Service.mpc\r\n  dds/' OpenDDS/DDS_TAOv2.mwc
-        echo "-----"
-        cat OpenDDS/DDS_TAOv2.mwc
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ACE+TAO-6_5_12
+        path: OpenDDS/ACE_TAO
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-tests --no-debug --no-inline --security --ace=%GITHUB_WORKSPACE%/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
-    - name: build OpenDDS
+        configure --no-tests --no-debug --no-inline --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+    - name: build ACE & TAO
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Release,Platform=x64 -m DDS_TAOv2.sln
+        mwc.pl -workers 4 -hierarchy -type vs2019 DDS_TAOv2_all.mwc
+        cd ACE_TAO\ACE
+        msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
+        cd ..\TAO
+        msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../windows-2016_no_debug_no_inline_ACE_TAO.tar
         xz ../windows-2016_no_debug_no_inline_ACE_TAO.tar
@@ -1336,7 +1308,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Release,Platform=x64 -m DDS.sln
+        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -1387,7 +1359,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1456,7 +1428,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Release,Platform=x64 -m DDS.sln
+        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -1507,7 +1479,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1664,7 +1636,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1796,7 +1768,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1953,7 +1925,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -2085,7 +2057,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
     - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.1.2
+      uses: simpsont-oci/action-junit-report@v1.1.3
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
