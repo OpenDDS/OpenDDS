@@ -108,44 +108,31 @@ void NetworkConfigModifier::update_interfaces()
   if (::getifaddrs(&p_ifa) != 0)
     return;
 
-  // Using logic from ACE::get_ip_interfaces_getifaddrs
-  // but need ifa_name which is not returned by it
-  typedef std::map<std::string, NetworkInterface> Nics;
-  Nics nics;
-
   std::map<std::string, ifaddrs*> net_names;
 
   // Pull the address out of each INET interface.
   for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
-    if (p_if->ifa_addr == 0) {
+    if (p_if->ifa_addr == 0)
       continue;
-    }
 
     // Check to see if it's up.
-    if ((p_if->ifa_flags & IFF_UP) != IFF_UP) {
+    if ((p_if->ifa_flags & IFF_UP) != IFF_UP)
       continue;
-    }
-
-
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
       struct sockaddr_in* addr = reinterpret_cast<sockaddr_in*> (p_if->ifa_addr);
-
       // Sometimes the kernel returns 0.0.0.0 as the interface
       // address, skip those...
       if (addr->sin_addr.s_addr != INADDR_ANY) {
         net_names.insert(std::make_pair(p_if->ifa_name, p_if));
-      } else {
       }
     }
 # if defined (ACE_HAS_IPV6)
     else if (p_if->ifa_addr->sa_family == AF_INET6) {
       struct sockaddr_in6 *addr = reinterpret_cast<sockaddr_in6 *> (p_if->ifa_addr);
-
       // Skip the ANY address
       if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
         net_names.insert(std::make_pair(p_if->ifa_name, p_if));
-      } else {
       }
     }
 # endif /* ACE_HAS_IPV6 */
