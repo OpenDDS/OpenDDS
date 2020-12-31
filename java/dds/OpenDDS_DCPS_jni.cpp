@@ -160,23 +160,13 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
 jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
 (JNIEnv * jni, jclass)
 {
-#ifdef ACE_ANDROID
-  jclass version = findClass(jni, "android.os.Build$VERSION");
-  jfieldID field = jni->GetStaticFieldID(version, "SDK_INT", "I");
-  int api = jni->GetStaticIntField(version, field);
-  if (api >= 30) {
-    //setup android network detection
-    ACE_DEBUG((LM_DEBUG, "\n\n\nAPI_VERSION: %d\n\n\n", api));
-  }
-#endif
   OpenDDS::DCPS::NetworkConfigModifier* ncm = TheServiceParticipant->network_config_modifier();
   if (ncm == 0) {
     return 0;
   }
   jclass configClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
   jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
-  return jni->NewObject(configClazz, ctor,
-                        reinterpret_cast<jlong>(ncm));
+  return jni->NewObject(configClazz, ctor, reinterpret_cast<jlong>(ncm));
 }
 
 // NetworkConfigModifier
@@ -193,7 +183,6 @@ void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
-  ACE_DEBUG((LM_DEBUG, "Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces()\n"));
   ncm->update_interfaces();
 }
 

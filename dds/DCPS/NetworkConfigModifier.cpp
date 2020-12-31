@@ -117,15 +117,12 @@ void NetworkConfigModifier::update_interfaces()
 
   // Pull the address out of each INET interface.
   for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("NetworkConfigModifier::remove_interface(): Checking interface %s\n"), p_if->ifa_name));
     if (p_if->ifa_addr == 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): address equals zero, continuing\n")));
       continue;
     }
 
     // Check to see if it's up.
     if ((p_if->ifa_flags & IFF_UP) != IFF_UP) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): IFF_UP not set, continuing\n")));
       continue;
     }
 
@@ -137,10 +134,8 @@ void NetworkConfigModifier::update_interfaces()
       // Sometimes the kernel returns 0.0.0.0 as the interface
       // address, skip those...
       if (addr->sin_addr.s_addr != INADDR_ANY) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): Adding ipv4: %s\n"), p_if->ifa_name));
         net_names.insert(std::make_pair(p_if->ifa_name, p_if));
       } else {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): address equals 0.0.0.0, continuing\n")));
       }
     }
 # if defined (ACE_HAS_IPV6)
@@ -149,23 +144,16 @@ void NetworkConfigModifier::update_interfaces()
 
       // Skip the ANY address
       if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): Adding ipv6: %s\n"), p_if->ifa_name));
         net_names.insert(std::make_pair(p_if->ifa_name, p_if));
       } else {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): any address, continuing\n")));
       }
     }
 # endif /* ACE_HAS_IPV6 */
-    else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  NetworkConfigModifier::remove_interface(): not ipv4 or ipv6\n")));
-    }
   }
   // Remove interfaces that are no longer active
   NetworkInterfaces nis = get_interfaces();
   for (OpenDDS::DCPS::NetworkInterfaces::iterator iter = nis.begin(); iter < nis.end(); ++iter) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Checking NI: %s\n"), iter->name().c_str()));
     if (net_names.find(iter->name()) == net_names.end()) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Calling remove_interface: %s\n"), iter->name().c_str()));
       remove_interface(iter->index());
     }
   }
