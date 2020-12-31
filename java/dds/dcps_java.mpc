@@ -86,9 +86,8 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
   verbatim (gnuace, top, 1) {
     opendds_android_network_callback = $(if $(ANDROID_ABI),AndroidNetworkCallback.java,FakeAndroidNetworkCallback.java)
   }
-
   Java_Files {
-    commandflags += $(if $(ANDROID_ABI),-classpath $(ANDROID_SDK)/platforms/android-$(ANDROID_API)/android.jar)
+    commandflags += $(if $(ANDROID_ABI),-classpath $(ANDROID_API_PATH)/android.jar)
     OpenDDS/DCPS/$(opendds_android_network_callback)
   }
 

@@ -40,6 +40,7 @@ are mostly for shorthand.
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
 | `$SSL_ROOT`  | Install prefix for cross-compiled OpenSSL        |
+| `$API`       | The Android API Version Number                   |
 
 ## Requirements
 
@@ -116,7 +117,7 @@ For example, to create a toolchain for 32-bit ARM Android 7.0 "Nougat" and
 later:
 
 ```Shell
-$NDK/build/tools/make_standalone_toolchain.py --arch arm --api 24 --install-dir $TOOLCHAIN
+$NDK/build/tools/make_standalone_toolchain.py --arch arm --api $API --install-dir $TOOLCHAIN
 ```
 
 **Windows Users:** Android NDK includes Python in `prebuilt\windows-x86_64\bin`
@@ -125,7 +126,7 @@ location of the NDK and `%TOOLCHAIN%` is the desired location of the toolchain,
 run this command instead:
 
 ```bat
-%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
+%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api $API --install-dir %TOOLCHAIN%
 ```
 
 Once a toolchain is obtained, OpenDDS can be configured to cross compile for
@@ -152,6 +153,7 @@ those sections before configuring and building OpenDDS.
 
 ```Shell
 ./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
+    --macros=ANDROID_API_PATH=$SDK/platforms/android-$API
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 

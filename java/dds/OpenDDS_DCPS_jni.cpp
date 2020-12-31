@@ -83,8 +83,6 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
     copyToJava(jni, j_dpf, dpf, true);
 
 #ifdef ACE_ANDROID
-    //Context context = getApplicationContext();
-    //AndroidNetworkCallback.register(context);
     jobject context = getGlobalContext(jni);
     jclass anc = findClass(jni, "OpenDDS/DCPS/AndroidNetworkCallback");
     jmethodID registerMethod = jni->GetStaticMethodID(anc, "register", "(Landroid/content/Context;)V");
