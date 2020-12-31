@@ -24,4 +24,3 @@ public final class NetworkConfigModifier {
 
     public native void update_interfaces();
 }
-
