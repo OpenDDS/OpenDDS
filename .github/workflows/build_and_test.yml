@@ -172,6 +172,11 @@ jobs:
       with:
         name: ubuntu-20_04_security_autobuild_output.log_Full.html
         path: OpenDDS/workspace/ubuntu-20_04_security_autobuild_output.log_Full.html
+    - name: upload Tests_JUnit xml
+      uses: actions/upload-artifact@v2
+      with:
+        name: ubuntu-20_04_security_autobuild_output.Tests_JUnit.xml
+        path: OpenDDS/workspace/Tests_JUnit.xml
     - name: check results
       shell: bash
       run: |
