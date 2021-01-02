@@ -975,17 +975,17 @@ jobs:
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ACE+TAO-6_5_12
-        path: ACE_TAO
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ACE+TAO-6_5_12
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
@@ -1095,17 +1095,17 @@ jobs:
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ACE+TAO-6_5_12
-        path: ACE_TAO
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ACE+TAO-6_5_12
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
@@ -1274,17 +1274,17 @@ jobs:
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ACE+TAO-6_5_12
-        path: ACE_TAO
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ACE+TAO-6_5_12
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
@@ -1394,17 +1394,17 @@ jobs:
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ACE+TAO-6_5_12
-        path: ACE_TAO
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ACE+TAO-6_5_12
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
