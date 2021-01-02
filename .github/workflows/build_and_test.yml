@@ -928,13 +928,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
-    - name: regenerate workspace
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        call mwc.pl -workers 4 -hierarchy -type vs2019 DDS_TAOv2_all.mwc
+        configure --no-tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       shell: cmd
       run: |
@@ -1232,13 +1226,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-tests --no-debug --no-inline --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
-    - name: regenerate workspace
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        call mwc.pl -workers 4 -hierarchy -type vs2017 DDS_TAOv2_all.mwc
+        configure --no-tests --no-debug --no-inline --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       shell: cmd
       run: |
