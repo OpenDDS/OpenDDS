@@ -41,7 +41,11 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#include <ace/Atomic_Op.h>
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op_T.h>
+#endif
 #include <ace/Task_Ex_T.h>
 #include <ace/Thread_Mutex.h>
 
@@ -251,7 +255,11 @@ private:
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
+#ifdef ACE_HAS_CPP11
+    std::atomic<bool> shutting_down_;
+#else
     ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutting_down_;
+#endif
 #ifdef OPENDDS_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;

@@ -339,7 +339,11 @@ OpenDDS::DCPS::TcpDataLink::set_release_pending(bool flag)
 bool
 OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 {
+#ifdef ACE_HAS_CPP11
+  return this->release_is_pending_;
+#else
   return this->release_is_pending_.value();
+#endif
 }
 
 bool

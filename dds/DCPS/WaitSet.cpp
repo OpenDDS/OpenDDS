@@ -113,7 +113,7 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
 {
   using namespace OpenDDS::DCPS;
 
-  if (waiting_.value()) {
+  if (waiting_ != false) {
     return RETCODE_PRECONDITION_NOT_MET;
   }
 

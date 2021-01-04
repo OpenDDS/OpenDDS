@@ -35,7 +35,11 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#include <ace/Atomic_Op.h>
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
 #include <ace/Thread_Mutex.h>
@@ -95,7 +99,14 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
   // Is Spdp shutting down?
-  bool shutting_down() { return shutdown_flag_.value(); }
+  bool shutting_down()
+  {
+#ifdef ACE_HAS_CPP11
+    return shutdown_flag_;
+#else
+    return shutdown_flag_.value();
+#endif
+  }
 
   bool associated() const;
   bool has_discovered_participant(const DCPS::RepoId& guid) const;
@@ -415,7 +426,11 @@ private:
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
+#ifdef ACE_HAS_CPP11
+  std::atomic<bool> shutdown_flag_; // Spdp shutting down
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
+#endif
 
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
