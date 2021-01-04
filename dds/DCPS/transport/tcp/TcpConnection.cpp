@@ -261,7 +261,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
             local_address_.get_host_addr(), local_address_.get_port_number(),
             transport_priority_, reconnect_state_string()));
       if (DCPS_debug_level > 9) {
-        network_order_address.dump ();
+        network_order_address.dump();
       }
 
       // remove from reactor, normal recv strategy setup will add us back
