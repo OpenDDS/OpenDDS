@@ -656,7 +656,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
           an_start = anc_it->second;
           acknack_counts_.erase(anc_it);
         }
-        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, an_start);
+        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable, an_start);
         rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
       }
       RtpsReader_rch reader = rr->second;
@@ -1768,7 +1768,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
       preassociation_writers_.erase(writer);
 
-      const SequenceRange sr(zero, hb_first.previous());
+      const SequenceNumber bound = (!writer->sends_directed_hb() && !durable_) ? std::max(hb_first, hb_last).previous() : hb_first.previous();
+      const SequenceRange sr(zero, bound);
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
         writer->held_.erase(writer->held_.begin());
