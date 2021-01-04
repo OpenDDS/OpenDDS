@@ -5,7 +5,7 @@
 
 for %%x in (perl.exe) do set PERLPATH=%%~dp$PATH:x
 if "x%PERLPATH%"=="x" (
-  echo ERROR: perl.exe was not found.  This script requires ActiveState Perl.
+  echo ERROR: perl.exe was not found.  This script requires Perl.
   exit /b 1
 )
 set PERLPATH=

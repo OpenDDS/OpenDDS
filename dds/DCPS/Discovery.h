@@ -166,7 +166,7 @@ public:
     DDS::DomainId_t domainId,
     const RepoId& participantId,
     const RepoId& topicId,
-    DataWriterCallbacks* publication,
+    DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
     const TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos) = 0;
@@ -207,7 +207,7 @@ public:
     DDS::DomainId_t domainId,
     const RepoId& participantId,
     const RepoId& topicId,
-    DataReaderCallbacks* subscription,
+    DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
     const TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
