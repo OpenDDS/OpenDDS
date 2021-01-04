@@ -172,11 +172,6 @@ jobs:
       with:
         name: ubuntu-20_04_security_autobuild_output.log_Full.html
         path: OpenDDS/workspace/ubuntu-20_04_security_autobuild_output.log_Full.html
-    - name: upload Tests_JUnit xml
-      uses: actions/upload-artifact@v2
-      with:
-        name: ubuntu-20_04_security_autobuild_output.Tests_JUnit.xml
-        path: OpenDDS/workspace/Tests_JUnit.xml
     - name: check results
       shell: bash
       run: |
@@ -943,6 +938,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find -iname "*\.obj" | xargs rm
         tar cvf ../../windows-2019_defaults_ACE_TAO.tar ACE/ace/config.h
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../windows-2019_defaults_ACE_TAO.tar
         xz ../../windows-2019_defaults_ACE_TAO.tar
@@ -996,6 +992,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ windows-2019_defaults_ACE_TAO.tar.xz
+        rm -f windows-2019_defaults_ACE_TAO.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
@@ -1051,8 +1048,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd workspace
-        dir "%GITHUB_WORKSPACE%\autobuild"
-        dir "%GITHUB_WORKSPACE%\OpenDDS\workspace"
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
     - name: upload Full log output
       uses: actions/upload-artifact@v2
@@ -1116,6 +1111,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ windows-2019_defaults_ACE_TAO.tar.xz
+        rm -f windows-2019_defaults_ACE_TAO.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
@@ -1171,8 +1167,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd workspace
-        dir "%GITHUB_WORKSPACE%\autobuild"
-        dir "%GITHUB_WORKSPACE%\OpenDDS\workspace"
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
     - name: upload Full log output
       uses: actions/upload-artifact@v2
@@ -1242,6 +1236,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find -iname "*\.obj" | xargs rm
         tar cvf ../../windows-2016_no_debug_no_inline_ACE_TAO.tar ACE/ace/config.h
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../windows-2016_no_debug_no_inline_ACE_TAO.tar
         xz ../../windows-2016_no_debug_no_inline_ACE_TAO.tar
@@ -1295,6 +1290,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
+        rm -f windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
@@ -1350,8 +1346,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd workspace
-        dir "%GITHUB_WORKSPACE%\autobuild"
-        dir "%GITHUB_WORKSPACE%\OpenDDS\workspace"
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
     - name: upload Full log output
       uses: actions/upload-artifact@v2
@@ -1415,6 +1409,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
+        rm -f windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
@@ -1470,8 +1465,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd workspace
-        dir "%GITHUB_WORKSPACE%\autobuild"
-        dir "%GITHUB_WORKSPACE%\OpenDDS\workspace"
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
     - name: upload Full log output
       uses: actions/upload-artifact@v2
