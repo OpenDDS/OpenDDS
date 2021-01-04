@@ -34,4 +34,4 @@ push(@reader_args, @common_args);
 $test->process('reader', 'DelayedDurable', join(' ', @reader_args));
 $test->start_process('reader');
 
-exit $test->finish(60);
+exit $test->finish(300);
