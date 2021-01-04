@@ -485,7 +485,7 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) TcpConnection::on_active_connection_established: "
                "Sending public address <%C> to remote side\n",
-               address.c_str ()));
+               address.c_str()));
   }
 
   ACE_UINT32 len = static_cast<ACE_UINT32>(address.length()) + 1;
