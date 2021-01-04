@@ -56,7 +56,7 @@ public:
   typedef WaitSet_var _var_type;
 
   WaitSet()
-    : cond_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic())
+    : cond_(lock_)
     , waiting_(false)
   {}
 
@@ -85,7 +85,10 @@ private:
   friend class OpenDDS::DCPS::ConditionImpl;
 
   ACE_Recursive_Thread_Mutex lock_;
+
   typedef OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
+  ConditionVariableType cond_;
+
 #ifdef ACE_HAS_CPP11
   std::atomic<bool> waiting_;
 #else
