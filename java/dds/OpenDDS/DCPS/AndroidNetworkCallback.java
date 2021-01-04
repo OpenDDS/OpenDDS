@@ -16,9 +16,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Build;
 
-import OpenDDS.DCPS.NetworkConfigModifier;
-import OpenDDS.DCPS.TheServiceParticipant;
-
 public class AndroidNetworkCallback extends NetworkCallback {
   public void onLost(Network network) {
     NetworkConfigModifier ncm = TheServiceParticipant.network_config_modifier();

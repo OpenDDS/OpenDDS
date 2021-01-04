@@ -10,6 +10,9 @@
 
 #include "ace/config.h"
 
+// ACE_HAS_GETIFADDRS is not set on android but is available in API >= 24
+#if ((!defined (ACE_LINUX) && defined(ACE_HAS_GETIFADDRS))  || (defined(ACE_ANDROID) && __ANDROID_API__ >= 24)) && !defined(OPENDDS_SAFETY_PROFILE)
+
 #define OPENDDS_NETWORK_CONFIG_MODIFIER
 
 #include "NetworkConfigMonitor.h"
@@ -35,10 +38,13 @@ public:
 private:
   void validate_interfaces_index();
 };
+typedef RcHandle<NetworkConfigModifier> NetworkConfigModifier_rch;
 
 } // DCPS
 } // OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif // ACE_HAS_GETIFADDRS && ! OPENDDS_SAFETY_PROFILE
 
 #endif // OPENDDS_DCPS_NETWORKCONFIGMODIFIER_H

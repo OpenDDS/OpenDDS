@@ -160,13 +160,19 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
 jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
 (JNIEnv * jni, jclass)
 {
-  OpenDDS::DCPS::NetworkConfigModifier* ncm = TheServiceParticipant->network_config_modifier();
-  if (ncm == 0) {
+  try {
+    OpenDDS::DCPS::NetworkConfigModifier_rch ncm(TheServiceParticipant->network_config_modifier(), OpenDDS::DCPS::inc_count());
+    if (ncm == 0) {
+      return 0;
+    } else {
+      jclass ncmClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
+      jmethodID ctor = jni->GetMethodID(ncmClazz, "<init>", "(J)V");
+      return jni->NewObject(ncmClazz, ctor, reinterpret_cast<jlong>(ncm._retn()));
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
     return 0;
   }
-  jclass configClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
-  jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
-  return jni->NewObject(configClazz, ctor, reinterpret_cast<jlong>(ncm));
 }
 
 // NetworkConfigModifier
@@ -175,7 +181,8 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
 (JNIEnv * jni, jobject jthis)
 {
-  //TODO:CLAYTON Something to do here for cleanup?
+  OpenDDS::DCPS::NetworkConfigModifier_rch ncm = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis));
+  ncm->_remove_ref();
 }
 
 // NetworkConfigModifier::update_interfaces

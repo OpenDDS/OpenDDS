@@ -138,7 +138,7 @@ void NetworkConfigMonitor::add_interface(const NetworkInterface& nic)
   for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {
     const RcHandle<NetworkConfigListener> listener(pos->lock());
     if (listener) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("add_interface(%s)\n"), nic.name().c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMontior::add_interface(%s)\n"), nic.name().c_str()));
       listener->add_interface(nic);
     }
   }
@@ -153,7 +153,7 @@ void NetworkConfigMonitor::remove_interface(int index)
     NetworkInterfaces::iterator pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceIndex(index));
     if (pos != network_interfaces_.end()) {
       nic = *pos;
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("remove_interface(%s)\n"), nic.name().c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMontior::remove_interface(%s)\n"), nic.name().c_str()));
       network_interfaces_.erase(pos);
       publish = true;
     }
@@ -173,6 +173,7 @@ void NetworkConfigMonitor::remove_interface(const OPENDDS_STRING& name)
     NetworkInterfaces::iterator pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
     if (pos != network_interfaces_.end()) {
       nic = *pos;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMontior::remove_interface(%s)\n"), nic.name().c_str()));
       network_interfaces_.erase(pos);
       publish = true;
     }
