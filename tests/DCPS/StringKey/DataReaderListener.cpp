@@ -49,7 +49,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     if (status == DDS::RETCODE_OK) {
 
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
-      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
+      cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << endl;
       cout << "SampleInfo.instance_handle = " << si.instance_handle << endl;
       if( previous_handle != this->last_hdl_) {
         cout << "HANDLE CHANGED: previous handle = " << previous_handle << endl;

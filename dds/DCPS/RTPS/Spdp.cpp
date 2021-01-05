@@ -386,7 +386,9 @@ Spdp::~Spdp()
 void
 Spdp::write_secure_updates()
 {
-  if (shutdown_flag_.value()) { return; }
+  if (shutdown_flag_ == true) {
+    return;
+  }
 
   const Security::SPDPdiscoveredParticipantData pdata =
     build_local_pdata(false, Security::DPDK_SECURE);
@@ -786,7 +788,9 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  if (shutdown_flag_.value()) { return; }
+  if (shutdown_flag_ == true) {
+    return;
+  }
 
   ParticipantData_t pdata;
 
