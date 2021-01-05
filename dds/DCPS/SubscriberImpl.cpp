@@ -158,7 +158,7 @@ SubscriberImpl::create_datareader(
       MultiTopicDataReaderBase* mtdr =
         dynamic_cast<MultiTopicDataReaderBase*>(dr.in());
       mtdr->init(dr_qos, a_listener, mask, this, mt);
-      if (enabled_.value() && qos_.entity_factory.autoenable_created_entities) {
+      if (enabled_ == true && qos_.entity_factory.autoenable_created_entities) {
         if (dr->enable() != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: ")
