@@ -8,7 +8,12 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->process('rtps_reliability', 'rtps_reliability');
+
+if ($test->flag('durable')) {
+  $test->process('rtps_reliability', 'rtps_reliability_durable');
+} else {
+  $test->process('rtps_reliability', 'rtps_reliability');
+}
 $test->start_process('rtps_reliability');
 my $result = $test->finish (60);
 if ($result != 0) {

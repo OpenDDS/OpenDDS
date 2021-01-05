@@ -1,2 +1,11 @@
-project: dcpsexe, dcps_test, dcps_rtps_udp {
+project(rtps_reliability): dcpsexe, dcps_test, dcps_rtps_udp {
+  source_files {
+    rtps_reliability.cpp
+  }
+}
+
+project(rtps_reliability_durable): dcpsexe, dcps_test, dcps_rtps_udp {
+  source_files {
+    rtps_reliability_durable.cpp
+  }
 }
