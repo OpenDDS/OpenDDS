@@ -153,7 +153,7 @@ those sections before configuring and building OpenDDS.
 
 ```Shell
 ./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
-    --macros=ANDROID_API_PATH=$SDK/platforms/android-$API
+    --macros=android_sdk=$SDK --macros=android_target_api=$API
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
@@ -448,6 +448,14 @@ Android builds of OpenDDS use the LinuxNetworkConfigMonitor to reconfigure
 OpenDDS connections automatically when the device switches from one network
 (cellular or wifi) to another. Apps that need to know when a network change
 occurs can register with the [ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager) for network callback events.
+
+As of API 30+, LinuxNetworkConfigMonitor can no longer be used, as Netlink 
+sockets are blocked by OS for security reasons. Instead, NetworkConfigModifier
+is utilized.  As a concequence of this, two new variables are required from the 
+user, android_sdk, and android_target_api.  These correspond to the location of your
+sdk, likely /home/<username>/Android/Sdk on Linux, and the API number you are building
+for. The NetworkConfigModifier is set up along with the necessary network callbacks
+when the user uses "TheParticipantFactory.WithArgs".
 
 ### OpenDDS Configuration Files
 

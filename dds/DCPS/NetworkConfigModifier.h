@@ -11,7 +11,7 @@
 #include "ace/config.h"
 
 // ACE_HAS_GETIFADDRS is not set on android but is available in API >= 24
-#if ((!defined (ACE_LINUX) && defined(ACE_HAS_GETIFADDRS))  || (defined(ACE_ANDROID) && __ANDROID_API__ >= 24)) && !defined(OPENDDS_SAFETY_PROFILE)
+#if ((!defined (ACE_LINUX) && defined(ACE_HAS_GETIFADDRS))  || (defined(ACE_ANDROID) && !defined ACE_LACKS_IF_NAMEINDEX)) && !defined(OPENDDS_SAFETY_PROFILE)
 
 #define OPENDDS_NETWORK_CONFIG_MODIFIER
 

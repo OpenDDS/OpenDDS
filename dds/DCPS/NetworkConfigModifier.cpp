@@ -143,7 +143,7 @@ void NetworkConfigModifier::update_interfaces()
   }
   // Remove interfaces that are no longer active
   NetworkInterfaces nis = get_interfaces();
-  for (OpenDDS::DCPS::NetworkInterfaces::iterator iter = nis.begin(); iter != nis.end(); ++iter) {
+  for (NetworkInterfaces::iterator iter = nis.begin(); iter != nis.end(); ++iter) {
     if (names.find(iter->name()) == names.end()) {
       remove_interface(iter->index());
     }
@@ -156,7 +156,7 @@ void NetworkConfigModifier::update_interfaces()
     if (pos == nis.end()) {
       ifaddrs* ifa = iter->second;
       ACE_INET_Addr address;
-      bool can_multicast = ifa->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK);
+      const bool can_multicast = ifa->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK);
       if (ifa->ifa_addr->sa_family == AF_INET) {
         sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
         address.set((u_short) 0, addr->sin_addr.s_addr, 0);
