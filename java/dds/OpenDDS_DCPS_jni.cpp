@@ -175,6 +175,8 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
     throw_java_exception(jni, se);
     return 0;
   }
+  #else
+  return 0;
   #endif
 }
 
