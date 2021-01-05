@@ -55,6 +55,7 @@
 template <typename CppClass>
 CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
 
+#ifdef ACE_ANDROID
 namespace {
   static jobject getGlobalContext(JNIEnv *env)
   {
@@ -67,6 +68,7 @@ namespace {
     return context;
   }
 }
+#endif
 
 // TheParticipantFactory
 
@@ -157,11 +159,10 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
   return retStr;
 }
 
-
 jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
 (JNIEnv * jni, jclass)
 {
-  #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
   try {
     OpenDDS::DCPS::NetworkConfigModifier_rch ncm(TheServiceParticipant->network_config_modifier(), OpenDDS::DCPS::inc_count());
     if (ncm == 0) {
@@ -175,9 +176,10 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
     throw_java_exception(jni, se);
     return 0;
   }
-  #else
+#else
+  ACE_UNUSED_ARG(jni);
   return 0;
-  #endif
+#endif
 }
 
 // NetworkConfigModifier
@@ -186,20 +188,26 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
 (JNIEnv * jni, jobject jthis)
 {
-  #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
   OpenDDS::DCPS::NetworkConfigModifier_rch ncm = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis));
   ncm->_remove_ref();
-  #endif
+#else
+  ACE_UNUSED_ARG(jni);
+  ACE_UNUSED_ARG(jthis);
+#endif
 }
 
 // NetworkConfigModifier::update_interfaces
 void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces
 (JNIEnv * jni, jobject jthis)
 {
-  #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
   OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
   ncm->update_interfaces();
-  #endif
+#else
+  ACE_UNUSED_ARG(jni);
+  ACE_UNUSED_ARG(jthis);
+#endif
 }
 
 // Exception translation
