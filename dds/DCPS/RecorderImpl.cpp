@@ -373,6 +373,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     AssociationData data;
     data.remote_id_ = writer.writerId;
     data.remote_data_ = writer.writerTransInfo;
+    data.remote_transport_context_ = writer.transportContext;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
     data.remote_reliable_ =
@@ -527,7 +528,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
                OPENDDS_STRING(writer_converter).c_str(),
                writers.length()));
   }
-  if (!this->entity_deleted_.value()) {
+  if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
@@ -535,7 +536,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     // be removed immediately
     WriterIdSeq non_active_writers;
     {
-      CORBA::ULong wr_len = writers.length();
+      const CORBA::ULong wr_len = writers.length();
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
@@ -732,7 +733,7 @@ RecorderImpl::remove_all_associations()
   }
 
   try {
-    CORBA::Boolean dont_notify_lost = 0;
+    CORBA::Boolean dont_notify_lost = false;
 
     if (0 < size) {
       remove_associations(writers, dont_notify_lost);
@@ -979,7 +980,7 @@ RecorderImpl::enable()
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
                               this->topic_servant_->get_id(),
-                              this,
+                              rchandle_from(this),
                               this->qos_,
                               trans_conf_info,
                               this->subqos_,

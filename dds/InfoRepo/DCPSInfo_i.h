@@ -152,6 +152,7 @@ public:
                        const char* pub_str,
                        const DDS::DataWriterQos & qos,
                        const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                       ACE_CDR::ULong transportContext,
                        const DDS::PublisherQos & publisherQos,
                        bool associate = false);
 
@@ -200,6 +201,7 @@ public:
                         const char* sub_str,
                         const DDS::DataReaderQos & qos,
                         const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                        ACE_CDR::ULong transportContext,
                         const DDS::SubscriberQos & subscriberQos,
                         const char* filterClassName,
                         const char* filterExpression,

@@ -103,7 +103,7 @@ struct NetworkInterfaceName {
   const OPENDDS_STRING name_;
 };
 
-class NetworkConfigListener : public virtual RcObject {
+class OpenDDS_Dcps_Export NetworkConfigListener : public virtual RcObject {
 public:
   virtual void add_interface(const NetworkInterface& interface)
   {

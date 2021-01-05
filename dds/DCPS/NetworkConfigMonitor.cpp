@@ -58,11 +58,7 @@ bool NetworkInterface::exclude_from_multicast(const char* configured_interface) 
   }
 
   const ACE_INET_Addr sp_default = TheServiceParticipant->default_address();
-  if (sp_default != ACE_INET_Addr() && addresses_.count(sp_default) == 0) {
-    return true;
-  }
-
-  return false;
+  return sp_default != ACE_INET_Addr() && addresses_.count(sp_default) == 0;
 }
 
 bool NetworkInterface::add_address(const ACE_INET_Addr& addr)

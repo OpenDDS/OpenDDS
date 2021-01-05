@@ -5,20 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
-
-#include <dds/DdsDcpsPublicationC.h>
-#include <dds/DCPS/WaitSet.h>
-
 #include "Args.h"
 #include "SecurityAttributesMessageTypeSupportC.h"
 #include "Writer.h"
 
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DCPS/WaitSet.h>
+
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
+
 const int num_instances_per_writer = 1;
 
-Writer::Writer(DDS::DataWriter_ptr writer, const SecurityAttributes::Args& args)
+Writer::Writer(DDS::DataWriter_ptr writer, const Args& args)
   : writer_(DDS::DataWriter::_duplicate(writer))
   , args_(args)
   , finished_instances_(0)
@@ -81,6 +81,11 @@ Writer::svc()
     } while (matches.current_count < 1);
 
     ws->detach_condition(condition);
+
+    if (args_.secure_part_user_data_) {
+      // Give secure participant writer time to send
+      ACE_OS::sleep(3);
+    }
 
     // Write samples
     SecurityAttributes::MessageDataWriter_var message_dw

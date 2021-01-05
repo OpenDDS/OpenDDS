@@ -79,7 +79,7 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
     return ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
 
   // Loop until we honor the shutdown_ flag.
-  while (1) {
+  while (true) {
     VDBG((LM_DEBUG,"(%P|%t) DBG:   "
           "Top of infinite svc() loop\n"));
 

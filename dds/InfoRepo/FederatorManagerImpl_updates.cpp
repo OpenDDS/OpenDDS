@@ -632,6 +632,7 @@ ManagerImpl::processCreate(const PublicationUpdate* sample, const DDS::SampleInf
                                             sample->callback,
                                             sample->datawriter_qos,
                                             sample->transport_info,
+                                            sample->transport_context,
                                             sample->publisher_qos,
                                             true)) {
     {
@@ -673,6 +674,7 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
                                              sample->callback,
                                              sample->datareader_qos,
                                              sample->transport_info,
+                                             sample->transport_context,
                                              sample->subscriber_qos,
                                              sample->filter_class_name,
                                              sample->filter_expression,
@@ -842,6 +844,7 @@ ManagerImpl::processDeferred()
                                                current->callback,
                                                current->datawriter_qos,
                                                current->transport_info,
+                                               current->transport_context,
                                                current->publisher_qos,
                                                true)) {
         if (OpenDDS::DCPS::DCPS_debug_level > 9) {
@@ -876,6 +879,7 @@ ManagerImpl::processDeferred()
                                                 current->callback,
                                                 current->datareader_qos,
                                                 current->transport_info,
+                                                current->transport_context,
                                                 current->subscriber_qos,
                                                 current->filter_class_name,
                                                 current->filter_expression,

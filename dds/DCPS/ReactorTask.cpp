@@ -165,7 +165,7 @@ OpenDDS::DCPS::ReactorTask::svc()
         tid = static_cast<unsigned long>(osx_tid);
       } else {
         tid = 0;
-        ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) ReactorTask::svc. Error getting OSX thread id\n.")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ReactorTask::svc. Error getting OSX thread id\n")));
       }
 #elif !defined (OPENDDS_SAFETY_PROFILE)
       ACE_thread_t tid = ACE_OS::thr_self();
@@ -186,7 +186,7 @@ OpenDDS::DCPS::ReactorTask::svc()
         if (thread_status_) {
           if (DCPS_debug_level > 4) {
             ACE_DEBUG((LM_DEBUG,
-                       "%T (%P|%t) ReactorTask::svc. Updating thread status.\n"));
+                       "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
           }
           ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
           thread_status_->map[key] = MonotonicTimePoint::now();

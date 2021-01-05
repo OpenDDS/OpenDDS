@@ -197,7 +197,7 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
                                 const bool reset_last_timestamp)
 {
   std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-  std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+  std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
 
   if (si.valid_data) {
     std::cout << "Message: subject    = " << msg.subject.in() << std::endl

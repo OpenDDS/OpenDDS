@@ -57,7 +57,7 @@ public:
   bool is_valid() const;
 
 private:
-  typedef std::set<CORBA::Long> Counts;
+  typedef std::set<CORBA::ULong> Counts;
 
   DDS::DataReader_var reader_;
   long                num_reads_;

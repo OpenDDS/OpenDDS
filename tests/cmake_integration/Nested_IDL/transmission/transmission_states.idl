@@ -1,0 +1,21 @@
+#ifndef TRANSMISSION_STATES_IDL
+#define TRANSMISSION_STATES_IDL
+
+enum GearSelect {
+    PARK,
+    REVERSE,
+    NEUTRAL,
+    FIRST,
+    SECOND,
+    THIRD,
+    FOURTH,
+    FIFTH,
+    SIXTH
+};
+
+enum FaultCode {
+    FC_OK,
+    FC_ERROR
+};
+
+#endif /* TRANSMISSION_STATES_IDL */

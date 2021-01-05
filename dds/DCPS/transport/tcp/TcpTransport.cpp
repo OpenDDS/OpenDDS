@@ -442,7 +442,7 @@ TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlag
 {
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address string <%C>\n",
             this->config().get_public_address().c_str()), 2);
 
   config().populate_locator(local_info, flags);
@@ -593,7 +593,8 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
     if (connect_tcp_datalink(*link, connection) == -1) {
       VDBG_LVL((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: connect_tcp_datalink failed\n")), 5);
+                ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
+                ACE_TEXT("ERROR: connect_tcp_datalink failed\n")), 5);
       GuardType guard(links_lock_);
       links_.unbind(key);
 
@@ -607,13 +608,15 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   // If we reach this point, this link was not in links_, so the
   // accept_datalink() call hasn't happened yet.  Store in connections_ for the
   // accept_datalink() method to find.
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n", connections_.size()), 5);
+  VDBG_LVL((LM_DEBUG,
+            ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - # of before connections: %d\n"),
+            connections_.size()), 5);
   const ConnectionMap::iterator where = connections_.find(key);
 
   if (where != connections_.end()) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: TcpTransport::passive_connection() - ")
-               ACE_TEXT("connection with %C:%d at priority %d already exists, ")
+               ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
+               ACE_TEXT("ERROR: connection with %C:%d at priority %d already exists, ")
                ACE_TEXT("overwriting previously established connection.\n"),
                remote_address.get_host_name(),
                remote_address.get_port_number(),
@@ -621,7 +624,9 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   }
 
   connections_[key] = connection;
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of after connections: %d\n", connections_.size()), 5);
+  VDBG_LVL((LM_DEBUG,
+            ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - # of after connections: %d\n"),
+            connections_.size()), 5);
 
   this->fresh_link(connection);
 }

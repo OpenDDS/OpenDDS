@@ -175,7 +175,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   pubId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                dwImpl.in(),
+                                rchandle_from(dwImpl.in()),
                                 dwQos.in(),
                                 tii,
                                 pQos.in());
@@ -285,7 +285,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   subId = disc->add_subscription(domain,
                                  subPartId,
                                  subTopicId,
-                                 &drImpl,
+                                 rchandle_from(&drImpl),
                                  drQos.in(),
                                  tii,
                                  subQos.in(),
@@ -335,7 +335,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   pubIncQosId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                &dwIncQosImpl,
+                                rchandle_from(&dwIncQosImpl),
                                 dwIncQosQos.in(),
                                 tii,
                                 pQos.in());

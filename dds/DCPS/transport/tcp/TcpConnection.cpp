@@ -238,7 +238,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
 
     ACE_OS::memcpy(&nlen, passive_setup_buffer_.rd_ptr(), sizeof(nlen));
     passive_setup_buffer_.rd_ptr(sizeof(nlen));
-    ACE_UINT32 hlen = ntohl(nlen);
+    const ACE_UINT32 hlen = ntohl(nlen);
     passive_setup_buffer_.size(hlen + 2 * sizeof(nlen));
 
     ACE_UINT32 nprio = 0;
@@ -260,6 +260,9 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
             remote_address_.get_host_addr(), remote_address_.get_port_number(),
             local_address_.get_host_addr(), local_address_.get_port_number(),
             transport_priority_, reconnect_state_string()));
+      if (DCPS_debug_level > 9) {
+        network_order_address.dump();
+      }
 
       // remove from reactor, normal recv strategy setup will add us back
       if (reactor()->remove_handler(this, READ_MASK | DONT_CALL) == -1) {
@@ -378,7 +381,6 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   GuardType guard(reconnect_lock_);
   TcpDataLink_rch link = link_;
 
-
   if (!link) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_close() link is null.\n"));
@@ -389,7 +391,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   TcpReceiveStrategy_rch receive_strategy = link->receive_strategy();
   TcpSendStrategy_rch send_strategy = link->send_strategy();
 
-  bool graceful = receive_strategy && receive_strategy->gracefully_disconnected();
+  const bool graceful = receive_strategy && receive_strategy->gracefully_disconnected();
 
   if (send_strategy) {
     if (graceful) {
@@ -478,6 +480,14 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
   std::string address = tcp_config_->get_public_address();
+
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) TcpConnection::on_active_connection_established: "
+               "Sending public address <%C> to remote side\n",
+               address.c_str()));
+  }
+
   ACE_UINT32 len = static_cast<ACE_UINT32>(address.length()) + 1;
 
   ACE_UINT32 nlen = htonl(len);
@@ -486,7 +496,8 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
                           sizeof(ACE_UINT32)) == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Unable to send address string length to "
+                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
+                      "Unable to send address string length to "
                       "the passive side to complete the active connection "
                       "establishment.\n"),
                      -1);
@@ -495,7 +506,8 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   if (this->peer().send_n(address.c_str(), len)  == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Unable to send our address to "
+                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
+                      "Unable to send our address to "
                       "the passive side to complete the active connection "
                       "establishment.\n"),
                      -1);
@@ -506,7 +518,8 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   if (this->peer().send_n(&npriority, sizeof(ACE_UINT32)) == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Unable to send publication priority to "
+                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
+                      "Unable to send publication priority to "
                       "the passive side to complete the active connection "
                       "establishment.\n"),
                      -1);
