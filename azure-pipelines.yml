@@ -258,9 +258,6 @@ jobs:
         TEST_JAVA_MESSENGER: true
         PackageDeps: libxerces-c-dev g++-8
       GCC10:
-        ConfigOpts: --compiler=g++-10 --no-inline
-        PackageDeps: g++-10
-      GCC10_Xerces:
         ConfigOpts: --compiler=g++-10 --xerces --no-inline
         TEST_FACE_MESSENGER: true
         PackageDeps: libxerces-c-dev g++-10
