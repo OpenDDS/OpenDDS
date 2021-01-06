@@ -107,7 +107,7 @@ jobs:
       perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
     displayName: Run Examples DCPS Messenger
   - script: |
-      ! git clean -nd -e ext | cut -d ' ' -f 3 | xargs -I {} echo "ERROR: The file '{}' should be gitignored" | grep ERROR
+      git clean -nd -e ext | cut -d ' ' -f 3 | xargs -I {} echo "##vso[task.logissue type=error]These files should be gitignored: '{}'"
     displayName: Check validity of .gitignore
 
 - job: VisualStudio2017
