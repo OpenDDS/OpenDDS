@@ -40,6 +40,8 @@ are mostly for shorthand.
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
 | `$SSL_ROOT`  | Install prefix for cross-compiled OpenSSL        |
+| `$MIN_API`   | The Minimum Android API Version Number           |
+| `$TARGET_API`| The Target API Version of your build             |
 
 ## Requirements
 
@@ -116,7 +118,7 @@ For example, to create a toolchain for 32-bit ARM Android 7.0 "Nougat" and
 later:
 
 ```Shell
-$NDK/build/tools/make_standalone_toolchain.py --arch arm --api 24 --install-dir $TOOLCHAIN
+$NDK/build/tools/make_standalone_toolchain.py --arch arm --api $MIN_API --install-dir $TOOLCHAIN
 ```
 
 **Windows Users:** Android NDK includes Python in `prebuilt\windows-x86_64\bin`
@@ -125,7 +127,7 @@ location of the NDK and `%TOOLCHAIN%` is the desired location of the toolchain,
 run this command instead:
 
 ```bat
-%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
+%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api $MIN_API --install-dir %TOOLCHAIN%
 ```
 
 Once a toolchain is obtained, OpenDDS can be configured to cross compile for
@@ -446,6 +448,20 @@ Android builds of OpenDDS use the LinuxNetworkConfigMonitor to reconfigure
 OpenDDS connections automatically when the device switches from one network
 (cellular or wifi) to another. Apps that need to know when a network change
 occurs can register with the [ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager) for network callback events.
+
+As of API 30+, LinuxNetworkConfigMonitor can no longer be used, as Netlink
+sockets are blocked by OS for security reasons. Instead, NetworkConfigModifier
+is utilized.  As a consequence of this, two new variables are required from the
+user, android_sdk, and android_target_api.  These correspond to the location of your
+sdk, likely /home/<username>/Android/Sdk on Linux, and the API number you are targeting.
+The NetworkConfigModifier is set up along with the necessary network callbacks
+when the user uses `TheParticipantFactory.WithArgs`.
+
+```Shell
+./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
+    --macros=android_sdk=$SDK --macros=android_target_api=$TARGET_API --java
+PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
+```
 
 ### OpenDDS Configuration Files
 

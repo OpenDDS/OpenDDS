@@ -7,6 +7,7 @@
 
 #include "OpenDDS_DCPS_TheParticipantFactory.h"
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
+#include "OpenDDS_DCPS_NetworkConfigModifier.h"
 #include "OpenDDS_DCPS_transport_TheTransportRegistry.h"
 #include "OpenDDS_DCPS_transport_TransportConfig.h"
 #include "OpenDDS_DCPS_transport_TcpInst.h"
@@ -54,6 +55,21 @@
 template <typename CppClass>
 CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
 
+#ifdef ACE_ANDROID
+namespace {
+  static jobject getGlobalContext(JNIEnv *env)
+  {
+    jclass activityThread = findClass(env, "android/app/ActivityThread");
+    jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
+    jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
+
+    jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
+    jobject context = env->CallObjectMethod(at, getApplication);
+    return context;
+  }
+}
+#endif
+
 // TheParticipantFactory
 
 jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
@@ -67,6 +83,14 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
       TheParticipantFactoryWithArgs(jargv.argc_, jargv.orb_argv());
     jobject j_dpf;
     copyToJava(jni, j_dpf, dpf, true);
+
+#ifdef ACE_ANDROID
+    jobject context = getGlobalContext(jni);
+    jclass anc = findClass(jni, "OpenDDS/DCPS/AndroidNetworkCallback");
+    jmethodID registerMethod = jni->GetStaticMethodID(anc, "register", "(Landroid/content/Context;)V");
+    jni->CallStaticVoidMethod(anc, registerMethod, context);
+#endif
+
     return j_dpf;
 
   } catch (const CORBA::SystemException &se) {
@@ -133,6 +157,57 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
   OpenDDS::DCPS::DomainParticipantImpl* impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part.in());
   jstring retStr = jni->NewStringUTF(impl->get_unique_id().c_str());
   return retStr;
+}
+
+jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
+(JNIEnv * jni, jclass)
+{
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  try {
+    OpenDDS::DCPS::NetworkConfigModifier_rch ncm(TheServiceParticipant->network_config_modifier(), OpenDDS::DCPS::inc_count());
+    if (ncm == 0) {
+      return 0;
+    } else {
+      jclass ncmClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
+      jmethodID ctor = jni->GetMethodID(ncmClazz, "<init>", "(J)V");
+      return jni->NewObject(ncmClazz, ctor, reinterpret_cast<jlong>(ncm._retn()));
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+    return 0;
+  }
+#else
+  ACE_UNUSED_ARG(jni);
+  return 0;
+#endif
+}
+
+// NetworkConfigModifier
+
+// NetworkConfigModifier::_jni_fini
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
+(JNIEnv * jni, jobject jthis)
+{
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  OpenDDS::DCPS::NetworkConfigModifier_rch ncm = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis));
+  ncm->_remove_ref();
+#else
+  ACE_UNUSED_ARG(jni);
+  ACE_UNUSED_ARG(jthis);
+#endif
+}
+
+// NetworkConfigModifier::update_interfaces
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces
+(JNIEnv * jni, jobject jthis)
+{
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  ncm->update_interfaces();
+#else
+  ACE_UNUSED_ARG(jni);
+  ACE_UNUSED_ARG(jthis);
+#endif
 }
 
 // Exception translation
