@@ -451,11 +451,11 @@ occurs can register with the [ConnectivityManager](https://developer.android.com
 
 As of API 30+, LinuxNetworkConfigMonitor can no longer be used, as Netlink 
 sockets are blocked by OS for security reasons. Instead, NetworkConfigModifier
-is utilized.  As a concequence of this, two new variables are required from the 
+is utilized.  As a consequence of this, two new variables are required from the
 user, android_sdk, and android_target_api.  These correspond to the location of your
-sdk, likely /home/<username>/Android/Sdk on Linux, and the API number you are building
-for. The NetworkConfigModifier is set up along with the necessary network callbacks
-when the user uses "TheParticipantFactory.WithArgs".
+sdk, likely /home/<username>/Android/Sdk on Linux, and the API number you are targeting.
+The NetworkConfigModifier is set up along with the necessary network callbacks
+when the user uses `TheParticipantFactory.WithArgs`.
 
 ### OpenDDS Configuration Files
 
