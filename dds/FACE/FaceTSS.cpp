@@ -80,7 +80,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
       return_code = INVALID_PARAM;
     } else {
       return_code = RC_NO_ERROR;
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDD_POOL_ALLOCATOR
       TheServiceParticipant->configure_pool();
 #endif
     }

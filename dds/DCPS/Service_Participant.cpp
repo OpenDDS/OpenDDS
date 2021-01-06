@@ -192,7 +192,7 @@ Service_Participant::Service_Participant()
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     pool_size_(1024*1024*16),
     pool_granularity_(8),
 #endif
@@ -422,7 +422,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDD_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
@@ -1854,7 +1854,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDD_POOL_ALLOCATOR
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
 #endif
@@ -2603,7 +2603,7 @@ Service_Participant::is_discovery_template(const OPENDDS_STRING& name)
   return false;
 }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDD_POOL_ALLOCATOR
 void
 Service_Participant::configure_pool()
 {
