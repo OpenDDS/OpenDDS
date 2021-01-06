@@ -153,7 +153,6 @@ those sections before configuring and building OpenDDS.
 
 ```Shell
 ./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
-    --macros=android_sdk=$SDK --macros=android_target_api=$API
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
@@ -456,6 +455,12 @@ user, android_sdk, and android_target_api.  These correspond to the location of 
 sdk, likely /home/<username>/Android/Sdk on Linux, and the API number you are targeting.
 The NetworkConfigModifier is set up along with the necessary network callbacks
 when the user uses `TheParticipantFactory.WithArgs`.
+
+```Shell
+./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
+    --macros=android_sdk=$SDK --macros=android_target_api=$API --java
+PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
+```
 
 ### OpenDDS Configuration Files
 
