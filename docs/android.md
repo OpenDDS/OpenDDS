@@ -448,7 +448,7 @@ OpenDDS connections automatically when the device switches from one network
 (cellular or wifi) to another. Apps that need to know when a network change
 occurs can register with the [ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager) for network callback events.
 
-As of API 30+, LinuxNetworkConfigMonitor can no longer be used, as Netlink 
+As of API 30+, LinuxNetworkConfigMonitor can no longer be used, as Netlink
 sockets are blocked by OS for security reasons. Instead, NetworkConfigModifier
 is utilized.  As a consequence of this, two new variables are required from the
 user, android_sdk, and android_target_api.  These correspond to the location of your
