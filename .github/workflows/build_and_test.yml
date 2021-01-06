@@ -161,7 +161,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -292,7 +292,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -447,7 +447,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -578,7 +578,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -733,7 +733,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -864,7 +864,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -1036,7 +1036,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -a -l tests\\security\\security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests\\security\\security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -1334,7 +1334,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -a -l tests\\security\\security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests\\security\\security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -1617,7 +1617,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -1749,7 +1749,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -1906,7 +1906,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2038,7 +2038,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
