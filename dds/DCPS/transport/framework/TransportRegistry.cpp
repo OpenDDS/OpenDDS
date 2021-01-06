@@ -71,6 +71,8 @@ const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_PORT = "add_domain_
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
   , released_(false)
+  , default_load_pending_(false)
+  , default_load_condition_(lock_)
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
@@ -679,6 +681,9 @@ TransportRegistry::fix_empty_default()
 {
   DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);
   GuardType guard(lock_);
+  while (default_load_pending_) {
+    default_load_condition_.wait();
+  }
   if (global_config_.is_nil()
       || !global_config_->instances_.empty()
       || global_config_->name() != DEFAULT_CONFIG_NAME) {
@@ -686,8 +691,12 @@ TransportRegistry::fix_empty_default()
   }
   TransportConfig_rch global_config = global_config_;
 #if !defined(ACE_AS_STATIC_LIBS)
+  default_load_pending_ = true;
   guard.release();
   load_transport_lib(FALLBACK_TYPE);
+  guard.acquire();
+  default_load_pending_ = false;
+  default_load_condition_.broadcast();
 #endif
   return global_config;
 }

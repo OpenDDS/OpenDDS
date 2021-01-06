@@ -164,6 +164,9 @@ private:
 
   mutable LockType lock_;
 
+  bool default_load_pending_;
+  mutable ACE_Condition<LockType> default_load_condition_;
+
   // transport template support
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_PORT;
