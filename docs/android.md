@@ -40,7 +40,8 @@ are mostly for shorthand.
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
 | `$SSL_ROOT`  | Install prefix for cross-compiled OpenSSL        |
-| `$API`       | The Android API Version Number                   |
+| `$MIN_API`   | The Minimum Android API Version Number           |
+| `$TARGET_API`| The Target API Version of your build             |
 
 ## Requirements
 
@@ -117,7 +118,7 @@ For example, to create a toolchain for 32-bit ARM Android 7.0 "Nougat" and
 later:
 
 ```Shell
-$NDK/build/tools/make_standalone_toolchain.py --arch arm --api $API --install-dir $TOOLCHAIN
+$NDK/build/tools/make_standalone_toolchain.py --arch arm --api $MIN_API --install-dir $TOOLCHAIN
 ```
 
 **Windows Users:** Android NDK includes Python in `prebuilt\windows-x86_64\bin`
@@ -126,7 +127,7 @@ location of the NDK and `%TOOLCHAIN%` is the desired location of the toolchain,
 run this command instead:
 
 ```bat
-%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api $API --install-dir %TOOLCHAIN%
+%NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api $MIN_API --install-dir %TOOLCHAIN%
 ```
 
 Once a toolchain is obtained, OpenDDS can be configured to cross compile for
@@ -458,7 +459,7 @@ when the user uses `TheParticipantFactory.WithArgs`.
 
 ```Shell
 ./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
-    --macros=android_sdk=$SDK --macros=android_target_api=$API --java
+    --macros=android_sdk=$SDK --macros=android_target_api=$TARGET_API --java
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
