@@ -109,30 +109,11 @@ public:
   virtual int svc() {
     DBG_ENTRY("QueueTaskBase","svc");
 
-    this->thr_id_ = ACE_OS::thr_self();
-#ifdef ACE_HAS_MAC_OSX
-    unsigned long tid = 0;
-    uint64_t osx_tid;
-    if (!pthread_threadid_np(0, &osx_tid)) {
-      tid = static_cast<unsigned long>(osx_tid);
-    } else {
-      tid = 0;
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n")));
-    }
-#elif !defined (OPENDDS_SAFETY_PROFILE)
-    ACE_thread_t tid = thr_id_;
-#endif /* ACE_HAS_MAC_OSX */
-    TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
-    ThreadStatus* status = TheServiceParticipant->get_thread_statuses();
+    thr_id_ = ACE_OS::thr_self();
 
-#ifndef OPENDDS_SAFETY_PROFILE
-    OPENDDS_STRING key = to_dds_string(tid);
-#else
-    OPENDDS_STRING key = "QueueTaskBase";
-#endif
-    if (name_ != "") {
-      key += " (" + name_ + ")";
-    }
+    const TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
+    ThreadStatus* const status = TheServiceParticipant->get_thread_statuses();
+    const String thread_key = ThreadStatus::get_key("QueueTaskBase", name_);
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
@@ -153,10 +134,9 @@ public:
                 if (status) {
                   if (DCPS_debug_level > 4) {
                     ACE_DEBUG((LM_DEBUG,
-                              "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                               "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                   }
-                  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
-                  status->map[key] = now;
+                  status->update(thread_key, now);
                 }
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
@@ -251,7 +231,7 @@ private:
   ACE_thread_t thr_id_;
 
   /// name for thread monitoring BIT
-  OPENDDS_STRING name_;
+  String name_;
 };
 
 } // namespace DCPS

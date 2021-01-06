@@ -95,28 +95,10 @@ namespace OpenDDS {
                   DataWriterCallbacks_rch dwr)
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
-        , interval_(TimeDuration(0))
-        , status_(0)
+        , interval_(TheServiceParticipant->get_thread_status_interval())
+        , status_(TheServiceParticipant->get_thread_statuses())
+        , thread_key_(ThreadStatus::get_key("DcpsUpcalls"))
       {
-        interval_ = TheServiceParticipant->get_thread_status_interval();
-        status_ = TheServiceParticipant->get_thread_statuses();
-#ifdef ACE_HAS_MAC_OSX
-        uint64_t osx_tid;
-        if (!pthread_threadid_np(0, &osx_tid)) {
-          tid_ = static_cast<unsigned long>(osx_tid);
-        } else {
-          tid_ = 0;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DcpsUpcalls::svc. Error getting OSX thread id\n")));
-        }
-#else
-        tid_ = ACE_OS::thr_self();
-#endif /* ACE_HAS_MAC_OSX */
-
-#ifndef OPENDDS_SAFETY_PROFILE
-        key_ = to_dds_string(tid_) + " (DcpsUpcalls)";
-#else
-        key_ = "(DcpsUpcalls)";
-#endif
       }
 
       int svc()
@@ -142,19 +124,25 @@ namespace OpenDDS {
               case CvStatus_NoTimeout:
                 break;
 
-              case CvStatus_Timeout: {
-            const MonotonicTimePoint now = MonotonicTimePoint::now();
-                expire = now + interval_;
-              if (status_) {
-                if (DCPS_debug_level > 4) {
-                  ACE_DEBUG((LM_DEBUG,
-                            "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+              case CvStatus_Timeout:
+                {
+                  const MonotonicTimePoint now = MonotonicTimePoint::now();
+                  expire = now + interval_;
+                  if (status_) {
+                    if (DCPS_debug_level > 4) {
+                      ACE_DEBUG((LM_DEBUG,
+                                 "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+                    }
+                    if (!status_->update(thread_key_, now)) {
+                      if (DCPS_debug_level) {
+                        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::svc: "
+                          "update failed\n"));
+                      }
+                      return -1;
+                    }
                   }
-                  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status_->lock, -1);
-                  status_->map[key_] = now;
                 }
                 break;
-              }
 
               case CvStatus_Error:
                 if (DCPS_debug_level) {
@@ -192,8 +180,10 @@ namespace OpenDDS {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
-          ACE_WRITE_GUARD(ACE_Thread_Mutex, g, status_->lock);
-          status_->map[key_] = now;
+          if (!status_->update(thread_key_, now) && DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::writer_done: "
+              "update failed\n"));
+          }
         }
       }
 
@@ -207,14 +197,9 @@ namespace OpenDDS {
       ConditionVariable<ACE_Thread_Mutex> cnd_;
 
       // thread reporting
-      TimeDuration interval_;
-      ThreadStatus* status_;
-#ifdef ACE_HAS_MAC_OSX
-      unsigned long tid_;
-#else
-      ACE_thread_t tid_;
-#endif
-      OPENDDS_STRING key_;
+      const TimeDuration interval_;
+      ThreadStatus* const status_;
+      const String thread_key_;
     };
 
     template <typename DiscoveredParticipantData_>

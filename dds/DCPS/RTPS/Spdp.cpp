@@ -8,6 +8,7 @@
 #include "Spdp.h"
 
 #include "BaseMessageTypes.h"
+#include "BaseMessageUtils.h"
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
@@ -3826,19 +3827,18 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
     if (thread_status_ && bit) {
       ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_->lock);
-
-      for (OPENDDS_MAP(OPENDDS_STRING, MonotonicTimePoint)::const_iterator i = thread_status_->map.begin(); i != thread_status_->map.end(); ++i) {
-        const MonotonicTimePoint t = i->second;
+      for (DCPS::ThreadStatus::Map::const_iterator i = thread_status_->map.begin();
+          i != thread_status_->map.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
-        ACE_OS::memcpy(&(data.guid), &(guid), 16);
+        assign(data.guid, guid);
         data.thread_id = i->first.c_str();
-        data.timestamp.sec = static_cast<CORBA::Long>(t.value().sec());
-        data.timestamp.nanosec = t.value().usec() * 1000;
+        data.timestamp = i->second.timestamp.to_dds_time();
+        data.since_last_update = i->second.since_last_update.to_dds_duration();
 
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
     } else {
-      // Not necessarily and error. App could be shutting down.
+      // Not necessarily an error. App could be shutting down.
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
     }

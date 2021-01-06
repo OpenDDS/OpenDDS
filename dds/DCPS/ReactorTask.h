@@ -31,10 +31,24 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// thread status reporting forward
-struct ThreadStatus {
+struct OpenDDS_Dcps_Export ThreadStatus {
+  struct Thread {
+    MonotonicTimePoint timestamp;
+    TimeDuration since_last_update;
+  };
+  typedef OPENDDS_MAP(String, Thread) Map;
+
   ACE_Thread_Mutex lock;
-  OPENDDS_MAP(OPENDDS_STRING, MonotonicTimePoint) map;
+  Map map;
+
+  /// Get key for map and update. fallback_tid is mostly for safety profile.
+  /// name is for a more human-friendly name that will be appended to the key.
+  static String get_key(const char* fallback_tid = "", const String& name = "");
+
+  /// Update the status of a thread to indicate it was able to check in at the
+  /// given time. Returns false if failed.
+  bool update(const String& key,
+    const MonotonicTimePoint& timestamp = MonotonicTimePoint::now());
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
@@ -46,7 +60,7 @@ public:
   virtual ~ReactorTask();
 
 public:
-  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, OPENDDS_STRING name = "");
+  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, String name = "");
   virtual int open(void* ptr) {
     return open_reactor_task(ptr);
   }
@@ -110,7 +124,7 @@ private:
   // thread status reporting
   ThreadStatus* thread_status_;
   TimeDuration timeout_;
-  OPENDDS_STRING name_;
+  String name_;
 
   ReactorInterceptor_rch interceptor_;
 };

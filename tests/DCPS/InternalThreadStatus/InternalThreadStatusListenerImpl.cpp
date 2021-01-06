@@ -6,8 +6,13 @@
  */
 
 #include "InternalThreadStatusListenerImpl.h"
+
+#include <dds/DCPS/ReactorTask.h>
+
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
+
 #include <ace/streams.h>
+
 #include <string>
 
 // Implementation skeleton constructor
@@ -45,9 +50,18 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
 
     std::cout << "== " << id_ << " Thread Info ==" << std::endl;
     std::cout
-    << "  guid: " << guid << std::endl
-    << "   tid: " << thread_info.thread_id << std::endl
-    << "  time: " << thread_info.timestamp.sec << std::endl;
+      << " guid: " << guid << std::endl
+      << "  tid: " << thread_info.thread_id << std::endl
+      << " time: " << thread_info.timestamp.sec << std::endl
+      << " prev: " << thread_info.since_last_update.sec << std::endl;
+
+    const CORBA::Long limit = 5;
+    const CORBA::Long exceeded = thread_info.since_last_update.sec > limit ?
+      thread_info.since_last_update.sec - limit : 0;
+    if (exceeded) {
+      std::cerr << "ERROR: Thread " << thread_info.thread_id << " was " <<
+        exceeded << "seconds late" << std::endl;
+    }
 
     ++count_;
   }
