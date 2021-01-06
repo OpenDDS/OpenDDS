@@ -22,4 +22,6 @@ public final class TheServiceParticipant {
     public static native void set_repo_ior(String ior, String repo);
 
     public static native String get_unique_id(DomainParticipant participant);
+
+    public static native NetworkConfigModifier network_config_modifier();
 }
