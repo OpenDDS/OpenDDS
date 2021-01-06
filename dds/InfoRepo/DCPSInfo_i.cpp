@@ -2155,6 +2155,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 {
   int status = 0;
 
+#ifndef DDS_HAS_MINIMUM_BIT
   try {
 
 #ifndef ACE_AS_STATIC_LIBS
@@ -2197,6 +2198,8 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     // beyond this point.
     status = 1;
   }
+#endif
+
   return status;
 }
 
