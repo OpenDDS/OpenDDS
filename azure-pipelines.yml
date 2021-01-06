@@ -108,7 +108,7 @@ jobs:
     displayName: Run Examples DCPS Messenger
   - script: |
       echo "##vso[task.setvariable variable=files]$(git clean -nd -e ext)"
-      if $(files) != ""
+      if [ "$(files)" != "" ]; then
         echo "##vso[task.logissue type=error]These files should be gitignored:"
         echo $(files);
         exit 1;
