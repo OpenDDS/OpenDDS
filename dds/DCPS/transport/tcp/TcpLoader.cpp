@@ -60,7 +60,7 @@ TcpLoader::init(int, ACE_TCHAR*[])
   registry->register_type(make_rch<TcpType>());
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
-                          std::string("0500_TCP"), TCP_NAME);
+                          std::string("0500_TCP"), TCP_NAME, false);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
 

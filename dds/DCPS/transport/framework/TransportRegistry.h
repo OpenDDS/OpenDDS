@@ -58,7 +58,8 @@ public:
   void release();
 
   TransportInst_rch create_inst(const OPENDDS_STRING& name,
-                                const OPENDDS_STRING& transport_type);
+                                const OPENDDS_STRING& transport_type,
+                                bool wait_for_pending_load = true);
   TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
 
   /// Removing a TransportInst from the registry shuts down the underlying
@@ -164,8 +165,8 @@ private:
 
   mutable LockType lock_;
 
-  bool default_load_pending_;
-  mutable ACE_Condition<LockType> default_load_condition_;
+  bool load_pending_;
+  mutable ACE_Condition<LockType> load_condition_;
 
   // transport template support
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
@@ -179,6 +180,8 @@ private:
     ValueMap customizations;
     ValueMap transport_info;
   };
+
+  void load_transport_lib_i(const OPENDDS_STRING& transport_type);
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
