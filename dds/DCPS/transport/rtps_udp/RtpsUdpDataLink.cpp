@@ -1060,7 +1060,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   const SequenceNumber seq = element->sequence();
   if (seq != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     max_sn_ = std::max(max_sn_, seq);
-    if (!durable_ &&
+    if (!durable_ && !is_pvs_writer() &&
         element->subscription_id() == GUID_UNKNOWN &&
         previous_max_sn != max_sn_.previous()) {
       add_gap_submsg_i(subm, previous_max_sn + 1);
@@ -3110,7 +3110,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
           }
         }
 
-        if (durable_) {
+        if (durable_ || is_pvs_writer()) {
           // Must send directed gap.
           gaps.insert(seq);
         } else {
@@ -3151,7 +3151,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
         }
       }
 
-      if (durable_) {
+      if (durable_ || is_pvs_writer()) {
         // Must send directed gap.
         gaps.insert(seq);
       } else {
