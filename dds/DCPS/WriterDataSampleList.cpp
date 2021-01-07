@@ -33,8 +33,8 @@ WriterDataSampleList::dequeue(const DataSampleElement* stale)
   // Search from head_->next_writer_sample_.
   bool found = false;
 
-  for (DataSampleElement* item = head_->next_writer_sample_ ;
-       item != 0 ;
+  for (DataSampleElement* item = head_->next_writer_sample_;
+       item != 0;
        item = item->next_writer_sample_) {
     if (item == stale) {
       found = true;
@@ -49,18 +49,7 @@ WriterDataSampleList::dequeue(const DataSampleElement* stale)
     //
     // Remove from the previous element.
     //
-    if (stale->previous_writer_sample_ != 0) {
-      // Remove from inside of the list.
-      stale->previous_writer_sample_->next_writer_sample_ = stale->next_writer_sample_ ;
-
-    } else {
-      // Remove from the head of the list.
-      head_ = stale->next_writer_sample_ ;
-
-      if (head_ != 0) {
-        head_->previous_writer_sample_ = 0;
-      }
-    }
+    stale->previous_writer_sample_->next_writer_sample_ = stale->next_writer_sample_ ;
 
     //
     // Remove from the next element.
