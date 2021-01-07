@@ -41,7 +41,7 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   registry->register_type(make_rch<UdpType>());
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
-                          std::string("0300_UDP"), UDP_NAME);
+                          std::string("0300_UDP"), UDP_NAME, false);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
 
