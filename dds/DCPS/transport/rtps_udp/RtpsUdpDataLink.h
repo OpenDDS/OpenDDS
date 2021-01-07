@@ -405,6 +405,12 @@ private:
                              const MonotonicTimePoint& now,
                              OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks);
 
+#ifdef OPENDDS_SECURITY
+    bool is_pvs_writer() const { return is_pvs_writer_; }
+#else
+    bool is_pvs_writer() const { return false; }
+#endif
+
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
