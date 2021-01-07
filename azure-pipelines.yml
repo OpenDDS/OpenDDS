@@ -106,9 +106,6 @@ jobs:
       cd DevGuideExamples\DCPS\Messenger
       perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
     displayName: Run Examples DCPS Messenger
-  - script: |
-      ! git clean -nd -e ext | cut -d ' ' -f 3 | xargs -I {} echo "##vso[task.logissue type=error]This file should be gitignored: '{}'" | exit 1
-    displayName: Check validity of .gitignore
 
 - job: VisualStudio2017
   timeoutInMinutes: 120
@@ -210,11 +207,13 @@ jobs:
     TEST_MESSENGER: true
     TEST_FACE_MESSENGER: false
     TEST_JAVA_MESSENGER: false
+    TEST_GITIGNORE: false
   strategy:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
         TEST_JAVA_MESSENGER: true
+        TEST_GITIGNORE: true
       Release:
         ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
         TEST_JAVA_MESSENGER: true
@@ -230,6 +229,7 @@ jobs:
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
+        TEST_GITIGNORE: true
       SecurityWithoutFeatures:
         ConfigOpts: >
           --security --no-inline --no-debug
@@ -390,6 +390,10 @@ jobs:
       perl run_test.pl rtps
     condition: eq(variables['TEST_JAVA_MESSENGER'], 'true')
     displayName: Run rtps JAVA Messenger tests
+  - script: |
+      ! git clean -nd -e ext | cut -d ' ' -f 3 | xargs -I {} echo "##vso[task.logissue type=error]This file should be gitignored: '{}'" | exit 1
+    condition: eq(variables['TEST_GITIGNORE'], 'true')
+    displayName: Check validity of .gitignore
 
 - job: macOS
   timeoutInMinutes: 120
