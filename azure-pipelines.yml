@@ -126,10 +126,10 @@ jobs:
     vmImage: vs2017-win2016
   strategy:
     matrix:
-      Release64:
+      Release64WChar:
         BuildPlatform: x64
         BuildConfiguration: Release
-      Debug64WChar:
+      Debug64:
         BuildPlatform: x64
         BuildConfiguration: Debug
   variables:
@@ -161,8 +161,7 @@ jobs:
       arguments: 'C:\Strawberry\perl\bin'
       modifyEnvironment: true
   - script: |
-      if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
-      if %BuildConfiguration%==Debug set OPT=--features=uses_wchar=1
+      if %BuildConfiguration%==Release set OPT=--no-debug --optimize --features=uses_wchar=1
       set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
       if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC=
       call configure -v --ace-github-latest --tests %SEC% %OPT%
