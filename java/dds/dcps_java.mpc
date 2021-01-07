@@ -84,9 +84,10 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
   }
 
   verbatim(gnuace, top, 1) {
-    android_target_api_dummy = $(if $(android_target_api), $(android_target_api), 0)
-    opendds_android_network_callback = $(if $(shell [ $(android_target_api_dummy) -ge 24 ] && echo "ok"),AndroidNetworkCallback.java,FakeAndroidNetworkCallback.java)
-    android_jar_file = $(if $(ANDROID_ABI),-classpath $(android_sdk)/platforms/android-$(android_target_api)/android.jar)
+    android_target_api ?= 0
+    need_network_callback = $(shell [ $(android_target_api) -ge 24 ] && echo "ok")
+    opendds_android_network_callback = $(if $(need_network_callback),AndroidNetworkCallback.java,FakeAndroidNetworkCallback.java)
+    android_jar_file = $(if $(need_network_callback),-classpath $(android_sdk)/platforms/android-$(android_target_api)/android.jar)
   }
 
   Java_Files {

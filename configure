@@ -108,7 +108,7 @@ my %platforminfo =
                       "Use --macros=ANDROID_ABI=<ARCH> to specify the",
                       "target architecture.",
                       "Defaults to armeabi-v7a which is 32-bit ARMv7.",
-                      "Use --macros=android_sdk=<SDK_PATH>  and",
+                      "Use --macros=android_sdk=<SDK_PATH> and",
                       "--macros=android_target_api=<API_NUMBER> to specify",
                       "where to find android.jar.",
                       "See docs/android.md for details.",
