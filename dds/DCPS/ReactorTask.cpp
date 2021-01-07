@@ -17,6 +17,7 @@
 #include <ace/Proactor.h>
 #include <ace/Proactor_Impl.h>
 #include <ace/WIN32_Proactor.h>
+#include <ace/OS_NS_Thread.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -276,6 +277,8 @@ String ThreadStatus::get_key(const char* fallback_tid, const String& name)
   } else if (DCPS_debug_level) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
   }
+#  elif defined ACE_HAS_GETTID
+  pid_t tid = ACE_OS::thr_gettid();
 #  else
   ACE_thread_t tid = ACE_OS::thr_self();
 #  endif
