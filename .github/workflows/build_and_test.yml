@@ -1155,7 +1155,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS"/>
+        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -1453,7 +1453,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS"/>
+        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
