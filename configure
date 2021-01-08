@@ -1048,11 +1048,6 @@ sub write_platform_macros {
         print $PMG 'TAO_IDL_DEP = $(TAO_IDL)$(HOST_EXE_EXT)', "\n";
         if ($has_host_compiler) {
           print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
-          if($opts{'target'} eq 'android') {
-            print $PMG 'ifeq (,$(findstring -I$(ACE_ROOT),$(INCLDIRS)))', "\n";
-            print $PMG '  INCLDIRS        += -isystem$(ACE_ROOT)', "\n";
-            print $PMG 'endif', "\n";
-          }
         }
         print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf', "\n";
         print $PMG 'build_tao_idl_be = 0', "\n";
@@ -1075,6 +1070,11 @@ sub write_platform_macros {
             $opts{'nonstdcompiler'} = $tcomp;
             print $PMG 'LDFLAGS += -Wl,-rpath-link,$(ACE_ROOT)/lib', "\n";
           }
+        }
+        if($opts{'target'} eq 'android') {
+          print $PMG 'ifeq (,$(findstring -I$(ACE_ROOT),$(INCLDIRS)))', "\n";
+          print $PMG '  INCLDIRS        += -isystem$(ACE_ROOT)', "\n";
+          print $PMG 'endif', "\n";
         }
       }
     }
