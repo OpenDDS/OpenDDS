@@ -166,7 +166,7 @@ jobs:
       if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC=
       call configure -v --ace-github-latest --tests %SEC% %OPT%
       perl tools\scripts\show_build_config.pl
-      if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
+      set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
     displayName: Run configure script
