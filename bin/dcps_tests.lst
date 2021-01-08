@@ -119,8 +119,8 @@ tests/DCPS/Presentation/run_test.pl: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS
 tests/DCPS/ReaderDataLifecycle/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/ReaderDataLifecycle/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
+tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Restart/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE
@@ -129,7 +129,7 @@ tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl -reliable: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
-tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
@@ -225,7 +225,7 @@ examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
-tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
+tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/KeyTest/run_test.pl keymarshalling: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl isbounded: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl md5: !DCPS_MIN
@@ -319,7 +319,7 @@ tests/DCPS/ManualAssertLiveliness/run_test.pl rtps lost: !DCPS_MIN RTPS !OPENDDS
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco lost: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS !GH_ACTIONS
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
@@ -339,7 +339,7 @@ tests/DCPS/LargeSample/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OW
 tests/DCPS/LargeSample/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LargeSample/run_test.pl multicast_async: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/LargeSample/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/LargeSample/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/LargeSample/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !TARGET
 tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -422,9 +422,9 @@ tests/FACE/Compiler/idl_test_fixed/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TO
 # Test for unregister_type method added as a type support extension (assuming no requirement when performing minimal test)
 tests/DCPS/UnregisterType/run_test.pl: !DCPS_MIN
 
-performance-tests/bench_2/run_test.pl disco: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench_2/run_test.pl fan: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench_2/run_test.pl disco: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
+performance-tests/bench_2/run_test.pl fan: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
 performance-tests/bench_2/run_test.pl fan_frag: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
 performance-tests/bench_2/run_test.pl echo: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 performance-tests/bench_2/run_test.pl echo_frag: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench_2/run_test.pl mixed: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench_2/run_test.pl mixed: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
