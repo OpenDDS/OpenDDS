@@ -2176,10 +2176,12 @@ namespace OpenDDS {
         struct LocationUpdate {
           ParticipantLocation mask_;
           ACE_INET_Addr from_;
+          SystemTimePoint timestamp_;
           LocationUpdate() {}
           LocationUpdate(ParticipantLocation mask,
-                         const ACE_INET_Addr& from)
-            : mask_(mask), from_(from) {}
+                         const ACE_INET_Addr& from,
+                         const SystemTimePoint& timestamp)
+            : mask_(mask), from_(from), timestamp_(timestamp) {}
         };
         typedef OPENDDS_VECTOR(LocationUpdate) LocationUpdateList;
         LocationUpdateList location_updates_;
