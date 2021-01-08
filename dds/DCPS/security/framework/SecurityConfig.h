@@ -81,10 +81,16 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return utility_plugin_;
   }
 
-  void insert_handle_registry(const DCPS::RepoId& particpant_id,
+  void insert_handle_registry(const DCPS::RepoId& participant_id,
                               const HandleRegistry_rch& handle_registry)
   {
-    handle_registry_map_[particpant_id] = handle_registry;
+    handle_registry_map_[participant_id] = handle_registry;
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("SecurityConfig::insert_handle_registry handle_registry_map_ (total %B)\n"),
+                 handle_registry_map_.size()));
+    }
   }
 
   HandleRegistry_rch get_handle_registry(const DCPS::RepoId& participant_id)
@@ -97,9 +103,15 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return HandleRegistry_rch();
   }
 
-  void erase_handle_registry(const DCPS::RepoId& particpant_id)
+  void erase_handle_registry(const DCPS::RepoId& participant_id)
   {
-    handle_registry_map_.erase(particpant_id);
+    handle_registry_map_.erase(participant_id);
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("SecurityConfig::erase_handle_registry handle_registry_map_ (total %B)\n"),
+                 handle_registry_map_.size()));
+    }
   }
 
 #endif
