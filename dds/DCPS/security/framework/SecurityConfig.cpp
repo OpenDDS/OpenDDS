@@ -41,11 +41,13 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
 
 SecurityConfig::~SecurityConfig()
 {
+#ifdef OPENDDS_SECURITY
   if (DCPS::security_debug.bookkeeping) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
                ACE_TEXT("SecurityConfig::~SecurityConfig handle_registry_map_ %B\n"),
                handle_registry_map_.size()));
   }
+#endif
 }
 
 void SecurityConfig::get_properties(DDS::PropertyQosPolicy& out_properties) const
