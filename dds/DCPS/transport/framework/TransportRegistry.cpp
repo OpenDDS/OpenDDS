@@ -498,7 +498,7 @@ TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type)
       ACE_Service_Config::process_directive(directive.c_str());
     }
     load_pending_ = false;
-    load_condition_.broadcast();
+    load_condition_.notify_all();
   }
 #endif
 }
