@@ -126,12 +126,9 @@ jobs:
     vmImage: vs2017-win2016
   strategy:
     matrix:
-      Release64WChar:
+      Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
-      Debug64:
-        BuildPlatform: x64
-        BuildConfiguration: Debug
   variables:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
@@ -161,12 +158,13 @@ jobs:
       arguments: 'C:\Strawberry\perl\bin'
       modifyEnvironment: true
   - script: |
-      if %BuildConfiguration%==Release set OPT=--no-debug --optimize --features=uses_wchar=1
+      if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
+      if %BuildConfiguration%==Debug set OPT=--features=uses_wchar=1
       set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
       if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC=
       call configure -v --ace-github-latest --tests %SEC% %OPT%
       perl tools\scripts\show_build_config.pl
-      set SLN=DDS_TAOv2_all.sln
+      if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
     displayName: Run configure script
