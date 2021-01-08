@@ -459,12 +459,17 @@ Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
                                 const ACE_INET_Addr& from)
 {
   // We have the global lock.
-  iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from));
+  iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from, DCPS::SystemTimePoint::now()));
 }
 
 void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish)
 {
   // We have the global lock.
+
+  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
+    // Do not process updates until the participant exists in the built-in topics.
+    return;
+  }
 
   DiscoveredParticipant::LocationUpdateList location_updates;
   std::swap(iter->second.location_updates_, location_updates);
@@ -489,65 +494,65 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force
 
     location_data.change_mask = pos->mask_;
 
-    const DCPS::SystemTimePoint now = DCPS::SystemTimePoint::now();
-
     bool address_change = false;
     switch (pos->mask_) {
     case DCPS::LOCATION_LOCAL:
       address_change = addr.compare(location_data.local_addr.in()) != 0;
       location_data.local_addr = addr.c_str();
-      location_data.local_timestamp = now.to_dds_time();
+      location_data.local_timestamp = pos->timestamp_.to_dds_time();
       break;
     case DCPS::LOCATION_ICE:
       address_change = addr.compare(location_data.ice_addr.in()) != 0;
       location_data.ice_addr = addr.c_str();
-      location_data.ice_timestamp = now.to_dds_time();
+      location_data.ice_timestamp = pos->timestamp_.to_dds_time();
       break;
     case DCPS::LOCATION_RELAY:
       address_change = addr.compare(location_data.relay_addr.in()) != 0;
       location_data.relay_addr = addr.c_str();
-      location_data.relay_timestamp = now.to_dds_time();
+      location_data.relay_timestamp = pos->timestamp_.to_dds_time();
       break;
     case DCPS::LOCATION_LOCAL6:
       address_change = addr.compare(location_data.local6_addr.in()) != 0;
       location_data.local6_addr = addr.c_str();
-      location_data.local6_timestamp = now.to_dds_time();
+      location_data.local6_timestamp = pos->timestamp_.to_dds_time();
       break;
     case DCPS::LOCATION_ICE6:
       address_change = addr.compare(location_data.ice6_addr.in()) != 0;
       location_data.ice6_addr = addr.c_str();
-      location_data.ice6_timestamp = now.to_dds_time();
+      location_data.ice6_timestamp = pos->timestamp_.to_dds_time();
       break;
     case DCPS::LOCATION_RELAY6:
       address_change = addr.compare(location_data.relay6_addr.in()) != 0;
       location_data.relay6_addr = addr.c_str();
-      location_data.relay6_timestamp = now.to_dds_time();
+      location_data.relay6_timestamp = pos->timestamp_.to_dds_time();
       break;
     }
 
-    const DDS::Time_t expr = (now - rtps_duration_to_time_duration(
-                                                                   iter->second.pdata_.leaseDuration,
-                                                                   iter->second.pdata_.participantProxy.protocolVersion,
-                                                                   iter->second.pdata_.participantProxy.vendorId)).to_dds_time();
+    const DDS::Time_t expr =
+      (
+       pos->timestamp_ - rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
+                                                        iter->second.pdata_.participantProxy.protocolVersion,
+                                                        iter->second.pdata_.participantProxy.vendorId)
+       ).to_dds_time();
     if ((location_data.location & DCPS::LOCATION_LOCAL) && DCPS::operator<(location_data.local_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL);
       location_data.change_mask |= DCPS::LOCATION_LOCAL;
-      location_data.local_timestamp = now.to_dds_time();
+      location_data.local_timestamp = pos->timestamp_.to_dds_time();
     }
     if ((location_data.location & DCPS::LOCATION_RELAY) && DCPS::operator<(location_data.relay_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_RELAY);
       location_data.change_mask |= DCPS::LOCATION_RELAY;
-      location_data.relay_timestamp = now.to_dds_time();
+      location_data.relay_timestamp = pos->timestamp_.to_dds_time();
     }
     if ((location_data.location & DCPS::LOCATION_LOCAL6) && DCPS::operator<(location_data.local6_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL6);
       location_data.change_mask |= DCPS::LOCATION_LOCAL6;
-      location_data.local6_timestamp = now.to_dds_time();
+      location_data.local6_timestamp = pos->timestamp_.to_dds_time();
     }
     if ((location_data.location & DCPS::LOCATION_RELAY6) && DCPS::operator<(location_data.relay6_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_RELAY6);
       location_data.change_mask |= DCPS::LOCATION_RELAY6;
-      location_data.relay6_timestamp = now.to_dds_time();
+      location_data.relay6_timestamp = pos->timestamp_.to_dds_time();
     }
 
     if (old_mask != location_data.location || address_change) {
@@ -564,10 +569,6 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force
 void
 Spdp::publish_location_update_i(DiscoveredParticipantIter iter)
 {
-  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
-    return;
-  }
-
   DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
   if (locbit) {
     const RepoId guid = iter->first;
@@ -824,6 +825,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       remove_discovered_participant(iter);
     }
   }
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  process_location_updates_i(iter);
+#endif
 }
 
 bool
