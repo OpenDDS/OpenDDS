@@ -14,13 +14,13 @@
 #include "TestException.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/transport/framework/EntryExit.h>
 
-#include "ace/Arg_Shifter.h"
+#include <ace/Arg_Shifter.h>
 
 #include <iostream>
 
@@ -171,44 +171,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     Allocator* allocator;
     ACE_NEW_RETURN(allocator, Allocator(mmap_file), -1);
-    //    std::cout << "Created the Allocator!" << std::endl;
     void* mem = allocator->malloc(sizeof(SharedData));
     if (mem == 0) {
-      std::cout << "Unable to malloc " << sizeof(SharedData) << " bytes" << std::endl;
-      return -1;
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) Failed to malloc\n")), -1);
     }
-    //    std::cout << "Malloc a memory for a SharedData object at address" << mem << "!" << std::endl;
+
     SharedData* state = new(mem) SharedData();
-    //    std::cout << "Initialize a new SharedData object!" << std::endl;
     allocator->sync();
-    //    std::cout << "Synchronize the shared mem into the backing file!" << std::endl;
-    allocator->bind("state", state);
-    //    std::cout << "Bind the SharedData object and its name to the shared mem!" << std::endl;
-    //    std::cout << "Based address on publisher:" << allocator->base_addr() << std::endl;
+    allocator->bind(obj_name, state);
 
     // Indicate that the publisher is ready
     state->pub_ready = true;
-    //    std::cout << "Publisher is ready!" << std::endl;
 
     const ACE_Time_Value small_time(0, 250000);
     // Wait for the subscriber to be ready.
     do {
       ACE_OS::sleep(small_time);
-    } while (state->sub_ready == false);
+    } while (!state->sub_ready);
 
     // ensure the associations are fully established before writing.
     ACE_OS::sleep(3);
 
-    //    std::cout << "Start writing data..." << std::endl;
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; i++) {
         writers[i]->start();
       }
     }
 
-    int timeout_writes = 0;
     bool writers_finished = false;
-
     while (!writers_finished) {
       writers_finished = true;
       for (int i = 0; i < num_datawriters; i++) {
@@ -219,7 +209,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; i++) {
-        timeout_writes += writers[i]->get_timeout_writes();
+        state->timeout_writes += writers[i]->get_timeout_writes();
       }
     }
     state->timeout_writes_ready = true;
@@ -230,7 +220,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Wait for the subscriber to finish.
     do {
       ACE_OS::sleep(small_time);
-    } while (state->sub_finished == false);
+    } while (!state->sub_finished);
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; i++) {
@@ -238,6 +228,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         delete writers[i];
       }
     }
+
+    delete allocator;
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
     status = 1;

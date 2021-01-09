@@ -22,16 +22,19 @@ struct SharedData {
                , pub_finished(false)
                , sub_ready(false)
                , sub_finished(false)
+               , timeout_writes(0)
                , timeout_writes_ready(false) {}
 
   bool pub_ready;
   bool pub_finished;
   bool sub_ready;
   bool sub_finished;
+  int timeout_writes;
   bool timeout_writes_ready;
 };
 
 extern const char* mmap_file;
+extern const char* obj_name;
 
 typedef ACE_Malloc_T<ACE_MMAP_MEMORY_POOL, ACE_Null_Mutex, ACE_PI_Control_Block> Allocator;
 

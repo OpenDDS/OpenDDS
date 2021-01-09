@@ -3,17 +3,19 @@
 #include "Writer.h"
 #include "common.h"
 #include "TestException.h"
+
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
-#include "ace/Atomic_Op_T.h"
-#include "ace/OS_NS_unistd.h"
+
+#include <ace/Atomic_Op_T.h>
+#include <ace/OS_NS_unistd.h>
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
 template<class DT, class DW, class DW_var>
-::DDS::ReturnCode_t write(int writer_id,
-        ACE_Atomic_Op<ACE_SYNCH_MUTEX, int>& timeout_writes,
-        ::DDS::DataWriter_ptr writer)
+DDS::ReturnCode_t write(int writer_id,
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int>& timeout_writes,
+  DDS::DataWriter_ptr writer)
 {
   try {
     DT foo;
@@ -25,8 +27,7 @@ template<class DT, class DW, class DW_var>
     DW_var foo_dw = DW::_narrow(writer);
     TEST_CHECK(!CORBA::is_nil(foo_dw.in()));
 
-    ACE_DEBUG((LM_DEBUG,
-         ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
     ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
 
@@ -41,8 +42,8 @@ template<class DT, class DW, class DW_var>
       ::DDS::ReturnCode_t ret = foo_dw->write(foo, handle);
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
-       ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-       ACE_TEXT ("%dth write() returned %d.\n"), i, ret));
+                   ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
+                   ACE_TEXT ("%dth write() returned %d.\n"), i, ret));
         if (ret == ::DDS::RETCODE_TIMEOUT) {
           timeout_writes++;
         }
@@ -54,7 +55,6 @@ template<class DT, class DW, class DW_var>
 
   return ::DDS::RETCODE_OK;
 }
-
 
 Writer::Writer(::DDS::DataWriter_ptr writer, int writer_id)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
@@ -71,9 +71,8 @@ void Writer::start()
   // Each thread writes one instance which uses the thread id as the
   // key value.
   if (activate(THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) {
-    ACE_ERROR((LM_ERROR,
-         ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
-         ACE_TEXT("activate")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
+               ACE_TEXT("activate")));
     throw TestException();
   }
 }

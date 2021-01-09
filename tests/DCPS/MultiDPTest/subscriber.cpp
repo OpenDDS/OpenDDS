@@ -17,18 +17,22 @@
 #include "common.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/TopicDescriptionImpl.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/TopicDescriptionImpl.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/transport/framework/EntryExit.h>
 // Add the TransportImpl.h before TransportImpl_rch.h is included to
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
-#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportConfig.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
-#include "ace/Arg_Shifter.h"
+#include <ace/Arg_Shifter.h>
 
 #include <cstdio>
 #include <iostream>
@@ -53,7 +57,6 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -v verbose transport debug
-
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0) {
@@ -82,6 +85,32 @@ void init_dcps_objects(int i)
   if (CORBA::is_nil(participant[i].in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_participant failed.\n")));
     throw TestException();
+  }
+
+  OpenDDS::DCPS::Discovery_rch disc = TheServiceParticipant->get_discovery(111);
+  OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
+  if (!rd.is_nil()) {
+    char config_name[64], inst_name[64];
+    ACE_TCHAR nak_depth[8];
+    ACE_OS::snprintf(config_name, 64, "cfg_%d", i);
+    ACE_OS::snprintf(inst_name, 64, "rtps_%d", i);
+    // The 2 is a safety factor to allow for control messages.
+    ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"),
+                     2 * num_instances_per_writer * num_samples_per_instance);
+
+    OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
+    OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+    ACE_Configuration_Heap ach;
+    ACE_Configuration_Section_Key sect_key;
+    ach.open();
+    ach.open_section(ach.root_section(), ACE_TEXT("not_root"), 1, sect_key);
+    ach.set_string_value(sect_key, ACE_TEXT("use_multicast"), ACE_TEXT("0"));
+    ach.set_string_value(sect_key, ACE_TEXT("nak_depth"), nak_depth);
+    ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
+    ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
+    inst->load(ach, sect_key);
+    config->instances_.push_back(inst);
+    TheTransportRegistry->bind_config(config_name, participant[i]);
   }
 
   ::Xyz::FooTypeSupportImpl::_var_type fts_servant = new ::Xyz::FooTypeSupportImpl();
@@ -189,26 +218,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Allocator* allocator;
     void* ptr;
     ACE_NEW_RETURN(allocator, Allocator(mmap_file), -1);
-    //    std::cout << "Create a new Allocator object!" << std::endl;
-    //    std::cout << "Based address on subscriber: " << allocator->base_addr() << std::endl;
-    while(allocator->find("state", ptr) != 0) {}
+
+    while(allocator->find(obj_name, ptr) != 0) {}
     SharedData* state = reinterpret_cast<SharedData*>(ptr);
-    //    std::cout << "Found the SharedData object at address " << ptr << std::endl;
 
     // Indicate that the subscriber is ready
     state->sub_ready = true;
-    //    std::cout << "Subscriber is ready!" << std::endl;
 
+    const ACE_Time_Value small_time(0, 250000);
     // Wait for the publisher to be ready
     do {
-      ACE_Time_Value small_time(0, 250000);
       ACE_OS::sleep(small_time);
-    } while (state->pub_ready == false);
+    } while (!state->pub_ready);
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
-
-    //    std::cout << "Start reading data..." << std::endl;
-    int timeout_writes = 0;
 
     int prev_reads = 0;
     while (num_reads < expected) {
@@ -219,10 +242,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Get the number of the timed out writes from publisher so we
       // can re-calculate the number of expected messages. Otherwise,
       // the blocking timeout test will never exit from this loop.
-      if (state->timeout_writes_ready == true && timeout_writes > 0) {
-        expected -= timeout_writes;
+      if (state->timeout_writes_ready) {
+        expected -= state->timeout_writes;
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
-                   timeout_writes, expected));
+                   state->timeout_writes, expected));
+        // Make sure timeout_writes is accounted only once
+        state->timeout_writes_ready = false;
       }
       ACE_OS::sleep(1);
     }
@@ -230,14 +255,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Indicate that the subscriber is done
     state->sub_finished = true;
 
-    //    std::cout << "Finish reading " << num_reads.value() << " samples. Waiting for publisher to finish..." << std::endl;
-
     // Wait for the publisher to finish
-    while (state->pub_finished == false) {
-      ACE_Time_Value small_time(0, 250000);
+    while (!state->pub_finished) {
       ACE_OS::sleep(small_time);
     }
 
+    delete allocator;
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
     status = 1;
