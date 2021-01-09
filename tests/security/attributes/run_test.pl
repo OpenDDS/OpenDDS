@@ -337,6 +337,7 @@ if ($scenario) {
     @topic_names = ("OD_OL_RWA_OM_OD");
     @partition = ("bar");
   } elsif ($scenario =~ /^(un)?secure-part-user-data$/) {
+    $pub_timeout = $sub_timeout = 20;
     my $secure_sub = $1 ? 0 : 1;
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @topic_names = ('OD_OL_OA_OM_OD');
