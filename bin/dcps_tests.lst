@@ -109,7 +109,7 @@ tests/DCPS/MultiDPTest/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TransientLocalMultiInstanceTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TransientLocalMultiInstanceTest/run_test.pl rtps: !DCPS_MIN RTPS !STATIC !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TransientLocalMultiInstanceTest/run_test.pl rtps_disc: !DCPS_MIN RTPS !STATIC !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/TransientLocalTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/TransientLocalTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/TransientLocalTest/run_test.pl rtps: !DCPS_MIN RTPS !STATIC !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DelayedDurable/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/DelayedDurable/run_test.pl --large-samples: !DCPS_MIN RTPS
@@ -123,7 +123,7 @@ tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE 
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Restart/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Restart/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl -reliable: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
@@ -301,7 +301,7 @@ tests/DCPS/Thrasher/run_test.pl default durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFE
 tests/DCPS/Thrasher/run_test.pl low durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl medium durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl high durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/Thrasher/run_test.pl single rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl double rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl triangle rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE

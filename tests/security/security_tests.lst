@@ -23,7 +23,7 @@ tests/security/attributes/run_test.pl SC4
 tests/security/attributes/run_test.pl SC5
 tests/security/attributes/run_test.pl TEST_8_8_5_FAILURE
 tests/security/attributes/run_test.pl TEST_8_8_5_SUCCESS
-tests/security/attributes/run_test.pl multiple_grants
+tests/security/attributes/run_test.pl multiple_grants: !GH_ACTIONS
 tests/security/attributes/run_test.pl FullMsgSign
 tests/security/attributes/run_test.pl FullMsgEncrypt
 tests/security/attributes/run_test.pl FullMsgSign_SubMsgSign
