@@ -134,7 +134,7 @@ tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !
 tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE !TARGET
+tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE !TARGET !GH_ACTIONS
 tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -145,7 +145,7 @@ tests/DCPS/Observer/run_test.pl: !DCPS_MIN
 tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reliability/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reliability/run_test.pl keep-last-one: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/Reliability/run_test.pl rtps keep-last-one: !DCPS_MIN
+tests/DCPS/Reliability/run_test.pl rtps keep-last-one: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/ReliableBestEffortReaders/run_test.pl: RTPS !DCPS_MIN
 
 tests/DCPS/WriteDataContainer/run_test.pl: !DCPS_MIN
@@ -365,7 +365,7 @@ tests/transport/rtps_directed_write/run_test.pl: !DCPS_MIN RTPS
 tests/transport/best_effort_reader/run_test.pl: !DCPS_MIN RTPS
 
 tests/DCPS/ManyTopicTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
+tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS !GH_ACTIONS
 
 tests/DCPS/ManyTopicMultiProcess/run_test.pl: !DCPS_MIN
 
