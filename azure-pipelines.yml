@@ -129,9 +129,6 @@ jobs:
       Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
-      Debug64WChar:
-        BuildPlatform: x64
-        BuildConfiguration: Debug
   variables:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
