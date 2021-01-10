@@ -15,6 +15,7 @@
 #include "DataReaderListener.h"
 #include "TestException.h"
 #include "common.h"
+
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
 #include <dds/DCPS/Service_Participant.h>
@@ -102,7 +103,7 @@ void init_dcps_objects(int i)
       ACE_OS::snprintf(inst_name, 64, "rtps_%d", i);
       // The 2 is a safety factor to allow for control messages.
       ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"),
-                       2 * num_instances_per_writer * num_samples_per_instance);
+        static_cast<unsigned long>(2 * num_instances_per_writer * num_samples_per_instance));
 
       OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
       OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");

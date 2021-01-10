@@ -33,7 +33,7 @@ struct SharedData {
   bool timeout_writes_ready;
 };
 
-extern const char* mmap_file;
+extern const ACE_TCHAR* mmap_file;
 extern const char* obj_name;
 
 typedef ACE_Malloc_T<ACE_MMAP_MEMORY_POOL, ACE_Null_Mutex, ACE_PI_Control_Block> Allocator;
