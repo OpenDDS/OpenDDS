@@ -43,7 +43,7 @@ tests/security/attributes/run_test.pl Partitions_Match
 tests/security/attributes/run_test.pl Partitions_Reordered
 tests/security/attributes/run_test.pl Partitions_Subset
 tests/security/attributes/run_test.pl secure-part-user-data: !NO_BUILT_IN_TOPICS
-tests/security/attributes/run_test.pl unsecure-part-user-data: !NO_BUILT_IN_TOPICS
+tests/security/attributes/run_test.pl unsecure-part-user-data: !NO_BUILT_IN_TOPICS !GH_ACTIONS
 tests/security/TopicWithoutPermissions/run_test.pl
 
 tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
