@@ -1618,8 +1618,7 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
   return DDS::RETCODE_NO_DATA;
 }
 
-void store_instance_data(
-                         unique_ptr<MessageTypeWithAllocator> instance_data,
+void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
                          const OpenDDS::DCPS::DataSampleHeader& header,
                          OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
                          bool& just_registered,
@@ -1956,9 +1955,9 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     return;
   }
 
-  ReceivedDataElement *ptr =
+  ReceivedDataElement* const ptr =
     new (*rd_allocator_.get()) ReceivedDataElementWithType<MessageTypeWithAllocator>(
-      header,instance_data.release(), &this->sample_lock_);
+      header, instance_data.release(), &this->sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_->disposed_generation_count();
@@ -2071,11 +2070,10 @@ void notify_status_condition_no_sample_lock()
 
 
 /// Common input read* & take* input processing and precondition checks
-DDS::ReturnCode_t check_inputs (
-                                const char* method_name,
-                                MessageSequenceType & received_data,
-                                DDS::SampleInfoSeq & info_seq,
-                                ::CORBA::Long max_samples)
+DDS::ReturnCode_t check_inputs(const char* method_name,
+                               MessageSequenceType& received_data,
+                               DDS::SampleInfoSeq& info_seq,
+                               ::CORBA::Long max_samples)
 {
   typename MessageSequenceType::PrivateMemberAccess received_data_p (received_data);
 

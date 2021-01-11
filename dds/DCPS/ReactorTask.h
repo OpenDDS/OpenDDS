@@ -41,9 +41,10 @@ struct OpenDDS_Dcps_Export ThreadStatus {
   ACE_Thread_Mutex lock;
   Map map;
 
-  /// Get key for map and update. fallback_tid is mostly for safety profile.
+  /// Get key for map and update.
+  /// safety_profile_tid is the thread id under safety profile, otherwise unused.
   /// name is for a more human-friendly name that will be appended to the key.
-  static String get_key(const char* fallback_tid = "", const String& name = "");
+  static String get_key(const char* safety_profile_tid = "", const String& name = "");
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.

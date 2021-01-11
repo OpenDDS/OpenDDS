@@ -262,13 +262,13 @@ bool ThreadStatus::update(
   return true;
 }
 
-String ThreadStatus::get_key(const char* fallback_tid, const String& name)
+String ThreadStatus::get_key(const char* safety_profile_tid, const String& name)
 {
-  ACE_UNUSED_ARG(fallback_tid);
   String key;
 #ifdef OPENDDS_SAFETY_PROFILE
-  key = fallback_tid;
+  key = safety_profile_tid;
 #else
+  ACE_UNUSED_ARG(safety_profile_tid);
 #  ifdef ACE_HAS_MAC_OSX
   unsigned long tid = 0;
   uint64_t u64_tid;
