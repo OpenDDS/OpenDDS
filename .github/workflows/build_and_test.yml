@@ -46,6 +46,8 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    needs: cancel-previous-runs
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -331,6 +333,8 @@ jobs:
   ubuntu-18_04_defaults_artifact:
 
     runs-on: ubuntu-18.04
+
+    needs: cancel-previous-runs
 
     steps:
     - name: install xerces
@@ -618,6 +622,8 @@ jobs:
 
     runs-on: ubuntu-16.04
 
+    needs: cancel-previous-runs
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -903,6 +909,8 @@ jobs:
   windows-2019_defaults_artifact:
 
     runs-on: windows-2019
+
+    needs: cancel-previous-runs
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -1202,6 +1210,8 @@ jobs:
 
     runs-on: windows-2016
 
+    needs: cancel-previous-runs
+
     steps:
     - name: install openssl-windows & xerces-c
       uses: lukka/run-vcpkg@v6
@@ -1500,6 +1510,8 @@ jobs:
 
     runs-on: macos-11.0
 
+    needs: cancel-previous-runs
+
     steps:
     - name: install xerces-c
       run: |
@@ -1788,6 +1800,8 @@ jobs:
   macos-10_15_defaults_artifact:
 
     runs-on: macos-10.15
+
+    needs: cancel-previous-runs
 
     steps:
     - name: install xerces-c
