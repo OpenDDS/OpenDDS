@@ -462,15 +462,8 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   pv_param.version(proxy.protocolVersion);
   add_param(param_list, pv_param);
 
-  // For guid prefix, copy into guid, and force some values
   Parameter gp_param;
-  GUID_t guid;
-  ACE_OS::memcpy(guid.guidPrefix,
-                 proxy.guidPrefix,
-                 sizeof(guid.guidPrefix));
-  guid.entityId = DCPS::ENTITYID_PARTICIPANT;
-
-  gp_param.guid(guid);
+  gp_param.guid(DCPS::make_part_guid(proxy.guidPrefix));
   gp_param._d(PID_PARTICIPANT_GUID);
   add_param(param_list, gp_param);
 
@@ -478,11 +471,9 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   vid_param.vendor(proxy.vendorId);
   add_param(param_list, vid_param);
 
-  if (proxy.expectsInlineQos != false)
-  {
+  if (!proxy.expectsInlineQos) {
     Parameter eiq_param; // Default is false
-    eiq_param.expects_inline_qos(
-        proxy.expectsInlineQos);
+    eiq_param.expects_inline_qos(proxy.expectsInlineQos);
     add_param(param_list, eiq_param);
   }
 
@@ -1483,7 +1474,7 @@ bool from_param_list(const ParameterList& param_list,
 
 #ifdef OPENDDS_SECURITY
 bool to_param_list(const DDS::Security::EndpointSecurityInfo& info,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   Parameter param;
   param.endpoint_security_info(info);

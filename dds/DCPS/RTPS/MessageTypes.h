@@ -29,14 +29,12 @@ namespace OpenDDS {
     /// Alignment of RTPS Submessage
     const size_t SM_ALIGN = 4;
 
-    const OctetArray4
-      PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
-        { 0x00, 0x00, 0x00, 0x00 },
-      PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE =
-        { 0x00, 0x00, 0x00, 0x01 },
-      PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE =
-        { 0x00, 0x00, 0x00, 0x02 };
-
+    const DCPS::EntityId_t PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
+      {{0x00, 0x00, 0x00}, 0x00};
+    const DCPS::EntityId_t PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE =
+      {{0x00, 0x00, 0x00}, 0x00};
+    const DCPS::EntityId_t PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE =
+      {{0x00, 0x00, 0x00}, 0x02};
   }
 }
 

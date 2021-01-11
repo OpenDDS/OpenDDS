@@ -199,7 +199,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
         SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
         SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
         BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-
     }
 
     if (enable_type_lookup_service) {
@@ -597,7 +596,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   pdata.associated_endpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
-  const DCPS::RepoId guid = make_id(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (sedp_->ignoring(guid)) {
@@ -840,7 +839,7 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  const DCPS::RepoId guid = make_id(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
   if (guid == guid_) {
     // About us, stop.
     return;
@@ -2117,7 +2116,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   hdr_.prefix[3] = 'S';
   hdr_.version = PROTOCOLVERSION;
   hdr_.vendorId = VENDORID_OPENDDS;
-  std::memcpy(hdr_.guidPrefix, outer_->guid_.guidPrefix, sizeof(GuidPrefix_t));
+  DCPS::assign(hdr_.guidPrefix, outer_->guid_.guidPrefix);
   data_.smHeader.submessageId = DATA;
   data_.smHeader.flags = FLAG_E | FLAG_D;
   data_.smHeader.submessageLength = 0; // last submessage in the Message
@@ -2552,7 +2551,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
   info_dst.smHeader.submessageId = INFO_DST;
   info_dst.smHeader.flags = FLAG_E;
   info_dst.smHeader.submessageLength = sizeof(guid.guidPrefix);
-  std::memcpy(info_dst.guidPrefix, guid.guidPrefix, sizeof(guid.guidPrefix));
+  DCPS::assign(info_dst.guidPrefix, guid.guidPrefix);
 
   wbuff_.reset();
   CORBA::UShort options = 0;
@@ -2706,8 +2705,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       case DATA: {
         DataSubmessage data;
         if (!(ser >> data)) {
-          ACE_ERROR((
-                     LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                      ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
           return 0;
@@ -2752,8 +2750,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
-          ACE_ERROR((
-                     LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                      ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
           return 0;

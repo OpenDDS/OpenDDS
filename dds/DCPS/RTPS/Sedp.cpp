@@ -2956,14 +2956,12 @@ Sedp::data_received(DCPS::MessageId message_id,
   if (spdp_.shutting_down()) { return; }
 
   const DCPS::DiscoveredReaderData& rdata = dsub.reader_data_;
-  const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  const GUID_t& guid = rdata.readerProxy.remoteReaderGuid;
+  const GUID_t part_guid = make_part_guid(guid);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (ignoring(guid)
-      || ignoring(guid_participant)
+  if (ignoring(guid) || ignoring(part_guid)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
@@ -2974,7 +2972,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 #endif
 
-  if (!spdp_.has_discovered_participant(guid_participant)) {
+  if (!spdp_.has_discovered_participant(part_guid)) {
     deferred_subscriptions_[guid] = std::make_pair(message_id, dsub);
     return;
   }
@@ -3261,7 +3259,7 @@ Sedp::association_complete_i(const RepoId& localId,
     spdp_.send_participant_crypto_tokens(remoteId);
     send_builtin_crypto_tokens(remoteId);
     resend_user_crypto_tokens(remoteId);
-  }
+  } else
 #endif
   if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
     write_durable_publication_data(remoteId, false);
@@ -3319,13 +3317,15 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
     write_participant_message_data(guid, local_participant_messages_[guid], GUID_UNKNOWN);
     break;
   }
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
     write_participant_message_data(guid, local_participant_messages_[guid], GUID_UNKNOWN);
     break;
   }
@@ -3371,13 +3371,15 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
     write_participant_message_data_secure(guid, local_participant_messages_secure_[guid], GUID_UNKNOWN);
     break;
   }
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
     write_participant_message_data_secure(guid, local_participant_messages_secure_[guid], GUID_UNKNOWN);
     break;
   }
@@ -3421,8 +3423,8 @@ Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
   return associate(subscription, true);
 }
 
-void
-Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
+void Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote)
+{
   if (!(flags & ASSOC_OK)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) Sedp::Writer::transport_assoc_done: ")
@@ -4300,7 +4302,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
         ACE_TEXT("failed to convert from ParameterList ")
         ACE_TEXT("to ICE Agent info\n")));
       return;
-}
+    }
     ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
     if (pos != ai_map.end()) {
       wdata.have_ice_agent_info_ = true;
@@ -4437,7 +4439,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
                  ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
       return;
     }
-    const DCPS::RepoId guid = make_id(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+    const GUID_t guid = make_part_guid(sample.header_.publication_id_);
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
     sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 

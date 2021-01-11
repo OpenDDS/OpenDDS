@@ -608,7 +608,7 @@ private:
     struct GuidPrefixWrapper {
       GuidPrefixWrapper(const GuidPrefix_t& prefix)
       {
-        std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
+        DCPS::assign(prefix_, prefix);
       }
 
       bool operator<(const GuidPrefixWrapper& other) const
