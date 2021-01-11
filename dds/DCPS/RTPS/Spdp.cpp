@@ -3833,7 +3833,6 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         assign(data.guid, guid);
         data.thread_id = i->first.c_str();
         data.timestamp = i->second.timestamp.to_dds_time();
-        data.since_last_update = i->second.since_last_update.to_dds_duration();
 
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }

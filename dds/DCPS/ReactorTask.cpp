@@ -245,19 +245,12 @@ bool ThreadStatus::update(
   const bool is_new = it == map.end();
   if (is_new) {
     it = map.insert(Map::value_type(thread_key, Thread())).first;
-  } else {
-    it->second.since_last_update = timestamp - it->second.timestamp;
   }
   it->second.timestamp = timestamp;
   if (DCPS_debug_level > 4) {
-    if (is_new) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: first update for "
-        "thread \"%C\"\n", thread_key.c_str()));
-    } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: last update for "
-        "thread \"%C\" was %#T seconds ago\n",
-        thread_key.c_str(), &it->second.since_last_update.value()));
-    }
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
+      "%Cupdate for thread \"%C\"\n @ %d",
+      is_new ? "first " : "", thread_key.c_str(), it->second.timestamp.value().sec()));
   }
   return true;
 }

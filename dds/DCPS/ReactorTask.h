@@ -34,7 +34,6 @@ namespace DCPS {
 struct OpenDDS_Dcps_Export ThreadStatus {
   struct Thread {
     MonotonicTimePoint timestamp;
-    TimeDuration since_last_update;
   };
   typedef OPENDDS_MAP(String, Thread) Map;
 

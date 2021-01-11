@@ -614,12 +614,8 @@ module OpenDDS {
     BUILT_IN_TOPIC_TYPE
     struct InternalThreadBuiltinTopicData {
       BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
-      string thread_id;
-      /// Timestamp for this update.
-      DDS::Time_t timestamp;
-      /// Time since last internal update, which might not have been
-      /// published.
-      DDS::Duration_t since_last_update;
+      BUILT_IN_TOPIC_KEY string thread_id;
+      BUILT_IN_TOPIC_KEY DDS::Time_t timestamp;
     };
 
   };// End of module DCPS
