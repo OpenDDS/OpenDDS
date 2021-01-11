@@ -176,6 +176,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
+    'workspace=s', 'Custom MPC workspace file to copy and use (Use a builtin one)',
    ],
    ['Build flags:',
     'debug!', 'Debugging (yes)',
@@ -503,6 +504,13 @@ $opts{'target'} = $opts{'host'} unless $opts{'target'};
 
 if (!exists $platforminfo{$opts{'target'}}) {
   die "ERROR: unknown target $opts{'target'}, stopped";
+}
+
+if (exists($opts{'workspace'})) {
+  if (!-r $opts{'workspace'}) {
+    die "ERROR: workspace file $opts{'workspace'} isn't a readable file, stopped";
+  }
+  $opts{'workspace'} = Cwd::realpath($opts{'workspace'});
 }
 
 # Set initial libpath
@@ -928,7 +936,7 @@ sub clone_host_and_target {
   }
 }
 
-sub backup_and_open {
+sub backup {
   my $file = shift;
   if (!$opts{'dry-run'} && -r $file) {
     print "WARNING: overwriting existing $file\n";
@@ -940,6 +948,22 @@ sub backup_and_open {
     }
     unlink $file;
   }
+}
+
+sub backup_and_copy {
+  my $src = shift;
+  my $dst = shift;
+  backup($dst);
+  if ($opts{'dry-run'}) {
+    print("Would copy $src to $dst\n");
+  } else {
+    copy($src, $dst);
+  }
+}
+
+sub backup_and_open {
+  my $file = shift;
+  backup($file);
   if ($opts{'dry-run'}) {
     return File::Temp->new();
   }
@@ -2003,9 +2027,17 @@ EOT
     }
   }
 
-  my $ws = 'DDS.mwc';
-  if (-r $buildEnv->{'DDS_ROOT'} . "/host_tools.mwc") {
+  my $custom_ws = "OpenDDS_custom.mwc";
+  if (exists($opts{'workspace'})) {
+    backup_and_copy($opts{'workspace'}, $custom_ws);
+  }
+
+  my $ws;
+  if (-r "$buildEnv->{'DDS_ROOT'}/host_tools.mwc") {
     $ws = 'host_tools.mwc';
+  }
+  elsif (-r $custom_ws) {
+    $ws = $custom_ws;
   }
   elsif (!$tests && $buildtao) {
     $ws = 'DDS_TAOv2.mwc';
@@ -2015,6 +2047,9 @@ EOT
   }
   elsif ($buildtao) {
     $ws = 'DDS_TAOv2_all.mwc';
+  }
+  else {
+    $ws = 'DDS.mwc';
   }
 
   my $static = (($opts{'static'} && $is_windows) ||
