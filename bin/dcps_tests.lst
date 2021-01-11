@@ -279,7 +279,7 @@ tests/DCPS/WaitForAck/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitForAck/run_test.pl rtps --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/Thrasher/run_test.pl triangle: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE

@@ -166,7 +166,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -297,7 +296,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -454,7 +452,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -585,7 +582,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -742,7 +738,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -873,7 +868,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1047,7 +1041,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$DBS_GHW\\OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1166,7 +1159,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$DBS_GHW\\OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1347,7 +1339,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$DBS_GHW\\OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1466,7 +1457,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$DBS_GHW\\OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1632,7 +1622,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1764,7 +1753,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -1923,7 +1911,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2055,7 +2042,6 @@ jobs:
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
-        <command name="git" options="dir=$GITHUB_WORKSPACE/OpenDDS log -1"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
