@@ -331,23 +331,14 @@ public:
       for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
         Encoding::Kind encoding_kind;
         if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-          if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
-            encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-            break;
-          } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-            // Supported but incompatible data representation
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-                       ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                       ACE_TEXT("Skip %C data representation\n"),
-                       TraitsType::type_name(),
-                       Encoding::kind_to_string(encoding_kind).c_str()));
-          }
+          encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
+          break;
         } else if (::OpenDDS::DCPS::DCPS_debug_level) {
-          // Unsupported or unknown data representation
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                      ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                     ACE_TEXT("Encountered unsupported or unknown data representation\n"),
-                     TraitsType::type_name()));
+                     ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
+                     TraitsType::type_name(),
+                     repIds[i]));
         }
       }
     } else {
