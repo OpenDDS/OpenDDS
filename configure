@@ -1071,9 +1071,9 @@ sub write_platform_macros {
             print $PMG 'LDFLAGS += -Wl,-rpath-link,$(ACE_ROOT)/lib', "\n";
           }
         }
-        if($opts{'target'} eq 'android') {
+        if ($opts{'target'} eq 'android') {
           print $PMG 'ifeq (,$(findstring -isystem$(ACE_ROOT),$(INCLDIRS)))', "\n";
-          print $PMG '  INCLDIRS        += -isystem$(ACE_ROOT)', "\n";
+          print $PMG '  INCLDIRS += -isystem $(ACE_ROOT)', "\n";
           print $PMG 'endif', "\n";
         }
       }
