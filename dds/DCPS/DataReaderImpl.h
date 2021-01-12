@@ -585,7 +585,7 @@ protected:
   void prepare_to_delete();
 
   /// Setup deserialization options
-  DDS::ReturnCode_t setup_deserialization();
+  virtual DDS::ReturnCode_t setup_deserialization() = 0;
 
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
