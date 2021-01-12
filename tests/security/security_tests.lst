@@ -62,10 +62,5 @@ tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse secure: !DCPS_MIN 
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
 
-tests/DCPS/ParticipantLocationTopic/run_test.pl:            !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
-tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6:       !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
-tests/DCPS/ParticipantLocationTopic/run_test.pl noice:      !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
-tests/DCPS/ParticipantLocationTopic/run_test.pl noice ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
-
 tests/DCPS/Restart/run_test.pl --secure
 tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE
