@@ -188,7 +188,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Wait for the subscriber to be ready.
     const ACE_Time_Value small_time(0, 250000);
-    FILE* readers_ready = 0
+    FILE* readers_ready = 0;
     do {
       ACE_OS::sleep(small_time);
       readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
