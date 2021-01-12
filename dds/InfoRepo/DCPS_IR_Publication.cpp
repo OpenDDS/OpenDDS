@@ -29,6 +29,7 @@ DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                                          OpenDDS::DCPS::DataWriterRemote_ptr writer,
                                          const DDS::DataWriterQos& qos,
                                          const OpenDDS::DCPS::TransportLocatorSeq& info,
+                                         ACE_CDR::ULong transportContext,
                                          const DDS::PublisherQos& publisherQos)
   : id_(id),
     participant_(participant),
@@ -37,6 +38,7 @@ DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
     isBIT_(0),
     qos_(qos),
     info_(info),
+    transportContext_(transportContext),
     publisherQos_(publisherQos)
 {
   writer_ =  OpenDDS::DCPS::DataWriterRemote::_duplicate(writer);
@@ -60,6 +62,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
     // inform the datawriter about the association
     OpenDDS::DCPS::ReaderAssociation association;
     association.readerTransInfo = sub->get_transportLocatorSeq();
+    association.transportContext = sub->get_transportContext();
     association.readerId = sub->get_id();
     association.subQos = *(sub->get_subscriber_qos());
     association.readerQos = *(sub->get_datareader_qos());
@@ -117,7 +120,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
                std::string(pub_converter).c_str(),
                std::string(sub_converter).c_str()));
   }
-  };
+  }
 
   return status;
 }

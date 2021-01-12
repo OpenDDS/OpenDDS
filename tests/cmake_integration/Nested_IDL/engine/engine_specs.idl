@@ -1,0 +1,18 @@
+#ifndef ENGINE_SPECS_IDL
+#define ENGINE_SPECS_IDL
+
+enum TempType {
+    OIL,
+    COOLANT
+};
+
+struct EngineTemp {
+    TempType type;
+    long value;
+};
+
+struct EngineRpm {
+    long value;
+};
+
+#endif /* ENGINE_SPECS_IDL */

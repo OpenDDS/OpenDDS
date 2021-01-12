@@ -10,7 +10,8 @@
 
 #include "ace/config.h"
 
-#if defined(ACE_HAS_GETIFADDRS) && !defined(OPENDDS_SAFETY_PROFILE) && !defined (ACE_LINUX)
+// ACE_HAS_GETIFADDRS is not set on android but is available in API >= 24
+#if ((!defined (ACE_LINUX) && defined(ACE_HAS_GETIFADDRS))  || (defined(ACE_ANDROID) && !defined ACE_LACKS_IF_NAMEINDEX)) && !defined(OPENDDS_SAFETY_PROFILE)
 
 #define OPENDDS_NETWORK_CONFIG_MODIFIER
 
@@ -32,10 +33,12 @@ public:
   using NetworkConfigMonitor::remove_interface;
   using NetworkConfigMonitor::add_address;
   using NetworkConfigMonitor::remove_address;
+  void update_interfaces();
 
 private:
   void validate_interfaces_index();
 };
+typedef RcHandle<NetworkConfigModifier> NetworkConfigModifier_rch;
 
 } // DCPS
 } // OpenDDS

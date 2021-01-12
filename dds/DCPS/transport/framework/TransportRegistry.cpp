@@ -71,6 +71,8 @@ const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_PORT = "add_domain_
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
   , released_(false)
+  , load_pending_(false)
+  , load_condition_(lock_)
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
@@ -474,33 +476,49 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 void
 TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
 {
-  ACE_UNUSED_ARG(transport_type);
-#if !defined(ACE_AS_STATIC_LIBS)
   GuardType guard(lock_);
+  load_transport_lib_i(transport_type);
+}
+
+void
+TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type)
+{
+#if defined(ACE_AS_STATIC_LIBS)
+  ACE_UNUSED_ARG(transport_type);
+#else
   LibDirectiveMap::iterator lib_iter = lib_directive_map_.find(transport_type);
   if (lib_iter != lib_directive_map_.end()) {
     ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
     // Release the lock, because loading a transport library will
     // recursively call this function to add its default inst.
-    guard.release();
-    ACE_Service_Config::process_directive(directive.c_str());
+    load_pending_ = true;
+    ACE_Reverse_Lock<LockType> rev_lock(lock_);
+    {
+      ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+      ACE_Service_Config::process_directive(directive.c_str());
+    }
+    load_pending_ = false;
+    load_condition_.broadcast();
   }
 #endif
 }
 
 TransportInst_rch
 TransportRegistry::create_inst(const OPENDDS_STRING& name,
-                               const OPENDDS_STRING& transport_type)
+                               const OPENDDS_STRING& transport_type,
+                               bool wait_for_pending_load)
 {
   GuardType guard(lock_);
   TransportType_rch type;
 
+  while (wait_for_pending_load && load_pending_) {
+    load_condition_.wait();
+  }
+
   if (find(type_map_, transport_type, type) != 0) {
 #if !defined(ACE_AS_STATIC_LIBS)
-    guard.release();
     // Not present, try to load library
-    load_transport_lib(transport_type);
-    guard.acquire();
+    load_transport_lib_i(transport_type);
 
     // Try to find it again
     if (find(type_map_, transport_type, type) != 0) {
@@ -612,7 +630,16 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
           throw Transport::UnableToCreate();
         }
         OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
-        OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
+        OPENDDS_STRING transport_config_name;
+
+        if (cfg_name.c_str() != 0) {
+          transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
+                     ACE_TEXT("Config name is null.\n")));
+          throw Transport::UnableToCreate();
+        }
 
         bool success = create_new_transport_instance_for_participant(domain_id, transport_config_name, transport_inst_name);
 
@@ -670,6 +697,9 @@ TransportRegistry::fix_empty_default()
 {
   DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);
   GuardType guard(lock_);
+  while (load_pending_) {
+    load_condition_.wait();
+  }
   if (global_config_.is_nil()
       || !global_config_->instances_.empty()
       || global_config_->name() != DEFAULT_CONFIG_NAME) {
@@ -677,8 +707,7 @@ TransportRegistry::fix_empty_default()
   }
   TransportConfig_rch global_config = global_config_;
 #if !defined(ACE_AS_STATIC_LIBS)
-  guard.release();
-  load_transport_lib(FALLBACK_TYPE);
+  load_transport_lib_i(FALLBACK_TYPE);
 #endif
   return global_config;
 }
@@ -1104,13 +1133,6 @@ bool TransportRegistry::process_customizations(const DDS::DomainId_t id, const T
                      ACE_TEXT("process_customizations processing add_domain_id_to_port: %C=%C\n"),
                      it->first.c_str(), addr.c_str()));
         }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
-                          ACE_TEXT("process_customizations ")
-                          ACE_TEXT("No support for %C customization\n"),
-                          idx->second.c_str()),
-                        false);
       }
 
       customs[idx->first] = addr.c_str();

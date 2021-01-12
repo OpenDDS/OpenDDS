@@ -584,7 +584,7 @@ RepoId
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const RepoId& participantId,
                                    const RepoId& topicId,
-                                   DCPS::DataWriterCallbacks* publication,
+                                   DCPS::DataWriterCallbacks_rch publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
                                    const DDS::PublisherQos& publisherQos)
@@ -676,7 +676,7 @@ RepoId
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const RepoId& participantId,
                                     const RepoId& topicId,
-                                    DCPS::DataReaderCallbacks* subscription,
+                                    DCPS::DataReaderCallbacks_rch subscription,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
                                     const DDS::SubscriberQos& subscriberQos,

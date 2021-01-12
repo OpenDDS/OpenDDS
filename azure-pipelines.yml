@@ -205,12 +205,18 @@ jobs:
     vmImage: ubuntu-18.04
   variables:
     TEST_MESSENGER: true
+    TEST_FACE_MESSENGER: false
+    TEST_JAVA_MESSENGER: false
+    TEST_GITIGNORE: false
   strategy:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=$(JAVA_HOME_12_X64)
+        TEST_JAVA_MESSENGER: true
+        TEST_GITIGNORE: true
       Release:
         ConfigOpts: --no-debug --optimize --java=$(JAVA_HOME_12_X64)
+        TEST_JAVA_MESSENGER: true
         DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
@@ -221,6 +227,7 @@ jobs:
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
+        TEST_GITIGNORE: true
       SecurityWithoutFeatures:
         ConfigOpts: >
           --security --no-inline --no-debug
@@ -247,9 +254,14 @@ jobs:
       GCC6:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
+      GCC8:
+        ConfigOpts: --compiler=g++-8 --xerces --no-inline --java=$(JAVA_HOME_12_X64)
+        TEST_JAVA_MESSENGER: true
+        PackageDeps: libxerces-c-dev g++-8
       GCC10:
-        ConfigOpts: --compiler=g++-10 --no-inline
-        PackageDeps: g++-10
+        ConfigOpts: --compiler=g++-10 --xerces --no-inline
+        TEST_FACE_MESSENGER: true
+        PackageDeps: libxerces-c-dev g++-10
   steps:
   - script: |
       set -e
@@ -334,6 +346,52 @@ jobs:
       perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and CMake
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
+  - script: |
+      set -e
+      source setenv.sh
+      cd tests/FACE/Messenger
+      perl run_test.pl
+    condition: eq(variables['TEST_FACE_MESSENGER'], 'true')
+    displayName: Run all FACE Messenger tests
+  - script: |
+      set -e
+      source setenv.sh
+      cd tests/FACE/Messenger
+      perl run_test.pl callback
+    condition: eq(variables['TEST_FACE_MESSENGER'], 'true')
+    displayName: Run callback FACE Messenger tests
+  - script: |
+      set -e
+      source setenv.sh
+      cd tests/FACE/Messenger
+      perl run_test.pl static
+    condition: eq(variables['TEST_FACE_MESSENGER'], 'true')
+    displayName: Run static FACE Messenger tests
+  - script: |
+      set -e
+      source setenv.sh
+      cd tests/FACE/Messenger
+      perl run_test.pl static callback
+    condition: eq(variables['TEST_FACE_MESSENGER'], 'true')
+    displayName: Run static callback FACE Messenger tests
+  - script: |
+      set -e
+      source setenv.sh
+      cd java/tests/messenger
+      perl run_test.pl tcp
+    condition: eq(variables['TEST_JAVA_MESSENGER'], 'true')
+    displayName: Run tcp JAVA Messenger tests
+  - script: |
+      set -e
+      source setenv.sh
+      cd java/tests/messenger
+      perl run_test.pl rtps
+    condition: eq(variables['TEST_JAVA_MESSENGER'], 'true')
+    displayName: Run rtps JAVA Messenger tests
+  - script: |
+      ! git clean -nd -e ext | cut -d ' ' -f 3 | xargs -I {} echo "##vso[task.logissue type=error]This file should be gitignored: '{}'" | exit 1
+    condition: eq(variables['TEST_GITIGNORE'], 'true')
+    displayName: Check validity of .gitignore
 
 - job: macOS
   timeoutInMinutes: 120

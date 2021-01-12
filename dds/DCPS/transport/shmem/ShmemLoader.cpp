@@ -44,7 +44,7 @@ ShmemLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   /*
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX + "0200_SHMEM",
-                          UDP_NAME);
+                          SHMEM_NAME, false);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
   */

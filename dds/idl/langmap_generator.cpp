@@ -1474,7 +1474,12 @@ struct Cxx11Generator : GeneratorBase
       }
     } else {
       if (af.cls_ & CL_ARRAY) {
-        initializer = "{{}}";
+        AST_Array* elem = dynamic_cast<AST_Array*>(af.act_);
+        const Classification elem_cls = classify(elem->base_type ());
+        // Only required when we have an array of pod types
+        if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
+          initializer = "{{}}";
+        }
       }
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
@@ -1881,8 +1886,14 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       return false;
 # endif
     default:
-      be_global->lang_header_ <<
-        "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        be_global->lang_header_ <<
+          "using "  << nm << " = " << generator_->map_type(base) << ";\n";
+      } else {
+        be_global->lang_header_ <<
+          "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      }
+
       generator_->gen_typedef_varout(nm, base);
 
       AST_Type* actual_base = resolveActualType(base);

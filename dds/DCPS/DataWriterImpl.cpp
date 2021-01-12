@@ -206,7 +206,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
                OPENDDS_STRING(reader_converter).c_str()));
   }
 
-  if (entity_deleted_.value()) {
+  if (get_deleted()) {
     if (DCPS_debug_level)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association")
                  ACE_TEXT(" This is a deleted datawriter, ignoring add.\n")));
@@ -239,6 +239,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -1169,7 +1170,7 @@ DataWriterImpl::assert_liveliness()
     }
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (send_liveliness(MonotonicTimePoint::now()) == false) {
+    if (!send_liveliness(MonotonicTimePoint::now())) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -1450,7 +1451,7 @@ DataWriterImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
                            pub_qos);
@@ -2382,14 +2383,14 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (send_liveliness(now) == false) {
+      if (!send_liveliness(now)) {
         liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       if (liveliness_asserted_) {
-        if (send_liveliness(now) == false) {
+        if (!send_liveliness(now)) {
           liveliness_lost = true;
         }
       }

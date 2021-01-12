@@ -13,8 +13,12 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/SequenceNumber.h"
-
 #include <utility>
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -171,13 +175,16 @@ protected:
   bool was_dropped() const;
 
 private:
-
   /// Common logic for data_dropped() and data_delivered().
   bool decision_made(bool dropped_by_transport);
   friend class TransportCustomizedElement;
 
   /// Counts the number of outstanding sub-loans.
+#ifdef ACE_HAS_CPP11
+  std::atomic<unsigned long> sub_loan_count_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;
+#endif
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;
