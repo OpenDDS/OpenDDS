@@ -3830,11 +3830,10 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
       for (DCPS::ThreadStatus::Map::const_iterator i = thread_status_->map.begin();
           i != thread_status_->map.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
-        assign(data.guid, guid);
+        assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
-        data.timestamp = i->second.timestamp.to_dds_time();
 
-        bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+        bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else {
       // Not necessarily an error. App could be shutting down.

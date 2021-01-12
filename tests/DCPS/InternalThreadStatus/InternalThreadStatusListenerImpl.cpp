@@ -46,13 +46,13 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
 
     // copy octet[] to guid
     OpenDDS::DCPS::RepoId guid;
-    std::memcpy(&guid, &thread_info.guid, sizeof(guid));
+    std::memcpy(&guid, &thread_info.participant_guid, sizeof(guid));
 
     std::cout << "== " << id_ << " Thread Info ==" << std::endl;
     std::cout
       << " guid: " << guid << std::endl
       << "  tid: " << thread_info.thread_id << std::endl
-      << " time: " << thread_info.timestamp.sec << std::endl;
+      << " time: " << si.source_timestamp.sec << std::endl;
 
     ++count_;
   }

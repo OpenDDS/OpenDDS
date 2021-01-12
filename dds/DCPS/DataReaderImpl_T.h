@@ -848,7 +848,8 @@ namespace OpenDDS {
 #endif
 
   DDS::InstanceHandle_t store_synthetic_data(const MessageType& sample,
-                                             DDS::ViewStateKind view)
+                                             DDS::ViewStateKind view,
+                                             const SystemTimePoint& timestamp = SystemTimePoint::now())
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
@@ -878,7 +879,7 @@ namespace OpenDDS {
       DataSampleHeader header;
       const int msg = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       header.message_id_ = static_cast<char>(msg);
-      const DDS::Time_t now = SystemTimePoint::now().to_dds_time();
+      const DDS::Time_t now = timestamp.to_dds_time();
       header.source_timestamp_sec_ = now.sec;
       header.source_timestamp_nanosec_ = now.nanosec;
 

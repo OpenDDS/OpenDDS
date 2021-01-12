@@ -613,9 +613,8 @@ module OpenDDS {
     // status monitoring.
     BUILT_IN_TOPIC_TYPE
     struct InternalThreadBuiltinTopicData {
-      BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
       BUILT_IN_TOPIC_KEY string thread_id;
-      BUILT_IN_TOPIC_KEY DDS::Time_t timestamp;
+      DDS::OctetArray16 participant_guid;
     };
 
   };// End of module DCPS

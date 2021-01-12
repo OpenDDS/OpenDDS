@@ -238,7 +238,7 @@ void ReactorTask::stop()
 }
 
 bool ThreadStatus::update(
-  const String& thread_key, const MonotonicTimePoint& timestamp)
+  const String& thread_key, const SystemTimePoint& timestamp)
 {
   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
   Map::iterator it = map.find(thread_key);

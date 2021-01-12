@@ -33,7 +33,7 @@ namespace DCPS {
 
 struct OpenDDS_Dcps_Export ThreadStatus {
   struct Thread {
-    MonotonicTimePoint timestamp;
+    SystemTimePoint timestamp;
   };
   typedef OPENDDS_MAP(String, Thread) Map;
 
@@ -48,7 +48,7 @@ struct OpenDDS_Dcps_Export ThreadStatus {
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
   bool update(const String& key,
-    const MonotonicTimePoint& timestamp = MonotonicTimePoint::now());
+    const SystemTimePoint& timestamp = SystemTimePoint::now());
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
