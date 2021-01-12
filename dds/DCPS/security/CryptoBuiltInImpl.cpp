@@ -1006,7 +1006,9 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator keys_iter = keys_.find(sending_datawriter_crypto);
   const EncryptOptions_t::const_iterator eo_iter = encrypt_options_.find(sending_datawriter_crypto);
-  OPENDDS_ASSERT(eo_iter != encrypt_options_.end());
+  if (eo_iter == encrypt_options_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "Datawriter handle lacks encrypt options");
+  }
   if (keys_iter == keys_.end() || !eo_iter->second.payload_) {
     encoded_buffer = plain_buffer;
     return true;
@@ -1395,7 +1397,9 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
   NativeCryptoHandle encode_handle = sending_datawriter_crypto;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const EncryptOptions_t::const_iterator eo_iter = encrypt_options_.find(encode_handle);
-  OPENDDS_ASSERT(eo_iter != encrypt_options_.end());
+  if (eo_iter == encrypt_options_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "Datawriter handle lacks encrypt options");
+  }
 
   if (!eo_iter->second.submessage_) {
     encoded_rtps_submessage = plain_rtps_submessage;
@@ -2155,7 +2159,9 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
     return CommonUtilities::set_security_error(ex, -1, 1, "No key for DataWriter crypto handle");
   }
   const EncryptOptions_t::const_iterator eo_iter = encrypt_options_.find(sending_datawriter_crypto);
-  OPENDDS_ASSERT(eo_iter != encrypt_options_.end());
+  if (eo_iter == encrypt_options_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "Datawriter handle lacks encrypt options");
+  }
   if (!eo_iter->second.payload_) {
     plain_buffer = encoded_buffer;
     if (security_debug.encdec_debug) {
