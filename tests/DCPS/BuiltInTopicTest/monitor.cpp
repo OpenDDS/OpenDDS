@@ -8,24 +8,23 @@
  */
 // ============================================================================
 
+#include "tests/Utils/ExceptionStreams.h"
+#include "tests/Utils/WaitForSample.h"
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
-
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/Discovery.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/StaticIncludes.h>
 
 #include <ace/streams.h>
-#include "ace/Get_Opt.h"
-#include "ace/OS_NS_unistd.h"
-#include "tests/Utils/ExceptionStreams.h"
-#include "tests/Utils/WaitForSample.h"
+#include <ace/Get_Opt.h>
+#include <ace/OS_NS_unistd.h>
 
 using namespace std;
 
