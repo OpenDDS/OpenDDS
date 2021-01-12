@@ -5,7 +5,7 @@ categories: news
 author: Object Computing, Inc.
 ---
 
-The open-enrollment training schedule for 2021 has been announced. 
+Object Computing, Inc. (OCI) offers open-enrollment training for OpenDDS.  Our initial schedule for 2021 has been announced.
 
 Q1: [Introduction to OpenDDS Programming](https://objectcomputing.com/services/training/catalog/middleware/opendds-programming-cpp-and-java) – March 3 & 4
 
