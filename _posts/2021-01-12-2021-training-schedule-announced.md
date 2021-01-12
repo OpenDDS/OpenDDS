@@ -13,7 +13,7 @@ Q2: DDS Security with OpenDDS – June 9 & 10
 
 Q3: Introduction to OpenDDS Programming – September 1 & 2
 
-Q4: Using DDS Xtypes in OpenDDS – December 1 & 2
+Q4: Using DDS XTypes in OpenDDS – December 1 & 2
 
 Stay tuned for additional information and enrollment details.
 
