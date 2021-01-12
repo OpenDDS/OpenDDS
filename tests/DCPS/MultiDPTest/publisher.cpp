@@ -12,6 +12,7 @@
 #include "common.h"
 #include "Writer.h"
 #include "TestException.h"
+
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
 #include <dds/DCPS/Service_Participant.h>

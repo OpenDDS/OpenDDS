@@ -7,6 +7,8 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 
+#include <dds/DCPS/SafetyProfileStreams.h>
+
 #include <ace/Atomic_Op_T.h>
 #include <ace/OS_NS_unistd.h>
 
@@ -41,9 +43,8 @@ DDS::ReturnCode_t write(int writer_id,
 
       ::DDS::ReturnCode_t ret = foo_dw->write(foo, handle);
       if (ret != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-                   ACE_TEXT ("%dth write() returned %d.\n"), i, ret));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
+          ACE_TEXT ("%dth write() returned %C.\n"), i, OpenDDS::DCPS::retcode_to_string(ret)));
         if (ret == ::DDS::RETCODE_TIMEOUT) {
           timeout_writes++;
         }

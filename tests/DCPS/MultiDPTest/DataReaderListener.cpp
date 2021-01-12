@@ -3,9 +3,11 @@
 #include "DataReaderListener.h"
 #include "common.h"
 #include "TestException.h"
-#include "dds/DCPS/Service_Participant.h"
+
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
+
+#include <dds/DCPS/Service_Participant.h>
 
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
 int read(::DDS::DataReader_ptr reader)
@@ -33,7 +35,7 @@ int read(::DDS::DataReader_ptr reader)
         ACE_TEXT("(%P|%t) ERROR: reader received ::DDS::RETCODE_NO_DATA!\n")), -1);
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: read  foo: Error: %d\n"), status), -1);
+        ACE_TEXT("(%P|%t) ERROR: read foo: Error: %C\n"), OpenDDS::DCPS::retcode_to_string(status)), -1);
     }
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("Exception caught in read:");

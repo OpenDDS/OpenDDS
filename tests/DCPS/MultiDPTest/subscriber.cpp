@@ -15,6 +15,7 @@
 #include "DataReaderListener.h"
 #include "TestException.h"
 #include "common.h"
+
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
 #include <dds/DCPS/Service_Participant.h>
