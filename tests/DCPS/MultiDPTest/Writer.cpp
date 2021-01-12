@@ -87,8 +87,8 @@ int Writer::svc()
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
   write<Xyz::Foo,
-        ::Xyz::FooDataWriter,
-        ::Xyz::FooDataWriter_var>(writer_id_, timeout_writes_, writer_.in());
+        Xyz::FooDataWriter,
+        Xyz::FooDataWriter_var>(writer_id_, timeout_writes_, writer_.in());
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 

@@ -35,7 +35,7 @@
 #include <ace/Arg_Shifter.h>
 
 #include <cstdio>
-#include <iostream>
+
 
 ::DDS::DomainParticipantFactory_var dpf;
 ::DDS::DomainParticipant_var participant[2];
@@ -59,6 +59,8 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -v verbose transport debug
+    //  -o directory of synch files used to coordinate publisher and subscriber
+    //     defaults to current directory
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0) {
@@ -70,6 +72,14 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
+      synch_file_dir = currentArg;
+      pub_ready_filename = synch_file_dir + pub_ready_filename;
+      pub_finished_filename = synch_file_dir + pub_finished_filename;
+      sub_ready_filename = synch_file_dir + sub_ready_filename;
+      sub_finished_filename = synch_file_dir + sub_finished_filename;
+
+      arg_shifter.consume_arg ();
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-safety-profile")) == 0) {
       safety_profile = true;
       arg_shifter.consume_arg();
@@ -102,7 +112,7 @@ void init_dcps_objects(int i)
       ACE_OS::snprintf(inst_name, 64, "rtps_%d", i);
       // The 2 is a safety factor to allow for control messages.
       ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"),
-                       2 * num_instances_per_writer * num_samples_per_instance);
+        static_cast<unsigned long>(2 * num_instances_per_writer * num_samples_per_instance));
 
       OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
       OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
@@ -222,52 +232,70 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
-    Allocator* allocator;
-    void* ptr;
-    ACE_NEW_RETURN(allocator, Allocator(mmap_file), -1);
-
-    while(allocator->find(obj_name, ptr) != 0) {}
-    SharedData* state = reinterpret_cast<SharedData*>(ptr);
-
     // Indicate that the subscriber is ready
-    state->sub_ready = true;
+    FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
+    if (readers_ready == 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
+    }
 
-    const ACE_Time_Value small_time(0, 250000);
     // Wait for the publisher to be ready
+    const ACE_Time_Value small_time(0, 250000);
+    FILE* writers_ready = 0;
     do {
       ACE_OS::sleep(small_time);
-    } while (!state->pub_ready);
+      writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("r"));
+    } while (!writers_ready);
+
+    if (readers_ready) ACE_OS::fclose(readers_ready);
+    if (writers_ready) ACE_OS::fclose(writers_ready);
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 
-    int prev_reads = 0;
+    FILE* writers_completed = 0;
+    int timeout_writes = 0;
+    bool read_timeout_writes = false;
     while (num_reads < expected) {
-      if (prev_reads < num_reads.value()) {
-        prev_reads = num_reads.value();
-        std::cout << "Read " << prev_reads << " samples!" << std::endl;
-      }
       // Get the number of the timed out writes from publisher so we
       // can re-calculate the number of expected messages. Otherwise,
       // the blocking timeout test will never exit from this loop.
-      if (state->timeout_writes_ready) {
-        expected -= state->timeout_writes;
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
-                   state->timeout_writes, expected));
-        // Make sure timeout_writes is accounted only once
-        state->timeout_writes_ready = false;
+      if (!read_timeout_writes) {
+        if (!writers_completed) {
+          writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
+        }
+
+        if (writers_completed) {
+          if (std::fscanf(writers_completed, "%d\n", &timeout_writes) != 1) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
+          } else {
+            expected -= timeout_writes;
+            read_timeout_writes = true;
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
+                       timeout_writes, expected));
+          }
+        }
       }
+
       ACE_OS::sleep(1);
     }
 
     // Indicate that the subscriber is done
-    state->sub_finished = true;
-
-    // Wait for the publisher to finish
-    while (!state->pub_finished) {
-      ACE_OS::sleep(small_time);
+    FILE* readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("w"));
+    if (!readers_completed) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
     }
 
-    delete allocator;
+    // Wait for the publisher to finish
+    while (!writers_completed) {
+      ACE_OS::sleep(small_time);
+      writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
+    }
+
+    if (readers_completed) ACE_OS::fclose(readers_completed);
+    if (writers_completed) ACE_OS::fclose(writers_completed);
+
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
     status = 1;

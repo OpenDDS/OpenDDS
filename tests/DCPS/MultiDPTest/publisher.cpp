@@ -22,7 +22,6 @@
 
 #include <ace/Arg_Shifter.h>
 
-#include <iostream>
 
 ::DDS::DomainParticipantFactory_var dpf;
 ::DDS::DomainParticipant_var participant;
@@ -44,6 +43,8 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -i num_samples_per_instance (defaults to 1)
     //  -m num_instances_per_writer (defaults to 1)
     //  -v verbose transport debug
+    //  -o directory of synch files used to coordinate publisher and subscriber
+    //     defaults to current directory
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0) {
@@ -55,6 +56,14 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
+      synch_file_dir = currentArg;
+      pub_ready_filename = synch_file_dir + pub_ready_filename;
+      pub_finished_filename = synch_file_dir + pub_finished_filename;
+      sub_ready_filename = synch_file_dir + sub_ready_filename;
+      sub_finished_filename = synch_file_dir + sub_finished_filename;
+
+      arg_shifter.consume_arg ();
     } else {
       arg_shifter.ignore_arg();
     }
@@ -169,67 +178,76 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     init();
 
-    Allocator* allocator;
-    ACE_NEW_RETURN(allocator, Allocator(mmap_file), -1);
-    void* mem = allocator->malloc(sizeof(SharedData));
-    if (mem == 0) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) Failed to malloc\n")), -1);
+    // Indicate that the publisher is ready
+    FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
+    if (writers_ready == 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
     }
 
-    SharedData* state = new(mem) SharedData();
-    allocator->sync();
-    allocator->bind(obj_name, state);
-
-    // Indicate that the publisher is ready
-    state->pub_ready = true;
-
-    const ACE_Time_Value small_time(0, 250000);
     // Wait for the subscriber to be ready.
+    const ACE_Time_Value small_time(0, 250000);
+    FILE* readers_ready = 0
     do {
       ACE_OS::sleep(small_time);
-    } while (!state->sub_ready);
+      readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
+    } while (!readers_ready);
+
+    if (writers_ready) ACE_OS::fclose(writers_ready);
+    if (readers_ready) ACE_OS::fclose(readers_ready);
 
     // ensure the associations are fully established before writing.
     ACE_OS::sleep(3);
 
     {  // Extra scope for VC6
-      for (int i = 0; i < num_datawriters; i++) {
+      for (int i = 0; i < num_datawriters; ++i) {
         writers[i]->start();
       }
     }
 
+    int timeout_writes = 0;
     bool writers_finished = false;
+
     while (!writers_finished) {
       writers_finished = true;
-      for (int i = 0; i < num_datawriters; i++) {
+      for (int i = 0; i < num_datawriters; ++i) {
         writers_finished = writers_finished && writers[i]->is_finished();
       }
       ACE_OS::sleep(small_time);
     }
 
     {  // Extra scope for VC6
-      for (int i = 0; i < num_datawriters; i++) {
-        state->timeout_writes += writers[i]->get_timeout_writes();
+      for (int i = 0; i < num_datawriters; ++i) {
+        timeout_writes += writers[i]->get_timeout_writes();
       }
     }
-    state->timeout_writes_ready = true;
 
     // Indicate that the publisher is done
-    state->pub_finished = true;
+    FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
+    if (writers_completed == 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Unable to i publisher completed file\n")));
+    } else {
+      ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
+    }
 
     // Wait for the subscriber to finish.
+    FILE* readers_completed = 0;
     do {
       ACE_OS::sleep(small_time);
-    } while (!state->sub_finished);
+      readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("r"));
+    } while (!readers_completed);
+
+    if (writers_completed) ACE_OS::fclose(writers_completed);
+    if (readers_completed) ACE_OS::fclose(readers_completed);
 
     {  // Extra scope for VC6
-      for (int i = 0; i < num_datawriters; i++) {
+      for (int i = 0; i < num_datawriters; ++i) {
         writers[i]->end();
         delete writers[i];
       }
     }
 
-    delete allocator;
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
     status = 1;

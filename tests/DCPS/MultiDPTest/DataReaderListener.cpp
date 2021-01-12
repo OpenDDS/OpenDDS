@@ -105,16 +105,13 @@ void DataReaderListenerImpl::on_sample_rejected(::DDS::DataReader_ptr reader,
 
 void DataReaderListenerImpl::on_data_available(::DDS::DataReader_ptr reader)
 {
-  //ACE_DEBUG((LM_DEBUG,
-  //  ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available %d\n"), num_reads.value ()));
-
   num_reads++;
 
   int ret = read<Xyz::Foo,
-     ::Xyz::FooSeq,
-     ::Xyz::FooDataReader,
-     ::Xyz::FooDataReader_ptr,
-     ::Xyz::FooDataReader_var>(reader);
+                 Xyz::FooSeq,
+                 Xyz::FooDataReader,
+                 Xyz::FooDataReader_ptr,
+                 Xyz::FooDataReader_var>(reader);
   if (ret != 0) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available read failed.\n")));

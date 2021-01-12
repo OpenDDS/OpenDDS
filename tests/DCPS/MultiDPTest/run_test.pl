@@ -29,10 +29,14 @@ $test->enable_console_logging();
 $test->process('sub', 'subscriber', $args);
 $test->process('pub', 'publisher', $args);
 
-$test->add_temporary_file('pub', 'tmp_file');
+$test->add_temporary_file('sub', 'subscriber_finished.txt');
+$test->add_temporary_file('sub', 'subscriber_ready.txt');
+$test->add_temporary_file('pub', 'publisher_finished.txt');
+$test->add_temporary_file('pub', 'publisher_ready.txt');
+
 $test->setup_discovery();
 
-$test->start_process('pub');
-$test->start_process('sub');
+$test->start_process('pub', '-o');
+$test->start_process('sub', '-o');
 
-exit $test->finish(30);
+exit $test->finish(300);
