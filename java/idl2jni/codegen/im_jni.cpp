@@ -1815,7 +1815,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   bool disc_is_bool = false;
   AST_PredefinedType *pd = dynamic_cast<AST_PredefinedType*>(discriminator);
   if (pd) {
-    disc_is_bool = (pd->pt() == AST_PredefinedType::PredefinedType::PT_boolean);
+    disc_is_bool = pd->pt() == AST_PredefinedType::PT_boolean;
   }
   string disc_name = disc_is_enum ? "disc_val" : "disc",
     extra_enum1 = disc_is_enum ?
