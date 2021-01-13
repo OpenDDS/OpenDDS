@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
 
 const char* type_name = "Foo";
 int num_datawriters = 2;
