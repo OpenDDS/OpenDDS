@@ -6,6 +6,8 @@
 
 #include "tests/Utils/ExceptionStreams.h"
 
+#include <dds/DCPS/SafetyProfileStreams.h>
+
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 
@@ -80,8 +82,8 @@ int Writer::svc()
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) Writer::svc ERROR, ")
-                   ACE_TEXT ("%dth write() returned %d.\n"),
-                   i, ret));
+                   ACE_TEXT ("%dth write() returned %C.\n"),
+                   i, OpenDDS::DCPS::retcode_to_string(ret)));
         if (ret == ::DDS::RETCODE_TIMEOUT) {
           timeout_writes_++;
         }

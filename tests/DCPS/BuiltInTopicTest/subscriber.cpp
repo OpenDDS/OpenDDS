@@ -149,27 +149,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // activate the listener
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
+    if (CORBA::is_nil(listener.in())) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: listener is nil.\n")));
+      exit(1);
+    }
+
     DataReaderListenerImpl* listener_servant = dynamic_cast<DataReaderListenerImpl*>(listener.in());
     if (!listener_servant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) %N:%l main()")
-                        ACE_TEXT(" ERROR: failed to obtain DataReaderListenerImpl!\n")), -1);
+                        ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
     }
 
     DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
     DDS::DataReader_var bitdr =
       builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
     listener_servant->set_builtin_datareader(bitdr.in());
-
-    if (CORBA::is_nil(listener.in())) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: listener is nil.\n")));
-      exit(1);
-    }
-    if (!listener_servant) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l main()")
-                        ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
-    }
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -237,7 +232,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(1);
     }
 
-    if (listener_servant->read_bit_instance()) {
+    if (!listener_servant->read_bit_instance()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: Built in topic read failure.\n")));
       result = 1;
     }

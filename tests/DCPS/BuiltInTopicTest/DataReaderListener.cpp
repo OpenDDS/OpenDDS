@@ -9,6 +9,7 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 #include <ace/streams.h>
@@ -45,9 +46,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
-        if (si.publication_handle == ::DDS::HANDLE_NIL
-            || (si.publication_handle != this->publication_handle_
-                && si.publication_handle != this->post_restart_publication_handle_)) {
+        if (si.publication_handle == ::DDS::HANDLE_NIL ||
+            (si.publication_handle != this->publication_handle_ &&
+             si.publication_handle != this->post_restart_publication_handle_)) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) DataReaderListener: ERROR: publication_handle validate failed.\n")));
           exit(1);
@@ -66,7 +67,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         ACE_TEXT("(%P|%t) DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!\n")));
     } else {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) DataReaderListener: ERROR: read Message: Error: %i\n"), status));
+        ACE_TEXT("(%P|%t) DataReaderListener: ERROR: read Message: Error: %C\n"),
+        OpenDDS::DCPS::retcode_to_string(status)));
     }
   } catch (CORBA::Exception& e) {
     e._tao_print_exception("DataReaderListener: Exception caught in read:", stderr);
@@ -136,7 +138,7 @@ bool DataReaderListenerImpl::read_bit_instance()
     case DDS::RETCODE_OK:
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
         "(%P|%t) read bit instance returned ok\n")));
-      return false;
+      return true;
     case DDS::RETCODE_NO_DATA:
       ACE_ERROR((LM_WARNING, ACE_TEXT(
         "(%P|%t) read bit instance returned no data\n")));
@@ -147,15 +149,16 @@ bool DataReaderListenerImpl::read_bit_instance()
       break;
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "(%P|%t) ERROR read bit instance returned %i\n"), ret));
-      return true;
+        "(%P|%t) ERROR read bit instance returned %C\n"),
+        OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
     }
     ACE_OS::sleep(ACE_Time_Value(0, 100000));
   }
 
   ACE_ERROR((LM_ERROR, ACE_TEXT(
     "(%P|%t) ERROR read bit instance: giving up after retries\n")));
-  return true;
+  return false;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(DDS::DataReader_ptr,

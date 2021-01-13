@@ -85,10 +85,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                     part_user_data_len,
                                     reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
 
-    DDS::DomainParticipant_var participant = dpf->create_participant(111,
-                                                                     partQos,
-                                                                     DDS::DomainParticipantListener::_nil(),
-                                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DomainParticipant_var participant =
+      dpf->create_participant(111,
+                              partQos,
+                              DDS::DomainParticipantListener::_nil(),
+                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) publisher: create_participant failed.")));
       return 1;
@@ -209,7 +210,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
     writer->start();
     while (!writer->is_finished()) {
-      ACE_Time_Value small_time(0,250000);
+      ACE_Time_Value small_time(0, 250000);
       ACE_OS::sleep(small_time);
     }
 
