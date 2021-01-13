@@ -146,3 +146,10 @@ project(*Serializer): dcps_test, googletest {
     Serializer.cpp
   }
 }
+
+project(*GuidUtils): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    GuidUtils.cpp
+  }
+}

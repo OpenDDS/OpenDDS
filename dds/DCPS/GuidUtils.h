@@ -200,9 +200,7 @@ inline void assign(GUID_t& dest, const GUID_t& src)
 
 inline void assign(OctetArray16& dest, const GUID_t& src)
 {
-  std::memcpy(&dest[0], &src.guidPrefix, sizeof(GuidPrefix_t));
-  std::memcpy(&dest[sizeof(GuidPrefix_t)], &src.entityId.entityKey, sizeof(EntityKey_t));
-  dest[sizeof(GuidPrefix_t) + sizeof(EntityKey_t)] = src.entityId.entityKind;
+  std::memcpy(&dest[0], &src, sizeof(src));
 }
 
 inline RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
