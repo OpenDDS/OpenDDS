@@ -136,7 +136,10 @@ public:
                     ACE_DEBUG((LM_DEBUG,
                                "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                   }
-                  status->update(thread_key, now);
+                  if (!status->update(thread_key) && DCPS_debug_level) {
+                    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::svc: "
+                      "thread update failed\n"));
+                  }
                 }
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);

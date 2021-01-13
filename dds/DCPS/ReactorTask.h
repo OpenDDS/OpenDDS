@@ -34,6 +34,7 @@ namespace DCPS {
 struct OpenDDS_Dcps_Export ThreadStatus {
   struct Thread {
     SystemTimePoint timestamp;
+    // TODO(iguessthislldo): Add Participant GUID
   };
   typedef OPENDDS_MAP(String, Thread) Map;
 
@@ -47,8 +48,7 @@ struct OpenDDS_Dcps_Export ThreadStatus {
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
-  bool update(const String& key,
-    const SystemTimePoint& timestamp = SystemTimePoint::now());
+  bool update(const String& key);
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
@@ -60,7 +60,8 @@ public:
   virtual ~ReactorTask();
 
 public:
-  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, String name = "");
+  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0),
+    ThreadStatus* thread_stat = 0, const String& name = "");
   virtual int open(void* ptr) {
     return open_reactor_task(ptr);
   }

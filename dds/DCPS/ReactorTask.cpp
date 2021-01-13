@@ -53,7 +53,8 @@ ReactorTask::~ReactorTask()
   delete timer_queue_;
 }
 
-int ReactorTask::open_reactor_task(void*, TimeDuration timeout, ThreadStatus* thread_stat, String name)
+int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
+  ThreadStatus* thread_stat, const String& name)
 {
   // thread status reporting support
   timeout_ = timeout;
@@ -170,7 +171,9 @@ int ReactorTask::svc()
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
           }
-          thread_status_->update(thread_key);
+          if (!thread_status_->update(thread_key) && DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
+          }
         }
       }
     }
@@ -237,20 +240,15 @@ void ReactorTask::stop()
   this->thr_mgr(0);
 }
 
-bool ThreadStatus::update(
-  const String& thread_key, const SystemTimePoint& timestamp)
+bool ThreadStatus::update(const String& thread_key)
 {
   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
-  Map::iterator it = map.find(thread_key);
-  const bool is_new = it == map.end();
-  if (is_new) {
-    it = map.insert(Map::value_type(thread_key, Thread())).first;
-  }
-  it->second.timestamp = timestamp;
+  const SystemTimePoint now = SystemTimePoint::now();
+  map[thread_key] = {now};
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "%Cupdate for thread \"%C\"\n @ %d",
-      is_new ? "first " : "", thread_key.c_str(), it->second.timestamp.value().sec()));
+      "update for thread \"%C\"\n @ %d",
+      thread_key.c_str(), now.value().sec()));
   }
   return true;
 }

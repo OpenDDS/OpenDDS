@@ -126,14 +126,13 @@ namespace OpenDDS {
 
               case CvStatus_Timeout:
                 {
-                  const MonotonicTimePoint now = MonotonicTimePoint::now();
-                  expire = now + interval_;
+                  expire = MonotonicTimePoint::now() + interval_;
                   if (status_) {
                     if (DCPS_debug_level > 4) {
                       ACE_DEBUG((LM_DEBUG,
                                  "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                     }
-                    if (!status_->update(thread_key_, now)) {
+                    if (!status_->update(thread_key_)) {
                       if (DCPS_debug_level) {
                         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::svc: "
                           "update failed\n"));
@@ -174,13 +173,12 @@ namespace OpenDDS {
 
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
-        const MonotonicTimePoint now = MonotonicTimePoint::now();
-        if (status_ && has_timeout() && now > expire) {
+        if (status_ && has_timeout() && MonotonicTimePoint::now() > expire) {
           if (DCPS_debug_level > 4) {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
-          if (!status_->update(thread_key_, now) && DCPS_debug_level) {
+          if (!status_->update(thread_key_) && DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::writer_done: "
               "update failed\n"));
           }
