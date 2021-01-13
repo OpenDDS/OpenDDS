@@ -335,10 +335,12 @@ public:
             encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
             if (encoding_kind == Encoding::KIND_XCDR1) {
               if (MarshalTraitsType::extensibility_level() == MUTABLE) {
-                ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                  ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
-                  TraitsType::type_name()));
+                if (::OpenDDS::DCPS::DCPS_debug_level) {
+                  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                    ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                    ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
+                    TraitsType::type_name()));
+                }
                 return DDS::RETCODE_ERROR;
               }
             }

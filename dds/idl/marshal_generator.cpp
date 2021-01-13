@@ -1630,39 +1630,41 @@ namespace {
     return bounded;
   }
 
-  ExtensibilityKind extensibility_kind(AST_Type* type, bool root = true)
+  ExtensibilityKind max_extensibility_kind(AST_Type* type, bool root = true)
   {
-    static ExtensibilityKind ek;
+    static ExtensibilityKind max_exten;
     static std::vector<AST_Type*> type_stack;
 
     if (root) {
       type_stack.clear();
-      ek = extensibilitykind_final;
+      max_exten = extensibilitykind_final;
     }
 
     type = resolveActualType(type);
     for (size_t i = 0; i < type_stack.size(); ++i) {
       // If we encounter the same type recursively, then it has already been considered
-      if (type == type_stack[i]) return ek;
+      if (type == type_stack[i]) return max_exten;
     }
     type_stack.push_back(type);
 
     const Classification fld_cls = classify(type);
     if (fld_cls & CL_STRUCTURE || fld_cls & CL_UNION) {
-      ExtensibilityKind exten = be_global->extensibility(type);
-      if (exten == extensibilitykind_mutable) {
+      ExtensibilityKind this_exten = be_global->extensibility(type);
+      if (this_exten == extensibilitykind_mutable) {
         return extensibilitykind_mutable;
       }
-      if (ek < exten) ek = exten;
+      if (max_exten < this_exten) max_exten = this_exten;
 
       const Fields fields(fld_cls & CL_STRUCTURE ? dynamic_cast<AST_Structure*>(type) : dynamic_cast<AST_Union*>(type));
       const Fields::Iterator fields_end = fields.end();
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        if (extensibilitykind_mutable == extensibility_kind(type, false)) {
+        if (extensibilitykind_mutable == max_extensibility_kind(type, false)) {
           return extensibilitykind_mutable;
         }
       }
-      return ek;
+      return max_exten;
+    } else if (fld_cls & CL_ARRAY || fld_cls & CL_SEQUENCE) {
+      return max_extensibility_kind(type, false);
     } else {
       return extensibilitykind_final;
     }
@@ -2685,7 +2687,7 @@ namespace {
     /*
      * This is used for topic type extensibility level.
      */
-    const ExtensibilityKind ek = extensibility_kind(struct_node != 0 ? struct_node : union_node);
+    const ExtensibilityKind ek = max_extensibility_kind(struct_node != 0 ? struct_node : union_node);
     be_global->header_ <<
       "  static Extensibility extensibility_level() { return ";
     switch (ek) {

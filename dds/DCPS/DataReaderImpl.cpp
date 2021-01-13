@@ -3312,6 +3312,67 @@ DataReaderImpl::get_ice_endpoint()
   return TransportClient::get_ice_endpoint();
 }
 
+DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
+{
+  const DDS::DataRepresentationIdSeq repIds =
+    get_effective_data_rep_qos(qos_.representation.value, true);
+  bool success = false;
+  if (cdr_encapsulation()) {
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      Encoding::Kind encoding_kind;
+      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+        if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
+          if (encoding_kind == Encoding::KIND_XCDR1) {
+            if (get_max_extensibility() == MUTABLE) {
+              if (::OpenDDS::DCPS::DCPS_debug_level) {
+                ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                  ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n")));
+              }
+              return DDS::RETCODE_ERROR;
+            }
+          }
+          decoding_modes_.insert(encoding_kind);
+          success = true;
+        } else if (DCPS_debug_level >= 2) {
+          // Supported but incompatible data representation
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+                     ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                     ACE_TEXT("Skip %C data representation.\n"),
+                     Encoding::kind_to_string(encoding_kind).c_str()));
+        }
+      } else if (DCPS_debug_level) {
+        // Unsupported or unknown data representation
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                   ACE_TEXT("Encountered unsupported or unknown data representation.\n")));
+      }
+    }
+  } else {
+    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
+    success = true;
+  }
+  if (!success) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                 ACE_TEXT("Could not find a valid data representation.\n")));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+               ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+               ACE_TEXT("Setup successfully with data representations: ")));
+    OPENDDS_SET(Encoding::Kind)::iterator it = decoding_modes_.begin();
+    for (; it != decoding_modes_.end(); ++it) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C "), Encoding::kind_to_string(*it).c_str()));
+    }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT(".\n")));
+  }
+
+  return DDS::RETCODE_OK;
+}
 
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
 {
