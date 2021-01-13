@@ -36,7 +36,7 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
 
     InternalThreadBuiltinTopicDataHolder info =
       new InternalThreadBuiltinTopicDataHolder(
-        new InternalThreadBuiltinTopicData(new byte[16], ""));
+        new InternalThreadBuiltinTopicData("", new byte[16]));
 
     SampleInfoHolder si = new SampleInfoHolder(new SampleInfo(0, 0, 0,
       new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
@@ -49,7 +49,7 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
       String guid = guidFormatter(info.value.participant_guid);
       System.out.println("  guid: " + guid);
       System.out.println("   tid: " + info.value.thread_id);
-      System.out.println("  time: " + si.source_timestamp.sec);
+      System.out.println("  time: " + si.value.source_timestamp.sec);
     }
   }
 
