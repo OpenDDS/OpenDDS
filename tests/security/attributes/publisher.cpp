@@ -95,7 +95,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       if (my_args.secure_part_user_data_) {
         part_qos.user_data.value.length(static_cast<unsigned int>(part_user_data_string.size()));
         for (size_t i = 0; i < part_user_data_string.size(); ++i) {
-          part_qos.user_data.value[i] = part_user_data_string[i];
+          part_qos.user_data.value[i] = static_cast<unsigned int>(part_user_data_string[i]);
         }
       }
 
