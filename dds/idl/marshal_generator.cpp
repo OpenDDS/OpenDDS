@@ -2687,7 +2687,7 @@ namespace {
     /*
      * This is used for topic type extensibility level.
      */
-    const ExtensibilityKind ek = max_extensibility_kind(struct_node != 0 ? struct_node : union_node);
+    const ExtensibilityKind ek = max_extensibility_kind(dynamic_cast<AST_Type*>(node));
     be_global->header_ <<
       "  static Extensibility extensibility_level() { return ";
     switch (ek) {
