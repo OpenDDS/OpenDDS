@@ -334,7 +334,7 @@ public:
           if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
             encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
             if (encoding_kind == Encoding::KIND_XCDR1) {
-              if (MarshalTraitsType::extensibility_level() == MUTABLE) {
+              if (MarshalTraitsType::max_extensibility_level() == MUTABLE) {
                 if (::OpenDDS::DCPS::DCPS_debug_level) {
                   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                     ACE_TEXT("%CDataWriterImpl::setup_serialization: ")

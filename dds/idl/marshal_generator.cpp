@@ -1651,6 +1651,7 @@ namespace {
     if (fld_cls & CL_STRUCTURE || fld_cls & CL_UNION) {
       ExtensibilityKind this_exten = be_global->extensibility(type);
       if (this_exten == extensibilitykind_mutable) {
+        type_stack.pop_back();
         return extensibilitykind_mutable;
       }
       if (max_exten < this_exten) max_exten = this_exten;
@@ -1659,13 +1660,20 @@ namespace {
       const Fields::Iterator fields_end = fields.end();
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         if (extensibilitykind_mutable == max_extensibility_kind(type, false)) {
+          type_stack.pop_back();
           return extensibilitykind_mutable;
         }
       }
+      type_stack.pop_back();
       return max_exten;
-    } else if (fld_cls & CL_ARRAY || fld_cls & CL_SEQUENCE) {
-      return max_extensibility_kind(type, false);
+    } else if (fld_cls & CL_ARRAY) {
+      type_stack.pop_back();
+      return max_extensibility_kind(dynamic_cast<AST_Array*>(type)->base_type(), false);
+    } else if (fld_cls & CL_SEQUENCE) {
+      type_stack.pop_back();
+      return max_extensibility_kind(dynamic_cast<AST_Sequence*>(type)->base_type(), false);
     } else {
+      type_stack.pop_back();
       return extensibilitykind_final;
     }
   }
@@ -2689,7 +2697,7 @@ namespace {
      */
     const ExtensibilityKind ek = max_extensibility_kind(dynamic_cast<AST_Type*>(node));
     be_global->header_ <<
-      "  static Extensibility extensibility_level() { return ";
+      "  static Extensibility max_extensibility_level() { return ";
     switch (ek) {
     case extensibilitykind_final:
       be_global->header_ << "FINAL";
