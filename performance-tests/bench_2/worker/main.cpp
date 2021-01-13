@@ -16,7 +16,11 @@
 #include "BenchC.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  if defined(__has_warning)
+#    if __has_warning("-Wclass-memaccess")
+#      pragma GCC diagnostic ignored "-Wclass-memaccess"
+#    endif
+#  endif
 #endif
 #include "BenchTypeSupportImpl.h"
 #ifdef __GNUC__
@@ -229,7 +233,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
 #endif
 
-  size_t max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
+  int max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
   Builder::ConstPropertyIndex max_decimal_places_prop =
     get_property(config.properties, "max_decimal_places", Builder::PVK_ULL);
   if (max_decimal_places_prop) {
