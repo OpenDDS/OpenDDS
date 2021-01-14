@@ -80,6 +80,11 @@ public:
     return ::DDS::RETCODE_ERROR;
   }
 
+  virtual OpenDDS::DCPS::Extensibility get_max_extensibility()
+  {
+    return OpenDDS::DCPS::FINAL;
+  }
+
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch) {}
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
   virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
