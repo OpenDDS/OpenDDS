@@ -19,12 +19,11 @@ sub get_output {
     return \@out;
   }
 
-  my $tsidl = $file;
-  $tsidl =~ s/\.idl$/TypeSupport.idl/;
-  #push(@out, $dir . basename($tsidl));
-
   my $deps;
   if ($flags =~ /-Wb,java/) {
+
+    my $tsidl = $file;
+    $tsidl =~ s/\.idl$/TypeSupport.idl/;
 
     my $i2j = CommandHelper::get('idl2jni_files');
     $i2j->do_cached_parse($file, $flags);
