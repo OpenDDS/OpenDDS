@@ -49,6 +49,13 @@ struct OpenDDS_Dcps_Export ThreadStatus {
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
   bool update(const String& key);
+
+#ifdef ACE_HAS_GETTID
+  static inline pid_t gettid()
+  {
+    return syscall(SYS_gettid);
+  }
+#endif
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,

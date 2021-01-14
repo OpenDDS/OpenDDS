@@ -269,9 +269,9 @@ String ThreadStatus::get_key(const char* safety_profile_tid, const String& name)
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
   }
 #  elif defined ACE_HAS_GETTID
-  pid_t tid = ACE_OS::thr_gettid();
+  const pid_t tid = gettid();
 #  else
-  ACE_thread_t tid = ACE_OS::thr_self();
+  const ACE_thread_t tid = ACE_OS::thr_self();
 #  endif
 
   key = to_dds_string(tid);
