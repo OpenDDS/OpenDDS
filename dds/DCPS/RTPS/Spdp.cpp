@@ -2966,29 +2966,44 @@ bool
 Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                          u_short participant_id)
 {
-  uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
-
   ACE_INET_Addr local_addr = outer_->config_->spdp_local_address();
-  local_addr.set_port_number(uni_port_);
+  const bool fixed_port = local_addr.get_port_number();
+
+  if (fixed_port) {
+    uni_port_ = local_addr.get_port_number();
+  } else {
+    uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
+    local_addr.set_port_number(uni_port_);
+  }
 
   if (unicast_socket_.open(local_addr, PF_INET) != 0) {
+    if (fixed_port) {
+      ACE_TCHAR buf[DCPS::AddrToStringSize];
+      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
+                 ACE_TEXT("failed to open %s %p.\n"),
+                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
+
+      throw std::runtime_error("failed to open unicast port for SPDP");
+    }
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((
-            LM_WARNING,
-            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-            ACE_TEXT("failed to open_appropriate_socket_type unicast socket on port %d %p.  ")
-            ACE_TEXT("Trying next participantId...\n"),
-            uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
+      ACE_TCHAR buf[DCPS::AddrToStringSize];
+      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
+                 ACE_TEXT("failed to open %s %p.  ")
+                 ACE_TEXT("Trying next participantId...\n"),
+                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   }
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((
-          LM_INFO,
-          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-          ACE_TEXT("opened unicast socket on port %d\n"),
-          uni_port_));
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
+               ACE_TEXT("opened unicast socket on port %d\n"),
+               uni_port_));
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->config_->ttl())) {
@@ -3014,29 +3029,44 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 bool
 Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 {
-  ipv6_uni_port_ = port;
-
   ACE_INET_Addr local_addr = outer_->config_->ipv6_spdp_local_address();
-  local_addr.set_port_number(ipv6_uni_port_);
+  const bool fixed_port = local_addr.get_port_number();
+
+  if (fixed_port) {
+    ipv6_uni_port_ = local_addr.get_port_number();
+  } else {
+    ipv6_uni_port_ = port;
+    local_addr.set_port_number(ipv6_uni_port_);
+  }
 
   if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((
-                 LM_WARNING,
+    if (fixed_port) {
+      ACE_TCHAR buf[DCPS::AddrToStringSize];
+      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                 ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  ")
+                 ACE_TEXT("failed to open %s %p.\n"),
+                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
+
+      throw std::runtime_error("failed to open ipv6 unicast port for SPDP");
+    }
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buf[DCPS::AddrToStringSize];
+      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+                 ACE_TEXT("failed to open %s %p.  ")
                  ACE_TEXT("Trying next port...\n"),
-                 uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
+                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   }
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((
-          LM_INFO,
-          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-          ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
-          ipv6_uni_port_));
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+               ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
+               ipv6_uni_port_));
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer_->config_->ttl())) {
