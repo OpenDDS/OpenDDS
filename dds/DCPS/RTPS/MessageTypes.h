@@ -32,7 +32,7 @@ namespace OpenDDS {
     const DCPS::EntityId_t PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
       {{0x00, 0x00, 0x00}, 0x00};
     const DCPS::EntityId_t PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE =
-      {{0x00, 0x00, 0x00}, 0x00};
+      {{0x00, 0x00, 0x00}, 0x01};
     const DCPS::EntityId_t PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE =
       {{0x00, 0x00, 0x00}, 0x02};
   }

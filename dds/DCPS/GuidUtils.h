@@ -208,12 +208,6 @@ inline DCPS::RepoId make_id(const DCPS::RepoId& participant_id, const EntityId_t
   return id;
 }
 
-OpenDDS_Dcps_Export inline GUID_t make_guid(
-  const GUID_t& guid, const EntityId_t& entity)
-{
-  return make_id(guid.guidPrefix, entity);
-}
-
 OpenDDS_Dcps_Export inline
 GUID_t make_part_guid(const GuidPrefix_t& prefix)
 {

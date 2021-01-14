@@ -1099,11 +1099,23 @@ void TransportClient::terminate_send_if_suspended()
 
 bool TransportClient::associated_with(const GUID_t& remote) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+  if (!guard.locked()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::associated_with: "
+      "lock failed\n"));
+    return false;
+  }
   return data_link_index_.count(remote);
 }
 
 bool TransportClient::pending_association_with(const GUID_t& remote) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+  if (!guard.locked()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::pending_association_with: "
+      "lock failed\n"));
+    return false;
+  }
   return pending_.count(remote);
 }
 

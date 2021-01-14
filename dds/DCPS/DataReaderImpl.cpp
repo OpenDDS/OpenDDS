@@ -3342,11 +3342,8 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   if (DCPS_debug_level >= 2) {
     OPENDDS_STRING encodings;
     EncodingKinds::iterator it = decoding_modes_.begin();
-    bool first = true;
     for (; it != decoding_modes_.end(); ++it) {
-      if (first) {
-        first = false;
-      } else {
+      if (!encodings.empty()) {
         encodings += ", ";
       }
       encodings += Encoding::kind_to_string(*it);

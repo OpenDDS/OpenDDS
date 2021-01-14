@@ -2157,10 +2157,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 #endif
 
     if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-      RepoId dst;
-      std::memcpy(dst.guidPrefix, it->dst_guid_.guidPrefix, sizeof(dst.guidPrefix));
-      dst.entityId = ENTITYID_UNKNOWN;
-      adr_map[addrs][dst].push_back(it);
+      adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
     } else {
       adr_map[addrs][GUID_UNKNOWN].push_back(it);
     }
@@ -2390,10 +2387,9 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
     for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin();
         it != meta_submessage_bundles[i].end(); ++it) {
       MetaSubmessage& res = **it;
-      RepoId dst = res.dst_guid_;
-      dst.entityId = ENTITYID_UNKNOWN;
+      const RepoId dst = make_unknown_guid(res.dst_guid_);
       if (dst != prev_dst) {
-        std::memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
+        assign(idst.guidPrefix, dst.guidPrefix);
         ser << idst;
       }
       switch (res.sm_._d()) {
@@ -3680,10 +3676,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       // Every reader is lagging and there is more than one.
       meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
       meta_submessage.sm_.heartbeat_sm().readerId = ENTITYID_UNKNOWN;
-      meta_submessage.sm_.heartbeat_sm().firstSN.low = firstSN.getLow();
-      meta_submessage.sm_.heartbeat_sm().firstSN.high = firstSN.getHigh();
-      meta_submessage.sm_.heartbeat_sm().lastSN.low = lastSN.getLow();
-      meta_submessage.sm_.heartbeat_sm().lastSN.high = lastSN.getHigh();
+      meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(firstSN);
+      meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(lastSN);
       for (ReaderInfoMap::const_iterator pos = remote_readers_.begin(), limit = remote_readers_.end(); pos != limit; ++pos) {
         // TODO: This should be factored out in a sporadic task.
         expire_durable_data(pos->second, cfg, now, pendingCallbacks);

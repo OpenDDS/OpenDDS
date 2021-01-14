@@ -260,9 +260,6 @@ using DCPS::Encoding;
 
 namespace {
   const Encoding sedp_encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_LITTLE);
-#ifdef OPENDDS_SECURITY
-  const Encoding secbinprop_encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
-#endif
   const Encoding type_lookup_encoding(Encoding::KIND_XCDR2, DCPS::ENDIAN_NATIVE);
 }
 
@@ -1692,7 +1689,7 @@ Sedp::disassociate(ParticipantData_t& pdata)
     typedef Security::HandleRegistry::DatareaderCryptoHandleList DatareaderCryptoHandleList;
     typedef Security::HandleRegistry::DatawriterCryptoHandleList DatawriterCryptoHandleList;
 
-    const RepoId key = make_id(part, ENTITYID_UNKNOWN);
+    const RepoId key = make_unknown_guid(part);
     const DatareaderCryptoHandleList drlist = get_handle_registry()->get_all_remote_datareaders(key);
     for (DatareaderCryptoHandleList::const_iterator pos = drlist.begin(), limit = drlist.end();
          pos != limit; ++pos) {
@@ -3497,7 +3494,7 @@ EntityId_t Sedp::Endpoint::counterpart_entity_id() const
   default:
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Endpoint::counterpart_entity_id: "
-        "Unexpected value: %u\n", rv));
+        "Unexpected entityKind: %u\n", rv.entityKind));
     }
     rv.entityKind = DCPS::ENTITYKIND_BUILTIN_UNKNOWN;
   }
@@ -3506,7 +3503,7 @@ EntityId_t Sedp::Endpoint::counterpart_entity_id() const
 
 GUID_t Sedp::Endpoint::make_counterpart_guid(const GUID_t& remote_part) const
 {
-  return make_guid(remote_part, counterpart_entity_id());
+  return make_id(remote_part, counterpart_entity_id());
 }
 
 bool Sedp::Endpoint::associated_with_counterpart(const GUID_t& remote_part) const

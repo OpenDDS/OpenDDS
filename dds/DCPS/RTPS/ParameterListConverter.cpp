@@ -471,7 +471,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   vid_param.vendor(proxy.vendorId);
   add_param(param_list, vid_param);
 
-  if (!proxy.expectsInlineQos) {
+  if (proxy.expectsInlineQos) {
     Parameter eiq_param; // Default is false
     eiq_param.expects_inline_qos(proxy.expectsInlineQos);
     add_param(param_list, eiq_param);
