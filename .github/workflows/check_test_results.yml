@@ -35,14 +35,13 @@ jobs:
               fs.writeFileSync('${{ github.workspace }}/' + matchArtifacts[i].name + '.zip', Buffer.from(download.data));
             }
 
-      - name: Setup
+      - name: 'Setup'
         shell: bash
         run: |
           unzip *.zip
           export PR_SHA=$(cat */SHA | sort -u | head -n 1)
           echo "PR_SHA=$PR_SHA" >> $GITHUB_ENV
-      - run: |
-        cat */SHA | 
+
       - name: 'Publish Unit Test Results'
         uses: simpsont-oci/action-junit-report@v1.2.1
         with:
