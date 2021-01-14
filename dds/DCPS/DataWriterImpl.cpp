@@ -206,7 +206,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
                OPENDDS_STRING(reader_converter).c_str()));
   }
 
-  if (entity_deleted_.value()) {
+  if (get_deleted()) {
     if (DCPS_debug_level)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association")
                  ACE_TEXT(" This is a deleted datawriter, ignoring add.\n")));
@@ -1481,7 +1481,7 @@ DataWriterImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
                            pub_qos,

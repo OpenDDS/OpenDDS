@@ -11,8 +11,6 @@ use PerlDDS::Run_Test;
 use PerlDDS::Process_Java;
 use strict;
 
-PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
-
 my $status = 0;
 my $debug = '0';
 

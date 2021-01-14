@@ -88,11 +88,11 @@ namespace OpenDDS {
         return interval_ > TimeDuration(0);
       }
 
-      DcpsUpcalls(DataReaderCallbacks* drr,
+      DcpsUpcalls(DataReaderCallbacks_rch drr,
                   const RepoId& reader,
                   const WriterAssociation& wa,
                   bool active,
-                  DataWriterCallbacks* dwr)
+                  DataWriterCallbacks_rch dwr)
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
         , interval_(TimeDuration(0))
@@ -127,7 +127,11 @@ namespace OpenDDS {
           expire = MonotonicTimePoint::now() + interval_;
         }
 
-        drr_->add_association(reader_, wa_, active_);
+        DataReaderCallbacks_rch drr = drr_.lock();
+        if (!drr) {
+          return 0;
+        }
+        drr->add_association(reader_, wa_, active_);
         {
           ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);
           reader_done_ = true;
@@ -193,11 +197,11 @@ namespace OpenDDS {
         }
       }
 
-      DataReaderCallbacks* const drr_;
+      DataReaderCallbacks_wrch drr_;
       const RepoId& reader_;
       const WriterAssociation& wa_;
       bool active_;
-      DataWriterCallbacks* const dwr_;
+      DataWriterCallbacks_wrch dwr_;
       bool reader_done_, writer_done_;
       ACE_Thread_Mutex mtx_;
       ConditionVariable<ACE_Thread_Mutex> cnd_;
@@ -220,6 +224,7 @@ namespace OpenDDS {
       struct DiscoveredSubscription : PoolAllocationBase {
         DiscoveredSubscription()
         : bit_ih_(DDS::HANDLE_NIL)
+        , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
 #endif
@@ -267,6 +272,7 @@ namespace OpenDDS {
       struct DiscoveredPublication : PoolAllocationBase {
         DiscoveredPublication()
         : bit_ih_(DDS::HANDLE_NIL)
+        , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
 #endif
@@ -504,7 +510,7 @@ namespace OpenDDS {
       virtual bool update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos) = 0;
 
       RepoId add_publication(const RepoId& topicId,
-                             DataWriterCallbacks* publication,
+                             DataWriterCallbacks_rch publication,
                              const DDS::DataWriterQos& qos,
                              const TransportLocatorSeq& transInfo,
                              const DDS::PublisherQos& publisherQos,
@@ -675,7 +681,7 @@ namespace OpenDDS {
       }
 
       RepoId add_subscription(const RepoId& topicId,
-                                    DataReaderCallbacks* subscription,
+                                    DataReaderCallbacks_rch subscription,
                                     const DDS::DataReaderQos& qos,
                                     const TransportLocatorSeq& transInfo,
                                     const DDS::SubscriberQos& subscriberQos,
@@ -901,13 +907,13 @@ namespace OpenDDS {
       };
 
       struct LocalPublication : LocalEndpoint {
-        DataWriterCallbacks* publication_;
+        DataWriterCallbacks_wrch publication_;
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
       };
 
       struct LocalSubscription : LocalEndpoint {
-        DataReaderCallbacks* subscription_;
+        DataReaderCallbacks_wrch subscription_;
         DDS::DataReaderQos qos_;
         DDS::SubscriberQos subscriber_qos_;
         ContentFilterProperty_t filterProperties;
@@ -1056,8 +1062,11 @@ namespace OpenDDS {
             writer_seq.length(1);
             writer_seq[0] = removing;
             const size_t count = lsi->second.remote_expectant_opendds_associations_.erase(removing);
-            lsi->second.subscription_->remove_associations(writer_seq,
-                                                           false /*notify_lost*/);
+            DataReaderCallbacks_rch drr = lsi->second.subscription_.lock();
+            if (drr) {
+              drr->remove_associations(writer_seq,
+                                       false /*notify_lost*/);
+            }
             remove_assoc_i(remove_from, lsi->second, removing);
             // Update writer
             if (count) {
@@ -1077,8 +1086,11 @@ namespace OpenDDS {
             reader_seq.length(1);
             reader_seq[0] = removing;
             lpi->second.remote_expectant_opendds_associations_.erase(removing);
-            lpi->second.publication_->remove_associations(reader_seq,
-                                                          false /*notify_lost*/);
+            DataWriterCallbacks_rch dwr = lpi->second.publication_.lock();
+            if (dwr) {
+              dwr->remove_associations(reader_seq,
+                                       false /*notify_lost*/);
+            }
             remove_assoc_i(remove_from, lpi->second, removing);
           }
         }
@@ -1234,7 +1246,7 @@ namespace OpenDDS {
               }
               bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
-              is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
+              is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
               save_matching_data_and_get_typeobjects(
                 writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
@@ -1248,7 +1260,7 @@ namespace OpenDDS {
               }
               bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
-              is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+              is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
 #endif
               save_matching_data_and_get_typeobjects(
                 reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
@@ -1536,13 +1548,17 @@ namespace OpenDDS {
 
         // Copy entries from local publication and local subscription maps
         // prior to releasing lock
-        DataWriterCallbacks* dwr = 0;
-        DataReaderCallbacks* drr = 0;
+        DataWriterCallbacks_wrch dwr;
+        DataReaderCallbacks_wrch drr;
         if (writer_local) {
           dwr = lpi->second.publication_;
+          OPENDDS_ASSERT(lpi->second.publication_);
+          OPENDDS_ASSERT(dwr);
         }
         if (reader_local) {
           drr = lsi->second.subscription_;
+          OPENDDS_ASSERT(lsi->second.subscription_);
+          OPENDDS_ASSERT(drr);
         }
 
         IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
@@ -1615,22 +1631,30 @@ namespace OpenDDS {
                 ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
                 OPENDDS_STRING(GuidConverter(reader)).c_str()));
             }
-            DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
-            if (call_reader) {
-              thr.activate();
+            DataWriterCallbacks_rch dwr_lock = dwr.lock();
+            if (dwr_lock) {
+              if (call_reader) {
+                DataReaderCallbacks_rch drr_lock = drr.lock();
+                if (drr_lock) {
+                  DcpsUpcalls thr(drr_lock, reader, wa, !writer_active, dwr_lock);
+                  thr.activate();
+                  dwr_lock->add_association(writer, ra, writer_active);
+                  thr.writer_done();
+                }
+              } else {
+                dwr_lock->add_association(writer, ra, writer_active);
+              }
             }
-            dwr->add_association(writer, ra, writer_active);
-            if (call_reader) {
-              thr.writer_done();
-            }
-
           } else if (call_reader) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
                 ACE_TEXT("adding reader %C association for writer %C\n"),
                 OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
             }
-            drr->add_association(reader, wa, !writer_active);
+            DataReaderCallbacks_rch drr_lock = drr.lock();
+            if (drr_lock) {
+              drr_lock->add_association(reader, wa, !writer_active);
+            }
           }
 
         } else if (already_matched) { // break an existing associtaion
@@ -1655,13 +1679,19 @@ namespace OpenDDS {
             ReaderIdSeq reader_seq(1);
             reader_seq.length(1);
             reader_seq[0] = reader;
-            dwr->remove_associations(reader_seq, false /*notify_lost*/);
+            DataWriterCallbacks_rch dwr_lock = dwr.lock();
+            if (dwr_lock) {
+              dwr_lock->remove_associations(reader_seq, false /*notify_lost*/);
+            }
           }
           if (reader_local) {
             WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = writer;
-            drr->remove_associations(writer_seq, false /*notify_lost*/);
+            DataReaderCallbacks_rch drr_lock = drr.lock();
+            if (drr_lock) {
+              drr_lock->remove_associations(writer_seq, false /*notify_lost*/);
+            }
           }
         } else { // something was incompatible
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
@@ -1670,14 +1700,20 @@ namespace OpenDDS {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
                          ACE_TEXT("writer incompatible\n")));
             }
-            dwr->update_incompatible_qos(writerStatus);
+            DataWriterCallbacks_rch dwr_lock = dwr.lock();
+            if (dwr_lock) {
+              dwr_lock->update_incompatible_qos(writerStatus);
+            }
           }
           if (reader_local && readerStatus.count_since_last_send) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
                          ACE_TEXT("reader incompatible\n")));
             }
-            drr->update_incompatible_qos(readerStatus);
+            DataReaderCallbacks_rch drr_lock = drr.lock();
+            if (drr_lock) {
+              drr_lock->update_incompatible_qos(readerStatus);
+            }
           }
         }
       }
@@ -1744,9 +1780,9 @@ namespace OpenDDS {
       {
         DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
         if (call_reader) {
-          DDS::Security::DatareaderCryptoHandle drch =
+          const DDS::Security::DatareaderCryptoHandle drch =
             get_handle_registry()->get_local_datareader_crypto_handle(reader);
-          DDS::Security::EndpointSecurityAttributes attribs =
+          const DDS::Security::EndpointSecurityAttributes attribs =
             get_handle_registry()->get_local_datareader_security_attributes(reader);
 
           // It might not exist due to security attributes, and that's OK
@@ -1774,9 +1810,9 @@ namespace OpenDDS {
         }
 
         if (call_writer) {
-          DDS::Security::DatawriterCryptoHandle dwch =
+          const DDS::Security::DatawriterCryptoHandle dwch =
             get_handle_registry()->get_local_datawriter_crypto_handle(writer);
-          DDS::Security::EndpointSecurityAttributes attribs =
+          const DDS::Security::EndpointSecurityAttributes attribs =
             get_handle_registry()->get_local_datawriter_security_attributes(writer);
 
           // It might not exist due to security attributes, and that's OK
@@ -2028,7 +2064,7 @@ namespace OpenDDS {
 
       RepoId
       add_publication(const RepoId& topicId,
-                      DataWriterCallbacks* publication,
+                      DataWriterCallbacks_rch publication,
                       const DDS::DataWriterQos& qos,
                       const TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos,
@@ -2067,7 +2103,7 @@ namespace OpenDDS {
 
       RepoId
       add_subscription(const RepoId& topicId,
-                       DataReaderCallbacks* subscription,
+                       DataReaderCallbacks_rch subscription,
                        const DDS::DataReaderQos& qos,
                        const TransportLocatorSeq& transInfo,
                        const DDS::SubscriberQos& subscriberQos,
@@ -2203,10 +2239,12 @@ namespace OpenDDS {
         struct LocationUpdate {
           ParticipantLocation mask_;
           ACE_INET_Addr from_;
+          SystemTimePoint timestamp_;
           LocationUpdate() {}
           LocationUpdate(ParticipantLocation mask,
-                         const ACE_INET_Addr& from)
-            : mask_(mask), from_(from) {}
+                         const ACE_INET_Addr& from,
+                         const SystemTimePoint& timestamp)
+            : mask_(mask), from_(from), timestamp_(timestamp) {}
         };
         typedef OPENDDS_VECTOR(LocationUpdate) LocationUpdateList;
         LocationUpdateList location_updates_;
@@ -2559,7 +2597,7 @@ namespace OpenDDS {
       virtual RepoId add_publication(DDS::DomainId_t domainId,
                                                     const RepoId& participantId,
                                                     const RepoId& topicId,
-                                                    DataWriterCallbacks* publication,
+                                                    DataWriterCallbacks_rch publication,
                                                     const DDS::DataWriterQos& qos,
                                                     const TransportLocatorSeq& transInfo,
                                                     const DDS::PublisherQos& publisherQos,
@@ -2605,7 +2643,7 @@ namespace OpenDDS {
       virtual RepoId add_subscription(DDS::DomainId_t domainId,
                                                      const RepoId& participantId,
                                                      const RepoId& topicId,
-                                                     DataReaderCallbacks* subscription,
+                                                     DataReaderCallbacks_rch subscription,
                                                      const DDS::DataReaderQos& qos,
                                                      const TransportLocatorSeq& transInfo,
                                                      const DDS::SubscriberQos& subscriberQos,

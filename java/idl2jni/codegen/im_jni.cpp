@@ -1812,6 +1812,11 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   commonSetup c(name);
   string unionJVMsig = scoped_helper(name, "/");
   bool disc_is_enum(disc_meth == "Object");
+  bool disc_is_bool = false;
+  AST_PredefinedType *pd = dynamic_cast<AST_PredefinedType*>(discriminator);
+  if (pd) {
+    disc_is_bool = (pd->pt() == AST_PredefinedType::PredefinedType::PT_boolean);
+  }
   string disc_name = disc_is_enum ? "disc_val" : "disc",
     extra_enum1 = disc_is_enum ?
     "  jmethodID mid_disc_val = jni->GetMethodID (jni->GetObjectClass "
@@ -1873,7 +1878,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "  " << disc_ty << " disc = jni->Call" << disc_meth << "Method (source, "
   "mid_disc);\n" <<
   extra_enum1 <<
-  "  switch (" << disc_name << ")\n"
+  "  switch (" << (disc_is_bool ? "(int)" : "") << disc_name << ")\n"
   "    {\n" <<
   branchesToCxx <<
   "    }\n"
@@ -1893,7 +1898,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "      clazz = jni->GetObjectClass (target);\n"
   "    }\n" <<
   explicitDiscSetup <<
-  "  switch (source._d ())\n"
+  "  switch (" << (disc_is_bool ? "(int)" : "") << "source._d ())\n"
   "    {\n" <<
   branchesToJava <<
   "    }\n" <<

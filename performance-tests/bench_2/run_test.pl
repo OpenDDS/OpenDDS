@@ -30,27 +30,27 @@ my $is_rtps_disc = 0;
 
 my $flag_found = 1;
 if ($test->flag('disco')) {
-  $tc_opts .= " ci_disco";
+  $tc_opts .= " ci_disco --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('fan')) {
-  $tc_opts .= " ci_fan --override-start-time 15";
+  $tc_opts .= " ci_fan --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('fan_frag')) {
-  $tc_opts .= " ci_fan_frag --override-start-time 15";
+  $tc_opts .= " ci_fan_frag --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('echo')) {
-  $tc_opts .= " ci_echo --override-start-time 15";
+  $tc_opts .= " ci_echo --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('echo_frag')) {
-  $tc_opts .= " ci_echo_frag --override-start-time 15";
+  $tc_opts .= " ci_echo_frag --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('mixed')) {
-  $tc_opts .= " ci_mixed --override-start-time 15";
+  $tc_opts .= " ci_mixed --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('sm10')) {

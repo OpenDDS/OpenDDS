@@ -532,7 +532,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
                OPENDDS_STRING(writer_converter).c_str(),
                writers.length()));
   }
-  if (!this->entity_deleted_.value()) {
+  if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
@@ -540,7 +540,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     // be removed immediately
     WriterIdSeq non_active_writers;
     {
-      CORBA::ULong wr_len = writers.length();
+      const CORBA::ULong wr_len = writers.length();
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
@@ -990,7 +990,7 @@ RecorderImpl::enable()
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
                               this->topic_servant_->get_id(),
-                              this,
+                              rchandle_from(this),
                               this->qos_,
                               trans_conf_info,
                               this->subqos_,

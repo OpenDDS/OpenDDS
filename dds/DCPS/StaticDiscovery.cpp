@@ -322,7 +322,10 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     const ReaderAssociation ra =
       {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0};
 #endif
-    pub.publication_->add_association(writerid, ra, true);
+    DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      pl->add_association(writerid, ra, true);
+    }
   }
 
   for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
@@ -330,7 +333,10 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
        ++pos) {
     const RepoId& readerid = *pos;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
-    pub.publication_->register_for_reader(participant_id_, writerid, readerid, reader.trans_info, this);
+    DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      pl->register_for_reader(participant_id_, writerid, readerid, reader.trans_info, this);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -354,7 +360,10 @@ StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublica
         ++pos, ++idx) {
     const RepoId& readerid = *pos;
     ids[idx] = readerid;
-    pub.publication_->unregister_for_reader(participant_id_, writerid, readerid);
+    DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      pl->unregister_for_reader(participant_id_, writerid, readerid);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -385,7 +394,10 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     const WriterAssociation wa = {
       writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos, type_info
     };
-    sub.subscription_->add_association(readerid, wa, false);
+    DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      sl->add_association(readerid, wa, false);
+    }
   }
 
   for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
@@ -393,7 +405,10 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
        ++pos) {
     const RepoId& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
-    sub.subscription_->register_for_writer(participant_id_, readerid, writerid, writer.trans_info, this);
+    DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      sl->register_for_writer(participant_id_, readerid, writerid, writer.trans_info, this);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -418,7 +433,10 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
         ++pos, ++idx) {
     const RepoId& writerid = *pos;
     ids[idx] = writerid;
-    sub.subscription_->unregister_for_writer(participant_id_, readerid, writerid);
+    DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      sl->unregister_for_writer(participant_id_, readerid, writerid);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -466,22 +484,24 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
   EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
   if (lp_pos != local_publications_.end() &&
       reader_pos != registry_.reader_map.end()) {
-    DataWriterCallbacks* dwr = lp_pos->second.publication_;
+    DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
+    if (dwr) {
 #ifdef __SUNPRO_CC
-    ReaderAssociation ra;
-    ra.readerTransInfo = reader_pos->second.trans_info;
-    ra.readerId = readerid;
-    ra.subQos = reader_pos->second.subscriber_qos;
-    ra.readerQos = reader_pos->second.qos;
-    ra.filterClassName = "";
-    ra.filterExpression = "";
-    ra.exprParams = 0;
+      ReaderAssociation ra;
+      ra.readerTransInfo = reader_pos->second.trans_info;
+      ra.readerId = readerid;
+      ra.subQos = reader_pos->second.subscriber_qos;
+      ra.readerQos = reader_pos->second.qos;
+      ra.filterClassName = "";
+      ra.filterExpression = "";
+      ra.exprParams = 0;
 #else
-    const ReaderAssociation ra =
-      {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0, 0};
+      const ReaderAssociation ra =
+        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos};
 
 #endif
-    dwr->add_association(writerid, ra, true);
+      dwr->add_association(writerid, ra, true);
+    }
   }
 }
 
@@ -493,11 +513,13 @@ StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoI
   EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
   if (lp_pos != local_publications_.end() &&
       reader_pos != registry_.reader_map.end()) {
-    DataWriterCallbacks* dwr = lp_pos->second.publication_;
-    ReaderIdSeq ids;
-    ids.length(1);
-    ids[0] = readerid;
-    dwr->remove_associations(ids, true);
+    DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
+    if (dwr) {
+      ReaderIdSeq ids;
+      ids.length(1);
+      ids[0] = readerid;
+      dwr->remove_associations(ids, true);
+    }
   }
 }
 
@@ -509,18 +531,20 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
   EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
   if (ls_pos != local_subscriptions_.end() &&
       writer_pos != registry_.writer_map.end()) {
-    DataReaderCallbacks* drr = ls_pos->second.subscription_;
+    DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
+    if (drr) {
 #ifdef __SUNPRO_CC
-    WriterAssociation wa;
-    wa.writerTransInfo = writer_pos->second.trans_info;
-    wa.writerId = writerid;
-    wa.pubQos = writer_pos->second.publisher_qos;
-    wa.writerQos = writer_pos->second.qos;
+      WriterAssociation wa;
+      wa.writerTransInfo = writer_pos->second.trans_info;
+      wa.writerId = writerid;
+      wa.pubQos = writer_pos->second.publisher_qos;
+      wa.writerQos = writer_pos->second.qos;
 #else
-    const WriterAssociation wa =
-      {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, 0};
+      const WriterAssociation wa =
+        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
 #endif
-    drr->add_association(readerid, wa, false);
+      drr->add_association(readerid, wa, false);
+    }
   }
 }
 
@@ -532,11 +556,13 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
   EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
   if (ls_pos != local_subscriptions_.end() &&
       writer_pos != registry_.writer_map.end()) {
-    DataReaderCallbacks* drr = ls_pos->second.subscription_;
-    WriterIdSeq ids;
-    ids.length(1);
-    ids[0] = writerid;
-    drr->remove_associations(ids, true);
+    DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
+    if (drr) {
+      WriterIdSeq ids;
+      ids.length(1);
+      ids[0] = writerid;
+      drr->remove_associations(ids, true);
+    }
   }
 }
 

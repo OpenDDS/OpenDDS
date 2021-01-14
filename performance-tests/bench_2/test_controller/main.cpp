@@ -42,6 +42,10 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
+namespace {
+  const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
+}
+
 int handle_report(const Bench::TestController::Report& report,
   const std::unordered_set<std::string>& tags,
   std::ostringstream& result_out);
@@ -143,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
    * not just a number.
    */
   std::string result_id;
-  bool overwrite_result = false, json_result = false;
+  bool overwrite_result = false, json_result = false, show_worker_logs = false;
 
   // List of tags
   std::unordered_set<std::string> tags;
@@ -246,6 +250,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         tags.insert(get_option_argument(i, argc, argv));
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json"))) {
         json_result = true;
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--show-worker-logs"))) {
+        show_worker_logs = true;
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -383,14 +389,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Saving Scenario Allocation to File..." << std::endl;
       std::ofstream file(preallocated_scenario_output_path);
       if (file.is_open()) {
-        if (!idl_2_json(allocated_scenario, file, pretty)) {
+        if ((pretty && !idl_2_json<AllocatedScenario, rapidjson::PrettyWriter<rapidjson::OStreamWrapper> >(allocated_scenario, file)) ||
+            (!pretty && !idl_2_json(allocated_scenario, file))) {
           throw std::runtime_error("Could not encode allocated scenario");
         }
       } else {
         throw std::runtime_error("Could not open file for writing allocated scenario");
       }
     } else if (debug_alloc) {
-      if (!idl_2_json(allocated_scenario, std::cout, true)) {
+      if (!idl_2_json<AllocatedScenario, rapidjson::PrettyWriter<rapidjson::OStreamWrapper> >(allocated_scenario, std::cout)) {
         throw std::runtime_error("Could not encode allocated scenario");
       }
     } else {
@@ -444,6 +451,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       size_t total_worker_reports = 0;
       for (CORBA::ULong i = 0; i < report.node_reports.length(); ++i) {
         total_worker_reports += report.node_reports[i].worker_reports.length();
+        if (show_worker_logs) {
+          for (CORBA::ULong j = 0; j < report.node_reports[i].worker_logs.length(); ++j) {
+            std::stringstream header;
+            header << "=== Showing Log for Node " << report.node_reports[i].node_id << " Worker #" << report.node_reports[i].worker_ids[j] << " ===" << std::endl;
+            result_file << header.str();
+            result_file << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
+            std::cout << header.str();
+            std::cout << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
+          }
+        }
       }
 
       if (total_worker_reports != allocated_scenario.expected_reports) {
@@ -461,7 +478,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           error << "Could not open " << json_result_path;
           throw std::runtime_error(error.str());
         }
-        idl_2_json(report, json_result_file, false);
+        idl_2_json(report, json_result_file, DEFAULT_MAX_DECIMAL_PLACES);
         std::cout << "Wrote JSON results to " << json_result_path << std::endl;
       }
     }

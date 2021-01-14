@@ -32,20 +32,26 @@ public:
   typedef std::pair<DCPS::RepoId, DDS::Security::DatawriterCryptoHandle> RepoIdDwch;
   typedef OPENDDS_VECTOR(RepoIdDwch) DatawriterCryptoHandleList;
 
+  HandleRegistry();
   ~HandleRegistry();
+
+  const DDS::Security::EndpointSecurityAttributes& default_endpoint_security_attributes() const
+  {
+    return default_endpoint_security_attributes_;
+  }
 
   void insert_local_datareader_crypto_handle(const DCPS::RepoId& id,
                                              DDS::Security::DatareaderCryptoHandle handle,
-                                             DDS::Security::EndpointSecurityAttributes attributes);
+                                             const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatareaderCryptoHandle get_local_datareader_crypto_handle(const DCPS::RepoId& id) const;
-  DDS::Security::EndpointSecurityAttributes get_local_datareader_security_attributes(const DCPS::RepoId& id) const;
+  const DDS::Security::EndpointSecurityAttributes& get_local_datareader_security_attributes(const DCPS::RepoId& id) const;
   void erase_local_datareader_crypto_handle(const DCPS::RepoId& id);
 
   void insert_local_datawriter_crypto_handle(const DCPS::RepoId& id,
                                              DDS::Security::DatawriterCryptoHandle handle,
-                                             DDS::Security::EndpointSecurityAttributes attributes);
+                                             const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatawriterCryptoHandle get_local_datawriter_crypto_handle(const DCPS::RepoId& id) const;
-  DDS::Security::EndpointSecurityAttributes get_local_datawriter_security_attributes(const DCPS::RepoId& id) const;
+  const DDS::Security::EndpointSecurityAttributes& get_local_datawriter_security_attributes(const DCPS::RepoId& id) const;
   void erase_local_datawriter_crypto_handle(const DCPS::RepoId& id);
 
   void insert_remote_participant_crypto_handle(const DCPS::RepoId& id,
@@ -55,17 +61,17 @@ public:
 
   void insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
                                               DDS::Security::DatareaderCryptoHandle handle,
-                                              DDS::Security::EndpointSecurityAttributes attributes);
+                                              const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatareaderCryptoHandle get_remote_datareader_crypto_handle(const DCPS::RepoId& id) const;
-  DDS::Security::EndpointSecurityAttributes get_remote_datareader_security_attributes(const DCPS::RepoId& id) const;
+  const DDS::Security::EndpointSecurityAttributes& get_remote_datareader_security_attributes(const DCPS::RepoId& id) const;
   DatareaderCryptoHandleList get_all_remote_datareaders(const DCPS::RepoId& prefix) const;
   void erase_remote_datareader_crypto_handle(const DCPS::RepoId& id);
 
   void insert_remote_datawriter_crypto_handle(const DCPS::RepoId& id,
                                               DDS::Security::DatawriterCryptoHandle handle,
-                                              DDS::Security::EndpointSecurityAttributes attributes);
+                                              const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatawriterCryptoHandle get_remote_datawriter_crypto_handle(const DCPS::RepoId& id) const;
-  DDS::Security::EndpointSecurityAttributes get_remote_datawriter_security_attributes(const DCPS::RepoId& id) const;
+  const DDS::Security::EndpointSecurityAttributes& get_remote_datawriter_security_attributes(const DCPS::RepoId& id) const;
   DatawriterCryptoHandleList get_all_remote_datawriters(const DCPS::RepoId& prefix) const;
   void erase_remote_datawriter_crypto_handle(const DCPS::RepoId& id);
 
@@ -78,6 +84,8 @@ private:
   typedef std::pair<DDS::Security::DatawriterCryptoHandle, DDS::Security::EndpointSecurityAttributes> P2;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, P2, DCPS::GUID_tKeyLessThan)
     DatawriterCryptoHandleMap;
+
+  DDS::Security::EndpointSecurityAttributes default_endpoint_security_attributes_;
 
   mutable ACE_Thread_Mutex mutex_;
   ParticipantCryptoHandleMap remote_participant_crypto_handles_;

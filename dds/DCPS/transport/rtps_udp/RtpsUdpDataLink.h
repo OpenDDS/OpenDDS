@@ -299,6 +299,7 @@ private:
     MonotonicTimePoint durable_timestamp_;
 #ifdef OPENDDS_SECURITY
     SequenceNumber max_pvs_sn_;
+    DisjointSequence pvs_outstanding_;
 #endif
 
     ReaderInfo(const RepoId& id, bool durable)
@@ -398,10 +399,17 @@ private:
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
+    void record_directed(const RepoId& reader, SequenceNumber seq);
     void expire_durable_data(const ReaderInfo_rch& reader,
                              const RtpsUdpInst& cfg,
                              const MonotonicTimePoint& now,
                              OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks);
+
+#ifdef OPENDDS_SECURITY
+    bool is_pvs_writer() const { return is_pvs_writer_; }
+#else
+    bool is_pvs_writer() const { return false; }
+#endif
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
@@ -512,6 +520,7 @@ private:
                                   const RepoId& src,
                                   bool directed,
                                   MetaSubmessageVec& meta_submessages);
+    void deliver_held_data(const RepoId& src);
 
     void gather_preassociation_ack_nacks(MetaSubmessageVec& meta_submessages);
     const RepoId& id() const { return id_; }
@@ -781,23 +790,20 @@ private:
   class DeliverHeldData {
   public:
     DeliverHeldData()
-      : reader_id_(GUID_UNKNOWN)
+      : writer_id_(GUID_UNKNOWN)
     {}
 
-    DeliverHeldData(const RtpsUdpDataLink_rch& link,
-                    const RepoId& reader_id,
-                    const WriterInfo_rch& writer)
-      : link_(link)
-      , reader_id_(reader_id)
-      , writer_(writer)
+    DeliverHeldData(RtpsReader_rch reader,
+                    const RepoId& writer_id)
+      : reader_(reader)
+      , writer_id_(writer_id)
     {}
 
     ~DeliverHeldData();
 
   private:
-    RtpsUdpDataLink_rch link_;
-    RepoId reader_id_;
-    WriterInfo_rch writer_;
+    RtpsReader_rch reader_;
+    RepoId writer_id_;
   };
 
 #ifdef OPENDDS_SECURITY

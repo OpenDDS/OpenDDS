@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 #include "DataSampleElement.h"
+
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -78,6 +79,7 @@ InstanceDataSampleList::enqueue_tail(const DataSampleElement* sample)
   if (head_ == 0) {
     // First sample on queue.
     head_ = tail_ = mSample;
+    mSample->previous_instance_sample_ = 0;
 
   } else {
     // Another sample on an existing queue.

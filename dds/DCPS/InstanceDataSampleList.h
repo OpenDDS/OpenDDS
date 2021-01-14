@@ -8,10 +8,11 @@
 #ifndef OPENDDS_DCPS_INSTANCEDATASAMPLELIST_H
 #define OPENDDS_DCPS_INSTANCEDATASAMPLELIST_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
-#include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
+
+#include "transport/framework/TransportDefs.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 #include <iterator>
 
@@ -32,10 +33,9 @@ class DataSampleElement;
 * Manages DataSampleElement's next_instance_sample pointer
 */
 class OpenDDS_Dcps_Export InstanceDataSampleList {
-
- public:
+public:
   InstanceDataSampleList();
-  ~InstanceDataSampleList(){}
+  ~InstanceDataSampleList() {}
 
   /// Reset to initial state.
   void reset();
@@ -54,7 +54,7 @@ class OpenDDS_Dcps_Export InstanceDataSampleList {
 
   bool dequeue(const DataSampleElement* stale);
 
- protected:
+protected:
 
    /// The first element of the list.
    DataSampleElement* head_;
@@ -63,7 +63,7 @@ class OpenDDS_Dcps_Export InstanceDataSampleList {
    DataSampleElement* tail_;
 
    /// Number of elements in the list.
-   ssize_t                size_;
+   ssize_t size_;
    //TBD size is never negative so should be size_t but this ripples through
    // the transport code so leave it for now. SHH
 

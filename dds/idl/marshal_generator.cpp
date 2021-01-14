@@ -3526,6 +3526,10 @@ namespace {
       generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
       be_global->impl_ <<
+        "  if (uni._d() == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
+        "    // Parameter union uses OctetSeq but this is not actually a sequence\n"
+        "    size -= 4;\n"
+        "  }\n"
         "  size += 4; // parameterId & length\n";
     }
     {
@@ -3546,8 +3550,12 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  ACE_Message_Block param(size);\n"
-        "  Serializer strm(&param, outer_strm.encoding());"
-        "  if (!insertParamData(strm, uni)) {\n"
+        "  Serializer strm(&param, outer_strm.encoding());\n"
+        "  if (uni._d() == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
+        "    if (!strm.write_octet_array(uni.type_information().get_buffer(), uni.type_information().length())) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  } else if (!insertParamData(strm, uni)) {\n"
         "    return false;\n"
         "  }\n"
         "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
@@ -3592,9 +3600,16 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  param.wr_ptr(size);\n"
+        "  if (disc == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
+        "    DDS::OctetSeq type_info(size);\n"
+        "    type_info.length(size);\n"
+        "    std::memcpy(type_info.get_buffer(), data, size);\n"
+        "    uni.type_information(type_info);\n"
+        "    return true;\n"
+        "  }\n"
         "  const Encoding encoding(\n"
         "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
-        "  Serializer strm(&param, encoding);"
+        "  Serializer strm(&param, encoding);\n"
         "  switch (disc) {\n";
       generateSwitchBody(u, streamCommon, branches, discriminator,
                          "return", ">> ", cxx.c_str(), true);

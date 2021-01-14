@@ -13,7 +13,11 @@
 #include "Definitions.h"
 #include "transport/framework/TransportConfig_rch.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <ace/Atomic_Op_T.h>
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op_T.h>
+#endif /* ACE_HAS_CPP11 */
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -75,11 +79,19 @@ protected:
 
   bool get_deleted();
 
+#ifdef ACE_HAS_CPP11
+  /// The flag indicates the entity is enabled.
+  std::atomic<bool>       enabled_;
+
+  /// The flag indicates the entity is being deleted.
+  std::atomic<bool>       entity_deleted_;
+#else
   /// The flag indicates the entity is enabled.
   ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
 
   /// The flag indicates the entity is being deleted.
   ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       entity_deleted_;
+#endif
 
 private:
   /// The status_changes_ variable lists all status changed flag.

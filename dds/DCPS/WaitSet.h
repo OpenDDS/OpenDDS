@@ -23,6 +23,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -51,8 +56,8 @@ public:
   typedef WaitSet_var _var_type;
 
   WaitSet()
-    : lock_()
-    , cond_(lock_)
+    : cond_(lock_)
+    , waiting_(false)
   {}
 
   virtual ~WaitSet() {}
@@ -80,10 +85,15 @@ private:
   friend class OpenDDS::DCPS::ConditionImpl;
 
   ACE_Recursive_Thread_Mutex lock_;
+
   typedef OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
   ConditionVariableType cond_;
-  // Treat as a boolean value.
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
+
+#ifdef ACE_HAS_CPP11
+  std::atomic<bool> waiting_;
+#else
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;
+#endif
 
   ConditionSet attached_conditions_;
   ConditionSet signaled_conditions_;
