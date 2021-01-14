@@ -124,8 +124,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 
   if (TK_UNION == to.minimal.kind) {
     result = to.minimal.union_type.union_flags & extensibility_mask;
-  }
-  else if (TK_STRUCTURE == to.minimal.kind) {
+  } else if (TK_STRUCTURE == to.minimal.kind) {
     result = to.minimal.struct_type.struct_flags & extensibility_mask;
   }
 
