@@ -1,0 +1,12 @@
+name: Cancel Previous Runs
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+
+cancel-previous-runs:
+  runs-on: ubuntu-20.04
+  steps:
+  - uses: n1hility/cancel-previous-runs@v2
+    with:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      workflow: build_and_test.yml

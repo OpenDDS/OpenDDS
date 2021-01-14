@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - branch-DDS-3.*
-      - gh_workflow
+      - gh_workflow*
     paths:
       - '**'
       - '!docs/**'
@@ -25,23 +25,11 @@ on:
 
 jobs:
 
-  # Cancel Previous Runs
-
-  cancel-previous-runs:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v1
-    - uses: n1hility/cancel-previous-runs@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-
   # Ubuntu 20.04
 
   ubuntu-20_04_defaults_artifact:
 
     runs-on: ubuntu-20.04
-
-    needs: cancel-previous-runs
 
     steps:
     - name: install xerces
@@ -88,7 +76,7 @@ jobs:
         name: ubuntu-20_04_defaults_ace_artifact
         path: ubuntu-20_04_defaults_ACE_TAO.tar.xz
 
-  ubuntu-20_04_security:
+  ubuntu-20_04_defaults_security:
 
     runs-on: ubuntu-20.04
 
@@ -149,15 +137,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir ubuntu-20_04_defaults_security_autobuild_workspace
+        cd ubuntu-20_04_defaults_security_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="ubuntu-20_04_security_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/ubuntu-20_04_defaults_security_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/ubuntu-20_04_defaults_security_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -172,26 +161,19 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_security_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-20_04_security_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/ubuntu-20_04_security_autobuild_output.log_Full.html
+        name: ubuntu-20_04_defaults_security_autobuild_output
+        path: OpenDDS/ubuntu-20_04_defaults_security_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-20_04_security"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
+        cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_security_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_security_autobuild_workspace/latest.txt"
 
-  ubuntu-20_04_java_no-bit:
+  ubuntu-20_04_defaults_java_no-bit:
 
     runs-on: ubuntu-20.04
 
@@ -279,15 +261,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir ubuntu-20_04_defaults_java_no-bit_autobuild_workspace
+        cd ubuntu-20_04_defaults_java_no-bit_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="ubuntu-20_04_java_no-bit_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -302,23 +285,23 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-20_04_java_no-bit_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/ubuntu-20_04_java_no-bit_autobuild_output.log_Full.html
+        name: ubuntu-20_04_defaults_java_no-bit_autobuild_output
+        path: OpenDDS/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-20_04_java_no-bit"
+        check_name: "Test Results: ubuntu-20_04_defaults_java_no-bit"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Ubuntu 18.04
@@ -326,8 +309,6 @@ jobs:
   ubuntu-18_04_defaults_artifact:
 
     runs-on: ubuntu-18.04
-
-    needs: cancel-previous-runs
 
     steps:
     - name: install xerces
@@ -374,7 +355,7 @@ jobs:
         name: ubuntu-18_04_defaults_ace_artifact
         path: ubuntu-18_04_defaults_ACE_TAO.tar.xz
 
-  ubuntu-18_04_security:
+  ubuntu-18_04_defaults_security:
 
     runs-on: ubuntu-18.04
 
@@ -435,15 +416,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir ubuntu-18_04_defaults_security_autobuild_workspace
+        cd ubuntu-18_04_defaults_security_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="ubuntu-18_04_security_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/ubuntu-18_04_defaults_security_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/ubuntu-18_04_defaults_security_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -458,26 +440,26 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_security_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-18_04_security_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/ubuntu-18_04_security_autobuild_output.log_Full.html
+        name: ubuntu-18_04_defaults_security_autobuild_output
+        path: OpenDDS/ubuntu-18_04_defaults_security_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_security_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_security_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-18_04_security"
+        check_name: "Test Results: ubuntu-18_04_defaults_security"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
-  ubuntu-18_04_java_no-bit:
+  ubuntu-18_04_defaults_java_no-bit:
 
     runs-on: ubuntu-18.04
 
@@ -565,15 +547,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir ubuntu-18_04_defaults_java_no-bit_autobuild_workspace
+        cd ubuntu-18_04_defaults_java_no-bit_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="ubuntu-18_04_java_no-bit_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -588,23 +571,23 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-18_04_java_no-bit_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/ubuntu-18_04_java_no-bit_autobuild_output.log_Full.html
+        name: ubuntu-18_04_defaults_java_no-bit_autobuild_output
+        path: OpenDDS/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-18_04_java_no-bit"
+        check_name: "Test Results: ubuntu-18_04_defaults_java_no-bit"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Ubuntu 16.04
@@ -612,8 +595,6 @@ jobs:
   ubuntu-16_04_defaults_artifact:
 
     runs-on: ubuntu-16.04
-
-    needs: cancel-previous-runs
 
     steps:
     - name: install xerces
@@ -660,7 +641,7 @@ jobs:
         name: ubuntu-16_04_defaults_ace_artifact
         path: ubuntu-16_04_defaults_ACE_TAO.tar.xz
 
-  ubuntu-16_04_security:
+  ubuntu-16_04_defaults_security:
 
     runs-on: ubuntu-16.04
 
@@ -721,15 +702,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir ubuntu-16_04_defaults_security_autobuild_workspace
+        cd ubuntu-16_04_defaults_security_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="ubuntu-16_04_security_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/ubuntu-16_04_defaults_security_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/ubuntu-16_04_defaults_security_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -744,26 +726,26 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_security_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-16_04_security_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/ubuntu-16_04_security_autobuild_output.log_Full.html
+        name: ubuntu-16_04_defaults_security_autobuild_output
+        path: OpenDDS/ubuntu-16_04_defaults_security_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_security_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_security_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-16_04_security"
+        check_name: "Test Results: ubuntu-16_04_defaults_security"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
-  ubuntu-16_04_java_no-bit:
+  ubuntu-16_04_defaults_java_no-bit:
 
     runs-on: ubuntu-16.04
 
@@ -851,15 +833,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir ubuntu-16_04_defaults_java_no-bit_autobuild_workspace
+        cd ubuntu-16_04_defaults_java_no-bit_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="ubuntu-16_04_java_no-bit_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -874,23 +857,23 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-16_04_java_no-bit_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/ubuntu-16_04_java_no-bit_autobuild_output.log_Full.html
+        name: ubuntu-16_04_defaults_java_no-bit_autobuild_output
+        path: OpenDDS/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-16_04_java_no-bit"
+        check_name: "Test Results: ubuntu-16_04_defaults_java_no-bit"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Windows 2019
@@ -898,8 +881,6 @@ jobs:
   windows-2019_defaults_artifact:
 
     runs-on: windows-2019
-
-    needs: cancel-previous-runs
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -1023,16 +1004,17 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        mkdir workspace
-        cd workspace
+        mkdir windows-2019_defaults_security_autobuild_workspace
+        cd windows-2019_defaults_security_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="windows-2019_security_autobuild_output.log"/>
-        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\windows-2019_defaults_security_autobuild_workspace"/>
         <variable name="project_root" value="$DBS_GHW\\OpenDDS"/>
-        <variable name="root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="root" value="$DBS_GHW\\OpenDDS\\windows-2019_defaults_security_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -1053,24 +1035,24 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
-    - name: upload Full log output
+        cd windows-2019_defaults_security_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\windows-2019_defaults_security_autobuild_workspace\config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: windows-2019_security_autobuild_output.log_Full.html
-        path: OpenDDS\workspace\windows-2019_security_autobuild_output.log_Full.html
+        name: windows-2019_defaults_security_autobuild_output
+        path: OpenDDS\windows-2019_defaults_security_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_security_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_security_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2019_security"
+        check_name: "Test Results: windows-2019_defaults_security"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   windows-2019_defaults_java_no-bit:
@@ -1141,16 +1123,17 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        mkdir workspace
-        cd workspace
+        mkdir windows-2019_defaults_java_no-bit_autobuild_workspace
+        cd windows-2019_defaults_java_no-bit_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="windows-2019_java_no-bit_autobuild_output.log"/>
-        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\windows-2019_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="project_root" value="$DBS_GHW\\OpenDDS"/>
-        <variable name="root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="root" value="$DBS_GHW\\OpenDDS\\windows-2019_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -1171,24 +1154,24 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
-    - name: upload Full log output
+        cd windows-2019_defaults_java_no-bit_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\windows-2019_defaults_java_no-bit_autobuild_workspace\config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: windows-2019_java_no-bit_autobuild_output.log_Full.html
-        path: OpenDDS\workspace\windows-2019_java_no-bit_autobuild_output.log_Full.html
+        name: windows-2019_defaults_java_no-bit_autobuild_output
+        path: OpenDDS\windows-2019_defaults_java_no-bit_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_java_no-bit_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_java_no-bit_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2019_java_no-bit"
+        check_name: "Test Results: windows-2019_defaults_java_no-bit"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Windows 2016
@@ -1196,8 +1179,6 @@ jobs:
   windows-2016_no_debug_no_inline_artifact:
 
     runs-on: windows-2016
-
-    needs: cancel-previous-runs
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -1321,16 +1302,17 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        mkdir workspace
-        cd workspace
+        mkdir windows-2016_no_debug_no_inline_security_autobuild_workspace
+        cd windows-2016_no_debug_no_inline_security_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="windows-2016_security_autobuild_output.log"/>
-        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\windows-2016_no_debug_no_inline_security_autobuild_workspace"/>
         <variable name="project_root" value="$DBS_GHW\\OpenDDS"/>
-        <variable name="root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="root" value="$DBS_GHW\\OpenDDS\\windows-2016_no_debug_no_inline_security_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -1351,24 +1333,24 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
-    - name: upload Full log output
+        cd windows-2016_no_debug_no_inline_security_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\windows-2016_no_debug_no_inline_security_autobuild_workspace\config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: windows-2016_security_autobuild_output.log_Full.html
-        path: OpenDDS\workspace\windows-2016_security_autobuild_output.log_Full.html
+        name: windows-2016_no_debug_no_inline_security_autobuild_output
+        path: OpenDDS\windows-2016_no_debug_no_inline_security_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_security_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_security_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2016_security"
+        check_name: "Test Results: windows-2016_no_debug_no_inline_security"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   windows-2016_no_debug_no_inline_java_no-bit:
@@ -1439,16 +1421,17 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        mkdir workspace
-        cd workspace
+        mkdir windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace
+        cd windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="windows-2016_java_no-bit_autobuild_output.log"/>
-        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace"/>
         <variable name="project_root" value="$DBS_GHW\\OpenDDS"/>
-        <variable name="root" value="$DBS_GHW\\OpenDDS\\workspace"/>
+        <variable name="root" value="$DBS_GHW\\OpenDDS\\windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -1469,24 +1452,24 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\workspace\config.xml"
-    - name: upload Full log output
+        cd windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace\config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: windows-2016_java_no-bit_autobuild_output.log_Full.html
-        path: OpenDDS\workspace\windows-2016_java_no-bit_autobuild_output.log_Full.html
+        name: windows-2016_no_debug_no_inline_java_no-bit_autobuild_output
+        path: OpenDDS\windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2016_java_no-bit"
+        check_name: "Test Results: windows-2016_no_debug_no_inline_java_no-bit"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # macOS 11.0
@@ -1494,8 +1477,6 @@ jobs:
 #  macos-11_0_defaults_artifact:
 #
 #    runs-on: macos-11.0
-#
-#    needs: cancel-previous-runs
 #
 #    steps:
 #    - name: install xerces-c
@@ -1543,7 +1524,7 @@ jobs:
 #        name: macos-11_0_defaults_ace_artifact
 #        path: macos-11_0_defaults_ACE_TAO.tar.xz
 #
-#  macos-11_0_security:
+#  macos-11_0_defaults_security:
 #
 #    runs-on: macos-11.0
 #
@@ -1607,13 +1588,14 @@ jobs:
 #        . setenv.sh
 #        mkdir workspace
 #        cd workspace
+#        echo $GITHUB_SHA > ./SHA
 #        cat > config.xml <<EOF
 #        <autobuild>
 #        <configuration>
-#        <variable name="log_file" value="macos-11_0_security_autobuild_output.log"/>
-#        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$DDS_ROOT/macos-11_0_defaults_security_autobuild_workspace"/>
 #        <variable name="project_root" value="$DDS_ROOT"/>
-#        <variable name="root" value="$DDS_ROOT/workspace"/>
+#        <variable name="root" value="$DDS_ROOT/macos-11_0_defaults_security_autobuild_workspace"/>
 #        <variable name="junit_xml_output" value="Tests"/>
 #        </configuration>
 #        <command name="log" options="on"/>
@@ -1628,26 +1610,26 @@ jobs:
 #        <command name="process_logs" options="prettify"/>
 #        </autobuild>
 #        EOF
-#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-#    - name: upload Full log output
+#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_security_autobuild_workspace/config.xml"
+#    - name: upload autobuild output
 #      uses: actions/upload-artifact@v2
 #      with:
-#        name: macos-11_0_security_autobuild_output.log_Full.html
-#        path: OpenDDS/workspace/macos-11_0_security_autobuild_output.log_Full.html
+#        name: macos-11_0_defaults_security_autobuild_output
+#        path: OpenDDS/macos-11_0_defaults_security_autobuild_workspace
 #    - name: check results
 #      shell: bash
 #      run: |
-#        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+#        cat "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_security_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_security_autobuild_workspace/latest.txt"
 #    - name: Publish Unit Test Results
 #      uses: simpsont-oci/action-junit-report@v1.2.1
 #      if: always()
 #      with:
 #        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        check_name: "Test Results: macos-11_0_security"
+#        check_name: "Test Results: macos-11_0_defaults_security"
 #        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 #
-#  macos-11_0_java_no-bit:
+#  macos-11_0_defaults_java_no-bit:
 #
 #    runs-on: macos-11.0
 #
@@ -1736,15 +1718,16 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        . setenv.sh
-#        mkdir workspace
-#        cd workspace
+#        mkdir macos-11_0_defaults_java_no-bit_autobuild_workspace
+#        cd macos-11_0_defaults_java_no-bit_autobuild_workspace
+#        echo $GITHUB_SHA > ./SHA
 #        cat > config.xml <<EOF
 #        <autobuild>
 #        <configuration>
-#        <variable name="log_file" value="macos-11_0_java_no-bit_autobuild_output.log"/>
-#        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$DDS_ROOT/macos-11_0_defaults_java_no-bit_autobuild_workspace"/>
 #        <variable name="project_root" value="$DDS_ROOT"/>
-#        <variable name="root" value="$DDS_ROOT/workspace"/>
+#        <variable name="root" value="$DDS_ROOT/macos-11_0_defaults_java_no-bit_autobuild_workspace"/>
 #        <variable name="junit_xml_output" value="Tests"/>
 #        </configuration>
 #        <command name="log" options="on"/>
@@ -1759,23 +1742,23 @@ jobs:
 #        <command name="process_logs" options="prettify"/>
 #        </autobuild>
 #        EOF
-#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-#    - name: upload Full log output
+#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_java_no-bit_autobuild_workspace/config.xml"
+#    - name: upload autobuild output
 #      uses: actions/upload-artifact@v2
 #      with:
-#        name: macos-11_0_java_no-bit_autobuild_output.log_Full.html
-#        path: OpenDDS/workspace/macos-11_0_java_no-bit_autobuild_output.log_Full.html
+#        name: macos-11_0_defaults_java_no-bit_autobuild_output
+#        path: OpenDDS/macos-11_0_defaults_java_no-bit_autobuild_workspace
 #    - name: check results
 #      shell: bash
 #      run: |
-#        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+#        cat "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_java_no-bit_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_java_no-bit_autobuild_workspace/latest.txt"
 #    - name: Publish Unit Test Results
 #      uses: simpsont-oci/action-junit-report@v1.2.1
 #      if: always()
 #      with:
 #        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        check_name: "Test Results: macos-11_0_java_no-bit"
+#        check_name: "Test Results: macos-11_0_defaults_java_no-bit"
 #        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # macOS 10.15
@@ -1783,8 +1766,6 @@ jobs:
   macos-10_15_defaults_artifact:
 
     runs-on: macos-10.15
-
-    needs: cancel-previous-runs
 
     steps:
     - name: install xerces-c
@@ -1832,7 +1813,7 @@ jobs:
         name: macos-10_15_defaults_ace_artifact
         path: macos-10_15_defaults_ACE_TAO.tar.xz
 
-  macos-10_15_security:
+  macos-10_15_defaults_security:
 
     runs-on: macos-10.15
 
@@ -1894,15 +1875,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir macos-10_15_defaults_security_autobuild_workspace
+        cd macos-10_15_defaults_security_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="macos-10_15_security_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/macos-10_15_defaults_security_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/macos-10_15_defaults_security_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -1917,26 +1899,26 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_security_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: macos-10_15_security_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/macos-10_15_security_autobuild_output.log_Full.html
+        name: macos-10_15_defaults_security_autobuild_output
+        path: OpenDDS/macos-10_15_defaults_security_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_security_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_security_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: macos-10_15_security"
+        check_name: "Test Results: macos-10_15_defaults_security"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
-  macos-10_15_java_no-bit:
+  macos-10_15_defaults_java_no-bit:
 
     runs-on: macos-10.15
 
@@ -2025,15 +2007,16 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        mkdir workspace
-        cd workspace
+        mkdir macos-10_15_defaults_java_no-bit_autobuild_workspace
+        cd macos-10_15_defaults_java_no-bit_autobuild_workspace
+        echo $GITHUB_SHA > ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="macos-10_15_java_no-bit_autobuild_output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/workspace"/>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/macos-10_15_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/workspace"/>
+        <variable name="root" value="$DDS_ROOT/macos-10_15_defaults_java_no-bit_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -2048,21 +2031,21 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/workspace/config.xml"
-    - name: upload Full log output
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_java_no-bit_autobuild_workspace/config.xml"
+    - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
-        name: macos-10_15_java_no-bit_autobuild_output.log_Full.html
-        path: OpenDDS/workspace/macos-10_15_java_no-bit_autobuild_output.log_Full.html
+        name: macos-10_15_defaults_java_no-bit_autobuild_output
+        path: OpenDDS/macos-10_15_defaults_java_no-bit_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/workspace/latest.txt"
+        cat "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_java_no-bit_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_java_no-bit_autobuild_workspace/latest.txt"
     - name: Publish Unit Test Results
       uses: simpsont-oci/action-junit-report@v1.2.1
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: macos-10_15_java_no-bit"
+        check_name: "Test Results: macos-10_15_defaults_java_no-bit"
         report_paths: OpenDDS/workspace/Tests_JUnit.xml
