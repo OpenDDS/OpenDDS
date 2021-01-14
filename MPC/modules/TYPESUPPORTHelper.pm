@@ -19,8 +19,8 @@ sub get_output {
     return \@out;
   }
 
-  #my $tsidl = $file;
-  #$tsidl =~ s/\.idl$/TypeSupport.idl/;
+  my $tsidl = $file;
+  $tsidl =~ s/\.idl$/TypeSupport.idl/;
   #push(@out, $dir . basename($tsidl));
 
   my $deps;

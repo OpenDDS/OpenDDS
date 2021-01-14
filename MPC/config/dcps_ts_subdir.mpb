@@ -7,10 +7,6 @@
 
 project: dcps_ts_defaults, taobaseidldefaults {
 
-  Modify_Custom(TypeSupport) {
-    commandflags += -o <%gendir%>
-  }
-
   Modify_Custom(IDL) {
     output_follows_input = 1
     // In general, the setting in current versions of taobaseidldefaults.mpb

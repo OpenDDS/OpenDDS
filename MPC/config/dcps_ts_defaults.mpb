@@ -16,7 +16,8 @@ project : dds_macros, taobaseidldefaults {
     dependent = $(OPENDDS_IDL_DEP) $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_flags = commandflags
     inputext              = .idl
-    pre_extension         = TypeSupportImpl
+    source_pre_extension  = TypeSupportImpl
+    header_pre_extension  = TypeSupportImpl
     source_outputext      = .cpp
     header_outputext      = .h
     optional(header_pre_extension) {
