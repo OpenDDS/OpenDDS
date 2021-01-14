@@ -254,9 +254,12 @@ ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, 
   var_x_sample_count_ = get_property(seq, prefix + "_var_x_sample_count", Builder::PVK_DOUBLE);
 
   Builder::ConstPropertyIndex median_buffer = get_property(seq, prefix + "_median_buffer", Builder::PVK_DOUBLE_SEQ);
-  median_buffer_.resize(median_buffer->value.double_seq_prop().length());
-  for (size_t i = 0; i < median_buffer_.size(); ++i) {
-    median_buffer_[i] = median_buffer->value.double_seq_prop()[static_cast<CORBA::ULong>(i)];
+
+  if (median_buffer) {
+    median_buffer_.resize(median_buffer->value.double_seq_prop().length());
+    for (size_t i = 0; i < median_buffer_.size(); ++i) {
+      median_buffer_[i] = median_buffer->value.double_seq_prop()[static_cast<CORBA::ULong>(i)];
+    }
   }
 
   median_sample_count_ = get_property(seq, prefix + "_median_sample_count", Builder::PVK_ULL);
@@ -270,16 +273,18 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
 {
   SimpleStatBlock result;
 
-  result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
-  result.min_ = min_->value.double_prop();
-  result.max_ = max_->value.double_prop();
-  result.mean_ = mean_->value.double_prop();
-  result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
+  if (sample_count_) {
+    result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
+    result.min_ = min_->value.double_prop();
+    result.max_ = max_->value.double_prop();
+    result.mean_ = mean_->value.double_prop();
+    result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
 
-  result.median_buffer_ = median_buffer_;
-  result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
-  result.median_ = median_->value.double_prop();
-  result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
+    result.median_buffer_ = median_buffer_;
+    result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
+    result.median_ = median_->value.double_prop();
+    result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
+  }
 
   return result;
 }

@@ -537,8 +537,10 @@ int handle_report(const Bench::TestController::Report& report,
   Bench::SimpleStatBlock consolidated_discovery_delta_stats;
   Bench::SimpleStatBlock consolidated_latency_stats;
   Bench::SimpleStatBlock consolidated_jitter_stats;
+  Bench::SimpleStatBlock consolidated_throughput_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
   Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
+  Bench::SimpleStatBlock consolidated_round_trip_throughput_stats;
 
   bool missing_durable_data = false;
 
@@ -547,7 +549,7 @@ int handle_report(const Bench::TestController::Report& report,
     out_of_order_data_counts, duplicate_data_counts, missing_data_counts;
   std::unordered_map<std::string, std::string> out_of_order_data_details, duplicate_data_details, missing_data_details;
   std::unordered_map<std::string, Bench::SimpleStatBlock> tagged_discovery_delta_stats, tagged_latency_stats,
-    tagged_jitter_stats, tagged_round_trip_latency_stats, tagged_round_trip_jitter_stats;
+    tagged_jitter_stats, tagged_throughput_stats, tagged_round_trip_latency_stats, tagged_round_trip_jitter_stats, tagged_round_trip_throughput_stats;
 
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
     const Bench::WorkerReport& worker_report = *(parsed_reports[r]);
@@ -572,8 +574,10 @@ int handle_report(const Bench::TestController::Report& report,
           Bench::ConstPropertyStatBlock dr_discovery_delta(dr_report.properties, "discovery_delta");
           Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
           Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
+          Bench::ConstPropertyStatBlock dr_throughput(dr_report.properties, "throughput");
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
           Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
+          Bench::ConstPropertyStatBlock dr_round_trip_throughput(dr_report.properties, "round_trip_throughput");
 
           Builder::ConstPropertyIndex lost_sample_count_prop = get_property(dr_report.properties, "lost_sample_count", Builder::PVK_ULL);
           if (lost_sample_count_prop) {
@@ -634,14 +638,18 @@ int handle_report(const Bench::TestController::Report& report,
           consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dr_discovery_delta.to_simple_stat_block());
           consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
+          consolidated_throughput_stats = consolidate(consolidated_throughput_stats, dr_throughput.to_simple_stat_block());
           consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
           consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
+          consolidated_round_trip_throughput_stats = consolidate(consolidated_round_trip_throughput_stats, dr_round_trip_throughput.to_simple_stat_block());
 
           consolidate_tagged_stats(tagged_discovery_delta_stats, dr_report.tags, tags, dr_discovery_delta);
           consolidate_tagged_stats(tagged_latency_stats, dr_report.tags, tags, dr_latency);
           consolidate_tagged_stats(tagged_jitter_stats, dr_report.tags, tags, dr_jitter);
+          consolidate_tagged_stats(tagged_throughput_stats, dr_report.tags, tags, dr_throughput);
           consolidate_tagged_stats(tagged_round_trip_latency_stats, dr_report.tags, tags, dr_round_trip_latency);
           consolidate_tagged_stats(tagged_round_trip_jitter_stats, dr_report.tags, tags, dr_round_trip_jitter);
+          consolidate_tagged_stats(tagged_round_trip_throughput_stats, dr_report.tags, tags, dr_round_trip_throughput);
         }
       }
 
@@ -705,10 +713,16 @@ int handle_report(const Bench::TestController::Report& report,
   consolidated_jitter_stats.pretty_print(result_out, "jitter", "  ", 1);
   result_out << std::endl;
 
+  consolidated_throughput_stats.pretty_print(result_out, "throughput", "  ", 1);
+  result_out << std::endl;
+
   consolidated_round_trip_latency_stats.pretty_print(result_out, "round trip latency", "  ", 1);
   result_out << std::endl;
 
   consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter", "  ", 1);
+  result_out << std::endl;
+
+  consolidated_round_trip_throughput_stats.pretty_print(result_out, "round trip throughput", "  ", 1);
   result_out << "\n\n";
 
   // Print stats information for the input tags
@@ -736,12 +750,20 @@ int handle_report(const Bench::TestController::Report& report,
       tagged_jitter_stats[tag].pretty_print(result_out, "jitter");
       result_out << std::endl;
     }
+    if (tagged_throughput_stats.count(tag)) {
+      tagged_throughput_stats[tag].pretty_print(result_out, "throughput");
+      result_out << std::endl;
+    }
     if (tagged_round_trip_latency_stats.count(tag)) {
       tagged_round_trip_latency_stats[tag].pretty_print(result_out, "round trip latency");
       result_out << std::endl;
     }
     if (tagged_round_trip_jitter_stats.count(tag)) {
       tagged_round_trip_jitter_stats[tag].pretty_print(result_out, "round trip jitter");
+      result_out << std::endl;
+    }
+    if (tagged_round_trip_throughput_stats.count(tag)) {
+      tagged_round_trip_throughput_stats[tag].pretty_print(result_out, "round trip throughput");
       result_out << std::endl;
     }
 
@@ -766,6 +788,7 @@ int handle_report(const Bench::TestController::Report& report,
       total_undermatched_writers ||
       total_out_of_order_data_count ||
       total_duplicate_data_count ||
+      total_missing_data_count ||
       missing_durable_data) {
     result = EXIT_FAILURE;
   }
