@@ -3,13 +3,11 @@
 // In the project, both IDL_Files and TypeSupport_Files sections must appear
 // with the gendir = <dir> setting and the name of the non-generated IDL file.
 // Also in the project (at project scope) include idlflags += -o <dir> where
-// <dir> is replaced by the subdirectory name.
+// <dir> is replaced by the subdirectory name. And with the TypeSupport_Files
+// add dcps_ts_flags += -o <dir> to let the opendds_idl compiler write the
+// generated files in the correct directory
 
 project: dcps_ts_defaults, taobaseidldefaults {
-
-  Modify_Custom(TypeSupport) {
-    commandflags += -o <%gendir%>
-  }
 
   Modify_Custom(IDL) {
     output_follows_input = 1
