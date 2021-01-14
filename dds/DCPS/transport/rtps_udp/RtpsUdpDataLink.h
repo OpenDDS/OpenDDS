@@ -378,6 +378,7 @@ private:
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
     const bool durable_;
+    bool stopping_;
     CORBA::Long heartbeat_count_;
 #ifdef OPENDDS_SECURITY
     const bool is_pvs_writer_; // Participant Volatile Secure writer

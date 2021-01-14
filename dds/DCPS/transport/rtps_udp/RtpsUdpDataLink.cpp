@@ -828,6 +828,8 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElemen
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
+  stopping_ = true;
+
   if (!elems_not_acked_.empty()) {
     OPENDDS_SET(SequenceNumber) sns_to_release;
     iter_t iter = elems_not_acked_.begin();
@@ -1056,7 +1058,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
 
   RtpsUdpDataLink_rch link = link_.lock();
-  if (!link) {
+  if (stopping_ || !link) {
     return 0;
   }
 
@@ -3971,6 +3973,7 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
  , link_(link)
  , id_(id)
  , durable_(durable)
+ , stopping_(false)
  , heartbeat_count_(heartbeat_count)
 #ifdef OPENDDS_SECURITY
  , is_pvs_writer_(id_.entityId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER)
