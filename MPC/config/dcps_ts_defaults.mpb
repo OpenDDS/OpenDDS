@@ -22,6 +22,12 @@ project : dds_macros, taobaseidldefaults {
     optional(header_pre_extension) {
       commandflags(-Lspcpp) += C
     }
+    optional(generic_pre_extension) {
+      commandflags(!-SI) += TypeSupport
+    }
+    optional(generic_outputext) {
+      commandflags(!-SI) = .idl
+    }
 
     // See $DDS_ROOT/MPC/modules/TYPESUPPORTHelper.pm for .idl and .java output
     // files and additional source and header files due to the -Gface option.

@@ -1,8 +1,9 @@
-project: dcpsexe, dcps_test, dcps_transports_for_test, dcps_ts_subdir {
+project: dcpsexe, dcps_test, dcps_transports_for_test, dcps_ts_defaults, taobaseidldefaults {
   exename = ReadConditionTest
   idlflags += -SS -o GeneratedCode
 
   TypeSupport_Files {
+    dcps_ts_flags += -o
     gendir = GeneratedCode
     Messenger.idl
   }
