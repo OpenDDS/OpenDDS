@@ -1658,7 +1658,9 @@ namespace {
           type_stack.pop_back();
           return extensibilitykind_mutable;
         }
-        exten = (exten >= this_exten) ? exten : this_exten;
+        if (exten < this_exten) {
+          exten = this_exten;
+        }
       }
       type_stack.pop_back();
       return exten;
