@@ -8,22 +8,22 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_CLIENT_H
 #define OPENDDS_DCPS_TRANSPORT_CLIENT_H
 
-#include "dds/DCPS/dcps_export.h"
 #include "TransportConfig_rch.h"
 #include "TransportImpl.h"
 #include "DataLinkSet.h"
 
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/DiscoveryListener.h"
-#include "dds/DCPS/RcEventHandler.h"
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/ReactorInterceptor.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/RcEventHandler.h>
 
-#include "ace/Time_Value.h"
-#include "ace/Event_Handler.h"
-#include "ace/Reverse_Lock_T.h"
+#include <ace/Time_Value.h>
+#include <ace/Event_Handler.h>
+#include <ace/Reverse_Lock_T.h>
 
 // Forward definition of a test-friendly class in the global name space
 class DDS_TEST;
@@ -137,6 +137,9 @@ public:
   virtual DDS::Subscriber_var get_builtin_subscriber() const { return DDS::Subscriber_var(); }
 
   void terminate_send_if_suspended();
+
+  bool associated_with(const GUID_t& remote) const;
+  bool pending_association_with(const GUID_t& remote) const;
 
 private:
 

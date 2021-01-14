@@ -495,7 +495,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   Parameter ebe_param;
   ebe_param.extended_builtin_endpoints(
     proxy.availableExtendedBuiltinEndpoints);
-  add_param(param_list, abe_param);
+  add_param(param_list, ebe_param);
 #endif
 
   // Each locator

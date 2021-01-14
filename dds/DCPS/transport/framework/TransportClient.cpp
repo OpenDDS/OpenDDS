@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
 
 #include "TransportClient.h"
 #include "TransportConfig.h"
@@ -13,14 +13,14 @@
 #include "TransportExceptions.h"
 #include "TransportReceiveListener.h"
 
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include <dds/DCPS/DataWriterImpl.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Definitions.h>
 
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/SendStateDataSampleList.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/Definitions.h"
+#include <dds/DdsDcpsInfoUtilsC.h>
 
-#include "ace/Reactor_Timer_Interface.h"
+#include <ace/Reactor_Timer_Interface.h>
 
 #include <algorithm>
 #include <iterator>
@@ -1092,12 +1092,22 @@ TransportClient::remove_all_msgs()
   return links_.remove_all_msgs(repo_id_);
 }
 
-void
-TransportClient::terminate_send_if_suspended() {
+void TransportClient::terminate_send_if_suspended()
+{
   links_.terminate_send_if_suspended();
 }
 
+bool TransportClient::associated_with(const GUID_t& remote) const
+{
+  return data_link_index_.count(remote);
 }
+
+bool TransportClient::pending_association_with(const GUID_t& remote) const
+{
+  return pending_.count(remote);
 }
+
+} // namepsace DCPS
+} // namepsace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
