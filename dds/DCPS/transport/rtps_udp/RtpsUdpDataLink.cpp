@@ -63,6 +63,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+using RTPS::to_opendds_seqnum;
+using RTPS::to_rtps_seqnum;
+
 const size_t ONE_SAMPLE_PER_PACKET = 1;
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
@@ -1368,24 +1371,19 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   // see send_nack_replies().
   using namespace OpenDDS::RTPS;
 
-  // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
-  // [gapStart, gapListBase) and those in the SNSet.
-  const SequenceNumber_t gapStart = {gap_start.getHigh(),
-                                     gap_start.getLow()},
-    gapListBase = {max_sn_.getHigh(),
-                   max_sn_.getLow()};
-
   const LongSeq8 bitmap;
 
+  // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
+  // [gapStart, gapListBase) and those in the SNSet.
   GapSubmessage gap = {
     {GAP, FLAG_E, 0 /*length determined below*/},
     ENTITYID_UNKNOWN, // readerId: applies to all matched readers
     id_.entityId,
-    gapStart,
-    {gapListBase, 0, bitmap}
+    to_rtps_seqnum(gap_start),
+    {to_rtps_seqnum(max_sn_), 0, bitmap}
   };
 
-    size_t size = serialized_size(Encoding(Encoding::KIND_XCDR1), gap);
+  const size_t size = serialized_size(Encoding(Encoding::KIND_XCDR1), gap);
   gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size) - SMHDR_SZ;
 
@@ -1497,9 +1495,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     return false;
   }
 
-  SequenceNumber seq;
-  seq.setValue(data.writerSN.high, data.writerSN.low);
-
+  const SequenceNumber seq = to_opendds_seqnum(data.writerSN);
   DeliverHeldData dhd;
   bool on_start = false;
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
@@ -1584,11 +1580,9 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     if (Transport_debug_level > 5) {
       GuidConverter writer(src);
       GuidConverter reader(id_);
-      SequenceNumber seq;
-      seq.setValue(data.writerSN.high, data.writerSN.low);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                            ACE_TEXT(" data seq: %q from %C to %C dropped because of unknown writer\n"),
-                           seq.getValue(),
+                           to_opendds_seqnum(data.writerSN).getValue(),
                            OPENDDS_STRING(writer).c_str(),
                            OPENDDS_STRING(reader).c_str()));
     }
@@ -1643,9 +1637,8 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
     return false;
   }
 
-  SequenceNumber start, base;
-  start.setValue(gap.gapStart.high, gap.gapStart.low);
-  base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
+  const SequenceNumber start = to_opendds_seqnum(gap.gapStart);
+  const SequenceNumber base = to_opendds_seqnum(gap.gapList.bitmapBase);
 
   writer->recvd_.insert(SequenceRange(start, base.previous()));
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
@@ -1764,10 +1757,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   }
 
   // Heartbeat Sequence Range
-  SequenceNumber hb_first;
-  hb_first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
-  SequenceNumber hb_last;
-  hb_last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
+  const SequenceNumber hb_first = to_opendds_seqnum(heartbeat.firstSN);
+  const SequenceNumber hb_last = to_opendds_seqnum(heartbeat.lastSN);
 
   static const SequenceNumber one, zero = SequenceNumber::ZERO();
 
@@ -2002,7 +1993,7 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks_i(MetaSubmessageVec
       reader_id,
       writer_id,
       { // SequenceNumberSet: acking bitmapBase - 1
-        {ack.getHigh(), ack.getLow()},
+        to_rtps_seqnum(ack),
         num_bits, bitmap
       },
       {++acknack_count_}
@@ -2094,7 +2085,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
       reader_id,
       writer_id,
       { // SequenceNumberSet: acking bitmapBase - 1
-        {ack.getHigh(), ack.getLow()},
+        to_rtps_seqnum(ack),
         num_bits, bitmap
       },
       {++acknack_count_}
@@ -2123,7 +2114,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
       reader_id,
       writer_id,
       { // SequenceNumberSet: acking bitmapBase - 1
-        {ack.getHigh(), ack.getLow()},
+        to_rtps_seqnum(ack),
         num_bits, bitmap
       },
       {++acknack_count_}
@@ -2166,10 +2157,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 #endif
 
     if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-      RepoId dst;
-      std::memcpy(dst.guidPrefix, it->dst_guid_.guidPrefix, sizeof(dst.guidPrefix));
-      dst.entityId = ENTITYID_UNKNOWN;
-      adr_map[addrs][dst].push_back(it);
+      adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
     } else {
       adr_map[addrs][GUID_UNKNOWN].push_back(it);
     }
@@ -2399,10 +2387,9 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
     for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin();
         it != meta_submessage_bundles[i].end(); ++it) {
       MetaSubmessage& res = **it;
-      RepoId dst = res.dst_guid_;
-      dst.entityId = ENTITYID_UNKNOWN;
+      const RepoId dst = make_unknown_guid(res.dst_guid_);
       if (dst != prev_dst) {
-        std::memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
+        assign(idst.guidPrefix, dst.guidPrefix);
         ser << idst;
       }
       switch (res.sm_._d()) {
@@ -2467,7 +2454,7 @@ RtpsUdpDataLink::send_heartbeat_replies(const DCPS::MonotonicTimePoint& /*now*/)
         pos->readerid.entityId,
         pos->writerid.entityId,
         { // SequenceNumberSet: acking bitmapBase - 1
-          {ack.getHigh(), ack.getLow()},
+          to_rtps_seqnum(ack),
           0 /* num_bits */, bitmap
         },
         {count}
@@ -2568,8 +2555,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
 
   for (size_t i = 0; i < frag_info.size(); ++i) {
     RTPS::NackFragSubmessage& nackfrag = meta_submessage.sm_.nack_frag_sm();
-    nackfrag.writerSN.low = frag_info[i].first.getLow();
-    nackfrag.writerSN.high = frag_info[i].first.getHigh();
+    nackfrag.writerSN = to_rtps_seqnum(frag_info[i].first);
     nackfrag.fragmentNumberState = frag_info[i].second;
     nackfrag.count.value = ++wi->nackfrag_count_;
     meta_submessages.push_back(meta_submessage);
@@ -2636,13 +2622,11 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
     return false;
   }
 
-  SequenceNumber seq;
-  seq.setValue(hb_frag.writerSN.high, hb_frag.writerSN.low);
-
   // If seq is outside the heartbeat range or we haven't completely received
   // it yet, send a NackFrag along with the AckNack.  The heartbeat range needs
   // to be checked first because recvd_ contains the numbers below the
   // heartbeat range (so that we don't NACK those).
+  const SequenceNumber seq = to_opendds_seqnum(hb_frag.writerSN);
   if (seq > writer->hb_last_ || !writer->recvd_.contains(seq)) {
     writer->frags_[seq] = hb_frag.lastFragmentNum;
     gather_ack_nacks_i(writer, link, !(hb_frag.smHeader.flags & RTPS::FLAG_F), meta_submessages);
@@ -2707,9 +2691,8 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
   // [gapStart, gapListBase) and those in the SNSet.
   const SequenceNumber firstMissing = gaps.low(),
                        base = ++SequenceNumber(gaps.cumulative_ack());
-  const SequenceNumber_t gapStart = {firstMissing.getHigh(),
-                                     firstMissing.getLow()},
-                         gapListBase = {base.getHigh(), base.getLow()};
+  const SequenceNumber_t gapStart = to_rtps_seqnum(firstMissing);
+  const SequenceNumber_t gapListBase = to_rtps_seqnum(base);
   CORBA::ULong num_bits = 0;
   LongSeq8 bitmap;
 
@@ -2733,9 +2716,8 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
   if (Transport_debug_level > 5) {
     const GuidConverter conv(id_);
     SequenceRange sr;
-    sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
-    SequenceNumber srbase;
-    srbase.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
+    sr.first = to_opendds_seqnum(gap.gapStart);
+    const SequenceNumber srbase = to_opendds_seqnum(gap.gapList.bitmapBase);
     sr.second = srbase.previous();
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::gather_gaps_i "
               "GAP with range [%q, %q] from %C\n",
@@ -2803,10 +2785,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   // Process the ack.
   SequenceNumber previous_acked_sn = reader->acked_sn();
-
-  SequenceNumber ack;
-  ack.setValue(acknack.readerSNState.bitmapBase.high,
-               acknack.readerSNState.bitmapBase.low);
+  const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
 
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(remote);
@@ -3016,8 +2995,7 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
     return;
   }
 
-  SequenceNumber seq;
-  seq.setValue(nackfrag.writerSN.high, nackfrag.writerSN.low);
+  const SequenceNumber seq = to_opendds_seqnum(nackfrag.writerSN);
 
   // TODO: Consider tacking on a heartbeat so the reader can nack immediately.
 
@@ -3565,15 +3543,14 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
          limit = writers_to_advertise.end();
        pos != limit;
        ++pos) {
-    const SequenceNumber SN = 1, lastSN = SequenceNumber::ZERO();
     const rw_iter rw = writers_.find(pos->first);
     const int count = rw == writers_.end() ? ++heartbeat_counts_[pos->first.entityId] : rw->second->inc_heartbeat_count();
     const HeartBeatSubmessage hb = {
       {HEARTBEAT, FLAG_E, HEARTBEAT_SZ},
       ENTITYID_UNKNOWN, // any matched reader may be interested in this
       pos->first.entityId,
-      {SN.getHigh(), SN.getLow()},
-      {lastSN.getHigh(), lastSN.getLow()},
+      to_rtps_seqnum(SequenceNumber(1)),
+      to_rtps_seqnum(SequenceNumber::ZERO()),
       {count}
     };
 
@@ -3654,8 +3631,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
      HEARTBEAT_SZ},
     ENTITYID_UNKNOWN, // any matched reader may be interested in this
     id_.entityId,
-    {firstSN.getHigh(), firstSN.getLow()},
-    {lastSN.getHigh(), lastSN.getLow()},
+    to_rtps_seqnum(firstSN),
+    to_rtps_seqnum(max_sn_),
     {0}
   };
 
@@ -3681,10 +3658,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       meta_submessage.dst_guid_ = reader->id_;
       meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
       meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-      meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
-      meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
-      meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
-      meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
+      meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(first_sn);
+      meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(last_sn);
       meta_submessages.push_back(meta_submessage);
       meta_submessage.reset_destination();
     }
@@ -3701,10 +3676,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       // Every reader is lagging and there is more than one.
       meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
       meta_submessage.sm_.heartbeat_sm().readerId = ENTITYID_UNKNOWN;
-      meta_submessage.sm_.heartbeat_sm().firstSN.low = firstSN.getLow();
-      meta_submessage.sm_.heartbeat_sm().firstSN.high = firstSN.getHigh();
-      meta_submessage.sm_.heartbeat_sm().lastSN.low = lastSN.getLow();
-      meta_submessage.sm_.heartbeat_sm().lastSN.high = lastSN.getHigh();
+      meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(firstSN);
+      meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(lastSN);
       for (ReaderInfoMap::const_iterator pos = remote_readers_.begin(), limit = remote_readers_.end(); pos != limit; ++pos) {
         // TODO: This should be factored out in a sporadic task.
         expire_durable_data(pos->second, cfg, now, pendingCallbacks);
@@ -3726,10 +3699,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           meta_submessage.dst_guid_ = reader->id_;
           meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
           meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-          meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
-          meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
-          meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
-          meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
+          meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(first_sn);
+          meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(last_sn);
           meta_submessages.push_back(meta_submessage);
           meta_submessage.reset_destination();
         }
@@ -3751,10 +3722,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         meta_submessage.dst_guid_ = reader->id_;
         meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
         meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
-        meta_submessage.sm_.heartbeat_sm().firstSN.low = first_sn.getLow();
-        meta_submessage.sm_.heartbeat_sm().firstSN.high = first_sn.getHigh();
-        meta_submessage.sm_.heartbeat_sm().lastSN.low = last_sn.getLow();
-        meta_submessage.sm_.heartbeat_sm().lastSN.high = last_sn.getHigh();
+        meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(first_sn);
+        meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(last_sn);
         meta_submessages.push_back(meta_submessage);
         meta_submessage.reset_destination();
       }
@@ -3798,26 +3767,20 @@ RtpsUdpDataLink::send_heartbeats_manual_i(const TransportSendControlElement* tsc
   using namespace OpenDDS::RTPS;
 
   const RepoId pub_id = tsce->publication_id();
-
-  const CORBA::Long counter = ++best_effort_heartbeat_count_;
-
-  // This liveliness heartbeat is from a best-effort Writer, the sequence numbers are not used
-  const SequenceNumber firstSN = 1, lastSN = tsce->sequence();
-
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
      CORBA::Octet(FLAG_E | FLAG_F | FLAG_L),
      HEARTBEAT_SZ},
     ENTITYID_UNKNOWN, // any matched reader may be interested in this
     pub_id.entityId,
-    {firstSN.getHigh(), firstSN.getLow()},
-    {lastSN.getHigh(), lastSN.getLow()},
-    {counter}
+    // This liveliness heartbeat is from a best-effort Writer, the sequence numbers are not used
+    to_rtps_seqnum(SequenceNumber(1)),
+    to_rtps_seqnum(tsce->sequence()),
+    {++best_effort_heartbeat_count_}
   };
 
   MetaSubmessage meta_submessage(pub_id, GUID_UNKNOWN);
   meta_submessage.sm_.heartbeat_sm(hb);
-
   meta_submessages.push_back(meta_submessage);
 }
 
@@ -3842,8 +3805,8 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
      HEARTBEAT_SZ},
     ENTITYID_UNKNOWN, // any matched reader may be interested in this
     id_.entityId,
-    {firstSN.getHigh(), firstSN.getLow()},
-    {lastSN.getHigh(), lastSN.getLow()},
+    to_rtps_seqnum(firstSN),
+    to_rtps_seqnum(lastSN),
     {counter}
   };
 

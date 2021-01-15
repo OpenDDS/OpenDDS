@@ -135,7 +135,7 @@ public:
   /// This is needed to know if delete DataReader should fail with
   /// PRECONDITION_NOT_MET because there are outstanding loans.
 #ifdef ACE_HAS_CPP11
-    std::atomic<long> zero_copy_cnt_;
+  std::atomic<long> zero_copy_cnt_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 #endif
@@ -155,7 +155,7 @@ public:
 
 private:
 #ifdef ACE_HAS_CPP11
-    std::atomic<long> ref_count_;
+  std::atomic<long> ref_count_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
 #endif

@@ -902,7 +902,8 @@ private:
   bool transport_disabled_;
 
 protected:
-  OPENDDS_SET(Encoding::Kind) decoding_modes_;
+  typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
+  EncodingKinds decoding_modes_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

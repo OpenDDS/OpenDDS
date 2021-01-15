@@ -256,6 +256,8 @@ bool run_test()
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
   rd.config()->use_ncm(false);
+  ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
+  rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
@@ -264,6 +266,15 @@ bool run_test()
   const DDS::Subscriber_var sVar;
   spdp->init_bit(sVar);
   reactor_wait();
+
+  // Check if the port override worked.
+  {
+    ACE_SOCK_Dgram test_sock;
+    if (test_sock.open(local_addr) == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: run_test() SPDP did not use specified port\n")));
+      return false;
+    }
+  }
 
   // Create a "test participant" which will use sockets directly
   // This will act like a remote participant.

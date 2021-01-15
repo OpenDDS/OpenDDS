@@ -15,12 +15,9 @@
 #include <dds/DdsDcpsGuidC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
-#include <tao/Basic_Types.h>
-
 #ifndef OPENDDS_SAFETY_PROFILE
-#include <iosfwd>
+#  include <iosfwd>
 #endif
-
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -48,11 +45,14 @@ const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER        = { {0x00,0x01,
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER        = { {0x00,0x01,0x00}, 0xc7};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xc2};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xc7};
-// From XTypes spec:
-const EntityId_t ENTITYID_TL_SVC_REQ_WRITER                      = { {0x00,0x03,0x00}, 0xc3};
-const EntityId_t ENTITYID_TL_SVC_REQ_READER                      = { {0x00,0x03,0x00}, 0xc4};
-const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER                    = { {0x00,0x03,0x01}, 0xc3};
-const EntityId_t ENTITYID_TL_SVC_REPLY_READER                    = { {0x00,0x03,0x01}, 0xc4};
+///@}
+
+///@{
+/// XTypes Type Lookup Service
+const EntityId_t ENTITYID_TL_SVC_REQ_WRITER = { {0x00,0x03,0x00}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REQ_READER = { {0x00,0x03,0x00}, 0xc4};
+const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER = { {0x00,0x03,0x01}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REPLY_READER = { {0x00,0x03,0x01}, 0xc4};
 ///@}
 
 /// Nil value for GUID.
@@ -131,6 +131,12 @@ operator!=(const GUID_t& lhs, const GUID_t& rhs)
 }
 #endif
 
+inline bool
+operator<(const GUID_t& lhs, const GUID_t& rhs)
+{
+  return GUID_tKeyLessThan()(lhs, rhs);
+}
+
 struct GuidPrefixEqual {
 
   bool
@@ -161,16 +167,10 @@ operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 }
 #endif
 
-struct EntityIdConverter {
-  explicit EntityIdConverter(const unsigned char (&o)[4])
-  {
-    std::memcpy(&entityId, o, sizeof(EntityId_t));
-  }
-
-  operator EntityId_t() const { return entityId; }
-
-  EntityId_t entityId;
-};
+inline void assign(EntityId_t& dest, const EntityId_t& src)
+{
+  std::memcpy(&dest, &src, sizeof(EntityId_t));
+}
 
 OpenDDS_Dcps_Export OPENDDS_STRING
 to_string(const GUID_t& guid);
@@ -193,19 +193,53 @@ inline void assign(GuidPrefix_t& dest, const GuidPrefix_t& src)
   std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
 }
 
-inline DCPS::RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
+inline void assign(GUID_t& dest, const GUID_t& src)
 {
-  DCPS::RepoId id;
+  std::memcpy(&dest, &src, sizeof(GUID_t));
+}
+
+inline void assign(OctetArray16& dest, const GUID_t& src)
+{
+  std::memcpy(&dest[0], &src, sizeof(src));
+}
+
+inline RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
+{
+  RepoId id;
   assign(id.guidPrefix, prefix);
   id.entityId = entity;
   return id;
 }
 
-inline DCPS::RepoId make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
+inline RepoId make_id(const RepoId& participant_id, const EntityId_t& entity)
 {
-  DCPS::RepoId id = participant_id;
+  RepoId id = participant_id;
   id.entityId = entity;
   return id;
+}
+
+OpenDDS_Dcps_Export inline
+GUID_t make_part_guid(const GuidPrefix_t& prefix)
+{
+  return make_id(prefix, ENTITYID_PARTICIPANT);
+}
+
+OpenDDS_Dcps_Export inline
+GUID_t make_part_guid(const GUID_t& guid)
+{
+  return make_part_guid(guid.guidPrefix);
+}
+
+OpenDDS_Dcps_Export inline
+GUID_t make_unknown_guid(const GuidPrefix_t& prefix)
+{
+  return make_id(prefix, ENTITYID_UNKNOWN);
+}
+
+OpenDDS_Dcps_Export inline
+GUID_t make_unknown_guid(const GUID_t& guid)
+{
+  return make_unknown_guid(guid.guidPrefix);
 }
 
 OpenDDS_Dcps_Export

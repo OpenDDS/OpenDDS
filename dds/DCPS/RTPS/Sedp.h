@@ -252,6 +252,12 @@ private:
         DCPS::to_dds_string(unsigned(participant.entityId.entityKind), true);
     }
 
+    EntityId_t counterpart_entity_id() const;
+    GUID_t make_counterpart_guid(const DCPS::GUID_t& remote_part) const;
+    bool associated_with_counterpart(const DCPS::GUID_t& remote_part) const;
+    bool pending_association_with_counterpart(const DCPS::GUID_t& remote_part) const;
+    bool associated_with_counterpart_if_not_pending(const DCPS::GUID_t& remote_part) const;
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
@@ -302,12 +308,21 @@ private:
 
     void end_historic_samples(const DCPS::RepoId& reader);
 
+    void send_deferred_samples(const GUID_t& reader);
+
   protected:
+    typedef OPENDDS_MAP(DCPS::SequenceNumber, DCPS::DataSampleElement*)
+      PerReaderDeferredSamples;
+    typedef OPENDDS_MAP(GUID_t, PerReaderDeferredSamples) DeferredSamples;
+    DeferredSamples deferred_samples_;
+
     void send_sample(const ACE_Message_Block& data,
                      size_t size,
                      const DCPS::RepoId& reader,
                      DCPS::SequenceNumber& sequence,
                      bool historic = false);
+
+    void send_sample_i(DCPS::DataSampleElement* el);
 
     void set_header_fields(DCPS::DataSampleHeader& dsh,
                            size_t size,
@@ -321,7 +336,11 @@ private:
       DCPS::MessageId id,
       DCPS::SequenceNumber seq = DCPS::SequenceNumber());
 
-  private:
+    virtual bool deferrable() const
+    {
+      return false;
+    }
+
     DCPS::SequenceNumber seq_;
   };
 
@@ -411,11 +430,17 @@ private:
 
     virtual ~TypeLookupRequestWriter();
 
-    DDS::ReturnCode_t send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
+    bool send_type_lookup_request(
+      const XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
-      DCPS::SequenceNumber& sequence,
       const DCPS::SequenceNumber& rpc_sequence,
       CORBA::ULong tl_kind);
+
+  protected:
+    virtual bool deferrable() const
+    {
+      return true;
+    }
   };
 
   typedef DCPS::RcHandle<TypeLookupRequestWriter> TypeLookupRequestWriter_rch;
@@ -429,8 +454,15 @@ private:
 
     virtual ~TypeLookupReplyWriter();
 
-    DDS::ReturnCode_t send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
+    bool send_type_lookup_reply(
+      XTypes::TypeLookup_Reply& type_lookup_reply,
       const DCPS::RepoId& reader);
+
+  protected:
+    virtual bool deferrable() const
+    {
+      return true;
+    }
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyWriter> TypeLookupReplyWriter_rch;
@@ -560,13 +592,13 @@ private:
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    DDS::ReturnCode_t process_type_lookup_request(DCPS::Serializer& ser,
+    bool process_type_lookup_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
 
-    DDS::ReturnCode_t process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
+    bool process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
       XTypes::TypeLookup_Reply& type_lookup_reply);
 
-    DDS::ReturnCode_t process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
+    bool process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
       XTypes::TypeLookup_Reply& reply);
 
     void gen_continuation_point(XTypes::OctetSeq32& cont_point) const;
@@ -598,14 +630,12 @@ private:
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    DDS::ReturnCode_t process_type_lookup_reply(const DCPS::ReceivedDataSample&,
-                                                DCPS::Serializer& ser,
-                                                bool is_discovery_protected);
-    DDS::ReturnCode_t process_get_types_reply(const XTypes::TypeLookup_Reply&);
-    DDS::ReturnCode_t process_get_dependencies_reply(const DCPS::ReceivedDataSample&,
-                                                     const XTypes::TypeLookup_Reply&,
-                                                     const DCPS::SequenceNumber&,
-                                                     bool is_discovery_protected);
+    bool process_type_lookup_reply(
+      const DCPS::ReceivedDataSample&, DCPS::Serializer& ser, bool is_discovery_protected);
+    bool process_get_types_reply(const XTypes::TypeLookup_Reply& reply);
+    bool process_get_dependencies_reply(
+      const DCPS::ReceivedDataSample& sample, const XTypes::TypeLookup_Reply& reply,
+      const DCPS::SequenceNumber& seq_num, bool is_discovery_protected);
 
     typedef std::pair<XTypes::OctetSeq32, XTypes::TypeIdentifierSeq> ContinuationPair;
 
@@ -617,7 +647,7 @@ private:
     struct GuidPrefixWrapper {
       GuidPrefixWrapper(const GuidPrefix_t& prefix)
       {
-        std::memcpy(&prefix_[0], &prefix[0], sizeof(GuidPrefix_t));
+        DCPS::assign(prefix_, prefix);
       }
 
       bool operator<(const GuidPrefixWrapper& other) const

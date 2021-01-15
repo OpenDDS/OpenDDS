@@ -62,6 +62,15 @@ TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
                  size));
     }
   }
+
+  for (int index = 0; index < RECEIVE_BUFFERS; ++index) {
+    if (receive_buffers_[index] != 0) {
+      ACE_DES_FREE(
+                   receive_buffers_[index],
+                   mb_allocator_.free,
+                   ACE_Message_Block);
+    }
+  }
 }
 
 template<typename TH, typename DSH>

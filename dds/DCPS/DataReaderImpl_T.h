@@ -848,7 +848,8 @@ namespace OpenDDS {
 #endif
 
   DDS::InstanceHandle_t store_synthetic_data(const MessageType& sample,
-                                             DDS::ViewStateKind view)
+                                             DDS::ViewStateKind view,
+                                             const SystemTimePoint& timestamp = SystemTimePoint::now())
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
@@ -878,7 +879,7 @@ namespace OpenDDS {
       DataSampleHeader header;
       const int msg = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       header.message_id_ = static_cast<char>(msg);
-      const DDS::Time_t now = SystemTimePoint::now().to_dds_time();
+      const DDS::Time_t now = timestamp.to_dds_time();
       header.source_timestamp_sec_ = now.sec;
       header.source_timestamp_nanosec_ = now.nanosec;
 
@@ -1623,8 +1624,7 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
   return DDS::RETCODE_NO_DATA;
 }
 
-void store_instance_data(
-                         unique_ptr<MessageTypeWithAllocator> instance_data,
+void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
                          const OpenDDS::DCPS::DataSampleHeader& header,
                          OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
                          bool& just_registered,
@@ -1961,9 +1961,9 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     return;
   }
 
-  ReceivedDataElement *ptr =
+  ReceivedDataElement* const ptr =
     new (*rd_allocator_.get()) ReceivedDataElementWithType<MessageTypeWithAllocator>(
-      header,instance_data.release(), &this->sample_lock_);
+      header, instance_data.release(), &this->sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_->disposed_generation_count();
@@ -2076,11 +2076,10 @@ void notify_status_condition_no_sample_lock()
 
 
 /// Common input read* & take* input processing and precondition checks
-DDS::ReturnCode_t check_inputs (
-                                const char* method_name,
-                                MessageSequenceType & received_data,
-                                DDS::SampleInfoSeq & info_seq,
-                                ::CORBA::Long max_samples)
+DDS::ReturnCode_t check_inputs(const char* method_name,
+                               MessageSequenceType& received_data,
+                               DDS::SampleInfoSeq& info_seq,
+                               ::CORBA::Long max_samples)
 {
   typename MessageSequenceType::PrivateMemberAccess received_data_p (received_data);
 

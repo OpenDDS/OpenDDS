@@ -257,10 +257,11 @@ using DCPS::TimeDuration;
 using DCPS::SystemTimePoint;
 using DCPS::Serializer;
 using DCPS::Encoding;
-using DCPS::ENDIAN_BIG;
-using DCPS::ENDIAN_LITTLE;
 
-const Encoding sedp_encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+namespace {
+  const Encoding sedp_encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_LITTLE);
+  const Encoding type_lookup_encoding(Encoding::KIND_XCDR2, DCPS::ENDIAN_NATIVE);
+}
 
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   : DCPS::EndpointManager<ParticipantData_t>(participant_id, lock)
@@ -411,7 +412,13 @@ Sedp::init(const RepoId& guid,
   const bool besteffort = false, nondurable = false;
 #endif
 
-  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+  const BuiltinEndpointSet_t bep = spdp_.available_builtin_endpoints();
+#ifdef OPENDDS_SECURITY
+  const DDS::Security::ExtendedBuiltinEndpointSet_t xbep =
+    spdp_.available_extended_builtin_endpoints();
+#endif
+
+  if (bep & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     publications_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   publications_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
@@ -419,13 +426,13 @@ Sedp::init(const RepoId& guid,
 #ifdef OPENDDS_SECURITY
   publications_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   publications_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  if (spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+  if (bep & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     publications_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   publications_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+  if (bep & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     subscriptions_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   subscriptions_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
@@ -433,13 +440,13 @@ Sedp::init(const RepoId& guid,
 #ifdef OPENDDS_SECURITY
   subscriptions_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   subscriptions_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  if (spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+  if (bep & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     subscriptions_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   subscriptions_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+  if (bep & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     participant_message_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   participant_message_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
@@ -447,7 +454,7 @@ Sedp::init(const RepoId& guid,
 #ifdef OPENDDS_SECURITY
   participant_message_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   participant_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  if (spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+  if (bep & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
     participant_message_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
   participant_message_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
@@ -466,32 +473,36 @@ Sedp::init(const RepoId& guid,
   dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER &&
-      spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
+  if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
     type_lookup_request_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
+  if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
     type_lookup_request_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
 
-  if (spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER &&
-      spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
+  if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
     type_lookup_reply_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
+  if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
     type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
 
 #ifdef OPENDDS_SECURITY
-  if (spdp_.available_extended_builtin_endpoints() & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE &&
-      spdp_.available_extended_builtin_endpoints() & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
     type_lookup_request_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_request_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_request_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+    type_lookup_request_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_request_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
 
-  if (spdp_.available_extended_builtin_endpoints() & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE &&
-      spdp_.available_extended_builtin_endpoints() & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
     type_lookup_reply_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_reply_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_reply_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+    type_lookup_reply_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_reply_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
   }
 #endif
@@ -1678,7 +1689,7 @@ Sedp::disassociate(ParticipantData_t& pdata)
     typedef Security::HandleRegistry::DatareaderCryptoHandleList DatareaderCryptoHandleList;
     typedef Security::HandleRegistry::DatawriterCryptoHandleList DatawriterCryptoHandleList;
 
-    const RepoId key = make_id(part, ENTITYID_UNKNOWN);
+    const RepoId key = make_unknown_guid(part);
     const DatareaderCryptoHandleList drlist = get_handle_registry()->get_all_remote_datareaders(key);
     for (DatareaderCryptoHandleList::const_iterator pos = drlist.begin(), limit = drlist.end();
          pos != limit; ++pos) {
@@ -2628,8 +2639,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
   const DCPS::DiscoveredWriterData& wdata = dpub.writer_data_;
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  const RepoId guid_participant = make_part_guid(guid);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -2664,8 +2674,7 @@ void Sedp::data_received(DCPS::MessageId message_id,
   if (spdp_.shutting_down()) { return; }
 
   const RepoId& guid = wrapper.data.writerProxy.remoteWriterGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  const RepoId guid_participant = make_part_guid(guid);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -2995,14 +3004,12 @@ Sedp::data_received(DCPS::MessageId message_id,
   if (spdp_.shutting_down()) { return; }
 
   const DCPS::DiscoveredReaderData& rdata = dsub.reader_data_;
-  const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  const GUID_t& guid = rdata.readerProxy.remoteReaderGuid;
+  const GUID_t part_guid = make_part_guid(guid);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (ignoring(guid)
-      || ignoring(guid_participant)
+  if (ignoring(guid) || ignoring(part_guid)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
@@ -3013,7 +3020,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 #endif
 
-  if (!spdp_.has_discovered_participant(guid_participant)) {
+  if (!spdp_.has_discovered_participant(part_guid)) {
     deferred_subscriptions_[guid] = std::make_pair(message_id, dsub);
     return;
   }
@@ -3306,7 +3313,7 @@ Sedp::association_complete_i(const RepoId& localId,
     spdp_.send_participant_crypto_tokens(remoteId);
     send_builtin_crypto_tokens(remoteId);
     resend_user_crypto_tokens(remoteId);
-  }
+  } else
 #endif
   if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
     write_durable_publication_data(remoteId, false);
@@ -3314,6 +3321,18 @@ Sedp::association_complete_i(const RepoId& localId,
     write_durable_subscription_data(remoteId, false);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER) {
     write_durable_participant_message_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REQ_READER
+#ifdef OPENDDS_SECURITY
+      || remoteId.entityId == ENTITYID_TL_SVC_REQ_READER_SECURE
+#endif
+      ) {
+    type_lookup_request_writer_->send_deferred_samples(remoteId);
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER
+#ifdef OPENDDS_SECURITY
+      || remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER_SECURE
+#endif
+      ) {
+    type_lookup_reply_writer_->send_deferred_samples(remoteId);
   }
 }
 
@@ -3364,13 +3383,15 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
     write_participant_message_data(guid, local_participant_messages_[guid], GUID_UNKNOWN);
     break;
   }
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
     write_participant_message_data(guid, local_participant_messages_[guid], GUID_UNKNOWN);
     break;
   }
@@ -3387,7 +3408,6 @@ bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
                                     bool is_discovery_protected,
                                     bool send_get_types)
 {
-  DCPS::SequenceNumber sequence = 0;
   TypeLookupRequestWriter_rch writer = type_lookup_request_writer_;
   DCPS::RepoId remote_reader = make_id(reader, ENTITYID_TL_SVC_REQ_READER);
 #ifdef OPENDDS_SECURITY
@@ -3399,11 +3419,10 @@ bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
   ACE_UNUSED_ARG(is_discovery_protected);
 #endif
 
-  return writer->send_type_lookup_request(type_ids,
-    remote_reader,
-    sequence,
-    type_lookup_service_sequence_number_,
-    send_get_types ? XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId) == DDS::RETCODE_OK;
+  return writer->send_type_lookup_request(
+    type_ids, remote_reader, type_lookup_service_sequence_number_,
+    send_get_types ?
+      XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId);
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3416,13 +3435,15 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
     write_participant_message_data_secure(guid, local_participant_messages_secure_[guid], GUID_UNKNOWN);
     break;
   }
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS: {
-    const RepoId& guid = make_id(participant_id_, DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE));
+    const GUID_t guid = make_id(participant_id_,
+      PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
     write_participant_message_data_secure(guid, local_participant_messages_secure_[guid], GUID_UNKNOWN);
     break;
   }
@@ -3450,6 +3471,53 @@ Sedp::Endpoint::get_builtin_subscriber() const
   return sedp_.spdp_.bit_subscriber();
 }
 
+EntityId_t Sedp::Endpoint::counterpart_entity_id() const
+{
+  EntityId_t rv = repo_id_.entityId;
+  switch (rv.entityKind) {
+  case DCPS::ENTITYKIND_BUILTIN_WRITER_WITH_KEY:
+    rv.entityKind = DCPS::ENTITYKIND_BUILTIN_READER_WITH_KEY;
+    break;
+
+  case DCPS::ENTITYKIND_BUILTIN_WRITER_NO_KEY:
+    rv.entityKind = DCPS::ENTITYKIND_BUILTIN_READER_NO_KEY;
+    break;
+
+  case DCPS::ENTITYKIND_BUILTIN_READER_NO_KEY:
+    rv.entityKind = DCPS::ENTITYKIND_BUILTIN_WRITER_NO_KEY;
+    break;
+
+  case DCPS::ENTITYKIND_BUILTIN_READER_WITH_KEY:
+    rv.entityKind = DCPS::ENTITYKIND_BUILTIN_WRITER_WITH_KEY;
+    break;
+
+  default:
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Endpoint::counterpart_entity_id: "
+        "Unexpected entityKind: %u\n", rv.entityKind));
+    }
+    rv.entityKind = DCPS::ENTITYKIND_BUILTIN_UNKNOWN;
+  }
+  return rv;
+}
+
+GUID_t Sedp::Endpoint::make_counterpart_guid(const GUID_t& remote_part) const
+{
+  return make_id(remote_part, counterpart_entity_id());
+}
+
+bool Sedp::Endpoint::associated_with_counterpart(const GUID_t& remote_part) const
+{
+  return associated_with(make_counterpart_guid(remote_part));
+}
+
+bool Sedp::Endpoint::associated_with_counterpart_if_not_pending(
+  const DCPS::GUID_t& remote_part) const
+{
+  const GUID_t counterpart = make_counterpart_guid(remote_part);
+  return associated_with(counterpart) || !pending_association_with(counterpart);
+}
+
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
@@ -3466,8 +3534,8 @@ Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
   return associate(subscription, true);
 }
 
-void
-Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
+void Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote)
+{
   if (!(flags & ASSOC_OK)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) Sedp::Writer::transport_assoc_done: ")
@@ -3531,6 +3599,29 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
     el->set_num_subs(1);
   }
 
+  if (deferrable() && !associated_with_counterpart(reader)) {
+    DeferredSamples::iterator samples_for_reader = deferred_samples_.insert(
+      std::make_pair(reader, PerReaderDeferredSamples())).first;
+    samples_for_reader->second.insert(std::make_pair(sequence, el));
+    return;
+  }
+
+  send_sample_i(el);
+}
+
+void Sedp::Writer::send_deferred_samples(const GUID_t& reader)
+{
+  DeferredSamples::iterator samples_for_reader = deferred_samples_.find(reader);
+  if (samples_for_reader != deferred_samples_.end()) {
+    for (PerReaderDeferredSamples::iterator i = samples_for_reader->second.begin();
+        i != samples_for_reader->second.end(); ++i) {
+      send_sample_i(i->second);
+    }
+  }
+}
+
+void Sedp::Writer::send_sample_i(DCPS::DataSampleElement* el)
+{
   DCPS::SendStateDataSampleList list;
   list.enqueue_tail(el);
 
@@ -3825,22 +3916,29 @@ Sedp::TypeLookupReplyReader::~TypeLookupReplyReader()
 {
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
+bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
+  const XTypes::TypeIdentifierSeq& type_ids,
   const DCPS::RepoId& reader,
-  DCPS::SequenceNumber& sequence,
   const DCPS::SequenceNumber& rpc_sequence,
   CORBA::ULong tl_kind)
 {
+  if (DCPS::DCPS_debug_level >= 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupRequestWriter::send_type_lookup_request: "
+      "to %C seq: %q\n", DCPS::LogGuid(reader).c_str(), rpc_sequence.getValue()));
+  }
   if (tl_kind != XTypes::TypeLookup_getTypes_HashId &&
       tl_kind != XTypes::TypeLookup_getDependencies_HashId) {
-    return DDS::RETCODE_BAD_PARAMETER;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+        "Sedp::TypeLookupRequestWriter::send_type_lookup_request: tl_kind is %u\n",
+        tl_kind));
+    }
+    return false;
   }
 
   XTypes::TypeLookup_Request type_lookup_request;
   type_lookup_request.header.request_id.writer_guid = get_repo_id();
-  type_lookup_request.header.request_id.sequence_number.high = rpc_sequence.getHigh();
-  type_lookup_request.header.request_id.sequence_number.low = rpc_sequence.getLow();
+  type_lookup_request.header.request_id.sequence_number = to_rtps_seqnum(rpc_sequence);
   type_lookup_request.header.instance_name = get_instance_name(reader).c_str();
   type_lookup_request.data.kind = tl_kind;
 
@@ -3853,71 +3951,94 @@ Sedp::TypeLookupRequestWriter::send_type_lookup_request(const XTypes::TypeIdenti
   }
 
   // Determine message length
-  size_t size = 0;
-  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
-  DCPS::serialized_size(sedp_encoding, size, type_lookup_request);
+  const size_t size = DCPS::EncapsulationHeader::serialized_size +
+    DCPS::serialized_size(type_lookup_encoding, type_lookup_request);
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), sedp_encoding);
+  Serializer serializer(payload.cont(), type_lookup_encoding);
   DCPS::EncapsulationHeader encap;
-  DDS::ReturnCode_t retcode = DDS::RETCODE_OK;
-  if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
+  bool success = true;
+  if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_request) {
-    send_sample(payload, size, reader, sequence);
+    DCPS::SequenceNumber sn(seq_++);
+    send_sample(payload, size, reader, sn);
   } else {
-    retcode = DDS::RETCODE_ERROR;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+        "Sedp::TypeLookupRequestWriter::send_type_lookup_request: serialization failed\n"));
+    }
+    success = false;
   }
 
   delete payload.cont();
-  return retcode;
+  return success;
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupReplyWriter::send_type_lookup_reply(XTypes::TypeLookup_Reply& type_lookup_reply,
-                                                    const DCPS::RepoId& reader)
+bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
+  XTypes::TypeLookup_Reply& type_lookup_reply,
+  const DCPS::RepoId& reader)
 {
-  DCPS::SequenceNumber sequence = 0;
+  if (DCPS::DCPS_debug_level >= 8) {
+    const DDS::SampleIdentity id = type_lookup_reply.header.related_request_id;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::send_type_lookup_reply: "
+      "to %C seq: %q\n", DCPS::LogGuid(reader).c_str(),
+      to_opendds_seqnum(id.sequence_number).getValue()));
+  }
+
   type_lookup_reply.header.remote_ex = DDS::RPC::REMOTE_EX_OK;
 
   // Determine message length
-  size_t size = 0;
-  DCPS::primitive_serialized_size_ulong(sedp_encoding, size);
-  DCPS::serialized_size(sedp_encoding, size, type_lookup_reply);
+  const size_t size = DCPS::EncapsulationHeader::serialized_size +
+    DCPS::serialized_size(type_lookup_encoding, type_lookup_reply);
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
-  Serializer serializer(payload.cont(), sedp_encoding);
+  Serializer serializer(payload.cont(), type_lookup_encoding);
   DCPS::EncapsulationHeader encap;
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  if (encap.from_encoding(sedp_encoding, DCPS::APPENDABLE) &&
+  bool success = true;
+  if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_reply) {
-    send_sample(payload, size, reader, sequence);
+    DCPS::SequenceNumber sn(seq_++);
+    send_sample(payload, size, reader, sn);
   } else {
-    result = DDS::RETCODE_ERROR;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+        "Sedp::TypeLookupReplyWriter::send_type_lookup_reply: serialization failed\n"));
+    }
+    success = false;
   }
 
   delete payload.cont();
-  return result;
+  return success;
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupRequestReader::process_type_lookup_request(DCPS::Serializer& ser,
-  XTypes::TypeLookup_Reply& type_lookup_reply)
+bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
+  Serializer& ser, XTypes::TypeLookup_Reply& type_lookup_reply)
 {
+  if (DCPS::DCPS_debug_level >= 8) {
+    const DDS::SampleIdentity id = type_lookup_reply.header.related_request_id;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
+      "from %C seq: %q\n",
+      DCPS::LogGuid(id.writer_guid).c_str(),
+      to_opendds_seqnum(id.sequence_number).getValue()));
+  }
+
   XTypes::TypeLookup_Request type_lookup_request;
   if (!(ser >> type_lookup_request)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_type_lookup_request - ")
-               ACE_TEXT("failed to deserialize type lookup request\n")));
-    return DDS::RETCODE_ERROR;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_type_lookup_request - ")
+                 ACE_TEXT("failed to deserialize type lookup request\n")));
+    }
+    return false;
   }
 
   if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
-    return DDS::RETCODE_OK;
+    return true;
   }
 
   switch (type_lookup_request.data.kind) {
@@ -3926,12 +4047,12 @@ Sedp::TypeLookupRequestReader::process_type_lookup_request(DCPS::Serializer& ser
   case XTypes::TypeLookup_getDependencies_HashId:
     return process_get_dependencies_request(type_lookup_request, type_lookup_reply);
   default:
-    return DDS::RETCODE_UNSUPPORTED;
+    return false;
   }
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
+bool Sedp::TypeLookupRequestReader::process_get_types_request(
+  const XTypes::TypeLookup_Request& type_lookup_request,
   XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
@@ -3941,9 +4062,13 @@ Sedp::TypeLookupRequestReader::process_get_types_request(const XTypes::TypeLooku
     type_lookup_reply._cxx_return.getType.return_code = DDS::RETCODE_OK;
     type_lookup_reply._cxx_return.kind = XTypes::TypeLookup_getTypes_HashId;
     type_lookup_reply.header.related_request_id = type_lookup_request.header.request_id;
-    return DDS::RETCODE_OK;
+    return true;
   }
-  return DDS::RETCODE_NO_DATA;
+  if (DCPS::DCPS_debug_level) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_get_types_request: "
+      "No types received\n"));
+  }
+  return false;
 }
 
 void Sedp::TypeLookupRequestReader::gen_continuation_point(XTypes::OctetSeq32& cont_point) const
@@ -3953,8 +4078,8 @@ void Sedp::TypeLookupRequestReader::gen_continuation_point(XTypes::OctetSeq32& c
   cont_point.length(0);
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::TypeLookup_Request& request,
+bool Sedp::TypeLookupRequestReader::process_get_dependencies_request(
+  const XTypes::TypeLookup_Request& request,
   XTypes::TypeLookup_Reply& reply)
 {
   // Send all dependencies (may be empty) of the requested types
@@ -3964,7 +4089,7 @@ Sedp::TypeLookupRequestReader::process_get_dependencies_request(const XTypes::Ty
   reply._cxx_return.getTypeDependencies.return_code = DDS::RETCODE_OK;
   gen_continuation_point(reply._cxx_return.getTypeDependencies.result.continuation_point);
   reply.header.related_request_id = request.header.request_id;
-  return DDS::RETCODE_OK;
+  return true;
 }
 
 void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& guid_prefix,
@@ -3994,21 +4119,23 @@ void Sedp::TypeLookupReplyReader::cleanup(const DCPS::GuidPrefix_t& guid_prefix,
   }
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataSample& sample,
-                                                       DCPS::Serializer& ser,
-                                                       bool is_discovery_protected)
+bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
+  const DCPS::ReceivedDataSample& sample, Serializer& ser, bool is_discovery_protected)
 {
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (!(ser >> type_lookup_reply)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-      ACE_TEXT("failed to deserialize type lookup reply\n")));
-    return DDS::RETCODE_ERROR;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+        ACE_TEXT("failed to deserialize type lookup reply\n")));
+    }
+    return false;
   }
 
-  DCPS::SequenceNumber seq_num;
-  seq_num.setValue(type_lookup_reply.header.related_request_id.sequence_number.high,
-                   type_lookup_reply.header.related_request_id.sequence_number.low);
+  const DCPS::SequenceNumber seq_num =
+    to_opendds_seqnum(type_lookup_reply.header.related_request_id.sequence_number);
+  if (DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: %q\n", seq_num.getValue()));
+  }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, DDS::RETCODE_ERROR);
   const OrigSeqNumberMap::const_iterator seq_num_it = sedp_.orig_seq_numbers_.find(seq_num);
@@ -4016,60 +4143,80 @@ Sedp::TypeLookupReplyReader::process_type_lookup_reply(const DCPS::ReceivedDataS
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
                ACE_TEXT("could not find request corresponding to the reply\n")));
-    return DDS::RETCODE_ERROR;
+    return false;
   }
 
-  DDS::ReturnCode_t retcode;
-  switch (type_lookup_reply._cxx_return.kind) {
+  bool success;
+  const ACE_CDR::ULong kind = static_cast<ACE_CDR::ULong>(type_lookup_reply._cxx_return.kind);
+  switch (kind) {
   case XTypes::TypeLookup_getTypes_HashId:
-    retcode = process_get_types_reply(type_lookup_reply);
+    success = process_get_types_reply(type_lookup_reply);
     break;
   case XTypes::TypeLookup_getDependencies_HashId:
-    retcode = process_get_dependencies_reply(sample, type_lookup_reply, seq_num, is_discovery_protected);
+    success = process_get_dependencies_reply(sample, type_lookup_reply, seq_num, is_discovery_protected);
     break;
   default:
-    return DDS::RETCODE_UNSUPPORTED;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+        "Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
+        "reply kind is %u\n", kind));
+    }
+    return false;
   }
 
-  if (XTypes::TypeLookup_getTypes_HashId == static_cast<ACE_CDR::ULong>(
-        type_lookup_reply._cxx_return.kind)) {
+  if (kind == XTypes::TypeLookup_getTypes_HashId) {
+    if (DCPS::DCPS_debug_level > 8) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: post process\n"));
+    }
     const DCPS::SequenceNumber key_seq_num = seq_num_it->second.seq_number;
 
     // Cleanup data
     cleanup(sample.header_.publication_id_.guidPrefix, seq_num_it->second.type_id);
     sedp_.orig_seq_numbers_.erase(seq_num);
 
-    if (DDS::RETCODE_OK == retcode) {
+    if (success) {
       sedp_.match_continue(key_seq_num);
     }
   }
-  return DDS::RETCODE_OK;
+
+  return success;
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Reply& reply)
+bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Reply& reply)
 {
+  if (DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply\n"));
+  }
+
   if (reply._cxx_return.getType.result.types.length() == 0) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_types_reply - ")
-      ACE_TEXT("received reply with no data\n")));
-    return DDS::RETCODE_NO_DATA;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_types_reply - "
+        "received reply with no data\n"));
+    }
+    return false;
   }
 
   sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType.result.types);
-  return DDS::RETCODE_OK;
+  return true;
 }
 
-DDS::ReturnCode_t
-Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::ReceivedDataSample& sample,
-                                                            const XTypes::TypeLookup_Reply& reply,
-                                                            const DCPS::SequenceNumber& seq_num,
-                                                            bool is_discovery_protected)
+bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
+  const DCPS::ReceivedDataSample& sample, const XTypes::TypeLookup_Reply& reply,
+  const DCPS::SequenceNumber& seq_num, bool is_discovery_protected)
 {
+  if (DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_dependencies_reply: ",
+      "seq %q\n", seq_num.getValue()));
+  }
+
   if (reply._cxx_return.getTypeDependencies.result.continuation_point.length() != 0 &&
       reply._cxx_return.getTypeDependencies.result.dependent_typeids.length() == 0) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
-      ACE_TEXT("received reply with no data\n")));
-    return DDS::RETCODE_NO_DATA;
+    if (DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+        "Sedp::TypeLookupReplyReader::process_get_dependencies_reply - "
+        "received reply with no data\n"));
+    }
+    return false;
   }
 
   const XTypes::TypeLookup_getTypeDependencies_Out& data = reply._cxx_return.getTypeDependencies.result;
@@ -4098,7 +4245,7 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
     if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send getTypes request\n")));
-      return DDS::RETCODE_ERROR;
+      return false;
     }
   } else { // Get more dependencies
     XTypes::TypeIdentifierSeq type_ids;
@@ -4106,11 +4253,11 @@ Sedp::TypeLookupReplyReader::process_get_dependencies_reply(const DCPS::Received
     if (!sedp_.send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send getTypeDependencies request\n")));
-      return DDS::RETCODE_ERROR;
+      return false;
     }
   }
 
-  return DDS::RETCODE_OK;
+  return true;
 }
 
 void Sedp::cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
@@ -4178,6 +4325,11 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     return;
   }
 
+  if (DCPS::DCPS_debug_level >= 9) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Reader::data_received: from %C\n",
+      DCPS::LogGuid(sample.header_.publication_id_).c_str()));
+  }
+
   const DCPS::MessageId id =
     static_cast<DCPS::MessageId>(sample.header_.message_id_);
 
@@ -4200,12 +4352,6 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER ||
       entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER ||
 #endif
-      entity_id == ENTITYID_TL_SVC_REQ_WRITER ||
-      entity_id == ENTITYID_TL_SVC_REPLY_WRITER ||
-#ifdef OPENDDS_SECURITY
-      entity_id == ENTITYID_TL_SVC_REQ_WRITER_SECURE ||
-      entity_id == ENTITYID_TL_SVC_REPLY_WRITER_SECURE ||
-#endif
       false;
     const bool is_final =
       (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) ||
@@ -4214,12 +4360,17 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
       entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER ||
 #endif
+      entity_id == ENTITYID_TL_SVC_REQ_WRITER ||
+      entity_id == ENTITYID_TL_SVC_REPLY_WRITER ||
+#ifdef OPENDDS_SECURITY
+      entity_id == ENTITYID_TL_SVC_REQ_WRITER_SECURE ||
+      entity_id == ENTITYID_TL_SVC_REPLY_WRITER_SECURE ||
+#endif
       false;
     if (is_mutable == is_final) {
-      if (is_mutable) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::Reader::data_received: ")
-          ACE_TEXT("Error in entity id logic\n")));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Reader::data_received: "
+        "entity id extensibility error over %C: both is_final and is_mutable are %d\n",
+        to_string(entity_id).c_str(), is_mutable));
       break;
     }
     const DCPS::Extensibility extensibility =
@@ -4346,7 +4497,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
         ACE_TEXT("failed to convert from ParameterList ")
         ACE_TEXT("to ICE Agent info\n")));
       return;
-}
+    }
     ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
     if (pos != ai_map.end()) {
       wdata.have_ice_agent_info_ = true;
@@ -4483,7 +4634,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
                  ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
       return;
     }
-    const DCPS::RepoId guid = make_id(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+    const GUID_t guid = make_part_guid(sample.header_.publication_id_);
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
     sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 
@@ -4497,8 +4648,13 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   DCPS::Serializer& ser,
   DCPS::Extensibility)
 {
+  if (DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupRequestReader::data_received_i: from %C\n",
+      DCPS::LogGuid(sample.header_.publication_id_).c_str()));
+  }
+
   XTypes::TypeLookup_Reply type_lookup_reply;
-  if (DDS::RETCODE_OK != process_type_lookup_request(ser, type_lookup_reply)) {
+  if (!process_type_lookup_request(ser, type_lookup_reply)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
       ACE_TEXT("failed to take type lookup request\n")));
     return;
@@ -4507,57 +4663,63 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
 #ifdef OPENDDS_SECURITY
   if (entity_id == ENTITYID_TL_SVC_REQ_WRITER_SECURE) {
     const DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER_SECURE);
-    if (DDS::RETCODE_OK != sedp_.type_lookup_reply_secure_writer_->send_type_lookup_reply(type_lookup_reply, reader)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
-        ACE_TEXT("failed to send secure type lookup reply\n")));
+    if (!sedp_.type_lookup_reply_secure_writer_->send_type_lookup_reply(type_lookup_reply, reader)) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
+          ACE_TEXT("failed to send secure type lookup reply\n")));
+      }
       return;
     }
   } else if (entity_id == ENTITYID_TL_SVC_REQ_WRITER) {
+#endif
     const DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
-    if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_type_lookup_reply(type_lookup_reply, reader)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
-        ACE_TEXT("failed to send type lookup reply\n")));
+    if (!sedp_.type_lookup_reply_writer_->send_type_lookup_reply(type_lookup_reply, reader)) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
+          ACE_TEXT("failed to send type lookup reply\n")));
+      }
       return;
     }
+#ifdef OPENDDS_SECURITY
   }
 #else
-  const DCPS::RepoId reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER);
-  if (DDS::RETCODE_OK != sedp_.type_lookup_reply_writer_->send_type_lookup_reply(type_lookup_reply, reader)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i - ")
-      ACE_TEXT("failed to send type lookup reply\n")));
-    return;
-  }
   ACE_UNUSED_ARG(entity_id);
 #endif
 }
 
-void
-Sedp::TypeLookupReplyReader::data_received_i(const DCPS::ReceivedDataSample& sample,
+void Sedp::TypeLookupReplyReader::data_received_i(
+  const DCPS::ReceivedDataSample& sample,
   const DCPS::EntityId_t& remote_id,
   DCPS::Serializer& ser,
   DCPS::Extensibility)
 {
+  if (DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::data_received_i: from %C\n",
+      DCPS::LogGuid(sample.header_.publication_id_).c_str()));
+  }
+
 #ifdef OPENDDS_SECURITY
   if (remote_id == ENTITYID_TL_SVC_REPLY_WRITER_SECURE) {
     if (!process_type_lookup_reply(sample, ser, true)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
-        ACE_TEXT("failed to process secure type lookup reply\n")));
+      if (DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
+          ACE_TEXT("failed to process secure type lookup reply\n")));
+      }
       return;
     }
   } else if (remote_id == ENTITYID_TL_SVC_REPLY_WRITER) {
+#endif
     if (!process_type_lookup_reply(sample, ser, false)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
-        ACE_TEXT("failed to process type lookup reply\n")));
+      if (DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
+          ACE_TEXT("failed to process type lookup reply\n")));
+      }
       return;
     }
+#ifdef OPENDDS_SECURITY
   }
 #else
   ACE_UNUSED_ARG(remote_id);
-  if (!process_type_lookup_reply(sample, ser, false)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i - ")
-      ACE_TEXT("failed to process type lookup reply\n")));
-    return;
-  }
 #endif
 }
 
@@ -5451,8 +5613,7 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   }
 
   if (!key_exchange->set_remote_datawriter_crypto_tokens(drch, dwch, dwcts, se)) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("(%P|%t) WARNING: Sedp::handle_datawriter_crypto_tokens() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::handle_datawriter_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote datawriter crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return false;
@@ -5514,8 +5675,7 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   }
 
   if (!key_exchange->set_remote_datareader_crypto_tokens(dwch, drch, drcts, se)) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("(%P|%t) WARNING: Sedp::handle_datareader_crypto_tokens() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::handle_datareader_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote datareader crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return false;

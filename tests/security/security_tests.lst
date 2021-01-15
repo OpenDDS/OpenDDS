@@ -23,7 +23,7 @@ tests/security/attributes/run_test.pl SC4
 tests/security/attributes/run_test.pl SC5
 tests/security/attributes/run_test.pl TEST_8_8_5_FAILURE
 tests/security/attributes/run_test.pl TEST_8_8_5_SUCCESS
-tests/security/attributes/run_test.pl multiple_grants
+tests/security/attributes/run_test.pl multiple_grants: !GH_ACTIONS
 tests/security/attributes/run_test.pl FullMsgSign
 tests/security/attributes/run_test.pl FullMsgEncrypt
 tests/security/attributes/run_test.pl FullMsgSign_SubMsgSign
@@ -43,7 +43,7 @@ tests/security/attributes/run_test.pl Partitions_Match
 tests/security/attributes/run_test.pl Partitions_Reordered
 tests/security/attributes/run_test.pl Partitions_Subset
 tests/security/attributes/run_test.pl secure-part-user-data: !NO_BUILT_IN_TOPICS
-tests/security/attributes/run_test.pl unsecure-part-user-data: !NO_BUILT_IN_TOPICS
+tests/security/attributes/run_test.pl unsecure-part-user-data: !NO_BUILT_IN_TOPICS !GH_ACTIONS
 tests/security/TopicWithoutPermissions/run_test.pl
 
 tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
@@ -62,10 +62,5 @@ tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse secure: !DCPS_MIN 
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
 
-tests/DCPS/ParticipantLocationTopic/run_test.pl:            !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
-tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6:       !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
-tests/DCPS/ParticipantLocationTopic/run_test.pl noice:      !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
-tests/DCPS/ParticipantLocationTopic/run_test.pl noice ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
-
-tests/DCPS/Restart/run_test.pl --secure
-tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Restart/run_test.pl --secure: !GH_ACTIONS
+tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
