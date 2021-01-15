@@ -46,9 +46,9 @@ if ($no_ice_opt && $ipv6_opt) {
 }
 
 if ($ipv6_opt) {
-    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 ");
+    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 4 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 ");
 } else {
-    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
+    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 4 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
 }
 
 $test->process("publisher", "publisher", "$no_ice_opt $ipv6_opt -ORBDebugLevel 1 -DCPSConfigFile ". $pub_sub_ini);
