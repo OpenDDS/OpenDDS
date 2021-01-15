@@ -22,17 +22,17 @@ sub runTest {
     $test->enable_console_logging();
 
     print "*********************************\n";
-    print "DomainRangeTest creates a single process with 1 DW and 2 DRs.\n\n";
+    print "DomainRangeTest creates a single process with 1 DW and 4 DRs.\n\n";
     print "Domains and transports are dynamically configured from the \n";
     print "templates in config.ini. The DW in each domain sends 10 \n";
     print "messages to its DRs.\n";
     print "*********************************\n";
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 11 -domain 20 -domain 50 -domain 11");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 8 -domain 20 -domain 50 -domain 8");
 
     $test->start_process("alpha");
 
-    my $res = $test->finish(150);
+    my $res = $test->finish(40);
     if ($res != 0) {
         print STDERR "ERROR: test returned $res\n";
         $result += $res;
