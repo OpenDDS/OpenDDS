@@ -296,13 +296,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-20_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-20_04_defaults_java_no-bit"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Ubuntu 18.04
 
@@ -451,13 +444,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_security_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_security_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-18_04_defaults_security"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   ubuntu-18_04_defaults_java_no-bit:
 
@@ -582,13 +568,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-18_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-18_04_defaults_java_no-bit"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Ubuntu 16.04
 
@@ -737,13 +716,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_security_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_security_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-16_04_defaults_security"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   ubuntu-16_04_defaults_java_no-bit:
 
@@ -868,13 +840,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/ubuntu-16_04_defaults_java_no-bit_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: ubuntu-16_04_defaults_java_no-bit"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Windows 2019
 
@@ -1047,13 +1012,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_security_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_security_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2019_defaults_security"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   windows-2019_defaults_java_no-bit:
 
@@ -1166,13 +1124,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_java_no-bit_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2019_defaults_java_no-bit_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2019_defaults_java_no-bit"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # Windows 2016
 
@@ -1345,13 +1296,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_security_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_security_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2016_no_debug_no_inline_security"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   windows-2016_no_debug_no_inline_java_no-bit:
 
@@ -1464,13 +1408,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/windows-2016_no_debug_no_inline_java_no-bit_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: windows-2016_no_debug_no_inline_java_no-bit"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # macOS 11.0
 
@@ -1621,13 +1558,6 @@ jobs:
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_security_autobuild_workspace/latest.txt"
 #        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_security_autobuild_workspace/latest.txt"
-#    - name: Publish Unit Test Results
-#      uses: simpsont-oci/action-junit-report@v1.2.1
-#      if: always()
-#      with:
-#        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        check_name: "Test Results: macos-11_0_defaults_security"
-#        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 #
 #  macos-11_0_defaults_java_no-bit:
 #
@@ -1753,13 +1683,6 @@ jobs:
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_java_no-bit_autobuild_workspace/latest.txt"
 #        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-11_0_defaults_java_no-bit_autobuild_workspace/latest.txt"
-#    - name: Publish Unit Test Results
-#      uses: simpsont-oci/action-junit-report@v1.2.1
-#      if: always()
-#      with:
-#        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        check_name: "Test Results: macos-11_0_defaults_java_no-bit"
-#        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   # macOS 10.15
 
@@ -1910,13 +1833,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_security_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_security_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: macos-10_15_defaults_security"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
 
   macos-10_15_defaults_java_no-bit:
 
@@ -2042,10 +1958,3 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_java_no-bit_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/macos-10_15_defaults_java_no-bit_autobuild_workspace/latest.txt"
-    - name: Publish Unit Test Results
-      uses: simpsont-oci/action-junit-report@v1.2.1
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: "Test Results: macos-10_15_defaults_java_no-bit"
-        report_paths: OpenDDS/workspace/Tests_JUnit.xml
