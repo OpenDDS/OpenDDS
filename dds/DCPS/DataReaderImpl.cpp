@@ -224,7 +224,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
         OPENDDS_STRING(writer_converter).c_str()));
   }
 
-  if (entity_deleted_.value()) {
+  if (get_deleted()) {
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
           ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
@@ -307,6 +307,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
   data.remote_reliable_ =
@@ -348,7 +349,6 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     return;
   }
 
-  const bool active = flags & ASSOC_ACTIVE;
   {
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
@@ -375,7 +375,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     if (!participant)
       return;
 
-    DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
 
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
@@ -438,23 +438,9 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     }
   }
 
-  if (!active) {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-
-    disco->association_complete(domain_id_, dp_id_,
-        subscription_id_, remote_id);
-  }
-
   if (monitor_) {
     monitor_->report();
   }
-}
-
-void
-DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
-{
-  // For the current DCPSInfoRepo implementation, the DataReader side will
-  // always be passive, so association_complete() will not be called.
 }
 
 void
@@ -485,7 +471,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         OPENDDS_STRING(writer_converter).c_str(),
         writers.length()));
   }
-  if (!this->entity_deleted_.value()) {
+  if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
@@ -1279,7 +1265,7 @@ DataReaderImpl::enable()
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
             this->topic_servant_->get_id(),
-            this,
+            rchandle_from(this),
             this->qos_,
             trans_conf_info,
             sub_qos,

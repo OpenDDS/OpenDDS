@@ -46,7 +46,10 @@ public:
   virtual ~ReactorTask();
 
 public:
-  virtual int open(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, OPENDDS_STRING name = "");
+  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, OPENDDS_STRING name = "");
+  virtual int open(void* ptr) {
+    return open_reactor_task(ptr);
+  }
   virtual int svc();
   virtual int close(u_long flags = 0);
 

@@ -29,6 +29,8 @@ which simplifies IDL compilation.
     * [Optional OpenDDS Features](#optional-opendds-features)
     * [Build-Related Options](#build-related-options)
   * [`OPENDDS_DEFAULT_NESTED`](#opendds_default_nested)
+  * [`OPENDDS_ALLOW_ENV_REDEFINES`](#opendds_allow_env_redefines)
+  * [`OPENDDS_FILENAME_ONLY_INCLUDES`](#opendds_filename_only_includes)
   * [`OPENDDS_LANGUAGE_MAPPINGS`](#opendds_language_mappings)
 
 ## Requirements
@@ -97,10 +99,12 @@ control the behavior of the OpenDDS CMake package.
 
 ### Cache Variables/Options Understood by OpenDDS
 
-| Cache Variable              | Description                                                         | Default |
-| --------------------------- | ------------------------------------------------------------------- | ------- |
-| `OPENDDS_CMAKE_VERBOSE`     | Print detailed status information at CMake-Generation time          | `OFF`   |
-| `OPENDDS_DEFAULT_NESTED`    | [Topic types must be declared explicitly.](#opendds_default_nested) | `ON`    |
+| Cache Variable                   | Description                                                                  | Default |
+| -------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| `OPENDDS_CMAKE_VERBOSE`          | Print detailed status information at CMake-Generation time                   | `OFF`   |
+| `OPENDDS_DEFAULT_NESTED`         | [Topic types must be declared explicitly.](#opendds_default_nested)          | `ON`    |
+| `OPENDDS_ALLOW_ENV_CHANGE`       | [Ignore environment variable changes.](#opendds_allow_env_change)            | `OFF`   |
+| `OPENDDS_FILENAME_ONLY_INCLUDES` | [No directory info in generated #includes.](#opendds_filename_only_includes) | `OFF`   |
 
 ### Libraries
 
@@ -218,6 +222,7 @@ OPENDDS_TARGET_SOURCES(target
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
   [OPENDDS_IDL_OPTIONS options...]
+  [NO_FILENAME_ONLY_INCLUDES]
 )
 ```
 
@@ -245,7 +250,7 @@ auxiliary IDL library can be created for inclusion by other executables:
 ```cmake
 add_library(messenger)
 OPENDDS_TARGET_SOURCES(messenger "Messenger.idl")
-target_link_libraries(publisher messenger OpenDDS::Dcps)
+target_link_libraries(messenger OpenDDS::Dcps)
 
 add_executable(publisher
   "publisher.cpp"
@@ -346,6 +351,20 @@ OPENDDS_TARGET_SOURCES(messenger
   OPENDDS_IDL_OPTIONS --no-default-nested
 )
 ```
+
+### `OPENDDS_ALLOW_ENV_CHANGE`
+
+OpenDDS's CMake build default settings generate an error if the project attempts
+to change the value of `$DDS_ROOT`, `$ACE_ROOT`, or `$TAO_ROOT`. This can happen
+unintentionally if a project's libraries and executable both require OpenDDS with
+`find_package(OpenDDS REQUIRED)`. Setting `OPENDDS_ALLOW_ENV_CHANGE` to `ON`
+disables the environment variable check.
+
+### `OPENDDS_FILENAME_ONLY_INCLUDES`
+
+This setting tells OpenDDS's IDL compiler to strip path information from `#include`
+lines in generated files. Turning the option on can make it easier to specify build
+rules for IDL files that include other IDL files.
 
 ### `OPENDDS_LANGUAGE_MAPPINGS`
 

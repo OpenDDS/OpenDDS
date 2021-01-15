@@ -41,7 +41,11 @@
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
 #endif
 
-#include "ace/Atomic_Op.h"
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op_T.h>
+#endif
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
@@ -152,9 +156,6 @@ public:
   bool update_subscription_params(const DCPS::RepoId& subId,
                                   const DDS::StringSeq& params);
 
-  // Managing reader/writer associations
-  void association_complete(const DCPS::RepoId& localId,
-                            const DCPS::RepoId& remoteId);
   void association_complete_i(const DCPS::RepoId& localId,
                               const DCPS::RepoId& remoteId);
 
@@ -241,7 +242,11 @@ private:
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
+#ifdef ACE_HAS_CPP11
+    std::atomic<bool> shutting_down_;
+#else
     ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutting_down_;
+#endif
 #ifdef OPENDDS_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
@@ -500,7 +505,7 @@ private:
   void assign_bit_key(DiscoveredSubscription& sub);
 
   template<typename Map>
-  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant);
+  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
 
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);

@@ -21,10 +21,12 @@ public:
   double get_mem_usage() noexcept;
 
 private:
+#ifndef ACE_HAS_MAC_OSX
   int process_id_;
   size_t num_processors_;
   size_t total_virtual_mem_;
   size_t total_mem_;
+#endif
 #ifdef ACE_WIN32
   HANDLE process_handle_;
   ULARGE_INTEGER last_time_;
@@ -36,4 +38,3 @@ private:
   size_t last_user_time_;
 #endif
 };
-

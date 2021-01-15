@@ -20,6 +20,11 @@
 #include "InfoRepoDiscovery_Export.h"
 
 #include "ace/Thread_Mutex.h"
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op_T.h>
+#endif /* ACE_HAS_CPP11 */
 
 #include <string>
 
@@ -152,7 +157,7 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterCallbacks* publication,
+    OpenDDS::DCPS::DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos);
@@ -181,7 +186,7 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderCallbacks* subscription,
+    OpenDDS::DCPS::DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
@@ -212,15 +217,6 @@ public:
     const OpenDDS::DCPS::RepoId& subscriptionId,
     const DDS::StringSeq& params);
 
-
-  // Managing reader/writer associations:
-
-  virtual void association_complete(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId);
-
 private:
   TransportConfig_rch bit_config();
 
@@ -249,7 +245,11 @@ private:
     void shutdown();
 
     CORBA::ORB_var orb_;
+#ifdef ACE_HAS_CPP11
+    std::atomic<unsigned long> use_count_;
+#else
     ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> use_count_;
+#endif
   private:
     OrbRunner(const OrbRunner&);
     OrbRunner& operator=(const OrbRunner&);

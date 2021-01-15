@@ -44,11 +44,11 @@ protected:
   bool reliable_{false};
   bool history_keep_all_{false};
   size_t history_depth_{false};
-  size_t expected_match_count_{0};
-  size_t match_count_{0};
-  size_t expected_sample_count_{0};
-  size_t sample_count_{0};
-  Builder::DataReader* datareader_{0};
+  size_t expected_match_count_{};
+  size_t match_count_{};
+  size_t expected_sample_count_{};
+  size_t sample_count_{};
+  Builder::DataReader* datareader_{};
   DataDataReader_var data_dr_;
   std::vector<DataHandler*> handlers_;
   mutable std::condition_variable expected_match_cv;
@@ -95,4 +95,3 @@ protected:
 };
 
 }
-

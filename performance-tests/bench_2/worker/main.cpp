@@ -1,6 +1,9 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include <ace/Proactor.h>
+#ifdef ACE_HAS_AIO_CALLS
+#include <ace/POSIX_CB_Proactor.h>
+#endif
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -13,7 +16,11 @@
 #include "BenchC.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  if defined(__has_warning)
+#    if __has_warning("-Wclass-memaccess")
+#      pragma GCC diagnostic ignored "-Wclass-memaccess"
+#    endif
+#  endif
 #endif
 #include "BenchTypeSupportImpl.h"
 #ifdef __GNUC__
@@ -45,6 +52,7 @@
 #include "WriteAction.h"
 #include "DataReader.h"
 #include "DataWriter.h"
+#include "SetCftParametersAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -59,6 +67,8 @@
 using Builder::Log;
 using Builder::ZERO;
 using Bench::get_option_argument;
+
+const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
 
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
   typedef std::multiset<std::pair<double, size_t> > WMMS;
@@ -143,7 +153,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   std::ofstream log_file;
   if (!log_file_path.empty()) {
-    log_file.open(log_file_path);
+    log_file.open(log_file_path, ios::app);
     if (!log_file.good()) {
       std::cerr << "Unable to open log file: '" << log_file_path << "'" << std::endl;
       return 2;
@@ -207,16 +217,59 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   // Disable some Proactor debug chatter to stdout (eventually make this configurable?)
   ACE_Log_Category::ace_lib().priority_mask(0);
 
-  ACE_Proactor proactor;
+#ifdef ACE_HAS_AIO_CALLS
+  Builder::ConstPropertyIndex use_aio_proactor_prop =
+    get_property(config.properties, "use_aio_proactor", Builder::PVK_ULL);
+#endif
+
+  std::shared_ptr<ACE_Proactor> proactor;
+#ifdef ACE_HAS_AIO_CALLS
+  if (use_aio_proactor_prop && use_aio_proactor_prop->value.ull_prop()) {
+    proactor.reset(new ACE_Proactor(new ACE_POSIX_AIOCB_Proactor()));
+  } else {
+#endif
+    proactor.reset(new ACE_Proactor());
+#ifdef ACE_HAS_AIO_CALLS
+  }
+#endif
+
+  int max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
+  Builder::ConstPropertyIndex max_decimal_places_prop =
+    get_property(config.properties, "max_decimal_places", Builder::PVK_ULL);
+  if (max_decimal_places_prop) {
+    max_decimal_places = max_decimal_places_prop->value.ull_prop();
+  }
+
+  size_t redirect_ace_log = 1;
+  Builder::ConstPropertyIndex redirect_ace_log_prop =
+    get_property(config.properties, "redirect_ace_log", Builder::PVK_ULL);
+  if (redirect_ace_log_prop) {
+    redirect_ace_log = redirect_ace_log_prop->value.ull_prop();
+  }
+
+  if (redirect_ace_log && !log_file_path.empty()) {
+    std::ofstream* output_stream = new std::ofstream(log_file_path.c_str(), ios::app);
+    if (output_stream->bad()) {
+      delete output_stream;
+    } else {
+      ACE_LOG_MSG->msg_ostream(output_stream, true);
+    }
+    ACE_LOG_MSG->clr_flags(ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
+    ACE_LOG_MSG->set_flags(ACE_Log_Msg::OSTREAM);
+  }
 
   // Register actions
   Bench::ActionManager::Registration
     write_action_registration("write", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(*proactor));
     });
   Bench::ActionManager::Registration
     forward_action_registration("forward", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(*proactor));
+    });
+  Bench::ActionManager::Registration
+    set_cft_parameters_action_registration("set_cft_parameters", [&]() {
+      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(*proactor));
     });
 
   // Timestamps used to measure method call durations
@@ -235,7 +288,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   const size_t THREAD_POOL_SIZE = 4;
   std::vector<std::shared_ptr<std::thread> > thread_pool;
   for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
-    thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor.proactor_run_event_loop(); }));
+    thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor->proactor_run_event_loop(); }));
   }
 
   try {
@@ -253,7 +306,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Beginning action construction / initialization." << std::endl;
 
-    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map());
+    Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map(), process.get_cft_map());
 
     Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 
@@ -303,7 +356,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
             if (!wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+              Log::log() << "Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
             }
           }
         }
@@ -334,7 +387,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     Log::log() << "Process tests stopped." << std::endl << std::endl;
 
-    proactor.proactor_end_event_loop();
+    proactor->proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
@@ -351,7 +404,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
-    proactor.proactor_end_event_loop();
+    proactor->proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
@@ -360,7 +413,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return 1;
   } catch (...) {
     std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
-    proactor.proactor_end_event_loop();
+    proactor->proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
@@ -554,7 +607,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   // If requested, write out worker report to file
 
   if (!report_file_path.empty()) {
-    idl_2_json(worker_report, report_file);
+    idl_2_json(worker_report, report_file, max_decimal_places);
   }
 
   // Log / print a few of the stats
@@ -625,4 +678,3 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   return 0;
 }
-

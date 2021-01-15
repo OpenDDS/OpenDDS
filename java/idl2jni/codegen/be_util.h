@@ -42,4 +42,3 @@ public:
 };
 
 #endif // if !defined
-

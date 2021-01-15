@@ -19,18 +19,15 @@ ProgressIndicator::ProgressIndicator(const char* format,
 ProgressIndicator::~ProgressIndicator()
 {}
 
-ProgressIndicator&
-ProgressIndicator::operator++()
+ProgressIndicator& ProgressIndicator::operator++()
 {
   ++curr_;
 
   std::size_t pct = std::size_t(curr_ / double(max_) * 100);
-  if (pct > last_)
-  {
+  if (pct > last_) {
     ACE_DEBUG((LM_DEBUG, format_, pct, curr_));
     last_ += grad_;
   }
 
   return *this;
 }
-

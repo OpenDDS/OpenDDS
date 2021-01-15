@@ -132,4 +132,3 @@ project(*NetworkConfig): dcps_test, googletest {
     NetworkConfig.cpp
   }
 }
-

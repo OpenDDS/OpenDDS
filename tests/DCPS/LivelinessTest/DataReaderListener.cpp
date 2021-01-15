@@ -267,4 +267,3 @@ void DataReaderListenerImpl::on_subscription_matched (
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
   }
-

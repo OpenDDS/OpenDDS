@@ -15,4 +15,3 @@ public:
   virtual void read(::DDS::DataReader_ptr reader);
 };
 #endif
-

@@ -28,4 +28,3 @@ private:
 };
 
 #endif /* _SQUARE_HPP */
-

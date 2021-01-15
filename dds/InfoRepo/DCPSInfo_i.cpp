@@ -34,6 +34,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace {
+  const ACE_CDR::ULong transportContextDefault = 0xffffffff;
+}
+
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
                                        , bool reincarnate
@@ -372,8 +376,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataWriterRemote_ptr publication,
   const DDS::DataWriterQos & qos,
-  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-  const DDS::PublisherQos & publisherQos)
+  const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+  const DDS::PublisherQos& publisherQos)
 {
   if (CORBA::is_nil(publication)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -438,6 +442,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                    dispatchingPublication.in(),
                    qos,
                    transInfo,
+                   transportContextDefault,
                    publisherQos));
 
   DCPS_IR_Publication* pub = pubPtr.get();
@@ -459,8 +464,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                           , callback.in()
                           , const_cast<DDS::PublisherQos &>(publisherQos)
                           , const_cast<DDS::DataWriterQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
-                          (transInfo), csi);
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
+                          , transportContextDefault, csi);
     this->um_->create(actor);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -485,6 +490,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                                     const char* pub_str,
                                     const DDS::DataWriterQos & qos,
                                     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                                    ACE_CDR::ULong transportContext,
                                     const DDS::PublisherQos & publisherQos,
                                     bool associate)
 {
@@ -556,6 +562,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                    publication.in(),
                    qos,
                    transInfo,
+                   transportContext,
                    publisherQos));
 
   DCPS_IR_Publication* pub = pubPtr.get();
@@ -742,6 +749,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
                      dispatchingSubscription.in(),
                      qos,
                      transInfo,
+                     transportContextDefault,
                      subscriberQos,
                      filterClassName,
                      filterExpression,
@@ -769,8 +777,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
                           , callback.in()
                           , const_cast<DDS::SubscriberQos &>(subscriberQos)
                           , const_cast<DDS::DataReaderQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
-                          (transInfo), csi);
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
+                          , transportContextDefault, csi);
 
     this->um_->create(actor);
 
@@ -798,6 +806,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const char* sub_str,
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+  ACE_CDR::ULong transportContext,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterClassName,
   const char* filterExpression,
@@ -873,6 +882,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
                    subscription.in(),
                    qos,
                    transInfo,
+                   transportContext,
                    subscriberQos,
                    filterClassName,
                    filterExpression,
@@ -1510,50 +1520,6 @@ int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 }
 #endif
 
-void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
-  const OpenDDS::DCPS::RepoId& participantId,
-  const OpenDDS::DCPS::RepoId& localId,
-  const OpenDDS::DCPS::RepoId& remoteId)
-{
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-  DCPS_IR_Domain_Map::iterator dom_iter = this->domains_.find(domainId);
-  if (dom_iter == this->domains_.end()) {
-    return;
-  }
-
-  DCPS_IR_Participant* partPtr = dom_iter->second->participant(participantId);
-  if (0 == partPtr) {
-    return;
-  }
-
-  // localId could be pub or sub (initial implementation will only use sub
-  // since the DataReader is the passive peer)
-  DCPS_IR_Subscription* sub = 0;
-  DCPS_IR_Publication* pub = 0;
-  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) completing association\n"));
-  }
-  if (0 == partPtr->find_subscription_reference(localId, sub)) {
-    sub->association_complete(remoteId);
-  } else if (0 == partPtr->find_publication_reference(localId, pub)) {
-    pub->association_complete(remoteId);
-  } else {
-    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-      OpenDDS::DCPS::RepoIdConverter part_converter(participantId);
-      OpenDDS::DCPS::RepoIdConverter local_converter(localId);
-      OpenDDS::DCPS::RepoIdConverter remote_converter(remoteId);
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::association_complete: ")
-                 ACE_TEXT("participant %C could not find subscription or publication %C ")
-                 ACE_TEXT("to complete association with remote %C.\n"),
-                 std::string(part_converter).c_str(),
-                 std::string(local_converter).c_str(),
-                 std::string(remote_converter).c_str()));
-    }
-  }
-}
-
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,
@@ -2189,6 +2155,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 {
   int status = 0;
 
+#ifndef DDS_HAS_MINIMUM_BIT
   try {
 
 #ifndef ACE_AS_STATIC_LIBS
@@ -2231,6 +2198,8 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     // beyond this point.
     status = 1;
   }
+#endif
+
   return status;
 }
 
@@ -2327,6 +2296,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                                 , sub->topicId, sub->actorId
                                 , sub->callback.c_str(), sub->drdwQos
                                 , sub->transportInterfaceInfo
+                                , sub->transportContext
                                 , sub->pubsubQos
                                 , sub->contentSubscriptionProfile.filterClassName
                                 , sub->contentSubscriptionProfile.filterExpr
@@ -2360,7 +2330,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
     if (!this->add_publication(pub->domainId, pub->participantId
                                , pub->topicId, pub->actorId
                                , pub->callback.c_str() , pub->drdwQos
-                               , pub->transportInterfaceInfo
+                               , pub->transportInterfaceInfo, pub->transportContext
                                , pub->pubsubQos
                                , true)) {
       OpenDDS::DCPS::RepoIdConverter pub_converter(pub->actorId);

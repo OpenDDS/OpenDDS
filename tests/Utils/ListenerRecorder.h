@@ -9,6 +9,7 @@
 #define TestUtils_ListenerRecorder_IMPL_H
 
 #include <tests/Utils/DataReaderListenerImpl.h>
+
 #include "ace/Thread_Mutex.h"
 
 #include <vector>

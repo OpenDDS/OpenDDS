@@ -6,8 +6,10 @@
 
 namespace Builder {
 
-DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber, const std::shared_ptr<TopicManager>& topics)
-  : name_(config.name.in()), topic_name_(config.topic_name.in())
+DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report, DDS::Subscriber_var& subscriber,
+  const std::shared_ptr<TopicManager>& topics, const ContentFilteredTopicMap& cft_map)
+  : name_(config.name.in())
+  , topic_name_(config.topic_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
   , listener_properties_(config.listener_properties)
@@ -21,13 +23,8 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   Log::log() << "Creating datareader: '" << name_ << "' with topic name '" << topic_name_
     << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
-  auto topic_ptr = topics->get_topic_by_name(config.topic_name.in());
-  if (!topic_ptr) {
-    std::stringstream ss;
-    ss << "topic lookup failed in datareader '" << config.name << "' for topic '" << config.topic_name << "'" << std::flush;
-    throw std::runtime_error(ss.str());
-  }
-  topic_ = topic_ptr->get_dds_topic();
+  // Associate user tags to the report
+  report_.tags = config.tags;
 
   // Customize QoS Object
   subscriber_->get_default_datareader_qos(qos_);
@@ -73,9 +70,9 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
         << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
-      DataReaderListener* savvy_listener_ = dynamic_cast<DataReaderListener*>(listener_.in());
-      if (savvy_listener_) {
-        savvy_listener_->set_datareader(*this);
+      DataReaderListener* savvy_listener = dynamic_cast<DataReaderListener*>(listener_.in());
+      if (savvy_listener) {
+        savvy_listener->set_datareader(*this);
       }
     }
   }
@@ -90,7 +87,28 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     enable_time_->value.time_prop(create_time_->value.time_prop());
   }
 
-  datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
+  auto topic_ptr = topics->get_topic_by_name(topic_name_);
+  if (topic_ptr) {
+    DDS::Topic_var topic = topic_ptr->get_dds_topic();
+    datareader_ = subscriber_->create_datareader(topic, qos_, listener_, listener_status_mask_);
+  } else {
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+    DDS::ContentFilteredTopic_var content_filtered_topic;
+    auto it = cft_map.find(topic_name_);
+    if (it != cft_map.end()) {
+      content_filtered_topic = it->second;
+    }
+
+    if (!content_filtered_topic) {
+      std::stringstream ss;
+      ss << "Topic lookup failed in datareader '" << config.name << "' for cft topic '" << topic_name_ << "'" << std::flush;
+      throw std::runtime_error(ss.str());
+    }
+
+    datareader_ = subscriber_->create_datareader(content_filtered_topic, qos_, listener_, listener_status_mask_);
+#endif
+  }
+
   if (CORBA::is_nil(datareader_.in())) {
     throw std::runtime_error("datareader creation failed");
   }
@@ -101,7 +119,9 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   }
 }
 
-DataReader::~DataReader() {
+DataReader::~DataReader()
+{
+  detach_listener();
   Log::log() << "Deleting datareader: " << name_ << std::endl;
   if (!CORBA::is_nil(datareader_.in())) {
     if (subscriber_->delete_datareader(datareader_) != DDS::RETCODE_OK) {
@@ -110,7 +130,8 @@ DataReader::~DataReader() {
   }
 }
 
-bool DataReader::enable(bool throw_on_error) {
+bool DataReader::enable(bool throw_on_error)
+{
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_hr_time());
   }
@@ -123,16 +144,17 @@ bool DataReader::enable(bool throw_on_error) {
   return result;
 }
 
-void DataReader::detach_listener() {
+void DataReader::detach_listener()
+{
   if (listener_) {
     DataReaderListener* savvy_listener_ = dynamic_cast<DataReaderListener*>(listener_.in());
     if (savvy_listener_) {
       savvy_listener_->unset_datareader(*this);
     }
     if (datareader_) {
-      datareader_->set_listener(DDS::DataReaderListener::_nil(), 0);
+      datareader_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
     }
-    listener_ = DDS::DataReaderListener::_nil();
+    listener_ = 0;
   }
 }
 

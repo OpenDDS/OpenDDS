@@ -362,7 +362,7 @@ ReplayerImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
                            this->publisher_qos_);
@@ -430,6 +430,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -448,36 +449,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   if (active) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-    // Have we already received an association_complete() callback?
-    if (assoc_complete_readers_.count(reader.readerId)) {
-      assoc_complete_readers_.erase(reader.readerId);
-      association_complete_i(reader.readerId);
-
-      // Add to pending_readers_ -> pending means we are waiting
-      // for the association_complete() callback.
-    } else if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
-      GuidConverter converter(reader.readerId);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::add_association: ")
-                 ACE_TEXT("failed to mark %C as pending.\n"),
-                 OPENDDS_STRING(converter).c_str()));
-
-    } else {
-      if (DCPS_debug_level > 0) {
-        GuidConverter converter(reader.readerId);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) ReplayerImpl::add_association: ")
-                   ACE_TEXT("marked %C as pending.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-    }
-  } else {
-    // In the current implementation, DataWriter is always active, so this
-    // code will not be applicable.
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->association_complete(this->domain_id_,
-                                this->participant_servant_->get_id(),
-                                this->publication_id_, reader.readerId);
+    association_complete_i(reader.readerId);
   }
 }
 
@@ -497,33 +469,6 @@ ReplayerImpl::ReaderInfo::ReaderInfo(const char*            filter,
 
 ReplayerImpl::ReaderInfo::~ReaderInfo()
 {
-}
-
-
-void
-ReplayerImpl::association_complete(const RepoId& remote_id)
-{
-  DBG_ENTRY_LVL("ReplayerImpl", "association_complete", 6);
-
-  if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) ReplayerImpl::association_complete - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
-  }
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-  if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-    // Not found in pending_readers_, defer calling association_complete_i()
-    // until add_association() resumes and sees this ID in assoc_complete_readers_.
-    assoc_complete_readers_.insert(remote_id);
-  } else {
-    association_complete_i(remote_id);
-  }
 }
 
 void
@@ -661,17 +606,6 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
         ++rds_len;
         rds.length(rds_len);
         rds [rds_len - 1] = readers[i];
-
-      } else if (OpenDDS::DCPS::remove(pending_readers_, readers[i]) == 0) {
-        ++rds_len;
-        rds.length(rds_len);
-        rds [rds_len - 1] = readers[i];
-
-        GuidConverter converter(readers[i]);
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: ReplayerImpl::remove_associations: ")
-                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
-                   OPENDDS_STRING(converter).c_str()));
       }
       reader_info_.erase(readers[i]);
       //else reader is already removed which indicates remove_association()
@@ -743,12 +677,10 @@ void ReplayerImpl::remove_all_associations()
 
   OpenDDS::DCPS::ReaderIdSeq readers;
   CORBA::ULong size;
-  CORBA::ULong num_pending_readers;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
-    num_pending_readers = static_cast<CORBA::ULong>(pending_readers_.size());
-    size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
+    size = static_cast<CORBA::ULong>(readers_.size());
     readers.length(size);
 
     RepoIdSet::iterator itEnd = readers_.end();
@@ -756,18 +688,6 @@ void ReplayerImpl::remove_all_associations()
 
     for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i++] = *it;
-    }
-
-    itEnd = pending_readers_.end();
-    for (RepoIdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
-      readers[i++] = *it;
-    }
-
-    if (num_pending_readers > 0) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ReplayerImpl::remove_all_associations() - ")
-                 ACE_TEXT("%d subscribers were pending and never fully associated.\n"),
-                 num_pending_readers));
     }
   }
 
@@ -1027,7 +947,7 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
   header_data.message_id_ = SAMPLE_DATA;
   header_data.coherent_change_ = content_filter;
 
-  header_data.content_filter_ = 0;
+  header_data.content_filter_ = false;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_repair_ = need_sequence_repair();

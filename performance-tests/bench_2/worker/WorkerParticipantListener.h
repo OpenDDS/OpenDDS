@@ -36,6 +36,7 @@ public:
   // From Builder::ParticipantListener
 
   void set_participant(Builder::Participant& participant) override;
+  void unset_participant(Builder::Participant& participant) override;
 
 protected:
   std::mutex mutex_;
@@ -43,4 +44,3 @@ protected:
 };
 
 }
-

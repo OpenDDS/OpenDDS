@@ -196,6 +196,13 @@ void postprocess(const char* fn, ostringstream& content,
     if (which == BE_GlobalData::STREAM_H) {
       out << "#include \"dds/DCPS/Definitions.h\"\n";
       out << "#include \"dds/DdsDcpsC.h\"\n";
+      out << "#include \"dds/Version.h\"\n";
+      out << "#if DDS_MAJOR_VERSION != " << DDS_MAJOR_VERSION
+          << " || DDS_MINOR_VERSION != " << DDS_MINOR_VERSION
+          << " || DDS_MICRO_VERSION != " << DDS_MICRO_VERSION
+          << "\n";
+      out << "#error This file should be regenerated with opendds_idl\n";
+      out << "#endif\n";
     }
   }
   break;

@@ -23,11 +23,11 @@ public:
   // From PublisherListener
 
   void set_publisher(Builder::Publisher& publisher) override;
+  void unset_publisher(Builder::Publisher& publisher) override;
 
 protected:
   std::mutex mutex_;
-  Builder::Publisher* publisher_{0};
+  Builder::Publisher* publisher_{};
 };
 
 }
-

@@ -43,8 +43,6 @@ public:
                                const ReaderAssociation& reader,
                                bool active) = 0;
 
-  virtual void association_complete(const RepoId& remote_id) = 0;
-
   virtual void remove_associations(const ReaderIdSeq& readers,
                                    CORBA::Boolean callback) = 0;
 
@@ -68,6 +66,9 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
+
+typedef RcHandle<DataWriterCallbacks> DataWriterCallbacks_rch;
+typedef WeakRcHandle<DataWriterCallbacks> DataWriterCallbacks_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS

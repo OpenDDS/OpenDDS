@@ -233,5 +233,3 @@ wait_publication_matched_status(const Options& opts, const DDS::DataWriter_ptr w
 
   return true;
 }
-
-

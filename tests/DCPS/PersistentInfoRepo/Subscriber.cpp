@@ -37,7 +37,7 @@ namespace {
         expected_count = msg.key;
       }
       else if (msg.key != expected_count) {
-        std::cerr << "ERROR: key of " << msg.key
+        std::cerr << "ERROR: Stage " << stage << " key of " << msg.key
                   << " for message # " << index
                   << " does not match expected count of "
                   << expected_count << "\n";
@@ -46,7 +46,7 @@ namespace {
 
       if (msg.x == 1.0) {
         if (!group1.insert((long)msg.c).second) {
-          std::cerr << "ERROR: message # " << index
+          std::cerr << "ERROR: Stage " << stage << " message # " << index
                     << " group1 repeated value for "
                     << (long)msg.c << "\n";
           valid = false;
@@ -54,7 +54,7 @@ namespace {
       }
       else if (msg.x == 2.0) {
         if (!group2.insert((long)msg.c).second) {
-          std::cerr << "ERROR: message # " << index
+          std::cerr << "ERROR: Stage " << stage << " message # " << index
                     << " group2 repeated value for "
                     << (long)msg.c << "\n";
           valid = false;
@@ -62,14 +62,14 @@ namespace {
       }
       else if (msg.x == 3.0) {
         if (!group3.insert((long)msg.c).second) {
-          std::cerr << "ERROR: message # " << index
+          std::cerr << "ERROR: Stage " << stage << " message # " << index
                     << " group3 repeated value for "
                     << (long)msg.c << "\n";
           valid = false;
         }
       }
       else {
-        std::cerr << "ERROR: for message # " << index
+        std::cerr << "ERROR: Stage " << stage << " for message # " << index
                   << " expecting to receive message with x=1.0,"
                   << " 2.0, or 3.0, but received " << msg.x << "\n";
         valid = false;
@@ -84,7 +84,7 @@ namespace {
     }
     else if ((int)group1.size() * 4 < expected_count) {
       const double pct = 100.0 * (double)group1.size()/(double)expected_count;
-      std::cerr << "ERROR: received only " << group1.size()
+      std::cerr << "ERROR: Stage " << stage << " received only " << group1.size()
                 << " of the " << expected_count
                 << " (" << pct
                 << "%) expected messages sent in Stage1.\n";
@@ -93,7 +93,7 @@ namespace {
 
     if ((int)group2.size() * 4 < expected_count) {
       const double pct = 100.0 * (double)group2.size()/(double)expected_count;
-      std::cerr << "ERROR: received only " << group2.size()
+      std::cerr << "ERROR: Stage " << stage << " received only " << group2.size()
                 << " of the " << expected_count
                 << " (" << pct
                 << "%) expected messages sent in Stage2 by the first publisher.\n";
@@ -102,7 +102,7 @@ namespace {
 
     if ((int)group3.size() * 4 < expected_count) {
       const double pct = 100.0 * (double)group3.size()/(double)expected_count;
-      std::cerr << "ERROR: received only " << group3.size()
+      std::cerr << "ERROR: Stage " << stage << " received only " << group3.size()
                 << " of the " << expected_count
                 << " (" << pct
                 << "%) expected messages sent in Stage2 by the second publisher.\n";
@@ -115,6 +115,7 @@ namespace {
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  long stage = 0;
   std::stringstream ss;
   ss << "(" << ACE_OS::getpid() << ")";
   const std::string pid = ss.str();
@@ -133,7 +134,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     args.add_bool("verbose", false);
     ::TestUtils::Options options(argc, argv);
 
-    const long stage = options.get<long>("stage");
+    stage = options.get<long>("stage");
     if (stage != 1 && stage != 2) {
       std::cerr << "ERROR: Sub command line parameter \"stage\" set to "
                 << stage << " should be set to 1 or 2 ";
@@ -164,7 +165,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = -1;
     }
 
-    std::cerr << pid << "Sub DDSApp going out of scope\n";
+    std::cerr << pid << "Sub Stage " << stage << " DDSApp going out of scope\n";
     // Listener will be cleaned up when reader goes out of scope
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
@@ -178,7 +179,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                msg.c_str()));
     status = -1;
   }
-  std::cerr << pid << "Sub returning status=" << status << "\n";
+  std::cerr << pid << "Sub Stage " << stage << " returning status=" << status << "\n";
 
   return status;
 }

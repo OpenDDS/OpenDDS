@@ -21,7 +21,7 @@ class TAO_DDS_DCPSDataReader_i
   : public OpenDDS::DCPS::DataReaderCallbacks
 {
 public:
-  enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS };
+  enum Called { ENABLE_SPECIFIC, ADD_ASSOC, REM_ASSOC, UPDATE_INCOMP_QOS };
 
   TAO_DDS_DCPSDataReader_i (void);
 
@@ -35,8 +35,6 @@ public:
       const ::OpenDDS::DCPS::RepoId& yourId,
       const OpenDDS::DCPS::WriterAssociation& writer,
       bool active);
-
-  virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::WriterIdSeq & writers,

@@ -100,6 +100,84 @@ bool NetworkConfigModifier::close()
   return true;
 }
 
+void NetworkConfigModifier::update_interfaces()
+{
+  ifaddrs* p_ifa = 0;
+  ifaddrs* p_if = 0;
+
+  if (::getifaddrs(&p_ifa) != 0) {
+    return;
+  }
+
+  typedef std::map<std::string, ifaddrs*> Names;
+  Names names;
+
+  // Pull the address out of each INET interface.
+  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
+    if (p_if->ifa_addr == 0) {
+      continue;
+    }
+
+    // Check to see if it's up.
+    if ((p_if->ifa_flags & IFF_UP) != IFF_UP) {
+      continue;
+    }
+
+    if (p_if->ifa_addr->sa_family == AF_INET) {
+      sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(p_if->ifa_addr);
+      // Sometimes the kernel returns 0.0.0.0 as the interface
+      // address, skip those...
+      if (addr->sin_addr.s_addr != INADDR_ANY) {
+        names.insert(std::make_pair(p_if->ifa_name, p_if));
+      }
+    }
+# if defined (ACE_HAS_IPV6)
+    else if (p_if->ifa_addr->sa_family == AF_INET6) {
+      sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(p_if->ifa_addr);
+      // Skip the ANY address
+      if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
+        names.insert(std::make_pair(p_if->ifa_name, p_if));
+      }
+    }
+# endif /* ACE_HAS_IPV6 */
+  }
+  // Remove interfaces that are no longer active
+  NetworkInterfaces nis = get_interfaces();
+  for (NetworkInterfaces::iterator iter = nis.begin(); iter != nis.end(); ++iter) {
+    if (names.find(iter->name()) == names.end()) {
+      remove_interface(iter->index());
+    }
+  }
+
+  // Add interfaces that are new
+  nis = get_interfaces();
+  for (Names::iterator iter = names.begin(); iter != names.end(); ++iter) {
+    NetworkInterfaces::iterator pos = std::find_if(nis.begin(), nis.end(), NetworkInterfaceName(iter->first));
+    if (pos == nis.end()) {
+      ifaddrs* ifa = iter->second;
+      ACE_INET_Addr address;
+      const bool can_multicast = ifa->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK);
+      if (ifa->ifa_addr->sa_family == AF_INET) {
+        sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
+        address.set((u_short) 0, addr->sin_addr.s_addr, 0);
+        NetworkInterface ni(ACE_OS::if_nametoindex(ifa->ifa_name), ifa->ifa_name, can_multicast);
+        ni.add_address(address);
+        NetworkConfigMonitor::add_interface(ni);
+      }
+# if defined (ACE_HAS_IPV6)
+      else if (ifa->ifa_addr->sa_family == AF_INET6) {
+        sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*> (ifa->ifa_addr);
+        address.set(reinterpret_cast<sockaddr_in*>(addr), sizeof(sockaddr_in6));
+        NetworkInterface ni(ACE_OS::if_nametoindex(ifa->ifa_name), ifa->ifa_name, can_multicast);
+        ni.add_address(address);
+        NetworkConfigMonitor::add_interface(ni);
+      }
+# endif /* ACE_HAS_IPV6 */
+    }
+  }
+  ::freeifaddrs(p_ifa);
+}
+
 void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 {
   NetworkInterface* p_nic = 0;

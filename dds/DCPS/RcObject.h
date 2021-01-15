@@ -7,7 +7,11 @@
 
 
 #include "dds/Versioned_Namespace.h"
-#include "ace/Atomic_Op.h"
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 #include "ace/Synch_Traits.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "RcHandle_T.h"
@@ -44,7 +48,11 @@ namespace DCPS {
     RcObject* lock();
     bool set_expire();
   private:
+#ifdef ACE_HAS_CPP11
+    std::atomic<long> ref_count_;
+#else
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
+#endif
     ACE_SYNCH_MUTEX mx_;
     RcObject* const ptr_;
     bool expired_;
@@ -70,7 +78,11 @@ namespace DCPS {
 
     /// This accessor is purely for debugging purposes
     long ref_count() const {
+#ifdef ACE_HAS_CPP11
+      return this->ref_count_;
+#else
       return this->ref_count_.value();
+#endif
     }
 
     WeakObject*
@@ -80,16 +92,17 @@ namespace DCPS {
     }
 
   protected:
-
     RcObject()
       : ref_count_(1)
       , weak_object_( new WeakObject(this) )
     {}
 
-
   private:
-
+#ifdef ACE_HAS_CPP11
+    std::atomic<long> ref_count_;
+#else
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
+#endif
     WeakObject*  weak_object_;
 
     RcObject(const RcObject&);

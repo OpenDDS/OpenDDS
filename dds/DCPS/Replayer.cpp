@@ -61,4 +61,3 @@ TAO::Objref_Traits<OpenDDS::DCPS::Replayer>::marshal(const OpenDDS::DCPS::Replay
 {
   return false;
 }
-

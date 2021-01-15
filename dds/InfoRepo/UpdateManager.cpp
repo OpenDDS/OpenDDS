@@ -251,7 +251,7 @@ Manager::pushImage(const DImage& image)
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *sub_qos, *reader_qos
-                                 , *trans, csi));
+                                 , *trans, actor.transportContext, csi));
       readers.push_back(reader);
       u_image.actors.push_back(reader);
 
@@ -274,7 +274,7 @@ Manager::pushImage(const DImage& image)
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *pub_qos, *writer_qos
-                                 , *trans, csi));
+                                 , *trans, actor.transportContext, csi));
       writers.push_back(writer);
       u_image.wActors.push_back(writer);
 
@@ -380,7 +380,7 @@ Manager::add(const DActor& actor)
     info_->add_subscription(actor.domainId, actor.participantId
                             , actor.topicId, actor.actorId
                             , callback.c_str(), reader_qos
-                            , transport_info, sub_qos
+                            , transport_info, actor.transportContext, sub_qos
                             , csi.filterClassName, csi.filterExpr, csi.exprParams);
 
   } else if (actor.type == DataWriter) {
@@ -394,7 +394,7 @@ Manager::add(const DActor& actor)
     info_->add_publication(actor.domainId, actor.participantId
                            , actor.topicId, actor.actorId
                            , callback.c_str(), writer_qos
-                           , transport_info, pub_qos);
+                           , transport_info, actor.transportContext, pub_qos);
   }
 }
 

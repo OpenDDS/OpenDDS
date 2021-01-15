@@ -41,7 +41,7 @@ template <typename T>
 class QueueTaskBase : public ACE_Task_Base {
 public:
   QueueTaskBase()
-  : work_available_(lock_),
+  : work_available_(lock_, ConditionAttributesMonotonic()),
       shutdown_initiated_(false),
       opened_(false),
       thr_id_(ACE_OS::NULL_thread),
@@ -118,9 +118,9 @@ public:
       tid = static_cast<unsigned long>(osx_tid);
     } else {
       tid = 0;
-      ACE_ERROR((LM_ERROR, ACE_TEXT("%T (%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n.")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) QueueTaskBase::svc. Error getting OSX thread id\n")));
     }
-#else
+#elif !defined (OPENDDS_SAFETY_PROFILE)
     ACE_thread_t tid = thr_id_;
 #endif /* ACE_HAS_MAC_OSX */
     TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
@@ -146,19 +146,18 @@ public:
             MonotonicTimePoint expire = MonotonicTimePoint::now() + interval;
 
             do {
-              this->work_available_.wait(&expire.value()); // wait uses abstime
+              this->work_available_.wait(&expire.value());
+
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
                 expire = now + interval;
                 if (status) {
                   if (DCPS_debug_level > 4) {
                     ACE_DEBUG((LM_DEBUG,
-                              "%T (%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                              "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                   }
-                  {
-                    ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
-                    status->map[key] = now;
-                  }
+                  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, status->lock, -1);
+                  status->map[key] = now;
                 }
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);

@@ -153,7 +153,7 @@ TestCase::test()
           DDS::SampleInfo si = si_seq[0];
           TestMessage message = message_seq[0];
           std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-          std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+          std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
 
           if (si.valid_data) {
             std::cout << "Message: key    = " << message.key << std::endl

@@ -48,7 +48,7 @@ exit 1 if !GetOptions(
     "no-shared" => \$no_shared,
     );
 
-my @dirs = ('Messenger_1', 'Messenger_2');
+my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, 'C++11_Messenger' unless $skip_cxx11;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
@@ -60,8 +60,9 @@ for my $dir (@dirs) {
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 
   my @generate_cmd = ("cmake",
-		      "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
-		      "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+    "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
+    "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+  );
   my @build_cmd = ("cmake", "--build", ".");
 
   if ($generator ne "") {

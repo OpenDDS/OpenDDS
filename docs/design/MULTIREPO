@@ -227,4 +227,3 @@ to be bound to specific domains.  This is a 1 (repository) to many
 manages the transport for the Built In Topics for the service,
 a transport needs to be created for each individual repository.
 This is a 1 (repository) to 1 (transport) relationship.
-

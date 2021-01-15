@@ -75,4 +75,3 @@ Puller::pull(const ACE_Time_Value& /*duration*/)
 
   return 0;
 }
-

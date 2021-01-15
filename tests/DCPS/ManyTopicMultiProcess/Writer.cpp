@@ -147,4 +147,3 @@ void Writer::rsleep(const int wait)
 {
   ACE_OS::sleep(ACE_Time_Value(0, wait / 2));
 }
-

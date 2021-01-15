@@ -5,4 +5,3 @@ project : dcps_test, dcps_qos_xml_handler {
     qos_dump.cpp
   }
 }
-
