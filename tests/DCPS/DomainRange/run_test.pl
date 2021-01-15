@@ -28,7 +28,7 @@ sub runTest {
     print "messages to its DRs.\n";
     print "*********************************\n";
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 11 -domain 20 -domain 50");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 11 -domain 20 -domain 50 -domain 11");
 
     $test->start_process("alpha");
 
