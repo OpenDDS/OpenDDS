@@ -3,6 +3,7 @@ project: dcpsexe, dcps_test, dcps_transports_for_test, dcps_ts_subdir {
   idlflags += -SS -o GeneratedCode
 
   TypeSupport_Files {
+    dcps_ts_flags += -o GeneratedCode
     gendir = GeneratedCode
     Messenger.idl
   }
