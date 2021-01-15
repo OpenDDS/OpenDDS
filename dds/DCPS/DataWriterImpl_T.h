@@ -332,17 +332,16 @@ public:
         Encoding::Kind encoding_kind;
         if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
           encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-            if (encoding_kind == Encoding::KIND_XCDR1) {
-              if (MarshalTraitsType::max_extensibility_level() == MUTABLE) {
-                if (::OpenDDS::DCPS::DCPS_debug_level) {
-                  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                    ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                    ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
-                    TraitsType::type_name()));
-                }
-                return DDS::RETCODE_ERROR;
-              }
+          if (encoding_kind == Encoding::KIND_XCDR1 &&
+              MarshalTraitsType::max_extensibility_level() == MUTABLE) {
+            if (::OpenDDS::DCPS::DCPS_debug_level) {
+              ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
+                TraitsType::type_name()));
             }
+            return DDS::RETCODE_ERROR;
+          }
           break;
         } else if (::OpenDDS::DCPS::DCPS_debug_level) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
