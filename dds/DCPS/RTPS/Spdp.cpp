@@ -199,7 +199,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
         SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
         SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
         BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-
     }
 
     if (enable_type_lookup_service) {
@@ -607,7 +606,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   pdata.associated_endpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
-  const DCPS::RepoId guid = make_id(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (sedp_->ignoring(guid)) {
@@ -871,16 +870,16 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  const DCPS::RepoId guid = make_id(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
   if (guid == guid_) {
     // About us, stop.
     return;
   }
 
-  DCPS::SequenceNumber seq;
-  seq.setValue(data.writerSN.high, data.writerSN.low);
-  handle_participant_data((data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-                          pdata, seq, from, false);
+  handle_participant_data(
+    (data.inlineQos.length() && disposed(data.inlineQos)) ?
+      DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
+    pdata, to_opendds_seqnum(data.writerSN), from, false);
 
 #ifdef OPENDDS_SECURITY
   if (!is_security_enabled()) {
@@ -2131,7 +2130,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   hdr_.prefix[3] = 'S';
   hdr_.version = PROTOCOLVERSION;
   hdr_.vendorId = VENDORID_OPENDDS;
-  std::memcpy(hdr_.guidPrefix, outer_->guid_.guidPrefix, sizeof(GuidPrefix_t));
+  DCPS::assign(hdr_.guidPrefix, outer_->guid_.guidPrefix);
   data_.smHeader.submessageId = DATA;
   data_.smHeader.flags = FLAG_E | FLAG_D;
   data_.smHeader.submessageLength = 0; // last submessage in the Message
@@ -2359,8 +2358,7 @@ void
 Spdp::SpdpTransport::dispose_unregister()
 {
   // Send the dispose/unregister SPDP sample
-  data_.writerSN.high = seq_.getHigh();
-  data_.writerSN.low = seq_.getLow();
+  data_.writerSN = to_rtps_seqnum(seq_);
   data_.smHeader.flags = FLAG_E | FLAG_Q | FLAG_K_IN_DATA;
   data_.inlineQos.length(1);
   static const StatusInfo_t dispose_unregister = { {0, 0, 0, 3} };
@@ -2471,8 +2469,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #endif
   );
 
-  data_.writerSN.high = seq_.getHigh();
-  data_.writerSN.low = seq_.getLow();
+  data_.writerSN = to_rtps_seqnum(seq_);
   ++seq_;
 
   ParameterList plist;
@@ -2530,8 +2527,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 #endif
   );
 
-  data_.writerSN.high = seq_.getHigh();
-  data_.writerSN.low = seq_.getLow();
+  data_.writerSN = to_rtps_seqnum(seq_);
   ++seq_;
 
   ParameterList plist;
@@ -2569,7 +2565,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
   info_dst.smHeader.submessageId = INFO_DST;
   info_dst.smHeader.flags = FLAG_E;
   info_dst.smHeader.submessageLength = sizeof(guid.guidPrefix);
-  std::memcpy(info_dst.guidPrefix, guid.guidPrefix, sizeof(guid.guidPrefix));
+  DCPS::assign(info_dst.guidPrefix, guid.guidPrefix);
 
   wbuff_.reset();
   CORBA::UShort options = 0;
@@ -2723,8 +2719,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       case DATA: {
         DataSubmessage data;
         if (!(ser >> data)) {
-          ACE_ERROR((
-                     LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                      ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
           return 0;
@@ -2769,8 +2764,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
-          ACE_ERROR((
-                     LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                      ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
           return 0;
