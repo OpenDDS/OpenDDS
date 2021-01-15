@@ -1,11 +1,11 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
-  "start_time": { "sec": -1, "nsec": 0 },
+  "start_time": { "sec": -10, "nsec": 0 },
   "stop_time": { "sec": -15, "nsec": 0 },
   "destruction_time": { "sec": -1, "nsec": 0 },
 
-  "wait_for_discovery": true,
-  "wait_for_discovery_seconds": 10,
+  "wait_for_discovery": false,
+  "wait_for_discovery_seconds": 0,
 
   "process": {
     "config_sections": [
@@ -60,7 +60,7 @@
                     "value": { "_d": "PVK_ULL", "ull_prop": 1 }
                   },
                   { "name": "expected_sample_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 100 }
+                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
                   }
                 ],
 

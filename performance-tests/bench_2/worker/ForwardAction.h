@@ -9,12 +9,13 @@
 #include "BenchTypeSupportImpl.h"
 
 #include <condition_variable>
+#include <random>
 
 namespace Bench {
 
-class ForwardAction : public Action, public DataHandler {
+class ForwardAction : public virtual Action, public virtual DataHandler, public std::enable_shared_from_this<ForwardAction> {
 public:
-  ForwardAction(ACE_Proactor& proactor);
+  explicit ForwardAction(ACE_Proactor& proactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
@@ -28,9 +29,9 @@ public:
 protected:
   class Registration {
   public:
-    Registration(ForwardAction& fa, WorkerDataReaderListener* wdrl) : fa_(fa), wdrl_(wdrl) { wdrl_->add_handler(fa_); }
+    Registration(std::shared_ptr<ForwardAction> fa, WorkerDataReaderListener* wdrl) : fa_(fa), wdrl_(wdrl) { wdrl->add_handler(fa); }
   protected:
-    ForwardAction& fa_;
+    std::weak_ptr<ForwardAction> fa_;
     WorkerDataReaderListener* wdrl_;
   };
 
@@ -39,6 +40,9 @@ protected:
   bool started_, stopped_;
   std::vector<std::shared_ptr<Registration> > registrations_;
   std::vector<DataDataWriter_var> data_dws_;
+  std::mt19937_64 mt_;
+  UniqueId id_;
+  UniqueId data_id_;
   bool prevent_copy_, force_copy_;
   size_t copy_threshold_;
   std::vector<Data> data_queue_;

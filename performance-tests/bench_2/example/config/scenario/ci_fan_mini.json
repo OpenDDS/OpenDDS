@@ -1,0 +1,15 @@
+{
+  "name": "Continuous Integration Fan-Out / Fan-In Test",
+  "desc": "This is a small quick test for data fan-out / fan-in capability",
+  "any_node": [
+    {
+      "config": "ci_fan_mini_client.json",
+      "count": 1
+    },
+    {
+      "config": "ci_fan_mini_server.json",
+      "count": 3
+    }
+  ],
+  "timeout": 120
+}

@@ -51,8 +51,8 @@
         "subscribers": [
           { "name": "subscriber_01",
             "datareaders": [
-              { "name": "datareader_01",
-                "topic_name": "topic_01",
+              { "name": "datareader_02",
+                "topic_name": "topic_02",
                 "listener_type_name": "bench_drl",
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
@@ -73,8 +73,8 @@
         "publishers": [
           { "name": "publisher_01",
             "datawriters": [
-              { "name": "datawriter_02",
-                "topic_name": "topic_02",
+              { "name": "datawriter_01",
+                "topic_name": "topic_01",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
@@ -91,10 +91,23 @@
   },
   "actions": [
     {
-      "name": "forward_action_01",
-      "type": "forward",
-      "readers": [ "datareader_01" ],
-      "writers": [ "datawriter_02" ]
+      "name": "write_action_01",
+      "type": "write",
+      "writers": [ "datawriter_01" ],
+      "params": [
+        { "name": "max_count",
+          "value": { "_d": "PVK_ULL", "ull_prop": 100 }
+        },
+        { "name": "total_hops",
+          "value": { "_d": "PVK_ULL", "ull_prop": 2 }
+        },
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 100000 }
+        },
+        { "name": "write_frequency",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
+        }
+      ]
     }
   ]
 }
