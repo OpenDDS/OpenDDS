@@ -3316,19 +3316,16 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
   const DDS::DataRepresentationIdSeq repIds =
     get_effective_data_rep_qos(qos_.representation.value, true);
+  bool xcdr1_mutable = false;
   if (cdr_encapsulation()) {
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
       Encoding::Kind encoding_kind;
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
         if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
-          if (::OpenDDS::DCPS::DCPS_debug_level) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-              ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-              ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n")));
-          }
-          return DDS::RETCODE_ERROR;
+          xcdr1_mutable = true;
+        } else {
+          decoding_modes_.insert(encoding_kind);
         }
-        decoding_modes_.insert(encoding_kind);
       } else if (DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("DataReaderImpl::setup_deserialization: ")
@@ -3343,7 +3340,8 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                 ACE_TEXT("Could not find a valid data representation.\n")));
+                 ACE_TEXT("Could not find a valid data representation.%C\n"),
+                 xcdr1_mutable ? " Unsupported combination of XCDR1 and mutable" : ""));
     }
     return DDS::RETCODE_ERROR;
   }
