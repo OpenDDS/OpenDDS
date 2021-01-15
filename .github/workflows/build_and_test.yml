@@ -30,7 +30,7 @@ jobs:
   cancel-previous-runs:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2.3.4
     - uses: n1hility/cancel-previous-runs@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -47,17 +47,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -98,17 +98,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -124,7 +124,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ ubuntu-20_04_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -201,17 +201,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -227,7 +227,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ ubuntu-20_04_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -333,17 +333,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -384,17 +384,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -410,7 +410,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ ubuntu-18_04_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -487,17 +487,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -513,7 +513,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ ubuntu-18_04_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -619,17 +619,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -670,17 +670,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -696,7 +696,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ ubuntu-16_04_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -773,17 +773,17 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -799,7 +799,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ ubuntu-16_04_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -909,17 +909,17 @@ jobs:
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -969,22 +969,22 @@ jobs:
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1087,22 +1087,22 @@ jobs:
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1207,17 +1207,17 @@ jobs:
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1267,22 +1267,22 @@ jobs:
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1385,22 +1385,22 @@ jobs:
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1502,17 +1502,17 @@ jobs:
 #      run: |
 #        brew install xerces-c
 #    - name: checkout MPC
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/MPC
 #        path: MPC
 #    - name: checkout OpenDDS
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        path: OpenDDS
 #        submodules: true
 #    - name: checkout ACE_TAO
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/ACE_TAO
 #        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
@@ -1554,17 +1554,17 @@ jobs:
 #      run: |
 #        brew install xerces-c
 #    - name: checkout MPC
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/MPC
 #        path: MPC
 #    - name: checkout autobuild
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/autobuild
 #        path: autobuild
 #    - name: checkout ACE_TAO
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/ACE_TAO
 #        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
@@ -1580,7 +1580,7 @@ jobs:
 #        cd ACE_TAO
 #        tar xvfJ macos-11_0_defaults_ACE_TAO.tar.xz
 #    - name: checkout OpenDDS
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        path: OpenDDS
 #        submodules: true
@@ -1658,17 +1658,17 @@ jobs:
 #      run: |
 #        brew install xerces-c
 #    - name: checkout MPC
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/MPC
 #        path: MPC
 #    - name: checkout autobuild
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/autobuild
 #        path: autobuild
 #    - name: checkout ACE_TAO
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        repository: DOCGroup/ACE_TAO
 #        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
@@ -1684,7 +1684,7 @@ jobs:
 #        cd ACE_TAO
 #        tar xvfJ macos-11_0_defaults_ACE_TAO.tar.xz
 #    - name: checkout OpenDDS
-#      uses: actions/checkout@v2
+#      uses: actions/checkout@v2.3.4
 #      with:
 #        path: OpenDDS
 #        submodules: true
@@ -1791,17 +1791,17 @@ jobs:
       run: |
         brew install xerces-c
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1843,17 +1843,17 @@ jobs:
       run: |
         brew install xerces-c
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1869,7 +1869,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ macos-10_15_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true
@@ -1947,17 +1947,17 @@ jobs:
       run: |
         brew install xerces-c
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout autobuild
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -1973,7 +1973,7 @@ jobs:
         cd ACE_TAO
         tar xvfJ macos-10_15_defaults_ACE_TAO.tar.xz
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         path: OpenDDS
         submodules: true

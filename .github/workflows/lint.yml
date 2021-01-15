@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
