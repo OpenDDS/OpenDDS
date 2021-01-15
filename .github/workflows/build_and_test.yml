@@ -925,7 +925,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.4.1
+      uses: ilammy/msvc-dev-cmd@v1.5.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -1001,7 +1001,7 @@ jobs:
         tar xvfJ windows-2019_defaults_ACE_TAO.tar.xz
         rm -f windows-2019_defaults_ACE_TAO.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.4.1
+      uses: ilammy/msvc-dev-cmd@v1.5.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -1119,7 +1119,7 @@ jobs:
         tar xvfJ windows-2019_defaults_ACE_TAO.tar.xz
         rm -f windows-2019_defaults_ACE_TAO.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.4.1
+      uses: ilammy/msvc-dev-cmd@v1.5.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -1223,7 +1223,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.4.1
+      uses: ilammy/msvc-dev-cmd@v1.5.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -1299,7 +1299,7 @@ jobs:
         tar xvfJ windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
         rm -f windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.4.1
+      uses: ilammy/msvc-dev-cmd@v1.5.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -1417,7 +1417,7 @@ jobs:
         tar xvfJ windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
         rm -f windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.4.1
+      uses: ilammy/msvc-dev-cmd@v1.5.0
     - name: configure OpenDDS
       shell: cmd
       run: |
