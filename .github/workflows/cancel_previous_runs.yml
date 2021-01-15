@@ -1,13 +1,18 @@
-name: Cancel Previous Runs
+name: Cancel Duplicate Workflow Runs
+
 on:
-  schedule:
-    - cron: '*/15 * * * *'
+  workflow_run:
+    workflows: ["Build & Test"]
+    types: ['requested']
 
 jobs:
-  cancel-previous-runs:
+  cancel-duplicate-workflow-runs:
+    name: "Cancel Duplicate Workflow Runs"
     runs-on: ubuntu-20.04
     steps:
-    - uses: n1hility/cancel-previous-runs@v2
+    - uses: potiuk/cancel-workflow-runs@v4_7
+      name: "Cancel Duplicate Workflow Runs"
       with:
+        cancelMode: allDuplicates
         token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: build_and_test.yml
+        sourceRunId: ${{ github.event.workflow_run.id }}

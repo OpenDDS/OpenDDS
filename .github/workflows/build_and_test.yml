@@ -16,7 +16,6 @@ on:
     branches:
       - master
       - branch-DDS-3.*
-      - gh_workflow*
     paths:
       - '**'
       - '!docs/**'
@@ -33,29 +32,41 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: ubuntu-20_04_defaults_ACE_TAO.tar.xz
+        key: ${{ github.job }}_ace6tao2
     - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         . setenv.sh
@@ -64,6 +75,7 @@ jobs:
         cd ../TAO
         make -j4
     - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
@@ -305,29 +317,41 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: ubuntu-18_04_defaults_ACE_TAO.tar.xz
+        key: ${{ github.job }}_ace6tao2
     - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         . setenv.sh
@@ -336,6 +360,7 @@ jobs:
         cd ../TAO
         make -j4
     - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
@@ -577,29 +602,41 @@ jobs:
     runs-on: ubuntu-16.04
 
     steps:
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: ubuntu-16_04_defaults_ACE_TAO.tar.xz
+        key: ${{ github.job }}_ace6tao2
     - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
       uses: actions/checkout@v2
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
       uses: actions/checkout@v2
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
       uses: actions/checkout@v2
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         . setenv.sh
@@ -608,6 +645,7 @@ jobs:
         cd ../TAO
         make -j4
     - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
@@ -849,36 +887,49 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: windows-2019_defaults_ACE_TAO.tar.xz
+        key: ${{ github.job }}_ace6tao2
     - name: install openssl-windows & xerces-c
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: set up msvc env
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
         configure --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
@@ -888,6 +939,7 @@ jobs:
         cd ..\TAO
         msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
@@ -1133,36 +1185,49 @@ jobs:
     runs-on: windows-2016
 
     steps:
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: windows-2016_no_debug_no_inline_ACE_TAO.tar.xz
+        key: ${{ github.job }}_ace6tao2
     - name: install openssl-windows & xerces-c
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: set up msvc env
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
         configure --tests --no-debug --no-inline --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
@@ -1172,6 +1237,7 @@ jobs:
         cd ..\TAO
         msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
@@ -1417,30 +1483,42 @@ jobs:
 #    runs-on: macos-11.0
 #
 #    steps:
+#    - name: Cache Artifact
+#      id: cache-artifact
+#      uses: actions/cache@v2
+#      with:
+#        path: macos-11_0_defaults_ACE_TAO.tar.xz
+#        key: ${{ github.job }}_ace6tao2
 #    - name: install xerces-c
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
 #        brew install xerces-c
 #    - name: checkout MPC
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      uses: actions/checkout@v2
 #      with:
 #        repository: DOCGroup/MPC
 #        path: MPC
 #    - name: checkout OpenDDS
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      uses: actions/checkout@v2
 #      with:
 #        path: OpenDDS
 #        submodules: true
 #    - name: checkout ACE_TAO
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      uses: actions/checkout@v2
 #      with:
 #        repository: DOCGroup/ACE_TAO
 #        ref: 9eae9c11f1bcd07b48c74820d8cb4c67aca9ef23 # Update to 6_5_13 when available
 #        path: OpenDDS/ACE_TAO
 #    - name: configure OpenDDS
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
 #        cd OpenDDS
 #        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
 #    - name: build ACE and TAO
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
 #        cd OpenDDS
 #        . setenv.sh
@@ -1449,6 +1527,7 @@ jobs:
 #        cd ../TAO
 #        make -j4
 #    - name: create ACE_TAO tar.xz artifact
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      shell: bash
 #      run: |
 #        cd OpenDDS/ACE_TAO
@@ -1692,30 +1771,42 @@ jobs:
     runs-on: macos-10.15
 
     steps:
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: macos-10_15_defaults_ACE_TAO.tar.xz
+        key: ${{ github.job }}_ace6tao2
     - name: install xerces-c
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         brew install xerces-c
     - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: checkout OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
     - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         . setenv.sh
@@ -1724,6 +1815,7 @@ jobs:
         cd ../TAO
         make -j4
     - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
