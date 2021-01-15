@@ -13,7 +13,7 @@ namespace Bench {
 
 class ReadAction : public Action {
 public:
-  ReadAction(ACE_Proactor& proactor);
+  explicit ReadAction(ACE_Proactor& proactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;

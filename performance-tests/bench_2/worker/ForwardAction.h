@@ -15,7 +15,7 @@ namespace Bench {
 
 class ForwardAction : public virtual Action, public virtual DataHandler, public std::enable_shared_from_this<ForwardAction> {
 public:
-  ForwardAction(ACE_Proactor& proactor);
+  explicit ForwardAction(ACE_Proactor& proactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;

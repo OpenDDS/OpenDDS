@@ -25,14 +25,14 @@ bool ReadAction::init(const ActionConfig& config, ActionReport& report, Builder:
 
   if (readers_by_index_.empty()) {
     std::stringstream ss;
-    ss << "ReadAction '" << config.name << "' is missing a reader" << std::flush;
+    ss << "ReadAction '" << config.name << "' is missing a reader";
     throw std::runtime_error(ss.str());
   }
 
   data_dr_ = DataDataReader::_narrow(readers_by_index_[0]->get_dds_datareader());
   if (!data_dr_) {
     std::stringstream ss;
-    ss << "ReadAction '" << config.name << "' is missing a valid Bench::Data datareader" << std::flush;
+    ss << "ReadAction '" << config.name << "' is missing a valid Bench::Data datareader";
     throw std::runtime_error(ss.str());
   }
 
@@ -41,7 +41,7 @@ bool ReadAction::init(const ActionConfig& config, ActionReport& report, Builder:
   std::string name(config.name.in());
 
   // First check frequency as double (seconds)
-  auto read_frequency_prop = get_property(config.params, "read_frequency", Builder::PVK_DOUBLE);
+  const auto read_frequency_prop = get_property(config.params, "read_frequency", Builder::PVK_DOUBLE);
   if (read_frequency_prop) {
     double period = 1.0 / read_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
@@ -115,10 +115,8 @@ void ReadAction::do_read()
           Bench::Data data;
           DDS::SampleInfo si;
           while ((ret = data_dr_->take_next_sample(data, si)) == DDS::RETCODE_OK) {
-            if (si.valid_data) {
-              if (dr_listener_) {
-                dr_listener_->on_valid_data(data, si);
-              }
+            if (si.valid_data && dr_listener_) {
+              dr_listener_->on_valid_data(data, si);
             }
           }
         }
