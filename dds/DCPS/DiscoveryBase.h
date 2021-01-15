@@ -1463,16 +1463,14 @@ namespace OpenDDS {
             for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
               Encoding::Kind encoding_kind;
               if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-                if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
-                  if (encoding_kind == Encoding::KIND_XCDR1) {
-                    const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
+                if (encoding_kind == Encoding::KIND_XCDR1) {
+                  const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
 
-                    if (type_lookup_service_->extensibility(extensibility_mask, writer_local ? reader_type_id : writer_type_id)) {
-                      if (::OpenDDS::DCPS::DCPS_debug_level) {
-                        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                          ACE_TEXT("EndpointManager::match_continue: ")
-                          ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
-                      }
+                  if (type_lookup_service_->extensibility(extensibility_mask, writer_local ? reader_type_id : writer_type_id)) {
+                    if (::OpenDDS::DCPS::DCPS_debug_level) {
+                      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("EndpointManager::match_continue: ")
+                        ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
                     }
                   }
                 }
