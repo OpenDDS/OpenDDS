@@ -89,7 +89,7 @@ protected:
 
   /// The number of entities using this topic
 #ifdef ACE_HAS_CPP11
-    std::atomic<uint32_t> entity_refs_;
+  std::atomic<uint32_t> entity_refs_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> entity_refs_;
 #endif

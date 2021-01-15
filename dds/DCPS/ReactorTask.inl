@@ -5,39 +5,42 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/Reactor.h"
-#include "debug.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_INLINE ACE_Reactor*
-OpenDDS::DCPS::ReactorTask::get_reactor()
+namespace OpenDDS {
+namespace DCPS {
+
+ACE_INLINE
+ACE_Reactor* ReactorTask::get_reactor()
 {
   return reactor_;
 }
 
-ACE_INLINE const ACE_Reactor*
-OpenDDS::DCPS::ReactorTask::get_reactor() const
+ACE_INLINE
+const ACE_Reactor* ReactorTask::get_reactor() const
 {
   return reactor_;
 }
 
-ACE_INLINE ACE_thread_t
-OpenDDS::DCPS::ReactorTask::get_reactor_owner() const
+ACE_INLINE
+ACE_thread_t ReactorTask::get_reactor_owner() const
 {
   return reactor_owner_;
 }
 
-ACE_INLINE ACE_Proactor*
-OpenDDS::DCPS::ReactorTask::get_proactor()
+ACE_INLINE
+ACE_Proactor* ReactorTask::get_proactor()
 {
   return proactor_;
 }
 
-ACE_INLINE const ACE_Proactor*
-OpenDDS::DCPS::ReactorTask::get_proactor() const
+ACE_INLINE
+const ACE_Proactor* ReactorTask::get_proactor() const
 {
   return proactor_;
 }
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
