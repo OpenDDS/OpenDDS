@@ -95,7 +95,7 @@ Fri Oct  5 18:45:09 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
         * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
-          
+
           Merge Changes from trunk.
 
 Fri Oct  5 16:54:09 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>

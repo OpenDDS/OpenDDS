@@ -436,7 +436,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
           std::pair<DwIdToQosMap::iterator, bool> pair =
               idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
-          if (pair.second == false) {
+          if (!pair.second) {
             GuidConverter converter(id);
             ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("(%P|%t) ")
@@ -665,7 +665,7 @@ PublisherImpl::end_coherent_changes()
               WriterCoherentSample(it->second->coherent_samples_,
                   it->second->sequence_number_)));
 
-      if (pair.second == false) {
+      if (!pair.second) {
         ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
             ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
@@ -800,7 +800,7 @@ PublisherImpl::enable()
   }
 
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
-  if (!participant || participant->is_enabled() == false) {
+  if (!participant || !participant->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -850,7 +850,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
   std::pair<PublicationMap::iterator, bool> pair =
       publication_map_.insert(PublicationMap::value_type(publication_id, writer));
 
-  if (pair.second == false) {
+  if (!pair.second) {
     GuidConverter converter(publication_id);
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
@@ -893,7 +893,7 @@ PublisherImpl::assert_liveliness_by_participant()
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {
-    DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
+    const DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
 
     if (dw_ret != DDS::RETCODE_OK) {
       ret = dw_ret;

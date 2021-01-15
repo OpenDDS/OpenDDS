@@ -152,4 +152,3 @@ void DataReaderListenerImpl::on_subscription_matched (
   {
     ACE_UNUSED_ARG(reader) ;
   }
-

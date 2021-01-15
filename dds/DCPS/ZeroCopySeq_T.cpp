@@ -110,6 +110,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
 
     } else { //grow to larger buffer
       ZeroCopyDataSeq<Sample_T, DEF_MAX> grow(max(length, sc_maximum_*2));
+      grow.sc_length_ = length;
       copy(sc_buffer_, &sc_buffer_[sc_length_], grow.sc_buffer_);
       fill(&grow.sc_buffer_[sc_length_], &grow.sc_buffer_[length],
            Sample_T());

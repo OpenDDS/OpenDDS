@@ -196,4 +196,3 @@ class MonitorDataModel : public QAbstractItemModel {
 } // End of namespace Monitor
 
 #endif /* MONITORDATAMODEL_H */
-

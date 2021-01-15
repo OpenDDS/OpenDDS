@@ -152,6 +152,7 @@ public:
                        const char* pub_str,
                        const DDS::DataWriterQos & qos,
                        const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                       ACE_CDR::ULong transportContext,
                        const DDS::PublisherQos & publisherQos,
                        bool associate = false);
 
@@ -200,6 +201,7 @@ public:
                         const char* sub_str,
                         const DDS::DataReaderQos & qos,
                         const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                        ACE_CDR::ULong transportContext,
                         const DDS::SubscriberQos & subscriberQos,
                         const char* filterClassName,
                         const char* filterExpression,
@@ -237,11 +239,6 @@ public:
   virtual void remove_domain_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId);
-
-  virtual void association_complete(DDS::DomainId_t domainId,
-                                    const OpenDDS::DCPS::RepoId& participantId,
-                                    const OpenDDS::DCPS::RepoId& localId,
-                                    const OpenDDS::DCPS::RepoId& remoteId);
 
   bool remove_by_owner(
     DDS::DomainId_t domain,

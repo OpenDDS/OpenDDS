@@ -38,7 +38,14 @@ bool LinuxNetworkConfigMonitor::open()
   ACE_Netlink_Addr addr;
   addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
+#ifdef ACE_ANDROID
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open: could not open socket"
+        " this is expected for API30+\n"));
+    }
+#else
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n")));
+#endif
     return false;
   }
 
@@ -50,7 +57,8 @@ bool LinuxNetworkConfigMonitor::open()
   struct {
     nlmsghdr header;
     rtgenmsg msg;
-  } request = {};
+  } request;
+  memset(&request, 0, sizeof(request));
 
   // Request a dump of the links.
   request.header.nlmsg_len = NLMSG_LENGTH(sizeof(request.msg));
@@ -59,7 +67,7 @@ bool LinuxNetworkConfigMonitor::open()
   request.header.nlmsg_pid = pid;
   request.msg.rtgen_family = AF_UNSPEC;
 
-  if (socket_.send(&request, request.header.nlmsg_len, 0) != request.header.nlmsg_len) {
+  if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for links: %m\n")));
     return false;
   }
@@ -73,7 +81,7 @@ bool LinuxNetworkConfigMonitor::open()
   request.header.nlmsg_pid = pid;
   request.msg.rtgen_family = AF_UNSPEC;
 
-  if (socket_.send(&request, request.header.nlmsg_len, 0) != request.header.nlmsg_len) {
+  if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for addresses: %m\n")));
     return false;
   }

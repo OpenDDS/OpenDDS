@@ -42,4 +42,3 @@ private:
 };
 
 #endif /* _SHAPESWIDGET_HPP */
-

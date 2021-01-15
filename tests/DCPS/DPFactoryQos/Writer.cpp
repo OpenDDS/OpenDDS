@@ -128,5 +128,3 @@ Writer::svc ()
 
   return 0;
 }
-
-

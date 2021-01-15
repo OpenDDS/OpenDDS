@@ -144,4 +144,3 @@ void DataReaderListenerImpl::on_budget_exceeded (
     cout << "  variance = " << stats[i].variance << endl;
   }
 }
-

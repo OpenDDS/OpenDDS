@@ -5,4 +5,3 @@ project: opendds_face, dcps_test_idl_only_lib, face_idl_test_config {
     struct_only.idl
   }
 }
-

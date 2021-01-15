@@ -7,7 +7,8 @@
 
 namespace Builder {
 
-Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report, DDS::DomainParticipant_var& participant, const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map)
+Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report, DDS::DomainParticipant_var& participant,
+  const std::shared_ptr<TopicManager>& topics, ReaderMap& reader_map, const ContentFilteredTopicMap& cft_map)
   : name_(config.name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
@@ -42,9 +43,9 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
       ss << "subscriber listener creation failed for subscriber '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
-      SubscriberListener* savvy_listener_ = dynamic_cast<SubscriberListener*>(listener_.in());
-      if (savvy_listener_) {
-        savvy_listener_->set_subscriber(*this);
+      SubscriberListener* savvy_listener = dynamic_cast<SubscriberListener*>(listener_.in());
+      if (savvy_listener) {
+        savvy_listener->set_subscriber(*this);
       }
     }
   }
@@ -59,10 +60,12 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), subscriber_);
   }
 
-  datareaders_.reset(new DataReaderManager(config.datareaders, report.datareaders, subscriber_, topics, reader_map));
+  datareaders_.reset(new DataReaderManager(config.datareaders, report.datareaders, subscriber_, topics, reader_map, cft_map));
 }
 
-Subscriber::~Subscriber() {
+Subscriber::~Subscriber()
+{
+  detach_listeners();
   datareaders_.reset();
   Log::log() << "Deleting subscriber: " << name_ << std::endl;
   if (!CORBA::is_nil(subscriber_.in())) {
@@ -72,7 +75,8 @@ Subscriber::~Subscriber() {
   }
 }
 
-bool Subscriber::enable(bool throw_on_error) {
+bool Subscriber::enable(bool throw_on_error)
+{
   bool success = (subscriber_->enable() == DDS::RETCODE_OK);
   if (!success && throw_on_error) {
     std::stringstream ss;
@@ -82,5 +86,19 @@ bool Subscriber::enable(bool throw_on_error) {
   return success && datareaders_->enable(throw_on_error);
 }
 
+void Subscriber::detach_listeners()
+{
+  if (listener_) {
+    SubscriberListener* savvy_listener = dynamic_cast<SubscriberListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_subscriber(*this);
+    }
+    if (subscriber_) {
+      subscriber_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
+    }
+    listener_ = 0;
+  }
+  datareaders_->detach_listeners();
 }
 
+}

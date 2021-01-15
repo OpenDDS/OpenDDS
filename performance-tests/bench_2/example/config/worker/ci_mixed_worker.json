@@ -15,7 +15,7 @@
       { "name": "common",
         "properties": [
           { "name": "DCPSGlobalTransportConfig",
-            "value": "mfs_config"
+            "value": "mfs_config_02"
           },
           { "name": "DCPSDefaultDiscovery",
             "value": "mfs_rtps_discovery"
@@ -44,32 +44,23 @@
           }
         ]
       },
-      { "name": "config/mfs_config",
+      { "name": "config/mfs_config_02",
         "properties": [
           { "name": "transports",
-            "value": "mfs_rtps_transport"
+            "value": "mfs_rtps_transport_02"
           },
           { "name": "passive_connect_duration",
             "value": "20000"
           }
         ]
       },
-      { "name": "transport/mfs_rtps_transport",
+      { "name": "transport/mfs_rtps_transport_02",
         "properties": [
           { "name": "transport_type",
             "value": "rtps_udp"
           },
-          { "name": "thread_per_connection",
-            "value": "1"
-          },
-          { "name": "ttl",
-            "value": "3"
-          },
-          { "name": "use_multicast",
-            "value": "0"
-          },
-          { "name": "handshake_timeout",
-            "value": "5000"
+          { "name": "multicast_group_address",
+            "value": "239.255.17.2:7401"
           }
         ]
       }
@@ -81,7 +72,7 @@
       }
     ],
     "instances": [
-      { "name": "rtps_instance_02",
+      { "name": "mfs_config_02",
         "type": "rtps_udp",
         "domain": 17
       }
@@ -89,7 +80,7 @@
     "participants": [
       { "name": "participant_C1",
         "domain": 17,
-        "transport_config_name": "rtps_instance_02",
+        "transport_config_name": "mfs_config_02",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },

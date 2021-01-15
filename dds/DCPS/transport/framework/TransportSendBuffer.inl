@@ -57,6 +57,17 @@ SingleSendBuffer::contains(const SequenceNumber& seq) const
   return this->buffers_.count(seq);
 }
 
+ACE_INLINE bool
+SingleSendBuffer::contains(const SequenceNumber& seq, RepoId& destination) const
+{
+  if (this->buffers_.count(seq)) {
+    DestinationMap::const_iterator pos = destinations_.find(seq);
+    destination = pos == destinations_.end() ? GUID_UNKNOWN : pos->second;
+    return true;
+  }
+  return false;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

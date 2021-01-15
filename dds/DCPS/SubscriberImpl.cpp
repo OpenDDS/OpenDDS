@@ -158,7 +158,7 @@ SubscriberImpl::create_datareader(
       MultiTopicDataReaderBase* mtdr =
         dynamic_cast<MultiTopicDataReaderBase*>(dr.in());
       mtdr->init(dr_qos, a_listener, mask, this, mt);
-      if (enabled_.value() && qos_.entity_factory.autoenable_created_entities) {
+      if (enabled_ == true && qos_.entity_factory.autoenable_created_entities) {
         if (dr->enable() != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: ")
@@ -620,7 +620,7 @@ SubscriberImpl::set_qos(
           std::pair<DrIdToQosMap::iterator, bool> pair
             = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
 
-          if (pair.second == false) {
+          if (!pair.second) {
             GuidConverter converter(id);
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
@@ -815,7 +815,7 @@ SubscriberImpl::enable()
   }
 
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
-  if (!participant || participant->is_enabled() == false) {
+  if (!participant || !participant->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 

@@ -44,6 +44,8 @@ SecurityDebug::set_all_flags_to(bool value)
   encdec_debug = value;
   auth_debug = value;
   auth_warn = value;
+  new_entity_error = value;
+  new_entity_warn = value;
   access_warn = value;
   bookkeeping = value;
   showkeys = value;
@@ -71,6 +73,10 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
         auth_debug = true;
       } else if (flag == "auth_warn") {
         auth_warn = true;
+      } else if (flag == "new_entity_error") {
+        new_entity_error = true;
+      } else if (flag == "new_entity_warn") {
+        new_entity_warn = true;
       } else if (flag == "access_warn") {
         access_warn = true;
       } else if (flag == "bookkeeping") {
@@ -96,6 +102,8 @@ SecurityDebug::set_debug_level(unsigned level)
 {
   access_warn = level >= 1;
   auth_warn = encdec_error = level >= 3;
+  new_entity_error = level >= 1;
+  new_entity_warn = level >= 3;
   auth_debug = encdec_warn = bookkeeping = level >= 4;
   encdec_debug = level >= 8;
   showkeys = level >= 9;

@@ -13,10 +13,11 @@ namespace Bench {
 ForwardAction::ForwardAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), prevent_copy_(false), force_copy_(false), copy_threshold_(0), queue_first_(0), queue_last_(0) {
 }
 
-bool ForwardAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
-
+bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
+  Builder::ReaderMap& readers, Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map)
+{
   std::unique_lock<std::mutex> lock(mutex_);
-  Action::init(config, report, readers, writers);
+  Action::init(config, report, readers, writers, cft_map);
 
   if (writers_by_index_.empty()) {
     std::stringstream ss;
@@ -86,14 +87,16 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report, Build
   return true;
 }
 
-void ForwardAction::start() {
+void ForwardAction::start()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     started_ = true;
   }
 }
 
-void ForwardAction::stop() {
+void ForwardAction::stop()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
@@ -101,7 +104,8 @@ void ForwardAction::stop() {
   }
 }
 
-void ForwardAction::on_data(const Data& data) {
+void ForwardAction::on_data(const Data& data)
+{
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     bool use_queue = (force_copy_ || (data_dws_.size() > copy_threshold_ && !prevent_copy_));
@@ -136,7 +140,8 @@ void ForwardAction::on_data(const Data& data) {
   }
 }
 
-void ForwardAction::do_writes() {
+void ForwardAction::do_writes()
+{
   std::unique_lock<std::mutex> lock(mutex_);
   while (queue_first_ != queue_last_) {
     Data& data = data_queue_[queue_first_];
@@ -151,4 +156,3 @@ void ForwardAction::do_writes() {
 }
 
 }
-

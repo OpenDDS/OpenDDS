@@ -113,4 +113,3 @@ GvOptionsData::GvOptionsData() : lrLayout_(false)
 
 
 } // End of namespace Monitor
-

@@ -30,36 +30,45 @@ my $is_rtps_disc = 0;
 
 my $flag_found = 1;
 if ($test->flag('disco')) {
-  $tc_opts .= " ci_disco";
+  $tc_opts .= " ci_disco --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('fan')) {
-  $tc_opts .= " ci_fan --override-start-time 15";
+  $tc_opts .= " ci_fan --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('fan_frag')) {
-  $tc_opts .= " ci_fan_frag --override-start-time 15";
+  $tc_opts .= " ci_fan_frag --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('echo')) {
-  $tc_opts .= " ci_echo --override-start-time 15";
+  $tc_opts .= " ci_echo --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('echo_frag')) {
-  $tc_opts .= " ci_echo_frag --override-start-time 15";
+  $tc_opts .= " ci_echo_frag --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('mixed')) {
-  $tc_opts .= " ci_mixed --override-start-time 15";
+  $tc_opts .= " ci_mixed --override-start-time 15 --show-worker-logs";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('sm10')) {
   $tc_opts .= " showtime_mixed_10 --override-start-time 25";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('sm20')) {
+  $tc_opts .= " showtime_mixed_20 --override-start-time 35";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('sm30')) {
   $tc_opts .= " showtime_mixed_30 --override-start-time 45";
   $is_rtps_disc = 1;
+}
+elsif ($test->flag('tag')) {
+  $tc_opts .= " simple_tags --tag continuous --tag control --tag processed --tag unknown";
+  $is_rtps_disc = 1;
+  $test->process("node_controller2", "node_controller/node_controller", $nc_opts);
 }
 else {
   $flag_found = 0;
@@ -74,6 +83,9 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log") unless $
 $test->process("node_controller", "node_controller/node_controller", $nc_opts);
 $test->process("test_controller", "test_controller/test_controller", $tc_opts);
 
+if ($test->flag('tag')) {
+  $test->start_process("node_controller2");
+}
 $test->start_process("node_controller");
 $test->start_process("test_controller");
 

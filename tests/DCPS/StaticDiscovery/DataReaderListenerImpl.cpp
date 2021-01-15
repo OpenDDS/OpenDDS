@@ -73,8 +73,6 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
       if (++received_samples_ == expected_samples_) {
-        subscriber_->delete_datareader(reader);
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) datareader deleted\n"));
         done_callback_(builtin_read_error_);
       } else {
         if (static_cast<int>(writers_.size()) == total_writers_) {
@@ -94,10 +92,10 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 void
 DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/,
-  const DDS::SubscriptionMatchedStatus& /*status*/)
+  const DDS::SubscriptionMatchedStatus& status)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (check_bits_) {
+  if (check_bits_ && status.current_count_change > 0) {
     DDS::PublicationBuiltinTopicDataDataReader_var rdr =
       DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
     DDS::PublicationBuiltinTopicDataSeq data;
@@ -130,6 +128,8 @@ DataReaderListenerImpl::on_subscription_matched(
       }
     }
   }
+#else
+ACE_UNUSED_ARG(status);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 

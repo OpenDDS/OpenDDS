@@ -36,10 +36,6 @@
 # include <winsock2.h>
 # include <iphlpapi.h>
 # include "ace/Version.h"
-// older versions of ACE don't link to IPHlpApi.Lib, see acedefaults.mpb
-# if ACE_MAJOR_VERSION == 6 && ACE_MINOR_VERSION == 0 && defined _MSC_VER
-#  pragma comment(lib, "IPHlpApi.Lib")
-# endif
 #endif
 
 #ifdef ACE_VXWORKS
@@ -57,7 +53,7 @@ using DCPS::SystemTimePoint;
 GuidGenerator::GuidGenerator()
   : pid_(ACE_OS::getpid())
 {
-  unsigned seed = static_cast<unsigned>(SystemTimePoint::now().value().usec());
+  unsigned seed = static_cast<unsigned>(SystemTimePoint::now().value().usec() + reinterpret_cast<size_t>(this));
 
   if (pid_ == -1) {
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
@@ -79,7 +75,7 @@ GuidGenerator::GuidGenerator()
     ACE_OS::memcpy(node_id_, macaddress.node, NODE_ID_SIZE);
   } else {
     for (int i = 0; i < NODE_ID_SIZE; ++i) {
-      node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
+      node_id_[i] = static_cast<unsigned char>(ACE_OS::rand_r(&seed));
     }
   }
 #else
@@ -87,7 +83,7 @@ GuidGenerator::GuidGenerator()
   ACE_UNUSED_ARG(result);
 
   for (int i = 0; i < NODE_ID_SIZE; ++i) {
-    node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
+    node_id_[i] = static_cast<unsigned char>(ACE_OS::rand_r(&seed));
   }
 #endif /* ACE_HAS_IOS */
 }

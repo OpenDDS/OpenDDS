@@ -48,4 +48,3 @@ class Subscriber {
 };
 
 #endif // SUBSCRIBER_H
-

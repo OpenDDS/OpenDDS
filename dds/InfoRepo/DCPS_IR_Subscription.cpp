@@ -28,6 +28,7 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
                                            OpenDDS::DCPS::DataReaderRemote_ptr reader,
                                            const DDS::DataReaderQos& qos,
                                            const OpenDDS::DCPS::TransportLocatorSeq& info,
+                                           ACE_CDR::ULong transportContext,
                                            const DDS::SubscriberQos& subscriberQos,
                                            const char* filterClassName,
                                            const char* filterExpression,
@@ -39,6 +40,7 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
     isBIT_(0),
     qos_(qos),
     info_(info),
+    transportContext_(transportContext),
     subscriberQos_(subscriberQos),
     filterClassName_(filterClassName),
     filterExpression_(filterExpression),
@@ -65,6 +67,7 @@ int DCPS_IR_Subscription::add_associated_publication(DCPS_IR_Publication* pub,
     // inform the datareader about the association
     OpenDDS::DCPS::WriterAssociation association;
     association.writerTransInfo = pub->get_transportLocatorSeq();
+    association.transportContext = pub->get_transportContext();
     association.writerId = pub->get_id();
     association.pubQos = *(pub->get_publisher_qos());
     association.writerQos = *(pub->get_datawriter_qos());
@@ -120,32 +123,9 @@ int DCPS_IR_Subscription::add_associated_publication(DCPS_IR_Publication* pub,
                std::string(sub_converter).c_str(),
                std::string(pub_converter).c_str()));
   }
-  };
+  }
 
   return status;
-}
-
-void
-DCPS_IR_Subscription::association_complete(const OpenDDS::DCPS::RepoId& remote)
-{
-  typedef DCPS_IR_Publication_Set::ITERATOR iter_t;
-  for (iter_t iter = associations_.begin(); iter != associations_.end(); ++iter) {
-    if ((*iter)->get_id() == remote) {
-      (*iter)->call_association_complete(get_id());
-    }
-  }
-}
-
-void
-DCPS_IR_Subscription::call_association_complete(const OpenDDS::DCPS::RepoId& remote)
-{
-  try {
-    reader_->association_complete(remote);
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception(
-      "(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::call_association_complete:");
-    participant_->mark_dead();
-  }
 }
 
 int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub,

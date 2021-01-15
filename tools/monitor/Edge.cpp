@@ -78,4 +78,3 @@ Monitor::Edge::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWidget 
 
   update();
 }
-

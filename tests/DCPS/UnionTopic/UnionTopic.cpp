@@ -206,8 +206,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   canonical["Turtle"] = 5;
 
   // Calculate the canonical expected winner
-  ElectionResult_t canonical_result;
-  canonical_result.total_votes = 0;
+  ElectionResult_t canonical_result = { { "", 0 }, 0 };
   Vote_t max = 0;
   Canonical::iterator i, finished = canonical.end();
   for (i = canonical.begin(); i != finished; ++i) {
@@ -257,6 +256,16 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
         i->first.c_str(), retcode_to_string(rc)), false);
     }
   }
+
+  DDS::Duration_t timeout =
+    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+  rc = writer_i->wait_for_acknowledgments(timeout);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Unable to wait for acknowledgements: %C\n"),
+      retcode_to_string(rc)), false);
+  }
+
   rc = writer_i->dispose(news, DDS::HANDLE_NIL);
   if (rc != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
@@ -271,8 +280,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   }
   max = 0;
   ElectionNews_tSeq newsSeq;
-  ElectionResult_t result_from_statuses;
-  result_from_statuses.total_votes = 0;
+  ElectionResult_t result_from_statuses = { { "", 0 }, 0 };
   DDS::SampleInfoSeq info;
   rc = reader_i->take(
     newsSeq, info,

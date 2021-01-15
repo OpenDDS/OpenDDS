@@ -59,4 +59,3 @@ OpenDDS::DCPS::ThreadSynch::wait_on_clogged_resource()
 
   return result;
 }
-

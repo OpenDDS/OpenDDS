@@ -11,10 +11,11 @@
 #include "Definitions.h"
 #include "LocalObject.h"
 #include "PoolAllocator.h"
+#include "InstanceHandle.h"
 
 #include <dds/DdsDcpsDomainC.h>
 
-#include <ace/Recursive_Thread_Mutex.h>
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -82,7 +83,6 @@ public:
   void cleanup();
 
 private:
-
   DDS::DomainParticipantFactoryQos qos_;
 
   /// The default qos value of DomainParticipant.
@@ -93,6 +93,10 @@ private:
 
   /// Protect the participant collection.
   mutable ACE_Thread_Mutex participants_protector_;
+
+  /// Instance handle generators for non-repo backed entities
+  /// (i.e. subscribers and publishers).
+  InstanceHandleGenerator participant_handles_;
 };
 
 } // namespace DCPS

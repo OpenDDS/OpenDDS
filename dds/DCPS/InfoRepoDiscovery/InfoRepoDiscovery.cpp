@@ -584,7 +584,7 @@ RepoId
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const RepoId& participantId,
                                    const RepoId& topicId,
-                                   DCPS::DataWriterCallbacks* publication,
+                                   DCPS::DataWriterCallbacks_rch publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
                                    const DDS::PublisherQos& publisherQos)
@@ -676,7 +676,7 @@ RepoId
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const RepoId& participantId,
                                     const RepoId& topicId,
-                                    DCPS::DataReaderCallbacks* subscription,
+                                    DCPS::DataReaderCallbacks_rch subscription,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
                                     const DDS::SubscriberQos& subscriberQos,
@@ -782,18 +782,6 @@ InfoRepoDiscovery::update_subscription_params(DDS::DomainId_t domainId,
 
 
 // Managing reader/writer associations:
-
-void
-InfoRepoDiscovery::association_complete(DDS::DomainId_t domainId,
-                                        const RepoId& participantId,
-                                        const RepoId& localId, const RepoId& remoteId)
-{
-  try {
-    get_dcps_info()->association_complete(domainId, participantId, localId, remoteId);
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("ERROR: InfoRepoDiscovery::association_complete: ");
-  }
-}
 
 void
 InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)

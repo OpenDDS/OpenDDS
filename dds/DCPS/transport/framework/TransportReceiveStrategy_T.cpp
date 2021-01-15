@@ -62,6 +62,15 @@ TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
                  size));
     }
   }
+
+  for (int index = 0; index < RECEIVE_BUFFERS; ++index) {
+    if (receive_buffers_[index] != 0) {
+      ACE_DES_FREE(
+                   receive_buffers_[index],
+                   mb_allocator_.free,
+                   ACE_Message_Block);
+    }
+  }
 }
 
 template<typename TH, typename DSH>
@@ -466,11 +475,11 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   //
   ACE_INET_Addr remote_address;
   bool stop = false;
-  ssize_t bytes_remaining = this->receive_bytes(iov,
-                                                static_cast<int>(vec_index),
-                                                remote_address,
-                                                fd,
-                                                stop);
+  const ssize_t bytes_remaining = this->receive_bytes(iov,
+                                                      static_cast<int>(vec_index),
+                                                      remote_address,
+                                                      fd,
+                                                      stop);
 
   if (stop) {
     return 0;
@@ -534,16 +543,12 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
        index = this->successor_index(index)) {
     VDBG((LM_DEBUG,"(%P|%t) DBG:    -> "
           "At top of for..loop block.\n"));
-    VDBG((LM_DEBUG,"(%P|%t) DBG:       "
-          "index == %d.\n", index));
-    VDBG((LM_DEBUG,"(%P|%t) DBG:       "
-          "bytes == %d.\n", bytes));
 
-    size_t amount
-    = ace_min<size_t>(bytes, this->receive_buffers_[index]->space());
+    const size_t amount = ace_min<size_t>(bytes, this->receive_buffers_[index]->space());
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
-          "amount == %d.\n", amount));
+          "index == %d bytes == %d amount == %d.\n",
+          index, bytes, amount));
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
           "this->receive_buffers_[index]->rd_ptr() ==  %u.\n",
@@ -674,7 +679,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Hex Dump of transport header block "
-                "(%d bytes):\n%s\n", xbytes, xbuffer));
+                "(%d bytes):\n%s", xbytes, xbuffer));
         }
 
         //
@@ -737,7 +742,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
       //  As new sample headers are read, the are read into a message
       //  buffer member variable and demarshaled directly.  The values are
       //  retained for the lifetime of the sample and are passed as part
-      //  of the recieve data sample itself.  The member message buffer
+      //  of the receive data sample itself.  The member message buffer
       //  allows us to retain partially read sample headers until we can
       //  read more data.
       //
@@ -795,7 +800,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
              ebuffer, sizeof(ebuffer));
 
             VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                  "Hex Dump:\n%s\n", ebuffer));
+                  "Hex Dump:\n%s", ebuffer));
           }
 
           this->data_sample_header_.pdu_remaining(this->pdu_remaining_);
@@ -809,7 +814,6 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
           //
           // Check the DataSampleHeader.
           //
-
           this->good_pdu_ = check_header(data_sample_header_);
 
           //
@@ -842,7 +846,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
                 "Amount of transport packet remaining: %d.\n",
                 this->pdu_remaining_));
 
-          int rtn_code = skip_bad_pdus();
+          const int rtn_code = skip_bad_pdus();
           if (rtn_code <= 0) return rtn_code;
         }
       }
@@ -861,7 +865,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         //   the lifetime of this data will last until the DataReader
         //   components demarshal the sample data.  A reference to the
         //   current sample being built is retained as a member to allow us
-        //   to hold partialy read samples until they are completed.
+        //   to hold partially read samples until they are completed.
         //
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Determine amount of data for the next block in the chain\n"));
@@ -925,12 +929,10 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "this->payload_->rd_ptr() "
-              "== %u.\n",
-              this->payload_->rd_ptr()));
-
-        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "== %u "
               "this->payload_->wr_ptr() "
               "== %u.\n",
+              this->payload_->rd_ptr(),
               this->payload_->wr_ptr()));
 
         //
@@ -948,12 +950,10 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "this->payload_->rd_ptr() "
-              "== %u.\n",
-              this->payload_->rd_ptr()));
-
-        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "== %u "
               "this->payload_->wr_ptr() "
               "== %u.\n",
+              this->payload_->rd_ptr(),
               this->payload_->wr_ptr()));
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
@@ -967,10 +967,8 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
               this->receive_buffers_[this->buffer_index_]->wr_ptr()));
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-              "After adjustment, remaining sample bytes == %d\n",
-              this->receive_sample_remaining_));
-        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-              "After adjustment, remaining transport packet bytes == %d\n",
+              "After adjustment, remaining sample bytes == %d and remaining transport packet bytes == %d\n",
+              this->receive_sample_remaining_,
               this->pdu_remaining_));
       }
 
@@ -1100,7 +1098,7 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
   for (size_t index = this->buffer_index_;
        this->pdu_remaining_ > 0;
        index = this->successor_index(index)) {
-    size_t amount =
+    const size_t amount =
       ace_min<size_t>(this->pdu_remaining_, this->receive_buffers_[index]->length());
 
     this->receive_buffers_[index]->rd_ptr(amount);

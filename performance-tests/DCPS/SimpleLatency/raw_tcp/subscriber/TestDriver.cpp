@@ -291,4 +291,3 @@ TestDriver::parse_address(const std::string& spec)
 
   return ACE_INET_Addr(spec.c_str());
 }
-

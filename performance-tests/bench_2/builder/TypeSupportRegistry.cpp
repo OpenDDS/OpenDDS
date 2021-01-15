@@ -8,7 +8,8 @@ namespace Builder {
 std::mutex TypeSupportRegistry::s_mutex;
 TypeSupportRegistry::type_support_registry_map TypeSupportRegistry::s_registry_map;
 
-bool TypeSupportRegistry::register_type_support(const std::string& name, DDS::TypeSupport* ts) {
+bool TypeSupportRegistry::register_type_support(const std::string& name, DDS::TypeSupport* ts)
+{
   std::unique_lock<std::mutex> lock(s_mutex);
   bool result = false;
 
@@ -20,7 +21,8 @@ bool TypeSupportRegistry::register_type_support(const std::string& name, DDS::Ty
   return result;
 }
 
-DDS::TypeSupport_var TypeSupportRegistry::get_type_support(const std::string& name) {
+DDS::TypeSupport_var TypeSupportRegistry::get_type_support(const std::string& name)
+{
   std::unique_lock<std::mutex> lock(s_mutex);
   DDS::TypeSupport_var result = DDS::TypeSupport::_nil();
 
@@ -31,7 +33,8 @@ DDS::TypeSupport_var TypeSupportRegistry::get_type_support(const std::string& na
   return result;
 }
 
-std::vector<std::string> TypeSupportRegistry::get_type_names() {
+std::vector<std::string> TypeSupportRegistry::get_type_names()
+{
   std::vector<std::string> result;
   std::unique_lock<std::mutex> lock(s_mutex);
   for (auto it = s_registry_map.begin(); it != s_registry_map.end(); ++it) {
@@ -40,7 +43,8 @@ std::vector<std::string> TypeSupportRegistry::get_type_names() {
   return result;
 }
 
-TypeSupportRegistry::TypeSupportRegistration::TypeSupportRegistration(DDS::TypeSupport* ts) {
+TypeSupportRegistry::TypeSupportRegistration::TypeSupportRegistration(DDS::TypeSupport* ts)
+{
   if (ts) {
     CORBA::String_var type_name = ts->get_type_name();
     Log::log() << "TypeSupportRegistration created for name '" << type_name << "'" << std::endl;
@@ -55,4 +59,3 @@ TypeSupportRegistry::TypeSupportRegistration::TypeSupportRegistration(DDS::TypeS
 }
 
 }
-

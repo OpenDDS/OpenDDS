@@ -25,6 +25,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_unistd.h"
 #include "tests/Utils/ExceptionStreams.h"
+#include "tests/Utils/WaitForSample.h"
 
 using namespace std;
 
@@ -182,38 +183,41 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::Subscriber_var bit_subscriber
         = participant->get_builtin_subscriber () ;
 
-      ::DDS::DataReader_var reader
-        = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC) ;
+      ::DDS::DataReader_var part_rdr =
+          bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC) ;
 
       ::DDS::ParticipantBuiltinTopicDataDataReader_var part_reader
-        = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (reader.in ());
+        = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (part_rdr.in ());
       if (CORBA::is_nil (part_reader.in ()))
       {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_PARTICIPANT_TOPIC datareader.\n"));
         return 1;
       }
 
-      reader = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
+      ::DDS::DataReader_var topic_rdr =
+          bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_reader
-        = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (reader.in ());
+        = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (topic_rdr.in ());
       if (CORBA::is_nil (topic_reader.in ()))
       {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_TOPIC_TOPIC datareader.\n"));
         return 1;
       }
 
-      reader = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) ;
+      ::DDS::DataReader_var subscription_rdr =
+          bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) ;
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var sub_reader
-        = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (reader.in ());
+        = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (subscription_rdr.in ());
       if (CORBA::is_nil (sub_reader.in ()))
       {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_SUBSCRIPTION_TOPIC datareader.\n"));
         return 1;
       }
 
-      reader = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
+      ::DDS::DataReader_var publication_rdr =
+          bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
-        = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (reader.in ());
+        = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (publication_rdr.in ());
       if (CORBA::is_nil (pub_reader.in ()))
       {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_PUBLICATION_TOPIC datareader.\n"));
@@ -277,36 +281,41 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
       }
 
-      ::DDS::SampleInfoSeq partinfos(10);
-      ::DDS::ParticipantBuiltinTopicDataSeq partdata(10);
-      ::DDS::ReturnCode_t ret = part_reader->read (partdata,
-                                                 partinfos,
-                                                 10,
-                                                 ::DDS::ANY_SAMPLE_STATE,
-                                                 ::DDS::ANY_VIEW_STATE,
-                                                 ::DDS::ALIVE_INSTANCE_STATE);
+      ::DDS::ReturnCode_t ret;
 
-      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
-        {
+      ::DDS::ParticipantBuiltinTopicDataSeq partdata;
+      const CORBA::ULong expected_part_count = num_parts - !ownEntitiesAreInBIT;
+
+      while (partdata.length() != expected_part_count) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample\n"));
+        Utils::waitForSample(part_rdr);
+        ::DDS::SampleInfoSeq pinfos(10);
+        ::DDS::ParticipantBuiltinTopicDataSeq pdata(10);
+        ret = part_reader->read(pdata,
+                                pinfos,
+                                10,
+                                ::DDS::ANY_SAMPLE_STATE,
+                                ::DDS::ANY_VIEW_STATE,
+                                ::DDS::ALIVE_INSTANCE_STATE);
+
+        if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT participant data.\n"),
-            1);
+                             "(%P|%t) monitor:  failed to read BIT participant data.\n"),
+                            1);
         }
 
-      CORBA::ULong len = partdata.length ();
-
-      if (len != num_parts - !ownEntitiesAreInBIT)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor: ERROR: read %d BIT part data, expected %d parts.\n", len, num_parts),
-          1);
+        for (CORBA::ULong i = 0; i < pdata.length(); ++i) {
+          const CORBA::ULong idx = partdata.length();
+          partdata.length(idx + 1);
+          partdata[idx] = pdata[i];
+        }
       }
 
 
       CORBA::ULong cur_dps_with_user_data = 0;
       CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
 
-      for (CORBA::ULong i = 0; i < len; ++i)
+      for (CORBA::ULong i = 0; i < partdata.length(); ++i)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x \n",
           partdata[i].key.value[0], partdata[i].key.value[1], partdata[i].key.value[2]));
@@ -334,6 +343,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
+        Utils::waitForSample(topic_rdr);
         ::DDS::InstanceHandleSeq handles;
         if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK)
         {
@@ -389,6 +400,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       ::DDS::SampleInfoSeq topicinfos(10);
       ::DDS::TopicBuiltinTopicDataSeq topicdata(10);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
+      Utils::waitForSample(topic_rdr);
       ret = topic_reader->read (topicdata,
         topicinfos,
         10,
@@ -403,7 +416,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             1);
         }
 
-      len = topicdata.length ();
+      CORBA::ULong len = topicdata.length ();
 
       if (len != num_topics)
       {
@@ -460,6 +473,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       ::DDS::SampleInfoSeq pubinfos(10);
       ::DDS::PublicationBuiltinTopicDataSeq pubdata(10);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for publication sample\n"));
+      Utils::waitForSample(publication_rdr);
       ret = pub_reader->read (pubdata,
         pubinfos,
         10,
@@ -548,6 +563,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       ::DDS::SampleInfoSeq subinfos(10);
       ::DDS::SubscriptionBuiltinTopicDataSeq subdata(10);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for subscription sample\n"));
+      Utils::waitForSample(subscription_rdr);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: done waiting for subscription sample\n"));
       ret = sub_reader->read (subdata,
         subinfos,
         10,
@@ -645,6 +663,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ACE_OS::fclose (fp);
         }
       }
+
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) monitor main done\n"));
     }
   catch (CORBA::Exception& e) {
     e._tao_print_exception(

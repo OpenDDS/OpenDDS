@@ -60,4 +60,3 @@ foreach (@libs) {
     chmod 0755, "$dest/lib/$fn";
     symlink("$dest/lib/$fn", "$dest/lib/${sln}.so") || die "Cannot symlink ${sln}.so : $!";
 }
-
