@@ -39,7 +39,8 @@ jobs:
       - name: 'Setup'
         shell: bash
         run: |
-          ls -1 *.zip | xargs -I {} unzip -q -o {}
+          echo "mkdir \${1} && cp \${1}.zip \${1} && cd \${1} && unzip \${1}.zip" > helper.sh
+          ls -1 *.zip | sed 's/\(.*\)\.zip$/\1/g' | xargs -I {} ./helper.sh {}
           export PR_SHA=$(cat */SHA | sort -u | head -n 1)
           echo "PR_SHA=$PR_SHA" >> $GITHUB_ENV
 
@@ -49,7 +50,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: ubuntu-20_04_defaults_security"
-          report_paths: ubuntu-20_04_defaults_security_workspace/Tests_JUnit.xml
+          report_paths: ubuntu-20_04_defaults_security_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -58,7 +59,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: ubuntu-20_04_defaults_java_no-bit"
-          report_paths: ubuntu-20_04_defaults_java_no-bit_workspace/Tests_JUnit.xml
+          report_paths: ubuntu-20_04_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -67,7 +68,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: ubuntu-18_04_defaults_security"
-          report_paths: ubuntu-18_04_defaults_security_workspace/Tests_JUnit.xml
+          report_paths: ubuntu-18_04_defaults_security_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -76,7 +77,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: ubuntu-18_04_defaults_java_no-bit"
-          report_paths: ubuntu-18_04_defaults_java_no-bit_workspace/Tests_JUnit.xml
+          report_paths: ubuntu-18_04_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -85,7 +86,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: ubuntu-16_04_defaults_security"
-          report_paths: ubuntu-16_04_defaults_security_workspace/Tests_JUnit.xml
+          report_paths: ubuntu-16_04_defaults_security_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -94,7 +95,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: ubuntu-16_04_defaults_java_no-bit"
-          report_paths: ubuntu-16_04_defaults_java_no-bit_workspace/Tests_JUnit.xml
+          report_paths: ubuntu-16_04_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -103,7 +104,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: windows-2019_defaults_security"
-          report_paths: windows-2019_defaults_security_workspace/Tests_JUnit.xml
+          report_paths: windows-2019_defaults_security_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -112,7 +113,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: windows-2019_defaults_java_no-bit"
-          report_paths: windows-2019_defaults_java_no-bit_workspace/Tests_JUnit.xml
+          report_paths: windows-2019_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -121,7 +122,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: windows-2016_no_debug_no_inline_security"
-          report_paths: windows-2016_no_debug_no_inline_security_workspace/Tests_JUnit.xml
+          report_paths: windows-2016_no_debug_no_inline_security_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -130,7 +131,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: windows-2016_no_debug_no_inline_java_no-bit"
-          report_paths: windows-2016_no_debug_no_inline_java_no-bit_workspace/Tests_JUnit.xml
+          report_paths: windows-2016_no_debug_no_inline_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -139,7 +140,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: macos-10_15_defaults_security"
-          report_paths: macos-10_15_defaults_security_workspace/Tests_JUnit.xml
+          report_paths: macos-10_15_defaults_security_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
       - name: 'Publish Unit Test Results'
@@ -148,6 +149,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: "Test Results: macos-10_15_defaults_java_no-bit"
-          report_paths: macos-10_15_defaults_java_no-bit_workspace/Tests_JUnit.xml
+          report_paths: macos-10_15_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
 
