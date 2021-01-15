@@ -47,6 +47,7 @@ public:
   void add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport);
 
   bool type_object_in_cache(const TypeIdentifier& ti) const;
+  bool extensibility(TypeFlag extensibility_mask, const TypeIdentifier& ti) const;
 
 private:
   // Only minimal Type Objects for now

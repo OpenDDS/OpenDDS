@@ -1457,6 +1457,26 @@ namespace OpenDDS {
           const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
           if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
             XTypes::TypeAssignability ta(type_lookup_service_);
+
+            const DDS::DataRepresentationIdSeq repIds =
+              get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
+            for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+              Encoding::Kind encoding_kind;
+              if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+                if (encoding_kind == Encoding::KIND_XCDR1) {
+                  const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
+
+                  if (type_lookup_service_->extensibility(extensibility_mask, writer_local ? reader_type_id : writer_type_id)) {
+                    if (::OpenDDS::DCPS::DCPS_debug_level) {
+                      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("EndpointManager::match_continue: ")
+                        ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
+                    }
+                  }
+                }
+              }
+            }
+
             consistent = ta.assignable(writer_type_id, reader_type_id);
           } else {
             //check remote and local type names match

@@ -1630,6 +1630,52 @@ namespace {
     return bounded;
   }
 
+  ExtensibilityKind max_extensibility_kind(AST_Type* type)
+  {
+    ExtensibilityKind exten = extensibilitykind_final;
+    static std::vector<AST_Type*> type_stack;
+
+    type = resolveActualType(type);
+    for (size_t i = 0; i < type_stack.size(); ++i) {
+      // If we encounter the same type recursively, then it has already been considered
+      if (type == type_stack[i]) return extensibilitykind_final;
+    }
+    type_stack.push_back(type);
+
+    const Classification fld_cls = classify(type);
+    if (fld_cls & CL_STRUCTURE || fld_cls & CL_UNION) {
+      exten = be_global->extensibility(type);
+      if (exten == extensibilitykind_mutable) {
+        type_stack.pop_back();
+        return extensibilitykind_mutable;
+      }
+
+      const Fields fields(fld_cls & CL_STRUCTURE ? dynamic_cast<AST_Structure*>(type) : dynamic_cast<AST_Union*>(type));
+      const Fields::Iterator fields_end = fields.end();
+      ExtensibilityKind this_exten = extensibilitykind_final;
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        if (extensibilitykind_mutable == (this_exten = max_extensibility_kind(type))) {
+          type_stack.pop_back();
+          return extensibilitykind_mutable;
+        }
+        if (exten < this_exten) {
+          exten = this_exten;
+        }
+      }
+      type_stack.pop_back();
+      return exten;
+    } else if (fld_cls & CL_ARRAY) {
+      type_stack.pop_back();
+      return max_extensibility_kind(dynamic_cast<AST_Array*>(type)->base_type());
+    } else if (fld_cls & CL_SEQUENCE) {
+      type_stack.pop_back();
+      return max_extensibility_kind(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else {
+      type_stack.pop_back();
+      return extensibilitykind_final;
+    }
+  }
+
   /**
    * Convert a compiler Encoding value to the string name of the corresponding
    * OpenDDS::DCPS::Encoding::XcdrVersion.
@@ -2640,6 +2686,29 @@ namespace {
     default:
       idl_global->err()->misc_error(
         "Unexpected extensibility while generating MarshalTraits", node);
+      return false;
+    }
+    be_global->header_ << "; }\n";
+
+    /*
+     * This is used for topic type extensibility level.
+     */
+    const ExtensibilityKind ek = max_extensibility_kind(dynamic_cast<AST_Type*>(node));
+    be_global->header_ <<
+      "  static Extensibility max_extensibility_level() { return ";
+    switch (ek) {
+    case extensibilitykind_final:
+      be_global->header_ << "FINAL";
+      break;
+    case extensibilitykind_appendable:
+      be_global->header_ << "APPENDABLE";
+      break;
+    case extensibilitykind_mutable:
+      be_global->header_ << "MUTABLE";
+      break;
+    default:
+      idl_global->err()->misc_error(
+        "Unexpected extensibility level while generating MarshalTraits", node);
       return false;
     }
     be_global->header_ << "; }\n"

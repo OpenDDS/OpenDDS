@@ -898,6 +898,11 @@ namespace OpenDDS {
     return inst;
   }
 
+  Extensibility get_max_extensibility()
+  {
+    return MarshalTraitsType::max_extensibility_level();
+  }
+
   void set_instance_state(DDS::InstanceHandle_t instance,
                           DDS::InstanceStateKind state)
   {
