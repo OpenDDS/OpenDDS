@@ -13,7 +13,7 @@ namespace Bench {
 
 class SetCftParametersAction : public Action {
 public:
-  SetCftParametersAction(ACE_Proactor& proactor);
+  explicit SetCftParametersAction(ACE_Proactor& proactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
