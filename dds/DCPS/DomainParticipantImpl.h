@@ -126,7 +126,7 @@ public:
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
-  DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
+  DomainParticipantImpl(InstanceHandleGenerator&           handle_generator,
                         const DDS::DomainId_t&             domain_id,
                         const DDS::DomainParticipantQos &  qos,
                         DDS::DomainParticipantListener_ptr a_listener,
@@ -419,7 +419,6 @@ private:
     DDS::Topic_ptr a_topic,
     bool           remove_objref);
 
-  DomainParticipantFactoryImpl* factory_;
   /// The default topic qos.
   DDS::TopicQos default_topic_qos_;
   /// The default publisher qos.
@@ -489,7 +488,7 @@ private:
 
   /// Instance handle generators for non-repo backed entities
   /// (i.e. subscribers and publishers).
-  InstanceHandleGenerator participant_handles_;
+  InstanceHandleGenerator& participant_handles_;
 
   unique_ptr<Monitor> monitor_;
 
