@@ -198,6 +198,16 @@ void PropertyStatBlock::finalize()
     ds[static_cast<CORBA::ULong>(i)] = median_buffer_[pos];
   }
   buff_prop->value.double_seq_prop(ds);
+  if (timestamp_buffer_.size()) {
+    Builder::PropertyIndex ts_buff_prop = get_or_create_property(*(median_.get_seq()), std::string(median_->name) + "_timestamp_buffer", Builder::PVK_TIME_SEQ);
+    Builder::TimeStampSeq tss;
+    tss.length(static_cast<CORBA::ULong>(count));
+    for (size_t i = 0; i < count; ++i) {
+      size_t pos = (count < timestamp_buffer_.size() ? i : ((sample_count_->value.ull_prop() + 1 + i) % timestamp_buffer_.size()));
+      tss[static_cast<CORBA::ULong>(i)] = timestamp_buffer_[pos];
+    }
+    ts_buff_prop->value.time_seq_prop(tss);
+  }
 
   if (count) {
     // calculate median
