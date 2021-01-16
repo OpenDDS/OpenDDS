@@ -10,7 +10,7 @@ on:
 
 jobs:
   download_and_publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
     steps:
       - name: 'Download Autobuild Artifacts'
@@ -40,6 +40,7 @@ jobs:
         shell: bash
         run: |
           echo "mkdir \${1} && cp \${1}.zip \${1} && cd \${1} && unzip \${1}.zip" > helper.sh
+          chmod +x helper.sh
           ls -1 *.zip | sed 's/\(.*\)\.zip$/\1/g' | xargs -I {} ./helper.sh {}
           export PR_SHA=$(cat */SHA | sort -u | head -n 1)
           echo "PR_SHA=$PR_SHA" >> $GITHUB_ENV
