@@ -55,7 +55,8 @@ WorkerDataWriterListener::on_publication_matched(
       if (datawriter_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
-    } else if (static_cast<size_t>(status.current_count) > match_count_) {
+    }
+    if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datawriter_) {
         discovery_delta_stat_block_->update(Builder::to_seconds_double(Builder::get_hr_time() - enable_time_->value.time_prop()));
       }

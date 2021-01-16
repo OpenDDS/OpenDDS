@@ -10,7 +10,7 @@ namespace Bench {
 
 class WriteAction : public Action {
 public:
-  WriteAction(ACE_Proactor& proactor);
+  explicit WriteAction(ACE_Proactor& proactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;

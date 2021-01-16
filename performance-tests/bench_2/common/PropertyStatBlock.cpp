@@ -198,6 +198,16 @@ void PropertyStatBlock::finalize()
     ds[static_cast<CORBA::ULong>(i)] = median_buffer_[pos];
   }
   buff_prop->value.double_seq_prop(ds);
+  if (timestamp_buffer_.size()) {
+    Builder::PropertyIndex ts_buff_prop = get_or_create_property(*(median_.get_seq()), std::string(median_->name) + "_timestamp_buffer", Builder::PVK_TIME_SEQ);
+    Builder::TimeStampSeq tss;
+    tss.length(static_cast<CORBA::ULong>(count));
+    for (size_t i = 0; i < count; ++i) {
+      size_t pos = (count < timestamp_buffer_.size() ? i : ((sample_count_->value.ull_prop() + 1 + i) % timestamp_buffer_.size()));
+      tss[static_cast<CORBA::ULong>(i)] = timestamp_buffer_[pos];
+    }
+    ts_buff_prop->value.time_seq_prop(tss);
+  }
 
   if (count) {
     // calculate median
@@ -254,9 +264,12 @@ ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, 
   var_x_sample_count_ = get_property(seq, prefix + "_var_x_sample_count", Builder::PVK_DOUBLE);
 
   Builder::ConstPropertyIndex median_buffer = get_property(seq, prefix + "_median_buffer", Builder::PVK_DOUBLE_SEQ);
-  median_buffer_.resize(median_buffer->value.double_seq_prop().length());
-  for (size_t i = 0; i < median_buffer_.size(); ++i) {
-    median_buffer_[i] = median_buffer->value.double_seq_prop()[static_cast<CORBA::ULong>(i)];
+
+  if (median_buffer) {
+    median_buffer_.resize(median_buffer->value.double_seq_prop().length());
+    for (size_t i = 0; i < median_buffer_.size(); ++i) {
+      median_buffer_[i] = median_buffer->value.double_seq_prop()[static_cast<CORBA::ULong>(i)];
+    }
   }
 
   median_sample_count_ = get_property(seq, prefix + "_median_sample_count", Builder::PVK_ULL);
@@ -270,16 +283,18 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
 {
   SimpleStatBlock result;
 
-  result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
-  result.min_ = min_->value.double_prop();
-  result.max_ = max_->value.double_prop();
-  result.mean_ = mean_->value.double_prop();
-  result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
+  if (sample_count_) {
+    result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
+    result.min_ = min_->value.double_prop();
+    result.max_ = max_->value.double_prop();
+    result.mean_ = mean_->value.double_prop();
+    result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
 
-  result.median_buffer_ = median_buffer_;
-  result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
-  result.median_ = median_->value.double_prop();
-  result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
+    result.median_buffer_ = median_buffer_;
+    result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
+    result.median_ = median_->value.double_prop();
+    result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
+  }
 
   return result;
 }
