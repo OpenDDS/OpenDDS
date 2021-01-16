@@ -201,10 +201,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       if (participant1->get_instance_handle () == participant2->get_instance_handle ())
       {
-//         ACE_ERROR_RETURN((LM_ERROR,
-//                           ACE_TEXT("%N:%l: main()")
-//                           ACE_TEXT(" ERROR: participant1 and participant2 do have the same instance handle!\n")),
-//                         -1);
+         ACE_ERROR_RETURN((LM_ERROR,
+                           ACE_TEXT("%N:%l: main()")
+                           ACE_TEXT(" ERROR: participant1 and participant2 do have the same instance handle!\n")),
+                           -1);
       }
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =
