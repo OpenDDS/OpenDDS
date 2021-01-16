@@ -151,4 +151,3 @@ jobs:
           check_name: "Test Results: macos-10_15_defaults_java_no-bit"
           report_paths: macos-10_15_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
           commit: ${{ env.PR_SHA }}
-
