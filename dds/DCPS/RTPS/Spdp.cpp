@@ -756,6 +756,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
       purge_handshake_deadlines(iter);
 #endif
+#ifndef DDS_HAS_MINIMUM_BIT
+      process_location_updates_i(iter);
+#endif
       remove_discovered_participant(iter);
       return;
     }
@@ -822,12 +825,18 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
       purge_handshake_deadlines(iter);
 #endif
+#ifndef DDS_HAS_MINIMUM_BIT
+      process_location_updates_i(iter);
+#endif
       remove_discovered_participant(iter);
+      return;
     }
   }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  process_location_updates_i(iter);
+  if (iter != participants_.end()) {
+    process_location_updates_i(iter);
+  }
 #endif
 }
 
