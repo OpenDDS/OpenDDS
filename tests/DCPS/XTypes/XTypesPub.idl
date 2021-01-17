@@ -10,7 +10,7 @@ struct PlainCdrStruct {
 
 @topic
 @final
-struct FinalStruct {
+struct FinalStructPub {
   @key long key;
 };
 
@@ -22,12 +22,6 @@ struct ModifiedFinalStruct {
 };
 
 // Appendable structues
-
-@topic
-@appendable
-struct AppendableStruct {
-  @key long key;
-};
 
 @topic
 @appendable
@@ -44,13 +38,6 @@ struct AdditionalPrefixFieldStruct {
 };
 
 // Mutable structues
-
-@topic
-@mutable
-struct MutableStruct {
-  @id(1) @key long key;
-  @id(2) long additional_field;
-};
 
 @topic
 @mutable
@@ -93,17 +80,6 @@ enum ModifiedUnionDisc {
   E_KEY_MODIFIED,
   E_OCTET_FIELD_MODIFIED,
   E_ADDITIONAL_FIELD_MODIFIED
-};
-
-@topic
-@mutable
-union MutableUnion switch (UnionDisc) {
-case E_KEY:
-  @id(6) long key;
-case E_OCTET_FIELD:
-  @id(8) octet octet_field;
-case E_ADDITIONAL_FIELD:
-  @id(12) long additional_field;
 };
 
 @topic
@@ -160,12 +136,6 @@ struct Trim64Struct {
   @try_construct(TRIM) str64 trim_string;
 };
 
-@topic
-@mutable
-struct Trim20Struct {
-  @try_construct(TRIM) str20 trim_string;
-};
-
 // Dependencies
 
 @appendable
@@ -179,3 +149,12 @@ struct AppendableStructWithDependency {
   @key long key;
   NestedStruct additional_nested_struct;
 };
+
+// No XTypes Test
+
+@topic
+@appendable
+struct AppendableStructNoXTypes {
+  @key long key;
+};
+

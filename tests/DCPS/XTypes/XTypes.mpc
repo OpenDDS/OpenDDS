@@ -1,5 +1,68 @@
-project: dcps_test, dcps_rtps_udp, msvc_bigobj {
+project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj {
+
+  exename   = xtypes_publisher
+
   TypeSupport_Files {
-    XTypes.idl
+    !XTypes.idl
+	!XTypesTypeSupport.idl
+	XTypesPub.idl
+	!XTypesSub.idl
+	!XTypesSubTypeSupport.idl
+  }
+
+  Idl_Files {
+    !XTypes.idl
+    !XTypesSub.idl
+  }
+  
+  Source_Files {
+    XTypesPublisher.cpp
+	!XTypesSubscriber.cpp
+	!XTypes.cpp
+	!XTypesC.cpp
+	!XTypesS.cpp
+	!XTypesTypeSupportC.cpp
+	!XTypesTypeSupportS.cpp
+	!XTypesTypeSupportImpl.cpp
+	!XTypesSubscriber.cpp
+	!XTypesSubTypeSupportC.cpp
+	!XTypesSubTypeSupportS.cpp
+	!XTypesSubC.cpp
+	!XTypesSubS.cpp
+	!XTypesSubTypeSupportImpl.cpp
+  }
+}
+
+project(XTypes_Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj {
+
+  exename   = xtypes_subscriber
+
+  TypeSupport_Files {
+    !XTypes.idl
+	!XTypesTypeSupport.idl
+	!XTypesPub.idl
+	XTypesSub.idl
+	!XTypesPubTypeSupport.idl
+  }
+
+  Idl_Files {
+    !XTypes.idl
+    !XTypesPub.idl
+  }
+  
+  Source_Files {
+    XTypesSubscriber.cpp
+	!XTypes.cpp
+	!XTypesC.cpp
+	!XTypesS.cpp
+	!XTypesTypeSupportC.cpp
+	!XTypesTypeSupportS.cpp	
+	!XTypesTypeSupportImpl.cpp
+	!XTypesPublisher.cpp
+	!XTypesPubTypeSupportC.cpp
+	!XTypesPubTypeSupportS.cpp
+	!XTypesPubC.cpp
+	!XTypesPubS.cpp
+	!XTypesPubTypeSupportImpl.cpp
   }
 }
