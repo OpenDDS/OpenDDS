@@ -633,6 +633,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #endif
     , pad = 631;
 
+  const auto& outerArray = my_foo._thestruct._f55;
+  for (const auto& innerArray: outerArray) {
+    for (const auto& value: innerArray) {
+      if (static_cast<uint32_t>(value)) {
+        ACE_ERROR((LM_ERROR, "Invalid value 0x%x in nested arrays of enums\n", value));
+        failed = true;
+      }
+    }
+  }
+
   try {
     if (try_marshaling(my_foo, ss_foo, SerializedSizeBound(), sz, pad, SerializedSizeBound(),
                        "Xyz::Foo")) {
