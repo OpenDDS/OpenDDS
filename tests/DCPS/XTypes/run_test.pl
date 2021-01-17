@@ -26,9 +26,9 @@ if ($verbose) {
 my %params = (
   "PlainCdr"                => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
-  "FinalStructMatch"        => {reader_type => "FinalStructPub", writer_type => "FinalStructSub", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
+  "FinalStructMatch"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
-  "FinalStructNoMatch"      => {reader_type => "FinalStructPub", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3,
+  "FinalStructNoMatch"      => {reader_type => "FinalStructSub", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
   "AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "AppendableStructT", key_val => 4,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
