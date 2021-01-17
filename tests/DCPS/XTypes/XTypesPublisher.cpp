@@ -218,7 +218,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
-  } else if (type == "FinalStruct") {
+  } else if (type == "FinalStructPub") {
     FinalStructPubTypeSupport_var ts = new FinalStructPubTypeSupportImpl;
     get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedFinalStruct") {
