@@ -437,13 +437,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                         -1);
       }
 
-//       DDS::ReturnCode_t retcode7 = dpf->delete_participant(participant2.in ());
-//       if (retcode7 != DDS::RETCODE_OK) {
-//         ACE_ERROR_RETURN((LM_ERROR,
-//                           ACE_TEXT("%N:%l: main()")
-//                           ACE_TEXT(" ERROR: should be able to delete participant2\n")),
-//                         -1);
-//       }
+
+      if (participant2->delete_contained_entities () != ::DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: participant2 delete_contained_entities failed\n")),
+                        -1);
+      }
+
+      DDS::ReturnCode_t retcode7 = dpf->delete_participant(participant2.in ());
+      if (retcode7 != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: should be able to delete participant2\n")),
+                        -1);
+      }
 
       ACE_DEBUG ((LM_DEBUG, "Shutting down the service participant with one participant still registered\n"));
       TheServiceParticipant->shutdown ();
