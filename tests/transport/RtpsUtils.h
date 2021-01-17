@@ -37,13 +37,14 @@ buildHeartbeat(const OpenDDS::DCPS::EntityId_t& writer, const OpenDDS::RTPS::Hea
     reader.entityId, writer, sequenceRange.first, sequenceRange.second,
     {++count}
   };
-  size_t size = RTPSHDR_SZ, padding = 0;
+  size_t size = RTPSHDR_SZ;
   if (reader != GUID_UNKNOWN) {
     size += SMHDR_SZ + INFO_DST_SZ;
   }
-  gen_find_size(hb, size, padding);
-  Message_Block_Ptr mb(new ACE_Message_Block(size + padding));
-  Serializer ser(mb.get(), !ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  static const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  serialized_size(encoding, size, hb);
+  Message_Block_Ptr mb(new ACE_Message_Block(size));
+  Serializer ser(mb.get(), encoding);
   const bool ok = (ser << header) &&
     (reader == GUID_UNKNOWN || ser << infoDst) &&
     (ser << hb);

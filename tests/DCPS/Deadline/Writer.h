@@ -3,17 +3,15 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include <dds/DdsDcpsPublicationC.h>
-#include "dds/DCPS/TimeTypes.h"
 #include "MessengerTypeSupportC.h"
 #include "DataWriterListenerImpl.h"
 
-#include <ace/Condition_T.h>
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/ConditionVariable.h>
+
 #include <ace/Synch_Traits.h>
 #include <ace/Task.h>
-
-using OpenDDS::DCPS::TimeDuration;
-using OpenDDS::DCPS::MonotonicTimePoint;
 
 class Writer : public ACE_Task_Base
 {
@@ -21,7 +19,7 @@ public:
 
   Writer(::DDS::DataWriter_ptr writer,
          CORBA::Long key,
-         TimeDuration sleep_duration);
+         OpenDDS::DCPS::TimeDuration sleep_duration);
 
   void start ();
 
@@ -41,13 +39,13 @@ private:
   typedef ACE_Guard<LockType> GuardType;
 
   LockType lock_;
-  ACE_Condition<ACE_SYNCH_MUTEX> condition_;
+  OpenDDS::DCPS::ConditionVariable<ACE_SYNCH_MUTEX> condition_;
 
   bool associated_;
   DataWriterListenerImpl* dwl_servant_;
   ::DDS::InstanceHandle_t instance_handle_;
   CORBA::Long key_;
-  TimeDuration sleep_duration_;
+  OpenDDS::DCPS::TimeDuration sleep_duration_;
 };
 
 #endif /* WRITER_H */

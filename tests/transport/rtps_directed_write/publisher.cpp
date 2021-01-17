@@ -1,17 +1,16 @@
-#include "TestMsg.h"
 #include "AppConfig.h"
-
 #include "../RtpsUtils.h"
 
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h"
+#include <TestMsg.h>
 
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/DataSampleElement.h"
+#include <dds/DCPS/transport/framework/TransportSendListener.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/RtpsCoreC.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
 
 #include <ace/OS_main.h>
@@ -20,10 +19,14 @@
 #include <ace/String_Base.h>
 #include <ace/SOCK_Dgram.h>
 #include <ace/Message_Block.h>
-
 #include <ace/OS_NS_sys_time.h>
 #include <ace/OS_NS_time.h>
+
 #include <ctime>
+
+using namespace OpenDDS::DCPS;
+
+const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 class DDS_TEST {
 public:
@@ -57,7 +60,7 @@ public:
   }
 
 private:
-  static const bool hostIsBigEndian = !ACE_CDR_BYTE_ORDER;
+  // TODO(iguessthislldo): Convert
   static const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
   static const CORBA::Octet DE  = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E;
   static const CORBA::Octet DEQ = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E | OpenDDS::RTPS::FLAG_Q;
@@ -136,15 +139,15 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
     ds.inlineQos[0]._d(OpenDDS::RTPS::PID_DIRECTED_WRITE);
   }
 
-  size_t size = 0, padding = 0;
-  gen_find_size(hdr, size, padding);
-  gen_find_size(it, size, padding);
-  gen_find_size(ds, size, padding);
-  find_size_ulong(size, padding);
-  gen_find_size(msg, size, padding);
+  size_t size = 0;
+  serialized_size(encoding, size, hdr);
+  serialized_size(encoding, size, it);
+  serialized_size(encoding, size, ds);
+  primitive_serialized_size_ulong(encoding, size, size);
+  serialized_size(encoding, size, msg);
 
-  ACE_Message_Block mb(size + padding);
-  Serializer ser(&mb, hostIsBigEndian, Serializer::ALIGN_CDR);
+  ACE_Message_Block mb(size);
+  Serializer ser(&mb, encoding);
   bool ok = (ser << hdr) && (ser << it) && (ser << ds) && (ser << encap) && (ser << msg);
   if (!ok) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to serialize RTPS message:%m\n")), false);

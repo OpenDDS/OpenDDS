@@ -35,8 +35,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 using namespace DDS::Security;
 using namespace OpenDDS::Security::CommonUtilities;
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Encoding;
+using OpenDDS::DCPS::ENDIAN_BIG;
+using OpenDDS::DCPS::align;
+using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 using OpenDDS::DCPS::security_debug;
+
+const Encoding common_encoding(Encoding::KIND_XCDR1, ENDIAN_BIG);
 
 namespace OpenDDS {
 namespace Security {
@@ -50,6 +56,16 @@ CryptoBuiltInImpl::CryptoBuiltInImpl()
 
 CryptoBuiltInImpl::~CryptoBuiltInImpl()
 {
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::~CryptoBuiltInImpl keys_ %B encrypt_options_ %B participant_to_entity_ %B sessions_ %B derived_key_handles_ %B\n"),
+               keys_.size(),
+               encrypt_options_.size(),
+               participant_to_entity_.size(),
+               sessions_.size(),
+               derived_key_handles_.size()));
+  }
+
   openssl_cleanup();
 }
 
@@ -157,6 +173,11 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[h] = keys;
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_local_participant keys_ (total %B)\n"),
+               keys_.size()));
+  }
   return h;
 }
 
@@ -353,11 +374,26 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[h] = keys;
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_local_datawriter keys_ (total %B)\n"),
+               keys_.size()));
+  }
   encrypt_options_[h] = security_attributes;
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_local_datawriter encrypt_options_ (total %B)\n"),
+               encrypt_options_.size()));
+  }
 
   if (participant_crypto != DDS::HANDLE_NIL) {
     const EntityInfo e(DATAWRITER_SUBMESSAGE, h);
     participant_to_entity_.insert(std::make_pair(participant_crypto, e));
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::register_local_datawriter participant_to_entity_ (total %B)\n"),
+                 participant_to_entity_.size()));
+    }
   }
 
   return h;
@@ -425,16 +461,41 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
         to_dds_string(dr_keys[0]).c_str()));
     }
     keys_[h] = dr_keys;
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader keys_ (total %B)\n"),
+                 keys_.size()));
+    }
     if (existing_handle_iter != derived_key_handles_.end()) {
       sessions_.erase(std::make_pair(h, submessage_key_index));
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader sessions_ (total %B)\n"),
+                   sessions_.size()));
+      }
       return h;
     }
     derived_key_handles_[input_handles] = h;
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader derived_key_handles_ (total %B)\n"),
+                 derived_key_handles_.size()));
+    }
   }
 
   const EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader participant_to_entity_ (total %B)\n"),
+               participant_to_entity_.size()));
+  }
   encrypt_options_[h] = encrypt_options_[local_datawriter_crypto_handle];
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader encrypt_options_ (total %B)\n"),
+               encrypt_options_.size()));
+  }
   return h;
 }
 
@@ -468,11 +529,26 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[h] = keys;
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_local_datareader keys_ (total %B)\n"),
+               keys_.size()));
+  }
   encrypt_options_[h] = security_attributes;
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_local_datareader encrypt_options_ (total %B)\n"),
+               encrypt_options_.size()));
+  }
 
   if (participant_crypto != DDS::HANDLE_NIL) {
     const EntityInfo e(DATAREADER_SUBMESSAGE, h);
     participant_to_entity_.insert(std::make_pair(participant_crypto, e));
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::register_local_datareader participant_to_entity_ (total %B)\n"),
+                 participant_to_entity_.size()));
+    }
   }
 
   return h;
@@ -539,16 +615,41 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
         to_dds_string(dw_keys[0]).c_str()));
     }
     keys_[h] = dw_keys;
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter keys_ (total %B)\n"),
+                 keys_.size()));
+    }
     if (existing_handle_iter != derived_key_handles_.end()) {
       sessions_.erase(std::make_pair(h, submessage_key_index));
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter sessions_ (total %B)\n"),
+                   sessions_.size()));
+      }
       return h;
     }
     derived_key_handles_[input_handles] = h;
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter derived_key_handles_ (total %B)\n"),
+                 derived_key_handles_.size()));
+    }
   }
 
   const EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter participant_to_entity_ (total %B)\n"),
+               participant_to_entity_.size()));
+  }
   encrypt_options_[h] = encrypt_options_[local_datareader_crypto_handle];
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter encrypt_options_ (total %B)\n"),
+               encrypt_options_.size()));
+  }
   return h;
 }
 
@@ -562,6 +663,11 @@ bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, S
   clear_common_data(handle);
   for (DerivedKeyIndex_t::iterator it = derived_key_handles_.lower_bound(std::make_pair(handle, 0));
        it != derived_key_handles_.end() && it->first.first == handle; derived_key_handles_.erase(it++)) {
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::unregister_participant derived_key_handles_ (total %B)\n"),
+                 derived_key_handles_.size()));
+    }
   }
   return true;
 }
@@ -569,9 +675,19 @@ bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, S
 void CryptoBuiltInImpl::clear_common_data(NativeCryptoHandle handle)
 {
   keys_.erase(handle);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::clear_common_data keys_ (total %B)\n"),
+               keys_.size()));
+  }
   for (SessionTable_t::iterator st_iter = sessions_.lower_bound(std::make_pair(handle, 0));
        st_iter != sessions_.end() && st_iter->first.first == handle;
        sessions_.erase(st_iter++)) {
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("CryptoBuiltInImpl::clear_common_data sessions_ (total %B)\n"),
+                 sessions_.size()));
+    }
   }
 }
 
@@ -579,11 +695,21 @@ void CryptoBuiltInImpl::clear_endpoint_data(NativeCryptoHandle handle)
 {
   clear_common_data(handle);
   encrypt_options_.erase(handle);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::clear_endpoint_data encrypt_options_ (total %B)\n"),
+               encrypt_options_.size()));
+  }
 
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
   for (iter_t it = participant_to_entity_.begin(); it != participant_to_entity_.end();) {
     if (it->second.handle_ == handle) {
       participant_to_entity_.erase(it++);
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::clear_endpoint_data participant_to_entity_ (total %B)\n"),
+                   participant_to_entity_.size()));
+      }
     } else {
       ++it;
     }
@@ -634,13 +760,15 @@ namespace {
       DDS::BinaryProperty_t& p = t.binary_properties[0];
       p.name = Token_KeyMat_Name;
       p.propagate = true;
-      size_t size = 0, padding = 0;
-      DCPS::gen_find_size(keys[i], size, padding);
-      p.value.length(static_cast<unsigned int>(size + padding));
-      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size + padding);
-      Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+      const size_t size = serialized_size(common_encoding, keys[i]);
+      p.value.length(static_cast<unsigned int>(size));
+      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size);
+      Serializer ser(&mb, common_encoding);
       if (ser << keys[i]) {
         push_back(tokens, t);
+      } else {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: keys_to_tokens: Failed to serialize\n"));
       }
     }
     return tokens;
@@ -657,10 +785,13 @@ namespace {
           if (Token_KeyMat_Name == p.name) {
             ACE_Message_Block mb(to_mb(p.value.get_buffer()), p.value.length());
             mb.wr_ptr(p.value.length());
-            Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+            Serializer ser(&mb, common_encoding);
             KeyMaterial_AES_GCM_GMAC key;
             if (ser >> key) {
               push_back(keys, key);
+            } else {
+              ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: tokens_to_keys: Failed to deserialize\n"));
             }
             break;
           }
@@ -711,6 +842,11 @@ bool CryptoBuiltInImpl::set_remote_participant_crypto_tokens(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[remote_participant_crypto] = tokens_to_keys(remote_participant_tokens);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::set_remote_participant_crypto_tokens keys_ (total %B)\n"),
+               keys_.size()));
+  }
   return true;
 }
 
@@ -753,6 +889,11 @@ bool CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[remote_datawriter_crypto] = tokens_to_keys(remote_datawriter_tokens);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens keys_ (total %B)\n"),
+               keys_.size()));
+  }
   return true;
 }
 
@@ -795,6 +936,11 @@ bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[remote_datareader_crypto] = tokens_to_keys(remote_datareader_tokens);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("CryptoBuiltInImpl::set_remote_datareader_crypto_tokens keys_ (total %B)\n"),
+               keys_.size()));
+  }
   return true;
 }
 
@@ -858,13 +1004,17 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  const KeyTable_t::const_iterator iter = keys_.find(sending_datawriter_crypto);
-  if (iter == keys_.end() || !encrypt_options_[sending_datawriter_crypto].payload_) {
+  const KeyTable_t::const_iterator keys_iter = keys_.find(sending_datawriter_crypto);
+  const EncryptOptions_t::const_iterator eo_iter = encrypt_options_.find(sending_datawriter_crypto);
+  if (eo_iter == encrypt_options_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "Datawriter handle lacks encrypt options");
+  }
+  if (keys_iter == keys_.end() || !eo_iter->second.payload_) {
     encoded_buffer = plain_buffer;
     return true;
   }
 
-  const KeySeq& keyseq = iter->second;
+  const KeySeq& keyseq = keys_iter->second;
   if (!keyseq.length()) {
     encoded_buffer = plain_buffer;
     return true;
@@ -896,20 +1046,18 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
-  using DCPS::gen_find_size;
-  gen_find_size(header, size, padding);
+  size_t size = serialized_size(common_encoding, header);
 
   if (pOut != &plain_buffer) {
     size += CRYPTO_CONTENT_ADDED_LENGTH;
   }
 
   size += pOut->length();
-  gen_find_size(footer, size, padding);
+  serialized_size(common_encoding, size, footer);
 
-  encoded_buffer.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_buffer.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size);
+  Serializer ser(&mb, common_encoding);
   ser << header;
 
   if (pOut != &plain_buffer) {
@@ -918,7 +1066,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
 
   ser << footer;
-  return true;
+  return ser.good_bit();
 }
 
 void CryptoBuiltInImpl::Session::create_key(const KeyMaterial& master)
@@ -1082,15 +1230,6 @@ namespace {
     return 0;
   }
 
-  // Update 'size' and 'padding' in the same way that gen_find_size does, but for aligning to 'alignment'
-  void align(size_t alignment, size_t& size, size_t& padding)
-  {
-    const size_t offset = (size + padding) % alignment;
-    if (offset) {
-      padding += alignment - offset;
-    }
-  }
-
   unsigned int roundUp(unsigned int length, unsigned int alignment)
   {
     const unsigned int offset = length % alignment;
@@ -1113,7 +1252,7 @@ namespace {
     ACE_Message_Block mb_in(to_mb(original.get_buffer() + offset), origLength);
     mb_in.wr_ptr(origLength);
 
-    Serializer ser_in(&mb_in);
+    Serializer ser_in(&mb_in, common_encoding);
     ser_in.skip(1); // submessageId
 
     unsigned char flags;
@@ -1184,27 +1323,26 @@ bool CryptoBuiltInImpl::encode_submessage(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
+  size_t size = 0;
+
   size += RTPS::SMHDR_SZ; // prefix submessage header
-  using DCPS::gen_find_size;
-  gen_find_size(header, size, padding);
-  const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size + padding - RTPS::SMHDR_SZ);
+  serialized_size(common_encoding, size, header);
+  const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size - RTPS::SMHDR_SZ);
 
   if (!authOnly) {
     size += RTPS::SMHDR_SZ + SEQLEN_SZ;
   }
 
   size += pOut->length(); // submessage inside wrapper
-  align(RTPS::SM_ALIGN, size, padding);
+  align(size, RTPS::SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // postfix submessage header
-  const size_t preFooter = size + padding;
-  gen_find_size(footer, size, padding);
+  const size_t preFooter = size;
+  serialized_size(common_encoding, size, footer);
 
-  encoded_rtps_submessage.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()),
-                       size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_rtps_submessage.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()), size);
+  Serializer ser(&mb, common_encoding);
   RTPS::SubmessageHeader smHdr = {RTPS::SEC_PREFIX, 0, hdrLen};
   ser << smHdr;
   ser << header;
@@ -1220,11 +1358,11 @@ bool CryptoBuiltInImpl::encode_submessage(
   ser.align_w(RTPS::SM_ALIGN);
 
   smHdr.submessageId = RTPS::SEC_POSTFIX;
-  smHdr.submessageLength = static_cast<ACE_UINT16>(size + padding - preFooter);
+  smHdr.submessageLength = static_cast<ACE_UINT16>(size - preFooter);
   ser << smHdr;
   ser << footer;
 
-  return true;
+  return ser.good_bit();
 }
 
 bool CryptoBuiltInImpl::encode_datawriter_submessage(
@@ -1258,7 +1396,12 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
 
   NativeCryptoHandle encode_handle = sending_datawriter_crypto;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!encrypt_options_[encode_handle].submessage_) {
+  const EncryptOptions_t::const_iterator eo_iter = encrypt_options_.find(encode_handle);
+  if (eo_iter == encrypt_options_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "Datawriter handle lacks encrypt options");
+  }
+
+  if (!eo_iter->second.submessage_) {
     encoded_rtps_submessage = plain_rtps_submessage;
     receiving_datareader_crypto_list_index = len;
     return true;
@@ -1383,25 +1526,24 @@ bool CryptoBuiltInImpl::encode_rtps_message(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
-  size += RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ; // RTPS Header, SRTPS Prefix
-  using DCPS::gen_find_size;
-  gen_find_size(cryptoHdr, size, padding);
-  const ACE_UINT16 cryptoHdrLen = static_cast<ACE_UINT16>(size + padding - RTPS::RTPSHDR_SZ - RTPS::SMHDR_SZ);
+  size_t size = RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ; // RTPS Header, SRTPS Prefix
+  serialized_size(common_encoding, size, cryptoHdr);
+  const ACE_UINT16 cryptoHdrLen =
+    static_cast<ACE_UINT16>(size - RTPS::RTPSHDR_SZ - RTPS::SMHDR_SZ);
 
   if (addSecBody) {
     size += RTPS::SMHDR_SZ + SEQLEN_SZ;
   }
 
   size += pOut->length();
-  align(RTPS::SM_ALIGN, size, padding);
+  align(size, RTPS::SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // SRTPS Postfix
-  gen_find_size(cryptoFooter, size, padding);
+  serialized_size(common_encoding, size, cryptoFooter);
 
-  encoded_rtps_message.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_rtps_message.get_buffer()), size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_rtps_message.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_rtps_message.get_buffer()), size);
+  Serializer ser(&mb, common_encoding);
 
   ser.write_octet_array(plain_rtps_message.get_buffer(), RTPS::RTPSHDR_SZ);
 
@@ -1424,7 +1566,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   ser << smHdr;
   ser << cryptoFooter;
 
-  return true;
+  return ser.good_bit();
 }
 
 namespace {
@@ -1456,10 +1598,13 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
-  Serializer de_ser(&mb_in, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
-  de_ser.skip(RTPS::SMHDR_SZ);
+  Serializer de_ser(&mb_in, common_encoding);
   CryptoHeader ch;
-  de_ser >> ch;
+  if (!(de_ser.skip(RTPS::SMHDR_SZ) && (de_ser >> ch))) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) CryptoBuiltInImpl::preprocess_secure_submsg: "
+      "Could not deserializer CyptoHeader\n"));
+  }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
@@ -1730,7 +1875,7 @@ bool CryptoBuiltInImpl::decode_rtps_message(
       return CommonUtilities::set_security_error(ex, -3, i, "Failed to deserialize SubmessageHeader");
     }
 
-    parser.serializer().swap_bytes(Serializer::SWAP_BE);
+    parser.serializer().endianness(ENDIAN_BIG);
     const int type = parser.submessageHeader().submessageId;
 
     if (i == 0 && type == RTPS::SRTPS_PREFIX) {
@@ -1747,7 +1892,8 @@ bool CryptoBuiltInImpl::decode_rtps_message(
       if (!(parser >> sizeOfEncrypted)) {
         return CommonUtilities::set_security_error(ex, -13, i, "Failed to deserialize CryptoContent length");
       }
-      const unsigned short sz = static_cast<unsigned short>(DCPS::max_marshaled_size_ulong());
+      const unsigned short sz =
+        static_cast<unsigned short>(DCPS::uint32_cdr_size);
       if (sizeOfEncrypted + sz > parser.submessageHeader().submessageLength) {
         return CommonUtilities::set_security_error(ex, -14, i, "CryptoContent length out of bounds");
       }
@@ -1851,7 +1997,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
-  Serializer de_ser(&mb_in, false, Serializer::ALIGN_CDR);
+  Serializer de_ser(&mb_in, common_encoding);
   ACE_CDR::Octet type, flags;
   // SEC_PREFIX
   de_ser >> ACE_InputCDR::to_octet(type);
@@ -1860,37 +2006,64 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
   CryptoHeader ch;
-  de_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   de_ser >> ch;
   de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
+  if (!de_ser.good_bit()) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+      "Failed to deserialize SEC_PREFIX\n"));
+    return false;
+  }
+
   // Next submessage, SEC_BODY if encrypted
   de_ser >> ACE_InputCDR::to_octet(type);
   de_ser >> ACE_InputCDR::to_octet(flags);
   de_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
   de_ser >> octetsToNext;
+  if (!de_ser.good_bit()) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+      "Failed to deserialize next submessage\n"));
+    return false;
+  }
+
   Message_Block_Ptr mb_footer(mb_in.duplicate());
   mb_footer->rd_ptr(octetsToNext);
   // SEC_POSTFIX
-  Serializer post_ser(mb_footer.get(), false, Serializer::ALIGN_CDR);
+  Serializer post_ser(mb_footer.get(), common_encoding);
   post_ser >> ACE_InputCDR::to_octet(type);
   post_ser >> ACE_InputCDR::to_octet(flags);
   post_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
   ACE_CDR::UShort postfixOctetsToNext;
   post_ser >> postfixOctetsToNext;
   CryptoFooter cf;
-  post_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   post_ser >> cf;
+  if (!post_ser.good_bit()) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+      "Failed to deserialize SEC_POST\n"));
+    return false;
+  }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  const KeySeq& keyseq = keys_[sender_handle];
+  const KeyTable_t::const_iterator keys_iter = keys_.find(sender_handle);
+  OPENDDS_ASSERT(keys_iter != keys_.end());
+  const KeySeq& keyseq = keys_iter->second;
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
     if (matches(keyseq[i], ch)) {
       const KeyId_t sKey = std::make_pair(sender_handle, i);
 
       if (encrypts(keyseq[i])) {
-        de_ser.swap_bytes(Serializer::SWAP_BE);
+        de_ser.endianness(ENDIAN_BIG);
         ACE_CDR::ULong n;
-        de_ser >> n;
+        if (!(de_ser >> n)) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: CryptoBuiltInImpl::decode_submessage: "
+            "Failed to deserialize content size(?)\n"));
+          return false;
+        }
         return decrypt(keyseq[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
                        plain_rtps_submessage, ex);
 
@@ -1985,7 +2158,11 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   if (iter == keys_.end()) {
     return CommonUtilities::set_security_error(ex, -1, 1, "No key for DataWriter crypto handle");
   }
-  if (!encrypt_options_[sending_datawriter_crypto].payload_) {
+  const EncryptOptions_t::const_iterator eo_iter = encrypt_options_.find(sending_datawriter_crypto);
+  if (eo_iter == encrypt_options_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "Datawriter handle lacks encrypt options");
+  }
+  if (!eo_iter->second.payload_) {
     plain_buffer = encoded_buffer;
     if (security_debug.encdec_debug) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec_debug} CryptoBuiltInImpl::decode_serialized_payload ")
@@ -1998,7 +2175,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   ACE_Message_Block mb_in(to_mb(encoded_buffer.get_buffer()),
                           encoded_buffer.length());
   mb_in.wr_ptr(encoded_buffer.length());
-  Serializer de_ser(&mb_in, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  Serializer de_ser(&mb_in, common_encoding);
   CryptoHeader ch;
   if (!(de_ser >> ch)) {
     return CommonUtilities::set_security_error(ex, -3, 4, "Failed to deserialize CryptoHeader");

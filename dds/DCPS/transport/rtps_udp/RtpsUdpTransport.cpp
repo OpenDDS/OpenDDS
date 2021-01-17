@@ -39,6 +39,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
   , ice_endpoint_(*this)
 #endif
 {
+  assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (! (configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
@@ -112,7 +113,9 @@ RtpsUdpTransport::use_ice_now(bool after)
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  std::memcpy(local_prefix_, local_prefix, sizeof(local_prefix_));
+  OPENDDS_ASSERT(!GuidPrefixEqual()(local_prefix, GUIDPREFIX_UNKNOWN));
+
+  assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
   relay_stun_task(DCPS::MonotonicTimePoint::now());
 #endif
@@ -286,14 +289,6 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 
   if (link_) {
     link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
-
-#if defined(OPENDDS_SECURITY)
-    if (remote_data.length() > blob_bytes_read) {
-      link_->populate_security_handles(local_id, remote_id,
-                                       remote_data.get_buffer() + blob_bytes_read,
-                                       remote_data.length() - blob_bytes_read);
-    }
-#endif
 
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                              local_durable, remote_durable, remote_context, max_sn, client);
@@ -743,7 +738,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
-  DCPS::Serializer serializer(&block, DCPS::Serializer::SWAP_BE);
+  DCPS::Serializer serializer(&block, STUN::encoding);
   const_cast<STUN::Message&>(message).block = &block;
   serializer << message;
 
@@ -838,7 +833,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 
   process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
 
-  if (stun_server_address != ACE_INET_Addr()) {
+  if (!GuidPrefixEqual()(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
     ice_endpoint_.send(stun_server_address, relay_srsm_.message());
   }
 }

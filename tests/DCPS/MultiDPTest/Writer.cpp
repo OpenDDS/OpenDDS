@@ -7,6 +7,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 
 #include <ace/Atomic_Op_T.h>

@@ -99,6 +99,8 @@
 /ContentFilteredTopicOperations.java
 /DATA_AVAILABLE_STATUS.java
 /DATA_ON_READERS_STATUS.java
+/DATA_REPRESENTATION_QOS_POLICY_ID.java
+/DATA_REPRESENTATION_QOS_POLICY_NAME.java
 /DataReader.java
 /DataReaderHelper.java
 /DataReaderHolder.java
@@ -112,6 +114,12 @@
 /DataReaderQosHolder.java
 /DataReaderSeqHelper.java
 /DataReaderSeqHolder.java
+/DataRepresentationId_tHelper.java
+/DataRepresentationIdSeqHelper.java
+/DataRepresentationIdSeqHolder.java
+/DataRepresentationQosPolicy.java
+/DataRepresentationQosPolicyHelper.java
+/DataRepresentationQosPolicyHolder.java
 /DataWriter.java
 /DataWriterHelper.java
 /DataWriterHolder.java
@@ -537,3 +545,12 @@
 /WriterDataLifecycleQosPolicy.java
 /WriterDataLifecycleQosPolicyHelper.java
 /WriterDataLifecycleQosPolicyHolder.java
+/XCDR2_DATA_REPRESENTATION.java
+/XCDR_DATA_REPRESENTATION.java
+/XML_DATA_REPRESENTATION.java
+/ALLOW_TYPE_COERCION.java
+/DISALLOW_TYPE_COERCION.java
+/TypeConsistencyEnforcementQosPolicy.java
+/TypeConsistencyEnforcementQosPolicyHelper.java
+/TypeConsistencyEnforcementQosPolicyHolder.java
+/TypeConsistencyEnforcementQosPolicyKind_tHelper.java

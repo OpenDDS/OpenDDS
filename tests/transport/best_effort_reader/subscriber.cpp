@@ -32,18 +32,21 @@ public:
     using OpenDDS::RTPS::message_block_to_sequence;
 
     ACE_INET_Addr remote_addr("127.0.0.1:12345");
-    LocatorSeq locators;
+    OpenDDS::DCPS::LocatorSeq locators;
     locators.length(1);
     locators[0].kind = address_to_kind(remote_addr);
     locators[0].port = remote_addr.get_port_number();
     address_to_bytes(locators[0].address, remote_addr);
 
-    size_t size_locator = 0, padding_locator = 0;
-    gen_find_size(locators, size_locator, padding_locator);
-    ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-    Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-    ser_loc << locators;
-    ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
+    const OpenDDS::DCPS::Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
+    size_t size_locator = 0;
+    serialized_size(locators_encoding, size_locator, locators);
+    ACE_Message_Block mb_locator(size_locator + 1);
+    OpenDDS::DCPS::Serializer ser_loc(&mb_locator, locators_encoding);
+    if (!(ser_loc << locators) ||
+        !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+      std::cerr << "subscriber serialize locators failed\n";
+    }
 
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);
@@ -70,7 +73,7 @@ private:
   }
 
   AppConfig config;
-  AssociationData publication;
+  OpenDDS::DCPS::AssociationData publication;
 };
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])

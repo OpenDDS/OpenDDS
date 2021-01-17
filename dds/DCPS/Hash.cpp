@@ -1,4 +1,21 @@
 /*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#include "Hash.h"
+
+#include <cstring>
+
+using std::memcpy;
+using std::memset;
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace {
+/*
  * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
  * MD5 Message-Digest Algorithm (RFC 1321).
  *
@@ -35,13 +52,17 @@
  * compile-time configuration.
  */
 
-#ifndef HAVE_OPENSSL
 
-#include <ace/config-all.h>
+/* Any 32-bit or wider unsigned integer data type will do */
+typedef unsigned int MD5_u32plus;
 
-#include <string.h>
+typedef struct {
+        MD5_u32plus lo, hi;
+        MD5_u32plus a, b, c, d;
+        unsigned char buffer[64];
+        MD5_u32plus block[16];
+} MD5_CTX;
 
-#include "md5.h"
 
 /*
  * The basic MD5 functions.
@@ -294,4 +315,20 @@ void MD5_Final(unsigned char *result, MD5_CTX *ctx)
         memset(ctx, 0, sizeof(*ctx));
 }
 
-#endif
+} // anonymous namespace
+
+namespace OpenDDS {
+namespace DCPS {
+
+void MD5Hash(MD5Result& result, const void* input, size_t size)
+{
+  MD5_CTX ctx;
+  MD5_Init(&ctx);
+  MD5_Update(&ctx, input, static_cast<unsigned long>(size));
+  MD5_Final(result, &ctx);
+}
+
+}
+}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

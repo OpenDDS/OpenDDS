@@ -6,8 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "DataReaderImpl.h"
-#include "tao/ORB_Core.h"
+
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
 #include "DomainParticipantImpl.h"
@@ -20,23 +21,28 @@
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
 #include "Util.h"
+#include "DCPS_Utils.h"
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
+#include "XTypes/TypeObject.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
+#include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
-#include "ace/OS_NS_sys_time.h"
+#include <tao/ORB_Core.h>
+
+#include <ace/Reactor.h>
+#include <ace/Auto_Ptr.h>
+#include <ace/OS_NS_sys_time.h>
 
 #include <cstdio>
 #include <stdexcept>
@@ -299,6 +305,10 @@ DataReaderImpl::add_association(const RepoId& yourId,
       }
     }
   }
+
+  //get message block from octet seq then deser to a type info
+  XTypes::TypeInformation ti;
+  XTypes::deserialize_type_info(ti, writer.serializedTypeInfo);
 
   // Propagate the add_associations processing down into the Transport
   // layer here.  This will establish the transport support and reserve
@@ -842,15 +852,14 @@ DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DataReaderImpl::set_qos(
-    const DDS::DataReaderQos & qos)
+DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
 {
-
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -1140,11 +1149,10 @@ DataReaderImpl::get_matched_publication_data(
 DDS::ReturnCode_t
 DataReaderImpl::enable()
 {
-  //According spec:
-  // - Calling enable on an already enabled Entity returns OK and has no
-  // effect.
+  // According to spec:
+  // - Calling enable on an already enabled Entity has no effect and returns OK.
   // - Calling enable on an Entity whose factory is not enabled will fail
-  // and return PRECONDITION_NOT_MET.
+  //   and return PRECONDITION_NOT_MET.
 
   if (this->is_enabled()) {
     return DDS::RETCODE_OK;
@@ -1166,6 +1174,18 @@ DataReaderImpl::enable()
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     dp_id_ = participant->get_id();
+  }
+
+  if (topic_servant_) {
+    if (!topic_servant_->check_data_representation(
+        get_effective_data_rep_qos(qos_.representation.value, true), false)) {
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
+          ACE_TEXT("none of the data representation QoS is allowed by the ")
+          ACE_TEXT("topic type IDL annotations\n")));
+      }
+      return DDS::RETCODE_ERROR;
+    }
   }
 
   if (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS) {
@@ -1231,7 +1251,6 @@ DataReaderImpl::enable()
   this->set_enabled();
 
   if (topic_servant_ && !transport_disabled_) {
-
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
@@ -1240,7 +1259,11 @@ DataReaderImpl::enable()
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
           ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
+    }
 
+    const DDS::ReturnCode_t setup_deserialization_result = setup_deserialization();
+    if (setup_deserialization_result != DDS::RETCODE_OK) {
+      return setup_deserialization_result;
     }
 
     const TransportLocatorSeq& trans_conf_info = this->connection_info();
@@ -1261,6 +1284,16 @@ DataReaderImpl::enable()
     DDS::SubscriberQos sub_qos;
     subscriber->get_qos(sub_qos);
 
+    TypeSupportImpl* const typesupport =
+      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+    XTypes::TypeInformation type_info;
+    typesupport->to_type_info(type_info);
+
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->add_type_objects_to_cache(*typesupport);
+
+    typesupport->populate_dependencies(type_lookup_service);
+
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
@@ -1271,7 +1304,8 @@ DataReaderImpl::enable()
             sub_qos,
             filterClassName,
             filterExpression,
-            exprParams);
+            exprParams,
+            type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_WARNING,
@@ -1442,7 +1476,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     Serializer serializer(
-        sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
+        sample.sample_.get(), Encoding::KIND_UNALIGNED_CDR,
+        sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
     if (!(serializer >> control)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
           ACE_TEXT("deserialization coherent change control failed.\n")));
@@ -1612,7 +1647,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_HISTORIC_SAMPLES: {
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
-      Serializer ser(sample.sample_.get());
+      Serializer ser(sample.sample_.get(), Encoding::KIND_UNALIGNED_CDR);
       RepoId readerId = GUID_UNKNOWN;
       if (!(ser >> readerId)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
@@ -3275,6 +3310,57 @@ ICE::Endpoint*
 DataReaderImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();
+}
+
+DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
+{
+  const DDS::DataRepresentationIdSeq repIds =
+    get_effective_data_rep_qos(qos_.representation.value, true);
+  bool xcdr1_mutable = false;
+  if (cdr_encapsulation()) {
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      Encoding::Kind encoding_kind;
+      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+        if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
+          xcdr1_mutable = true;
+        } else {
+          decoding_modes_.insert(encoding_kind);
+        }
+      } else if (DCPS_debug_level) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                   ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
+                   repIds[i]));
+      }
+    }
+  } else {
+    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
+  }
+  if (decoding_modes_.empty()) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                 ACE_TEXT("Could not find a valid data representation.%C\n"),
+                 xcdr1_mutable ? " Unsupported combination of XCDR1 and mutable" : ""));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  if (DCPS_debug_level >= 2) {
+    OPENDDS_STRING encodings;
+    EncodingKinds::iterator it = decoding_modes_.begin();
+    for (; it != decoding_modes_.end(); ++it) {
+      if (!encodings.empty()) {
+        encodings += ", ";
+      }
+      encodings += Encoding::kind_to_string(*it);
+    }
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::setup_deserialization: "
+               "Setup successfully with the following data representation%C: %C\n",
+               encodings.size() != 1 ? "s" : "",
+               encodings.c_str()));
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)

@@ -200,6 +200,7 @@ private:
       , handshake_debug(false)
     {
     }
+    ~LocalParticipantData();
   };
   typedef std::map<DDS::Security::IdentityHandle, LocalParticipantData::shared_ptr> LocalParticipantMap;
   LocalParticipantMap local_participants_;

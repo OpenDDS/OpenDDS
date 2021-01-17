@@ -29,22 +29,25 @@
 #include <ctime>
 #include <exception>
 
+using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
+
+const Encoding SocketWriter::encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 const double SocketWriter::NTP_FRACTIONAL = 4294.967296; // NTP fractional (2^-32) sec per microsec
 
-OpenDDS::RTPS::Header SocketWriter::header(OpenDDS::DCPS::RepoId id)
+Header SocketWriter::header(RepoId id)
 {
-  const OpenDDS::RTPS::GuidPrefix_t& px = id.guidPrefix;
-  OpenDDS::RTPS::Header hdr = {{'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
+  const GuidPrefix_t& px = id.guidPrefix;
+  Header hdr = {{'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
     {px[0], px[1], px[2], px[3], px[4], px[5], px[6], px[7], px[8], px[9], px[10], px[11]}};
   return hdr;
 }
 
-SocketWriter::SocketWriter(const OpenDDS::DCPS::RepoId& id, const ACE_INET_Addr& destination)
+SocketWriter::SocketWriter(const RepoId& id, const ACE_INET_Addr& destination)
   : id_(id), hdr_(header(id))
 {
-  if (!OpenDDS::DCPS::open_appropriate_socket_type(socket_, local_addr_)) {
+  if (!open_appropriate_socket_type(socket_, local_addr_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: open_appropriate_socket_type\n")));
     throw std::exception();
   }
@@ -57,8 +60,8 @@ void SocketWriter::addDestination(const ACE_INET_Addr& dest) {
 
 bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg) const
 {
-  const OpenDDS::RTPS::InfoTimestampSubmessage it = timeSubMsg();
-  OpenDDS::RTPS::DataSubmessage ds = dataSubMsg(seqN, msg);
+  const InfoTimestampSubmessage it = timeSubMsg();
+  DataSubmessage ds = dataSubMsg(seqN, msg);
   ACE_Message_Block mb(msgSize(it, ds, msg));
   if (serialize(mb, it, ds, msg)) {
     return send(mb);
@@ -66,14 +69,14 @@ bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg) const
   return false;
 }
 
-bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::DCPS::RepoId& directedWrite) const
+bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const RepoId& directedWrite) const
 {
-  const OpenDDS::RTPS::InfoTimestampSubmessage it = timeSubMsg();
+  const InfoTimestampSubmessage it = timeSubMsg();
   CORBA::UShort sz = static_cast<CORBA::UShort>(20 + 24 + 12 + ACE_OS::strlen(msg.value) + 1);
   DataSubmessage ds = {{DATA, DEQ, sz}, 0, 16, ENTITYID_UNKNOWN, id_.entityId, {0, seqN}, ParameterList()};
   ds.inlineQos.length(1);
   ds.inlineQos[0].guid(directedWrite);
-  ds.inlineQos[0]._d(OpenDDS::RTPS::PID_DIRECTED_WRITE);
+  ds.inlineQos[0]._d(PID_DIRECTED_WRITE);
   ACE_Message_Block mb(msgSize(it, ds, msg));
   if (serialize(mb, it, ds, msg)) {
     return send(mb);
@@ -91,54 +94,52 @@ bool SocketWriter::writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount,
   return mb ? send(*mb) : false;
 }
 
-OpenDDS::RTPS::InfoTimestampSubmessage SocketWriter::timeSubMsg() const
+InfoTimestampSubmessage SocketWriter::timeSubMsg() const
 {
   const ACE_Time_Value t = ACE_OS::gettimeofday();
-  OpenDDS::RTPS::InfoTimestampSubmessage it = {{INFO_TS, 1, 8},
+  InfoTimestampSubmessage it = {{INFO_TS, 1, 8},
     {static_cast<ACE_CDR::ULong>(t.sec()), static_cast<ACE_CDR::ULong>(t.usec() * NTP_FRACTIONAL)}};
   return it;
 }
 
-OpenDDS::RTPS::DataSubmessage SocketWriter::dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const
+DataSubmessage SocketWriter::dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const
 {
   CORBA::UShort sz = static_cast<CORBA::UShort>(20 + 12 + ACE_OS::strlen(msg.value) + 1);
   DataSubmessage ds = {{DATA, DE, sz}, 0, 16, ENTITYID_UNKNOWN, id_.entityId, {0, seqN}, ParameterList()};
   return ds;
 }
 
-size_t SocketWriter::msgSize(const OpenDDS::RTPS::InfoTimestampSubmessage& t,
-                             const OpenDDS::RTPS::DataSubmessage& d, const TestMsg& m) const
+size_t SocketWriter::msgSize(const InfoTimestampSubmessage& t,
+                             const DataSubmessage& d, const TestMsg& m) const
 {
-  size_t size = 0, padding = 0;
-  gen_find_size(hdr_, size, padding);
-  gen_find_size(t, size, padding);
-  gen_find_size(d, size, padding);
-  find_size_ulong(size, padding);
-  gen_find_size(m, size, padding);
-  return size + padding;
+  size_t size = serialized_size(encoding, hdr_);
+  serialized_size(encoding, size, t);
+  serialized_size(encoding, size, d);
+  primitive_serialized_size_ulong(encoding, size);
+  serialized_size(encoding, size, m);
+  return size;
 }
 
-size_t SocketWriter::hbSize(const OpenDDS::RTPS::HeartBeatSubmessage& hb) const
+size_t SocketWriter::hbSize(const HeartBeatSubmessage& hb) const
 {
-  size_t size = 0, padding = 0;
-  gen_find_size(hdr_, size, padding);
-  gen_find_size(hb, size, padding);
-  return size + padding;
+  size_t size = serialized_size(encoding, hdr_);
+  serialized_size(encoding, size, hb);
+  return size;
 }
 
-bool SocketWriter::serialize(ACE_Message_Block& mb, const OpenDDS::RTPS::InfoTimestampSubmessage& t,
-                             const OpenDDS::RTPS::DataSubmessage& d, const TestMsg& m) const
+bool SocketWriter::serialize(ACE_Message_Block& mb, const InfoTimestampSubmessage& t,
+                             const DataSubmessage& d, const TestMsg& m) const
 {
-  Serializer s(&mb, hostIsBigEndian, Serializer::ALIGN_CDR);
+  Serializer s(&mb, encoding);
   if (!((s << hdr_) && (s << t) && (s << d) && (s << ENCAP) && (s << m))) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to serialize RTPS message:%m\n")), false);
   }
   return true;
 }
 
-bool SocketWriter::serialize(ACE_Message_Block& mb, const OpenDDS::RTPS::HeartBeatSubmessage& hb) const
+bool SocketWriter::serialize(ACE_Message_Block& mb, const HeartBeatSubmessage& hb) const
 {
-  Serializer s(&mb, hostIsBigEndian, Serializer::ALIGN_CDR);
+  Serializer s(&mb, encoding);
   if (!((s << hdr_) && (s << hb))) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to serialize RTPS heartbeat:%m\n")), false);
   }

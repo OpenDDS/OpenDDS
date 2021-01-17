@@ -265,7 +265,7 @@ module Xyz {
     AUnion theUnion;
     SeqOfAUnion theSeqOfUnion;
     BigUnion theBigUnion;
-    BigUnionSeq theSeqOfBitUnion;
+    BigUnionSeq theSeqOfBigUnion;
     float x;
     float y;
     wchar theWChar;

@@ -9,25 +9,25 @@
 #define dds_generator_H
 
 #include "be_extern.h"
+#include "../DCPS/RestoreOutputStreamState.h"
 
-#include "utl_scoped_name.h"
-#include "utl_identifier.h"
-#include "utl_string.h"
+#include <utl_scoped_name.h>
+#include <utl_identifier.h>
+#include <utl_string.h>
+#include <ast.h>
+#include <ast_component_fwd.h>
+#include <ast_eventtype_fwd.h>
+#include <ast_structure_fwd.h>
+#include <ast_union_fwd.h>
+#include <ast_valuetype_fwd.h>
 
-#include "ast.h"
-#include "ast_component_fwd.h"
-#include "ast_eventtype_fwd.h"
-#include "ast_structure_fwd.h"
-#include "ast_union_fwd.h"
-#include "ast_valuetype_fwd.h"
-
-#include "ace/CDR_Base.h"
+#include <ace/CDR_Base.h>
 
 #include <string>
 #include <vector>
 #include <cstring>
-
-#include "../DCPS/RestoreOutputStreamState.h"
+#include <set>
+#include <stdexcept>
 
 class dds_generator {
 public:
@@ -140,16 +140,30 @@ private:
 
 // common utilities for all "generator" derived classes
 
+const char* const namespace_guard_start =
+  "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
+  "namespace OpenDDS { namespace DCPS {\n\n";
+const char* const namespace_guard_end =
+  "} }\n"
+  "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+
 struct NamespaceGuard {
-  NamespaceGuard()
+  const bool enabled_;
+
+  NamespaceGuard(bool enabled = true)
+  : enabled_(enabled)
   {
-    be_global->header_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace OpenDDS { namespace DCPS {\n\n";
-    be_global->impl_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace OpenDDS { namespace DCPS {\n\n";
+    if (enabled_) {
+      be_global->header_ << namespace_guard_start;
+      be_global->impl_ << namespace_guard_start;
+    }
   }
   ~NamespaceGuard()
   {
-    be_global->header_ << "}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
-    be_global->impl_ << "}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+    if (enabled_) {
+      be_global->header_ << namespace_guard_end;
+      be_global->impl_ << namespace_guard_end;
+    }
   }
 };
 
@@ -184,11 +198,19 @@ struct ScopedNamespaceGuard  {
 struct Function {
   bool has_arg_;
   std::string preamble_;
+  bool extra_newline_;
 
-  Function(const std::string& name, const std::string returntype)
+  Function(const std::string& name, const std::string returntype,
+           const char* template_args = 0)
     : has_arg_(false)
+    , extra_newline_(true)
   {
     using std::string;
+    if (template_args) {
+      const string tmpl = string("template<") + template_args + "> ";
+      be_global->header_ << tmpl;
+      be_global->impl_ << tmpl;
+    }
     ACE_CString ace_exporter = be_global->export_macro();
     bool use_exp = ace_exporter != "";
     string exporter = use_exp ? (string(" ") + ace_exporter.c_str()) : "";
@@ -217,8 +239,57 @@ struct Function {
 
   ~Function()
   {
-    be_global->impl_ << "}\n\n";
+    be_global->impl_ << "}\n";
+    if (extra_newline_) {
+      be_global->impl_ << "\n";
+    }
   }
+};
+
+class PreprocessorIfGuard {
+public:
+  PreprocessorIfGuard(
+    const std::string& what,
+    bool impl = true, bool header = true,
+    const std::string& indent = "")
+  : what_(what)
+  , impl_(impl)
+  , header_(header)
+  , indent_(indent)
+  , extra_newline_(false)
+  {
+    output("#" + indent + "if" + what + "\n");
+  }
+
+  ~PreprocessorIfGuard()
+  {
+    output("#" + indent_ + "endif // if" + what_ + "\n");
+    if (extra_newline_) {
+      output("\n");
+    }
+  }
+
+  void output(const std::string& str) const
+  {
+    if (impl_) {
+      be_global->impl_ << str;
+    }
+    if (header_) {
+      be_global->header_ << str;
+    }
+  }
+
+  void extra_newline(bool value)
+  {
+    extra_newline_ = value;
+  }
+
+private:
+  const std::string what_;
+  const bool impl_;
+  const bool header_;
+  const std::string indent_;
+  bool extra_newline_;
 };
 
 inline std::string scoped(UTL_ScopedName* sn)
@@ -372,6 +443,73 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
   }
 }
 
+inline std::string string_type(AstTypeClassification::Classification cls)
+{
+  return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
+    ((cls & AstTypeClassification::CL_WIDE) ? "std::wstring" : "std::string") :
+    (cls & AstTypeClassification::CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
+}
+
+inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
+{
+  const AstTypeClassification::Classification cls = AstTypeClassification::classify(type);
+  if (cls & AstTypeClassification::CL_ENUM) {
+    size = 4;
+    return "ACE_CDR::ULong";
+  }
+  if (cls & AstTypeClassification::CL_STRING) {
+    return string_type(cls);
+  }
+  if (cls & AstTypeClassification::CL_PRIMITIVE) {
+    AST_Type* t = AstTypeClassification::resolveActualType(type);
+    AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(t);
+    switch (p->pt()) {
+    case AST_PredefinedType::PT_long:
+      size = 4;
+      return "ACE_CDR::Long";
+    case AST_PredefinedType::PT_ulong:
+      size = 4;
+      return "ACE_CDR::ULong";
+    case AST_PredefinedType::PT_longlong:
+      size = 8;
+      return "ACE_CDR::LongLong";
+    case AST_PredefinedType::PT_ulonglong:
+      size = 8;
+      return "ACE_CDR::ULongLong";
+    case AST_PredefinedType::PT_short:
+      size = 2;
+      return "ACE_CDR::Short";
+    case AST_PredefinedType::PT_ushort:
+      size = 2;
+      return "ACE_CDR::UShort";
+    case AST_PredefinedType::PT_float:
+      size = 4;
+      return "ACE_CDR::Float";
+    case AST_PredefinedType::PT_double:
+      size = 8;
+      return "ACE_CDR::Double";
+    case AST_PredefinedType::PT_longdouble:
+      size = 16;
+      return "ACE_CDR::LongDouble";
+    case AST_PredefinedType::PT_char:
+      size = 1;
+      return "ACE_CDR::Char";
+    case AST_PredefinedType::PT_wchar:
+      size = 2;
+      return "ACE_CDR::WChar";
+    case AST_PredefinedType::PT_boolean:
+      size = 1;
+      return "ACE_CDR::Boolean";
+    case AST_PredefinedType::PT_octet:
+      size = 1;
+      return "ACE_CDR::Octet";
+    default:
+      throw std::invalid_argument("Unknown PRIMITIVE type");
+    }
+  }
+  return scoped(type->name());
+}
+
 inline
 std::string getWrapper(const std::string& name, AST_Type* type, WrapDirection wd)
 {
@@ -448,6 +586,24 @@ std::ostream& operator<<(std::ostream& o,
   }
 }
 
+inline std::string bounded_arg(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  std::ostringstream arg;
+  const Classification cls = classify(type);
+  if (cls & CL_STRING) {
+    AST_String* const str = dynamic_cast<AST_String*>(type);
+    arg << str->max_size()->ev()->u.ulval;
+  } else if (cls & CL_SEQUENCE) {
+    AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
+    arg << seq->max_size()->ev()->u.ulval;
+  }
+  return arg.str();
+}
+
+std::string type_to_default(const std::string& indent, AST_Type* type,
+  const std::string& name, bool is_anonymous = false, bool is_union = false);
+
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
                           size_t& n_labels, bool& has_default)
@@ -491,14 +647,46 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   }
 }
 
-typedef std::string (*CommonFn)(const std::string& name, AST_Type* type,
-                                const std::string& prefix, std::string& intro,
-                                const std::string&);
+struct Intro {
+  typedef std::set<std::string> LineSet;
+  LineSet line_set;
+  typedef std::vector<std::string> LineVec;
+  LineVec line_vec;
+
+  void join(std::ostream& os, const std::string& indent)
+  {
+    for (LineVec::iterator i = line_vec.begin(); i != line_vec.end(); ++i) {
+      os << indent << *i << '\n';
+    }
+  }
+
+  void insert(const std::string& line)
+  {
+    if (line_set.insert(line).second) {
+      line_vec.push_back(line);
+    }
+  }
+
+  void insert(const Intro& other)
+  {
+    for (LineVec::const_iterator i = other.line_vec.begin(); i != other.line_vec.end(); ++i) {
+      insert(*i);
+    }
+  }
+};
+
+typedef std::string (*CommonFn)(
+  const std::string& indent,
+  const std::string& name, AST_Type* type,
+  const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
+  const std::string&, bool printing);
 
 inline
-void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
-                      const char* statementPrefix, const char* namePrefix,
-                      const char* uni, bool generateBreaks, bool parens)
+void generateCaseBody(
+  CommonFn commonFn, CommonFn commonFn2,
+  AST_UnionBranch* branch, AutoidKind auto_id, ACE_CDR::ULong& member_id,
+  const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens,
+  bool printing = false)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -512,62 +700,122 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
         && br->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(br->file_name().c_str());
     }
+
     std::string rhs;
-    if (br_cls & CL_STRING) {
-      if (use_cxx11) {
-        brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
-          + "string";
-        rhs = "tmp";
-      } else {
-        const std::string nmspace =
-          lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
-        brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
-          + "String_var";
-        rhs = "tmp.out()";
-      }
-    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
-      rhs = "IDL::DistinctType<" + brType + ", " +
-        dds_generator::scoped_helper(branch->field_type()->name(), "_")
+    const bool is_face = lmap == BE_GlobalData::LANGMAP_FACE_CXX;
+    const bool is_wide = br_cls & CL_WIDE;
+    const bool is_bound_string = (br_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED);
+    const std::string bound_string_suffix = (is_bound_string && !is_face) ? ".c_str()" : "";
+
+    if (is_bound_string) {
+      const std::string to_type = is_face ? is_wide ? "ACE_InputCDR::to_wstring" : "ACE_InputCDR::to_string"
+        : is_wide ? "Serializer::ToBoundedString<wchar_t>" : "Serializer::ToBoundedString<char>";
+      const std::string face_suffix = is_face ? ".out()" : "";
+      brType = is_face ? is_wide ? "FACE::WString_var" : "FACE::String_var"
+        : is_wide ? "OPENDDS_WSTRING" : "OPENDDS_STRING";
+      rhs = to_type + "(tmp" + face_suffix + ", " + bounded_arg(br) + ")";
+    } else if (br_cls & CL_STRING) {
+      const std::string nmspace = is_face ? "FACE::" : "CORBA::";
+      brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"
+        : nmspace + (is_wide ? "W" : "") + "String_var";
+      rhs = use_cxx11 ? "tmp" : "tmp.out()";
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
+      rhs = "IDL::DistinctType<" + brType + ", "
+        + dds_generator::scoped_helper(branch->field_type()->name(), "_")
         + "_tag>(tmp)";
-    } else if (br_cls & CL_ARRAY) {
+    } else if (br_cls & CL_ARRAY) { //array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
-    } else {
+    } else { // anything else
       rhs = getWrapper("tmp", br, WD_INPUT);
     }
     be_global->impl_ <<
       "    " << brType << " tmp;\n" << forany <<
       "    if (strm >> " << rhs << ") {\n"
-      "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+      "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp" + bound_string_suffix + ");\n") <<
       "      uni._d(disc);\n"
       "      return true;\n"
-      "    }\n"
-      "    return false;\n";
+      "    }\n";
+
+    if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
+      be_global->impl_ <<
+        type_to_default("        ", br, "uni." + name, branch->anonymous(), true) <<
+        "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+        "        return true;\n";
+    } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
+                (br_cls & (CL_STRING | CL_SEQUENCE))) {
+      if (is_bound_string) {
+        const std::string check_not_empty = "!tmp.empty()";
+        const std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
+        const std::string inout = use_cxx11 ? "" : ".inout()";
+        const std::string strtype = br_cls & CL_WIDE ? "std::wstring" : "std::string";
+        be_global->impl_ <<
+          "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
+                    << bounded_arg(br) << " < " << get_length << ")) {\n"
+          "          " << strtype << " s = tmp;\n"
+          "          s.resize(" << bounded_arg(br) << ");\n"
+          "          uni." << name << "(s.c_str());\n"
+          "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "          return true;\n"
+          "        } else {\n"
+          "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "          return false;\n"
+          "        }\n";
+      } else if (br_cls & CL_SEQUENCE) {
+        be_global->impl_ <<
+          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "          return false;\n"
+          "        }\n"
+          "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
+          "        uni._d(disc);\n"
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "        return true;\n";
+      }
+    } else {
+      //discard/default
+      be_global->impl_ <<
+        "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+        "        return false;\n  ";
+    }
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
-    std::string intro;
-    std::string expr = commonFn(name + (parens ? "()" : ""), branch->field_type(),
-                                std::string(namePrefix) + "uni", intro, uni);
-    be_global->impl_ <<
-      (intro.empty() ? "" : "  ") << intro;
+    const std::string indent = "    ";
+    Intro intro;
+    std::ostringstream contents;
+    if (commonFn2) {
+      const unsigned id = be_global->get_id(branch, auto_id, member_id);
+      contents
+        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "", false)
+        << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
+        << indent << "  return false;\n"
+        << indent << "}\n";
+    }
+    const std::string expr = commonFn(indent,
+      name + (parens ? "()" : ""), branch->field_type(),
+      std::string(namePrefix) + "uni", false, intro, uni, printing);
     if (*statementPrefix) {
-      be_global->impl_ <<
-        "    " << statementPrefix << " " << expr << ";\n" <<
+      contents <<
+        indent << statementPrefix << " " << expr << ";\n" <<
         (statementPrefix == std::string("return") ? "" : breakString);
     } else {
-      be_global->impl_ << expr << breakString;
+      contents << expr << breakString;
     }
+    intro.join(be_global->impl_, indent);
+    be_global->impl_ << contents.str();
   }
 }
 
 inline
-bool generateSwitchBody(CommonFn commonFn,
+bool generateSwitchBody(AST_Union* u, CommonFn commonFn,
                         const std::vector<AST_UnionBranch*>& branches,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
                         bool forceDisableDefault = false, bool parens = true,
-                        bool breaks = true)
+                        bool breaks = true, CommonFn commonFn2 = 0)
 {
+  const AutoidKind auto_id = be_global->autoid(u);
+  ACE_CDR::ULong member_id = 0;
+
   size_t n_labels = 0;
   bool has_default = false;
   for (size_t i = 0; i < branches.size(); ++i) {
@@ -585,7 +833,8 @@ bool generateSwitchBody(CommonFn commonFn,
       }
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
-    generateCaseBody(commonFn, branch, statementPrefix, namePrefix, uni, breaks, parens);
+    generateCaseBody(commonFn, commonFn2, branch, auto_id, member_id, statementPrefix, namePrefix,
+                     uni, breaks, parens, false);
     be_global->impl_ <<
       "  }\n";
   }
@@ -601,12 +850,12 @@ bool generateSwitchBody(CommonFn commonFn,
 
 /// returns true if a default: branch was generated (no default: label in IDL)
 inline
-bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
+bool generateSwitchForUnion(AST_Union* u, const char* switchExpr, CommonFn commonFn,
                             const std::vector<AST_UnionBranch*>& branches,
                             AST_Type* discriminator, const char* statementPrefix,
                             const char* namePrefix = "", const char* uni = "",
                             bool forceDisableDefault = false, bool parens = true,
-                            bool breaks = true)
+                            bool breaks = true, CommonFn commonFn2 = 0)
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
@@ -638,16 +887,19 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
         "  {\n";
     }
 
+    const AutoidKind auto_id = be_global->autoid(u);
+    ACE_CDR::ULong member_id = 0;
+
     if (true_branch || default_branch) {
-      generateCaseBody(commonFn, true_branch ? true_branch : default_branch,
-                       statementPrefix, namePrefix, uni, false, parens);
+      generateCaseBody(commonFn, commonFn2, true_branch ? true_branch : default_branch,
+                       auto_id, member_id, statementPrefix, namePrefix, uni, false, parens);
     }
 
     if (false_branch || (default_branch && true_branch)) {
       be_global->impl_ <<
         "  } else {\n";
-      generateCaseBody(commonFn, false_branch ? false_branch : default_branch,
-                       statementPrefix, namePrefix, uni, false, parens);
+      generateCaseBody(commonFn, commonFn2, false_branch ? false_branch : default_branch,
+                       auto_id, member_id, statementPrefix, namePrefix, uni, false, parens);
     }
 
     be_global->impl_ <<
@@ -658,9 +910,10 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
   } else {
     be_global->impl_ <<
       "  switch (" << switchExpr << ") {\n";
-    bool b(generateSwitchBody(commonFn, branches, discriminator,
+    bool b(generateSwitchBody(u, commonFn, branches, discriminator,
                               statementPrefix, namePrefix, uni,
-                              forceDisableDefault, parens, breaks));
+                              forceDisableDefault, parens, breaks,
+                              commonFn2));
     be_global->impl_ <<
       "  }\n";
     return b;
@@ -669,9 +922,12 @@ bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
 
 inline
 std::string insert_cxx11_accessor_parens(
-              const std::string& full_var_name_, bool is_union_member) {
+  const std::string& full_var_name_, bool is_union_member = false)
+{
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  if (!use_cxx11 || is_union_member) return full_var_name_;
+  if (!use_cxx11 || is_union_member || full_var_name_.empty()) {
+    return full_var_name_;
+  }
 
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
@@ -692,6 +948,34 @@ std::string insert_cxx11_accessor_parens(
     ? full_var_name : full_var_name + "()";
 }
 
+enum FieldFilter {
+  FieldFilter_All,
+  FieldFilter_NestedKeyOnly,
+  FieldFilter_KeyOnly
+};
+
+inline
+AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
+{
+  if (!struct_node || index >= struct_node->nfields()) {
+    return 0;
+  }
+  AST_Field** field_ptrptr;
+  struct_node->field(field_ptrptr, index);
+  return field_ptrptr ? *field_ptrptr : 0;
+}
+
+inline
+bool struct_has_explicit_keys(AST_Structure* node)
+{
+  for (unsigned i = 0; i < node->nfields(); ++i) {
+    if (be_global->is_key(get_struct_field(node, i))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Wrapper for Iterating Over Structure Fields
  */
@@ -704,22 +988,33 @@ public:
     typedef AST_Field*& reference;
     typedef std::input_iterator_tag iterator_category;
 
-    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0)
+    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0, bool explicit_keys_only = false)
     : node_(node)
     , pos_(pos)
+    , explicit_keys_only_(explicit_keys_only)
     {
-      check();
+      validate_pos();
     }
 
-    bool valid() const {
+    bool valid() const
+    {
       return node_ && pos_ < node_->nfields();
     }
 
-    void check()
+    bool check()
     {
       if (!valid()) {
-        node_ = 0;
-        pos_ = 0;
+        if (node_) {
+          *this = Iterator();
+        }
+        return false;
+      }
+      return true;
+    }
+
+    void validate_pos()
+    {
+      for (; check() && explicit_keys_only_ && !be_global->is_key(**this); ++pos_) {
       }
     }
 
@@ -730,10 +1025,8 @@ public:
 
     Iterator& operator++() // Prefix
     {
-      if (node_) {
-        ++pos_;
-        check();
-      }
+      ++pos_;
+      validate_pos();
       return *this;
     }
 
@@ -746,19 +1039,14 @@ public:
 
     AST_Field* operator*() const
     {
-      if (node_) {
-        AST_Field** field_ptrptr;
-        node_->field(field_ptrptr, pos_);
-        if (field_ptrptr) {
-          return *field_ptrptr;
-        }
-      }
-      return 0;
+      return get_struct_field(node_, pos_);
     }
 
     bool operator==(const Iterator& other) const
     {
-      return node_ == other.node_ && pos_ == other.pos_;
+      return node_ == other.node_
+        && pos_ == other.pos_
+        && explicit_keys_only_ == other.explicit_keys_only_;
     }
 
     bool operator!=(const Iterator& other) const
@@ -769,11 +1057,19 @@ public:
   private:
     AST_Structure* node_;
     unsigned pos_;
+    bool explicit_keys_only_;
   };
 
-  explicit Fields(AST_Structure* node = 0)
+  explicit Fields(AST_Structure* node = 0, FieldFilter filter = FieldFilter_All)
   : node_(node)
+  , explicit_keys_only_(explicit_keys_only(node, filter))
   {
+  }
+
+  static bool explicit_keys_only(AST_Structure* node, FieldFilter filter)
+  {
+    return filter == FieldFilter_KeyOnly ||
+      (filter == FieldFilter_NestedKeyOnly && node && struct_has_explicit_keys(node));
   }
 
   AST_Structure* node() const
@@ -783,7 +1079,7 @@ public:
 
   Iterator begin() const
   {
-    return Iterator(node_);
+    return Iterator(node_, 0, explicit_keys_only_);
   }
 
   Iterator end() const
@@ -798,7 +1094,18 @@ public:
   }
 
 private:
-  AST_Structure* node_;
+  AST_Structure* const node_;
+  const bool explicit_keys_only_;
 };
+
+inline
+ACE_CDR::ULong array_element_count(AST_Array* arr)
+{
+  ACE_CDR::ULong count = 1;
+  for (ACE_CDR::ULong i = 0; i < arr->n_dims(); ++i) {
+    count *= arr->dims()[i]->ev()->u.ulval;
+  }
+  return count;
+}
 
 #endif

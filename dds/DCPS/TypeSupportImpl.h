@@ -9,9 +9,13 @@
 #define OPENDDS_DCPS_TYPESUPPORTIMPL_H
 
 #include "dcps_export.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DdsDcpsTypeSupportExtC.h"
+#include "Definitions.h"
 #include "LocalObject.h"
+#include "Serializer.h"
+#include "SafetyProfileStreams.h"
+#include "XTypes/TypeObject.h"
+
+#include <dds/DdsDcpsTypeSupportExtC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -19,7 +23,12 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+
 namespace OpenDDS {
+namespace XTypes {
+  class TypeLookupService;
+}
+
 namespace DCPS {
 
 class MetaStruct;
@@ -27,6 +36,41 @@ class MetaStruct;
 template <typename Message> struct DDSTraits;
 
 template <typename Message> struct MarshalTraits;
+
+class OpenDDS_Dcps_Export SerializedSizeBound {
+public:
+  SerializedSizeBound()
+  : bounded_(false)
+  , bound_(0)
+  {
+  }
+
+  SerializedSizeBound(size_t bound)
+  : bounded_(true)
+  , bound_(bound)
+  {
+  }
+
+  operator bool() const
+  {
+    return bounded_;
+  }
+
+  size_t get() const
+  {
+    OPENDDS_ASSERT(bounded_);
+    return bound_;
+  }
+
+  OPENDDS_STRING to_string() const
+  {
+    return bounded_ ? to_dds_string(bound_) : "<unbounded>";
+  }
+
+private:
+  bool bounded_;
+  size_t bound_;
+};
 
 class OpenDDS_Dcps_Export TypeSupportImpl
   : public virtual LocalObject<TypeSupport> {
@@ -46,6 +90,19 @@ public:
                                             const char* type_name);
 
   virtual char* get_type_name();
+
+  /// Get allowed representations defined by IDL annotations
+  virtual void representations_allowed_by_type(
+    DDS::DataRepresentationIdSeq& seq) = 0;
+
+  virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
+  virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
+
+  virtual Extensibility getExtensibility() const = 0;
+
+  void to_type_info(XTypes::TypeInformation& type_info) const;
+
+  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
 private:
   virtual const char* default_type_name() const = 0;

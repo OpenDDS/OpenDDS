@@ -42,6 +42,10 @@ namespace OpenDDS {
     using OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER;
     using OpenDDS::DCPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     using OpenDDS::DCPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    using OpenDDS::DCPS::ENTITYID_TL_SVC_REQ_WRITER;
+    using OpenDDS::DCPS::ENTITYID_TL_SVC_REQ_READER;
+    using OpenDDS::DCPS::ENTITYID_TL_SVC_REPLY_WRITER;
+    using OpenDDS::DCPS::ENTITYID_TL_SVC_REPLY_READER;
 
     const SequenceNumber_t SEQUENCENUMBER_UNKNOWN = { -1, 0 };
 
@@ -61,11 +65,6 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_2_3 = { 2, 3 }; // DDS-Security 1.1
     const ProtocolVersion_t PROTOCOLVERSION_2_4 = { 2, 4 };
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_4;
-
-    const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
-    const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
-    const char BLOB_PROP_DR_CRYPTO_HANDLE[] = "DatareaderCryptoHandle";
-    const char BLOB_PROP_ENDPOINT_SEC_ATTR[] = "EndpointSecurityAttributes";
   }
 }
 

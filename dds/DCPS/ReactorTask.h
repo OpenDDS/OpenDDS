@@ -8,18 +8,18 @@
 #ifndef OPENDDS_DCPS_REACTORTASK_H
 #define OPENDDS_DCPS_REACTORTASK_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/TimeTypes.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "ace/Task.h"
-#include "ace/Barrier.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Condition_T.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Timer_Heap_T.h"
-#include "ace/Event_Handler_Handle_Timeout_Upcall.h"
+#include "dcps_export.h"
+#include "RcObject.h"
+#include "TimeTypes.h"
+#include "ReactorInterceptor.h"
+#include "SafetyProfileStreams.h"
+#include "ConditionVariable.h"
+
+#include <ace/Task.h>
+#include <ace/Barrier.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Timer_Heap_T.h>
+#include <ace/Event_Handler_Handle_Timeout_Upcall.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
@@ -31,10 +31,31 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// thread status reporting forward
-struct ThreadStatus {
+struct OpenDDS_Dcps_Export ThreadStatus {
+  struct Thread {
+    SystemTimePoint timestamp;
+    // TODO(iguessthislldo): Add Participant GUID
+  };
+  typedef OPENDDS_MAP(String, Thread) Map;
+
   ACE_Thread_Mutex lock;
-  OPENDDS_MAP(OPENDDS_STRING, MonotonicTimePoint) map;
+  Map map;
+
+  /// Get key for map and update.
+  /// safety_profile_tid is the thread id under safety profile, otherwise unused.
+  /// name is for a more human-friendly name that will be appended to the key.
+  static String get_key(const char* safety_profile_tid = "", const String& name = "");
+
+  /// Update the status of a thread to indicate it was able to check in at the
+  /// given time. Returns false if failed.
+  bool update(const String& key);
+
+#ifdef ACE_HAS_GETTID
+  static inline pid_t gettid()
+  {
+    return syscall(SYS_gettid);
+  }
+#endif
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
@@ -46,7 +67,8 @@ public:
   virtual ~ReactorTask();
 
 public:
-  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0), ThreadStatus* thread_stat = 0, OPENDDS_STRING name = "");
+  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0),
+    ThreadStatus* thread_stat = 0, const String& name = "");
   virtual int open(void* ptr) {
     return open_reactor_task(ptr);
   }
@@ -73,9 +95,9 @@ public:
 
 private:
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
   typedef ACE_Timer_Heap_T<
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
@@ -100,7 +122,7 @@ private:
   ACE_Barrier   barrier_;
   LockType      lock_;
   State         state_;
-  ConditionType condition_;
+  ConditionVariableType condition_;
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
@@ -110,7 +132,7 @@ private:
   // thread status reporting
   ThreadStatus* thread_status_;
   TimeDuration timeout_;
-  OPENDDS_STRING name_;
+  String name_;
 
   ReactorInterceptor_rch interceptor_;
 };

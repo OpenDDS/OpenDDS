@@ -203,6 +203,9 @@ Manager::pushImage(const DImage& image)
   SeqGuard<OpenDDS::DCPS::TransportLocatorSeq> trans_guard;
   SeqGuard<OpenDDS::DCPS::TransportLocatorSeq>::Seq& transports = trans_guard.seq();
 
+  SeqGuard<DDS::OctetSeq> type_info_guard;
+  SeqGuard<DDS::OctetSeq>::Seq& serializedTypeInfoSeq = type_info_guard.seq();
+
   SeqGuard<URActor> reader_guard;
   SeqGuard<URActor>::Seq& readers = reader_guard.seq();
   SeqGuard<UWActor> writer_guard;
@@ -220,6 +223,13 @@ Manager::pushImage(const DImage& image)
     ACE_NEW_NORETURN(trans, OpenDDS::DCPS::TransportLocatorSeq);
     transports.push_back(trans);
     in_cdr >> *trans;
+
+    TAO_InputCDR ti_cdr(actor.serializedTypeInfo.second
+                        , actor.serializedTypeInfo.first);
+    DDS::OctetSeq* type_info_ptr;
+    ACE_NEW_NORETURN(type_info_ptr, DDS::OctetSeq);
+    serializedTypeInfoSeq.push_back(type_info_ptr);
+    ti_cdr >> *type_info_ptr;
 
     DDS::PublisherQos* pub_qos = 0;
     DDS::DataWriterQos* writer_qos = 0;
@@ -251,7 +261,8 @@ Manager::pushImage(const DImage& image)
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *sub_qos, *reader_qos
-                                 , *trans, actor.transportContext, csi));
+                                 , *trans, actor.transportContext, csi
+                                 , *type_info_ptr));
       readers.push_back(reader);
       u_image.actors.push_back(reader);
 
@@ -274,7 +285,8 @@ Manager::pushImage(const DImage& image)
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *pub_qos, *writer_qos
-                                 , *trans, actor.transportContext, csi));
+                                 , *trans, actor.transportContext, csi
+                                 , *type_info_ptr));
       writers.push_back(writer);
       u_image.wActors.push_back(writer);
 
@@ -362,6 +374,11 @@ Manager::add(const DActor& actor)
   OpenDDS::DCPS::TransportLocatorSeq transport_info;
   transportCdr >> transport_info;
 
+  TAO_InputCDR typeInfoCdr(actor.serializedTypeInfo.second, actor.serializedTypeInfo.first);
+
+  DDS::OctetSeq serializedTypeInfo;
+  typeInfoCdr >> serializedTypeInfo;
+
   if (actor.type == DataReader) {
     DDS::SubscriberQos sub_qos;
     DDS::DataReaderQos reader_qos;
@@ -381,7 +398,8 @@ Manager::add(const DActor& actor)
                             , actor.topicId, actor.actorId
                             , callback.c_str(), reader_qos
                             , transport_info, actor.transportContext, sub_qos
-                            , csi.filterClassName, csi.filterExpr, csi.exprParams);
+                            , csi.filterClassName, csi.filterExpr, csi.exprParams
+                            , serializedTypeInfo);
 
   } else if (actor.type == DataWriter) {
     DDS::PublisherQos pub_qos;
@@ -394,7 +412,8 @@ Manager::add(const DActor& actor)
     info_->add_publication(actor.domainId, actor.participantId
                            , actor.topicId, actor.actorId
                            , callback.c_str(), writer_qos
-                           , transport_info, actor.transportContext, pub_qos);
+                           , transport_info, actor.transportContext, pub_qos
+                           , serializedTypeInfo);
   }
 }
 

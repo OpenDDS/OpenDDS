@@ -1,7 +1,7 @@
 #ifndef tests_transport_best_effort_reader_AppConfig_h
 #define tests_transport_best_effort_reader_AppConfig_h
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/Service_Participant.h>
 
 class AppConfig {
 public:

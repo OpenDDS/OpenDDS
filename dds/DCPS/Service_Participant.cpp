@@ -192,7 +192,7 @@ Service_Participant::Service_Participant()
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     pool_size_(1024*1024*16),
     pool_granularity_(8),
 #endif
@@ -422,7 +422,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
@@ -735,6 +735,9 @@ Service_Participant::initialize()
 
   initial_WriterDataLifecycleQosPolicy_.autodispose_unregistered_instances = true;
 
+  // Will get interpreted based on how the type was annotated.
+  initial_DataRepresentationQosPolicy_.value.length(0);
+
   initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
@@ -757,6 +760,7 @@ Service_Participant::initialize()
   initial_TopicQos_.transport_priority = initial_TransportPriorityQosPolicy_;
   initial_TopicQos_.lifespan = initial_LifespanQosPolicy_;
   initial_TopicQos_.ownership = initial_OwnershipQosPolicy_;
+  initial_TopicQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_DataWriterQos_.durability = initial_DurabilityQosPolicy_;
   initial_DataWriterQos_.durability_service = initial_DurabilityServiceQosPolicy_;
@@ -780,6 +784,7 @@ Service_Participant::initialize()
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
 #endif
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
+  initial_DataWriterQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
   initial_PublisherQos_.partition = initial_PartitionQosPolicy_;
@@ -798,11 +803,19 @@ Service_Participant::initialize()
   initial_DataReaderQos_.time_based_filter = initial_TimeBasedFilterQosPolicy_;
   initial_DataReaderQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataReaderQos_.reader_data_lifecycle = initial_ReaderDataLifecycleQosPolicy_;
+  initial_DataReaderQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_SubscriberQos_.presentation = initial_PresentationQosPolicy_;
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+
+  initial_TypeConsistencyEnforcementQosPolicy_.kind = DDS::ALLOW_TYPE_COERCION;
+  initial_TypeConsistencyEnforcementQosPolicy_.prevent_type_widening = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_sequence_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_string_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
 
   bit_autopurge_nowriter_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
   bit_autopurge_nowriter_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;
@@ -1841,7 +1854,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
 #endif
@@ -2590,7 +2603,7 @@ Service_Participant::is_discovery_template(const OPENDDS_STRING& name)
   return false;
 }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
 void
 Service_Participant::configure_pool()
 {

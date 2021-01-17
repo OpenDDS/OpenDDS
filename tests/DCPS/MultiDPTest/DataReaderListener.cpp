@@ -7,6 +7,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
 
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>

@@ -1,5 +1,6 @@
 #include <dds/DdsDcpsInfrastructure.idl>
 
+@topic
 struct TBTD {
   string name;
   DDS::DurabilityQosPolicy durability;

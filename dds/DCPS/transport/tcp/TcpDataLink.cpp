@@ -21,6 +21,11 @@
 #include "TcpDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace {
+  using OpenDDS::DCPS::Encoding;
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
@@ -286,7 +291,6 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
 
   // To work arround this problem, I have to add bogus data to chain with the
   // DataSampleHeader to make the receiving work.
-  size_t max_marshaled_size = header_data.max_marshaled_size();
 
   Message_Block_Ptr data(
     new ACE_Message_Block(20,
@@ -305,7 +309,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   header_data.message_length_ = static_cast<ACE_UINT32>(data->length());
 
   Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           data.release(), //cont
                           0, //data
@@ -404,7 +408,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 {
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
     RepoId local;
-    DCPS::Serializer ser(&(*sample.sample_));
+    DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
     }
@@ -424,10 +428,8 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
   header_data.publication_id_ = sample.header_.publication_id_;
   header_data.publisher_id_ = sample.header_.publisher_id_;
 
-  size_t max_marshaled_size = header_data.max_marshaled_size();
-
   Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           0, //cont
                           0, //data
@@ -493,10 +495,8 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
   header_data.publication_id_ = local;
   header_data.publisher_id_ = remote;
 
-  size_t max_marshaled_size = header_data.max_marshaled_size();
-
   Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           0, //cont
                           0, //data
@@ -509,7 +509,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
                           0));
 
   *message << header_data;
-  DCPS::Serializer ser(message.get());
+  DCPS::Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
 
   TransportControlElement* send_element = new TransportControlElement(move(message));

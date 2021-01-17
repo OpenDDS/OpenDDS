@@ -5,9 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+
 #include "PerConnectionSynch.h"
-#include "dds/DCPS/debug.h"
+
+#include <dds/DCPS/debug.h>
 
 #if !defined (__ACE_INLINE__)
 #include "PerConnectionSynch.inl"
@@ -24,7 +26,7 @@ OpenDDS::DCPS::PerConnectionSynch::work_available()
   DBG_ENTRY_LVL("PerConnectionSynch","work_available",6);
   GuardType guard(this->lock_);
   this->work_available_ = 1;
-  this->condition_.signal();
+  condition_.notify_one();
 }
 
 int
@@ -189,7 +191,7 @@ OpenDDS::DCPS::PerConnectionSynch::unregister_worker_i()
 
     // Signal the condition_ object in case the svc() method is currently
     // blocked wait()'ing on the condition.
-    this->condition_.signal();
+    condition_.notify_one();
   }
 
   // Wait for all threads running this task (there should just be one thread)

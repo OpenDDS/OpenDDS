@@ -4,4 +4,4 @@
 .git
 ACE_wrappers
 .dockerignore
-Dockerfile
+Dockerfile*

@@ -49,7 +49,7 @@ public:
   virtual OPENDDS_STRING dump_to_str() const;
 
   bool is_reliable() const { return true; }
-  bool requires_cdr() const { return true; }
+  bool requires_cdr_encapsulation() const { return true; }
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
