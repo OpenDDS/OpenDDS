@@ -157,4 +157,3 @@ struct AppendableStructWithDependency {
 struct AppendableStructNoXTypes {
   @key long key;
 };
-

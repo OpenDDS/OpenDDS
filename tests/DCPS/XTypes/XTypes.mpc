@@ -14,7 +14,7 @@ project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj {
     !XTypes.idl
     !XTypesSub.idl
   }
-  
+
   Source_Files {
     XTypesPublisher.cpp
 	!XTypesSubscriber.cpp
@@ -49,14 +49,14 @@ project(XTypes_Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj {
     !XTypes.idl
     !XTypesPub.idl
   }
-  
+
   Source_Files {
     XTypesSubscriber.cpp
 	!XTypes.cpp
 	!XTypesC.cpp
 	!XTypesS.cpp
 	!XTypesTypeSupportC.cpp
-	!XTypesTypeSupportS.cpp	
+	!XTypesTypeSupportS.cpp
 	!XTypesTypeSupportImpl.cpp
 	!XTypesPublisher.cpp
 	!XTypesPubTypeSupportC.cpp

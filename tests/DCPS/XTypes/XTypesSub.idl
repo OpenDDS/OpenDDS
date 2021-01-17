@@ -82,4 +82,3 @@ struct NestedStruct {
 struct AppendableStructNoXTypes {
   @key long key;
 };
-
