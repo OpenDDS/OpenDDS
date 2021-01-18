@@ -337,11 +337,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Debug ========= Check built-in topic topic data
     {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
+      //      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
       // Debug: temporarily comment out this line
       //      Utils::waitForSample(topic_rdr);
       // Debug begin
-      ACE_DEBUG((LM_DEBUG, "monitor: finished waiting for topic sample\n"));
+      //      ACE_DEBUG((LM_DEBUG, "monitor: finished waiting for topic sample\n"));
       // Debug end
       ::DDS::InstanceHandleSeq handles;
       if (participant->get_discovered_topics(handles) != ::DDS::RETCODE_OK) {
@@ -355,6 +355,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           "(%P|%t) monitor: ERROR: get_discovered_topics expected %d got %d.\n",
           num_topics, len), 1);
       }
+      // Debug begin
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Discovered %d topics, expected %d topics\n"),
+                 len, num_topics));
+      // Debug end
 
       for (CORBA::ULong i = 0; i < len; ++i) {
         ::DDS::TopicBuiltinTopicData data;
@@ -388,6 +392,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover topics test PASSED.\n"));
     }
 
+    if (ignoredEntitiesAreInBIT) {
     ::DDS::SampleInfoSeq topicinfos(10);
     ::DDS::TopicBuiltinTopicDataSeq topicdata(10);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
@@ -411,6 +416,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         "(%P|%t) monitor: ERROR: read %d BIT topic data, expected %d topics.\n", len, num_topics),
         1);
     }
+    // Debug begin
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Read %d BIT topics, expected %d topics\n"), len, num_topics));
+    // Debug end
 
     CORBA::ULong num_topics_with_data = 0;
     for (CORBA::ULong i = 0; i < len; ++i) {
@@ -419,12 +427,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           "(%P|%t) monitor: ERROR: got topic name \"%C\", expected topic name \"%C\"\n",
           topicdata[i].name.in(), topic_name), 1);
       }
+      // Debug begin
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%dth topic -- topic name: %C\n"), i, topicdata[i].name.in()));
+      // Debug end
 
       if (ACE_OS::strcmp(topicdata[i].type_name.in(), topic_type_name) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
           "(%P|%t) monitor:  got topic type name \"%C\", expected topic type name \"%C\"\n",
           topicdata[i].type_name.in(), topic_type_name), 1);
       }
+      // Debug begin
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%dth topic -- type name: %C\n"), i, topicdata[i].type_name.in()));
+      // Debug end
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
         "type_name=%C \n",
@@ -446,6 +460,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
         "(%P|%t) monitor:  Topic changeable qos test FAILED. \n"), 1);
     }
+    }
 
     // Debug ========== Check built-in publication topic data
     ::DDS::SampleInfoSeq pubinfos(10);
@@ -464,7 +479,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         "(%P|%t) monitor:  failed to read BIT publication data.\n"), 1);
     }
 
-    len = pubdata.length();
+    CORBA::ULong len = pubdata.length();
     bool pubWasIgnored = false;
     if (len != num_pubs) {
       if (!ignoredEntitiesAreInBIT && len == num_pubs - 1) {
