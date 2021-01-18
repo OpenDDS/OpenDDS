@@ -58,7 +58,7 @@ ACE_TString synch_dir;
 ACE_TCHAR synch_fname[] = ACE_TEXT("monitor1_done");
 
 int
-parse_args(int argc, ACE_TCHAR *argv[])
+parse_args(int argc, ACE_TCHAR* argv[])
 {
   ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("T:l:d:t:s:p:u"));
   int c;
@@ -130,13 +130,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       FILE* fp = ACE_OS::fopen((synch_dir + synch_fname).c_str(), ACE_TEXT("r"));
       int i = 0;
       while (fp == 0 && i < 15) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting for monitor1 to finish...\n")));
         ACE_OS::sleep(1);
         ++i;
         fp = ACE_OS::fopen((synch_dir + synch_fname).c_str(), ACE_TEXT("r"));
       }
 
       if (fp != 0) ACE_OS::fclose(fp);
+      // Debug begin
+      else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("Monitor2 -- Monitor1 probably hasn't finished yet...\n")));
+      }
+      // Debug end
     }
 
     participant = dpf->create_participant(111,
@@ -160,8 +165,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-    const bool ignoredEntitiesAreInBIT =
-      !dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
+    // Debug begin
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Monitor's participant ID: %C\n"),
+               OpenDDS::DCPS::to_string(part_svt->get_id()).c_str()));
+    // Debug end
+
+    const bool ignoredEntitiesAreInBIT = !dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
     const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
     // give time for BIT datareader/datawriter fully association.
@@ -211,6 +220,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
+    // Debug ========= Check built-in participant topic data
     {
       ::DDS::InstanceHandleSeq handles;
       if (participant->get_discovered_participants(handles) != ::DDS::RETCODE_OK
@@ -221,10 +231,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       CORBA::ULong len = handles.length();
       if (len != num_parts - 1) {
+        // Debug begin
+        for (unsigned i = 0; i < len; ++i) {
+          DDS::ParticipantBuiltinTopicData data;
+          participant->get_discovered_participant_data(data, handles[i]);
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("Discovered participant id: %C\n"),
+                     OpenDDS::DCPS::to_string(id).c_str()));
+        }
+        // Debug end
+
         ACE_ERROR_RETURN((LM_ERROR,
           "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
-          num_parts, len),
-          1);
+          num_parts - 1, len), 1);
       }
 
       for (CORBA::ULong i = 0; i < len; ++i) {
@@ -255,6 +274,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
+      // Debug: if the ignored participant is from the RTPS peer, reduce num_parts?
+      // Else do nothing if the ignored participant is from the DCPSInfoRepo?
       if (!ignoredEntitiesAreInBIT) --num_parts;
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
@@ -263,6 +284,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::DDS::ReturnCode_t ret;
 
     ::DDS::ParticipantBuiltinTopicDataSeq partdata;
+    // SonDN: expected_part_count == 1?
     const CORBA::ULong expected_part_count = num_parts - !ownEntitiesAreInBIT;
 
     while (partdata.length() != expected_part_count) {
@@ -301,8 +323,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (cur_len == user_data_len &&
           ACE_OS::strncmp(reinterpret_cast<char*>(partdata[i].user_data.value.get_buffer()),
-                          CUR_PART_USER_DATA,
-                          user_data_len) == 0) {
+                          CUR_PART_USER_DATA, user_data_len) == 0) {
         ++cur_dps_with_user_data;
       }
     }
@@ -314,9 +335,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         "(%P|%t) monitor:  DomainParticipant changeable qos test FAILED.\n"), 1);
     }
 
+    // Debug ========= Check built-in topic topic data
     {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
-      Utils::waitForSample(topic_rdr);
+      // Debug: temporarily comment out this line
+      //      Utils::waitForSample(topic_rdr);
+      // Debug begin
+      ACE_DEBUG((LM_DEBUG, "monitor: finished waiting for topic sample\n"));
+      // Debug end
       ::DDS::InstanceHandleSeq handles;
       if (participant->get_discovered_topics(handles) != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics test failed.\n"));
@@ -409,8 +435,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topicdata[i].topic_data.value.length() == topic_data_len &&
           ACE_OS::strncmp(reinterpret_cast <char*>(topicdata[i].topic_data.value.get_buffer()),
-                          CUR_TOPIC_DATA,
-                          topic_data_len) == 0) {
+                          CUR_TOPIC_DATA, topic_data_len) == 0) {
         ++num_topics_with_data;
       }
     }
@@ -422,16 +447,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         "(%P|%t) monitor:  Topic changeable qos test FAILED. \n"), 1);
     }
 
+    // Debug ========== Check built-in publication topic data
     ::DDS::SampleInfoSeq pubinfos(10);
     ::DDS::PublicationBuiltinTopicDataSeq pubdata(10);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for publication sample\n"));
     Utils::waitForSample(publication_rdr);
     ret = pub_reader->read(pubdata,
-                            pubinfos,
-                            10,
-                            ::DDS::ANY_SAMPLE_STATE,
-                            ::DDS::ANY_VIEW_STATE,
-                            ::DDS::ALIVE_INSTANCE_STATE);
+                           pubinfos,
+                           10,
+                           ::DDS::ANY_SAMPLE_STATE,
+                           ::DDS::ANY_VIEW_STATE,
+                           ::DDS::ALIVE_INSTANCE_STATE);
 
     if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -477,9 +503,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (pubdata[i].user_data.value.length() == user_data_len &&
           pubdata[i].topic_data.value.length() == topic_data_len &&
           pubdata[i].group_data.value.length() == group_data_len) {
-        if (ACE_OS::strncmp(reinterpret_cast<char*>(pubdata[i].user_data.value.get_buffer()), CUR_DW_USER_DATA, user_data_len) == 0 &&
-            ACE_OS::strncmp(reinterpret_cast<char*>(pubdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0 &&
-            ACE_OS::strncmp(reinterpret_cast<char*>(pubdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0) {
+        if (ACE_OS::strncmp(reinterpret_cast<char*>(pubdata[i].user_data.value.get_buffer()),
+                            CUR_DW_USER_DATA, user_data_len) == 0 &&
+            ACE_OS::strncmp(reinterpret_cast<char*>(pubdata[i].topic_data.value.get_buffer()),
+                            CUR_TOPIC_DATA, topic_data_len) == 0 &&
+            ACE_OS::strncmp(reinterpret_cast<char*>(pubdata[i].group_data.value.get_buffer()),
+                            CUR_GROUP_DATA, group_data_len) == 0) {
           ++num_dws_with_data;
         }
       }
@@ -492,6 +521,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         "(%P|%t) monitor: DataWriter changeable qos test FAILED. \n"), 1);
     }
 
+    // Debug ========== Check built-in subscription topic data
     ::DDS::SampleInfoSeq subinfos(10);
     ::DDS::SubscriptionBuiltinTopicDataSeq subdata(10);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for subscription sample\n"));
@@ -515,10 +545,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (!pubWasIgnored && !ignoredEntitiesAreInBIT && len == num_subs - 1) {
         ACE_DEBUG((LM_INFO, "(%P|%t) monitor: sub assumed to be ignored\n"));
       } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "(%P|%t) monitor:  read %d BIT sub data, "
-                          "expected %d subs.\n", len, num_subs),
-                         1);
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  read %d BIT sub data, "
+                          "expected %d subs.\n", len, num_subs), 1);
       }
     }
 
@@ -549,9 +577,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (subdata[i].user_data.value.length() == user_data_len &&
           subdata[i].topic_data.value.length() == topic_data_len &&
           subdata[i].group_data.value.length() == group_data_len) {
-        if (ACE_OS::strncmp(reinterpret_cast<char*>(subdata[i].user_data.value.get_buffer()), CUR_DR_USER_DATA, user_data_len) == 0 &&
-            ACE_OS::strncmp(reinterpret_cast<char*>(subdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0 &&
-            ACE_OS::strncmp(reinterpret_cast<char*>(subdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0) {
+        if (ACE_OS::strncmp(reinterpret_cast<char*>(subdata[i].user_data.value.get_buffer()),
+                            CUR_DR_USER_DATA, user_data_len) == 0 &&
+            ACE_OS::strncmp(reinterpret_cast<char*>(subdata[i].topic_data.value.get_buffer()),
+                            CUR_TOPIC_DATA, topic_data_len) == 0 &&
+            ACE_OS::strncmp(reinterpret_cast<char*>(subdata[i].group_data.value.get_buffer()),
+                            CUR_GROUP_DATA, group_data_len) == 0) {
           ++num_drs_with_data;
         }
       }
@@ -574,6 +605,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) monitor1 is done\n")));
         ACE_OS::fclose(fp);
       }
+      // Debug begin
+      else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("Failed to create file monitor1_done!!!\n")));
+      }
+      // Debug end
     }
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor main done\n"));

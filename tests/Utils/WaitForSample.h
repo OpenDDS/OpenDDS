@@ -14,7 +14,8 @@ inline
 bool waitForSample(const DDS::DataReader_var& dr)
 {
   DDS::ReadCondition_var dr_rc = dr->create_readcondition(DDS::ANY_SAMPLE_STATE,
-                                                          DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+                                                          DDS::ANY_VIEW_STATE,
+                                                          DDS::ALIVE_INSTANCE_STATE);
   DDS::WaitSet_var ws = new DDS::WaitSet;
   ws->attach_condition(dr_rc);
   DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};

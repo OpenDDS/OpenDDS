@@ -43,6 +43,6 @@ sleep (15);
 
 $test->start_process("monitor2", "-T");
 
-my $status = $test->finish(300, "monitor1");
+my $status = $test->finish(60, "monitor1");
 
 exit $status;

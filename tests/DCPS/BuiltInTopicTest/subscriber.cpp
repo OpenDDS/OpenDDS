@@ -19,6 +19,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/DomainParticipantImpl.h> //Debug
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
@@ -99,6 +100,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: create_participant failed.\n")));
       return 1;
     }
+
+    // Debug begin
+    OpenDDS::DCPS::DomainParticipantImpl* part_servant =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Subscriber's participant ID: %C\n"),
+               OpenDDS::DCPS::to_string(part_servant->get_id()).c_str()));
+    // Debug end
 
     ::Messenger::MessageTypeSupport_var mts = new ::Messenger::MessageTypeSupportImpl();
 
@@ -190,7 +198,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     FILE* fp = ACE_OS::fopen((synch_dir + synch_fname).c_str(), ACE_TEXT("r"));
     int i = 0;
     while (fp == 0 && i < 15) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting monitor1 to finish...\n")));
       ACE_OS::sleep(1);
       ++i;
       fp = ACE_OS::fopen((synch_dir + synch_fname).c_str(), ACE_TEXT("r"));
@@ -198,6 +206,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (fp) {
       ACE_OS::fclose(fp);
     }
+    // Debug begin
+    else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Monitor1 probably hasn't finished yet!\n")));
+    }
+    // Debug end
+
+    // Give time for the second monitor to initialize
+    ACE_OS::sleep(3);
 
     // Now change the changeable qos. The second monitor should get the updated qos from BIT.
     part_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen(UPDATED_PART_USER_DATA));

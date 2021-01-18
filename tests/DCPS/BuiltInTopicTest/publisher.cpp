@@ -17,9 +17,12 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/DomainParticipantImpl.h> // Debug
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
+
+#include <iostream> // Debug
 
 using namespace std;
 
@@ -67,13 +70,13 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher main\n"));
-
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
     if (parse_args(argc, argv) == -1) {
       return -1;
     }
+
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher main\n"));
 
     DDS::DomainParticipantQos partQos;
     dpf->get_default_participant_qos(partQos);
@@ -94,6 +97,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) publisher: create_participant failed.")));
       return 1;
     }
+
+    // Debug begin
+    OpenDDS::DCPS::DomainParticipantImpl* part_servant =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Publisher's participant ID: %C\n"),
+               OpenDDS::DCPS::to_string(part_servant->get_id()).c_str()));
+    // Debug end
 
     ::Messenger::MessageTypeSupport_var ts = new ::Messenger::MessageTypeSupportImpl();
 
@@ -175,6 +185,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     if (fp != 0) {
       ACE_OS::fclose(fp);
     }
+    // Debug begin
+    else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("monitor1 probably hasn't finished yet!\n")));
+    }
+    // Debug end
+
+    // Give time for the second monitor to initialize
+    ACE_OS::sleep(3);
 
     // Now change the changeable qos. The second monitor should get the updated qos from BIT.
 
