@@ -286,7 +286,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (expect_to_match) {
     if (type == "PlainCdrStruct") {
       write_plain_cdr_struct(dw);
-    } else if (type == "FinalStruct") {
+    } else if (type == "FinalStructPub") {
       write_final_struct(dw);
     } else if (type == "ModifiedFinalStruct") {
       write_modified_final_struct(dw);
