@@ -18,8 +18,8 @@ public:
   WorkerDataReaderListener(const Builder::PropertySeq& properties);
   virtual ~WorkerDataReaderListener();
 
-  void add_handler(DataHandler& handler);
-  void remove_handler(const DataHandler& handler);
+  void add_handler(std::shared_ptr<DataHandler> handler);
+  void remove_handler(std::shared_ptr<DataHandler> handler);
 
   // From DDS::DataReaderListener
 
@@ -37,6 +37,7 @@ public:
   void unset_datareader(Builder::DataReader& datareader) override;
 
   bool wait_for_expected_match(const std::chrono::system_clock::time_point& deadline) const;
+  void on_valid_data(const Data& data, const DDS::SampleInfo& info);
 
 protected:
   mutable std::mutex mutex_;
@@ -50,7 +51,7 @@ protected:
   size_t sample_count_{};
   Builder::DataReader* datareader_{};
   DataDataReader_var data_dr_;
-  std::vector<DataHandler*> handlers_;
+  std::vector<std::weak_ptr<DataHandler> > handlers_;
   mutable std::condition_variable expected_match_cv;
 
   Builder::ConstPropertyIndex enable_time_;
@@ -77,6 +78,10 @@ protected:
     OpenDDS::DCPS::DisjointSequence duplicate_data_received_;
     double previous_latency_{0.0};
     double previous_round_trip_latency_{0.0};
+    Builder::TimeStamp first_data_time_;
+    Builder::TimeStamp first_round_trip_data_time_;
+    size_t total_byte_count_{0};
+    size_t total_round_trip_byte_count_{0};
   };
 
   typedef std::unordered_map<DDS::InstanceHandle_t, WriterState> WriterStateMap;
@@ -88,10 +93,12 @@ protected:
   // Normal Latency / Jitter
   std::shared_ptr<PropertyStatBlock> latency_stat_block_;
   std::shared_ptr<PropertyStatBlock> jitter_stat_block_;
+  std::shared_ptr<PropertyStatBlock> throughput_stat_block_;
 
   // Round-Trip Latency / Jitter
   std::shared_ptr<PropertyStatBlock> round_trip_latency_stat_block_;
   std::shared_ptr<PropertyStatBlock> round_trip_jitter_stat_block_;
+  std::shared_ptr<PropertyStatBlock> round_trip_throughput_stat_block_;
 };
 
 }

@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 
 #include "dcps_export.h"
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -26,12 +27,11 @@ class DataSampleElement;
 * Manages DataSampleElement's previous_writer_sample/next_writer_sample pointers
 */
 class OpenDDS_Dcps_Export WriterDataSampleList {
-
- public:
+public:
 
   /// Default constructor clears the list.
   WriterDataSampleList();
-  ~WriterDataSampleList(){}
+  ~WriterDataSampleList() {}
 
   /// Reset to initial state.
   void reset();
@@ -46,7 +46,7 @@ class OpenDDS_Dcps_Export WriterDataSampleList {
 
   bool dequeue(const DataSampleElement* stale);
 
- protected:
+protected:
 
    /// The first element of the list.
    DataSampleElement* head_;
@@ -55,7 +55,7 @@ class OpenDDS_Dcps_Export WriterDataSampleList {
    DataSampleElement* tail_;
 
    /// Number of elements in the list.
-   ssize_t                size_;
+   ssize_t size_;
    //TBD size is never negative so should be size_t but this ripples through
    // the transport code so leave it for now. SHH
 };

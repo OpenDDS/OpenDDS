@@ -134,6 +134,7 @@
 /OpenDDS_DCPS_DataReaderExHelper.h
 /OpenDDS_DCPS_DataReaderListenerHelper.h
 /OpenDDS_DCPS_DataWriterListenerHelper.h
+/OpenDDS_DCPS_NetworkConfigModifier.h
 /OpenDDS_DCPS_ParticipantLocationBuiltinTopicDataDataReaderHelper.h
 /OpenDDS_DCPS_ParticipantLocationBuiltinTopicDataDataWriterHelper.h
 /OpenDDS_DCPS_ParticipantLocationBuiltinTopicDataTypeSupportHelper.h

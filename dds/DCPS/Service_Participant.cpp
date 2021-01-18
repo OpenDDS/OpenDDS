@@ -192,7 +192,7 @@ Service_Participant::Service_Participant()
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     pool_size_(1024*1024*16),
     pool_granularity_(8),
 #endif
@@ -422,7 +422,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
@@ -1854,7 +1854,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
 #endif
@@ -2603,7 +2603,7 @@ Service_Participant::is_discovery_template(const OPENDDS_STRING& name)
   return false;
 }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
 void
 Service_Participant::configure_pool()
 {
@@ -2805,11 +2805,28 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
     }
     network_config_monitor_ = make_rch<NetworkConfigModifier>();
 #endif
-
-    if (network_config_monitor_ && !network_config_monitor_->open()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n ")));
-      network_config_monitor_->close();
-      network_config_monitor_.reset();
+    if (network_config_monitor_) {
+      if (!network_config_monitor_->open()) {
+        bool open_failed = false;
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n")));
+        }
+        network_config_monitor_ = make_rch<NetworkConfigModifier>();
+        if (network_config_monitor_ && !network_config_monitor_->open()) {
+          open_failed = true;
+        }
+#else
+        open_failed = true;
+#endif
+        if (open_failed) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n")));
+          network_config_monitor_->close();
+          network_config_monitor_.reset();
+        }
+      }
     }
   }
 

@@ -54,7 +54,7 @@ void OpenDDS::DCPS::NetworkAddress::to_addr(ACE_INET_Addr& addr) const
 }
 
 ACE_INLINE
-void OpenDDS::DCPS::NetworkAddress::dump()
+void OpenDDS::DCPS::NetworkAddress::dump() const
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress addr: %C reserved: %d\n", addr_.c_str(), reserved_));
 }

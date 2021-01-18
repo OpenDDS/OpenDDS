@@ -27,7 +27,7 @@
 #define DDS_HAS_WCHAR
 #endif
 
-#if defined (ACE_HAS_CPP11)
+#ifdef ACE_HAS_CPP11
 #define OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(CLASS)         \
   CLASS(const CLASS&) = delete;           \
   CLASS(CLASS&&) = delete;           \

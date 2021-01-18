@@ -45,7 +45,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 
   ~NetworkAddress();
 
-  void dump();
+  void dump() const;
 
   /// Accessor to populate the provided ACE_INET_Addr object from the
   /// address string received through transport.

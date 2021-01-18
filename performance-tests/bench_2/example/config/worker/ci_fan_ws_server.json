@@ -1,11 +1,11 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
-  "start_time": { "sec": -3, "nsec": 0 },
-  "stop_time": { "sec": -10, "nsec": 0 },
+  "start_time": { "sec": -10, "nsec": 0 },
+  "stop_time": { "sec": -15, "nsec": 0 },
   "destruction_time": { "sec": -1, "nsec": 0 },
 
-  "wait_for_discovery": true,
-  "wait_for_discovery_seconds": 30,
+  "wait_for_discovery": false,
+  "wait_for_discovery_seconds": 0,
 
   "process": {
     "config_sections": [
@@ -54,23 +54,13 @@
               { "name": "datareader_01",
                 "topic_name": "topic_01",
                 "listener_type_name": "bench_drl",
-                "listener_status_mask": 4294967295,
+                "listener_status_mask": 4294966271,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
-                  }
-                ],
-
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true } }
-              },
-              { "name": "datareader_02",
-                "topic_name": "topic_02",
-                "listener_type_name": "bench_drl",
-                "listener_status_mask": 4294967295,
-                "listener_properties": [
-                  { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                    "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+                  },
+                  { "name": "expected_sample_count",
+                    "value": { "_d": "PVK_ULL", "ull_prop": 100 }
                   }
                 ],
 
@@ -83,23 +73,13 @@
         "publishers": [
           { "name": "publisher_01",
             "datawriters": [
-              { "name": "datawriter_01",
-                "topic_name": "topic_01",
-                "listener_type_name": "bench_dwl",
-                "listener_status_mask": 4294967295,
-                "listener_properties": [
-                  { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
-                  }
-                ]
-              },
               { "name": "datawriter_02",
                 "topic_name": "topic_02",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                    "value": { "_d": "PVK_ULL", "ull_prop": 1 }
                   }
                 ]
               }
@@ -108,5 +88,23 @@
         ]
       }
     ]
-  }
+  },
+  "actions": [
+    {
+      "name": "forward_action_01",
+      "type": "forward",
+      "readers": [ "datareader_01" ],
+      "writers": [ "datawriter_02" ]
+    },
+    {
+      "name": "read_action_01",
+      "type": "read",
+      "readers": [ "datareader_01" ],
+      "params": [
+        { "name": "read_period",
+          "value": { "_d": "PVK_TIMESTAMP", "timestamp_prop": { "sec": 3, "nsec": 0 } }
+        }
+      ]
+    }
+  ]
 }

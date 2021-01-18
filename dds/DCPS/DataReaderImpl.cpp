@@ -230,7 +230,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
         OPENDDS_STRING(writer_converter).c_str()));
   }
 
-  if (entity_deleted_.value()) {
+  if (get_deleted()) {
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
           ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
@@ -481,7 +481,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         OPENDDS_STRING(writer_converter).c_str(),
         writers.length()));
   }
-  if (!this->entity_deleted_.value()) {
+  if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
@@ -3316,49 +3316,48 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
   const DDS::DataRepresentationIdSeq repIds =
     get_effective_data_rep_qos(qos_.representation.value, true);
-  bool success = false;
+  bool xcdr1_mutable = false;
   if (cdr_encapsulation()) {
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
       Encoding::Kind encoding_kind;
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-        if (Encoding::KIND_XCDR2 == encoding_kind || Encoding::KIND_XCDR1 == encoding_kind) {
+        if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
+          xcdr1_mutable = true;
+        } else {
           decoding_modes_.insert(encoding_kind);
-          success = true;
-        } else if (DCPS_debug_level >= 2) {
-          // Supported but incompatible data representation
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-                     ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                     ACE_TEXT("Skip %C data representation.\n"),
-                     Encoding::kind_to_string(encoding_kind).c_str()));
         }
       } else if (DCPS_debug_level) {
-        // Unsupported or unknown data representation
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                   ACE_TEXT("Encountered unsupported or unknown data representation.\n")));
+                   ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
+                   repIds[i]));
       }
     }
   } else {
     decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
-    success = true;
   }
-  if (!success) {
+  if (decoding_modes_.empty()) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                 ACE_TEXT("Could not find a valid data representation.\n")));
+                 ACE_TEXT("Could not find a valid data representation.%C\n"),
+                 xcdr1_mutable ? " Unsupported combination of XCDR1 and mutable" : ""));
     }
     return DDS::RETCODE_ERROR;
   }
   if (DCPS_debug_level >= 2) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-               ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-               ACE_TEXT("Setup successfully with data representations: ")));
-    OPENDDS_SET(Encoding::Kind)::iterator it = decoding_modes_.begin();
+    OPENDDS_STRING encodings;
+    EncodingKinds::iterator it = decoding_modes_.begin();
     for (; it != decoding_modes_.end(); ++it) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C "), Encoding::kind_to_string(*it).c_str()));
+      if (!encodings.empty()) {
+        encodings += ", ";
+      }
+      encodings += Encoding::kind_to_string(*it);
     }
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(".\n")));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::setup_deserialization: "
+               "Setup successfully with the following data representation%C: %C\n",
+               encodings.size() != 1 ? "s" : "",
+               encodings.c_str()));
   }
 
   return DDS::RETCODE_OK;

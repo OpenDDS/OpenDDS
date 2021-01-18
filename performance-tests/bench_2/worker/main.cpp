@@ -16,7 +16,11 @@
 #include "BenchC.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  if defined(__has_warning)
+#    if __has_warning("-Wclass-memaccess")
+#      pragma GCC diagnostic ignored "-Wclass-memaccess"
+#    endif
+#  endif
 #endif
 #include "BenchTypeSupportImpl.h"
 #ifdef __GNUC__
@@ -26,19 +30,23 @@
 
 #include "ListenerFactory.h"
 
-#include "TopicListener.h"
-#include "DataReaderListener.h"
-#include "DataWriterListener.h"
-#include "SubscriberListener.h"
-#include "PublisherListener.h"
-#include "ParticipantListener.h"
 #include "BuilderProcess.h"
+#include "DataReader.h"
+#include "DataReaderListener.h"
+#include "DataWriter.h"
+#include "DataWriterListener.h"
+#include "ParticipantListener.h"
+#include "PublisherListener.h"
+#include "SubscriberListener.h"
+#include "TopicListener.h"
 
 #include "Utils.h"
+#include "PropertyStatBlock.h"
 
 #include "ActionManager.h"
 #include "ForwardAction.h"
-#include "PropertyStatBlock.h"
+#include "ReadAction.h"
+#include "SetCftParametersAction.h"
 #include "WorkerDataReaderListener.h"
 #include "WorkerDataWriterListener.h"
 #include "WorkerTopicListener.h"
@@ -46,9 +54,6 @@
 #include "WorkerPublisherListener.h"
 #include "WorkerParticipantListener.h"
 #include "WriteAction.h"
-#include "DataReader.h"
-#include "DataWriter.h"
-#include "SetCftParametersAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -229,7 +234,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
 #endif
 
-  size_t max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
+  int max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
   Builder::ConstPropertyIndex max_decimal_places_prop =
     get_property(config.properties, "max_decimal_places", Builder::PVK_ULL);
   if (max_decimal_places_prop) {
@@ -258,6 +263,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Bench::ActionManager::Registration
     write_action_registration("write", [&](){
       return std::shared_ptr<Bench::Action>(new Bench::WriteAction(*proactor));
+    });
+  Bench::ActionManager::Registration
+    read_action_registration("read", [&](){
+      return std::shared_ptr<Bench::Action>(new Bench::ReadAction(*proactor));
     });
   Bench::ActionManager::Registration
     forward_action_registration("forward", [&](){

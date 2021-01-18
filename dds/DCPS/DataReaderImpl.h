@@ -586,6 +586,7 @@ protected:
 
   /// Setup deserialization options
   DDS::ReturnCode_t setup_deserialization();
+  virtual Extensibility get_max_extensibility() = 0;
 
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
@@ -901,7 +902,8 @@ private:
   bool transport_disabled_;
 
 protected:
-  OPENDDS_SET(Encoding::Kind) decoding_modes_;
+  typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
+  EncodingKinds decoding_modes_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

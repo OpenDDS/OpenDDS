@@ -134,23 +134,23 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 #endif
       TheServiceParticipant->set_default_discovery (OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
 
-      DDS::DomainParticipant_var participant =
+      DDS::DomainParticipant_var participant1 =
         dpf->create_participant(11,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (participant.in ())) {
+      if (CORBA::is_nil (participant1.in ())) {
         cerr << "create_participant failed." << endl;
         return 1;
       }
       else
       {
         ACE_DEBUG ((LM_DEBUG, "Created participant 1 with instance handle %d\n",
-                    participant->get_instance_handle ()));
+                    participant1->get_instance_handle ()));
       }
       try
       {
-        OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config, participant.in());
+        OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config, participant1.in());
       }
       catch (const OpenDDS::DCPS::Transport::MiscProblem &) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -200,11 +200,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                           -1);
       }
 
+      if (participant1->get_instance_handle () == participant2->get_instance_handle ())
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: participant1 and participant2 do have the same instance handle!\n")),
+                        -1);
+      }
+
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =
         new Messenger::MessageTypeSupportImpl();
 
-      if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      if (mts->register_type(participant1.in(), "") != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: register_type failed!\n")),
@@ -214,11 +222,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       // Create Topic
       CORBA::String_var type_name = mts->get_type_name();
       DDS::Topic_var topic =
-        participant->create_topic("Movie Discussion List",
-                                  type_name.in(),
-                                  TOPIC_QOS_DEFAULT,
-                                  DDS::TopicListener::_nil(),
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        participant1->create_topic("Movie Discussion List",
+                                   type_name.in(),
+                                   TOPIC_QOS_DEFAULT,
+                                   DDS::TopicListener::_nil(),
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(topic.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -229,9 +237,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // Create Publisher
       DDS::Publisher_var pub =
-        participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                      DDS::PublisherListener::_nil(),
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        participant1->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                       DDS::PublisherListener::_nil(),
+                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(pub.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -262,15 +270,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                         -1);
       }
 
-      DDS::ReturnCode_t retcode5 = dpf->delete_participant(participant.in ());
+      DDS::ReturnCode_t retcode5 = dpf->delete_participant(participant1.in ());
       if (retcode5 != DDS::RETCODE_PRECONDITION_NOT_MET) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: should not be able to delete participant\n")),
+                          ACE_TEXT(" ERROR: should not be able to delete participant1\n")),
                         -1);
       }
 
-      DDS::ReturnCode_t retcode3 = participant->delete_publisher (pub.in ());
+      DDS::ReturnCode_t retcode3 = participant1->delete_publisher (pub.in ());
       if (retcode3 != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
@@ -278,7 +286,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                         -1);
       }
 
-      DDS::ReturnCode_t retcode4 = participant->delete_topic (topic.in ());
+      DDS::ReturnCode_t retcode4 = participant1->delete_topic (topic.in ());
       if (retcode4 != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
@@ -286,11 +294,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                         -1);
       }
 
-      DDS::ReturnCode_t retcode6 = dpf->delete_participant(participant.in ());
+      DDS::ReturnCode_t retcode6 = dpf->delete_participant(participant1.in ());
       if (retcode6 != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: should be able to delete participant\n")),
+                          ACE_TEXT(" ERROR: should be able to delete participant1\n")),
                         -1);
       }
 

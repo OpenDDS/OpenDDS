@@ -16,6 +16,8 @@
 #include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
+#include <dds/DCPS/SequenceNumber.h>
+
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfoUtilsTypeSupportImpl.h>
 
@@ -28,9 +30,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
-  using DCPS::GuidPrefix_t;
-  using DCPS::GUID_t;
-  using DCPS::EntityId_t;
+
+using DCPS::GuidPrefix_t;
+using DCPS::GUID_t;
+using DCPS::EntityId_t;
 
 template <typename T>
 void marshal_key_hash(const T& msg, KeyHash_t& hash) {
@@ -204,8 +207,23 @@ private:
 OpenDDS_Rtps_Export
 bool bitmapNonEmpty(const SequenceNumberSet& snSet);
 
+inline DCPS::SequenceNumber to_opendds_seqnum(const RTPS::SequenceNumber_t& rtps_seqnum)
+{
+  DCPS::SequenceNumber opendds_seqnum;
+  opendds_seqnum.setValue(rtps_seqnum.high, rtps_seqnum.low);
+  return opendds_seqnum;
 }
+
+inline RTPS::SequenceNumber_t to_rtps_seqnum(const DCPS::SequenceNumber& opendds_seqnum)
+{
+  RTPS::SequenceNumber_t rtps_seqnum;
+  rtps_seqnum.high = opendds_seqnum.getHigh();
+  rtps_seqnum.low = opendds_seqnum.getLow();
+  return rtps_seqnum;
 }
+
+} // namespace RTPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

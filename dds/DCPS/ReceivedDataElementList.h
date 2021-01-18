@@ -8,7 +8,11 @@
 #ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
-#include "ace/Atomic_Op_T.h"
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op_T.h>
+#endif
 #include "ace/Thread_Mutex.h"
 
 #include "dcps_export.h"
@@ -81,7 +85,11 @@ public:
 
   long ref_count()
   {
+#ifdef ACE_HAS_CPP11
+    return this->ref_count_;
+#else
     return this->ref_count_.value();
+#endif
   }
 
   PublicationId pub_;
@@ -126,7 +134,11 @@ public:
 
   /// This is needed to know if delete DataReader should fail with
   /// PRECONDITION_NOT_MET because there are outstanding loans.
+#ifdef ACE_HAS_CPP11
+  std::atomic<long> zero_copy_cnt_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
+#endif
 
   /// The data sample's sequence number
   SequenceNumber sequence_;
@@ -142,7 +154,11 @@ public:
   void operator delete(void* memory, ACE_New_Allocator& pool);
 
 private:
+#ifdef ACE_HAS_CPP11
+  std::atomic<long> ref_count_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
+#endif
 protected:
   ACE_Recursive_Thread_Mutex* mx_;
 }; // class ReceivedDataElement

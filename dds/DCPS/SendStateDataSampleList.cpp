@@ -67,54 +67,38 @@ SendStateDataSampleList::dequeue(const DataSampleElement* stale)
   }
 
   if (toRemove) {
-    size_ --;
+    --size_;
     // Remove from the previous element.
-    toRemove->previous_send_sample_->next_send_sample_ = toRemove->next_send_sample_ ;
+    toRemove->previous_send_sample_->next_send_sample_ = toRemove->next_send_sample_;
 
     // Remove from the next element.
     if (toRemove->next_send_sample_ != 0) {
       // Remove from the inside of the list.
-      toRemove->next_send_sample_->previous_send_sample_ = toRemove->previous_send_sample_ ;
+      toRemove->next_send_sample_->previous_send_sample_ = toRemove->previous_send_sample_;
 
     } else {
-      toRemove->previous_send_sample_->next_send_sample_ = 0;
       // Remove from the tail of the list.
-      tail_ = toRemove->previous_send_sample_ ;
+      tail_ = toRemove->previous_send_sample_;
     }
 
     toRemove->next_send_sample_ = 0;
     toRemove->previous_send_sample_ = 0;
   }
 
-  return toRemove;
+  return toRemove != 0;
 }
 
 void
 SendStateDataSampleList::enqueue_tail(SendStateDataSampleList list)
 {
-  //// Make the appended list linked with next_send_sample_ first.
-  //DataSampleElement* cur = list.head_;
-
-  //if (list.size_ > 1 && cur->next_send_sample_ == 0)
-  // {
-  //   for (ssize_t i = 0; i < list.size_; i ++)
-  //     {
-  //       cur->next_send_sample_ = cur->next_writer_sample_;
-  //       cur = cur->next_writer_sample_;
-  //     }
-  // }
-
   if (head_ == 0) {
     head_ = list.head_;
     tail_ = list.tail_;
     size_ = list.size_;
 
   } else {
-    tail_->next_send_sample_
-    //= tail_->next_writer_sample_
-    = list.head_;
+    tail_->next_send_sample_ = list.head_;
     list.head_->previous_send_sample_ = tail_;
-    //list.head_->previous_writer_sample_ = tail_;
     tail_ = list.tail_;
     size_ = size_ + list.size_;
   }
@@ -135,8 +119,9 @@ SendStateDataSampleListIterator::SendStateDataSampleListIterator(
 SendStateDataSampleListIterator&
 SendStateDataSampleListIterator::operator++()
 {
-  if (this->current_)
+  if (this->current_) {
     this->current_ = this->current_->next_send_sample_;
+  }
 
   return *this;
 }
@@ -152,11 +137,11 @@ SendStateDataSampleListIterator::operator++(int)
 SendStateDataSampleListIterator&
 SendStateDataSampleListIterator::operator--()
 {
-  if (this->current_)
+  if (this->current_) {
     this->current_ = this->current_->previous_send_sample_;
-
-  else
+  } else {
     this->current_ = this->tail_;
+  }
 
   return *this;
 }
@@ -207,8 +192,9 @@ SendStateDataSampleListConstIterator::SendStateDataSampleListConstIterator(
 SendStateDataSampleListConstIterator&
 SendStateDataSampleListConstIterator::operator++()
 {
-  if (this->current_)
+  if (this->current_) {
     this->current_ = this->current_->next_send_sample_;
+  }
 
   return *this;
 }
@@ -224,11 +210,11 @@ SendStateDataSampleListConstIterator::operator++(int)
 SendStateDataSampleListConstIterator&
 SendStateDataSampleListConstIterator::operator--()
 {
-  if (this->current_)
+  if (this->current_) {
     this->current_ = this->current_->previous_send_sample_;
-
-  else
+  } else {
     this->current_ = this->tail_;
+  }
 
   return *this;
 }

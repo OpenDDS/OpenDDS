@@ -117,6 +117,40 @@ bool TypeLookupService::type_object_in_cache(const TypeIdentifier& ti) const
   return it_type_id_with_size_seq != minimal_type_map_.end();
 }
 
+bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIdentifier& type_id) const
+{
+  bool result = false;
+  TypeObject to = get_type_objects(type_id);
+
+  if (TK_UNION == to.minimal.kind) {
+    result = to.minimal.union_type.union_flags & extensibility_mask;
+  } else if (TK_STRUCTURE == to.minimal.kind) {
+    result = to.minimal.struct_type.struct_flags & extensibility_mask;
+  }
+
+  if (result) {
+    return true;
+  }
+
+  TypeIdentifierWithSizeSeq dependencies;
+  TypeIdentifierSeq type_ids;
+  type_ids.append(type_id);
+  get_type_dependencies(type_ids, dependencies);
+
+  for (unsigned i = 0; i < dependencies.length(); ++i) {
+    TypeObject dep_to = get_type_objects(dependencies[i].type_id);
+    if (TK_UNION == dep_to.minimal.kind) {
+      result = dep_to.minimal.union_type.union_flags & extensibility_mask;
+    } else if (TK_STRUCTURE == dep_to.minimal.kind) {
+      result = dep_to.minimal.struct_type.struct_flags & extensibility_mask;
+    }
+    if (result) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 

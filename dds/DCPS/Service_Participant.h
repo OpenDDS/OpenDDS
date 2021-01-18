@@ -674,7 +674,7 @@ private:
   /// Scheduler time slice from configuration file.
   TimeDuration schedulerQuantum_;
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
   /// Pool size from configuration file.
   size_t pool_size_;
 

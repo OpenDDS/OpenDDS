@@ -28,6 +28,7 @@ lib*.dylib
 *.VC.opendb
 .vs/
 .vscode/
+.idea/
 
 /setenv.sh
 /setenv.cmd
@@ -40,7 +41,6 @@ lib*.dylib
 /ipch
 /ACE_wrappers
 /ACE_TAO
-.idea/
-.vs/
 /tags
 /host_tools.mwc*
+/OpenDDS_custom.mwc*

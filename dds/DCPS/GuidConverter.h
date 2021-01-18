@@ -8,16 +8,13 @@
 #ifndef OPENDDS_DCPS_GUIDCONVERTER_H
 #define OPENDDS_DCPS_GUIDCONVERTER_H
 
-#include "tao/Basic_Types.h"
-
-#include "dds/DdsDcpsGuidC.h"
-
-#include "GuidUtils.h"
-
 #include "dcps_export.h"
 #include "Definitions.h"
 #include "SafetyProfileStreams.h"
 #include "PoolAllocator.h"
+#include "GuidUtils.h"
+
+#include <dds/DdsDcpsGuidC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -115,6 +112,10 @@ protected:
 struct OpenDDS_Dcps_Export LogGuid {
   explicit LogGuid(const GUID_t& id)
     : conv_(GuidConverter(id)) {}
+  explicit LogGuid(const GuidPrefix_t& prefix)
+    : conv_(GuidConverter(make_part_guid(prefix)))
+  {
+  }
   const char* c_str() const { return conv_.c_str(); }
   OPENDDS_STRING conv_;
 };
@@ -129,8 +130,8 @@ operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 #endif //DDS_HAS_WCHAR
 #endif //OPENDDS_SAFETY_PROFILE
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
