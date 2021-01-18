@@ -4,11 +4,13 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 #include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
 #include <ace/SString.h>
 #include "ace/Time_Value.h"
+#include "BenchTypeSupportImpl.h"
 
 #include "Bench_Common_Export.h"
 
@@ -39,6 +41,9 @@ std::string Bench_Common_Export iso8601(const std::chrono::system_clock::time_po
 
 uint32_t Bench_Common_Export one_at_a_time_hash(const uint8_t* key, size_t length);
 
+int Bench_Common_Export handle_report(const Bench::TestController::Report& report,
+  const std::unordered_set<std::string>& tags,
+  std::ostringstream& result_out);
 }
 
 #endif
