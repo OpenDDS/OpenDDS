@@ -299,7 +299,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
     DEFAULT_STATUS_MASK);
 
-  ACE_OS::sleep(ACE_Time_Value(5, 0));
+  ACE_OS::sleep(ACE_Time_Value(7, 0));
 
   failed = !check_inconsistent_topic_status(topic);
 
