@@ -277,7 +277,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
 
-  ACE_OS::sleep(ACE_Time_Value(1, 0));
+  ACE_OS::sleep(ACE_Time_Value(5, 0));
 
   failed = !check_inconsistent_topic_status(topic);
 
