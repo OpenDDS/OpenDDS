@@ -3915,6 +3915,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_octet && ev->u.oval == 0) ||
               (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
           {
+            AST_Type* br = resolveActualType(branch->field_type());
+            Classification br_cls = classify(br);
+            if (br_cls & (CL_SEQUENCE | CL_ARRAY)) {
+              be_global->impl_ << scoped(branch->field_type()->name()) << " " << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n";
+            }
             be_global->impl_ << type_to_default("  ", branch->field_type(), string("uni.")
               + branch->local_name()->get_string(), false, true);
             found = true;
