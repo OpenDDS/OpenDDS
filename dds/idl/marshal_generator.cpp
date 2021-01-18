@@ -3401,6 +3401,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     be_global->impl_ <<
       "    if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
       "      unsigned field_id = map_name_to_id(base_field.c_str());\n"
+      "      ACE_UNUSED_ARG(field_id);\n"
       "      unsigned member_id;\n"
       "      size_t field_size;\n"
       "      const size_t end_of_struct = strm.pos() + total_size;\n"
