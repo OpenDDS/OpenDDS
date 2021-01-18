@@ -98,7 +98,7 @@ void DataReaderListenerImpl::on_subscription_matched(::DDS::DataReader_ptr reade
   }
 =======
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
 }
 >>>>>>> upstream/master
 
@@ -114,7 +114,7 @@ void DataReaderListenerImpl::on_sample_rejected(::DDS::DataReader_ptr reader,
   }
 =======
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
 }
 >>>>>>> upstream/master
 
@@ -145,6 +145,6 @@ void DataReaderListenerImpl::on_sample_lost(::DDS::DataReader_ptr reader,
   }
 =======
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
 }
 >>>>>>> upstream/master
