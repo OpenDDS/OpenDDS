@@ -10,6 +10,7 @@ project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj {
 
   Idl_Files {
     !XTypesSub.idl
+    !XTypesSubTypeSupport.idl
   }
 
   Source_Files {
@@ -35,6 +36,7 @@ project(XTypes_Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj {
 
   Idl_Files {
     !XTypesPub.idl
+    !XTypesPubTypeSupport.idl
   }
 
   Source_Files {
