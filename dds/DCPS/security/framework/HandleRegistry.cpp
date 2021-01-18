@@ -239,7 +239,7 @@ HandleRegistry::get_remote_datareader_security_attributes(const DCPS::RepoId& id
 HandleRegistry::DatareaderCryptoHandleList
 HandleRegistry::get_all_remote_datareaders(const DCPS::RepoId& prefix) const
 {
-  const DCPS::GuidPrefixEqual guid_prefix_equal;
+  const DCPS::GuidPrefixEqual guid_prefix_equal = DCPS::GuidPrefixEqual();
   DatareaderCryptoHandleList retval;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, retval);
   for (DatareaderCryptoHandleMap::const_iterator pos =
@@ -310,7 +310,7 @@ HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::RepoId& id
 HandleRegistry::DatawriterCryptoHandleList
 HandleRegistry::get_all_remote_datawriters(const DCPS::RepoId& prefix) const
 {
-  const DCPS::GuidPrefixEqual guid_prefix_equal;
+  const DCPS::GuidPrefixEqual guid_prefix_equal = DCPS::GuidPrefixEqual();
   DatawriterCryptoHandleList retval;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, retval);
   for (DatawriterCryptoHandleMap::const_iterator pos =
