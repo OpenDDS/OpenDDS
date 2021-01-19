@@ -9,9 +9,10 @@
 #include "dds/DCPS/Message_Block_Ptr.h"
 
 #include "ace/ACE.h"
-#include "ace/SOCK_Dgram.h"
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Arg_Shifter.h"
+#include "ace/Log_Msg.h"
+#include "ace/SOCK_Dgram.h"
 
 #include <array>
 #include <cstdlib>
@@ -353,7 +354,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   return status;
 }
 #else
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   ACE_ERROR((LM_ERROR, "ERROR: No IETF STUN support in this build\n"));
   return EXIT_FAILURE;
