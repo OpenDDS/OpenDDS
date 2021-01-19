@@ -74,6 +74,10 @@ typedef sequence <ShortSeqBound2> SeqShortSeqBoundUnbound2;
 typedef sequence <@try_construct(TRIM) ShortSeqBound, 2> SeqShortSeqBoundBound;
 typedef sequence <ShortSeqBound2, 3> SeqShortSeqBoundBound2;
 
+union NestedUnionDefaultSeq switch (EnumType) {
+  case VALUE1: ShortSeqUnbound ss_ub;
+  case VALUE2: short u_s;
+};
 
 //arrays
 //enum
@@ -91,6 +95,11 @@ typedef short ShortArrThreeDim[3][3][3];
 //sequence
 typedef ShortSeqUnbound ArrSeqUnbound[3];
 typedef ShortSeqBound ArrSeqBound[3];
+
+union NestedUnionDefaultArr switch (EnumType) {
+  case VALUE1: UnsignedShortArr u_sa;
+  case VALUE2: short u_s;
+};
 
 //anon seq
 //enum
