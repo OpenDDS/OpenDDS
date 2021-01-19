@@ -87,12 +87,12 @@ sub run_test {
 
   my @reader_args = ("-DCPSConfigFile $v->{r_ini} -ORBLogFile subscriber_$test_name_param.log --reader --type $v->{reader_type}");
   push(@reader_args, @test_args);
-  $test->process("reader_$test_name_param", 'xtypes_subscriber', join(' ', @reader_args));
+  $test->process("reader_$test_name_param", './Sub/xtypes_subscriber', join(' ', @reader_args));
   $test->start_process("reader_$test_name_param");
 
   my @writer_args = ("-DCPSConfigFile $v->{w_ini} -ORBLogFile publisher_$test_name_param.log --writer --type $v->{writer_type}");
   push(@writer_args, @test_args);
-  $test->process("writer_$test_name_param", 'xtypes_publisher', join(' ', @writer_args));
+  $test->process("writer_$test_name_param", './Pub/xtypes_publisher', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
 }
 

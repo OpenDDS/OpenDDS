@@ -1,0 +1,14 @@
+project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj {
+
+  exename   = xtypes_publisher
+  
+  includes += ..
+
+  TypeSupport_Files {
+    XTypesPub.idl
+  }
+
+  Source_Files {
+    XTypesPublisher.cpp
+  }
+}
