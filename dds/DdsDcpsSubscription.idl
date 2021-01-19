@@ -8,8 +8,8 @@
 #ifndef OPENDDS_DDSDCPSSUBSCRIPTION_IDL
 #define OPENDDS_DDSDCPSSUBSCRIPTION_IDL
 
-#include "DdsDcpsInfrastructure.idl"
-#include "DdsDcpsDataReaderSeq.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/DdsDcpsDataReaderSeq.idl>
 
 #pragma ciao lem "dds/DdsDcpsSubscriptionE.idl"
 

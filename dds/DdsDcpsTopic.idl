@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DDSDCPSTOPIC_IDL
 #define OPENDDS_DDSDCPSTOPIC_IDL
 
-#include "DdsDcpsInfrastructure.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
 
 #pragma ciao lem "dds/DdsDcpsTopicE.idl"
 

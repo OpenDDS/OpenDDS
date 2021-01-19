@@ -8,10 +8,10 @@
 #ifndef OPENDDS_DDSDCPSDOMAIN_IDL
 #define OPENDDS_DDSDCPSDOMAIN_IDL
 
-#include "DdsDcpsInfrastructure.idl"
-#include "DdsDcpsTopic.idl"
-#include "DdsDcpsPublication.idl"
-#include "DdsDcpsSubscription.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/DdsDcpsTopic.idl>
+#include <dds/DdsDcpsPublication.idl>
+#include <dds/DdsDcpsSubscription.idl>
 
 #pragma ciao lem "dds/DdsDcpsDomainE.idl"
 

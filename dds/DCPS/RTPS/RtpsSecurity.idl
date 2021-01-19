@@ -9,8 +9,7 @@
 #ifndef OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
 #define OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
 
-#include "RtpsCore.idl"
-
+#include <dds/DCPS/RTPS/RtpsCore.idl>
 #include <dds/DdsSecurityCore.idl>
 
 module OpenDDS {
