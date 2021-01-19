@@ -163,6 +163,7 @@
 /TypeSupportHelper.java
 /TypeSupportHolder.java
 /TypeSupportOperations.java
+/UNALIGNED_CDR_DATA_REPRESENTATION.java
 /_ConnectionDataDataReaderLocalBase.java
 /_ConnectionDataDataReaderTAOPeer.java
 /_ConnectionDataDataWriterLocalBase.java

@@ -6,13 +6,15 @@
  */
 
 #include "ts_generator.h"
+
 #include "be_extern.h"
 #include "be_util.h"
 #include "topic_keys.h"
+#include "typeobject_generator.h"
 
-#include "utl_identifier.h"
+#include <utl_identifier.h>
 
-#include "ace/OS_NS_sys_stat.h"
+#include <ace/OS_NS_sys_stat.h>
 
 #include <cstring>
 #include <fstream>
@@ -91,7 +93,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       return true;
     }
   } else if (be_global->is_topic_type(union_node)) {
-    key_count = be_global->has_key(union_node) ? 1 : 0;
+    key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
   } else {
     return true;
   }
@@ -124,7 +126,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
     "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
     "dds/DCPS/MultiTopicDataReader_T.h", "dds/DCPS/DataWriterImpl_T.h",
-    "dds/DCPS/DataReaderImpl_T.h"
+    "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/XTypes/TypeObject.h"
   };
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 
@@ -150,7 +152,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
-    "namespace OpenDDS { namespace DCPS {\n"
+    "namespace OpenDDS {\n"
+    "namespace DCPS {\n"
     "template <>\n"
     "struct DDSTraits<" << cxxName << "> {\n"
     "  typedef " << cxxName << " MessageType;\n"
@@ -160,17 +163,15 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "  typedef " << cxxName << "DataWriter DataWriterType;\n"
     "  typedef " << cxxName << "DataReader DataReaderType;\n"
     "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
+    "  typedef OpenDDS::DCPS::KeyOnly<const " << cxxName << "> KeyOnlyType;\n"
     "\n"
-    "  static const char* type_name () { return \"" << cxxName << "\"; }\n"
-    "  static bool gen_has_key () { return " << (key_count ? "true" : "false") << "; }\n"
-    "  static size_t key_count () { return " << key_count << "; }\n"
-    "\n"
-    "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
-    "\n"
-    "  static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
-    "};\n}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+    "  static const char* type_name() { return \"" << cxxName << "\"; }\n"
+    "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
+    "  static size_t key_count() { return " << key_count << "; }\n"
+    "};\n"
+    "} // namespace DCPS\n"
+    "} // namespace OpenDDS\n"
+    "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
   be_global->header_ << be_global->versioning_begin() << "\n";
   {
@@ -183,6 +184,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "{\n"
       "public:\n"
       "  typedef OpenDDS::DCPS::DDSTraits<" << short_name << "> TraitsType;\n"
+      "  typedef OpenDDS::DCPS::MarshalTraits<" << short_name << "> MarshalTraitsType;\n"
       "  typedef " << short_name << "TypeSupport TypeSupportType;\n"
       "  typedef " << short_name << "TypeSupport::_var_type _var_type;\n"
       "  typedef " << short_name << "TypeSupport::_ptr_type _ptr_type;\n"
@@ -200,6 +202,14 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n"
       "  virtual bool has_dcps_key();\n"
       "  const char* default_type_name() const;\n"
+      "\n"
+      "  void representations_allowed_by_type(::DDS::DataRepresentationIdSeq& seq);\n"
+      "\n"
+      "  virtual const OpenDDS::XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;\n"
+      "  virtual const OpenDDS::XTypes::TypeMap& getMinimalTypeMap() const;\n"
+      "\n"
+      "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
+      "\n"
       "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
   }
@@ -244,11 +254,30 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n\n"
       "bool " << short_name << "TypeSupportImpl::has_dcps_key()\n"
       "{\n"
-      "  return TraitsType::gen_has_key ();\n"
+      "  return TraitsType::gen_has_key();\n"
       "}\n\n"
       "const char* " << short_name << "TypeSupportImpl::default_type_name() const\n"
       "{\n"
       "  return TraitsType::type_name();\n"
+      "}\n"
+      "\n"
+      "void " << short_name << "TypeSupportImpl::representations_allowed_by_type(\n"
+      "  ::DDS::DataRepresentationIdSeq& seq)\n"
+      "{\n"
+      "  MarshalTraitsType::representations_allowed_by_type(seq);\n"
+      "}\n"
+      "\n"
+      "const OpenDDS::XTypes::TypeIdentifier& " << short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
+      "{\n"
+      "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "}\n\n"
+      "const OpenDDS::XTypes::TypeMap& " << short_name << "TypeSupportImpl::getMinimalTypeMap() const\n"
+      "{\n"
+      "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "}\n\n"
+      "OpenDDS::DCPS::Extensibility " << short_name << "TypeSupportImpl::getExtensibility() const\n"
+      "{\n"
+      "  return MarshalTraitsType::extensibility();\n"
       "}\n\n"
       << short_name << "TypeSupport::_ptr_type " << short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"

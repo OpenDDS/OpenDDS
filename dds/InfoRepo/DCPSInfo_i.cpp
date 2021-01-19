@@ -34,6 +34,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace {
+  const ACE_CDR::ULong transportContextDefault = 0xffffffff;
+}
+
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
                                        , bool reincarnate
@@ -372,8 +376,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataWriterRemote_ptr publication,
   const DDS::DataWriterQos & qos,
-  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-  const DDS::PublisherQos & publisherQos)
+  const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+  const DDS::PublisherQos& publisherQos,
+  const DDS::OctetSeq& serializedTypeInfo)
 {
   if (CORBA::is_nil(publication)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -438,7 +443,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                    dispatchingPublication.in(),
                    qos,
                    transInfo,
-                   publisherQos));
+                   transportContextDefault,
+                   publisherQos,
+                   serializedTypeInfo));
 
   DCPS_IR_Publication* pub = pubPtr.get();
   if (partPtr->add_publication(OpenDDS::DCPS::move(pubPtr)) != 0) {
@@ -457,10 +464,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
 
     Update::UWActor actor(domainId, pubId, topicId, participantId, Update::DataWriter
                           , callback.in()
-                          , const_cast<DDS::PublisherQos &>(publisherQos)
-                          , const_cast<DDS::DataWriterQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
-                          (transInfo), csi);
+                          , const_cast<DDS::PublisherQos&>(publisherQos)
+                          , const_cast<DDS::DataWriterQos&>(qos)
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
+                          , transportContextDefault, csi
+                          , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
     this->um_->create(actor);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -485,7 +493,9 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                                     const char* pub_str,
                                     const DDS::DataWriterQos & qos,
                                     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                                    ACE_CDR::ULong transportContext,
                                     const DDS::PublisherQos & publisherQos,
+                                    const DDS::OctetSeq & serializedTypeInfo,
                                     bool associate)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
@@ -556,7 +566,9 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                    publication.in(),
                    qos,
                    transInfo,
-                   publisherQos));
+                   transportContext,
+                   publisherQos,
+                   serializedTypeInfo));
 
   DCPS_IR_Publication* pub = pubPtr.get();
   switch (partPtr->add_publication(move(pubPtr))) {
@@ -672,7 +684,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   const DDS::SubscriberQos & subscriberQos,
   const char* filterClassName,
   const char* filterExpression,
-  const DDS::StringSeq& exprParams)
+  const DDS::StringSeq& exprParams,
+  const DDS::OctetSeq & serializedTypeInfo)
 {
   if (CORBA::is_nil(subscription)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -742,10 +755,12 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
                      dispatchingSubscription.in(),
                      qos,
                      transInfo,
+                     transportContextDefault,
                      subscriberQos,
                      filterClassName,
                      filterExpression,
-                     exprParams));
+                     exprParams,
+                     serializedTypeInfo));
 
     // Release lock
   }
@@ -767,10 +782,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
 
     Update::URActor actor(domainId, subId, topicId, participantId, Update::DataReader
                           , callback.in()
-                          , const_cast<DDS::SubscriberQos &>(subscriberQos)
-                          , const_cast<DDS::DataReaderQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
-                          (transInfo), csi);
+                          , const_cast<DDS::SubscriberQos&>(subscriberQos)
+                          , const_cast<DDS::DataReaderQos&>(qos)
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq&>(transInfo)
+                          , transportContextDefault, csi
+                          , const_cast<DDS::OctetSeq&>(serializedTypeInfo));
 
     this->um_->create(actor);
 
@@ -798,10 +814,12 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const char* sub_str,
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+  ACE_CDR::ULong transportContext,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterClassName,
   const char* filterExpression,
   const DDS::StringSeq& exprParams,
+  const DDS::OctetSeq & serializedTypeInfo,
   bool associate)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
@@ -873,10 +891,12 @@ TAO_DDS_DCPSInfo_i::add_subscription(
                    subscription.in(),
                    qos,
                    transInfo,
+                   transportContext,
                    subscriberQos,
                    filterClassName,
                    filterExpression,
-                   exprParams));
+                   exprParams,
+                   serializedTypeInfo));
 
   DCPS_IR_Subscription* sub = subPtr.get();
   switch (partPtr->add_subscription(OpenDDS::DCPS::move(subPtr))) {
@@ -2145,6 +2165,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 {
   int status = 0;
 
+#ifndef DDS_HAS_MINIMUM_BIT
   try {
 
 #ifndef ACE_AS_STATIC_LIBS
@@ -2187,6 +2208,8 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     // beyond this point.
     status = 1;
   }
+#endif
+
   return status;
 }
 
@@ -2277,16 +2300,17 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
   for (Update::UImage::ReaderSeq::const_iterator iter = image.actors.begin();
        iter != image.actors.end(); iter++) {
     const Update::URActor* sub = *iter;
-
     // no reason to associate, there are no publishers yet to associate with
     if (!this->add_subscription(sub->domainId, sub->participantId
                                 , sub->topicId, sub->actorId
                                 , sub->callback.c_str(), sub->drdwQos
                                 , sub->transportInterfaceInfo
+                                , sub->transportContext
                                 , sub->pubsubQos
                                 , sub->contentSubscriptionProfile.filterClassName
                                 , sub->contentSubscriptionProfile.filterExpr
-                                , sub->contentSubscriptionProfile.exprParams)) {
+                                , sub->contentSubscriptionProfile.exprParams
+                                , sub->serializedTypeInfo)) {
       OpenDDS::DCPS::RepoIdConverter sub_converter(sub->actorId);
       OpenDDS::DCPS::RepoIdConverter part_converter(sub->participantId);
       ACE_ERROR((LM_ERROR,
@@ -2316,8 +2340,9 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
     if (!this->add_publication(pub->domainId, pub->participantId
                                , pub->topicId, pub->actorId
                                , pub->callback.c_str() , pub->drdwQos
-                               , pub->transportInterfaceInfo
+                               , pub->transportInterfaceInfo, pub->transportContext
                                , pub->pubsubQos
+                               , pub->serializedTypeInfo
                                , true)) {
       OpenDDS::DCPS::RepoIdConverter pub_converter(pub->actorId);
       OpenDDS::DCPS::RepoIdConverter part_converter(pub->participantId);

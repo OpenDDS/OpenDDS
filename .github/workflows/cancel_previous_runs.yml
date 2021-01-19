@@ -1,0 +1,18 @@
+name: Cancel Duplicate Workflow Runs
+
+on:
+  workflow_run:
+    workflows: ["Build & Test"]
+    types: ['requested']
+
+jobs:
+  cancel-duplicate-workflow-runs:
+    name: "Cancel Duplicate Workflow Runs"
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: potiuk/cancel-workflow-runs@v4_7
+      name: "Cancel Duplicate Workflow Runs"
+      with:
+        cancelMode: allDuplicates
+        token: ${{ secrets.GITHUB_TOKEN }}
+        sourceRunId: ${{ github.event.workflow_run.id }}

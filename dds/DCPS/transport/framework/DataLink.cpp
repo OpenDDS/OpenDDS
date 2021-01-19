@@ -600,7 +600,7 @@ DataLink::create_control(char submessage_id,
   ACE_NEW_MALLOC_RETURN(message,
                         static_cast<ACE_Message_Block*>(
                           this->mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(header.max_marshaled_size(),
+                        ACE_Message_Block(header.get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(),
                                           0,  // data
@@ -1196,8 +1196,12 @@ std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {
   str << "   There are " << value.assoc_by_local_.size()
-      << " local entities currently using this link comprising following associations:"
-      << std::endl;
+      << " local entities currently using this link";
+
+  if (!value.assoc_by_local_.empty()) {
+    str << " comprising following associations:";
+  }
+  str << std::endl;
 
   typedef DataLink::AssocByLocal::const_iterator assoc_iter_t;
   const DataLink::AssocByLocal& abl = value.assoc_by_local_;

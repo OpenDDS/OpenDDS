@@ -32,6 +32,7 @@ public:
   DDS::Topic_var& get_dds_topic();
 
   bool enable(bool throw_on_error = false);
+  void detach_listener();
 
 protected:
   const std::string name_;

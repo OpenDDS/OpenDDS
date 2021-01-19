@@ -18,10 +18,12 @@
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/security/Utility.h"
+#include "HandleRegistry.h"
 #endif
 
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
 
 #include "ace/Synch_Traits.h"
@@ -78,6 +80,40 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   {
     return utility_plugin_;
   }
+
+  void insert_handle_registry(const DCPS::RepoId& participant_id,
+                              const HandleRegistry_rch& handle_registry)
+  {
+    handle_registry_map_[participant_id] = handle_registry;
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("SecurityConfig::insert_handle_registry handle_registry_map_ (total %B)\n"),
+                 handle_registry_map_.size()));
+    }
+  }
+
+  HandleRegistry_rch get_handle_registry(const DCPS::RepoId& participant_id)
+  {
+    HandleRegistryMap::const_iterator pos = handle_registry_map_.find(participant_id);
+    if (pos != handle_registry_map_.end()) {
+      return pos->second;
+    }
+
+    return HandleRegistry_rch();
+  }
+
+  void erase_handle_registry(const DCPS::RepoId& participant_id)
+  {
+    handle_registry_map_.erase(participant_id);
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("SecurityConfig::erase_handle_registry handle_registry_map_ (total %B)\n"),
+                 handle_registry_map_.size()));
+    }
+  }
+
 #endif
 
   void get_properties(DDS::PropertyQosPolicy& properties) const;
@@ -112,6 +148,8 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   CryptoKeyFactory_var key_factory_plugin_;
   CryptoTransform_var transform_plugin_;
   Utility* utility_plugin_;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, HandleRegistry_rch, DCPS::GUID_tKeyLessThan) HandleRegistryMap;
+  HandleRegistryMap handle_registry_map_;
 #endif
 
   ConfigPropertyList properties_;

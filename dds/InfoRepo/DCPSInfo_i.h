@@ -122,7 +122,8 @@ public:
     OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const DDS::DataWriterQos & qos,
     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-    const DDS::PublisherQos & publisherQos);
+    const DDS::PublisherQos & publisherQos,
+    const DDS::OctetSeq & serializedTypeInfo);
 
   /**
    * @brief Add a previously existing publication to the repository.
@@ -152,7 +153,9 @@ public:
                        const char* pub_str,
                        const DDS::DataWriterQos & qos,
                        const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                       ACE_CDR::ULong transportContext,
                        const DDS::PublisherQos & publisherQos,
+                       const DDS::OctetSeq & serializedTypeInfo,
                        bool associate = false);
 
   virtual void remove_publication(
@@ -170,7 +173,8 @@ public:
     const DDS::SubscriberQos & subscriberQos,
     const char* filterClassName,
     const char* filterExpression,
-    const DDS::StringSeq& exprParams);
+    const DDS::StringSeq& exprParams,
+    const DDS::OctetSeq & serializedTypeInfo);
 
   /**
    * @brief Add a previously existing subscription to the repository.
@@ -200,10 +204,12 @@ public:
                         const char* sub_str,
                         const DDS::DataReaderQos & qos,
                         const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                        ACE_CDR::ULong transportContext,
                         const DDS::SubscriberQos & subscriberQos,
                         const char* filterClassName,
                         const char* filterExpression,
                         const DDS::StringSeq& exprParams,
+                        const DDS::OctetSeq & serializedTypeInfo,
                         bool associate = false);
 
   virtual void remove_subscription(

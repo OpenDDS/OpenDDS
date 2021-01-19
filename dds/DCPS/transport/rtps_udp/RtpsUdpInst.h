@@ -38,7 +38,6 @@ public:
 
   size_t max_message_size_;
   size_t nak_depth_;
-  size_t max_bundle_size_;
   double quick_reply_ratio_;
   TimeDuration nak_response_delay_, heartbeat_period_,
     heartbeat_response_delay_, handshake_timeout_, durable_data_timeout_;
@@ -50,7 +49,7 @@ public:
   virtual OPENDDS_STRING dump_to_str() const;
 
   bool is_reliable() const { return true; }
-  bool requires_cdr() const { return true; }
+  bool requires_cdr_encapsulation() const { return true; }
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;

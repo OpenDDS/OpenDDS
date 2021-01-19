@@ -20,6 +20,7 @@
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
 #include "MonitorFactory.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
@@ -358,14 +359,23 @@ ReplayerImpl::enable()
 
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+
+
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
-                           this->publisher_qos_);
+                           this->publisher_qos_,
+                           type_info);
 
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
@@ -430,6 +440,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -786,8 +797,8 @@ ReplayerImpl::data_delivered(const DataSampleElement* sample)
 
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    if ((--pending_write_count_) == 0) {
-      empty_condition_.broadcast();
+    if (--pending_write_count_ == 0) {
+      empty_condition_.notify_all();
     }
   }
 }
@@ -811,7 +822,7 @@ ReplayerImpl::data_dropped(const DataSampleElement* sample,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     if ((--pending_write_count_) == 0) {
-      empty_condition_.broadcast();
+      empty_condition_.notify_all();
     }
   }
 }
@@ -946,7 +957,7 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
   header_data.message_id_ = SAMPLE_DATA;
   header_data.coherent_change_ = content_filter;
 
-  header_data.content_filter_ = 0;
+  header_data.content_filter_ = false;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_repair_ = need_sequence_repair();
@@ -968,12 +979,11 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
 
   // header_data.publication_id_ = publication_id_;
   // header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
   ACE_Message_Block* tmp;
   ACE_NEW_MALLOC_RETURN(tmp,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
+                        ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(),   //cont
                                           0,   //data

@@ -10,6 +10,8 @@
 #include "be_util.h"
 #include "be_extern.h"
 
+#include "dds/DCPS/XTypes/TypeObject.h"
+
 #include <ast_generator.h>
 #include <global_extern.h>
 #include <idl_defines.h>
@@ -32,6 +34,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <set>
 
@@ -44,16 +47,27 @@ BE_GlobalData::BE_GlobalData()
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
+  , suppress_xtypes_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
   , generate_rapidjson_(false)
   , face_ts_(false)
+  , printer_(false)
+  , filename_only_includes_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
+  , default_extensibility_(extensibilitykind_appendable)
+  , root_default_autoid_(autoidkind_sequential)
+  , default_try_construct_(tryconstructfailaction_discard)
 {
+  default_data_representation_.set_all(true);
+
+  platforms_.insert("*");
+  platforms_.insert("DDS");
+  platforms_.insert("OpenDDS");
 }
 
 BE_GlobalData::~BE_GlobalData()
@@ -197,6 +211,17 @@ bool BE_GlobalData::no_default_gen() const
   return this->no_default_gen_;
 }
 
+void BE_GlobalData::filename_only_includes(bool b)
+{
+  this->filename_only_includes_ = b;
+}
+
+bool BE_GlobalData::filename_only_includes() const
+{
+  return this->filename_only_includes_;
+}
+
+
 void BE_GlobalData::itl(bool b)
 {
   this->generate_itl_ = b;
@@ -235,6 +260,16 @@ void BE_GlobalData::face_ts(bool b)
 bool BE_GlobalData::face_ts() const
 {
   return this->face_ts_;
+}
+
+void BE_GlobalData::printer(bool b)
+{
+  this->printer_ = b;
+}
+
+bool BE_GlobalData::printer() const
+{
+  return this->printer_;
 }
 
 void
@@ -299,16 +334,11 @@ BE_GlobalData::spawn_options()
   return idl_global->idl_flags();
 }
 
-void invalid_option(char * option)
+void invalid_option(char* option)
 {
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
-#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
   idl_global->parse_args_exit(1);
-#else
-  idl_global->set_compile_flags(
-    idl_global->compile_flags() | IDL_CF_ONLY_USAGE);
-#endif
 }
 
 void
@@ -327,18 +357,23 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
   static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
 
+  static const char FILENAME_ONLY_INCLUDES_FLAG[] = "--filename-only-includes";
+  static const size_t FILENAME_ONLY_INCLUDES_FLAG_SIZE = sizeof(FILENAME_ONLY_INCLUDES_FLAG) - 1;
+
   switch (av[i][1]) {
   case 'o':
-    idl_global->append_idl_flag(av[i + 1]);
-    if (ACE_OS::mkdir(av[i + 1]) != 0 && errno != EEXIST) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("IDL: unable to create directory %C")
-        ACE_TEXT(" specified by -o option\n"), av[i + 1]));
-#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
+    if (av[++i] == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for -o\n")));
       idl_global->parse_args_exit(1);
-#endif
     } else {
-      output_dir_ = av[++i];
+      idl_global->append_idl_flag(av[i]);
+      if (ACE_OS::mkdir(av[i]) != 0 && errno != EEXIST) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: unable to create directory %C")
+          ACE_TEXT(" specified by -o option\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      } else {
+        output_dir_ = av[i];
+      }
     }
     break;
 
@@ -348,9 +383,11 @@ BE_GlobalData::parse_args(long& i, char** av)
     } else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS")) {
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
-      be_global->v8(true);
+      v8(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Grapidjson")) {
-      be_global->rapidjson(true);
+      rapidjson(true);
+    } else if (!ACE_OS::strcasecmp(av[i], "-Gprinter")) {
+      printer(true);
     } else {
       invalid_option(av[i]);
     }
@@ -385,6 +422,9 @@ BE_GlobalData::parse_args(long& i, char** av)
     case 't':
       suppress_typecode_ = true;
       break;
+    case 'x':
+      suppress_xtypes_ = true;
+      break;
     case 'a':
       // ignore, accepted for tao_idl compatibility
       break;
@@ -402,6 +442,51 @@ BE_GlobalData::parse_args(long& i, char** av)
       root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       warn_about_dcps_data_type_ = false;
+    } else if (!ACE_OS::strncasecmp(av[i], FILENAME_ONLY_INCLUDES_FLAG, FILENAME_ONLY_INCLUDES_FLAG_SIZE)) {
+      filename_only_includes_ = true;
+    } else if (!std::strcmp(av[i], "--default-extensibility")) {
+      if (av[++i] == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-extensibility\n")));
+        idl_global->parse_args_exit(1);
+      } else if (!std::strcmp(av[i], "final")) {
+        default_extensibility_ = extensibilitykind_final;
+      } else if (!std::strcmp(av[i], "appendable")) {
+        default_extensibility_ = extensibilitykind_appendable;
+      } else if (!std::strcmp(av[i], "mutable")) {
+        default_extensibility_ = extensibilitykind_mutable;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      }
+    } else if (!std::strcmp(av[i], "--default-autoid")) {
+      if (av[++i] == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
+        idl_global->parse_args_exit(1);
+      } else if (!std::strcmp(av[i], "sequential")) {
+        root_default_autoid_ = autoidkind_sequential;
+      } else if (!std::strcmp(av[i], "hash")) {
+        root_default_autoid_ = autoidkind_hash;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-autoid: %C\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      }
+    } else if (!std::strcmp(av[i], "--default-try-construct")) {
+      if (av[++i] == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-try-construct\n")));
+        idl_global->parse_args_exit(1);
+      } else if (!std::strcmp(av[i], "discard")) {
+        default_try_construct_ = tryconstructfailaction_discard;
+      } else if (!std::strcmp(av[i], "use-default")) {
+        default_try_construct_ = tryconstructfailaction_use_default;
+      } else if (!std::strcmp(av[i], "trim")) {
+        default_try_construct_ = tryconstructfailaction_trim;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-try-construct: %C\n"), av[i]));
+        idl_global->parse_args_exit(1);
+      }
     } else {
       invalid_option(av[i]);
     }
@@ -525,18 +610,37 @@ namespace {
     return base_name + suffix;
   }
 
-  std::string make_relative(const std::string& absolute)
+  std::string make_relative(const std::string& absolute, const bool filename_only_includes)
   {
     for (Includes_t::const_iterator iter = inc_path_.begin(),
         end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
+
         if (rel.size() && (rel[0] == '/' || rel[0] == '\\')) {
           rel.erase(0, 1);
         }
+
+        if (filename_only_includes) {
+          size_t loc = rel.rfind('/', rel.length());
+          size_t locw = rel.rfind('\\', rel.length());
+
+          if (loc != string::npos && locw != string::npos) {
+            // path may contain both '/' and '\'. choose the last one.
+            loc = loc > locw ? loc : locw;
+          } else if (loc == string::npos) {
+            loc = locw;
+          }
+
+          if (loc != string::npos) {
+            rel = rel.substr(loc + 1, rel.length() - loc);
+          }
+        }
+
         return rel;
       }
     }
+
     return absolute;
   }
 
@@ -553,15 +657,17 @@ namespace {
 
   struct InsertRefIncludes : InsertIncludes {
     const char* const suffix_;
+    bool filename_only_includes_;
 
-    InsertRefIncludes(std::ostream& ret, const char* suffix)
+    InsertRefIncludes(std::ostream& ret, const char* suffix, const bool filename_only_includes)
       : InsertIncludes(ret)
       , suffix_(suffix)
+      , filename_only_includes_(filename_only_includes)
     {}
 
     void operator()(const std::string& str) const
     {
-      InsertIncludes::operator()(transform_referenced(make_relative(str), suffix_));
+      InsertIncludes::operator()(transform_referenced(make_relative(str, filename_only_includes_), suffix_));
     }
   };
 }
@@ -598,7 +704,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   switch (which) {
   case STREAM_LANG_H:
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "C.h"));
+                  InsertRefIncludes(ret, "C.h", filename_only_includes_));
     // fall through
   case STREAM_H:
     if (!export_include().empty())
@@ -607,7 +713,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   case STREAM_CPP:
     std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "TypeSupportImpl.h"));
+                  InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
     break;
   default:
     break;
@@ -618,15 +724,27 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 
 bool BE_GlobalData::is_topic_type(AST_Decl* node)
 {
-  return builtin_annotations_["::@topic"]->find_on(node) || !is_nested(node);
+  return !is_nested(node);
 }
 
 bool BE_GlobalData::is_nested(AST_Decl* node)
 {
+  {
+    // @topic overrides @nested and @default_nested.
+    TopicAnnotation* topic = dynamic_cast<TopicAnnotation*>(builtin_annotations_["::@topic"]);
+    TopicValue value;
+    if (topic->node_value_exists(node, value)) {
+      if (platforms_.count(value.platform)) {
+        return false;
+      }
+    }
+  }
+
   NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
     builtin_annotations_["::@nested"]);
-  if (nested->find_on(node)) {
-    return nested->node_value(node);
+  bool value;
+  if (nested->node_value_exists(node, value)) {
+    return value;
   }
 
   return is_default_nested(node->defined_in());
@@ -638,8 +756,9 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
   DefaultNestedAnnotation* default_nested = dynamic_cast<DefaultNestedAnnotation*>(
     builtin_annotations_["::@default_nested"]);
   if (module) {
-    if (default_nested->find_on(module)) {
-      return default_nested->node_value(module);
+    bool value;
+    if (default_nested->node_value_exists(module, value)) {
+      return value;
     }
 
     return is_default_nested(module->defined_in());
@@ -648,13 +767,14 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
   return root_default_nested_;
 }
 
-bool BE_GlobalData::check_key(AST_Field* node, bool& value)
+bool BE_GlobalData::check_key(AST_Decl* node, bool& value) const
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  value = key->absent_value;
   return key->node_value_exists(node, value);
 }
 
-bool BE_GlobalData::has_key(AST_Union* node)
+bool BE_GlobalData::union_discriminator_is_key(AST_Union* node)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
   return key->union_value(node);
@@ -694,4 +814,193 @@ bool BE_GlobalData::warn_about_dcps_data_type()
   }
   warn_about_dcps_data_type_ = false;
   return idl_global->print_warnings();
+}
+
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
+{
+  if (builtin_annotations_["::@final"]->find_on(node)) {
+    return extensibilitykind_final;
+  }
+
+  if (builtin_annotations_["::@appendable"]->find_on(node)) {
+    return extensibilitykind_appendable;
+  }
+
+  if (builtin_annotations_["::@mutable"]->find_on(node)) {
+    return extensibilitykind_mutable;
+  }
+
+  ExtensibilityAnnotation* extensibility_annotation =
+    dynamic_cast<ExtensibilityAnnotation*>(
+      builtin_annotations_["::@extensibility"]);
+  ExtensibilityKind value;
+  if (!extensibility_annotation->node_value_exists(node, value)) {
+    value = default_extensibility_;
+  }
+  return value;
+}
+
+AutoidKind BE_GlobalData::autoid(AST_Decl* node) const
+{
+  AutoidAnnotation* autoid_annotation = dynamic_cast<AutoidAnnotation*>(
+    builtin_annotations_["::@autoid"]);
+  AutoidKind value;
+  if (autoid_annotation->node_value_exists(node, value)) {
+    return value;
+  }
+  return scoped_autoid(node->defined_in());
+}
+
+AutoidKind BE_GlobalData::scoped_autoid(UTL_Scope* scope) const
+{
+  AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
+  AutoidAnnotation* autoid_annotation = dynamic_cast<AutoidAnnotation*>(
+    builtin_annotations_["::@autoid"]);
+  if (module) {
+    AutoidKind value;
+    if (autoid_annotation->node_value_exists(module, value)) {
+      return value;
+    }
+    return scoped_autoid(module->defined_in());
+  }
+  return root_default_autoid_;
+}
+
+bool BE_GlobalData::id(AST_Decl* node, ACE_CDR::ULong& value) const
+{
+  IdAnnotation* id_annotation =
+    dynamic_cast<IdAnnotation*>(builtin_annotations_["::@id"]);
+  return id_annotation->node_value_exists(node, value);
+}
+
+bool BE_GlobalData::hashid(AST_Decl* node, std::string& value) const
+{
+  HashidAnnotation* hashid_annotation =
+    dynamic_cast<HashidAnnotation*>(builtin_annotations_["::@hashid"]);
+  return hashid_annotation->node_value_exists(node, value);
+}
+
+bool BE_GlobalData::is_optional(AST_Decl* node) const
+{
+  OptionalAnnotation* optional_annotation =
+    dynamic_cast<OptionalAnnotation*>(
+      builtin_annotations_["::@optional"]);
+  bool value = optional_annotation->absent_value;
+  optional_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_must_understand(AST_Decl* node) const
+{
+  MustUnderstandAnnotation* must_understand_annotation =
+    dynamic_cast<MustUnderstandAnnotation*>(
+      builtin_annotations_["::@must_understand"]);
+  bool value = must_understand_annotation->absent_value;
+  must_understand_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_key(AST_Decl* node) const
+{
+  bool value;
+  check_key(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_external(AST_Decl* node) const
+{
+  ExternalAnnotation* external_annotation =
+    dynamic_cast<ExternalAnnotation*>(
+      builtin_annotations_["::@external"]);
+  bool value = external_annotation->absent_value;
+  external_annotation->node_value_exists(node, value);
+  return value;
+}
+
+bool BE_GlobalData::is_plain(AST_Decl* node) const
+{
+  ExternalAnnotation* external_annotation =
+    dynamic_cast<ExternalAnnotation*>(
+      builtin_annotations_["::@external"]);
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(
+      builtin_annotations_["::@try_construct"]);
+
+  for (AST_Annotation_Appls::iterator i = node->annotations().begin();
+       i != node->annotations().end(); ++i) {
+    AST_Annotation_Appl* appl = i->get();
+    if (appl &&
+        appl->annotation_decl() != external_annotation->declaration() &&
+        appl->annotation_decl() != try_construct_annotation->declaration()) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+TryConstructFailAction BE_GlobalData::try_construct(AST_Decl* node) const
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(
+      builtin_annotations_["::@try_construct"]);
+  TryConstructFailAction value;
+  if (!try_construct_annotation->node_value_exists(node, value)) {
+    value = default_try_construct_;
+  }
+  return value;
+}
+
+TryConstructFailAction BE_GlobalData::sequence_element_try_construct(AST_Sequence* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->sequence_element_value(node);
+}
+
+TryConstructFailAction BE_GlobalData::array_element_try_construct(AST_Array* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->array_element_value(node);
+}
+
+TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Union* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->union_value(node);
+}
+
+OpenDDS::DataRepresentation BE_GlobalData::data_representations(
+  AST_Decl* node) const
+{
+  using namespace OpenDDS;
+  DataRepresentationAnnotation* data_representation_annotation =
+    dynamic_cast<DataRepresentationAnnotation*>(
+      builtin_annotations_["::OpenDDS::@data_representation"]);
+  DataRepresentation value;
+  if (!data_representation_annotation->node_value_exists(node, value)) {
+    value = default_data_representation_;
+  }
+  return value;
+}
+
+ACE_CDR::ULong BE_GlobalData::get_id(AST_Field* field, AutoidKind auto_id, ACE_CDR::ULong& member_id) const
+{
+  using OpenDDS::XTypes::hash_member_name_to_id;
+  const std::string field_name = field->local_name()->get_string();
+  std::string hash_id;
+  if (id(field, member_id)) {
+    // @id
+    return member_id++;
+  } else if (hashid(field, hash_id)) {
+    // @hashid
+    return hash_member_name_to_id(hash_id.empty() ? field_name : hash_id);
+  } else if (auto_id == autoidkind_hash) {
+    return hash_member_name_to_id(field_name);
+  } else {
+    // auto_id == autoidkind_sequential
+    return member_id++;
+  }
 }

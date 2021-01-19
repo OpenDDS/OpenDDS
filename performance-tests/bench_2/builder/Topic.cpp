@@ -106,20 +106,23 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
   }
 }
 
-Topic::~Topic() {
-  if (topic_) {
-  }
+Topic::~Topic()
+{
+  detach_listener();
 }
 
-const std::string& Topic::get_name() const {
+const std::string& Topic::get_name() const
+{
   return name_;
 }
 
-DDS::Topic_var& Topic::get_dds_topic() {
+DDS::Topic_var& Topic::get_dds_topic()
+{
   return topic_;
 }
 
-bool Topic::enable(bool throw_on_error) {
+bool Topic::enable(bool throw_on_error)
+{
   bool result = (topic_->enable() == DDS::RETCODE_OK);
   if (!result && throw_on_error) {
     std::stringstream ss;
@@ -127,6 +130,20 @@ bool Topic::enable(bool throw_on_error) {
     throw std::runtime_error(ss.str());
   }
   return result;
+}
+
+void Topic::detach_listener()
+{
+  if (listener_) {
+    TopicListener* savvy_listener = dynamic_cast<TopicListener*>(listener_.in());
+    if (savvy_listener) {
+      savvy_listener->unset_topic(*this);
+    }
+    if (topic_) {
+      topic_->set_listener(0, OpenDDS::DCPS::NO_STATUS_MASK);
+    }
+    listener_ = 0;
+  }
 }
 
 }

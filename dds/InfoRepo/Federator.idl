@@ -113,6 +113,8 @@ module OpenDDS { module Federator {
       DDS::DataWriterQos datawriter_qos;
 
       OpenDDS::DCPS::TransportLocatorSeq  transport_info;
+      unsigned long transport_context;
+      DDS::OctetSeq serialized_type_info;
     };
 
     // Constant values.
@@ -137,11 +139,13 @@ module OpenDDS { module Federator {
       DDS::DataReaderQos datareader_qos;
 
       OpenDDS::DCPS::TransportLocatorSeq transport_info;
+      unsigned long transport_context;
 
       // The following are for Content-Subscription Profile
       string filter_class_name;
       string filter_expression;
       DDS::StringSeq expression_params;
+      DDS::OctetSeq serialized_type_info;
     };
 
     // Constant values.

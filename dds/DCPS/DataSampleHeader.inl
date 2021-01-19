@@ -33,7 +33,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , lifespan_duration_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
   , publisher_id_(GUID_UNKNOWN)
-  , marshaled_size_(0)
+  , serialized_size_(0)
 {
 }
 
@@ -78,15 +78,13 @@ OpenDDS::DCPS::DataSampleHeader::operator=(ACE_Message_Block& buffer)
 }
 
 ACE_INLINE
-size_t
-OpenDDS::DCPS::DataSampleHeader::marshaled_size() const
+size_t OpenDDS::DCPS::DataSampleHeader::get_serialized_size() const
 {
-  return marshaled_size_;
+  return serialized_size_;
 }
 
 ACE_INLINE
-size_t
-OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
+size_t OpenDDS::DCPS::DataSampleHeader::get_max_serialized_size()
 {
   return 1 + // message_id_;
          1 + // submessage_id_;
@@ -100,7 +98,7 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
         16 + // publication_id_;
         16 ; // publisher_id_;
   // content_filter_entries_ is not marsahled into the same Data Block
-  // so it is not part of the max_marshaled_size() which is used to allocate
+  // so it is not part of the max_serialized_size() which is used to allocate
 }
 
 /// The clear_flag and set_flag methods are a hack to update the

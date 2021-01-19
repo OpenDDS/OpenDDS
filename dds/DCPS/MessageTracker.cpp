@@ -23,17 +23,14 @@ MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 , dropped_count_(0)
 , delivered_count_(0)
 , sent_count_(0)
-, done_condition_(lock_, ConditionAttributesMonotonic())
+, done_condition_(lock_)
 {
 }
 
 bool
 MessageTracker::pending_messages()
 {
-  if (sent_count_ > delivered_count_ + dropped_count_) {
-    return true;
-  }
-  return false;
+  return sent_count_ > delivered_count_ + dropped_count_;
 }
 
 void
@@ -49,8 +46,9 @@ MessageTracker::message_delivered()
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   ++delivered_count_;
 
-  if (!pending_messages())
-    done_condition_.broadcast();
+  if (!pending_messages()) {
+    done_condition_.notify_all();
+  }
 }
 
 void
@@ -59,8 +57,9 @@ MessageTracker::message_dropped()
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   ++dropped_count_;
 
-  if (!pending_messages())
-    done_condition_.broadcast();
+  if (!pending_messages()) {
+    done_condition_.notify_all();
+  }
 }
 
 void MessageTracker::wait_messages_pending(const char* caller)
@@ -72,39 +71,48 @@ void MessageTracker::wait_messages_pending(const char* caller)
 
 void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTimePoint& deadline)
 {
-  const ACE_Time_Value_T<MonotonicClock>* deadline_ptr = deadline.is_zero() ? 0 : &deadline.value();
+  const bool use_deadline = deadline.is_zero();
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_messages();
   if (report) {
-    if (deadline_ptr) {
+    if (use_deadline) {
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
+                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait until %#T.\n"),
-                msg_src_.c_str(), deadline_ptr));
+                msg_src_.c_str(), &deadline.value()));
     } else {
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
+                ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait with no timeout.\n")));
     }
   }
-  while (true) {
-    if (!pending_messages())
-      break;
-
-    if (done_condition_.wait(deadline_ptr) == -1 && pending_messages()) {
-      if (DCPS_debug_level) {
+  bool loop = true;
+  while (loop && pending_messages()) {
+    switch (done_condition_.wait_until(deadline)) {
+    case CvStatus_Timeout:
+      if (DCPS_debug_level && pending_messages()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) %T MessageTracker::")
-                   ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p (caller: %C)\n"),
+                   ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %T ")
+                   ACE_TEXT("(Redmine Issue# 1446) (caller: %C)\n"),
                    ACE_TEXT("Timed out waiting for messages to be transported"),
                    caller));
       }
+      loop = false;
       break;
+
+    case CvStatus_NoTimeout:
+      break;
+
+    case CvStatus_Error:
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MessageTracker::wait_messages_pending: "
+          "error in wait_until\n"));
+      }
+      return;
     }
   }
   if (report) {
-    ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) MessageTracker::wait_messages_pending done\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) MessageTracker::wait_messages_pending %T done\n"));
   }
 }
 

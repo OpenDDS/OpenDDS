@@ -1,15 +1,49 @@
 # OpenDDS Releases
 
-## Version 3.15 of OpenDDS
-OpenDDS 3.15 is currently in development, so this list might change.
+## Version 3.16 of OpenDDS
+OpenDDS 3.16 is currently in development, so this list might change.
 
 ### Additions:
+- TODO: Add your features here
 
 ### Fixes:
+- TODO: Add your fixes here
 
 ### Notes:
-- Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake
-  module is now deprecated. (#1741)
+- TODO: Add your notes here
+
+## Version 3.15 of OpenDDS
+OpenDDS 3.15 was released on Dec 22 2020.
+
+### Additions:
+- Scalability and performance improvements (#1525, #1610, #1616, #1662, #1792, #1927)
+- Support for dynamic configuration of discovery and transport from config file templates (#1764)
+- Some forms of IDL4 Anonymous Types are supported, see Developer's Guide (#1754)
+- Added the Observer interface, which allows untyped access to data samples (#1851)
+- Built-In Topics with RTPS Discovery support disconnect/reconnect cycles (#1924)
+  - This feature required adopting the upcoming DDS spec (1.5) change to BuiltinTopicKey_t: it is now based on a 16-byte opaque identifier.
+- Added an OpenDDS-specific Built-In Topic for internal thread status reporting (#1906)
+- Added an option to omit DomainParticipant's USER_DATA QoS from in-the-clear messages when security is enabled (#2066)
+- Added options to the CMake module, see `docs/cmake.md` (#2075)
+
+### Platform Support and Dependencies:
+- Improved Android support (#1634, #2171)
+- Improved IPv6 support (#1639)
+- The only DOCGroup ACE/TAO versions supported are the current releases from the 6.x/2.x series (#2070)
+- Compatibility with Wireshark 3.4 (#2076)
+
+### Fixes:
+- Fixed bugs in RtpsRelay/ICE/STUN (#1595, #1605, #1603, #1628, #1625, #1636)
+- Fixed some rtps_udp fragmentation issues (#1643, #1800, #1884)
+- Fixed an rtps_udp protocol issue (#1654)
+- Fixed bug with wrong status mask used for publication matched event (#1659)
+- Fixed a bug where SpdpLocalAddress was parsed incorrectly (#1743)
+- Improve efficiency of waiting on pending writes (#1831)
+- Reduced the chances for GUID collision in RTPS Discovery multi-domain processes (#2107)
+- Explicit initialization of reliable RTPS readers to more closely follow DDS spec (#2146)
+
+### Notes:
+- Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake module is now deprecated (#1741)
 
 ## Version 3.14.1 of OpenDDS
 OpenDDS 3.14.1 was released on Nov 20 2020.

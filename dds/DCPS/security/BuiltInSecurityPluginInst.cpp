@@ -5,11 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/security/BuiltInSecurityPluginInst.h"
-#include "dds/DCPS/security/AccessControlBuiltInImpl.h"
-#include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
-#include "dds/DCPS/security/CryptoBuiltInImpl.h"
-#include "dds/DCPS/security/UtilityImpl.h"
+#include "AccessControlBuiltInImpl.h"
+#include "AuthenticationBuiltInImpl.h"
+#include "BuiltInSecurityPluginInst.h"
+#include "CryptoBuiltInImpl.h"
+#include "UtilityImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

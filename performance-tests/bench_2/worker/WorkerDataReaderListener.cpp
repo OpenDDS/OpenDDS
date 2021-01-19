@@ -32,19 +32,21 @@ WorkerDataReaderListener::~WorkerDataReaderListener()
 }
 
 void
-WorkerDataReaderListener::add_handler(DataHandler& handler)
+WorkerDataReaderListener::add_handler(std::shared_ptr<DataHandler> handler)
 {
-  handlers_.push_back(&handler);
+  std::unique_lock<std::mutex> lock(mutex_);
+  handlers_.push_back(handler);
 }
 
 void
-WorkerDataReaderListener::remove_handler(const DataHandler& handler)
+WorkerDataReaderListener::remove_handler(std::shared_ptr<DataHandler> handler)
 {
   bool found = true;
   while (found) {
     found = false;
+    std::unique_lock<std::mutex> lock(mutex_);
     for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
-      if (&handler == (*it)) {
+      if (handler.get() == it->lock().get()) {
         handlers_.erase(it);
         found = true;
         break;
@@ -91,91 +93,126 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
   if (data_dr_) {
     Data data;
     DDS::SampleInfo si;
-    DDS::ReturnCode_t status = data_dr_->take_next_sample(data, si);
-    if (status == DDS::RETCODE_OK && si.valid_data) {
+    DDS::ReturnCode_t status = DDS::RETCODE_OK;
+    while ((status = data_dr_->take_next_sample(data, si)) == DDS::RETCODE_OK) {
+      if (si.valid_data) {
+        on_valid_data(data, si);
+      }
+    }
+  }
+}
 
-      // Calculate the stateless stuff
-      const Builder::TimeStamp& now = Builder::get_sys_time();
-      double latency = Builder::to_seconds_double(now - data.sent_time);
-      double jitter = -1.0;
-      double round_trip_latency = -1.0;
-      if (data.total_hops != 0 && data.hop_count == data.total_hops) {
-        round_trip_latency = Builder::to_seconds_double(now - data.created_time) / static_cast<double>(data.total_hops);
+void
+WorkerDataReaderListener::on_valid_data(const Data& data, const DDS::SampleInfo& si)
+{
+  // Calculate the stateless stuff
+  const Builder::TimeStamp& now = Builder::get_sys_time();
+  double latency = Builder::to_seconds_double(now - data.sent_time);
+  double jitter = -1.0;
+  double throughput = -1.0;
+  double round_trip_latency = -1.0;
+  if (data.total_hops != 0 && data.hop_count == data.total_hops) {
+    round_trip_latency = Builder::to_seconds_double(now - data.created_time) / static_cast<double>(data.total_hops);
+  }
+  size_t bytes = sizeof(Data) - sizeof(unsigned char*) + data.buffer.length();
+
+  std::unique_lock<std::mutex> lock(mutex_);
+
+  bool new_writer = false;
+  auto ws_it = writer_state_map_.find(si.publication_handle);
+  if (ws_it == writer_state_map_.end()) {
+    new_writer = true;
+    ws_it = writer_state_map_.insert(WriterStateMap::value_type(si.publication_handle, WriterState())).first;
+  }
+  WriterState& ws = ws_it->second;
+
+  if (ws.sample_count_ == 0) {
+    ws.first_data_count_ = data.msg_count;
+    ws.prev_data_count_ = data.msg_count;
+    ws.current_data_count_ = data.msg_count;
+    if (durable_ && (history_keep_all_ || history_depth_ > data.msg_count)) {
+      ws.data_received_.insert(0);
+    }
+    if (reliable_ && expected_sample_count_) {
+      ws.data_received_.insert(0);
+    }
+    ws.first_data_time_ = data.sent_time;
+  } else {
+    ws.prev_data_count_ = ws.current_data_count_;
+    ws.current_data_count_ = data.msg_count;
+    if (ws.current_data_count_ < ws.prev_data_count_) {
+      // once we have one out-of-order, how do we count subsequent ones?
+      // one option is to consider everything out of order until it's 'fixed'
+      // another (this way) is to only capture relative out-of-order issues
+      // which will have a greater penalty for repeated violations
+      ++(ws.out_of_order_data_count_);
+      ws.out_of_order_data_received_.insert(ws.current_data_count_);
+    }
+  }
+
+  if (!ws.data_received_.insert(data.msg_count)) {
+    ++(ws.duplicate_data_count_);
+    ws.duplicate_data_received_.insert(ws.current_data_count_);
+  }
+  if (!ws.previously_disjoint_ && ws.data_received_.disjoint()) {
+    //std::cout << "This shouldn't happen... " << std::endl;
+  }
+  ws.previously_disjoint_ = ws.data_received_.disjoint();
+  ++(ws.sample_count_);
+  ++sample_count_;
+
+  // Update Latency & Calculate / Update Jitter
+  if (!new_writer) {
+    jitter = std::fabs(ws.previous_latency_ - latency);
+    throughput = ws.total_byte_count_ / Builder::to_seconds_double(now - ws.first_data_time_);
+  }
+  ws.previous_latency_ = latency;
+  ws.total_byte_count_ += bytes;
+  if (datareader_) {
+    latency_stat_block_->update(latency);
+
+    if (jitter >= 0.0) {
+      jitter_stat_block_->update(jitter);
+    }
+
+    if (throughput >= 0.0) {
+      throughput_stat_block_->update(throughput);
+    }
+  }
+
+  // Update Round-Trip Latency & Calculate / Update Round-Trip Jitter
+  if (data.total_hops != 0 && data.hop_count == data.total_hops) {
+    double round_trip_jitter = -1.0;
+    double round_trip_throughput = -1.0;
+    if (!new_writer) {
+      round_trip_jitter = std::fabs(ws.previous_round_trip_latency_ - round_trip_latency);
+      round_trip_throughput = ws.total_round_trip_byte_count_ / Builder::to_seconds_double(now - ws.first_round_trip_data_time_);
+    } else {
+      ws.first_round_trip_data_time_ = data.created_time;
+    }
+    ws.previous_round_trip_latency_ = round_trip_latency;
+    ws.total_round_trip_byte_count_ += bytes;
+    if (datareader_) {
+      round_trip_latency_stat_block_->update(round_trip_latency);
+
+      if (round_trip_jitter >= 0.0) {
+        round_trip_jitter_stat_block_->update(round_trip_jitter);
       }
 
-      std::unique_lock<std::mutex> lock(mutex_);
-
-      bool new_writer = false;
-      auto ws_it = writer_state_map_.find(si.publication_handle);
-      if (ws_it == writer_state_map_.end()) {
-        new_writer = true;
-        ws_it = writer_state_map_.insert(WriterStateMap::value_type(si.publication_handle, WriterState())).first;
+      if (round_trip_throughput >= 0.0) {
+        round_trip_throughput_stat_block_->update(round_trip_throughput);
       }
-      WriterState& ws = ws_it->second;
+    }
+  }
 
-      if (ws.sample_count_ == 0) {
-        ws.first_data_count_ = data.msg_count;
-        ws.prev_data_count_ = data.msg_count;
-        ws.current_data_count_ = data.msg_count;
-        if (durable_ && (history_keep_all_ || history_depth_ > data.msg_count)) {
-          ws.data_received_.insert(0);
-        }
-      } else {
-        ws.prev_data_count_ = ws.current_data_count_;
-        ws.current_data_count_ = data.msg_count;
-        if (ws.current_data_count_ < ws.prev_data_count_) {
-          // once we have one out-of-order, how do we count subsequent ones?
-          // one option is to consider everything out of order until it's 'fixed'
-          // another (this way) is to only capture relative out-of-order issues
-          // which will have a greater penalty for repeated violations
-          ++(ws.out_of_order_data_count_);
-          ws.out_of_order_data_received_.insert(ws.current_data_count_);
-        }
-      }
+  auto handlers = handlers_;
 
-      if (!ws.data_received_.insert(data.msg_count)) {
-        ++(ws.duplicate_data_count_);
-        ws.duplicate_data_received_.insert(ws.current_data_count_);
-      }
-      if (!ws.previously_disjoint_ && ws.data_received_.disjoint()) {
-        //std::cout << "This shouldn't happen... " << std::endl;
-      }
-      ws.previously_disjoint_ = ws.data_received_.disjoint();
-      ++(ws.sample_count_);
-      ++sample_count_;
+  lock.unlock();
 
-      // Update Latency & Calculate / Update Jitter
-      if (!new_writer) {
-        jitter = std::fabs(ws.previous_latency_ - latency);
-      }
-      ws.previous_latency_ = latency;
-      if (datareader_) {
-        latency_stat_block_->update(latency);
-
-        if (jitter >= 0.0) {
-          jitter_stat_block_->update(jitter);
-        }
-      }
-
-      // Update Round-Trip Latency & Calculate / Update Round-Trip Jitter
-      if (data.total_hops != 0 && data.hop_count == data.total_hops) {
-        double round_trip_jitter = -1.0;
-        if (!new_writer) {
-          round_trip_jitter = std::fabs(ws.previous_round_trip_latency_ - round_trip_latency);
-        }
-        ws.previous_round_trip_latency_ = round_trip_latency;
-        if (datareader_) {
-          round_trip_latency_stat_block_->update(round_trip_latency);
-
-          if (round_trip_jitter >= 0.0) {
-            round_trip_jitter_stat_block_->update(round_trip_jitter);
-          }
-        }
-      }
-
-      for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
-        (*it)->on_data(data);
-      }
+  for (auto it = handlers.begin(); it != handlers.end(); ++it) {
+    auto handler = it->lock();
+    if (handler) {
+      handler->on_data(data);
     }
   }
 }
@@ -187,12 +224,13 @@ WorkerDataReaderListener::on_subscription_matched(
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (expected_match_count_ != 0) {
-    if (static_cast<size_t>(status.current_count) == expected_match_count_) {
+    if (static_cast<size_t>(status.current_count) >= expected_match_count_) {
       expected_match_cv.notify_all();
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
-    } else if (static_cast<size_t>(status.current_count) > match_count_) {
+    }
+    if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datareader_) {
         discovery_delta_stat_block_->update(Builder::to_seconds_double(Builder::get_hr_time() - enable_time_->value.time_prop()));
       }
@@ -264,10 +302,14 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", buffer_size);
   jitter_stat_block_ =
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "jitter", buffer_size);
+  throughput_stat_block_ =
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "throughput", buffer_size);
   round_trip_latency_stat_block_ =
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_latency", buffer_size);
   round_trip_jitter_stat_block_ =
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_jitter", buffer_size);
+  round_trip_throughput_stat_block_ =
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_throughput", buffer_size);
 }
 
 void
@@ -294,7 +336,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         auto psr = it->second.out_of_order_data_received_.present_sequence_ranges();
         for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
           if (new_writer) {
-            out_of_order_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            size_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
+            out_of_order_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
             out_of_order_data_details << ", " << std::flush;
@@ -319,7 +362,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         auto psr = it->second.duplicate_data_received_.present_sequence_ranges();
         for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
           if (new_writer) {
-            duplicate_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            size_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
+            duplicate_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
             duplicate_data_details << ", " << std::flush;
@@ -344,7 +388,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
           missing_data_count += static_cast<ptrdiff_t>(it2->second.getValue() - (it2->first.getValue() - 1)); // update count
           if (new_writer) {
-            missing_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            size_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
+            missing_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
             missing_data_details << ", " << std::flush;
@@ -357,8 +402,9 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         }
       }
     }
+
     // if we didn't meet the expected sample count, add difference to missing sample count
-    if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
+    if (!reliable_ && expected_sample_count_ && sample_count_ < expected_sample_count_) {
       missing_data_count += expected_sample_count_ - sample_count_;
       missing_data_details << " ERROR Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
     }
@@ -374,9 +420,11 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 
     latency_stat_block_->finalize();
     jitter_stat_block_->finalize();
+    throughput_stat_block_->finalize();
 
     round_trip_latency_stat_block_->finalize();
     round_trip_jitter_stat_block_->finalize();
+    round_trip_throughput_stat_block_->finalize();
 
     datareader_ = nullptr;
   }
@@ -386,12 +434,13 @@ bool WorkerDataReaderListener::wait_for_expected_match(const std::chrono::system
 {
   std::unique_lock<std::mutex> expected_lock(mutex_);
 
-  while (expected_match_count_ > match_count_) {
+  while (match_count_ < expected_match_count_) {
     if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
-      return match_count_ <= expected_match_count_;
+      return match_count_ >= expected_match_count_;
     }
   }
-  return true;
+
+  return match_count_ >= expected_match_count_;
 }
 
 }

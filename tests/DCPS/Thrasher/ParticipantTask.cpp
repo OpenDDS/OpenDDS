@@ -25,8 +25,10 @@
 
 #include "tests/Utils/StatusMatching.h"
 
-ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
+ParticipantTask::ParticipantTask(std::size_t samples_per_thread,
+                                 bool durable)
   : samples_per_thread_(samples_per_thread)
+  , durable_(durable)
   , thread_index_(0)
 {
 }
@@ -37,8 +39,7 @@ ParticipantTask::~ParticipantTask()
 int
 ParticipantTask::svc()
 {
-  try
-  {
+  try {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PUBLISHER STARTED\n")));
 
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
@@ -54,11 +55,10 @@ ParticipantTask::svc()
       this_thread_index = thread_index_++;
 
       // Create Participant
-      participant =
-        dpf->create_participant(42,
-                                PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      participant = dpf->create_participant(42,
+                                            PARTICIPANT_QOS_DEFAULT,
+                                            DDS::DomainParticipantListener::_nil(),
+                                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       // RTPS cannot be shared
       OpenDDS::DCPS::Discovery_rch disc = TheServiceParticipant->get_discovery(42);
@@ -71,13 +71,10 @@ ParticipantTask::svc()
         // The 2 is a safety factor to allow for control messages.
         ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
 
-        ACE_DEBUG((LM_INFO,
-          "(%P|%t)    -> PUBLISHER %d creating transport config %C\n",
-          this_thread_index, config_name));
-        OpenDDS::DCPS::TransportConfig_rch config =
-          TheTransportRegistry->create_config(config_name);
-        OpenDDS::DCPS::TransportInst_rch inst =
-          TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+        ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d creating transport config %C\n",
+                   this_thread_index, config_name));
+        OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
+        OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
         ACE_Configuration_Heap ach;
         ACE_Configuration_Section_Key sect_key;
         ach.open();
@@ -99,11 +96,9 @@ ParticipantTask::svc()
     }
 
     // Create Publisher
-    publisher =
-      participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                    DDS::PublisherListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
+    publisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                              DDS::PublisherListener::_nil(),
+                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(publisher.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
@@ -113,19 +108,18 @@ ParticipantTask::svc()
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
+    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" register_type failed!\n")), 1);
+    }
 
     // Create Topic (FooTopic)
-    DDS::Topic_var topic =
-      participant->create_topic("FooTopic",
-                                CORBA::String_var(ts->get_type_name()),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
+    DDS::Topic_var topic = participant->create_topic("FooTopic",
+                                                     CORBA::String_var(ts->get_type_name()),
+                                                     TOPIC_QOS_DEFAULT,
+                                                     DDS::TopicListener::_nil(),
+                                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
@@ -136,32 +130,32 @@ ParticipantTask::svc()
     DDS::DataWriterQos writer_qos;
     publisher->get_default_datawriter_qos(writer_qos);
     writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-    writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    if (durable_) {
+      writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     writer_qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
 #endif
 
-    writer =
-      publisher->create_datawriter(topic.in(),
-                                   writer_qos,
-                                   DDS::DataWriterListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
+    writer = publisher->create_datawriter(topic.in(),
+                                          writer_qos,
+                                          DDS::DataWriterListener::_nil(),
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(writer.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" create_datawriter failed!\n")), 1);
     }
 
-    OpenDDS::DCPS::DataWriterImpl* impl =
-      dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
+    OpenDDS::DCPS::DataWriterImpl* impl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
 
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d is %C\n", this_thread_index, OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
-
-    Utils::wait_match(writer, 1);
-
-    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d is %C\n", this_thread_index,
+               OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+    if (!durable_) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
+      Utils::wait_match(writer, 1);
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+    }
 
     writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i)) {
@@ -177,8 +171,7 @@ ParticipantTask::svc()
     ProgressIndicator progress("(%P|%t)       PUBLISHER %d%% (%d samples sent)\n",
                                samples_per_thread_);
 
-    for (std::size_t i = 0; i < samples_per_thread_; ++i)
-    {
+    for (std::size_t i = 0; i < samples_per_thread_; ++i) {
       Foo foo;
       foo.key = 3;
       foo.x = (float) this_thread_index;
@@ -193,13 +186,17 @@ ParticipantTask::svc()
       ++progress;
     }
 
+    if (durable_) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for match\n", this_thread_index));
+      Utils::wait_match(writer, 1);
+      ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d match found!\n", this_thread_index));
+    }
+
     DDS::Duration_t interval = { 30, 0 };
     ACE_DEBUG((LM_INFO, "(%P|%t)    -> PUBLISHER %d waiting for acknowledgments\n", this_thread_index));
     if (DDS::RETCODE_OK != writer->wait_for_acknowledgments(interval)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P:%t) ERROR: svc() - ")
-        ACE_TEXT("timed out waiting for acks!\n")
-      ), 1);
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: svc() - ")
+                        ACE_TEXT("timed out waiting for acks!\n")), 1);
     }
 
     // Clean-up!
@@ -208,9 +205,8 @@ ParticipantTask::svc()
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d DELETE PARTICIPANT\n"), this_thread_index));
     dpf->delete_participant(participant.in());
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER %d VARS GOING OUT OF SCOPE\n"), this_thread_index));
-  }
-  catch (const CORBA::Exception& e)
-  {
+
+  } catch (const CORBA::Exception& e) {
     e._tao_print_exception("caught in svc()");
     return 1;
   }

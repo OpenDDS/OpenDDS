@@ -1,0 +1,29 @@
+project(ECU): dcpsexe {
+
+  exename   = ecu
+  includes += .
+  idlflags += -I./engine -I./engine/engine_stats -I./transmission
+
+  TypeSupport_Files {
+    idlflags += -I./engine -I./engine/engine_stats -I./transmission
+    idlflags += --filename-only-includes
+    engine/engine_specs.idl
+    engine/engine_stats/fuel_stats.idl
+    transmission/transmission_specs.idl
+    transmission/transmission_states.idl
+    ecu.idl
+  }
+
+  Idl_Files {
+    idlflags += -I./engine -I./engine/engine_stats -I./transmission
+    engine/engine_specs.idl
+    engine/engine_stats/fuel_stats.idl
+    transmission/transmission_specs.idl
+    transmission/transmission_states.idl
+    ecu.idl
+  }
+
+  Source_Files {
+    ecu.cpp
+  }
+}

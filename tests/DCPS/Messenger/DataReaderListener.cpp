@@ -56,11 +56,11 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Messenger::Message message;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+    const DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
 
       if (si.valid_data) {
         if (!counts_.insert(message.count).second) {
@@ -163,7 +163,7 @@ void DataReaderListenerImpl::on_sample_lost(
 
 bool DataReaderListenerImpl::is_valid() const
 {
-  CORBA::Long expected = 0;
+  CORBA::ULong expected = 0;
   Counts::const_iterator count = counts_.begin();
   bool valid_count = true;
   while (count != counts_.end() && expected < num_messages) {
@@ -205,8 +205,8 @@ bool DataReaderListenerImpl::is_valid() const
     valid_count = false;
   }
   // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if ((int)counts_.size() < num_messages &&
-           (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
+  else if (counts_.size() < num_messages &&
+           (reliable_ || (counts_.size() * 4) < num_messages)) {
     std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
     valid_count = false;
   }

@@ -1,0 +1,14 @@
+/Compiler_XtypesExtensibility
+ExtensibilityC.cpp
+ExtensibilityC.h
+ExtensibilityC.inl
+ExtensibilityS.cpp
+ExtensibilityS.h
+ExtensibilityTypeSupport.idl
+ExtensibilityTypeSupportC.cpp
+ExtensibilityTypeSupportC.h
+ExtensibilityTypeSupportC.inl
+ExtensibilityTypeSupportImpl.cpp
+ExtensibilityTypeSupportImpl.h
+ExtensibilityTypeSupportS.cpp
+ExtensibilityTypeSupportS.h

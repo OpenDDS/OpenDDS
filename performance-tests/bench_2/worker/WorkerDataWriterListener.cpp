@@ -50,12 +50,13 @@ WorkerDataWriterListener::on_publication_matched(
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (expected_match_count_ != 0) {
-    if (static_cast<size_t>(status.current_count) == expected_match_count_) {
+    if (static_cast<size_t>(status.current_count) >= expected_match_count_) {
       expected_match_cv.notify_all();
       if (datawriter_) {
         last_discovery_time_->value.time_prop(Builder::get_hr_time());
       }
-    } else if (static_cast<size_t>(status.current_count) > match_count_) {
+    }
+    if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datawriter_) {
         discovery_delta_stat_block_->update(Builder::to_seconds_double(Builder::get_hr_time() - enable_time_->value.time_prop()));
       }
@@ -104,12 +105,13 @@ bool WorkerDataWriterListener::wait_for_expected_match(const std::chrono::system
 {
   std::unique_lock<std::mutex> expected_lock(mutex_);
 
-  while (expected_match_count_ > match_count_) {
+  while (match_count_ < expected_match_count_) {
     if (expected_match_cv.wait_until(expected_lock, deadline) == std::cv_status::timeout) {
-      return match_count_ <= expected_match_count_;
+      return match_count_ >= expected_match_count_;
     }
   }
-  return true;
+
+  return match_count_ >= expected_match_count_;
 }
 
 }

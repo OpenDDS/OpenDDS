@@ -1,0 +1,22 @@
+workspace {
+  $(ACE_ROOT)/ace/ace.mpc
+  $(ACE_ROOT)/ace/XML_Utils/XML.mpc
+  $(ACE_ROOT)/apps/gperf/src
+  $(TAO_ROOT)/TAO_IDL
+  $(TAO_ROOT)/tao/tao.mpc
+  $(TAO_ROOT)/tao/AnyTypeCode/AnyTypeCode.mpc
+  $(TAO_ROOT)/tao/BiDir_GIOP/BiDir_GIOP.mpc
+  $(TAO_ROOT)/tao/CodecFactory/CodecFactory.mpc
+  $(TAO_ROOT)/tao/CSD_Framework/CSD_Framework.mpc
+  $(TAO_ROOT)/tao/CSD_ThreadPool/CSD_ThreadPool.mpc
+  $(TAO_ROOT)/tao/Codeset/Codeset.mpc
+  $(TAO_ROOT)/tao/DynamicInterface/DynamicInterface.mpc
+  $(TAO_ROOT)/tao/ImR_Client/ImR_Client.mpc
+  $(TAO_ROOT)/tao/IORManipulation/IORManipulation.mpc
+  $(TAO_ROOT)/tao/IORTable
+  $(TAO_ROOT)/tao/Messaging/Messaging.mpc
+  $(TAO_ROOT)/tao/PI/PI.mpc
+  $(TAO_ROOT)/tao/PortableServer/PortableServer.mpc
+  $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc
+  $(TAO_ROOT)/orbsvcs/orbsvcs/Svc_Utils.mpc
+}

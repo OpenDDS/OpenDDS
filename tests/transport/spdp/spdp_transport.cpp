@@ -37,7 +37,7 @@ class DDS_TEST {
 public:
   DDS_TEST(const RcHandle<Spdp>& spdp, const GUID_t& guid)
   : spdp_(spdp)
-  , guid_(make_guid(guid.guidPrefix, ENTITYID_PARTICIPANT))
+  , guid_(make_id(guid.guidPrefix, ENTITYID_PARTICIPANT))
   {
   }
 
@@ -74,8 +74,6 @@ public:
   const RcHandle<Spdp> spdp_;
   const GUID_t guid_;
 };
-
-const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
 
 struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock, const OpenDDS::DCPS::GuidPrefix_t& prefix)
@@ -119,31 +117,34 @@ struct TestParticipant: ACE_Event_Handler {
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
                  const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, const ACE_INET_Addr& send_to)
   {
+    using OpenDDS::DCPS::Encoding;
+
     const DataSubmessage ds = {
       {DATA, FLAG_E | FLAG_D, 0},
       0, DATA_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq, ParameterList()
     };
 
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(ds, size, padding);
-    find_size_ulong(size, padding);
-    gen_find_size(plist, size, padding);
+    const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
 
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, ds);
+    primitive_serialized_size_ulong(encoding, size);
+    serialized_size(encoding, size, plist);
 
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+
+    // TODO(iguessthislldo) Use common encapsulation code, NOTE that 3 is "PL_CDR_LE", not "CDR_LE"
     const ACE_CDR::ULong encap = 0x00000300; // {CDR_LE, options} in BE format
 
-    const bool ok = (ser << hdr_) && (ser << ds) && (ser << encap);
-    if (!ok) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
+    if (!(ser << hdr_ && ser << ds && ser << encap)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
       return false;
     }
 
-    const bool ok2 = (ser << plist);
-    if (!ok2) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
+    if (!(ser << plist)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize payload\n"));
       return false;
     }
 
@@ -255,6 +256,8 @@ bool run_test()
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
   rd.config()->use_ncm(false);
+  ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
+  rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
@@ -263,6 +266,15 @@ bool run_test()
   const DDS::Subscriber_var sVar;
   spdp->init_bit(sVar);
   reactor_wait();
+
+  // Check if the port override worked.
+  {
+    ACE_SOCK_Dgram test_sock;
+    if (test_sock.open(local_addr) == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: run_test() SPDP did not use specified port\n")));
+      return false;
+    }
+  }
 
   // Create a "test participant" which will use sockets directly
   // This will act like a remote participant.
@@ -300,8 +312,20 @@ bool run_test()
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
-    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER |
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER |
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER |
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER
   ;
+
+#ifdef OPENDDS_SECURITY
+  const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+#endif
 
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
@@ -320,22 +344,25 @@ bool run_test()
       qos.user_data
     },
     {
-      domain,
-      "",
-      PROTOCOLVERSION,
-      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
-      VENDORID_OPENDDS,
-      false /*expectsIQoS*/,
-      availableBuiltinEndpoints,
-      0,
-      nonEmptyList /* sedp_multicast */,
-      nonEmptyList /* sedp_unicast */,
-      nonEmptyList /*defaultMulticastLocatorList*/,
-      nonEmptyList /*defaultUnicastLocatorList*/,
-      { 0 /*manualLivelinessCount*/ },
-      qos.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+      domain
+      , ""
+      , PROTOCOLVERSION
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , VENDORID_OPENDDS
+      , false /*expectsIQoS*/
+      , availableBuiltinEndpoints
+      , 0
+      , nonEmptyList /* sedp_multicast */
+      , nonEmptyList /* sedp_unicast */
+      , nonEmptyList /*defaultMulticastLocatorList*/
+      , nonEmptyList /*defaultUnicastLocatorList*/
+      , { 0 /*manualLivelinessCount*/ }
+      , qos.property
+      , {PFLAGS_THIS_VERSION} // opendds_participant_flags
+#ifdef OPENDDS_SECURITY
+      , availableExtendedBuiltinEndpoints
+#endif
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),

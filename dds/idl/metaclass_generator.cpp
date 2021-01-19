@@ -7,6 +7,7 @@
 
 #include "metaclass_generator.h"
 
+#include "marshal_generator.h"
 #include "field_info.h"
 #include "be_extern.h"
 #include "topic_keys.h"
@@ -120,146 +121,6 @@ namespace {
     }
   }
 
-  std::string string_type(Classification cls)
-  {
-    return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
-      ((cls & CL_WIDE) ? "std::wstring" : "std::string") :
-      (cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
-  }
-
-  std::string to_cxx_type(AST_Type* type, std::size_t& size)
-  {
-    const Classification cls = classify(type);
-    if (cls & CL_ENUM) {
-      size = 4;
-      return "ACE_CDR::ULong";
-    }
-    if (cls & CL_STRING) {
-      size = 4; // encoding of str length is 4 bytes
-      return string_type(cls);
-    }
-    if (cls & CL_PRIMITIVE) {
-      AST_Type* t = resolveActualType(type);
-      AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(t);
-      switch (p->pt()) {
-      case AST_PredefinedType::PT_long:
-        size = 4;
-        return "ACE_CDR::Long";
-      case AST_PredefinedType::PT_ulong:
-        size = 4;
-        return "ACE_CDR::ULong";
-      case AST_PredefinedType::PT_longlong:
-        size = 8;
-        return "ACE_CDR::LongLong";
-      case AST_PredefinedType::PT_ulonglong:
-        size = 8;
-        return "ACE_CDR::ULongLong";
-      case AST_PredefinedType::PT_short:
-        size = 2;
-        return "ACE_CDR::Short";
-      case AST_PredefinedType::PT_ushort:
-        size = 2;
-        return "ACE_CDR::UShort";
-      case AST_PredefinedType::PT_float:
-        size = 4;
-        return "ACE_CDR::Float";
-      case AST_PredefinedType::PT_double:
-        size = 8;
-        return "ACE_CDR::Double";
-      case AST_PredefinedType::PT_longdouble:
-        size = 16;
-        return "ACE_CDR::LongDouble";
-      case AST_PredefinedType::PT_char:
-        size = 1;
-        return "ACE_CDR::Char";
-      case AST_PredefinedType::PT_wchar:
-        size = 1; // encoding of wchar length is 1 byte
-        return "ACE_CDR::WChar";
-      case AST_PredefinedType::PT_boolean:
-        size = 1;
-        return "ACE_CDR::Boolean";
-      case AST_PredefinedType::PT_octet:
-        size = 1;
-        return "ACE_CDR::Octet";
-      default:
-        throw std::invalid_argument("Unknown PRIMITIVE type");
-      }
-    }
-    return scoped(type->name());
-  }
-
-  void
-  gen_field_getValueFromSerialized(AST_Field* field)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    AST_Type* type = field->field_type();
-    const Classification cls = classify(type);
-    const std::string fieldName = field->local_name()->get_string();
-    std::size_t size = 0;
-    const std::string cxx_type = to_cxx_type(type, size);
-    if (cls & CL_SCALAR) {
-      type = resolveActualType(type);
-      const std::string val = (cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
-        : getWrapper("val", type, WD_INPUT);
-      be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      " << cxx_type << " val;\n"
-        "      if (!(ser >> " << val << ")) {\n"
-        "        throw std::runtime_error(\"Field '" << fieldName << "' could "
-        "not be deserialized\");\n"
-        "      }\n"
-        "      return val;\n"
-        "    } else {\n";
-      if (cls & CL_STRING) {
-        be_global->impl_ <<
-          "      ACE_CDR::ULong len;\n"
-          "      if (!(ser >> len)) {\n"
-          "        throw std::runtime_error(\"String '" << fieldName <<
-          "' length could not be deserialized\");\n"
-          "      }\n"
-          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
-          "        throw std::runtime_error(\"String '" << fieldName <<
-          "' contents could not be skipped\");\n"
-          "      }\n";
-      } else if (cls & CL_WIDE) {
-        be_global->impl_ <<
-          "      ACE_CDR::Octet len;\n"
-          "      if (!(ser >> ACE_InputCDR::to_octet(len))) {\n"
-          "        throw std::runtime_error(\"WChar '" << fieldName <<
-          "' length could not be deserialized\");\n"
-          "      }\n"
-          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
-          "        throw std::runtime_error(\"WChar '" << fieldName <<
-          "' contents could not be skipped\");\n"
-          "      }\n";
-      } else {
-        be_global->impl_ <<
-          "      if (!ser.skip(1, " << size << ")) {\n"
-          "        throw std::runtime_error(\"Field '" << fieldName <<
-          "' could not be skipped\");\n"
-          "      }\n";
-      }
-      be_global->impl_ <<
-        "    }\n";
-    } else if (cls & CL_STRUCTURE) {
-      delegateToNested(fieldName, field, "ser", true);
-    } else { // array, sequence, union:
-      std::string pre, post;
-      if (!use_cxx11 && (cls & CL_ARRAY)) {
-        post = "_forany";
-      } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE))) {
-        pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
-      }
-      const std::string ptr = field->field_type()->anonymous() ?
-        FieldInfo(*field).ptr_ : (pre + cxx_type + post + '*');
-      be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << ptr << ">(0))) {\n"
-        "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
-        "    }\n";
-    }
-  }
-
   void
   gen_field_createQC(AST_Field* field)
   {
@@ -344,13 +205,13 @@ namespace {
         be_global->impl_ <<
           "      " << fieldType << "_forany rhsForany(const_cast<" <<
           fieldType << "_slice*>(*rhsArr));\n"
-          "      size_t size = 0, padding = 0;\n"
-          "      gen_find_size(rhsForany, size, padding);\n"
-          "      ACE_Message_Block mb(size);\n"
-          "      Serializer ser_out(&mb);\n"
+          // TODO(iguessthislldo) I'm not 100% certain this will always work
+          "      const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);\n"
+          "      ACE_Message_Block mb(serialized_size(encoding, rhsForany));\n"
+          "      Serializer ser_out(&mb, encoding);\n"
           "      ser_out << rhsForany;\n"
           "      " << fieldType << "_forany lhsForany(*lhsArr);\n"
-          "      Serializer ser_in(&mb);\n"
+          "      Serializer ser_in(&mb, encoding);\n"
           "      ser_in >> lhsForany;\n";
       } else {
         std::string indent = "      ";
@@ -463,7 +324,7 @@ namespace {
         key_count = info->key_list_.size();
       }
     } else { // Union
-      key_count = be_global->has_key(union_node) ? 1 : 0;
+      key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
     }
 
     be_global->impl_ <<
@@ -493,34 +354,59 @@ namespace {
         be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
       }
     }
+    const std::string exception =
+      "throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+      "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
       "    return false;\n"
-      "  }\n\n"
+      "  }\n\n";
+    if (struct_node) {
+      be_global->impl_ <<
+        "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
+        "  {\n"
+        "    static const std::pair<std::string, ACE_CDR::ULong> name_to_id_pairs[] = {\n";
+      const AutoidKind auto_id = be_global->autoid(node);
+      for (size_t i = 0; i < fields.size(); ++i) {
+        ACE_CDR::ULong default_id = static_cast<ACE_CDR::ULong>(i);
+        be_global->impl_ << "      std::make_pair(\"" << fields[i]->local_name()->get_string() << "\", " <<
+          be_global->get_id(fields[i], auto_id, default_id) << "),\n";
+      }
+      be_global->impl_ <<
+        "    };\n"
+        "    static const std::map<std::string, ACE_CDR::ULong> name_to_id_map(name_to_id_pairs,"
+        " name_to_id_pairs + " << fields.size() << ");\n"
+        "    std::map<std::string, ACE_CDR::ULong>::const_iterator it = name_to_id_map.find(field);\n"
+        "    if (it == name_to_id_map.end()) {\n"
+        "      " << exception <<
+        "    } else {\n"
+        "      return it->second;\n"
+        "    }\n"
+        "  }\n\n";
+    }
+    be_global->impl_ <<
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
       "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
       "    ACE_UNUSED_ARG(typed);\n";
     std::for_each(fields.begin(), fields.end(), gen_field_getValue);
-    const std::string exception =
-      "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
-      exception <<
-      "  }\n\n"
-      "  Value getValue(Serializer& ser, const char* field) const\n"
-      "  {\n";
-    if (struct_node && fields.size()) {
-      std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
+      "    " << exception <<
+      "  }\n\n";
+    if (struct_node) {
+      marshal_generator::gen_field_getValueFromSerialized(struct_node, clazz);
     } else {
-      be_global->impl_ << "    ACE_UNUSED_ARG(ser);\n";
+      be_global->impl_ <<
+        "  Value getValue(Serializer& ser, const char* field) const\n"
+        "  {\n"
+        "    ACE_UNUSED_ARG(ser);\n"
+        "    if (!field[0]) {\n"   // if 'field' is the empty string...
+        "      return 0;\n"        // ...we've skipped the entire struct
+        "    }\n"                  //    and the return value is ignored
+        "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+        "valid for struct " << clazz << "\");\n"
+        "  }\n\n";
     }
     be_global->impl_ <<
-      "    if (!field[0]) {\n"   // if 'field' is the empty string...
-      "      return 0;\n"        // ...we've skipped the entire struct
-      "    }\n"                  //    and the return value is ignored
-      "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "valid for struct " << clazz << "\");\n"
-      "  }\n\n"
       "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
       "ComparatorBase::Ptr next) const\n"
       "  {\n"
@@ -614,15 +500,72 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         f.addArg("ser", "Serializer&");
         f.addArg("", af.ptr_);
         f.endArgs();
-        if (af.seq_) {
-          be_global->impl_ <<
-          "  ACE_CDR::ULong length;\n" <<
-          "  if (!(ser >> length)) return false;\n";
+
+        AST_Type* elem;
+        if (af.seq_ != 0) {
+          elem = af.seq_->base_type();
+        } else {
+          elem = af.arr_->base_type();
         }
-        std::size_t sz = 0;
-        to_cxx_type(af.as_act_, sz);
         be_global->impl_ <<
-          "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << sz << ");\n";
+          "  const Encoding& encoding = ser.encoding();\n"
+          "  ACE_UNUSED_ARG(encoding);\n";
+        Classification elem_cls = classify(elem);
+        const bool primitive = elem_cls & CL_PRIMITIVE;
+        marshal_generator::generate_dheader_code(
+          "    if (!ser.read_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n", !primitive, true);
+
+        std::string len;
+        if (af.arr_) {
+          std::ostringstream strstream;
+          strstream << array_element_count(af.arr_);
+          len = strstream.str();
+        } else { // Sequence
+          be_global->impl_ <<
+            "  ACE_CDR::ULong length;\n"
+            "  if (!(ser >> length)) return false;\n";
+          len = "length";
+        }
+        const std::string cxx_elem = scoped(elem->name());
+        AST_Type* elem_orig = elem;
+        elem = resolveActualType(elem);
+        elem_cls = classify(elem);
+
+        if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
+          // fixed-length sequence/array element -> skip all elements at once
+          size_t sz = 0;
+          to_cxx_type(af.as_act_, sz);
+          be_global->impl_ <<
+            "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
+        } else {
+          be_global->impl_ <<
+            "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
+          if (elem_cls & CL_STRING) {
+            be_global->impl_ <<
+              "    ACE_CDR::ULong strlength;\n"
+              "    if (!(ser >> strlength)) return false;\n"
+              "    if (!ser.skip(strlength)) return false;\n";
+          } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
+            std::string pre, post;
+            const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+            if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+              post = "_forany";
+            } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
+              pre = "IDL::DistinctType<";
+              post = ", " + dds_generator::scoped_helper(elem_orig->name(), "_") + "_tag>";
+            }
+            be_global->impl_ <<
+              "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
+              << "*>(0))) return false;\n";
+          }
+          be_global->impl_ <<
+            "  }\n";
+          be_global->impl_ <<
+            "  return true;\n";
+        }
+
       }
     }
   }
@@ -662,20 +605,29 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   }
   f.endArgs();
 
-  std::string len;
   AST_Type* elem;
+  if (seq != 0) {
+    elem = seq->base_type();
+  } else {
+    elem = arr->base_type();
+  }
+  be_global->impl_ <<
+    "  const Encoding& encoding = ser.encoding();\n"
+    "  ACE_UNUSED_ARG(encoding);\n";
+  Classification elem_cls = classify(elem);
+  const bool primitive = elem_cls & CL_PRIMITIVE;
+  marshal_generator::generate_dheader_code(
+    "    if (!ser.read_delimiter(total_size)) {\n"
+    "      return false;\n"
+    "    }\n", !primitive, true);
+
+  std::string len;
 
   if (arr) {
-    elem = arr->base_type();
-    size_t n_elems = 1;
-    for (size_t i = 0; i < arr->n_dims(); ++i) {
-      n_elems *= arr->dims()[i]->ev()->u.ulval;
-    }
     std::ostringstream strstream;
-    strstream << n_elems;
+    strstream << array_element_count(arr);
     len = strstream.str();
   } else { // Sequence
-    elem = seq->base_type();
     be_global->impl_ <<
       "  ACE_CDR::ULong length;\n"
       "  if (!(ser >> length)) return false;\n";
@@ -685,27 +637,22 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   const std::string cxx_elem = scoped(elem->name());
   AST_Type* elem_orig = elem;
   elem = resolveActualType(elem);
-  const Classification elem_cls = classify(elem);
+  elem_cls = classify(elem);
 
-  if ((elem_cls & (CL_PRIMITIVE | CL_ENUM)) && !(elem_cls & CL_WIDE)) {
+  if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
     // fixed-length sequence/array element -> skip all elements at once
-    std::size_t sz = 0;
+    size_t sz = 0;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
-      "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
+      "  return ser.skip(" << len << ", " << sz << ");\n";
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
-    if ((elem_cls & CL_PRIMITIVE) && (elem_cls & CL_WIDE)) {
-      be_global->impl_ <<
-        "    ACE_CDR::Octet o;\n"
-        "    if (!(ser >> ACE_InputCDR::to_octet(o))) return false;\n"
-        "    if (!ser.skip(o)) return false;\n";
-    } else if (elem_cls & CL_STRING) {
+    if (elem_cls & CL_STRING) {
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
         "    if (!(ser >> strlength)) return false;\n"
-        "    if (!ser.skip(static_cast<ACE_UINT16>(strlength))) return false;\n";
+        "    if (!ser.skip(strlength)) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       std::string pre, post;
       if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
@@ -728,24 +675,25 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 static std::string
-func(const std::string&, AST_Type* br_type, const std::string&,
-  std::string&, const std::string&)
+func(const std::string&, const std::string&, AST_Type* br_type, const std::string&,
+  bool, Intro&, const std::string&, bool)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
   const Classification br_cls = classify(br_type);
+  ss <<
+    "    if (is_mutable) {\n"
+    "      if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
+    "        return false;\n"
+    "      }\n"
+    "    }\n";
   if (br_cls & CL_STRING) {
     ss <<
       "    ACE_CDR::ULong len;\n"
       "    if (!(ser >> len)) return false;\n"
-      "    if (!ser.skip(static_cast<ACE_UINT16>(len))) return false;\n";
-  } else if (br_cls & CL_WIDE) {
-    ss <<
-      "    ACE_CDR::Octet len;\n"
-      "    if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
       "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
-    std::size_t sz = 0;
+    size_t sz = 0;
     to_cxx_type(br_type, sz);
     ss <<
       "    if (!ser.skip(1, " << sz << ")) return false;\n";
@@ -786,12 +734,33 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     f.addArg("ser", "Serializer&");
     f.addArg("", clazz + "*");
     f.endArgs();
+
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    const bool not_final = exten != extensibilitykind_final;
+    const bool is_mutable  = exten == extensibilitykind_mutable;
+    be_global->impl_ <<
+      "  const Encoding& encoding = ser.encoding();\n"
+      "  ACE_UNUSED_ARG(encoding);\n"
+      "  const bool is_mutable = " << is_mutable <<";\n"
+      "  unsigned member_id;\n"
+      "  size_t field_size;\n"
+      "  bool must_understand = false;\n";
+    marshal_generator::generate_dheader_code(
+      "    if (!ser.read_delimiter(total_size)) {\n"
+      "      return false;\n"
+      "    }\n", not_final);
+    if (is_mutable) {
+      be_global->impl_ <<
+        "  if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "    return false;\n"
+        "  }\n";
+    }
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n"
       "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
       "    return false;\n"
       "  }\n";
-    if (generateSwitchForUnion("disc", func, branches, discriminator, "", "", "",
+    if (generateSwitchForUnion(node, "disc", func, branches, discriminator, "", "", "",
                                false, true, false)) {
       be_global->impl_ <<
         "  return true;\n";

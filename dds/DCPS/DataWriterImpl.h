@@ -107,6 +107,10 @@ public:
     MonotonicTimePoint deadline() const {
       return tstamp_ + TimeDuration(max_wait_);
     }
+
+    bool deadline_is_infinite() const {
+      return max_wait_.sec == DDS::DURATION_INFINITE_SEC && max_wait_.nanosec == DDS::DURATION_INFINITE_NSEC;
+    }
   };
 
   DataWriterImpl();
@@ -472,6 +476,11 @@ protected:
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
   virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+
+  /**
+   * Setup CDR serialization options in type-specific DataWrtier.
+   */
+  virtual DDS::ReturnCode_t setup_serialization() = 0;
 
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;

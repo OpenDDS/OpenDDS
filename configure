@@ -108,6 +108,9 @@ my %platforminfo =
                       "Use --macros=ANDROID_ABI=<ARCH> to specify the",
                       "target architecture.",
                       "Defaults to armeabi-v7a which is 32-bit ARMv7.",
+                      "Use --macros=android_sdk=<SDK_PATH> and",
+                      "--macros=android_target_api=<API_NUMBER> to specify",
+                      "where to find android.jar.",
                       "See docs/android.md for details.",
                     ],
                   'needs_i2jrt_corba' => 1,
@@ -173,6 +176,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
+    'workspace=s', 'Custom MPC workspace file to copy and use (Use a builtin one)',
    ],
    ['Build flags:',
     'debug!', 'Debugging (yes)',
@@ -500,6 +504,13 @@ $opts{'target'} = $opts{'host'} unless $opts{'target'};
 
 if (!exists $platforminfo{$opts{'target'}}) {
   die "ERROR: unknown target $opts{'target'}, stopped";
+}
+
+if (exists($opts{'workspace'})) {
+  if (!-r $opts{'workspace'}) {
+    die "ERROR: workspace file $opts{'workspace'} isn't a readable file, stopped";
+  }
+  $opts{'workspace'} = Cwd::realpath($opts{'workspace'});
 }
 
 # Set initial libpath
@@ -925,7 +936,7 @@ sub clone_host_and_target {
   }
 }
 
-sub backup_and_open {
+sub backup {
   my $file = shift;
   if (!$opts{'dry-run'} && -r $file) {
     print "WARNING: overwriting existing $file\n";
@@ -937,6 +948,22 @@ sub backup_and_open {
     }
     unlink $file;
   }
+}
+
+sub backup_and_copy {
+  my $src = shift;
+  my $dst = shift;
+  backup($dst);
+  if ($opts{'dry-run'}) {
+    print("Would copy $src to $dst\n");
+  } else {
+    copy($src, $dst);
+  }
+}
+
+sub backup_and_open {
+  my $file = shift;
+  backup($file);
   if ($opts{'dry-run'}) {
     return File::Temp->new();
   }
@@ -1070,6 +1097,11 @@ sub write_platform_macros {
             $opts{'nonstdcompiler'} = $tcomp;
             print $PMG 'LDFLAGS += -Wl,-rpath-link,$(ACE_ROOT)/lib', "\n";
           }
+        }
+        if ($opts{'target'} eq 'android') {
+          print $PMG 'ifeq (,$(findstring -isystem$(ACE_ROOT),$(INCLDIRS)))', "\n";
+          print $PMG '  INCLDIRS += -isystem $(ACE_ROOT)', "\n";
+          print $PMG 'endif', "\n";
         }
       }
     }
@@ -1409,6 +1441,7 @@ sub has_feature {
   return 0;
 }
 
+my @features;
 if ($opts{'java'}) {
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
@@ -1418,7 +1451,7 @@ if ($opts{'java'}) {
       if (/javac (\d+)/) {
         print "Found javac major version $1\n" if $opts{'verbose'};
         if ($1 > 1) {
-          push(@{$opts{'features'}}, "$feat=0");
+          push(@features, "$feat=0");
           print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
         }
         last;
@@ -1463,7 +1496,6 @@ if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
 
 # Enable MPC features and populate expected environment variables
 # for all required "optional" dependencies.
-my @features;
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
@@ -1759,6 +1791,7 @@ workspace {
   $(ACE_ROOT)/ace/ace.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL
+  dds/DCPS/OpenDDS_Util.mpc
   dds/idl
   java/idl2jni/codegen
 EOT
@@ -2000,9 +2033,17 @@ EOT
     }
   }
 
-  my $ws = 'DDS.mwc';
-  if (-r $buildEnv->{'DDS_ROOT'} . "/host_tools.mwc") {
+  my $custom_ws = "OpenDDS_custom.mwc";
+  if (exists($opts{'workspace'})) {
+    backup_and_copy($opts{'workspace'}, $custom_ws);
+  }
+
+  my $ws;
+  if (-r "$buildEnv->{'DDS_ROOT'}/host_tools.mwc") {
     $ws = 'host_tools.mwc';
+  }
+  elsif (-r $custom_ws) {
+    $ws = $custom_ws;
   }
   elsif (!$tests && $buildtao) {
     $ws = 'DDS_TAOv2.mwc';
@@ -2012,6 +2053,9 @@ EOT
   }
   elsif ($buildtao) {
     $ws = 'DDS_TAOv2_all.mwc';
+  }
+  else {
+    $ws = 'DDS.mwc';
   }
 
   my $static = (($opts{'static'} && $is_windows) ||

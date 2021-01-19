@@ -451,9 +451,9 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     return false;
   }
 
+  dr->delete_readcondition(disposed_condition);
   sub->delete_datareader(dr);
   pub->delete_datawriter(dw);
-  dr->delete_readcondition(disposed_condition);
   dp->delete_contentfilteredtopic(cft);
   dp->delete_topic(topic);
   return true;

@@ -91,13 +91,12 @@ namespace DCPS {
 
 // Implementation skeleton constructor
 DomainParticipantImpl::DomainParticipantImpl(
-  DomainParticipantFactoryImpl* factory,
+  InstanceHandleGenerator& handle_generator,
   const DDS::DomainId_t& domain_id,
   const DDS::DomainParticipantQos& qos,
   DDS::DomainParticipantListener_ptr a_listener,
   const DDS::StatusMask& mask)
-  : factory_(factory),
-    default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
+  : default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
     default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
     qos_(qos),
@@ -111,12 +110,14 @@ DomainParticipantImpl::DomainParticipantImpl(
     federated_(false),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
+    participant_handles_(handle_generator),
     pub_id_gen_(dp_id_),
     automatic_liveliness_timer_(*this),
     participant_liveliness_timer_(*this)
 {
   (void) this->set_listener(a_listener, mask);
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
+  type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
 }
 
 DomainParticipantImpl::~DomainParticipantImpl()
@@ -248,7 +249,7 @@ DomainParticipantImpl::create_subscriber(
     return DDS::Subscriber::_nil();
   }
 
-  SubscriberImpl* sub = 0 ;
+  SubscriberImpl* sub = 0;
   ACE_NEW_RETURN(sub,
                  SubscriberImpl(participant_handles_.next(),
                                 sub_qos,
@@ -429,6 +430,7 @@ DomainParticipantImpl::create_topic_i(
     return DDS::Topic::_nil();
   }
 
+  // See if there is a Topic with the same name.
   TopicMap::mapped_type* entry = 0;
   bool found = false;
   {
@@ -454,6 +456,10 @@ DomainParticipantImpl::create_topic_i(
     }
   }
 
+  /*
+   * If there is a topic with the same name, return the topic if it has the
+   * same type name and QoS, else it is an error.
+   */
   if (found) {
     CORBA::String_var found_type = entry->pair_.svt_->get_type_name();
     if (ACE_OS::strcmp(type_name, found_type) == 0) {
@@ -470,23 +476,25 @@ DomainParticipantImpl::create_topic_i(
         }
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
 
-      } else {
+      } else { // Same Name and Type, Different QoS
         if (DCPS_debug_level >= 1) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DomainParticipantImpl::create_topic, ")
-                     ACE_TEXT("qos not match: topic_name=%C type_name=%C\n"),
-                     topic_name, type_name));
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic: ")
+            ACE_TEXT("topic with name \"%C\" and type %C already exists, ")
+            ACE_TEXT("but the QoS doesn't match.\n"),
+            topic_name, type_name));
         }
 
         return DDS::Topic::_nil();
       }
 
-    } else { // no match
+    } else { // Same Name, Different Type
       if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::create_topic, ")
-                   ACE_TEXT(" not match: topic_name=%C type_name=%C\n"),
-                   topic_name, type_name));
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic: ")
+          ACE_TEXT("topic with name \"%C\" already exists, but its type, %C ")
+          ACE_TEXT("is not the same as %C.\n"),
+          topic_name, found_type.in(), type_name));
       }
 
       return DDS::Topic::_nil();
@@ -555,7 +563,6 @@ DomainParticipantImpl::delete_topic_i(
   DDS::Topic_ptr a_topic,
   bool             remove_objref)
 {
-
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   try {
@@ -573,8 +580,6 @@ DomainParticipantImpl::delete_topic_i(
       }
       return DDS::RETCODE_ERROR;
     }
-
-    CORBA::String_var topic_name = the_topic_servant->get_name();
 
     DDS::DomainParticipant_var dp = the_topic_servant->get_participant();
 
@@ -608,6 +613,7 @@ DomainParticipantImpl::delete_topic_i(
                        this->topics_protector_,
                        DDS::RETCODE_ERROR);
 
+      CORBA::String_var topic_name = the_topic_servant->get_name();
       TopicMap::mapped_type* entry = 0;
 
       if (Util::find(topics_, topic_name.in(), entry) == -1) {
@@ -620,10 +626,9 @@ DomainParticipantImpl::delete_topic_i(
         return DDS::RETCODE_ERROR;
       }
 
-      --entry->client_refs_;
+      const CORBA::ULong client_refs = --entry->client_refs_;
 
-      if (remove_objref == true ||
-          0 == entry->client_refs_) {
+      if (remove_objref || 0 == client_refs) {
         //TBD - mark the TopicImpl as deleted and make it
         //      reject calls to the TopicImpl.
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -650,9 +655,16 @@ DomainParticipantImpl::delete_topic_i(
           }
           return DDS::RETCODE_ERROR;
 
-        } else
+        } else {
           return DDS::RETCODE_OK;
-
+        }
+      } else {
+        if (DCPS_debug_level > 4) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
+            ACE_TEXT("Didn't remove topic from the map, remove_objref %d client_refs %d\n"),
+            remove_objref, client_refs));
+        }
       }
     }
 
@@ -1837,6 +1849,8 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
+  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
+
   if (monitor_) {
     monitor_->report();
   }
@@ -2001,7 +2015,15 @@ DomainParticipantImpl::create_new_topic(
 
   if ((enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities)) {
-    topic_servant->enable();
+    const DDS::ReturnCode_t ret = topic_servant->enable();
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: ")
+          ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+          ACE_TEXT("enable failed.\n")));
+      return DDS::Topic::_nil();
+    }
   }
 
   DDS::Topic_ptr obj(topic_servant);
@@ -2588,7 +2610,7 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
   shutdown_mutex_.acquire();
   shutdown_result_ = ret;
   shutdown_complete_ = true;
-  shutdown_condition_.signal();
+  shutdown_condition_.notify_one();
   shutdown_mutex_.release();
 
   return 0;

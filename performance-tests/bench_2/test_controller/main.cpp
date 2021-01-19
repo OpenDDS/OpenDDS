@@ -1,10 +1,24 @@
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
+#include "ScenarioOverrides.h"
+#include "ScenarioManager.h"
+
+#include <PropertyStatBlock.h>
+#include <util.h>
+#include <json_conversion.h>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)
+#    if __has_warning("-Wclass-memaccess")
+#      pragma GCC diagnostic ignored "-Wclass-memaccess"
+#    endif
+#  elif __GNUC__ > 7
+#    pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  endif
+#endif
+#include "BenchTypeSupportImpl.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -14,28 +28,23 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-#include "BenchTypeSupportImpl.h"
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
-#include "PropertyStatBlock.h"
-
-#include <util.h>
-#include <json_conversion.h>
-
-#include "ScenarioOverrides.h"
-#include "ScenarioManager.h"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace Bench;
 using namespace Bench::NodeController;
 using namespace Bench::TestController;
 
 std::string bench_root;
+
+namespace {
+  const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
+}
 
 int handle_report(const Bench::TestController::Report& report,
   const std::unordered_set<std::string>& tags,
@@ -138,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
    * not just a number.
    */
   std::string result_id;
-  bool overwrite_result = false, json_result = false;
+  bool overwrite_result = false, json_result = false, show_worker_logs = false;
 
   // List of tags
   std::unordered_set<std::string> tags;
@@ -225,7 +234,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--overwrite-result"))) {
         overwrite_result = true;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-bench-partition-suffix"))) {
-        overrides.bench_partition_suffix = get_option_argument(i, argc, argv);
+        std::string suffix = get_option_argument(i, argc, argv);
+        overrides.bench_partition_suffix = suffix == "none" ? "" : suffix;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-create-time"))) {
         overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-enable-time"))) {
@@ -240,6 +250,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         tags.insert(get_option_argument(i, argc, argv));
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json"))) {
         json_result = true;
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--show-worker-logs"))) {
+        show_worker_logs = true;
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -377,14 +389,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Saving Scenario Allocation to File..." << std::endl;
       std::ofstream file(preallocated_scenario_output_path);
       if (file.is_open()) {
-        if (!idl_2_json(allocated_scenario, file, pretty)) {
+        if ((pretty && !idl_2_json<AllocatedScenario, rapidjson::PrettyWriter<rapidjson::OStreamWrapper> >(allocated_scenario, file)) ||
+            (!pretty && !idl_2_json(allocated_scenario, file))) {
           throw std::runtime_error("Could not encode allocated scenario");
         }
       } else {
         throw std::runtime_error("Could not open file for writing allocated scenario");
       }
     } else if (debug_alloc) {
-      if (!idl_2_json(allocated_scenario, std::cout, true)) {
+      if (!idl_2_json<AllocatedScenario, rapidjson::PrettyWriter<rapidjson::OStreamWrapper> >(allocated_scenario, std::cout)) {
         throw std::runtime_error("Could not encode allocated scenario");
       }
     } else {
@@ -438,6 +451,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       size_t total_worker_reports = 0;
       for (CORBA::ULong i = 0; i < report.node_reports.length(); ++i) {
         total_worker_reports += report.node_reports[i].worker_reports.length();
+        if (show_worker_logs) {
+          for (CORBA::ULong j = 0; j < report.node_reports[i].worker_logs.length(); ++j) {
+            std::stringstream header;
+            header << "=== Showing Log for Node " << report.node_reports[i].node_id << " Worker #" << report.node_reports[i].worker_ids[j] << " ===" << std::endl;
+            result_file << header.str();
+            result_file << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
+            std::cout << header.str();
+            std::cout << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
+          }
+        }
       }
 
       if (total_worker_reports != allocated_scenario.expected_reports) {
@@ -455,7 +478,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           error << "Could not open " << json_result_path;
           throw std::runtime_error(error.str());
         }
-        idl_2_json(report, json_result_file, false);
+        idl_2_json(report, json_result_file, DEFAULT_MAX_DECIMAL_PLACES);
         std::cout << "Wrote JSON results to " << json_result_path << std::endl;
       }
     }
@@ -514,8 +537,10 @@ int handle_report(const Bench::TestController::Report& report,
   Bench::SimpleStatBlock consolidated_discovery_delta_stats;
   Bench::SimpleStatBlock consolidated_latency_stats;
   Bench::SimpleStatBlock consolidated_jitter_stats;
+  Bench::SimpleStatBlock consolidated_throughput_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
   Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
+  Bench::SimpleStatBlock consolidated_round_trip_throughput_stats;
 
   bool missing_durable_data = false;
 
@@ -524,7 +549,7 @@ int handle_report(const Bench::TestController::Report& report,
     out_of_order_data_counts, duplicate_data_counts, missing_data_counts;
   std::unordered_map<std::string, std::string> out_of_order_data_details, duplicate_data_details, missing_data_details;
   std::unordered_map<std::string, Bench::SimpleStatBlock> tagged_discovery_delta_stats, tagged_latency_stats,
-    tagged_jitter_stats, tagged_round_trip_latency_stats, tagged_round_trip_jitter_stats;
+    tagged_jitter_stats, tagged_throughput_stats, tagged_round_trip_latency_stats, tagged_round_trip_jitter_stats, tagged_round_trip_throughput_stats;
 
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
     const Bench::WorkerReport& worker_report = *(parsed_reports[r]);
@@ -549,8 +574,10 @@ int handle_report(const Bench::TestController::Report& report,
           Bench::ConstPropertyStatBlock dr_discovery_delta(dr_report.properties, "discovery_delta");
           Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
           Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
+          Bench::ConstPropertyStatBlock dr_throughput(dr_report.properties, "throughput");
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
           Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
+          Bench::ConstPropertyStatBlock dr_round_trip_throughput(dr_report.properties, "round_trip_throughput");
 
           Builder::ConstPropertyIndex lost_sample_count_prop = get_property(dr_report.properties, "lost_sample_count", Builder::PVK_ULL);
           if (lost_sample_count_prop) {
@@ -611,14 +638,18 @@ int handle_report(const Bench::TestController::Report& report,
           consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dr_discovery_delta.to_simple_stat_block());
           consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
+          consolidated_throughput_stats = consolidate(consolidated_throughput_stats, dr_throughput.to_simple_stat_block());
           consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
           consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
+          consolidated_round_trip_throughput_stats = consolidate(consolidated_round_trip_throughput_stats, dr_round_trip_throughput.to_simple_stat_block());
 
           consolidate_tagged_stats(tagged_discovery_delta_stats, dr_report.tags, tags, dr_discovery_delta);
           consolidate_tagged_stats(tagged_latency_stats, dr_report.tags, tags, dr_latency);
           consolidate_tagged_stats(tagged_jitter_stats, dr_report.tags, tags, dr_jitter);
+          consolidate_tagged_stats(tagged_throughput_stats, dr_report.tags, tags, dr_throughput);
           consolidate_tagged_stats(tagged_round_trip_latency_stats, dr_report.tags, tags, dr_round_trip_latency);
           consolidate_tagged_stats(tagged_round_trip_jitter_stats, dr_report.tags, tags, dr_round_trip_jitter);
+          consolidate_tagged_stats(tagged_round_trip_throughput_stats, dr_report.tags, tags, dr_round_trip_throughput);
         }
       }
 
@@ -682,10 +713,16 @@ int handle_report(const Bench::TestController::Report& report,
   consolidated_jitter_stats.pretty_print(result_out, "jitter", "  ", 1);
   result_out << std::endl;
 
+  consolidated_throughput_stats.pretty_print(result_out, "throughput", "  ", 1);
+  result_out << std::endl;
+
   consolidated_round_trip_latency_stats.pretty_print(result_out, "round trip latency", "  ", 1);
   result_out << std::endl;
 
   consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter", "  ", 1);
+  result_out << std::endl;
+
+  consolidated_round_trip_throughput_stats.pretty_print(result_out, "round trip throughput", "  ", 1);
   result_out << "\n\n";
 
   // Print stats information for the input tags
@@ -713,12 +750,20 @@ int handle_report(const Bench::TestController::Report& report,
       tagged_jitter_stats[tag].pretty_print(result_out, "jitter");
       result_out << std::endl;
     }
+    if (tagged_throughput_stats.count(tag)) {
+      tagged_throughput_stats[tag].pretty_print(result_out, "throughput");
+      result_out << std::endl;
+    }
     if (tagged_round_trip_latency_stats.count(tag)) {
       tagged_round_trip_latency_stats[tag].pretty_print(result_out, "round trip latency");
       result_out << std::endl;
     }
     if (tagged_round_trip_jitter_stats.count(tag)) {
       tagged_round_trip_jitter_stats[tag].pretty_print(result_out, "round trip jitter");
+      result_out << std::endl;
+    }
+    if (tagged_round_trip_throughput_stats.count(tag)) {
+      tagged_round_trip_throughput_stats[tag].pretty_print(result_out, "round trip throughput");
       result_out << std::endl;
     }
 
@@ -743,6 +788,7 @@ int handle_report(const Bench::TestController::Report& report,
       total_undermatched_writers ||
       total_out_of_order_data_count ||
       total_duplicate_data_count ||
+      total_missing_data_count ||
       missing_durable_data) {
     result = EXIT_FAILURE;
   }

@@ -17,6 +17,7 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/StaticIncludes.h>
 
 #include "FooTypeTypeSupportImpl.h"

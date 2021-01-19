@@ -1,3 +1,5 @@
+#include "key_annotationTypeSupportImpl.h"
+
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/FilterEvaluator.h>
@@ -5,9 +7,10 @@
 #include <ace/ACE.h>
 #include <ace/Log_Msg.h>
 
-#include "key_annotationTypeSupportImpl.h"
-
 using namespace key_annotation;
+
+const OpenDDS::DCPS::Encoding encoding(
+  OpenDDS::DCPS::Encoding::KIND_XCDR1);
 
 template <typename T>
 OpenDDS::DCPS::DDSTraits<T>& get_traits()
@@ -44,22 +47,11 @@ bool assert_key_count(size_t expected)
 }
 
 template <typename T>
-size_t find_size(const T& data, size_t& padding)
-{
-  size_t size = 0;
-  padding = 0;
-  OpenDDS::DCPS::gen_find_size(data, size, padding);
-  return size;
-}
-
-template <typename T>
 bool assert_key_only_size(const T& data, size_t expected)
 {
   typedef OpenDDS::DCPS::KeyOnly<const T> KeyOnlyType;
-  KeyOnlyType key_only_data(data);
-
-  size_t padding;
-  size_t size = find_size<KeyOnlyType>(key_only_data, padding);
+  const KeyOnlyType key_only_data(data);
+  const size_t size = OpenDDS::DCPS::serialized_size(encoding, key_only_data);
   if (size != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")

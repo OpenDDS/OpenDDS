@@ -1,0 +1,3 @@
+project(opendds_tests_transport_testmsg): dcps_test {
+  dynamicflags += TESTMSG_BUILD_DLL
+}

@@ -223,9 +223,18 @@ my %all_checks = (
 
   gettimeofday => {
     path_matches_all_of => ['cpp_file', 'in_dds_dcps'],
-    line_matches => qr/gettimeofday/,
+    line_matches => qr/gettimeofday|ACE_Time_Value\(\)\.now\(\)/,
     message => [
       'ACE_OS::gettimeofday() and "ACE_Time_Value().now()" are forbidden in the core libraries.',
+      'See the "Time" section in docs/guidelines.md.',
+    ],
+  },
+
+  ace_condition => {
+    path_matches_all_of => ['cpp_file', 'in_dds_dcps'],
+    line_matches => qr/(?:ACE_|ace\/)Condition(?:(?:_Recursive)?_Thread_Mutex)?/,
+    message => [
+      'Except for in Condition.h, ACE_Condition and related types are forbidden in the core libraries.',
       'See the "Time" section in docs/guidelines.md.',
     ],
   },

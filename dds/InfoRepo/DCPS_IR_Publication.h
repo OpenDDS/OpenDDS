@@ -47,7 +47,9 @@ public:
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
                       const DDS::DataWriterQos& qos,
                       const OpenDDS::DCPS::TransportLocatorSeq& info,
-                      const DDS::PublisherQos& publisherQos);
+                      ACE_CDR::ULong transportContext,
+                      const DDS::PublisherQos& publisherQos,
+                      const DDS::OctetSeq & serializedTypeInfo);
 
   ~DCPS_IR_Publication();
 
@@ -126,6 +128,7 @@ public:
   void set_qos(const DDS::PublisherQos& qos);
 
   OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
+  ACE_CDR::ULong get_transportContext() const { return transportContext_; }
 
   /// Return pointer to the incompatible qos status
   /// Publication retains ownership
@@ -168,6 +171,8 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
+  const DDS::OctetSeq& get_serialized_type_info() const;
+
 private:
 
   OpenDDS::DCPS::RepoId id_;
@@ -180,8 +185,9 @@ private:
   OpenDDS::DCPS::DataWriterRemote_var writer_;
   DDS::DataWriterQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
+  ACE_CDR::ULong transportContext_;
   DDS::PublisherQos publisherQos_;
-
+  DDS::OctetSeq serializedTypeInfo_;
   DCPS_IR_Subscription_Set associations_;
   DCPS_IR_Subscription_Set defunct_;
 

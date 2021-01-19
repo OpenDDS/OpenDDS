@@ -21,8 +21,9 @@ typedef void (*callback_t)();
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const OPENDDS_STRING& id, int expected_samples, callback_t done_callback)
+  DataReaderListenerImpl(const OPENDDS_STRING& id, DDS::DomainId_t domain, int expected_samples, callback_t done_callback)
     : id_(id)
+    , domain_(domain)
     , expected_samples_(expected_samples)
     , received_samples_(0)
     , done_callback_(done_callback)
@@ -61,6 +62,7 @@ public:
 
 private:
   OPENDDS_STRING id_;
+  DDS::DomainId_t domain_;
   const int expected_samples_;
   int received_samples_;
   callback_t done_callback_;

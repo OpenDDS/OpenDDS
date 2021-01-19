@@ -6,8 +6,16 @@
 namespace Bench {
 
 WriteAction::WriteAction(ACE_Proactor& proactor)
- : proactor_(proactor), started_(false), stopped_(false)
- , write_period_(1, 0), max_count_(0), new_key_count_(0), new_key_probability_(0)
+ : proactor_(proactor)
+ , started_(false)
+ , stopped_(false)
+ , manual_rescheduling_(false)
+ , write_period_(1, 0)
+ , last_scheduled_time_(0, 0)
+ , max_count_(0)
+ , new_key_count_(0)
+ , new_key_probability_(0)
+ , final_wait_for_ack_{DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC}
 {
 }
 
@@ -61,6 +69,13 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   }
   new_key_count_ = new_key_count;
 
+  bool relative_scheduling = false;
+  auto manual_rescheduling_prop = get_property(config.params, "relative_scheduling", Builder::PVK_ULL);
+  if (manual_rescheduling_prop) {
+    relative_scheduling = manual_rescheduling_prop->value.ull_prop() != 0u;
+  }
+  manual_rescheduling_ = relative_scheduling;
+
   double new_key_probability = 0.0;
   auto new_key_probability_prop = get_property(config.params, "new_key_probability", Builder::PVK_DOUBLE);
   if (new_key_probability_prop) {
@@ -108,6 +123,14 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
   }
 
+  auto final_wait_for_ack_prop = get_property(config.params, "final_wait_for_ack", Builder::PVK_DOUBLE);
+  if (final_wait_for_ack_prop) {
+    double period = final_wait_for_ack_prop->value.double_prop();
+    int64_t sec = static_cast<int64_t>(period);
+    uint64_t nsec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000000u);
+    final_wait_for_ack_ = {static_cast<CORBA::Long>(sec), static_cast<CORBA::ULong>(nsec)};
+  }
+
   // Filter class parameters
   size_t filter_class_start_value = 0;
   auto filter_class_start_value_prop = get_property(config.params, "filter_class_start_value", Builder::PVK_ULL);
@@ -143,7 +166,13 @@ void WriteAction::start()
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, write_period_);
+    if (manual_rescheduling_) {
+      const auto now = Builder::get_hr_time();
+      last_scheduled_time_ = ACE_Time_Value(now.sec, static_cast<suseconds_t>(now.nsec / 1000u));
+      proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
+    } else {
+      proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, write_period_);
+    }
   }
 }
 
@@ -153,10 +182,9 @@ void WriteAction::stop()
   if (started_ && !stopped_) {
     stopped_ = true;
     proactor_.cancel_timer(*handler_);
-    const DDS::Duration_t timeout = { 0, 0 };
-    data_dw_->wait_for_acknowledgments(timeout);
+    data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
     data_dw_->unregister_instance(data_, instance_);
-    data_dw_->wait_for_acknowledgments(timeout);
+    data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
   }
 }
 
@@ -180,6 +208,21 @@ void WriteAction::do_write()
       } else {
         if ((data_.filter_class += static_cast<CORBA::ULong>(filter_class_increment_)) > static_cast<CORBA::ULong>(filter_class_stop_value_)) {
           data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
+        }
+      }
+
+      if (manual_rescheduling_) {
+        const auto now = Builder::get_hr_time();
+        const ACE_Time_Value atv_now(now.sec, static_cast<suseconds_t>(now.nsec / 1000u));
+        const ACE_Time_Value diff = atv_now - last_scheduled_time_;
+
+        if (diff < write_period_) {
+          const ACE_Time_Value remaining = write_period_ - diff;
+          last_scheduled_time_ = atv_now + remaining;
+          proactor_.schedule_timer(*handler_, nullptr, remaining, ZERO_TIME);
+        } else {
+          last_scheduled_time_ = atv_now;
+          proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
         }
       }
     }

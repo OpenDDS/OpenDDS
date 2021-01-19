@@ -85,6 +85,12 @@ public:
 
   void inconsistent_topic(int count);
 
+  /**
+   * Compare the QoS of the IDL Type and the Topic/DataWriter/DataReader to see
+   * whether the type matches all values in the QoS.
+   */
+  bool check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer);
+
 private:
   /// The topic qos
   DDS::TopicQos                qos_;

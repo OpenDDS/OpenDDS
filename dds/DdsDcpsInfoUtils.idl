@@ -58,19 +58,23 @@ module OpenDDS
 
     struct WriterAssociation {
       TransportLocatorSeq writerTransInfo;
+      unsigned long transportContext;
       RepoId writerId;
       ::DDS::PublisherQos pubQos;
       ::DDS::DataWriterQos writerQos;
+      ::DDS::OctetSeq serializedTypeInfo;
     };
 
     struct ReaderAssociation {
       TransportLocatorSeq readerTransInfo;
+      unsigned long transportContext;
       RepoId readerId;
       ::DDS::SubscriberQos subQos;
       ::DDS::DataReaderQos readerQos;
       string filterClassName;
       string filterExpression;
       ::DDS::StringSeq exprParams;
+      ::DDS::OctetSeq serializedTypeInfo;
     };
 
     typedef sequence<RepoId> WriterIdSeq;

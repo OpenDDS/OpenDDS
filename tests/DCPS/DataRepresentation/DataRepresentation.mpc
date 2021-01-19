@@ -1,0 +1,6 @@
+project: dcps_test, dcps_rtps, dcps_rtps_udp {
+  exename = *
+  TypeSupport_Files {
+    DataRepresentation.idl
+  }
+}

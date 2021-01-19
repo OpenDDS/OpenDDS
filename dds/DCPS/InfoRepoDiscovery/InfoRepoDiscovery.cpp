@@ -6,7 +6,6 @@
  */
 #include "InfoRepoDiscovery.h"
 
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h"
@@ -14,6 +13,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
@@ -584,10 +584,11 @@ RepoId
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const RepoId& participantId,
                                    const RepoId& topicId,
-                                   DCPS::DataWriterCallbacks* publication,
+                                   DCPS::DataWriterCallbacks_rch publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
-                                   const DDS::PublisherQos& publisherQos)
+                                   const DDS::PublisherQos& publisherQos,
+                                   const XTypes::TypeInformation& type_info)
 {
   RepoId pubId;
 
@@ -603,9 +604,12 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     //this is the client reference to the DataWriterRemoteImpl
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_);
+    //turn into a octet seq to pass through generated files
+    DDS::OctetSeq serializedTypeInfo;
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
-      dr_remote_obj, qos, transInfo, publisherQos);
+      dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above
@@ -676,13 +680,14 @@ RepoId
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const RepoId& participantId,
                                     const RepoId& topicId,
-                                    DCPS::DataReaderCallbacks* subscription,
+                                    DCPS::DataReaderCallbacks_rch subscription,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
                                     const DDS::SubscriberQos& subscriberQos,
                                     const char* filterClassName,
                                     const char* filterExpr,
-                                    const DDS::StringSeq& params)
+                                    const DDS::StringSeq& params,
+                                    const XTypes::TypeInformation& type_info)
 {
   RepoId subId;
 
@@ -698,10 +703,14 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     //this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
+    //turn into a octet seq to pass through generated files
+    DDS::OctetSeq serializedTypeInfo;
+    XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,
-                                              filterClassName, filterExpr, params);
+                                              filterClassName, filterExpr, params,
+                                              serializedTypeInfo);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above

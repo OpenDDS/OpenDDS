@@ -277,7 +277,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     }
   } else {
     // Assume STUN.
-    OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::DCPS::Serializer::SWAP_BE);
+    OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::STUN::encoding);
     OpenDDS::STUN::Message message;
     message.block = msg.get();
     if (!(serializer >> message)) {
@@ -605,7 +605,7 @@ size_t VerticalHandler::send(const ACE_INET_Addr& addr,
   using namespace OpenDDS::STUN;
   const size_t length = HEADER_SIZE + message.length();
   Message_Block_Shared_Ptr block(new ACE_Message_Block(length));
-  Serializer serializer(block.get(), Serializer::SWAP_BE);
+  Serializer serializer(block.get(), encoding);
   message.block = block.get();
   serializer << message;
   RelayHandler::enqueue_message(addr, block, now);
@@ -695,8 +695,13 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
                                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                         const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
+  using namespace OpenDDS::DCPS;
+
+  const Encoding encoding(Encoding::KIND_XCDR1);
+
   // Determine how many guids we can pack into a single UDP message.
-  const auto max_guids_per_message = (OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - msg->length() - 4) / sizeof(OpenDDS::DCPS::RepoId);
+  const auto max_guids_per_message =
+    (TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - msg->length() - 4) / sizeof(RepoId);
 
   auto remaining = guids.size();
   auto pos = guids.begin();
@@ -711,10 +716,10 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
       to.push_back(repoid_to_guid(*pos));
     }
 
-    size_t size = 0, padding = 0;
-    OpenDDS::DCPS::gen_find_size(relay_header, size, padding);
-    OpenDDS::DCPS::Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size + padding));
-    OpenDDS::DCPS::Serializer ser(header_block.get());
+    size_t size = 0;
+    serialized_size(encoding, size, relay_header);
+    Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size));
+    Serializer ser(header_block.get(), encoding);
     ser << relay_header;
     header_block->cont(msg.get()->duplicate());
     RelayHandler::enqueue_message(addr, header_block, now);

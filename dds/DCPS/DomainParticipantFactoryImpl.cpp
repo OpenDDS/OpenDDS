@@ -34,7 +34,7 @@ DomainParticipantFactoryImpl::~DomainParticipantFactoryImpl()
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) DomainParticipantFactoryImpl::"
+               "(%P|%t) DomainParticipantFactoryImpl::"
                "~DomainParticipantFactoryImpl()\n"));
   }
 }
@@ -73,7 +73,7 @@ DomainParticipantFactoryImpl::create_participant(
   }
 
   RcHandle<DomainParticipantImpl> dp =
-    make_rch<DomainParticipantImpl>(this, domainId, par_qos, a_listener, mask);
+    make_rch<DomainParticipantImpl>(ref(participant_handles_), domainId, par_qos, a_listener, mask);
 
   if (qos_.entity_factory.autoenable_created_entities) {
     if (dp->enable() != DDS::RETCODE_OK) {
@@ -94,16 +94,19 @@ DomainParticipantFactoryImpl::create_participant(
 
   // if the specified transport is a transport template then create a new transport
   // instance for the new participant if per_participant is set (checked before creating instance).
-  ACE_TString transport_config_name;
-  TheServiceParticipant->get_transport_config_name(domainId, transport_config_name);
+  ACE_TString transport_base_config_name;
+  TheServiceParticipant->get_transport_base_config_name(domainId, transport_base_config_name);
 
-  if (TheTransportRegistry->config_has_transport_template(transport_config_name)) {
-    OPENDDS_STRING instance_config_name = dp->get_unique_id();
+  if (TheTransportRegistry->config_has_transport_template(transport_base_config_name)) {
+    OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(transport_base_config_name.c_str());
+    OPENDDS_STRING transport_instance_name = dp->get_unique_id();
 
-    const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, instance_config_name);
+    // unique config and instance names are returned in transport_config_name and transport_instance_name
+    const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, transport_instance_name);
 
     if (ret) {
-      TheTransportRegistry->bind_config(instance_config_name, dp.in());
+      TheTransportRegistry->bind_config(transport_config_name, dp.in());
+      TheTransportRegistry->update_config_template_instance_info(transport_config_name, transport_instance_name);
     } else {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
@@ -146,6 +149,14 @@ DomainParticipantFactoryImpl::delete_participant(
   }
 
   RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
+
+  TransportConfig_rch tr_cfg = servant_rch->transport_config();
+
+  if (tr_cfg) {
+    // check for and remove tranport template instance
+    OPENDDS_STRING dyn_cfg_name = tr_cfg->name();
+    TheTransportRegistry->remove_transport_template_instance(dyn_cfg_name);
+  }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (!the_servant->is_clean()) {

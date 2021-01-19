@@ -5,12 +5,18 @@
 
 #include "BaseMessageUtils.h"
 
-#include "dds/DCPS/Time_Helper.h"
+#include <dds/DCPS/Time_Helper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+
+using DCPS::Encoding;
+
+namespace {
+  const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
+}
 
 int locator_to_address(ACE_INET_Addr& dest,
                        const DCPS::Locator_t& locator,
@@ -49,6 +55,12 @@ int locator_to_address(ACE_INET_Addr& dest,
   return -1;
 }
 
+const DCPS::Encoding& get_locators_encoding()
+{
+  static const Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
+  return encoding;
+}
+
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
                                    bool* requires_inline_qos,
@@ -60,7 +72,7 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
 
-  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+  DCPS::Serializer ser(&mb, get_locators_encoding());
   if (!(ser >> locators)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) blob_to_locators: ")
@@ -93,16 +105,23 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
 void locators_to_blob(const DCPS::LocatorSeq& locators,
                       DCPS::TransportBLOB& blob)
 {
-  using OpenDDS::DCPS::Serializer;
-  size_t size_locator = 0, padding_locator = 0;
-  DCPS::gen_find_size(locators, size_locator, padding_locator);
-  ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-  ser_loc << locators;
+  using namespace OpenDDS::DCPS;
+  const Encoding& encoding = get_locators_encoding();
+  size_t size = 0;
+  serialized_size(encoding, size, locators);
+  ACE_Message_Block mb_locator(size + 1);
+  Serializer ser(&mb_locator, encoding);
+  if (!(ser << locators)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) locators_to_blob: ")
+      ACE_TEXT("Failed to serialize locators to blob\n")));
+  }
   // Add a bool for 'requires inline qos', see Sedp::set_inline_qos():
   // if the bool is no longer the last octet of the sequence then that function
   // must be changed as well.
-  ser_loc << ACE_OutputCDR::from_boolean(false);
+  if (!(ser << ACE_OutputCDR::from_boolean(false))) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) locators_to_blob: ")
+      ACE_TEXT("Failed to serialize boolean for blob\n")));
+  }
   message_block_to_sequence(mb_locator, blob);
 }
 
@@ -116,7 +135,7 @@ DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& 
 
 MessageParser::MessageParser(const ACE_Message_Block& in)
   : in_(in.duplicate())
-  , ser_(in_.get(), false, DCPS::Serializer::ALIGN_CDR)
+  , ser_(in_.get(), encoding_plain_native)
   , header_()
   , sub_()
   , smContentStart_(0)
@@ -124,7 +143,7 @@ MessageParser::MessageParser(const ACE_Message_Block& in)
 
 MessageParser::MessageParser(const DDS::OctetSeq& in)
   : fromSeq_(reinterpret_cast<const char*>(in.get_buffer()), in.length())
-  , ser_(&fromSeq_, false, DCPS::Serializer::ALIGN_CDR)
+  , ser_(&fromSeq_, encoding_plain_native)
   , header_()
   , sub_()
   , smContentStart_(0)

@@ -1,7 +1,19 @@
 #ifndef OPENDDS_DCPS_POOL_ALLOCATOR_H
 #define OPENDDS_DCPS_POOL_ALLOCATOR_H
 
-#include "ace/config-macros.h"
+#include <ace/config-macros.h>
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#  define OPENDDS_POOL_ALLOCATOR 1
+#else
+#  define OPENDDS_POOL_ALLOCATOR 0
+#endif
+
+#if OPENDDS_POOL_ALLOCATOR
+#  include "dcps_export.h"
+#  include "SafetyProfilePool.h"
+#endif
+#include <dds/Versioned_Namespace.h>
+
 #include <limits>
 #include <string>
 #include <map>
@@ -10,14 +22,12 @@
 #include <queue>
 #include <set>
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
-#include "dcps_export.h"
-#include "SafetyProfilePool.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+#if OPENDDS_POOL_ALLOCATOR
 
 OpenDDS_Dcps_Export void* pool_alloc_memory(size_t size);
 
@@ -97,12 +107,11 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 template <typename T>
 struct add_const { typedef const T type; };
 
-}}
-
-OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-#define OPENDDS_STRING std::basic_string<char, std::char_traits<char>, \
-          OpenDDS::DCPS::PoolAllocator<char> >
+// TODO(iguessthislldo): Rewrite with using in C++11
+#define OPENDDS_ALLOCATOR(T) OpenDDS::DCPS::PoolAllocator<T >
+typedef std::basic_string<char, std::char_traits<char>, OPENDDS_ALLOCATOR(char)> String;
+typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, OPENDDS_ALLOCATOR(wchar_t)>
+  WString;
 #define OPENDDS_MAP(K, V) std::map<K, V, std::less<K >, \
           OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, V > > >
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C, \
@@ -134,8 +143,10 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #define OPENDDS_QUEUE(T) std::queue<T, std::deque<T, \
           OpenDDS::DCPS::PoolAllocator<T > > >
 
-#else
-#define OPENDDS_STRING std::string
+#else // (!OPENDDS_POOL_ALLOCATOR)
+#define OPENDDS_ALLOCATOR(T) std::allocator<T >
+typedef std::string String;
+typedef std::wstring WString;
 #define OPENDDS_MAP(K, V) std::map<K, V >
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C >
 #define OPENDDS_MULTIMAP(K, T) std::multimap<K, T >
@@ -152,7 +163,14 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #define OPENDDS_DEQUE(T) std::deque<T >
 #define OPENDDS_QUEUE(T) std::queue<T >
 
-#endif // OPENDDS_SAFETY_PROFILE && ACE_HAS_ALLOC_HOOKS
+#endif // OPENDDS_POOL_ALLOCATOR
 
+#define OPENDDS_STRING OpenDDS::DCPS::String
+#define OPENDDS_WSTRING OpenDDS::DCPS::WString
+
+} // namespace DCPS
+} // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_DCPS_POOL_ALLOCATOR_H

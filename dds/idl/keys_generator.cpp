@@ -142,7 +142,7 @@ bool keys_generator::gen_union(
 {
   if (be_global->is_topic_type(node)) {
     KeyLessThanWrapper wrapper(name);
-    if (be_global->has_key(node)) {
+    if (be_global->union_discriminator_is_key(node)) {
       wrapper.has_keys_signature();
       wrapper.key_compare("_d()");
     } else {

@@ -20,4 +20,11 @@ bool SubscriberManager::enable(bool throw_on_error)
   return result;
 }
 
+void SubscriberManager::detach_listeners()
+{
+  for (auto it = subscribers_.begin(); it != subscribers_.end(); ++it) {
+    (*it)->detach_listeners();
+  }
+}
+
 }

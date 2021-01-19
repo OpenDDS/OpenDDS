@@ -9,6 +9,8 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../TestMsg');
+
 sub do_test {
   my $mcast = shift;
   my $port = PerlACE::random_port();
@@ -29,16 +31,16 @@ sub do_test {
                  $mcast ? "-h 239.255.0.2 -p 7401" : "-h 127.0.0.1 -p $port");
   $test->start_process('publisher');
 
-  my $result = $test->finish(60);
-  if ($result != 0) {
-      print STDERR "ERROR: test returned $result\n";
+  my $failed = $test->finish(60) ? 1 : 0;
+  if ($failed) {
+    print STDERR "ERROR: test failed\n";
   }
-  return $result;
+  return $failed;
 }
 
-my $result = do_test(0);
-
+my $failed = 0;
+$failed |= do_test(0);
 print "Running with multicast...\n";
-$result += do_test(1);
+$failed |= do_test(1);
 
-exit $result;
+exit $failed;

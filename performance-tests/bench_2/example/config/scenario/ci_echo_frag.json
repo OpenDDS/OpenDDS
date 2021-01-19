@@ -3,11 +3,11 @@
   "desc": "This is a small quick test for rapid-fire data send / receive capability with large samples (fragmentation)",
   "any_node": [
     {
-      "config": "ci_echo_client_frag.json",
+      "config": "ci_echo_frag_client.json",
       "count": 1
     },
     {
-      "config": "ci_echo_server.json",
+      "config": "ci_echo_frag_server.json",
       "count": 1
     }
   ],

@@ -1,6 +1,7 @@
 #include "ForwardAction.h"
 
 #include "MemFunHandler.h"
+#include "util.h"
 
 namespace {
 
@@ -48,7 +49,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
       ss << "ForwardAction::init() - reader '" << config.name << "' does not have a WorkerDataReaderListener (\"bench_drl\") listener" << std::flush;
       throw std::runtime_error(ss.str());
     }
-    registrations_.push_back(std::make_shared<Registration>(*this, wdrl));
+    registrations_.push_back(std::make_shared<Registration>(shared_from_this(), wdrl));
   }
 
   auto force_copy_prop = get_property(config.params, "force_copy", Builder::PVK_ULL);
@@ -77,6 +78,17 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
   if (queue_size_prop) {
     queue_size = static_cast<size_t>(queue_size_prop->value.ull_prop());
   }
+
+  std::string name(config.name.in());
+
+  std::random_device r;
+  std::seed_seq seed{r(), one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size()), r(), r(), r(), r(), r(), r()};
+  mt_ = std::mt19937_64(seed);
+
+  id_.high = mt_();
+  id_.low = mt_();
+  data_id_.high = mt_();
+  data_id_.low = mt_();
 
   // because of the way we're doing indices, vector size should be one more than effective queue size
   // hence 0 and 1 are not valid vector sizes and will not work
@@ -107,7 +119,12 @@ void ForwardAction::stop()
 void ForwardAction::on_data(const Data& data)
 {
   std::unique_lock<std::mutex> lock(mutex_);
-  if (started_ && !stopped_) {
+  if (!stopped_) {
+    if (memcmp(&data.id, &data_id_, sizeof(data.id))) {
+      id_.high = mt_();
+      id_.low = mt_();
+      data_id_ = data.id;
+    }
     bool use_queue = (force_copy_ || (data_dws_.size() > copy_threshold_ && !prevent_copy_));
     if (use_queue) {
       bool queue_full = (((queue_last_ + 1) % data_queue_.size()) == queue_first_);
@@ -116,6 +133,7 @@ void ForwardAction::on_data(const Data& data)
         queue_full = (((queue_last_ + 1) % data_queue_.size()) == queue_first_);
       }
       data_queue_[queue_last_] = data;
+      data_queue_[queue_last_].id = id_;
       queue_last_ = (queue_last_ + 1) % data_queue_.size();
       proactor_.schedule_timer(*handler_, nullptr, ZERO);
     } else {
@@ -124,17 +142,20 @@ void ForwardAction::on_data(const Data& data)
         // Cache previous values of things we're going to tweak
         Builder::TimeStamp old_sent_time = data.sent_time;
         CORBA::ULong old_hop_count = data.hop_count;
+        UniqueId old_id = data.id;
 
         // Temporarily break const promises to modify data for resending
         Data& dangerous_data = const_cast<Data&>(data);
         dangerous_data.sent_time = Builder::get_sys_time();
         dangerous_data.hop_count = old_hop_count + 1;
+        dangerous_data.id = id_;
 
         (*it)->write(data, 0);
 
         // Set it back in case anyone else really needed us to keep our promises
         dangerous_data.sent_time = old_sent_time;
         dangerous_data.hop_count = old_hop_count;
+        dangerous_data.id = old_id;
       }
     }
   }

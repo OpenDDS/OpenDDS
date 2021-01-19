@@ -720,7 +720,7 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, DCPS::Serializer::SWAP_BE);
+  DCPS::Serializer serializer(block, encoding);
 
   // Write the length and resize for hashing.
   block->wr_ptr(block->base() + 2);
@@ -809,7 +809,7 @@ ACE_UINT32 Message::compute_fingerprint() const
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, DCPS::Serializer::SWAP_BE);
+  DCPS::Serializer serializer(block, encoding);
 
   // Resize for hashing.
   block->wr_ptr(block->base() + HEADER_SIZE + length() - 8);

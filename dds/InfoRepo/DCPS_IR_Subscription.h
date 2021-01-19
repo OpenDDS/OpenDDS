@@ -47,10 +47,12 @@ public:
                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
                        const DDS::DataReaderQos& qos,
                        const OpenDDS::DCPS::TransportLocatorSeq& info,
+                       ACE_CDR::ULong transportContext,
                        const DDS::SubscriberQos& subscriberQos,
                        const char* filterClassName,
                        const char* filterExpression,
-                       const DDS::StringSeq& exprParams);
+                       const DDS::StringSeq& exprParams,
+                       const DDS::OctetSeq & serializedTypeInfo);
 
   ~DCPS_IR_Subscription();
 
@@ -145,6 +147,7 @@ public:
   bool reevaluate_association(DCPS_IR_Publication* publication);
 
   OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
+  ACE_CDR::ULong get_transportContext() const { return transportContext_; }
 
   /// Return pointer to the incompatible qos status
   /// Subscription retains ownership
@@ -176,6 +179,9 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
+
+  const DDS::OctetSeq& get_serialized_type_info() const;
+
 private:
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
@@ -187,11 +193,12 @@ private:
   OpenDDS::DCPS::DataReaderRemote_var reader_;
   DDS::DataReaderQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
+  ACE_CDR::ULong transportContext_;
   DDS::SubscriberQos subscriberQos_;
   std::string filterClassName_;
   std::string filterExpression_;
   DDS::StringSeq exprParams_;
-
+  DDS::OctetSeq serializedTypeInfo_;
   DCPS_IR_Publication_Set associations_;
   DCPS_IR_Publication_Set defunct_;
 
