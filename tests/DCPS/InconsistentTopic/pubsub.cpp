@@ -119,11 +119,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
       if (pub_status.total_count != 0) {
-        cerr << "ERROR: (alpha) datawriter 1 total_count should be 0 but is " << pub_status.total_count << endl;
+        cerr << "ERROR: dw1 total_count should be 0 but is " << pub_status.total_count << endl;
         test_error = true;
       }
       if (pub_status.total_count_change != 0) {
-        cerr << "ERROR: (alpha) datawriter 1 total_count_change should be 0 but is " << pub_status.total_count_change << endl;
+        cerr << "ERROR: dw1 total_count_change should be 0 but is " << pub_status.total_count_change << endl;
         test_error = true;
       }
 
