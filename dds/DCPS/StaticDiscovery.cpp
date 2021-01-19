@@ -486,20 +486,9 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
       reader_pos != registry_.reader_map.end()) {
     DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
     if (dwr) {
-#ifdef __SUNPRO_CC
-      ReaderAssociation ra;
-      ra.readerTransInfo = reader_pos->second.trans_info;
-      ra.readerId = readerid;
-      ra.subQos = reader_pos->second.subscriber_qos;
-      ra.readerQos = reader_pos->second.qos;
-      ra.filterClassName = "";
-      ra.filterExpression = "";
-      ra.exprParams = 0;
-#else
       const ReaderAssociation ra =
-        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos};
-
-#endif
+        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
+         "", "", DDS::StringSeq(), DDS::OctetSeq()};
       dwr->add_association(writerid, ra, true);
     }
   }
