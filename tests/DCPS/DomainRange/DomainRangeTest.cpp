@@ -31,7 +31,7 @@
 
 const int MSGS_PER_WRITER = 10;
 const int TOTAL_WRITERS = 1;
-const int TOTAL_READERS = 5;
+const int TOTAL_READERS = 4;
 
 #define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
 
