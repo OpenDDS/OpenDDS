@@ -80,7 +80,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
       return_code = INVALID_PARAM;
     } else {
       return_code = RC_NO_ERROR;
-#if OPENDD_POOL_ALLOCATOR
+#if OPENDDS_POOL_ALLOCATOR
       TheServiceParticipant->configure_pool();
 #endif
     }
