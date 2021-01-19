@@ -100,6 +100,7 @@ while (my $arg = shift(@ARGV)) {
 my $usage_message =
   "usage: lint.pl [-h|--help] | [OPTIONS] [CHECK ...] [-- ACE_ARGS ...]\n";
 
+#  ###############################################################################
 my $help_message = $usage_message .
   "\n" .
   "OpenDDS Repo General Linter\n" .
@@ -662,7 +663,11 @@ my %all_checks = (
       'Path for include is non-relative when it should be relative',
     ],
     can_fix => 1,
-    path_matches_all_of => ['preprocessor_file'],
+    # TODO: Get https://github.com/DOCGroup/ACE_TAO/pull/1357 and
+    # https://github.com/DOCGroup/ACE_TAO/pull/1366 merged before this can be
+    # enforced on IDL files.
+    # path_matches_all_of => ['preprocessor_file'],
+    path_matches_all_of => ['cpp_file'],
     file_matches => sub {
       my $filename = shift;
       my $full_filename = shift;
