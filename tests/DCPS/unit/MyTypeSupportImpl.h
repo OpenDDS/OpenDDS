@@ -65,6 +65,8 @@ public:
 #endif
 
   bool has_dcps_key() { return false; }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 };
 
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
@@ -76,6 +78,11 @@ public:
   virtual ::DDS::ReturnCode_t auto_return_loan (void *)
   {
     return ::DDS::RETCODE_ERROR;
+  }
+
+  virtual OpenDDS::DCPS::Extensibility get_max_extensibility()
+  {
+    return OpenDDS::DCPS::FINAL;
   }
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch) {}
@@ -126,10 +133,17 @@ public:
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
-  virtual ::DDS::ReturnCode_t enable_specific (
-      ) {return ::DDS::RETCODE_OK;};
+  ::DDS::ReturnCode_t enable_specific()
+  {
+    return ::DDS::RETCODE_OK;
+  }
 
   virtual void unregistered(DDS::InstanceHandle_t /* instance_handle */) {};
+
+  DDS::ReturnCode_t setup_serialization()
+  {
+    return DDS::RETCODE_OK;
+  }
 };
 
 #endif /* MYTYPESUPPORTIMPL_H_  */

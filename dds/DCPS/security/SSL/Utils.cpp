@@ -4,24 +4,39 @@
  */
 
 #include "Utils.h"
+
 #include "Err.h"
-#include "dds/DCPS/GuidUtils.h"
-#include <vector>
-#include <utility>
-#include <cstdio>
+
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
 
-#include "dds/DCPS/Serializer.h"
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include <vector>
+#include <utility>
+#include <cstdio>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 namespace SSL {
+
+using DCPS::Serializer;
+using DCPS::Encoding;
+using DCPS::serialized_size;
+
+namespace {
+  Encoding get_common_encoding() {
+    Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
+    return encoding;
+  }
+}
 
 int make_adjusted_guid(const OpenDDS::DCPS::GUID_t& src,
                        OpenDDS::DCPS::GUID_t& dst,
@@ -166,13 +181,11 @@ public:
 
     EVP_DigestInit_ex(hash_ctx, EVP_sha256(), 0);
 
-    size_t size = 0u, padding = 0u;
-    DCPS::gen_find_size(src, size, padding);
-    ACE_Message_Block buffer(size + padding);
-
-    OpenDDS::DCPS::Serializer serializer(
-      &buffer, OpenDDS::DCPS::Serializer::SWAP_BE,
-      OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
+    const Encoding encoding = get_common_encoding();
+    size_t size = 0;
+    serialized_size(encoding, size, src);
+    ACE_Message_Block buffer(size);
+    Serializer serializer(&buffer, encoding);
     if (serializer << src) {
       EVP_DigestUpdate(hash_ctx, buffer.rd_ptr(), buffer.length());
 
@@ -194,7 +207,7 @@ public:
     return 0;
   }
 
-  private:
+private:
   EVP_MD_CTX* hash_ctx;
 };
 
@@ -207,17 +220,15 @@ int hash_serialized(const DDS::BinaryPropertySeq& src, DDS::OctetSeq& dst)
 int sign_serialized(const DDS::BinaryPropertySeq& src,
                     const PrivateKey& key, DDS::OctetSeq& dst)
 {
-  size_t size = 0u, padding = 0u;
-  DCPS::gen_find_size(src, size, padding);
+  const Encoding encoding = get_common_encoding();
+  size_t size = 0;
+  serialized_size(encoding, size, src);
 
   DDS::OctetSeq tmp;
-  tmp.length(static_cast<unsigned int>(size + padding));
+  tmp.length(static_cast<unsigned int>(size));
   ACE_Message_Block buffer(reinterpret_cast<const char*>(tmp.get_buffer()),
                            tmp.length());
-
-  OpenDDS::DCPS::Serializer serializer(
-    &buffer, OpenDDS::DCPS::Serializer::SWAP_BE,
-    OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
+  Serializer serializer(&buffer, encoding);
   if (!(serializer << src)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SSL::sign_serialized: ERROR, failed to serialize "
@@ -236,17 +247,15 @@ int verify_serialized(const DDS::BinaryPropertySeq& src,
                       const Certificate& key,
                       const DDS::OctetSeq& signed_data)
 {
-  size_t size = 0u, padding = 0u;
-  DCPS::gen_find_size(src, size, padding);
+  const Encoding encoding = get_common_encoding();
+  size_t size = 0;
+  serialized_size(encoding, size, src);
 
   DDS::OctetSeq tmp;
-  tmp.length(static_cast<unsigned int>(size + padding));
+  tmp.length(static_cast<unsigned int>(size));
   ACE_Message_Block buffer(reinterpret_cast<const char*>(tmp.get_buffer()),
                            tmp.length());
-
-  OpenDDS::DCPS::Serializer serializer(
-    &buffer, OpenDDS::DCPS::Serializer::SWAP_BE,
-    OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
+  Serializer serializer(&buffer, encoding);
   if (!(serializer << src)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SSL::verify_serialized: ERROR, failed to serialize binary-property-sequence\n")));

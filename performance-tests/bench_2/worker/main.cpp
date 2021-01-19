@@ -30,19 +30,23 @@
 
 #include "ListenerFactory.h"
 
-#include "TopicListener.h"
-#include "DataReaderListener.h"
-#include "DataWriterListener.h"
-#include "SubscriberListener.h"
-#include "PublisherListener.h"
-#include "ParticipantListener.h"
 #include "BuilderProcess.h"
+#include "DataReader.h"
+#include "DataReaderListener.h"
+#include "DataWriter.h"
+#include "DataWriterListener.h"
+#include "ParticipantListener.h"
+#include "PublisherListener.h"
+#include "SubscriberListener.h"
+#include "TopicListener.h"
 
 #include "Utils.h"
+#include "PropertyStatBlock.h"
 
 #include "ActionManager.h"
 #include "ForwardAction.h"
-#include "PropertyStatBlock.h"
+#include "ReadAction.h"
+#include "SetCftParametersAction.h"
 #include "WorkerDataReaderListener.h"
 #include "WorkerDataWriterListener.h"
 #include "WorkerTopicListener.h"
@@ -50,9 +54,6 @@
 #include "WorkerPublisherListener.h"
 #include "WorkerParticipantListener.h"
 #include "WriteAction.h"
-#include "DataReader.h"
-#include "DataWriter.h"
-#include "SetCftParametersAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -262,6 +263,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Bench::ActionManager::Registration
     write_action_registration("write", [&](){
       return std::shared_ptr<Bench::Action>(new Bench::WriteAction(*proactor));
+    });
+  Bench::ActionManager::Registration
+    read_action_registration("read", [&](){
+      return std::shared_ptr<Bench::Action>(new Bench::ReadAction(*proactor));
     });
   Bench::ActionManager::Registration
     forward_action_registration("forward", [&](){

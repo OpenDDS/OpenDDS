@@ -19,7 +19,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 OPENDDS_STRING
-to_dds_string(::CORBA::UShort to_convert)
+to_dds_string(unsigned short to_convert)
 {
   const char* fmt = "%hu";
   const int buff_size = 5 + 1; // note +1 for null terminator
@@ -143,60 +143,11 @@ OPENDDS_STRING to_hex_dds_string(
   return rv;
 }
 
-OPENDDS_STRING to_hex_dds_string(
-  const DDS::OctetSeq& data, const char delim, const size_t delim_every)
-{
-  const size_t size = data.length();
-  return size ? to_hex_dds_string(
-    reinterpret_cast<const char*>(&data[0]), size, delim, delim_every) : "";
-}
-
 OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr)
 {
   ACE_TCHAR buffer[AddrToStringSize];
   addr.addr_to_string(buffer, AddrToStringSize);
   return ACE_TEXT_ALWAYS_CHAR(buffer);
-}
-
-const char* retcode_to_string(DDS::ReturnCode_t value)
-{
-  switch (value) {
-  case DDS::RETCODE_OK:
-    return "OK";
-  case DDS::RETCODE_ERROR:
-    return "Error";
-  case DDS::RETCODE_UNSUPPORTED:
-    return "Unsupported";
-  case DDS::RETCODE_BAD_PARAMETER:
-    return "Bad parameter";
-  case DDS::RETCODE_PRECONDITION_NOT_MET:
-    return "Precondition not met";
-  case DDS::RETCODE_OUT_OF_RESOURCES:
-    return "Out of resources";
-  case DDS::RETCODE_NOT_ENABLED:
-    return "Not enabled";
-  case DDS::RETCODE_IMMUTABLE_POLICY:
-    return "Immutable policy";
-  case DDS::RETCODE_INCONSISTENT_POLICY:
-    return "Inconsistent policy";
-  case DDS::RETCODE_ALREADY_DELETED:
-    return "Already deleted";
-  case DDS::RETCODE_TIMEOUT:
-    return "Timeout";
-  case DDS::RETCODE_NO_DATA:
-    return "No data";
-  case DDS::RETCODE_ILLEGAL_OPERATION:
-    return "Illegal operation";
-#ifdef OPENDDS_SECURITY
-  case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
-    return "Not allowed by security";
-#endif
-  default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: retcode_to_string: ")
-      ACE_TEXT("%d is either invalid or not recognized.\n"),
-      value));
-    return "Invalid return code";
-  }
 }
 
 } // namespace DCPS

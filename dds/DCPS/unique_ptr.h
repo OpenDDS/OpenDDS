@@ -130,6 +130,11 @@ public:
     std::swap(ptr_, b.ptr_);
   }
 
+  bool operator<(const unique_ptr& other) const
+  {
+    return ptr_ < other.ptr_;
+  }
+
 private:
   unique_ptr(const unique_ptr&);
   unique_ptr& operator=(const unique_ptr&);

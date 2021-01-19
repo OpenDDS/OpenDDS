@@ -1,0 +1,6 @@
+module XYZ {
+  @topic
+  struct Message {
+    @key sequence<long> key;
+  };
+};

@@ -1,8 +1,9 @@
 #ifndef test_transport_SocketWriter_H
 #define test_transport_SocketWriter_H
 
-#include "TestMsg.h"
+#include <TestMsg.h>
 
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -24,12 +25,13 @@ public:
                       const OpenDDS::DCPS::RepoId& reader = OpenDDS::DCPS::GUID_UNKNOWN) const;
 
 private:
-  static const bool hostIsBigEndian = !ACE_CDR_BYTE_ORDER;
   static const double NTP_FRACTIONAL; // NTP fractional (2^-32) sec per microsec
+  // TODO(iguessthislldo): convert
   static const ACE_CDR::ULong ENCAP = 0x00000100; // {CDR_LE, options} in BE format
   static const CORBA::Octet DE  = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E;
   static const CORBA::Octet DEQ = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E | OpenDDS::RTPS::FLAG_Q;
   static OpenDDS::RTPS::Header header(OpenDDS::DCPS::RepoId id);
+  static const OpenDDS::DCPS::Encoding encoding;
 
   OpenDDS::RTPS::InfoTimestampSubmessage timeSubMsg() const;
   OpenDDS::RTPS::DataSubmessage dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const;

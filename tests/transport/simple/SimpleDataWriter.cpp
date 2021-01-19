@@ -204,7 +204,7 @@ DDS_TEST::run(int num_messages, int msg_size)
 
     // The DataSampleHeader is what goes in the "Header Block".
     OpenDDS::DCPS::Message_Block_Ptr header_block(
-      new ACE_Message_Block(header.max_marshaled_size()));
+      new ACE_Message_Block(header.get_max_serialized_size()));
     *header_block << header;
 
     OpenDDS::DCPS::Message_Block_Ptr data_block(new ACE_Message_Block(num_data_bytes));

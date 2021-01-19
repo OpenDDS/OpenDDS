@@ -16,6 +16,10 @@ if ($@) {
 my %expected = (
   "NonAnnotatedStruct"                             => {not_found => 1, dn => 0, no_dn => 1},
   "TopicStruct"                                    => {not_found => 1, dn => 1, no_dn => 1},
+  "TopicStarStruct"                                => {not_found => 1, dn => 1, no_dn => 1},
+  "TopicDdsStruct"                                 => {not_found => 1, dn => 1, no_dn => 1},
+  "TopicOpenDdsStruct"                             => {not_found => 1, dn => 1, no_dn => 1},
+  "TopicInvalidStruct"                             => {not_found => 1, dn => 0, no_dn => 1},
   "NestedStruct"                                   => {not_found => 1, dn => 0, no_dn => 0},
   "NestedTrueStruct"                               => {not_found => 1, dn => 0, no_dn => 0},
   "NestedFalseStruct"                              => {not_found => 1, dn => 1, no_dn => 1},

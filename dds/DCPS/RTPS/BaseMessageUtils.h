@@ -12,16 +12,17 @@
 #include "rtps_export.h"
 #include "BaseMessageTypes.h"
 
-#include "dds/DCPS/Message_Block_Ptr.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/TypeSupportImpl.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
+#include <dds/DCPS/Hash.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/TypeSupportImpl.h>
+#include <dds/DCPS/SequenceNumber.h>
 
-#include "md5.h"
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsInfoUtilsTypeSupportImpl.h>
 
-#include "ace/INET_Addr.h"
-#include "ace/Message_Block.h"
+#include <ace/INET_Addr.h>
+#include <ace/Message_Block.h>
 
 #include <cstring>
 
@@ -29,69 +30,42 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
-  using DCPS::GuidPrefix_t;
-  using DCPS::GUID_t;
-  using DCPS::EntityId_t;
+
+using DCPS::GuidPrefix_t;
+using DCPS::GUID_t;
+using DCPS::EntityId_t;
 
 template <typename T>
 void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   using DCPS::Serializer;
+  using DCPS::Encoding;
+  typedef DCPS::MarshalTraits<T> Traits;
 
   DCPS::KeyOnly<const T> ko(msg);
 
-  static const size_t HASH_LIMIT = 16;
-  std::memset(hash.value, 0, HASH_LIMIT);
+  static const size_t hash_limit = 16;
+  std::memset(hash.value, 0, hash_limit);
 
-  // Key Hash must use big endian ordering.
-  // Native==Little endian means we need to swap
-#if defined ACE_LITTLE_ENDIAN
-  static const bool swap_bytes = true;
-#else
-  static const bool swap_bytes = false;
-#endif
+  const Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
+  const OpenDDS::DCPS::SerializedSizeBound bound =
+    Traits::key_only_serialized_size_bound(encoding);
 
-  if (DCPS::MarshalTraits<T>::gen_is_bounded_key_size() &&
-      gen_max_marshaled_size(ko, true /*align*/) <= HASH_LIMIT) {
+  if (bound && bound.get() <= hash_limit) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
-    ACE_Message_Block mb(HASH_LIMIT);
-    Serializer out_serializer(&mb, swap_bytes, Serializer::ALIGN_INITIALIZE);
+    ACE_Message_Block mb(hash_limit);
+    Serializer out_serializer(&mb, encoding);
     out_serializer << ko;
     std::memcpy(hash.value, mb.rd_ptr(), mb.length());
 
   } else {
     // We will use the hash of the marshaled key
-    size_t size = 0, padding = 0;
-    gen_find_size(ko, size, padding);
-    ACE_Message_Block mb(size + padding);
-    Serializer out_serializer(&mb, swap_bytes, Serializer::ALIGN_INITIALIZE);
+    ACE_Message_Block mb(serialized_size(encoding, ko));
+    Serializer out_serializer(&mb, encoding);
     out_serializer << ko;
 
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, mb.rd_ptr(), static_cast<unsigned long>(mb.length()));
-    MD5_Final(hash.value, &ctx);
+    DCPS::MD5Hash(hash.value, mb.rd_ptr(), mb.length());
   }
-}
-
-inline void assign(GuidPrefix_t& dest, const GuidPrefix_t& src)
-{
-  std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
-}
-
-inline DCPS::RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
-{
-  DCPS::RepoId id;
-  assign(id.guidPrefix, prefix);
-  id.entityId = entity;
-  return id;
-}
-
-inline DCPS::RepoId make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
-{
-  DCPS::RepoId id = participant_id;
-  id.entityId = entity;
-  return id;
 }
 
 inline void assign(DCPS::OctetArray16& dest,
@@ -146,6 +120,9 @@ address_to_kind(const ACE_INET_Addr& addr)
   return LOCATOR_KIND_UDPv4;
 #endif
 }
+
+OpenDDS_Rtps_Export
+const DCPS::Encoding& get_locators_encoding();
 
 OpenDDS_Rtps_Export
 int locator_to_address(ACE_INET_Addr& dest,
@@ -230,8 +207,23 @@ private:
 OpenDDS_Rtps_Export
 bool bitmapNonEmpty(const SequenceNumberSet& snSet);
 
+inline DCPS::SequenceNumber to_opendds_seqnum(const RTPS::SequenceNumber_t& rtps_seqnum)
+{
+  DCPS::SequenceNumber opendds_seqnum;
+  opendds_seqnum.setValue(rtps_seqnum.high, rtps_seqnum.low);
+  return opendds_seqnum;
 }
+
+inline RTPS::SequenceNumber_t to_rtps_seqnum(const DCPS::SequenceNumber& opendds_seqnum)
+{
+  RTPS::SequenceNumber_t rtps_seqnum;
+  rtps_seqnum.high = opendds_seqnum.getHigh();
+  rtps_seqnum.low = opendds_seqnum.getLow();
+  return rtps_seqnum;
 }
+
+} // namespace RTPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

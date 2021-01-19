@@ -17,10 +17,14 @@
 #include <ace/Proactor.h>
 #include <ace/Proactor_Impl.h>
 #include <ace/WIN32_Proactor.h>
+#include <ace/OS_NS_Thread.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
+namespace OpenDDS {
+namespace DCPS {
+
+ReactorTask::ReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
   , condition_(lock_)
@@ -34,7 +38,7 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
 {
 }
 
-OpenDDS::DCPS::ReactorTask::~ReactorTask()
+ReactorTask::~ReactorTask()
 {
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (proactor_) {
@@ -49,8 +53,8 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
   delete timer_queue_;
 }
 
-int
-OpenDDS::DCPS::ReactorTask::open_reactor_task(void*, TimeDuration timeout, ThreadStatus* thread_stat, OPENDDS_STRING name)
+int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
+  ThreadStatus* thread_stat, const String& name)
 {
   // thread status reporting support
   timeout_ = timeout;
@@ -111,8 +115,7 @@ OpenDDS::DCPS::ReactorTask::open_reactor_task(void*, TimeDuration timeout, Threa
   return 0;
 }
 
-int
-OpenDDS::DCPS::ReactorTask::svc()
+int ReactorTask::svc()
 {
   // First off - We need to obtain our own reference to ourselves such
   // that we don't get deleted while still running in our own thread.
@@ -149,7 +152,7 @@ OpenDDS::DCPS::ReactorTask::svc()
       state_ = STATE_RUNNING;
 
       // Signal the condition_ that we are here.
-      condition_.signal();
+      condition_.notify_one();
     }
   }
 
@@ -158,27 +161,7 @@ OpenDDS::DCPS::ReactorTask::svc()
     if (timeout_ == TimeDuration(0)) {
       reactor_->run_reactor_event_loop();
     } else {
-#ifdef ACE_HAS_MAC_OSX
-      unsigned long tid = 0;
-      uint64_t osx_tid;
-      if (!pthread_threadid_np(NULL, &osx_tid)) {
-        tid = static_cast<unsigned long>(osx_tid);
-      } else {
-        tid = 0;
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ReactorTask::svc. Error getting OSX thread id\n")));
-      }
-#elif !defined (OPENDDS_SAFETY_PROFILE)
-      ACE_thread_t tid = ACE_OS::thr_self();
-#endif /* ACE_HAS_MAC_OSX */
-
-#ifndef OPENDDS_SAFETY_PROFILE
-      OPENDDS_STRING key = to_dds_string(tid);
-#else
-      OPENDDS_STRING key = "ReactorTask";
-#endif
-      if (name_ != "") {
-        key += " (" + name_ + ")";
-      }
+      const String thread_key = ThreadStatus::get_key("ReactorTask", name_);
 
       while (state_ == STATE_RUNNING) {
         ACE_Time_Value t = timeout_.value();
@@ -188,8 +171,9 @@ OpenDDS::DCPS::ReactorTask::svc()
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
           }
-          ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, thread_status_->lock, -1);
-          thread_status_->map[key] = MonotonicTimePoint::now();
+          if (!thread_status_->update(thread_key) && DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
+          }
         }
       }
     }
@@ -205,8 +189,7 @@ OpenDDS::DCPS::ReactorTask::svc()
   return 0;
 }
 
-int
-OpenDDS::DCPS::ReactorTask::close(u_long flags)
+int ReactorTask::close(u_long flags)
 {
   ACE_UNUSED_ARG(flags);
   // This is called after the reactor threads exit.
@@ -224,8 +207,7 @@ OpenDDS::DCPS::ReactorTask::close(u_long flags)
   return 0;
 }
 
-void
-OpenDDS::DCPS::ReactorTask::stop()
+void ReactorTask::stop()
 {
 
   {
@@ -257,5 +239,52 @@ OpenDDS::DCPS::ReactorTask::stop()
   // Reset the thread manager in case it goes away before the next open.
   this->thr_mgr(0);
 }
+
+bool ThreadStatus::update(const String& thread_key)
+{
+  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
+  const SystemTimePoint now = SystemTimePoint::now();
+  map[thread_key] = Thread(now);
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
+      "update for thread \"%C\"\n @ %d",
+      thread_key.c_str(), now.value().sec()));
+  }
+  return true;
+}
+
+String ThreadStatus::get_key(const char* safety_profile_tid, const String& name)
+{
+  String key;
+#ifdef OPENDDS_SAFETY_PROFILE
+  key = safety_profile_tid;
+#else
+  ACE_UNUSED_ARG(safety_profile_tid);
+#  ifdef ACE_HAS_MAC_OSX
+  unsigned long tid = 0;
+  uint64_t u64_tid;
+  if (!pthread_threadid_np(0, &u64_tid)) {
+    tid = static_cast<unsigned long>(u64_tid);
+  } else if (DCPS_debug_level) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
+  }
+#  elif defined ACE_HAS_GETTID
+  const pid_t tid = gettid();
+#  else
+  const ACE_thread_t tid = ACE_OS::thr_self();
+#  endif
+
+  key = to_dds_string(tid);
+#endif
+
+  if (name.length()) {
+    key += " (" + name + ")";
+  }
+
+  return key;
+}
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

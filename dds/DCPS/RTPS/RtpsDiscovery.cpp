@@ -75,6 +75,8 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , undirected_spdp_(true)
   , periodic_directed_spdp_(false)
   , secure_participant_user_data_(false)
+  , max_type_lookup_service_reply_period_(5, 0)
+  , use_xtypes_(true)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -620,6 +622,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->periodic_directed_spdp(bool(smInt));
+        } else if (name == "TypeLookupServiceReplyTimeout") {
+          const OPENDDS_STRING& value = it->second;
+          int timeout;
+          if (!DCPS::convertToInteger(value, timeout)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for TypeLookupServiceReplyTimeout in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
+        } else if (name == "UseXTypes") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->use_xtypes(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -682,7 +706,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
     // ads.id may change during Spdp constructor
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
@@ -696,17 +720,19 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 
 #if defined(OPENDDS_SECURITY)
 DCPS::AddDomainStatus
-RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
-                                      const DDS::DomainParticipantQos& qos,
-                                      const OpenDDS::DCPS::RepoId& guid,
-                                      DDS::Security::IdentityHandle id,
-                                      DDS::Security::PermissionsHandle perm,
-                                      DDS::Security::ParticipantCryptoHandle part_crypto)
+RtpsDiscovery::add_domain_participant_secure(
+  DDS::DomainId_t domain,
+  const DDS::DomainParticipantQos& qos,
+  const OpenDDS::DCPS::RepoId& guid,
+  DDS::Security::IdentityHandle id,
+  DDS::Security::PermissionsHandle perm,
+  DDS::Security::ParticipantCryptoHandle part_crypto)
 {
   DCPS::AddDomainStatus ads = {guid, false /*federated*/};
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ads.id, qos, this, id, perm, part_crypto));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(
+      domain, ads.id, qos, this, id, perm, part_crypto));
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;

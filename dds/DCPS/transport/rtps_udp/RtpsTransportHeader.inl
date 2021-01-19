@@ -13,7 +13,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE size_t
-RtpsTransportHeader::max_marshaled_size()
+RtpsTransportHeader::get_max_serialized_size()
 {
   return RTPS::RTPSHDR_SZ;
 }

@@ -289,6 +289,10 @@ public:
     initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy;
   #endif
     initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy;
+
+    initial_DataWriterQos_.representation.value.length(1);
+    initial_DataWriterQos_.representation.value[0] =
+      DDS::XCDR_DATA_REPRESENTATION;
   }
 
   WriteDataContainer* delayed_deliver_container_;
@@ -378,7 +382,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
           dw_qos.resource_limits.max_samples = MAX_SAMPLES;
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
+            new Test::SimpleDataWriterImpl());
+          fast_dw->set_qos(dw_qos);
+          fast_dw->setup_serialization();
           test->substitute_dw_particpant(fast_dw.get(), tpi);
 
           WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
@@ -388,7 +395,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("Initial Setup:", test_data_container);
 
           Test::Simple foo1;
-          foo1.key  = 1;
+          foo1.key = 1;
           foo1.count = 1;
 
           Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
@@ -492,7 +499,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           dw_qos.resource_limits.max_samples = 2;
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
+            new Test::SimpleDataWriterImpl());
+          fast_dw->set_qos(dw_qos);
+          fast_dw->setup_serialization();
           test->substitute_dw_particpant(fast_dw.get(), tpi);
           WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 
@@ -628,7 +638,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.reliability.max_blocking_time.sec = 2;
           dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
+            new Test::SimpleDataWriterImpl());
+          fast_dw->set_qos(dw_qos);
+          fast_dw->setup_serialization();
           test->substitute_dw_particpant(fast_dw.get(), tpi);
           WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 
@@ -766,7 +779,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.resource_limits.max_samples = MAX_SAMPLES;
           dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
+            new Test::SimpleDataWriterImpl());
+          fast_dw->set_qos(dw_qos);
+          fast_dw->setup_serialization();
           test->substitute_dw_particpant(fast_dw.get(), tpi);
           WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 

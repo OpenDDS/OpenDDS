@@ -133,8 +133,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
-    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
-    if (0 == pub_loc_dr) {
+    DDS::DataReader_var thread_reader =
+      bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+    if (!thread_reader) {
       std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
                 << " DataReader." << std::endl;
       ACE_OS::exit(EXIT_FAILURE);
@@ -143,9 +144,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher");
     DDS::DataReaderListener_var listener_var(listener);
 
-    CORBA::Long retcode =
-      pub_loc_dr->set_listener(listener,
-                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    const DDS::ReturnCode_t retcode =
+      thread_reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (retcode != DDS::RETCODE_OK) {
       std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC << " failed." << std::endl;
       ACE_OS::exit(EXIT_FAILURE);

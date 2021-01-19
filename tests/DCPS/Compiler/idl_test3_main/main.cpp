@@ -2,88 +2,101 @@
 #include "FooDef2TypeSupportImpl.h"
 #include "FooDef3TypeSupportImpl.h"
 
-#include "tao/CDR.h"
-#include "ace/ACE.h"
-#include "ace/Log_Msg.h"
+#include <tao/CDR.h>
+
+#include <ace/ACE.h>
+#include <ace/Log_Msg.h>
 
 #include <map>
 #include <cstring>
 
-int failed = false;
+bool failed = false;
 bool dump_buffer = false;
 
-#define DONT_CHECK_CS 0
-#define DONT_CHECK_MS 0
+using OpenDDS::DCPS::SerializedSizeBound;
+
+using OpenDDS::DCPS::Encoding;
+const Encoding unaligned_encoding(Encoding::KIND_UNALIGNED_CDR);
+const Encoding aligned_encoding(Encoding::KIND_XCDR1);
+
+void initialize_enums(Xyz::AStruct& stru)
+{
+  stru.f8 = Xyz::redx;
+  for (int i = 0; i < 5; ++i) stru.f15[i] = Xyz::redx;
+  for (int i = 0; i < 7; ++i) for (int j = 0; j < 5; ++j) stru.f55[i][j] = Xyz::redx;
+}
 
 template<typename FOO>
-int try_marshaling(const FOO& in_foo, FOO& out_foo,
-                   size_t expected_ms, size_t expected_cs,
-                   size_t expected_pad, size_t expected_ms_align,
-                   const char* name)
+bool try_marshaling(const FOO& in_foo, FOO& out_foo,
+  SerializedSizeBound expected_bound, size_t expected_size,
+  size_t expected_pad, SerializedSizeBound expected_aligned_bound, const char* name)
 {
-  CORBA::Boolean bounded = OpenDDS::DCPS::MarshalTraits<FOO>::gen_is_bounded_size();
-  size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(in_foo, false);
-  size_t ms_align = OpenDDS::DCPS::gen_max_marshaled_size(in_foo, true);
-  size_t cs = 0, padding = 0;
-  OpenDDS::DCPS::gen_find_size(in_foo, cs, padding);
+  expected_aligned_bound = SerializedSizeBound(); // TODO: Remove Once This Is Fixed
 
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_is_bounded_size(foo) => %d\n"),
-             name, int(bounded)));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_max_marshaled_size(foo, false) => %B\n"),
-             name, ms));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_max_marshaled_size(foo, true) => %B\n"),
-             name, ms_align));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_find_size(foo) => %B, padding %B\n"),
-             name, cs, padding));
+  const OPENDDS_STRING expected_bound_str = expected_bound.to_string();
+  const OPENDDS_STRING expected_aligned_bound_str = expected_aligned_bound.to_string();
+  const size_t expected_aligned_size = expected_size + expected_pad;
 
-  // NOTE: gen_max_marshaled_size is not always > for unbounded.
-  if (bounded && ms < cs) {
+  typedef OpenDDS::DCPS::MarshalTraits<FOO> MarshalTraits;
+  const SerializedSizeBound bound = MarshalTraits::serialized_size_bound(unaligned_encoding);
+  const OPENDDS_STRING bound_str = bound.to_string();
+  const SerializedSizeBound aligned_bound = MarshalTraits::serialized_size_bound(aligned_encoding);
+  const OPENDDS_STRING aligned_bound_str = aligned_bound.to_string();
+
+  const size_t size = OpenDDS::DCPS::serialized_size(unaligned_encoding, in_foo);
+  const size_t aligned_size = OpenDDS::DCPS::serialized_size(aligned_encoding, in_foo);
+
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C: serialized_size_bound(unaligned_encoding) => %C\n"),
+    name, bound_str.c_str()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C: serialized_size_bound(aligned_encoding) => %C\n"),
+    name, aligned_bound_str.c_str()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C: serialized_size(unaligned_encoding, foo) => %B\n"),
+    name, size));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C: serialized_size(aligned_encoding, foo) => %B\n"),
+    name, aligned_size));
+
+  if (bound && bound.get() < size) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_max_marshaled_size(foo) %B < gen_find_size(foo) %B\n"),
-               name, ms, cs));
+               ACE_TEXT("%C: serialized_size_bound(unaligned_encoding) %B < ")
+               ACE_TEXT("serialized_size(unaligned_encoding, foo) %B\n"),
+               name, bound.get(), size));
     failed = true;
     return false;
   }
 
-  if (expected_cs != DONT_CHECK_CS && cs != expected_cs) {
+  if (size != expected_size) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_find_size(foo) got %B but expected %B\n"),
-               name, cs, expected_cs));
+               ACE_TEXT("%C: serialized_size(unaligned_encoding, foo) got %B but expected %B\n"),
+               name, size, expected_size));
     failed = true;
     return false;
   }
 
-  if (expected_ms != DONT_CHECK_MS && ms != expected_ms) {
+  if (expected_bound != bound) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_max_marshaled_size(foo, false) got %B but expected %B\n"),
-               name, ms, expected_ms));
+               ACE_TEXT("%C: serialized_size_bound(unaligned_encoding) got %C but expected %C\n"),
+               name, bound_str.c_str(), expected_bound_str.c_str()));
     failed = true;
     return false;
   }
 
-  if (expected_pad != padding) {
+  if (expected_aligned_size != aligned_size) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_find_size(foo) padding got %B but expected %B\n"),
-               name, padding, expected_pad));
+               ACE_TEXT("%C: serialized_size(aligned_encoding, foo) got %B but expected %B\n"),
+               name, aligned_size, expected_aligned_size));
     failed = true;
     return false;
   }
 
-  if (bounded && expected_ms_align != ms_align) {
+  if (expected_aligned_bound != aligned_bound) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_max_marshaled_size(foo, true) got %B but expected %B\n"),
-               name, ms_align, expected_ms_align));
+               ACE_TEXT("%C: serialized_size_bound(aligned_encoding) got %C but expected %C\n"),
+               name, aligned_bound_str.c_str(), expected_aligned_bound_str.c_str()));
     failed = true;
     return false;
   }
 
-  // testing with OpenDDS::DCPS::gen_find_size is a stronger test
-  const size_t buff_size = cs; // bounded ? ms : cs;
-  ACE_Message_Block mb(buff_size);
+  ACE_Message_Block mb(size);
 
   TAO_OutputCDR cdr;
 
@@ -97,7 +110,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
   ACE_TCHAR ebuffer[51200];
   ebuffer[0] = ACE_TEXT('\0');
 
-  OpenDDS::DCPS::Serializer ss(&mb);
+  OpenDDS::DCPS::Serializer ss(&mb, unaligned_encoding);
 
   if (dump_buffer) {
     ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
@@ -119,7 +132,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
                name, mb.length(), ebuffer));
   }
 
-  OpenDDS::DCPS::Serializer ss2(&mb);
+  OpenDDS::DCPS::Serializer ss2(&mb, unaligned_encoding);
 
   if (!(ss2 >> out_foo)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%C: Deserializing failed\n"), name));
@@ -332,8 +345,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     val.field[4] = CORBA::string_dup("");
     Xyz::StructOfSeqOfString val_out;
 
-    if (try_marshaling(val, val_out, DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*5+14,
-                       2+3+3+2, DONT_CHECK_MS, "Xyz::StructOfSeqOfString")) {
+    if (try_marshaling(val, val_out, SerializedSizeBound(), SEQ_LEN_SIZE+SEQ_LEN*5+14,
+                       2+3+3+2, SerializedSizeBound(), "Xyz::StructOfSeqOfString")) {
       for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++) {
         if (strcmp(val.field[ii], val_out.field[ii])) {
           ACE_ERROR((LM_ERROR,
@@ -424,7 +437,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Xyz::StructOfSeqOfAnEnum val_out;
 
     const size_t sz = SEQ_LEN_SIZE + SEQ_LEN*4;
-    if (try_marshaling(val, val_out, DONT_CHECK_MS, sz, 0, 0,
+    if (try_marshaling(val, val_out, SerializedSizeBound(), sz, 0, 0,
                        "Xyz::StructOfSeqOfAnEnum")) {
       for (CORBA::ULong ii = 0; ii < SEQ_LEN; ii++) {
         if (val_out.field[ii] != ((ii % 2 == 0) ? Xyz::greenx : Xyz::bluex)) {
@@ -508,7 +521,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // size = union descr/4 + string length/4 + string contents/4
     Xyz::StructAUnion val_out;
 
-    if (try_marshaling(val, val_out, DONT_CHECK_MS, 4+4+4, 0, DONT_CHECK_MS,
+    if (try_marshaling(val, val_out, SerializedSizeBound(), 4+4+4, 0, SerializedSizeBound(),
                        "Xyz::StructAUnion")) {
         if (0 != std::strcmp(val.sau_f1.rv(), val_out.sau_f1.rv())) {
         ACE_ERROR((LM_ERROR,
@@ -525,7 +538,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     val.field[1] = CORBA::string_dup("five5"); //4+6 strlen + string
     Xyz::StructOfSeqOfString val_out;
 
-    if (try_marshaling(val, val_out, DONT_CHECK_MS, 23, 3, DONT_CHECK_MS,
+    if (try_marshaling(val, val_out, SerializedSizeBound(), 23, 3, SerializedSizeBound(),
                        "Xyz::StructOfSeqOfString")) {
       if (0 != std::strcmp(val.field[1], val_out.field[1])) {
         ACE_ERROR((LM_ERROR,
@@ -536,7 +549,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   Xyz::Foo my_foo;
-
   // greenx < redx < bluex
   const Xyz::AnEnum orig_color = Xyz::greenx;
 
@@ -553,6 +565,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //    ** see breakdown in comment at the end of this file
   //  AStructSeq theStructSeq; //+4 = 911
   //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
+  initialize_enums(my_foo.thestruct);
+  for (int k = 0; k < 3; ++k) {
+    initialize_enums(my_foo.structArray[k]);
+  }
+
   my_foo.theUnion._d(Xyz::bluex); //+4 = 3570
 
   Xyz::SeqOfLong asol;
@@ -565,17 +582,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   my_foo.theSeqOfUnion[0].rv("Berkley"); //+4+8 = 3602
   my_foo.theSeqOfUnion[1]._d(Xyz::greenx); //+4 = 3606
   Xyz::AStruct as;
+  initialize_enums(as);
   as.f2 = 3.14F;
   as.f5 = 42;
   my_foo.theSeqOfUnion[1].gv(as); //+885 = 4491   {padding +123 = 629}
 
   //  BigUnion theBigUnion;        //+4 = 4495
-  //  BigUnionSeq theSeqOfBitUnion;//+4 = 4499
+  //  BigUnionSeq theSeqOfBigUnion;//+4 = 4499
   my_foo.x = 0.99f;                //+4 = 4503
   my_foo.y = 0.11f;                //+4 = 4507
-  my_foo.theWChar = L'a';          //+3 = 4510
-  //  wstring theWString;          //+4 = 4514    {padding +1 = 630}
-  //  long double theLongDouble;  //+16 = 4530
+  my_foo.theWChar = L'a';          //+2 = 4509
+  //  wstring theWString;          //+4 = 4513    {padding +2 = 631}
+  //  long double theLongDouble;  //+16 = 4529
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -630,14 +648,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 4530 // see running totals above
+  const size_t sz = 4529 // see running totals above
 #ifdef OPENDDS_SAFETY_PROFILE
     - 4 // theWString is gone
 #endif
-    , pad = 630;
+    , pad = 631;
 
   try {
-    if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
+    if (try_marshaling(my_foo, ss_foo, SerializedSizeBound(), sz, pad, SerializedSizeBound(),
                        "Xyz::Foo")) {
       if (ss_foo.key != my_foo.key) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize key\n")));

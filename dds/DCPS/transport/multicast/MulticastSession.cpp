@@ -23,6 +23,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+}
+
 SynWatchdog::SynWatchdog(ACE_Reactor* reactor,
                          ACE_thread_t owner,
                          MulticastSession* session)
@@ -179,7 +183,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
 
   MulticastPeer local_peer;
   RepoId remote_writer;
@@ -257,7 +261,7 @@ MulticastSession::send_syn(const RepoId& local_writer,
 
   Message_Block_Ptr data( new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), encoding_kind);
 
   serializer << this->remote_peer_;
   serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(&local_writer), sizeof(local_writer));
@@ -293,7 +297,7 @@ MulticastSession::synack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
 
   MulticastPeer local_peer;
   RepoId remote_reader;
@@ -334,7 +338,7 @@ MulticastSession::send_synack(const RepoId& local_reader,
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), encoding_kind);
 
   serializer << this->remote_peer_;
   serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(&local_reader), sizeof(local_reader));

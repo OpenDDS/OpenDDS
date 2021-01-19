@@ -5,17 +5,20 @@ feature(no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaul
   IDL_Files {
     RtpsCore.idl
     RtpsSecurity.idl
+    RtpsRpc.idl
   }
 
   TypeSupport_Files {
     RtpsCore.idl
+    RtpsRpc.idl
   }
 }
 
 feature(!no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaults {
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Lspcpp
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Sx -Lspcpp
 
   TypeSupport_Files {
     RtpsCore.idl
+    RtpsRpc.idl
   }
 }

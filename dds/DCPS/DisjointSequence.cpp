@@ -86,8 +86,8 @@ DisjointSequence::insert_i(const SequenceRange& range,
 }
 
 bool
-DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
-                         const CORBA::Long bits[])
+DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
+                         const ACE_CDR::Long bits[])
 {
   bool inserted = false;
   RangeSet::iterator iter = sequences_.end();
@@ -96,12 +96,12 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
   const SequenceNumber::Value val = value.getValue();
 
   // See RTPS v2.1 section 9.4.2.6 SequenceNumberSet
-  for (CORBA::ULong i = 0, x = 0, bit = 0; i < num_bits; ++i, ++bit) {
+  for (ACE_CDR::ULong i = 0, x = 0, bit = 0; i < num_bits; ++i, ++bit) {
 
     if (bit == 32) bit = 0;
 
     if (bit == 0) {
-      x = static_cast<CORBA::ULong>(bits[i / 32]);
+      x = static_cast<ACE_CDR::ULong>(bits[i / 32]);
       if (x == 0) {
         // skip an entire Long if it's all 0's (adds 32 due to ++i)
         i += 31;
@@ -129,10 +129,10 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
 
       if (iter != sequences_.end() && iter->second.getValue() != to_insert) {
         // skip ahead: next gap in sequence must be past iter->second
-        CORBA::ULong next_i = CORBA::ULong(iter->second.getValue() - val);
+        ACE_CDR::ULong next_i = ACE_CDR::ULong(iter->second.getValue() - val);
         bit = next_i % 32;
         if (next_i / 32 != i / 32 && next_i < num_bits) {
-          x = static_cast<CORBA::ULong>(bits[next_i / 32]);
+          x = static_cast<ACE_CDR::ULong>(bits[next_i / 32]);
         }
         i = next_i;
       }
@@ -199,8 +199,8 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
 }
 
 bool
-DisjointSequence::to_bitmap(CORBA::Long bitmap[], CORBA::ULong length,
-                            CORBA::ULong& num_bits, bool invert) const
+DisjointSequence::to_bitmap(ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
+                            ACE_CDR::ULong& num_bits, bool invert) const
 {
   // num_bits will be 1 more than the index of the last bit we wrote
   num_bits = 0;
@@ -213,15 +213,15 @@ DisjointSequence::to_bitmap(CORBA::Long bitmap[], CORBA::ULong length,
   for (RangeSet::const_iterator iter = sequences_.begin(), prev = iter++;
        iter != sequences_.end(); ++iter, ++prev) {
 
-    CORBA::ULong low = 0, high = 0;
+    ACE_CDR::ULong low = 0, high = 0;
 
     if (invert) {
-      low = CORBA::ULong(prev->second.getValue() + 1 - base.getValue());
-      high = CORBA::ULong(iter->first.getValue() - 1 - base.getValue());
+      low = ACE_CDR::ULong(prev->second.getValue() + 1 - base.getValue());
+      high = ACE_CDR::ULong(iter->first.getValue() - 1 - base.getValue());
 
     } else {
-      low = CORBA::ULong(iter->first.getValue() - base.getValue());
-      high = CORBA::ULong(iter->second.getValue() - base.getValue());
+      low = ACE_CDR::ULong(iter->first.getValue() - base.getValue());
+      high = ACE_CDR::ULong(iter->second.getValue() - base.getValue());
     }
 
     if (!fill_bitmap_range(low, high, bitmap, length, num_bits)) {
@@ -233,9 +233,9 @@ DisjointSequence::to_bitmap(CORBA::Long bitmap[], CORBA::ULong length,
 }
 
 bool
-DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
-                                    CORBA::Long bitmap[], CORBA::ULong length,
-                                    CORBA::ULong& num_bits)
+DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
+                                    ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
+                                    ACE_CDR::ULong& num_bits)
 {
   bool clamped = false;
   if ((low / 32) >= length) {
@@ -246,7 +246,7 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
     clamped = true;
   }
 
-  const CORBA::ULong idx_nb = num_bits / 32, bit_nb = num_bits % 32,
+  const ACE_CDR::ULong idx_nb = num_bits / 32, bit_nb = num_bits % 32,
                      idx_low = low / 32, bit_low = low % 32,
                      idx_high = high / 32, bit_high = high % 32;
 
@@ -258,7 +258,7 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   }
 
   // handle zeros between idx_nb and idx_low (if gap exists)
-  for (CORBA::ULong i = idx_nb + 1; i < idx_low; ++i) {
+  for (ACE_CDR::ULong i = idx_nb + 1; i < idx_low; ++i) {
     bitmap[i] = 0;
   }
 
@@ -274,7 +274,7 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   }
 
   // handle ones between idx_low and idx_high (if gap exists)
-  for (CORBA::ULong i = idx_low + 1; i < idx_high; ++i) {
+  for (ACE_CDR::ULong i = idx_low + 1; i < idx_high; ++i) {
     bitmap[i] = 0xFFFFFFFF;
   }
 
@@ -333,10 +333,10 @@ DisjointSequence::dump() const
   }
 }
 
-CORBA::ULong
+ACE_CDR::ULong
 DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high)
 {
-  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
+  return high < low ? 0u : std::min(8u, unsigned((high.getValue() - low.getValue() + 32) / 32));
 }
 
 void

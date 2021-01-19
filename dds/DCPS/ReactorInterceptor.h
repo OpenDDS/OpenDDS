@@ -10,13 +10,15 @@
 
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
-#include "ace/Reactor.h"
-#include "ace/Thread.h"
-#include "ace/Condition_Thread_Mutex.h"
 #include "RcEventHandler.h"
 #include "dcps_export.h"
 #include "unique_ptr.h"
 #include "RcHandle_T.h"
+#include "ConditionVariable.h"
+
+#include <ace/Reactor.h>
+#include <ace/Thread.h>
+#include <ace/Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,7 +53,7 @@ public:
     {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
       executed_ = true;
-      condition_.broadcast();
+      condition_.notify_all();
     }
 
   protected:
@@ -64,7 +66,7 @@ public:
 
     bool executed_;
     mutable ACE_Thread_Mutex mutex_;
-    mutable ACE_Condition_Thread_Mutex condition_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;

@@ -19,7 +19,7 @@ my $status = 0;
 my $rtps = 0;
 my $help = 0;
 
-my $help_message = "usage: run_test.pl [--rtps]\n";
+my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
 if (not GetOptions(
   "rtps" => \$rtps,
   "help|h" => \$help
@@ -30,6 +30,9 @@ if ($help) {
   print $help_message;
   exit 0;
 }
+
+unlink "subscriber.log";
+unlink "publisher.log";
 
 my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10";
 

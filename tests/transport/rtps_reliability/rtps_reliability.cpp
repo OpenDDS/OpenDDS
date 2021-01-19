@@ -41,7 +41,8 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
-const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
+const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
+const Encoding& blob_encoding = get_locators_encoding();
 
 struct SimpleTC: TransportClient {
   explicit SimpleTC(const RepoId& local) : local_id_(local), mutex_(), cond_(mutex_) {}
@@ -142,11 +143,13 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     dsle_.get_header().message_length_ = 8;
     dsle_.get_header().byte_order_ = ACE_CDR_BYTE_ORDER;
     payload_.init(dsle_.get_header().message_length_);
+    // TODO(iguessthislldo) Use common encapsulation code
     const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in LE format
       data = 0xDCBADCBA;
-    Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
-    ser << encap;
-    ser << data;
+    Serializer ser(&payload_, encoding);
+    if (!(ser << encap && ser << data)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: SimpleDataWriter(): serialization failed\n"));
+    }
 
     // The reference count is explicited incremented to avoid been explcitly deleted
     // via the RcHandle<TransportClient> because the object is always been created
@@ -161,7 +164,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void send_data(const SequenceNumber& seq)
   {
     dsle_.get_header().sequence_ = seq;
-    Message_Block_Ptr sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+    Message_Block_Ptr sample(
+      new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()));
     dsle_.set_sample(move(sample));
     *dsle_.get_sample() << dsle_.get_header();
     dsle_.get_sample()->cont(payload_.duplicate());
@@ -244,16 +248,16 @@ struct TestParticipant: ACE_Event_Handler {
       0, DATA_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq, ParameterList()
     };
 #endif
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(ds, size, padding);
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, ds);
     size += 8; // CDR encap header + 4 bytes of data
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+    // TODO(iguessthislldo) Use common encapsulation code
     const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in BE format
       data = 0xABCDABCD;
-    bool ok = (ser << hdr_) && (ser << ds) && (ser << encap) && (ser << data);
-    if (!ok) {
+    if (!(ser << hdr_ && ser << ds && ser << encap && ser << data)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
       return false;
     }
@@ -291,19 +295,21 @@ struct TestParticipant: ACE_Event_Handler {
       0, DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq,
       {i + 1},       // fragmentStartingNum
       1,             // fragmentsInSubmessage
-      FRAG_SIZE,     // fragmentSize (smallest fragmentSize allowed is 1KB)
+      FRAG_SIZE,     // fragmentSize (smallest fragmentSize allowed is 1KiB)
       N * FRAG_SIZE, // sampleSize
       inlineQoS
     };
 #endif
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(df, size, padding);
+
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, df);
     size += FRAG_SIZE;
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+    // TODO(iguessthislldo) Use common encapsulation code
     const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in LE format
-    bool ok = (ser << hdr_) && (ser << df);
+    bool ok = (ser << hdr_ && ser << df);
     if (i == 0) ok &= (ser << encap);
     ok &= ser.write_octet_array(data_for_frag_,
                                 i ? FRAG_SIZE : FRAG_SIZE - 4);
@@ -336,13 +342,12 @@ struct TestParticipant: ACE_Event_Handler {
       {seq_pp, 1, bitmap}
     };
 #endif
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(gap, size, padding);
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
-    bool ok = (ser << hdr_) && (ser << gap);
-    if (!ok) {
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, gap);
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+    if (!(ser << hdr_ && ser << gap)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize gap\n"));
       return false;
     }
@@ -383,13 +388,12 @@ struct TestParticipant: ACE_Event_Handler {
       ENTITYID_UNKNOWN, writer, seq, {lastAvailFrag}, {++hbfrag_count_}
     };
 #endif
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(hbf, size, padding);
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
-    bool ok = (ser << hdr_) && (ser << hbf);
-    if (!ok) {
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, hbf);
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+    if (!(ser << hdr_ && ser << hbf)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize heartbeatfrag\n"));
       return false;
     }
@@ -422,13 +426,12 @@ struct TestParticipant: ACE_Event_Handler {
       {++acknack_count_}
     };
 #endif
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(an, size, padding);
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
-    bool ok = (ser << hdr_) && (ser << an);
-    if (!ok) {
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, an);
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+    if (!(ser << hdr_ && ser << an)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize acknack\n"));
       return false;
     }
@@ -447,7 +450,7 @@ struct TestParticipant: ACE_Event_Handler {
       return -1;
     }
     recv_mb_.wr_ptr(ret);
-    Serializer ser(&recv_mb_, host_is_bigendian, Serializer::ALIGN_CDR);
+    Serializer ser(&recv_mb_, encoding);
     if (!(ser >> recv_hdr_)) {
       ACE_ERROR((LM_ERROR,
         "ERROR: in handle_input() failed to deserialize RTPS Header\n"));
@@ -725,10 +728,10 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
       LOCATOR_KIND_UDPv4;
   part1_locators[0].port = part1_addr.get_port_number();
   address_to_bytes(part1_locators[0].address, part1_addr);
-  size_t size_locator = 0, padding_locator = 0;
-  gen_find_size(part1_locators, size_locator, padding_locator);
-  mb_locator.init(size_locator + padding_locator + 1);
-  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  size_t size = 0;
+  serialized_size(blob_encoding, size, part1_locators);
+  mb_locator.init(size + 1);
+  Serializer ser_loc(&mb_locator, blob_encoding);
   ser_loc << part1_locators;
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
 }
@@ -740,7 +743,7 @@ bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)
     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  Serializer ser(&mb, blob_encoding);
   LocatorSeq locators;
   if (!(ser >> locators) || locators.length() < 1) {
     ACE_DEBUG((LM_DEBUG,

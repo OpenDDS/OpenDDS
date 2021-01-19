@@ -263,8 +263,10 @@ private:
                           AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTask();
     void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);
+    void erase(DDS::Security::PermissionsHandle pm_handle);
 
   private:
+    typedef OPENDDS_MAP(DDS::Security::PermissionsHandle, time_t) HandleToExpiration;
     typedef OPENDDS_MULTIMAP(time_t, DDS::Security::PermissionsHandle) ExpirationToHandle;
 
     virtual void execute(const DCPS::MonotonicTimePoint& now);
@@ -272,6 +274,7 @@ private:
     AccessControlBuiltInImpl& impl_;
 
     mutable ACE_Thread_Mutex lock_;
+    HandleToExpiration handle_to_expiration_;
     ExpirationToHandle expiration_to_handle_;
   };
   typedef DCPS::RcHandle<RevokePermissionsTask> RevokePermissionsTask_rch;

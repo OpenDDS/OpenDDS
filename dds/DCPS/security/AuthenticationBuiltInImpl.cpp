@@ -83,7 +83,12 @@ AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 
 AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
-
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl local_participants_ %B handshake_data_ %B\n"),
+               local_participants_.size(),
+               handshake_data_.size()));
+  }
 }
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_local_identity(
@@ -123,6 +128,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         {
           ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
           local_participants_[local_identity_handle] = local_participant;
+
+          if (DCPS::security_debug.bookkeeping) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                       ACE_TEXT("AuthenticationBuiltInImpl::validate_local_identity local_participants_ (total %B)\n"),
+                       local_participants_.size()));
+          }
         }
 
         result = DDS::Security::VALIDATION_OK;
@@ -272,6 +283,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
     remote_identity_handle = get_next_handle();
     found = local_data->validated_remotes.insert(std::make_pair(remote_identity_handle, remote_participant)).first;
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AuthenticationBuiltInImpl::validate_remote_identity validated_remotes (total %B)\n"),
+                 local_data->validated_remotes.size()));
+    }
   }
 
   // Update the remote token.
@@ -393,6 +410,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   {
     ACE_Guard<ACE_Thread_Mutex> identity_data_guard(handshake_mutex_);
     handshake_data_[handshake_handle] = handshake_data;
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AuthenticationBuiltInImpl::begin_handshake_request handshake_data_ (total %B)\n"),
+                 handshake_data_.size()));
+    }
   }
 
   return DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
@@ -404,7 +427,9 @@ void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUI
 
   ACE_Message_Block buffer(reinterpret_cast<const char*>(cpdata.get_buffer()), cpdata.length());
   buffer.wr_ptr(cpdata.length());
-  OpenDDS::DCPS::Serializer serializer(&buffer, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
+  OpenDDS::DCPS::Serializer serializer(&buffer,
+                                       DCPS::Encoding::KIND_XCDR1,
+                                       DCPS::ENDIAN_BIG);
   RTPS::ParameterList params;
 
   if (serializer >> params) {
@@ -788,6 +813,12 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   {
     ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
     handshake_data_[handshake_handle] = handshake_data;
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AuthenticationBuiltInImpl::begin_handshake_reply handshake_data_ (total %B)\n"),
+                 handshake_data_.size()));
+    }
   }
 
   return Pending;
@@ -947,6 +978,13 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   HandshakeDataMap::iterator found = handshake_data_.find(handshake_handle);
   if (found != handshake_data_.end()) {
     handshake_data_.erase(found);
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AuthenticationBuiltInImpl::return_handshake_handle handshake_data_ (total %B)\n"),
+                 handshake_data_.size()));
+    }
+
     return true;
   }
 
@@ -963,6 +1001,13 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   LocalParticipantMap::iterator local = local_participants_.find(identity_handle);
   if (local != local_participants_.end()) {
     local_participants_.erase(local);
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AuthenticationBuiltInImpl::return_identity_handle local_participants_ (total %B)\n"),
+                 local_participants_.size()));
+    }
+
     return true;
   }
 
@@ -971,6 +1016,13 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   if (local != local_participants_.end()) {
     local->second->validated_remotes.erase(identity_handle);
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AuthenticationBuiltInImpl::return_identity_handle validated_remotes (total %B)\n"),
+                 local->second->validated_remotes.size()));
+    }
+
     return true;
   }
 
@@ -1283,6 +1335,15 @@ AuthenticationBuiltInImpl::get_local_participant(DDS::Security::IdentityHandle h
   }
 
   return LocalParticipantData::shared_ptr();
+}
+
+AuthenticationBuiltInImpl::LocalParticipantData::~LocalParticipantData()
+{
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("LocalParticipantData::~LocalParticipantData validated_remotes %B\n"),
+               validated_remotes.size()));
+  }
 }
 
 AuthenticationBuiltInImpl::HandshakeDataPair

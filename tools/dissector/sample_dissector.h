@@ -106,7 +106,7 @@ namespace OpenDDS
       guint32 index;
 
       Wireshark_Bundle(
-        char* data, size_t size, bool swap_bytes, Serializer::Alignment align
+        char* data, size_t size, bool swap_bytes, Encoding::Alignment align
       );
       Wireshark_Bundle(const Wireshark_Bundle & other);
 

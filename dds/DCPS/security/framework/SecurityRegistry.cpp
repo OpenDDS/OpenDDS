@@ -261,7 +261,8 @@ SecurityRegistry::default_config() const
     CryptoKeyExchange_var c;
     CryptoKeyFactory_var d;
     CryptoTransform_var e;
-    default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e, static_cast<Utility*>(0),
+    default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e,
+                                                     static_cast<Utility*>(0),
                                                      ConfigPropertyList());
   }
 #endif

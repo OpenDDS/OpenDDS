@@ -110,20 +110,31 @@ TEST_F(CryptoTransformTest, encode_serialized_payload_NullHandle)
 
 TEST_F(CryptoTransformTest, encode_serialized_payload_EmptyBuffer)
 {
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+
   DDS::OctetSeq inline_qos;
   DDS::OctetSeq output;
-  DDS::Security::SecurityException ex;
-  DDS::Security::DatawriterCryptoHandle handle = 1;
+  DDS::PropertySeq no_properties;
+  EndpointSecurityAttributes esa = {{false, false, false, false}, false, false, false, 0, no_properties};
+  SecurityException ex;
+  const DatawriterCryptoHandle handle = kef.register_local_datawriter(0, no_properties, esa, ex);
+
   EXPECT_TRUE(get_inst().encode_serialized_payload(output, inline_qos, get_buffer(), handle, ex));
   EXPECT_EQ(get_buffer(), output);
 }
 
 TEST_F(CryptoTransformTest, encode_serialized_payload_WithData)
 {
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+
   DDS::OctetSeq inline_qos;
   DDS::OctetSeq output;
-  DDS::Security::SecurityException ex;
-  DDS::Security::DatawriterCryptoHandle handle = 1;
+  DDS::PropertySeq no_properties;
+  EndpointSecurityAttributes esa = {{false, false, false, false}, false, false, false, 0, no_properties};
+  SecurityException ex;
+  const DatawriterCryptoHandle handle = kef.register_local_datawriter(0, no_properties, esa, ex);
 
   // Create a buffer of non-zero size with non-zero data
   init_buffer(50U, 3);
@@ -191,9 +202,14 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_NilReaderAtN)
 
 TEST_F(CryptoTransformTest, encode_datawriter_submessage_MultiPass)
 {
-  ::DDS::OctetSeq output;
-  ::DDS::Security::SecurityException ex;
-  ::DDS::Security::DatawriterCryptoHandle handle = 1;
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+
+  DDS::OctetSeq output;
+  DDS::PropertySeq no_properties;
+  EndpointSecurityAttributes esa = {{false, false, false, false}, false, false, false, 0, no_properties};
+  SecurityException ex;
+  const DatawriterCryptoHandle handle = kef.register_local_datawriter(0, no_properties, esa, ex);
 
   // Provide a valid list of reader handles
   const ::CORBA::Long NUM_READERS = 10;
