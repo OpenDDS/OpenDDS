@@ -89,7 +89,7 @@ namespace OpenDDS
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
-      char* data, size_t size, bool swap_bytes, Encoding::Alignment align
+      char* data, size_t size, bool swap_bytes, Encoding::Alignment
     ) :
       block(data, size),
       serializer(&block, Encoding::KIND_UNALIGNED_CDR, swap_bytes)
