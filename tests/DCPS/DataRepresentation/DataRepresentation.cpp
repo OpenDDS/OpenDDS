@@ -16,7 +16,6 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/DCPS_Utils.h>
-
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
