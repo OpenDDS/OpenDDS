@@ -26,9 +26,9 @@ if ($verbose) {
 my %params = (
   "PlainCdr"                => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
-  "FinalStructMatch"        => {reader_type => "FinalStruct", writer_type => "FinalStruct", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
+  "FinalStructMatch"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
-  "FinalStructNoMatch"      => {reader_type => "FinalStruct", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3,
+  "FinalStructNoMatch"      => {reader_type => "FinalStructSub", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
   "AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "AppendableStructT", key_val => 4,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
@@ -55,13 +55,13 @@ my %params = (
   "Dependency"              => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "DependencyT", key_val => 14,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
 
-  "Match_no_xtypes_nn"      => {reader_type => "AppendableStruct", writer_type => "AppendableStruct", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_nn",
+  "Match_no_xtypes_nn"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_nn",
                                 key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc_no_xtypes.ini"},
 
-  "Match_no_xtypes_yn"      => {reader_type => "AppendableStruct", writer_type => "AppendableStruct", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_yn",
+  "Match_no_xtypes_yn"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_yn",
                                 key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini"},
 
-  "Match_no_xtypes_ny"      => {reader_type => "AppendableStruct", writer_type => "AppendableStruct", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_ny",
+  "Match_no_xtypes_ny"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_ny",
                                 key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini"},
 );
 
@@ -87,12 +87,12 @@ sub run_test {
 
   my @reader_args = ("-DCPSConfigFile $v->{r_ini} -ORBLogFile subscriber_$test_name_param.log --reader --type $v->{reader_type}");
   push(@reader_args, @test_args);
-  $test->process("reader_$test_name_param", 'XTypes', join(' ', @reader_args));
+  $test->process("reader_$test_name_param", './Sub/xtypes_subscriber', join(' ', @reader_args));
   $test->start_process("reader_$test_name_param");
 
   my @writer_args = ("-DCPSConfigFile $v->{w_ini} -ORBLogFile publisher_$test_name_param.log --writer --type $v->{writer_type}");
   push(@writer_args, @test_args);
-  $test->process("writer_$test_name_param", 'XTypes', join(' ', @writer_args));
+  $test->process("writer_$test_name_param", './Pub/xtypes_publisher', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
 }
 
@@ -100,7 +100,7 @@ sub run_test {
 if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test ($v, $k);
-    sleep(1);
+    sleep(7);
   }
 }
 else {
