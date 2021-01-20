@@ -476,10 +476,9 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapSTypeDefn() 
+    PlainMapSTypeDefn()
       : key_flags(0)
     {}
-    
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
                       const SBound& a_bound,
