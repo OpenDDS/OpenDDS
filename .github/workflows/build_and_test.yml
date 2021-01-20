@@ -3414,6 +3414,12 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
         rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+    - name: Move ACE and MPC to C Drive
+      shell: bash
+      run: |
+        mv ACE_TAO /
+        mv MPC /
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3421,7 +3427,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-debug --no-inline --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --tests --rapidjson --security --ace="C:\Program Files\GIT\ACE_TAO\ACE" --tao="C:\Program Files\GIT\ACE_TAO\TAO" --mpc="C:\Program Files\GIT\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -3605,6 +3611,11 @@ jobs:
         tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
         rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+    - name: Move ACE and MPC to C Drive
+      shell: bash
+      run: |
+        mv ACE_TAO /
+        mv MPC /
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3612,7 +3623,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-debug --no-inline --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows
+        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\Program Files\GIT\ACE_TAO\ACE" --tao="C:\Program Files\GIT\ACE_TAO\TAO" --mpc="C:\Program Files\GIT\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
