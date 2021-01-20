@@ -377,8 +377,8 @@ namespace XTypes {
     CollectionElementFlag element_flags;
 
     PlainCollectionHeader()
-      : element_flags(0)
-      , equiv_kind(0)
+      : equiv_kind(0)
+      , element_flags(0)
     {}
 
     PlainCollectionHeader(const EquivalenceKind& a_equiv_kind,
@@ -1096,7 +1096,7 @@ namespace XTypes {
     TypeIdentifier type_id;
 
     CommonDiscriminatorMember()
-     : member_flags(0)
+      : member_flags(0)
     {}
 
     CommonDiscriminatorMember(const UnionDiscriminatorFlag& a_member_flags,
