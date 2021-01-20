@@ -65,8 +65,8 @@ tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/key_annotation/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/rapidjson_generator/run_test.pl: !DCPS_MIN RAPIDJSON CXX11
-tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN
-tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11
+tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/xcdr/run_test.pl
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN
 

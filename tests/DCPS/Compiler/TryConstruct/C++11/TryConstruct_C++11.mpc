@@ -1,4 +1,5 @@
 project(Compiler*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
+  requires += no_opendds_safety_profile
   exename = *
   idlflags += -I..
 
