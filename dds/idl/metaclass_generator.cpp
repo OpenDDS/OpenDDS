@@ -365,11 +365,9 @@ namespace {
         "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
         "  {\n"
         "    static const std::pair<std::string, ACE_CDR::ULong> name_to_id_pairs[] = {\n";
-      const AutoidKind auto_id = be_global->autoid(node);
       for (size_t i = 0; i < fields.size(); ++i) {
-        ACE_CDR::ULong default_id = static_cast<ACE_CDR::ULong>(i);
         be_global->impl_ << "      std::make_pair(\"" << fields[i]->local_name()->get_string() << "\", " <<
-          be_global->get_id(fields[i], auto_id, default_id) << "),\n";
+          be_global->get_id(fields[i]) << "),\n";
       }
       be_global->impl_ <<
         "    };\n"

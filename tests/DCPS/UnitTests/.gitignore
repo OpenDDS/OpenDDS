@@ -18,3 +18,5 @@
 /UnitTests_XTypesAssignability
 /UnitTests_Serializer
 /UnitTests_GuidUtils
+/UnitTests_JsonValueWriter
+/UnitTests_JsonValueReader

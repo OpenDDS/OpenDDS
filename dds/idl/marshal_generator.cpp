@@ -2806,11 +2806,9 @@ namespace {
           "\n";
 
         std::ostringstream cases;
-        const AutoidKind auto_id = be_global->autoid(node);
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
-          ACE_CDR::ULong default_id = i.pos();
-          const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
+          const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
           string field_name =
             string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
@@ -3075,11 +3073,9 @@ namespace {
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
           "    size_t size = 0;\n"
           "    ACE_UNUSED_ARG(size);\n";
-        const AutoidKind auto_id = be_global->autoid(node);
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
-          ACE_CDR::ULong default_id = i.pos();
-          const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
+          const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
           const string field_name = field->local_name()->get_string();
           const bool is_key = be_global->is_key(field);
 
@@ -3377,7 +3373,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   RtpsFieldCustomizer rtpsCustom(cpp_name);
-  const AutoidKind auto_id = be_global->autoid(node);
 
   be_global->impl_ <<
     "  Value getValue(Serializer& strm, const char* field) const\n"
@@ -3427,9 +3422,8 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     std::ostringstream cases;
     for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
       AST_Field* const field = *i;
-      ACE_CDR::ULong default_id = i.pos();
       size_t size = 0;
-      const ACE_CDR::ULong id = be_global->get_id(field, auto_id, default_id);
+      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
       std::string field_name = field->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(field->field_type());
       Classification fld_cls = classify(field_type);

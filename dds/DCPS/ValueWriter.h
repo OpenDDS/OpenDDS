@@ -38,12 +38,15 @@ struct ValueWriter {
 
   virtual void begin_struct() {}
   virtual void end_struct() {}
+  virtual void begin_struct_member(const char* /*name*/) {}
+  virtual void end_struct_member() {}
+
   virtual void begin_union() {}
   virtual void end_union() {}
   virtual void begin_discriminator() {}
   virtual void end_discriminator() {}
-  virtual void begin_field(const char* /*name*/) {}
-  virtual void end_field() {}
+  virtual void begin_union_member(const char* /*name*/) {}
+  virtual void end_union_member() {}
 
   virtual void begin_array() {}
   virtual void end_array() {}

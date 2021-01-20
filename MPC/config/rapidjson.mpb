@@ -6,4 +6,5 @@ project {
     $(DDS_ROOT)/tools/rapidjson
   }
   includes += $(RAPIDJSON_ROOT)/include
+  macros   += OPENDDS_RAPIDJSON
 }
