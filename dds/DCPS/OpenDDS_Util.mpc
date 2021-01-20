@@ -24,4 +24,7 @@ project: acelib, dds_macros, install {
     XTypes/TypeObject.cpp
   }
 
+  verbatim(gnuace, local, 1) {
+    idl_stubs: all
+  }
 }

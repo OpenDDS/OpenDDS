@@ -35,6 +35,15 @@ typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
 enum EnumType {VALUE1, VALUE2, ValueExtra};
 enum EnumType2 {B1, B2, B3, B4, BExtra};
 
+struct LongDoubleStruct{
+  long double ld;
+};
+
+union LongDoubleUnion switch (EnumType) {
+  case VALUE1: long double ld;
+  case VALUE2: short u_s;
+};
+
 //nested union for use in struct, union, and sequence
 union NestedUnion switch (EnumType) {
   case VALUE1: boolean u_b;
