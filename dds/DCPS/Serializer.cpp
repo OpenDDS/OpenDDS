@@ -22,7 +22,6 @@
 #include <ace/OS_Memory.h>
 
 #include <cstdlib>
-#include <cassert>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
