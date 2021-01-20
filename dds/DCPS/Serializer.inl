@@ -6,7 +6,6 @@
  */
 
 #include "Serializer.h"
-
 #include "debug.h"
 
 #include <ace/Message_Block.h>
