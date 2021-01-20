@@ -4,14 +4,15 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 #include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
 #include <ace/SString.h>
 #include "ace/Time_Value.h"
-#include "BenchTypeSupportImpl.h"
 
+#include "PropertyStatBlock.h"
 #include "Bench_Common_Export.h"
 
 const ACE_Time_Value ZERO_TIME(0, 0);
@@ -41,9 +42,20 @@ std::string Bench_Common_Export iso8601(const std::chrono::system_clock::time_po
 
 uint32_t Bench_Common_Export one_at_a_time_hash(const uint8_t* key, size_t length);
 
-int Bench_Common_Export handle_report(const Bench::TestController::Report& report,
-  const std::unordered_set<std::string>& tags,
-  std::ostringstream& result_out);
+void Bench_Common_Export update_stats_for_tags(std::unordered_map<std::string, uint64_t>& stats,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const Builder::ConstPropertyIndex& prop);
+
+void Bench_Common_Export update_details_for_tags(std::unordered_map<std::string, std::string>& details,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const std::string& detail);
+
+void Bench_Common_Export consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatBlock>& stats,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const Bench::ConstPropertyStatBlock& data);
 }
 
 #endif
