@@ -135,18 +135,28 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopicDescription(
   typename Topics::Values       topic
 )
 {
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   typename ContentFilteredTopics::Values cfTopic =
                this->modelData_.contentFilteredTopic(topic);
+#endif
+#ifndef OPENDDS_NO_MULTI_TOPIC
   typename MultiTopics::Values multiTopic =
                this->modelData_.multiTopic(topic);
+#endif
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // If this is a content-filtered topic
   if (cfTopic != ContentFilteredTopics::LAST_INDEX) {
     createContentFilteredTopic(participant, topic, cfTopic);
   // Else if this is a multitopic
-  } else if (multiTopic != MultiTopics::LAST_INDEX) {
+  } else
+#endif
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  if (multiTopic != MultiTopics::LAST_INDEX) {
     createMultiTopic(participant, topic, multiTopic);
   // Else this is a standard topic
-  } else {
+  } else
+#endif
+  {
     createTopic(participant, topic);
   }
 }
@@ -192,12 +202,14 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
   DDS::Topic_var related_topic = DDS::Topic::_narrow(this->topic(participant, target_topic));
   const char* filter_expression = this->modelData_.filterExpression(cfTopic);
   DDS::DomainParticipant_var domain_participant = this->participant(participant);
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // TODO: Should this be moved to Delegate?
   this->topics_[participant][topic] =
         domain_participant->create_contentfilteredtopic(topicName,
                                                         related_topic,
                                                         filter_expression,
                                                         DDS::StringSeq());
+#endif
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -213,7 +225,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createMultiTopic(
   typename Types::Values type = this->modelData_.type(topic);
   DDS::DomainParticipant_var domain_participant = this->participant(participant);
   const char* topicExpression = this->modelData_.topicExpression(multiTopic);
-
+#ifndef OPENDDS_NO_MULTI_TOPIC
   if(!this->types_[participant][type]) {
     this->modelData_.registerType(type, this->participants_[ participant]);
     this->types_[participant][type] = true;
@@ -224,6 +236,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createMultiTopic(
                                               this->modelData_.typeName(type),
                                               topicExpression,
                                               DDS::StringSeq());
+#endif
 }
 
 template< typename ModelName, class InstanceTraits>
