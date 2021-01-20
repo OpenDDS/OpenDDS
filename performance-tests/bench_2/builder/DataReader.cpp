@@ -106,6 +106,8 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     }
 
     datareader_ = subscriber_->create_datareader(content_filtered_topic, qos_, listener_, listener_status_mask_);
+#else
+  ACE_UNUSED_ARG(cft_map);
 #endif
   }
 
