@@ -522,16 +522,8 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
       writer_pos != registry_.writer_map.end()) {
     DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
     if (drr) {
-#ifdef __SUNPRO_CC
-      WriterAssociation wa;
-      wa.writerTransInfo = writer_pos->second.trans_info;
-      wa.writerId = writerid;
-      wa.pubQos = writer_pos->second.publisher_qos;
-      wa.writerQos = writer_pos->second.qos;
-#else
       const WriterAssociation wa =
-        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
-#endif
+        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq()};
       drr->add_association(readerid, wa, false);
     }
   }
