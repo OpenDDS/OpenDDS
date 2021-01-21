@@ -298,8 +298,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
-    ACE_OS::sleep(60);
+    // All participants are sending SPDP at a one second interval so 10 seconds should be adequate.
+    ACE_OS::sleep(10);
 
     // check that all locations received
     if (!listener->check(no_ice, ipv6)) {
