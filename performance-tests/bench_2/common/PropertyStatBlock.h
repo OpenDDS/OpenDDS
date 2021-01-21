@@ -20,6 +20,7 @@ struct Bench_Common_Export SimpleStatBlock {
   double var_x_sample_count_;
 
   std::vector<double> median_buffer_;
+  std::vector<Builder::TimeStamp> timestamp_buffer_;
   size_t median_sample_count_;
   size_t median_sample_overflow_;
   double median_;
@@ -71,6 +72,7 @@ private:
   Builder::ConstPropertyIndex var_x_sample_count_;
 
   std::vector<double> median_buffer_;
+  std::vector<Builder::TimeStamp> timestamp_buffer_;
   Builder::ConstPropertyIndex median_sample_count_;
   Builder::ConstPropertyIndex median_;
   Builder::ConstPropertyIndex median_absolute_deviation_;

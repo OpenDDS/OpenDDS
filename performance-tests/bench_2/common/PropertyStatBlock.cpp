@@ -15,6 +15,7 @@ SimpleStatBlock::SimpleStatBlock()
  , mean_(0.0)
  , var_x_sample_count_(0.0)
  , median_buffer_()
+ , timestamp_buffer_()
  , median_sample_count_(0)
  , median_sample_overflow_(0)
  , median_(0.0)
@@ -83,6 +84,17 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
     result.median_buffer_[sb1.median_sample_count_ + i] = sb2.median_buffer_[i];
   }
   result.median_sample_overflow_ = result.sample_count_ - result.median_sample_count_;
+
+  // Consolidate timestamp buffers
+  size_t sb1_timestamp_buffer_count = sb1.timestamp_buffer_.size();
+  size_t sb2_timestamp_buffer_count = sb2.timestamp_buffer_.size();
+  result.timestamp_buffer_.resize(sb1_timestamp_buffer_count + sb2_timestamp_buffer_count);
+  for (size_t i = 0; i < sb1_timestamp_buffer_count; ++i) {
+    result.timestamp_buffer_[i] = sb1.timestamp_buffer_[i];
+  }
+  for (size_t i = 0; i < sb2_timestamp_buffer_count; ++i) {
+    result.timestamp_buffer_[sb1_timestamp_buffer_count + i] = sb2.timestamp_buffer_[i];
+  }
 
   if (result.median_sample_count_) {
     // Calculate consolidated median from consolidated median buffer
@@ -244,6 +256,7 @@ SimpleStatBlock PropertyStatBlock::to_simple_stat_block() const
   result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
 
   result.median_buffer_ = median_buffer_;
+  result.timestamp_buffer_ = timestamp_buffer_;
   result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
   result.median_ = median_->value.double_prop();
   result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
@@ -272,6 +285,15 @@ ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, 
     }
   }
 
+  Builder::ConstPropertyIndex timestamp_buffer = get_property(seq, prefix + "_median_timestamp_buffer", Builder::PVK_TIME_SEQ);
+
+  if (timestamp_buffer) {
+    timestamp_buffer_.resize(timestamp_buffer->value.double_seq_prop().length());
+    for (size_t i = 0; i < timestamp_buffer_.size(); ++i) {
+      timestamp_buffer_[i] = timestamp_buffer->value.time_seq_prop()[static_cast<CORBA::ULong>(i)];
+    }
+  }
+
   median_sample_count_ = get_property(seq, prefix + "_median_sample_count", Builder::PVK_ULL);
 
   median_ = get_property(seq, prefix + "_median", Builder::PVK_DOUBLE);
@@ -291,6 +313,7 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
     result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
 
     result.median_buffer_ = median_buffer_;
+    result.timestamp_buffer_ = timestamp_buffer_;
     result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
     result.median_ = median_->value.double_prop();
     result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
