@@ -36,7 +36,14 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
     ACE_ERROR((LM_ERROR, "ERROR: register_type failed\n"));
     return false;
   }
-  CORBA::String_var type_name = (registered_type_name.empty() ? ts->get_type_name() : registered_type_name.c_str());
+
+  CORBA::String_var type_name;
+  if (registered_type_name.empty()) {
+    type_name = ts->get_type_name();
+  } else {
+    type_name = registered_type_name.c_str();
+  }
+
   topic = dp->create_topic(topic_name.c_str(), type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   return true;
