@@ -3027,6 +3027,9 @@ TEST(StructTypeTest, Assignable)
   uni_b.discriminator.common.type_id = TypeIdentifier(TK_CHAR8);
   uni_a.discriminator.common.member_flags = 0;
   uni_b.discriminator.common.member_flags = 0;
+  uni_a.union_flags = IS_MUTABLE;
+  uni_b.union_flags = uni_a.union_flags;
+
   uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
                                                                makeString(false, StringLTypeDefn(120)),
                                                                UnionCaseLabelSeq().append(1).append(2).append(3)),
@@ -3035,7 +3038,7 @@ TEST(StructTypeTest, Assignable)
                                                                makeString(false, StringSTypeDefn(100)),
                                                                UnionCaseLabelSeq().append(4).append(5).append(6)),
                                              MinimalMemberDetail("inner2")));
-  uni_b.discriminator.common.type_id = TypeIdentifier(TK_CHAR8);
+
   uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(1, IS_DEFAULT,
                                                                makeString(false, StringSTypeDefn(130)),
                                                                UnionCaseLabelSeq().append(1).append(2)),
