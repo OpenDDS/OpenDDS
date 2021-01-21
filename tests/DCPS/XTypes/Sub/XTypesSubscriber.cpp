@@ -183,34 +183,6 @@ ReturnCode_t read_trim20_struct(const DataReader_var& dr)
 }
 
 
-template<typename T>
-void get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_name,
-  Topic_var& topic, const std::string& registered_type_name)
-{
-  ts->register_type(dp, registered_type_name.c_str());
-  CORBA::String_var type_name = (registered_type_name.empty() ? ts->get_type_name() : registered_type_name.c_str());
-  topic = dp->create_topic(topic_name.c_str(), type_name,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-}
-
-
-bool check_inconsistent_topic_status(Topic_var topic)
-{
-  DDS::InconsistentTopicStatus status;
-  DDS::ReturnCode_t retcode;
-
-  retcode = topic->get_inconsistent_topic_status(status);
-  if (retcode != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
-    return false;
-  } else if (status.total_count != (expect_to_match ? 0 : 1)) {
-    ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
-    return false;
-  }
-  return true;
-}
-
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -263,27 +235,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "FinalStructSub") {
     FinalStructSubTypeSupport_var ts = new FinalStructSubTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStruct") {
     AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructNoXTypes") {
     AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "MutableStruct") {
     MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "MutableUnion") {
     MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+    return 1;
+  }
+
+  if (failed) {
     return 1;
   }
 
