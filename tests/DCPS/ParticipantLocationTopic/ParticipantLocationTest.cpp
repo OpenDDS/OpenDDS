@@ -183,29 +183,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_publisher failed!\n")),
                        EXIT_FAILURE);
     }
-/*
-    DDS::DataWriterQos qos;
-    pub->get_default_datawriter_qos(qos);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" Reliable DataWriter\n")));
-    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    // Create DataWriter
-    DDS::DataWriter_var dw =
-      pub->create_datawriter(topic.in(),
-                             qos,
-                             DDS::DataWriterListener::_nil(),
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(dw.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                       EXIT_FAILURE);
-    }
-*/
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
@@ -293,24 +271,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
     }
-/*
-    DDS::DataReaderQos dr_qos;
-    sub->get_default_datareader_qos(dr_qos);
-    std::cout << "Reliable DataReader" << std::endl;
-    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    DDS::DataReader_var reader =
-      sub->create_datareader(topic.in(),
-                             dr_qos,
-                             0,
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(reader.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), EXIT_FAILURE);
-    }
-*/
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var sub_bit_subscriber = sub_participant->get_builtin_subscriber();
 
@@ -336,11 +297,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
-
-    // start writer task
-    //ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n"));
-    //WriterTask task(dw);
-    //task.activate(DEFAULT_FLAGS, 1);
 
     // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
     ACE_OS::sleep(60);
