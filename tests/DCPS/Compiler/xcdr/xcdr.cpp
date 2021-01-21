@@ -180,9 +180,10 @@ bool operator==(const DataView& a, const DataView& b)
   }
 
   std::string a_line;
-  std::stringstream astrm(to_hex_dds_string(a.data, a.size, '\n', 8));
+  // Use c_str so that it can cast to std::string on Safety Profile
+  std::stringstream a_strm(to_hex_dds_string(a.data, a.size, '\n', 8).c_str());
   std::string b_line;
-  std::stringstream bstrm(to_hex_dds_string(b.data, b.size, '\n', 8));
+  std::stringstream b_strm(to_hex_dds_string(b.data, b.size, '\n', 8).c_str());
   std::stringstream result;
   bool got_a = true;
   bool got_b = true;
@@ -191,7 +192,7 @@ bool operator==(const DataView& a, const DataView& b)
     line.width(16);
     line << std::left;
     if (got_a) {
-      if (std::getline(astrm, a_line, '\n')) {
+      if (std::getline(a_strm, a_line, '\n')) {
         line << a_line;
       } else {
         got_a = false;
@@ -204,7 +205,7 @@ bool operator==(const DataView& a, const DataView& b)
     line.width(16);
     line << std::left;
     if (got_b) {
-      if (std::getline(bstrm, b_line, '\n')) {
+      if (std::getline(b_strm, b_line, '\n')) {
         line << b_line;
       } else {
         got_b = false;
