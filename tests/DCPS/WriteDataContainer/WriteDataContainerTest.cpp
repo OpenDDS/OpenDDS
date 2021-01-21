@@ -1,19 +1,20 @@
-#include "ace/Condition_Recursive_Thread_Mutex.h"
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/WriteDataContainer.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "ace/Arg_Shifter.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
 #include "SimpleTypeSupportImpl.h"
-#include "dds/DCPS/InstanceHandle.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DataWriterImpl_T.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
 
 #include "../common/TestSupport.h"
 
-#include "ace/Task.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/WriteDataContainer.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/InstanceHandle.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DataWriterImpl_T.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
+
+#include <ace/Task.h>
+#include <ace/Arg_Shifter.h>
+#include <ace/Condition_Recursive_Thread_Mutex.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -23,9 +24,9 @@ using namespace std;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 
-const long  MY_DOMAIN   = 111;
-const char* MY_TOPIC    = "topic_foo";
-const char* MY_TYPE     = "type_foo";
+const long  MY_DOMAIN = 111;
+const char* MY_TOPIC = "topic_foo";
+const char* MY_TYPE = "type_foo";
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
@@ -37,33 +38,29 @@ int MAX_BLOCKING_TIME_NANO = 0;
 
 int test_failed = 0;
 
-class TestException
-{
-  public:
-    TestException()  {}
-    ~TestException() {}
+class TestException {
+public:
+  TestException() {}
+  ~TestException() {}
 };
 
-class TestParticipantImpl : public DomainParticipantImpl
-{
+class TestParticipantImpl : public DomainParticipantImpl {
 public:
-  TestParticipantImpl(InstanceHandleGenerator & participant_handles)
+  TestParticipantImpl(InstanceHandleGenerator& participant_handles)
     : DomainParticipantImpl(participant_handles,
                             MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
                             ::DDS::DomainParticipantListener::_nil(),
-                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK) {};
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK) {}
 
-  virtual ~TestParticipantImpl() {};
+  virtual ~TestParticipantImpl() {}
 };
 
-namespace Test
-{
-  typedef OpenDDS::DCPS::DataWriterImpl_T<Simple> SimpleDataWriterImpl;
+namespace Test {
+typedef OpenDDS::DCPS::DataWriterImpl_T<Simple> SimpleDataWriterImpl;
 }
 
-class DDS_TEST
-{
+class DDS_TEST {
 public:
   DDS_TEST()
     : delayed_deliver_container_(0)
@@ -92,15 +89,15 @@ public:
 
   void delayed_deliver()
   {
-    ACE_GUARD (ACE_Recursive_Thread_Mutex,
-        guard,
-        this->lock_wdc(delayed_deliver_container_));
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+              guard,
+              this->lock_wdc(delayed_deliver_container_));
 
     this->delayed_deliver_container_->data_delivered(this->element_to_deliver_);
     this->log_send_state_lists("DDS_TEST data_delivered complete:", this->delayed_deliver_container_);
   }
 
-  void log_send_state_lists (std::string description, WriteDataContainer* wdc) const
+  void log_send_state_lists(std::string description, WriteDataContainer* wdc) const
   {
     ACE_DEBUG((LM_DEBUG, "\n%T %C\n\tTest Data Container send state lists: unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
                description.c_str(),
@@ -111,7 +108,7 @@ public:
                wdc->instances_.size()));
   }
 
-  void log_perceived_qos_limits (WriteDataContainer* wdc) const
+  void log_perceived_qos_limits(WriteDataContainer* wdc) const
   {
     ACE_DEBUG((LM_DEBUG, "Test Data Container perceived qos limits: max_samples_per_instance(%d), max_num_instances(%d), max_num_samples(%d)\n",
                wdc->max_samples_per_instance_,
@@ -119,7 +116,7 @@ public:
                wdc->max_num_samples_));
   }
 
-  void log_dw_qos_limits (DataWriterQos& qos) const
+  void log_dw_qos_limits(DataWriterQos& qos) const
   {
     ACE_DEBUG((LM_DEBUG, "DW qos limits: history_depth(%d) <= max_samples_per_instance(%d) <= max_samples(%d), max_instances(%d)\n",
                qos.history.depth,
@@ -130,7 +127,7 @@ public:
 
   ACE_Recursive_Thread_Mutex& lock_wdc(WriteDataContainer* wdc) { return wdc->lock_; }
 
-  WriteDataContainer* get_test_data_container(::DDS::DataWriterQos const & dw_qos,
+  WriteDataContainer* get_test_data_container(DDS::DataWriterQos const& dw_qos,
                                               Test::SimpleDataWriterImpl* fast_dw,
                                               ACE_Recursive_Thread_Mutex& deadline_status_lock,
                                               DDS::OfferedDeadlineMissedStatus& deadline_status,
@@ -143,8 +140,9 @@ public:
     size_t n_chunks = TheServiceParticipant->n_chunks();
 
     int mspi = dw_qos.resource_limits.max_samples_per_instance;
-    if (mspi == DDS::LENGTH_UNLIMITED)
+    if (mspi == DDS::LENGTH_UNLIMITED) {
       mspi = 0x7fffffff;
+    }
 
     int depth = (dw_qos.history.kind == DDS::KEEP_ALL_HISTORY_QOS ||
                  dw_qos.history.depth == DDS::LENGTH_UNLIMITED) ? 0x7fffffff : dw_qos.history.depth;
@@ -159,25 +157,27 @@ public:
         resource_blocking =
           (dw_qos.resource_limits.max_samples < dw_qos.resource_limits.max_instances)
           || (dw_qos.resource_limits.max_samples <
-          (dw_qos.resource_limits.max_instances * depth));
+              (dw_qos.resource_limits.max_instances * depth));
       }
     }
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-  // Get data durability cache if DataWriter QoS requires durable
-  // samples.  Publisher servant retains ownership of the cache.
+    // Get data durability cache if DataWriter QoS requires durable
+    // samples.  Publisher servant retains ownership of the cache.
     DataDurabilityCache* const durability_cache =
       TheServiceParticipant->get_data_durability_cache(dw_qos.durability);
 #endif
 
     CORBA::Long max_instances = 0;
 
-    if (reliable && dw_qos.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
+    if (reliable && dw_qos.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) {
       max_instances = dw_qos.resource_limits.max_instances;
+    }
 
     CORBA::Long max_total_samples = 10;
 
-    if (reliable && resource_blocking)
+    if (reliable && resource_blocking) {
       max_total_samples = dw_qos.resource_limits.max_samples;
+    }
 
     return new WriteDataContainer(fast_dw,
                                   mspi,
@@ -205,19 +205,13 @@ public:
     initial_DurabilityQosPolicy.kind = DDS::VOLATILE_DURABILITY_QOS;
 
     DDS::DurabilityServiceQosPolicy initial_DurabilityServiceQosPolicy;
-    initial_DurabilityServiceQosPolicy.service_cleanup_delay.sec =
-      DDS::DURATION_ZERO_SEC;
-    initial_DurabilityServiceQosPolicy.service_cleanup_delay.nanosec =
-      DDS::DURATION_ZERO_NSEC;
-    initial_DurabilityServiceQosPolicy.history_kind =
-      DDS::KEEP_LAST_HISTORY_QOS;
+    initial_DurabilityServiceQosPolicy.service_cleanup_delay.sec = DDS::DURATION_ZERO_SEC;
+    initial_DurabilityServiceQosPolicy.service_cleanup_delay.nanosec = DDS::DURATION_ZERO_NSEC;
+    initial_DurabilityServiceQosPolicy.history_kind = DDS::KEEP_LAST_HISTORY_QOS;
     initial_DurabilityServiceQosPolicy.history_depth = 1;
-    initial_DurabilityServiceQosPolicy.max_samples =
-      DDS::LENGTH_UNLIMITED;
-    initial_DurabilityServiceQosPolicy.max_instances =
-      DDS::LENGTH_UNLIMITED;
-    initial_DurabilityServiceQosPolicy.max_samples_per_instance =
-      DDS::LENGTH_UNLIMITED;
+    initial_DurabilityServiceQosPolicy.max_samples = DDS::LENGTH_UNLIMITED;
+    initial_DurabilityServiceQosPolicy.max_instances = DDS::LENGTH_UNLIMITED;
+    initial_DurabilityServiceQosPolicy.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
 
     DDS::DeadlineQosPolicy initial_DeadlineQosPolicy;
     initial_DeadlineQosPolicy.period.sec = DDS::DURATION_INFINITE_SEC;
@@ -266,7 +260,7 @@ public:
 #else
     ACE_UNUSED_ARG(initial_OwnershipStrengthQosPolicy);
 #endif
-    DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy;
+    DDS::WriterDataLifecycleQosPolicy initial_WriterDataLifecycleQosPolicy;
     initial_WriterDataLifecycleQosPolicy.autodispose_unregistered_instances = true;
 
     initial_DataWriterQos_.durability = initial_DurabilityQosPolicy;
@@ -291,8 +285,7 @@ public:
     initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy;
 
     initial_DataWriterQos_.representation.value.length(1);
-    initial_DataWriterQos_.representation.value[0] =
-      DDS::XCDR_DATA_REPRESENTATION;
+    initial_DataWriterQos_.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
   }
 
   WriteDataContainer* delayed_deliver_container_;
@@ -300,15 +293,14 @@ public:
 };
 
 // Writer thread.
-class Delayed_Deliver_Handler : public ACE_Task_Base
-{
+class Delayed_Deliver_Handler : public ACE_Task_Base {
 public:
   DDS_TEST* test_;
 
-  Delayed_Deliver_Handler (DDS_TEST* test) : test_(test)
+  Delayed_Deliver_Handler(DDS_TEST* test) : test_(test)
   {}
 
-  virtual int svc (void)
+  virtual int svc(void)
   {
     test_->delayed_deliver();
     return 0;
@@ -318,26 +310,21 @@ public:
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
 {
-
   u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  while (arg_shifter.is_anything_left())
-  {
+  while (arg_shifter.is_anything_left()) {
     // options:
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
 
-    if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
-    {
+    if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
-    }
-    else
-    {
-      arg_shifter.ignore_arg ();
+    } else {
+      arg_shifter.ignore_arg();
     }
   }
   // Indicates successful parsing of the command line
@@ -351,10 +338,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   ACE_DEBUG((LM_DEBUG,"(%P|%t) write data container test start\n"));
 
-  parse_args (argc, argv);
+  parse_args(argc, argv);
 
-  try
-    {
+  try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     InstanceHandleGenerator participant_handles;
@@ -368,543 +354,536 @@ int run_test(int argc, ACE_TCHAR *argv[])
     DDS::OfferedDeadlineMissedStatus deadline_status;
     CORBA::Long deadline_last_total_count;
 
-      try { // the real testing.
+    try { // the real testing.
+      { //Test Case 1 scope
+        ACE_DEBUG((LM_INFO,
+                   ACE_TEXT("\n\n==== TEST case 1 : Reliable, Keep All, max_samples_per_instance = 2, max samples = 3.\n")
+                   ACE_TEXT("Single instance: Should block on third obtain buffer due to max_samples_per_instance\n")
+                   ACE_TEXT("===============================================\n")));
+
+        dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+        dw_qos.history.depth = ::DDS::LENGTH_UNLIMITED;
 
-        { //Test Case 1 scope
-          ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("\n\n==== TEST case 1 : Reliable, Keep All, max_samples_per_instance = 2, max samples = 3.\n")
-                     ACE_TEXT("Single instance: Should block on third obtain buffer due to max_samples_per_instance\n")
-                     ACE_TEXT("===============================================\n")));
+        dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
+        dw_qos.resource_limits.max_samples = MAX_SAMPLES;
 
-          dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-          dw_qos.history.depth = ::DDS::LENGTH_UNLIMITED;
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        fast_dw->set_qos(dw_qos);
+        fast_dw->setup_serialization();
+        test->substitute_dw_particpant(fast_dw.get(), tpi);
+
+        WriteDataContainer* test_data_container = test->get_test_data_container(dw_qos, fast_dw.get(),
+                                                                                deadline_status_lock,
+                                                                                deadline_status,
+                                                                                deadline_last_total_count);
+
+        test->log_dw_qos_limits(dw_qos);
+        test->log_perceived_qos_limits(test_data_container);
+        test->log_send_state_lists("Initial Setup:", test_data_container);
+
+        Test::Simple foo1;
+        foo1.key = 1;
+        foo1.count = 1;
 
-          dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
-          dw_qos.resource_limits.max_samples = MAX_SAMPLES;
+        Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
-            new Test::SimpleDataWriterImpl());
-          fast_dw->set_qos(dw_qos);
-          fast_dw->setup_serialization();
-          test->substitute_dw_particpant(fast_dw.get(), tpi);
+        ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
+        DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
+        test->log_send_state_lists("After registering instance 1", test_data_container);
+
+        if (retval != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "register instance failed\n"));
+        }
+
+        DDS::ReturnCode_t ret;
+
+        //obtain the WriteDataContainer's lock as would be normal
+        //when obtained by the datawriter during a write before accessing
+        //the WriteDataContainer
+        ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                         guard,
+                         test->lock_wdc(test_data_container),
+                         ::DDS::RETCODE_ERROR);
 
-          test->log_dw_qos_limits(dw_qos);
-          test->log_perceived_qos_limits(test_data_container);
-          test->log_send_state_lists("Initial Setup:", test_data_container);
+        DataSampleElement* element_0 = 0;
+        ret = test_data_container->obtain_buffer(element_0, handle1);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          Test::Simple foo1;
-          foo1.key = 1;
-          foo1.count = 1;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
+        }
 
-          Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        element_0->set_sample(OpenDDS::DCPS::move(mb));
 
-          ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
+          return ret;
+        }
 
-          DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
-          test->log_send_state_lists("After registering instance 1", test_data_container);
+        ret = test_data_container->enqueue(element_0, handle1);
+        test->log_send_state_lists("After enqueue", test_data_container);
+
+        SendStateDataSampleList temp;
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          if (retval != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "register instance failed\n"));
-          }
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
+        }
+        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          DDS::ReturnCode_t ret;
+        DataSampleElement* element_1 = 0;
+        ret = test_data_container->obtain_buffer(element_1, handle1);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          //obtain the WriteDataContainer's lock as would be normal
-          //when obtained by the datawriter during a write before accessing
-          //the WriteDataContainer
-          ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-              guard,
-              test->lock_wdc(test_data_container),
-              ::DDS::RETCODE_ERROR);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
+        }
 
-          DataSampleElement* element_0 = 0;
-          ret = test_data_container->obtain_buffer(element_0, handle1);
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
-          }
+        if (ret != DDS::RETCODE_OK) {
+          return ret;
+        }
 
-          element_0->set_sample(OpenDDS::DCPS::move(mb));
+        ret = test_data_container->enqueue(element_1, handle1);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
-            return ret;
-          }
+        temp.reset();
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          ret = test_data_container->enqueue(element_0, handle1);
-          test->log_send_state_lists("After enqueue", test_data_container);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
+        }
+        DataSampleElement* element_2 = 0;
+        ret = test_data_container->obtain_buffer(element_2, handle1);
+        test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
-          SendStateDataSampleList temp;
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
+        TEST_ASSERT(errno == ETIME);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
-          }
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
 
-          DataSampleElement* element_1 = 0;
-          ret = test_data_container->obtain_buffer(element_1, handle1);
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        test_data_container->release_buffer(element_0);
+        test_data_container->release_buffer(element_1);
+        test_data_container->unregister_all();
+        guard.release();
+        delete test_data_container;
+      } //End Test Case 1 scope
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
-          }
+      { //Test Case 2 scope
+        //=====================================================
+        ACE_DEBUG((LM_INFO,
+                   ACE_TEXT("\n\n==== TEST case 2 : Reliable, Keep All, max samples = 2.\n")
+                   ACE_TEXT("Write 1 sample ea. on 3 instances: Should block on third obtain buffer due to max_samples\n")
+                   ACE_TEXT("===============================================\n")));
 
-          element_1->set_sample(OpenDDS::DCPS::move(mb1));
+        test->get_default_datawriter_qos(dw_qos);
 
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
+        dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
+        dw_qos.history.depth = ::DDS::LENGTH_UNLIMITED;
 
-          ret = test_data_container->enqueue(element_1, handle1);
-          test->log_send_state_lists("After enqueue", test_data_container);
+        dw_qos.resource_limits.max_samples = 2;
 
-          temp.reset();
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        fast_dw->set_qos(dw_qos);
+        fast_dw->setup_serialization();
+        test->substitute_dw_particpant(fast_dw.get(), tpi);
+        WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(),
+                                                                                 deadline_status_lock,
+                                                                                 deadline_status,
+                                                                                 deadline_last_total_count);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
-          }
-          DataSampleElement* element_2 = 0;
-          ret = test_data_container->obtain_buffer(element_2, handle1);
-          test->log_send_state_lists("After obtain buffer which should block", test_data_container);
+        test->log_dw_qos_limits(dw_qos);
+        test->log_perceived_qos_limits(test_data_container);
+        test->log_send_state_lists("Initial Setup:", test_data_container);
 
-          TEST_ASSERT(errno == ETIME);
+        Test::Simple foo1;
+        foo1.key  = 1;
+        foo1.count = 1;
 
-          test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
+        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          test_data_container->release_buffer(element_0);
-          test_data_container->release_buffer(element_1);
-          test_data_container->unregister_all();
-          guard.release();
-          delete test_data_container;
-        } //End Test Case 1 scope
+        ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
-        { //Test Case 2 scope
-          //=====================================================
-          ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("\n\n==== TEST case 2 : Reliable, Keep All, max samples = 2.\n")
-                     ACE_TEXT("Write 1 sample ea. on 3 instances: Should block on third obtain buffer due to max_samples\n")
-                     ACE_TEXT("===============================================\n")));
+        DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
+        test->log_send_state_lists("After register instance", test_data_container);
 
-          test->get_default_datawriter_qos(dw_qos);
+        if (retval != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "register instance failed\n"));
+        }
 
-          dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
-          dw_qos.history.depth = ::DDS::LENGTH_UNLIMITED;
+        DDS::ReturnCode_t ret;
 
-          dw_qos.resource_limits.max_samples = 2;
+        //obtain the WriteDataContainer's lock as would be normal
+        //when obtained by the datawriter during a write before accessing
+        //the WriteDataContainer
+        ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                         guard,
+                         test->lock_wdc(test_data_container),
+                         ::DDS::RETCODE_ERROR);
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
-            new Test::SimpleDataWriterImpl());
-          fast_dw->set_qos(dw_qos);
-          fast_dw->setup_serialization();
-          test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
+        DataSampleElement* element_1 = 0;
+        ret = test_data_container->obtain_buffer(element_1, handle1);
 
-          test->log_dw_qos_limits(dw_qos);
-          test->log_perceived_qos_limits(test_data_container);
-          test->log_send_state_lists("Initial Setup:", test_data_container);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          Test::Simple foo1;
-          foo1.key  = 1;
-          foo1.count = 1;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
+        }
 
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
-          ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
+          return ret;
+        }
 
-          DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
-          test->log_send_state_lists("After register instance", test_data_container);
+        ret = test_data_container->enqueue(element_1, handle1);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          if (retval != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "register instance failed\n"));
-          }
+        SendStateDataSampleList temp;
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          DDS::ReturnCode_t ret;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
+        }
+        Test::Simple foo2;
+        foo2.key  = 2;
+        foo2.count = 1;
 
-          //obtain the WriteDataContainer's lock as would be normal
-          //when obtained by the datawriter during a write before accessing
-          //the WriteDataContainer
-          ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                            guard,
-                            test->lock_wdc(test_data_container),
-                            ::DDS::RETCODE_ERROR);
+        Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          DataSampleElement* element_1 = 0;
-          ret = test_data_container->obtain_buffer(element_1, handle1);
+        ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
 
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        retval = test_data_container->register_instance(handle2, mb2);
+        test->log_send_state_lists("After register instance 2", test_data_container);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
-          }
+        DataSampleElement* element_2 = 0;
+        ret = test_data_container->obtain_buffer(element_2, handle2);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          element_1->set_sample(OpenDDS::DCPS::move(mb1));
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
+        }
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
-            return ret;
-          }
+        element_2->set_sample(OpenDDS::DCPS::move(mb2));
 
-          ret = test_data_container->enqueue(element_1, handle1);
-          test->log_send_state_lists("After enqueue", test_data_container);
+        if (ret != DDS::RETCODE_OK) {
+          return ret;
+        }
 
-          SendStateDataSampleList temp;
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
+        ret = test_data_container->enqueue(element_2, handle2);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
-          }
-          Test::Simple foo2;
-          foo2.key  = 2;
-          foo2.count = 1;
+        temp.reset();
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 2\n"));
+        }
+        Test::Simple foo3;
+        foo3.key  = 3;
+        foo3.count = 1;
 
-          ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
+        Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          retval = test_data_container->register_instance(handle2, mb2);
-          test->log_send_state_lists("After register instance 2", test_data_container);
+        ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
 
+        retval = test_data_container->register_instance(handle3, mb3);
+        test->log_send_state_lists("After register instance 3", test_data_container);
 
-          DataSampleElement* element_2 = 0;
-          ret = test_data_container->obtain_buffer(element_2, handle2);
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        DataSampleElement* element_3 = 0;
+        ret = test_data_container->obtain_buffer(element_3, handle3);
+        test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
+        TEST_ASSERT(errno == ETIME);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
-          }
+        test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
+        test_data_container->release_buffer(element_1);
+        test_data_container->release_buffer(element_2);
+        test_data_container->unregister_all();
+        guard.release();
+        delete test_data_container;
+      } //End Test Case 2 scope
 
-          element_2->set_sample(OpenDDS::DCPS::move(mb2));
+      { //Test Case 3 scope
+        //=====================================================
+        ACE_DEBUG((LM_INFO,
+                   ACE_TEXT("\n\n==== TEST case 3 : Reliable, max samples per instance = 1, max samples = 2.\n")
+                   ACE_TEXT("Write 1 sample ea. on 3 instances: Should block on third obtain buffer due to max_samples\n")
+                   ACE_TEXT("===============================================\n")));
 
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
+        test->get_default_datawriter_qos(dw_qos);
 
-          ret = test_data_container->enqueue(element_2, handle2);
-          test->log_send_state_lists("After enqueue", test_data_container);
+        dw_qos.resource_limits.max_samples = 2;
+        dw_qos.resource_limits.max_samples_per_instance = 1;
 
-          temp.reset();
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
+        dw_qos.reliability.max_blocking_time.sec = 2;
+        dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 2\n"));
-          }
-          Test::Simple foo3;
-          foo3.key  = 3;
-          foo3.count = 1;
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        fast_dw->set_qos(dw_qos);
+        fast_dw->setup_serialization();
+        test->substitute_dw_particpant(fast_dw.get(), tpi);
+        WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(),
+                                                                                 deadline_status_lock,
+                                                                                 deadline_status,
+                                                                                 deadline_last_total_count);
 
-          Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        test->log_dw_qos_limits(dw_qos);
+        test->log_perceived_qos_limits(test_data_container);
+        test->log_send_state_lists("Initial Setup:", test_data_container);
 
-          ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
+        Test::Simple foo1;
+        foo1.key  = 1;
+        foo1.count = 1;
 
-          retval = test_data_container->register_instance(handle3, mb3);
-          test->log_send_state_lists("After register instance 3", test_data_container);
+        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          DataSampleElement* element_3 = 0;
-          ret = test_data_container->obtain_buffer(element_3, handle3);
-          test->log_send_state_lists("After obtain buffer which should block", test_data_container);
+        ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
-          TEST_ASSERT(errno == ETIME);
+        DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
+        test->log_send_state_lists("After register instance", test_data_container);
 
-          test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
-          test_data_container->release_buffer(element_1);
-          test_data_container->release_buffer(element_2);
-          test_data_container->unregister_all();
-          guard.release();
-          delete test_data_container;
-        } //End Test Case 2 scope
+        if (retval != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "register instance failed\n"));
+        }
 
-        { //Test Case 3 scope
-          //=====================================================
-          ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("\n\n==== TEST case 3 : Reliable, max samples per instance = 1, max samples = 2.\n")
-                     ACE_TEXT("Write 1 sample ea. on 3 instances: Should block on third obtain buffer due to max_samples\n")
-                     ACE_TEXT("===============================================\n")));
+        DDS::ReturnCode_t ret;
 
-          test->get_default_datawriter_qos(dw_qos);
+        //obtain the WriteDataContainer's lock as would be normal
+        //when obtained by the datawriter during a write before accessing
+        //the WriteDataContainer
+        ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                         guard,
+                         test->lock_wdc(test_data_container),
+                         ::DDS::RETCODE_ERROR);
 
-          dw_qos.resource_limits.max_samples = 2;
-          dw_qos.resource_limits.max_samples_per_instance = 1;
+        DataSampleElement* element_1 = 0;
+        ret = test_data_container->obtain_buffer(element_1, handle1);
 
-          dw_qos.reliability.max_blocking_time.sec = 2;
-          dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
-            new Test::SimpleDataWriterImpl());
-          fast_dw->set_qos(dw_qos);
-          fast_dw->setup_serialization();
-          test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
+        }
 
-          test->log_dw_qos_limits(dw_qos);
-          test->log_perceived_qos_limits(test_data_container);
-          test->log_send_state_lists("Initial Setup:", test_data_container);
+        element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
-          Test::Simple foo1;
-          foo1.key  = 1;
-          foo1.count = 1;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
+          return ret;
+        }
 
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        ret = test_data_container->enqueue(element_1, handle1);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
+        SendStateDataSampleList temp;
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
-          test->log_send_state_lists("After register instance", test_data_container);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
+        }
+        Test::Simple foo2;
+        foo2.key  = 2;
+        foo2.count = 1;
 
-          if (retval != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "register instance failed\n"));
-          }
+        Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          DDS::ReturnCode_t ret;
+        ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
 
-          //obtain the WriteDataContainer's lock as would be normal
-          //when obtained by the datawriter during a write before accessing
-          //the WriteDataContainer
-          ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                            guard,
-                            test->lock_wdc(test_data_container),
-                            ::DDS::RETCODE_ERROR);
+        retval = test_data_container->register_instance(handle2, mb2);
+        test->log_send_state_lists("After register instance 2", test_data_container);
 
-          DataSampleElement* element_1 = 0;
-          ret = test_data_container->obtain_buffer(element_1, handle1);
+        DataSampleElement* element_2 = 0;
+        ret = test_data_container->obtain_buffer(element_2, handle2);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
+        }
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
-          }
+        element_2->set_sample(OpenDDS::DCPS::move(mb2));
 
-          element_1->set_sample(OpenDDS::DCPS::move(mb1));
+        if (ret != DDS::RETCODE_OK) {
+          return ret;
+        }
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
-            return ret;
-          }
+        ret = test_data_container->enqueue(element_2, handle2);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          ret = test_data_container->enqueue(element_1, handle1);
-          test->log_send_state_lists("After enqueue", test_data_container);
+        temp.reset();
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          SendStateDataSampleList temp;
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 2\n"));
+        }
+        Test::Simple foo3;
+        foo3.key  = 3;
+        foo3.count = 1;
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
-          }
-          Test::Simple foo2;
-          foo2.key  = 2;
-          foo2.count = 1;
+        Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
 
-          ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
+        retval = test_data_container->register_instance(handle3, mb3);
+        test->log_send_state_lists("After register instance 3", test_data_container);
 
-          retval = test_data_container->register_instance(handle2, mb2);
-          test->log_send_state_lists("After register instance 2", test_data_container);
+        DataSampleElement* element_3_first_time_blocks = 0;
 
+        ret = test_data_container->obtain_buffer(element_3_first_time_blocks, handle3);
+        test->log_send_state_lists("After 3rd obtain buffer which should block", test_data_container);
 
-          DataSampleElement* element_2 = 0;
-          ret = test_data_container->obtain_buffer(element_2, handle2);
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        TEST_ASSERT(errno == ETIME);
 
+        test->log_send_state_lists("After TEST_ASSERT 3rd obtain_buffer TIMED OUT", test_data_container);
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
-          }
+        test_data_container->release_buffer(element_1);
+        test_data_container->release_buffer(element_2);
+        test_data_container->unregister_all();
 
-          element_2->set_sample(OpenDDS::DCPS::move(mb2));
+        guard.release();
+        delete test_data_container;
+      } //End Test Case 3 scope
 
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
+      { //Test Case 4 scope
+        //=====================================================
+        ACE_DEBUG((LM_INFO,
+                   ACE_TEXT("\n\n==== TEST case 4 : Reliable, max samples per instance = 2, max samples = 3.\n")
+                   ACE_TEXT("Write 3 samples on 1 instance: Should block on third obtain buffer due to max samples per instance\n")
+                   ACE_TEXT("===============================================\n")));
 
-          ret = test_data_container->enqueue(element_2, handle2);
-          test->log_send_state_lists("After enqueue", test_data_container);
+        test->get_default_datawriter_qos(dw_qos);
 
-          temp.reset();
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
+        dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 2\n"));
-          }
-          Test::Simple foo3;
-          foo3.key  = 3;
-          foo3.count = 1;
+        dw_qos.resource_limits.max_samples = MAX_SAMPLES;
+        dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
 
-          Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        fast_dw->set_qos(dw_qos);
+        fast_dw->setup_serialization();
+        test->substitute_dw_particpant(fast_dw.get(), tpi);
+        WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(),
+                                                                                 deadline_status_lock,
+                                                                                 deadline_status,
+                                                                                 deadline_last_total_count);
 
-          ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
+        test->log_dw_qos_limits(dw_qos);
+        test->log_perceived_qos_limits(test_data_container);
+        test->log_send_state_lists("Initial Setup:", test_data_container);
 
-          retval = test_data_container->register_instance(handle3, mb3);
-          test->log_send_state_lists("After register instance 3", test_data_container);
+        Test::Simple foo1;
+        foo1.key  = 1;
+        foo1.count = 1;
 
-          DataSampleElement* element_3_first_time_blocks = 0;
+        Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          ret = test_data_container->obtain_buffer(element_3_first_time_blocks, handle3);
-          test->log_send_state_lists("After 3rd obtain buffer which should block", test_data_container);
+        ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;//fast_dw->register_instance(foo1);
 
-          TEST_ASSERT(errno == ETIME);
+        DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
+        test->log_send_state_lists("After register instance", test_data_container);
 
-          test->log_send_state_lists("After TEST_ASSERT 3rd obtain_buffer TIMED OUT", test_data_container);
+        if (retval != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "register instance failed\n"));
+        }
 
-          test_data_container->release_buffer(element_1);
-          test_data_container->release_buffer(element_2);
-          test_data_container->unregister_all();
+        DDS::ReturnCode_t ret;
 
-          guard.release();
-          delete test_data_container;
-        } //End Test Case 3 scope
+        //obtain the WriteDataContainer's lock as would be normal
+        //when obtained by the datawriter during a write before accessing
+        //the WriteDataContainer
+        ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                         guard,
+                         test->lock_wdc(test_data_container),
+                         ::DDS::RETCODE_ERROR);
 
-        { //Test Case 4 scope
-          //=====================================================
-          ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("\n\n==== TEST case 4 : Reliable, max samples per instance = 2, max samples = 3.\n")
-                     ACE_TEXT("Write 3 samples on 1 instance: Should block on third obtain buffer due to max samples per instance\n")
-                     ACE_TEXT("===============================================\n")));
+        DataSampleElement* element_0 = 0;
+        ret = test_data_container->obtain_buffer(element_0, handle1);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          test->get_default_datawriter_qos(dw_qos);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
+        }
 
-          dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+        element_0->set_sample(OpenDDS::DCPS::move(mb));
 
-          dw_qos.resource_limits.max_samples = MAX_SAMPLES;
-          dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
+          return ret;
+        }
 
-          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(
-            new Test::SimpleDataWriterImpl());
-          fast_dw->set_qos(dw_qos);
-          fast_dw->setup_serialization();
-          test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
+        ret = test_data_container->enqueue(element_0, handle1);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          test->log_dw_qos_limits(dw_qos);
-          test->log_perceived_qos_limits(test_data_container);
-          test->log_send_state_lists("Initial Setup:", test_data_container);
+        SendStateDataSampleList temp;
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          Test::Simple foo1;
-          foo1.key  = 1;
-          foo1.count = 1;
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
+        }
+        DataSampleElement* element_1 = 0;
+        ret = test_data_container->obtain_buffer(element_1, handle1);
+        test->log_send_state_lists("After obtain buffer", test_data_container);
 
-          Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
+        }
+        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;//fast_dw->register_instance(foo1);
+        element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
-          DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
-          test->log_send_state_lists("After register instance", test_data_container);
+        if (ret != DDS::RETCODE_OK) {
+          return ret;
+        }
 
-          if (retval != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "register instance failed\n"));
-          }
+        ret = test_data_container->enqueue(element_1, handle1);
+        test->log_send_state_lists("After enqueue", test_data_container);
 
-          DDS::ReturnCode_t ret;
+        temp.reset();
+        test_data_container->get_unsent_data(temp);
+        test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-          //obtain the WriteDataContainer's lock as would be normal
-          //when obtained by the datawriter during a write before accessing
-          //the WriteDataContainer
-          ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                            guard,
-                            test->lock_wdc(test_data_container),
-                            ::DDS::RETCODE_ERROR);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
+        }
+        DataSampleElement* element_2 = 0;
+        ret = test_data_container->obtain_buffer(element_2, handle1);
+        test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
-          DataSampleElement* element_0 = 0;
-          ret = test_data_container->obtain_buffer(element_0, handle1);
-          test->log_send_state_lists("After obtain buffer", test_data_container);
+        TEST_ASSERT(errno == ETIME);
 
+        test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
+        test_data_container->release_buffer(element_0);
+        test_data_container->release_buffer(element_1);
+        test_data_container->unregister_all();
+        guard.release();
+        delete test_data_container;
+      } //End Test Case 4 scope
 
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
-          }
-
-          element_0->set_sample(OpenDDS::DCPS::move(mb));
-
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
-            return ret;
-          }
-
-          ret = test_data_container->enqueue(element_0, handle1);
-          test->log_send_state_lists("After enqueue", test_data_container);
-
-          SendStateDataSampleList temp;
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
-
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
-          }
-          DataSampleElement* element_1 = 0;
-          ret = test_data_container->obtain_buffer(element_1, handle1);
-          test->log_send_state_lists("After obtain buffer", test_data_container);
-
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
-          }
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
-
-          element_1->set_sample(OpenDDS::DCPS::move(mb1));
-
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
-
-          ret = test_data_container->enqueue(element_1, handle1);
-          test->log_send_state_lists("After enqueue", test_data_container);
-
-          temp.reset();
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
-
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
-          }
-          DataSampleElement* element_2 = 0;
-          ret = test_data_container->obtain_buffer(element_2, handle1);
-          test->log_send_state_lists("After obtain buffer which should block", test_data_container);
-
-          TEST_ASSERT(errno == ETIME);
-
-          test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
-          test_data_container->release_buffer(element_0);
-          test_data_container->release_buffer(element_1);
-          test_data_container->unregister_all();
-          guard.release();
-          delete test_data_container;
-        } //End Test Case 4 scope
-
-
-      }//test scope
-      catch (const TestException&)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
-        return 1;
-      }
-    } //xxx dp::Entity::Object::muxtex_refcount_ = 1
-  catch (const TestException&)
-    {
+    } catch (const TestException&) {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  catch (const CORBA::Exception& ex)
-    {
-      ex._tao_print_exception ("Exception caught in main.cpp:");
-      return 1;
-    }
-  catch (...)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) unknown exception caught in main.cpp. ")));
-      return 1;
-    }
+  } catch (const TestException&) {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
+    return 1;
+  } catch (const CORBA::Exception& ex) {
+    ex._tao_print_exception ("Exception caught in main.cpp:");
+    return 1;
+  } catch (...) {
+    ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) unknown exception caught in main.cpp. ")));
+    return 1;
+  }
 
   return test_failed;
 }
@@ -914,12 +893,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int ret = 0;
   try {
     ret = run_test(argc, argv);
+  } catch (const CORBA::Exception& ex) {
+    ex._tao_print_exception ("Exception caught in main.cpp:");
+    return 1;
   }
-  catch (const CORBA::Exception& ex)
-    {
-      ex._tao_print_exception ("Exception caught in main.cpp:");
-      return 1;
-    }
+
   // cleanup
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();
