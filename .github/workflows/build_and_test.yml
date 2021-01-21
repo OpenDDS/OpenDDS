@@ -3418,8 +3418,8 @@ jobs:
     - name: Move ACE and MPC to C Drive
       shell: bash
       run: |
-        mv OpenDDS/ACE_TAO /
-        mv MPC /
+        mv OpenDDS/ACE_TAO /c/
+        mv MPC /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3427,7 +3427,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --rapidjson --security --ace="C:\Program Files\GIT\ACE_TAO\ACE" --tao="C:\Program Files\GIT\ACE_TAO\TAO" --mpc="C:\Program Files\GIT\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -3614,8 +3614,8 @@ jobs:
     - name: Move ACE and MPC to C Drive
       shell: bash
       run: |
-        mv OpenDDS/ACE_TAO /
-        mv MPC /
+        mv OpenDDS/ACE_TAO /c/
+        mv MPC /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3623,7 +3623,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\Program Files\GIT\ACE_TAO\ACE" --tao="C:\Program Files\GIT\ACE_TAO\TAO" --mpc="C:\Program Files\GIT\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows
+        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -3889,8 +3889,8 @@ jobs:
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
-#        mv OpenDDS/ACE_TAO /
-#        mv MPC /
+#        mv OpenDDS/ACE_TAO /c/
+#        mv MPC /c/
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
 #      uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3898,7 +3898,7 @@ jobs:
 #      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        configure --tests --rapidjson --security --ace="C:\Program Files\GIT\ACE_TAO\ACE" --tao="C:\Program Files\GIT\ACE_TAO\TAO" --mpc="C:\Program Files\GIT\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
 #    - name: check build configuration
 #      shell: cmd
 #      run: |
@@ -4086,8 +4086,8 @@ jobs:
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
-#        mv OpenDDS/ACE_TAO /
-#        mv MPC /
+#        mv OpenDDS/ACE_TAO /c/
+#        mv MPC /c/
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
 #      uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -4095,7 +4095,7 @@ jobs:
 #      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\Program Files\GIT\ACE_TAO\ACE" --tao="C:\Program Files\GIT\ACE_TAO\TAO" --mpc="C:\Program Files\GIT\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows
+#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3=%VCPKG_ROOT%/installed/x64-windows
 #    - name: check build configuration
 #      shell: cmd
 #      run: |
