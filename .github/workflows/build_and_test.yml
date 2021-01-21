@@ -3418,7 +3418,7 @@ jobs:
     - name: Move ACE and MPC to C Drive
       shell: bash
       run: |
-        mv ACE_TAO /
+        mv OpenDDS/ACE_TAO /
         mv MPC /
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
@@ -3614,7 +3614,7 @@ jobs:
     - name: Move ACE and MPC to C Drive
       shell: bash
       run: |
-        mv ACE_TAO /
+        mv OpenDDS/ACE_TAO /
         mv MPC /
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
@@ -3889,7 +3889,7 @@ jobs:
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
-#        mv ACE_TAO /
+#        mv OpenDDS/ACE_TAO /
 #        mv MPC /
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
@@ -4086,7 +4086,7 @@ jobs:
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
-#        mv ACE_TAO /
+#        mv OpenDDS/ACE_TAO /
 #        mv MPC /
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
