@@ -333,7 +333,7 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
         def_val = "0.0L";
       } else {
         if (is_union) {
-          def_val = "ACE_CDR_LONG_DOUBLE_INITIALIZER";
+          def_val = "0";
         } else {
           def_val = "ACE_CDR_LONG_DOUBLE_ASSIGNMENT(" + name + ", 0)";
           return indent + def_val + ";\n";
