@@ -31,6 +31,8 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include "ParticipantLocationListenerImpl.h"
 
+#include "tests/Utils/StatusMatching.h"
+
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 
@@ -124,7 +126,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 #endif
 
-    // Create DomainParticipant
+    // Create Publisher DomainParticipant
     DDS::DomainParticipant_var participant = dpf->create_participant(4,
                                                                      part_qos,
                                                                      DDS::DomainParticipantListener::_nil(),
@@ -181,7 +183,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_publisher failed!\n")),
                        EXIT_FAILURE);
     }
-
+/*
     DDS::DataWriterQos qos;
     pub->get_default_datawriter_qos(qos);
     ACE_DEBUG((LM_DEBUG,
@@ -203,7 +205,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                        EXIT_FAILURE);
     }
-
+*/
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
@@ -230,22 +232,143 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
+    // Create Subscriber
+    // Register Type (Messenger::Message)
+    Messenger::MessageTypeSupport_var sub_ts =
+      new Messenger::MessageTypeSupportImpl();
+
+    if (sub_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), EXIT_FAILURE);
+    }
+
+    // Create Subscriber
+    // Create Subscriber DomainParticipant
+    DDS::DomainParticipant_var sub_participant = dpf->create_participant(4,
+                                                                     part_qos,
+                                                                     DDS::DomainParticipantListener::_nil(),
+                                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    // Create Topic (Movie Discussion List)
+    CORBA::String_var sub_type_name = sub_ts->get_type_name();
+    DDS::Topic_var sub_topic =
+      participant->create_topic("Movie Discussion List",
+                                type_name.in(),
+                                TOPIC_QOS_DEFAULT,
+                                DDS::TopicListener::_nil(),
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil(sub_topic.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: create_topic() failed!\n")), EXIT_FAILURE);
+    }
+
+    if (CORBA::is_nil(sub_participant.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: subscriber create_participant failed!\n")),
+                       EXIT_FAILURE);
+    }
+
+    DDS::SubscriberQos subscriber_qos;
+    sub_participant->get_default_subscriber_qos(subscriber_qos);
+    subscriber_qos.partition.name.length(1);
+    subscriber_qos.partition.name[0] = "OCI";
+
+    DDS::Subscriber_var sub =
+      sub_participant->create_subscriber(subscriber_qos,
+                                     DDS::SubscriberListener::_nil(),
+                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    // Since the application is only interested in BIT location
+    // data and is not passing messages between publisher and
+    // subscriber, binding a transport config to the second
+    // participant subscriber is not necessary.
+    // OpenDDS::DCPS::TransportRegistry::instance()->bind_config("subscriber_config", sub);
+
+    if (CORBA::is_nil(sub.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
+    }
+/*
+    DDS::DataReaderQos dr_qos;
+    sub->get_default_datareader_qos(dr_qos);
+    std::cout << "Reliable DataReader" << std::endl;
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+    DDS::DataReader_var reader =
+      sub->create_datareader(topic.in(),
+                             dr_qos,
+                             0,
+                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil(reader.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), EXIT_FAILURE);
+    }
+*/
+    // Get the Built-In Subscriber for Built-In Topics
+    DDS::Subscriber_var sub_bit_subscriber = sub_participant->get_builtin_subscriber();
+
+    DDS::DataReader_var sub_loc_dr = sub_bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    if (0 == sub_loc_dr) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: Could not get %C DataReader\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
+      ACE_OS::exit(EXIT_FAILURE);
+    }
+
+    ParticipantLocationListenerImpl* sub_listener = new ParticipantLocationListenerImpl("Subscriber");
+    DDS::DataReaderListener_var sub_listener_var(listener);
+
+    retcode =
+      sub_loc_dr->set_listener(sub_listener,
+                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (retcode != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: set_listener for %C failed\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
+      ACE_OS::exit(EXIT_FAILURE);
+    }
+
+    // start writer task
+    //ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n"));
+    //WriterTask task(dw);
+    //task.activate(DEFAULT_FLAGS, 1);
+
     // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
-    ACE_OS::sleep(10);
+    ACE_OS::sleep(60);
 
     // check that all locations received
     if (!listener->check(no_ice, ipv6)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l main()")
-                 ACE_TEXT(" ERROR: Check for all locations failed\n")));
+                 ACE_TEXT(" ERROR: Check for all publisher locations failed\n")));
+      status = EXIT_FAILURE;
+    }
+
+    if (!sub_listener->check(no_ice, ipv6)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: Check for all subscriber locations failed\n")));
       status = EXIT_FAILURE;
     }
 
     // Clean-up!
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" participant deleting contained entities\n")));
+               ACE_TEXT(" publisher participant deleting contained entities\n")));
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" subscriber participant deleting contained entities\n")));
+    sub_participant->delete_contained_entities();
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" domain participant factory deleting participant\n")));

@@ -51,17 +51,13 @@ if ($ipv6_opt) {
     $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 4 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
 }
 
-$test->process("publisher", "publisher", "$no_ice_opt $ipv6_opt -ORBDebugLevel 1 -DCPSConfigFile ". $pub_sub_ini);
-$test->process("subscriber", "subscriber", "$no_ice_opt $ipv6_opt -ORBDebugLevel 1 -DCPSConfigFile " . $pub_sub_ini);
+$test->process("ParticipantLocationTest", "ParticipantLocationTest", "$no_ice_opt $ipv6_opt -ORBDebugLevel 1 -DCPSConfigFile ". $pub_sub_ini);
 
 $test->start_process("relay");
 sleep 1;
-$test->start_process("publisher");
-sleep 1;
-$test->start_process("subscriber");
+$test->start_process("ParticipantLocationTest");
 
-$test->stop_process(180, "subscriber");
-$test->stop_process(5, "publisher");
+$test->stop_process(40, "ParticipantLocationTest");
 
 $test->kill_process(5, "relay");
 
