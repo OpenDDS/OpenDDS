@@ -11,4 +11,3 @@ project(ParticipantLocationTopic): dcpsexe, dcps_test, dcps_cm, dcps_transports_
     ParticipantLocationListenerImpl.cpp
   }
 }
-
