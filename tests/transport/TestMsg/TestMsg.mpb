@@ -1,0 +1,6 @@
+project {
+  after += DDS_tests_transport_testmsg
+  libs += transport_testmsg
+  libpaths += $(TEST_ROOT)/tests/transport/TestMsg
+  includes += $(TEST_ROOT)/tests/transport/TestMsg
+}
