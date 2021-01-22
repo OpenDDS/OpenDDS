@@ -868,7 +868,9 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
   pdata.associated_endpoints = 0;
+#ifdef OPENDDS_SECURITY
   pdata.extended_associated_endpoints = 0;
+#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
