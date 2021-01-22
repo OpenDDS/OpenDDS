@@ -456,7 +456,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         ret = test_data_container->obtain_buffer(element_2, handle1);
         test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
-        TEST_ASSERT(errno == ETIME);
+        TEST_ASSERT(ret != RETCODE_OK && errno == ETIME);
 
         test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
 
@@ -592,7 +592,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         ret = test_data_container->obtain_buffer(element_3, handle3);
         test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
-        TEST_ASSERT(errno == ETIME);
+        TEST_ASSERT(ret != DDS::RETCODE_OK && errno == ETIME);
 
         test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
         test_data_container->release_buffer(element_1);
@@ -726,7 +726,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         ret = test_data_container->obtain_buffer(element_3_first_time_blocks, handle3);
         test->log_send_state_lists("After 3rd obtain buffer which should block", test_data_container);
 
-        TEST_ASSERT(errno == ETIME);
+        TEST_ASSERT(ret != DDS::RETCODE_OK && errno == ETIME);
 
         test->log_send_state_lists("After TEST_ASSERT 3rd obtain_buffer TIMED OUT", test_data_container);
 
@@ -841,13 +841,20 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         DataSampleElement* element_2 = 0;
         ret = test_data_container->obtain_buffer(element_2, handle1);
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
         test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
-        TEST_ASSERT(errno == ETIME);
-
+        TEST_ASSERT(ret != DDS::RETCODE_OK && errno == ETIME);
         test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
+#else
+        test->log_send_state_lists("After obtain buffer", test_data_container);
+#endif
+
         test_data_container->release_buffer(element_0);
         test_data_container->release_buffer(element_1);
+#ifdef OPENDDS_NO_OWNERSHIP_PROFILE
+        test_data_container->release_buffer(element_2);
+#endif
         test_data_container->unregister_all();
         guard.release();
         delete test_data_container;
