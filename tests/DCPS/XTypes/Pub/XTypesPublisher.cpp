@@ -237,7 +237,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
   }
 
@@ -264,7 +264,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
   if ((ws->wait(conditions, timeout) != DDS::RETCODE_OK) && expect_to_match) {
-    ACE_ERROR((LM_ERROR, "ERROR: %s condition wait failed for type %s\n",
+    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
       expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
     failed = 1;
   }
@@ -276,7 +276,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   if (failed) {
-    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
   } else if (expect_to_match) {
     if (type == "PlainCdrStruct") {
       write_plain_cdr_struct(dw);
