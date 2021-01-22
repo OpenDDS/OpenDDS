@@ -2602,11 +2602,11 @@ jobs:
         tar xvfJ windows-2019_defaults_security_build.tar.xz
         rm -f windows-2019_defaults_security_build.tar.xz
     - name: check build configuration
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
+        call setenv.cmd
+        tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -2788,11 +2788,11 @@ jobs:
         tar xvfJ windows-2019_defaults_java_no-bit_build.tar.xz
         rm -f windows-2019_defaults_java_no-bit_build.tar.xz
     - name: check build configuration
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
+        call setenv.cmd
+        tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -3052,11 +3052,11 @@ jobs:
 #        tar xvfJ windows-2019_wchar_security_build.tar.xz
 #        rm -f windows-2019_wchar_security_build.tar.xz
 #    - name: check build configuration
-#      shell: bash
+#      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -3238,11 +3238,11 @@ jobs:
 #        tar xvfJ windows-2019_wchar_java_no-bit_build.tar.xz
 #        rm -f windows-2019_wchar_java_no-bit_build.tar.xz
 #    - name: check build configuration
-#      shell: bash
+#      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -3514,11 +3514,11 @@ jobs:
         tar xvfJ windows-2016_no-debug_no-inline_security_build.tar.xz
         rm -f windows-2016_no-debug_no-inline_security_build.tar.xz
     - name: check build configuration
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
+        call setenv.cmd
+        tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -3713,11 +3713,11 @@ jobs:
         tar xvfJ windows-2016_no-debug_no-inline_java_no-bit_build.tar.xz
         rm -f windows-2016_no-debug_no-inline_java_no-bit_build.tar.xz
     - name: check build configuration
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
+        call setenv.cmd
+        tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -3988,11 +3988,11 @@ jobs:
 #        tar xvfJ windows-2016_ipv6_no-debug_no-inline_security_build.tar.xz
 #        rm -f windows-2016_ipv6_no-debug_no-inline_security_build.tar.xz
 #    - name: check build configuration
-#      shell: bash
+#      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -4185,11 +4185,11 @@ jobs:
 #        tar xvfJ windows-2016_ipv6_no-debug_no-inline_java_no-bit_build.tar.xz
 #        rm -f windows-2016_ipv6_no-debug_no-inline_java_no-bit_build.tar.xz
 #    - name: check build configuration
-#      shell: bash
+#      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
