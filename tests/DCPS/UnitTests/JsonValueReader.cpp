@@ -327,17 +327,17 @@ TEST(JsonValueReader, array_min)
 
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_uint32(uint32_value));
-  EXPECT_EQ(uint32_value, 0);
+  EXPECT_EQ(uint32_value, 0U);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_int64(int64_value));
-  EXPECT_EQ(int64_value, -9223372036854775808);
+  EXPECT_EQ(int64_value, -9223372036854775807 - 1);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_uint64(uint64_value));
-  EXPECT_EQ(uint64_value, 0);
+  EXPECT_EQ(uint64_value, 0U);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.begin_element());
@@ -448,7 +448,7 @@ TEST(JsonValueReader, sequence_zero)
   EXPECT_TRUE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_uint32(uint32_value));
-  EXPECT_EQ(uint32_value, 0);
+  EXPECT_EQ(uint32_value, 0U);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.elements_remaining());
@@ -460,7 +460,7 @@ TEST(JsonValueReader, sequence_zero)
   EXPECT_TRUE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_uint64(uint64_value));
-  EXPECT_EQ(uint64_value, 0);
+  EXPECT_EQ(uint64_value, 0U);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.elements_remaining());

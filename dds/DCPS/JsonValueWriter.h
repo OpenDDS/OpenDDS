@@ -285,7 +285,7 @@ void JsonValueWriter<Buffer>::write_string(const ACE_CDR::Char* value)
 }
 
 template <typename Buffer>
-void JsonValueWriter<Buffer>::write_wstring(const ACE_CDR::WChar* value)
+void JsonValueWriter<Buffer>::write_wstring(const ACE_CDR::WChar*)
 {
   // TODO
   writer_.String("wide string");
