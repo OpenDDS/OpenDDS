@@ -298,19 +298,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
   } else if (expect_to_match) {
     if (type == "PlainCdrStruct") {
-      failed = !(read_plain_cdr_struct(dr) == RETCODE_OK);
+      failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStruct") {
-      failed = !(read_appendable_struct(dr) == RETCODE_OK);
+      failed = (read_appendable_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStructNoXTypes") {
-      failed = !(read_appendable_struct_no_xtypes(dr) == RETCODE_OK);
+      failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
     } else if (type == "FinalStructSub") {
-      failed = !(read_final_struct(dr) == RETCODE_OK);
+      failed = (read_final_struct(dr) != RETCODE_OK);
     } else if (type == "MutableStruct") {
-      failed = !(read_mutable_struct(dr) == RETCODE_OK);
+      failed = (read_mutable_struct(dr) != RETCODE_OK);
     } else if (type == "MutableUnion") {
-      failed = !(read_mutable_union(dr) == RETCODE_OK);
+      failed = (read_mutable_union(dr) != RETCODE_OK);
     } else if (type == "Trim20Struct") {
-      failed = !(read_trim20_struct(dr) == RETCODE_OK);
+      failed = (read_trim20_struct(dr) != RETCODE_OK);
     }
   }
 
