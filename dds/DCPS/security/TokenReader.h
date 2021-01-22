@@ -10,10 +10,10 @@
 #ifndef OPENDDS_DCPS_SECURITY_TOKENREADER_H
 #define OPENDDS_DCPS_SECURITY_TOKENREADER_H
 
-#include "DdsSecurity_Export.h"
+#include "OpenDDS_Security_Export.h"
 
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
+#include <dds/DdsSecurityCoreC.h>
+#include <dds/Versioned_Namespace.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -37,7 +37,7 @@ namespace Security {
 *
 */
 
-class DdsSecurity_Export TokenReader
+class OpenDDS_Security_Export TokenReader
 {
 public:
 

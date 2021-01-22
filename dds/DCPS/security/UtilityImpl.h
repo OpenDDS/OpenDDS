@@ -6,10 +6,10 @@
 #ifndef OPENDDS_DCPS_SECURITY_UTILITYIMPL_H
 #define OPENDDS_DCPS_SECURITY_UTILITYIMPL_H
 
-#include "DdsSecurity_Export.h"
+#include "OpenDDS_Security_Export.h"
 #include "Utility.h"
 
-#include "dds/Versioned_Namespace.h"
+#include <dds/Versioned_Namespace.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -20,7 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-class DdsSecurity_Export UtilityImpl
+class OpenDDS_Security_Export UtilityImpl
   : public virtual OpenDDS::Security::Utility {
 public:
   virtual ~UtilityImpl();

@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H
 #define OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H
 
-#include "DdsSecurity_Export.h"
+#include "OpenDDS_Security_Export.h"
 #include "AccessControl/LocalAccessCredentialData.h"
 #include "AccessControl/Governance.h"
 #include "AccessControl/Permissions.h"
@@ -52,7 +52,7 @@ namespace Security {
 * the interface this class is implementing.
 *
 */
-class DdsSecurity_Export AccessControlBuiltInImpl
+class OpenDDS_Security_Export AccessControlBuiltInImpl
   : public virtual DDS::Security::AccessControl {
 public:
   AccessControlBuiltInImpl();

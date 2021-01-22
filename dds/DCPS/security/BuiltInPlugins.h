@@ -6,15 +6,16 @@
 #ifndef OPENDDS_DCPS_SECURITY_BUILTINPLUGINS_H
 #define OPENDDS_DCPS_SECURITY_BUILTINPLUGINS_H
 
-#include "DdsSecurity_Export.h"
-#include "dds/Versioned_Namespace.h"
+#include "OpenDDS_Security_Export.h"
+
+#include <dds/Versioned_Namespace.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
-class DdsSecurity_Export BuiltinPluginsInitializer {
+class OpenDDS_Security_Export BuiltinPluginsInitializer {
 public:
   BuiltinPluginsInitializer();
 };

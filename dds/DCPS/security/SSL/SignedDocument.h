@@ -6,12 +6,15 @@
 #ifndef OPENDDS_DCPS_SECURITY_SSL_SIGNEDDOCUMENT_H
 #define OPENDDS_DCPS_SECURITY_SSL_SIGNEDDOCUMENT_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DdsSecurityCoreC.h"
 #include "Certificate.h"
-#include <string>
+
+#include <dds/DCPS/security/OpenDDS_Security_Export.h>
+#include <dds/DCPS/unique_ptr.h>
+#include <dds/DdsSecurityCoreC.h>
+
 #include <openssl/pkcs7.h>
+
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -19,11 +22,11 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-class DdsSecurity_Export SignedDocument {
+class OpenDDS_Security_Export SignedDocument {
 public:
   typedef DCPS::unique_ptr<SignedDocument> unique_ptr;
 
-  friend DdsSecurity_Export bool operator==(const SignedDocument& lhs,
+  friend OpenDDS_Security_Export bool operator==(const SignedDocument& lhs,
                                             const SignedDocument& rhs);
 
   explicit SignedDocument(const std::string& uri);
@@ -99,7 +102,7 @@ public:
   std::string verifiable_;
 };
 
-DdsSecurity_Export bool operator==(const SignedDocument& lhs,
+OpenDDS_Security_Export bool operator==(const SignedDocument& lhs,
                                    const SignedDocument& rhs);
 
 }  // namespace SSL

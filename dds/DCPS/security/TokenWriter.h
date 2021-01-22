@@ -10,11 +10,13 @@
 #ifndef OPENDDS_DCPS_SECURITY_TOKENWRITER_H
 #define OPENDDS_DCPS_SECURITY_TOKENWRITER_H
 
-#include "DdsSecurity_Export.h"
-#include "dds/DCPS/SequenceIterator.h"
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
+#include "OpenDDS_Security_Export.h"
 #include "TokenReader.h"
+
+#include <dds/DCPS/SequenceIterator.h>
+#include <dds/Versioned_Namespace.h>
+
+#include <dds/DdsSecurityCoreC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -38,7 +40,7 @@ namespace Security {
 *
 */
 
-class DdsSecurity_Export TokenWriter
+class OpenDDS_Security_Export TokenWriter
 {
 public:
   explicit TokenWriter(DDS::Security::Token& token_ref);

@@ -17,7 +17,7 @@
 
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "XML_QOS_Handler_Export.h"
+#include "OpenDDS_XML_QOS_Handler_Export.h"
 
 namespace XML
 {
@@ -29,7 +29,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  class XML_QOS_Handler_Export QOS_XML_File_Handler
+  class OpenDDS_XML_QOS_Handler_Export QOS_XML_File_Handler
   {
   public:
     QOS_XML_File_Handler(void);

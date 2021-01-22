@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
 #define OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
 
-#include "DdsSecurity_Export.h"
+#include "OpenDDS_Security_Export.h"
 #include "framework/SecurityPluginInst.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -21,7 +21,7 @@ namespace Security {
  *
  * @brief Factory object to create interfaces for the BuiltIn plugin.
  */
-class DdsSecurity_Export BuiltInSecurityPluginInst : public SecurityPluginInst {
+class OpenDDS_Security_Export BuiltInSecurityPluginInst : public SecurityPluginInst {
 public:
 
   BuiltInSecurityPluginInst();

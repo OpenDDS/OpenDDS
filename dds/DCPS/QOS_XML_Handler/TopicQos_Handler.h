@@ -8,7 +8,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include "XML_QOS_Handler_Export.h"
+#include "OpenDDS_XML_QOS_Handler_Export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -19,7 +19,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-class XML_QOS_Handler_Export TopicQos_Handler
+class OpenDDS_XML_QOS_Handler_Export TopicQos_Handler
 {
 public:
   /**

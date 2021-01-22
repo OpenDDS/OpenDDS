@@ -53,7 +53,7 @@ sub colour_else {
   if ($color) {
     return colour(@_);
   }
-  else{
+  else {
     return $not_color;
   }
 }
@@ -344,9 +344,30 @@ my %path_conditions = (
     'cmake_file',
     qr/\.(py|pl|rb|java)$/,
   ],
+  export_header => sub {
+    my $filename = shift;
+    my $full_filename = shift;
+
+    if (!-f $full_filename || $filename !~ /export.*\.h$/i) {
+      return 0;
+    }
+
+    my $is_export = 0;
+    open(my $fd, $full_filename);
+    while (my $line = <$fd>) {
+      if ($line =~ /This file is generated automatically by generate_export_file\.pl/) {
+        $is_export = 1;
+        last;
+      }
+    }
+    close($fd);
+
+    return $is_export;
+  },
   needs_include_guard => [
     MATCH_ALL,
     'in_core_includes',
+    '!export_header',
     [
       'cpp_header_file',
       'idl_file',

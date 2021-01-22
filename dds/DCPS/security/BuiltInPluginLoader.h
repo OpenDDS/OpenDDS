@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_SECURITY_BUILTINPLUGINLOADER_H
 #define OPENDDS_DCPS_SECURITY_BUILTINPLUGINLOADER_H
 
-#include "DdsSecurity_Export.h"
+#include "OpenDDS_Security_Export.h"
 
 #include <dds/Versioned_Namespace.h>
 
@@ -23,7 +23,7 @@ namespace Security {
 
 class BuiltInSecurityPluginInst;
 
-class DdsSecurity_Export BuiltInPluginLoader : public ACE_Service_Object
+class OpenDDS_Security_Export BuiltInPluginLoader : public ACE_Service_Object
 {
 public:
   virtual int init(int argc, ACE_TCHAR* argv[]);

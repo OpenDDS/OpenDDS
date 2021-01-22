@@ -6,12 +6,15 @@
 #ifndef OPENDDS_DCPS_SECURITY_SSL_PRIVATEKEY_H
 #define OPENDDS_DCPS_SECURITY_SSL_PRIVATEKEY_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DdsDcpsCoreC.h"
+#include <dds/DCPS/security/OpenDDS_Security_Export.h>
+#include <dds/DCPS/unique_ptr.h>
+
+#include <dds/DdsDcpsCoreC.h>
+
+#include <openssl/evp.h>
+
 #include <string>
 #include <vector>
-#include <openssl/evp.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -19,12 +22,12 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-class DdsSecurity_Export PrivateKey
+class OpenDDS_Security_Export PrivateKey
 {
 public:
   typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
 
-  friend DdsSecurity_Export bool operator==(const PrivateKey& lhs,
+  friend OpenDDS_Security_Export bool operator==(const PrivateKey& lhs,
                                             const PrivateKey& rhs);
 
   explicit PrivateKey(const std::string& uri, const std::string& password = "");
@@ -51,7 +54,7 @@ private:
   EVP_PKEY* k_;
 };
 
-DdsSecurity_Export bool operator==(const PrivateKey& lhs,
+OpenDDS_Security_Export bool operator==(const PrivateKey& lhs,
                                    const PrivateKey& rhs);
 
 }  // namespace SSL
