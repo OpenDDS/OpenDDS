@@ -3383,6 +3383,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
+        vcpkgDirectory: '/c/vcpkg'
     - name: Clean Up VCPKG
       shell: bash
       run: |
@@ -3421,7 +3422,6 @@ jobs:
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
         echo $VCPKG_ROOT
-        mv $VCPKG_ROOT /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3581,6 +3581,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
+        vcpkgDirectory: '/c/vcpkg'
     - name: Clean Up VCPKG
       shell: bash
       run: |
@@ -3619,7 +3620,6 @@ jobs:
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
         echo $VCPKG_ROOT
-        mv $VCPKG_ROOT /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
