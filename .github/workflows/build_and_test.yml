@@ -3383,7 +3383,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
-        vcpkgDirectory: '/c/vcpkg'
+        vcpkgDirectory: 'C:\vcpkg'
     - name: Clean Up VCPKG
       shell: bash
       run: |
@@ -3581,7 +3581,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
-        vcpkgDirectory: '/c/vcpkg'
+        vcpkgDirectory: 'C:\vcpkg'
     - name: Clean Up VCPKG
       shell: bash
       run: |
