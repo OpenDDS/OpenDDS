@@ -416,7 +416,7 @@ private:
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
-    void update_max_sn(SequenceNumber seq);
+    void update_max_sn(const RepoId& reader, SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     RemoveResult remove_sample(const DataSampleElement* sample);
