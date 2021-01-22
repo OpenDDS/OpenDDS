@@ -3586,6 +3586,11 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
                                DCPS::SequenceNumber& sequence,
                                bool historic)
 {
+  if (DCPS::DCPS_debug_level >= 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Writer::send_sample from %C to %C\n",
+      DCPS::LogGuid(repo_id_).c_str(),
+      DCPS::LogGuid(reader).c_str()));
+  }
   DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch());
   set_header_fields(el->get_header(), size, reader, sequence, historic);
 
@@ -3597,13 +3602,17 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
   if (reader != GUID_UNKNOWN) {
     el->set_sub_id(0, reader);
     el->set_num_subs(1);
-  }
 
-  if (deferrable() && !associated_with_counterpart(reader)) {
-    DeferredSamples::iterator samples_for_reader = deferred_samples_.insert(
-      std::make_pair(reader, PerReaderDeferredSamples())).first;
-    samples_for_reader->second.insert(std::make_pair(sequence, el));
-    return;
+    if (deferrable() && !associated_with_counterpart(reader)) {
+      if (DCPS::DCPS_debug_level >= 8) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Writer::send_sample: "
+          "counterpart isn't associated, deferring\n"));
+      }
+      DeferredSamples::iterator samples_for_reader = deferred_samples_.insert(
+        std::make_pair(reader, PerReaderDeferredSamples())).first;
+      samples_for_reader->second.insert(std::make_pair(sequence, el));
+      return;
+    }
   }
 
   send_sample_i(el);
@@ -3613,10 +3622,15 @@ void Sedp::Writer::send_deferred_samples(const GUID_t& reader)
 {
   DeferredSamples::iterator samples_for_reader = deferred_samples_.find(reader);
   if (samples_for_reader != deferred_samples_.end()) {
+    if (DCPS::DCPS_debug_level >= 8) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Writer::send_deferred_samples to %C\n",
+        DCPS::LogGuid(reader).c_str()));
+    }
     for (PerReaderDeferredSamples::iterator i = samples_for_reader->second.begin();
         i != samples_for_reader->second.end(); ++i) {
       send_sample_i(i->second);
     }
+    deferred_samples_.erase(samples_for_reader);
   }
 }
 
