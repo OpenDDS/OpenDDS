@@ -3891,6 +3891,7 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo_rch& ri) const
 void
 RtpsUdpDataLink::RtpsWriter::update_max_sn(SequenceNumber seq)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
   max_sn_ = std::max(max_sn_, seq);
 }
 
