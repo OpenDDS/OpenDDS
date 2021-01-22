@@ -1,6 +1,6 @@
 # QoS XML Handler
 
-Optional utility to allow one to define the QoS of DDS unities using XML.
+Optional utility to allow one to define the QoS of DDS entities using XML.
 
 ## `dds_qos.hpp`
 
