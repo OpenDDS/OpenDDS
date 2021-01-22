@@ -26,8 +26,6 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "MessengerTypeSupportImpl.h"
-
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include "ParticipantLocationListenerImpl.h"
 

@@ -93,7 +93,7 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
       p.first->second |= participant.location;
     }
 
-    if (!done_ && check(false)) {
+    if (!done_ && check(true)) {
       done_ = true;
       std::cout << "== " << id_ << " Participant received all expected locations" << std::endl;
       done_callback_();
