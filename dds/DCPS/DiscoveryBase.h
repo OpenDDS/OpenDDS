@@ -1156,7 +1156,7 @@ namespace OpenDDS {
         }
       };
 
-      typedef std::map<MatchingPair, MatchingData> MatchingDataMap;
+      typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
       typedef typename MatchingDataMap::iterator MatchingDataIter;
       MatchingDataMap matching_data_buffer_;
       typedef PmfSporadicTask<EndpointManager> EndpointManagerSporadic;
