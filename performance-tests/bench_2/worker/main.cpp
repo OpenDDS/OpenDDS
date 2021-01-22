@@ -238,7 +238,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::ConstPropertyIndex max_decimal_places_prop =
     get_property(config.properties, "max_decimal_places", Builder::PVK_ULL);
   if (max_decimal_places_prop) {
-    max_decimal_places = max_decimal_places_prop->value.ull_prop();
+    max_decimal_places = static_cast<int>(max_decimal_places_prop->value.ull_prop());
   }
 
   size_t redirect_ace_log = 1;
