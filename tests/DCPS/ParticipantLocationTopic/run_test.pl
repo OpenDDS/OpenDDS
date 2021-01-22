@@ -57,7 +57,7 @@ $test->start_process("relay");
 sleep 1;
 $test->start_process("ParticipantLocationTest");
 
-$test->stop_process(40, "ParticipantLocationTest");
+$test->stop_process(30, "ParticipantLocationTest");
 
 $test->kill_process(5, "relay");
 
