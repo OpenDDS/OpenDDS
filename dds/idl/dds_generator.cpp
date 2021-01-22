@@ -332,11 +332,13 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
       if (use_cxx11) {
         def_val = "0.0L";
       } else {
+		    string temp_val = "ACE_CDR::LongDouble val = ACE_CDR_LONG_DOUBLE_INITIALIZER";
         if (is_union) {
-          def_val = "0";
+          def_val = "val";
+		  return indent + temp_val + ";\n" + indent + name + pre + def_val + post + ";\n";
         } else {
-          def_val = "ACE_CDR_LONG_DOUBLE_ASSIGNMENT(" + name + ", 0)";
-          return indent + def_val + ";\n";
+          def_val += "ACE_CDR_LONG_DOUBLE_ASSIGNMENT(" + name + ", val)";
+          return indent + "{\n  " + indent + temp_val + ";\n  " + indent + def_val + ";\n" + indent + "}\n";
         }
       }
     } else {
