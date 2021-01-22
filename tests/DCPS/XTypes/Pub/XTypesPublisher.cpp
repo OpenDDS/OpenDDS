@@ -264,7 +264,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
   if ((ws->wait(conditions, timeout) != DDS::RETCODE_OK) && expect_to_match) {
-    ACE_ERROR((LM_ERROR, "ERROR: wait failed for type %s\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: %s condition wait failed for type %s\n",
+      expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
     failed = 1;
   }
 
