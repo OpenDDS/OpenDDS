@@ -256,9 +256,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
 
-  ACE_OS::sleep(ACE_Time_Value(7, 0));
+  DDS::StatusCondition_var condition = expect_to_match ? dw->get_statuscondition() : topic->get_statuscondition();
+  condition->set_enabled_statuses(expect_to_match ? DDS::PUBLICATION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
 
-  failed = !check_inconsistent_topic_status(topic);
+  DDS::ConditionSeq conditions;
+  DDS::Duration_t timeout = { 10, 0 };
+  if ((ws->wait(conditions, timeout) != DDS::RETCODE_OK) && expect_to_match) {
+    ACE_ERROR((LM_ERROR, "ERROR: wait failed for type %s\n", type.c_str()));
+    failed = 1;
+  }
+
+  ws->detach_condition(condition);
+
+  if (!failed) {
+    failed = !check_inconsistent_topic_status(topic);
+  }
 
   if (failed) {
     ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
