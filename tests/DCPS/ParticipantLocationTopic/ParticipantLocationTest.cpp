@@ -82,6 +82,17 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
   props[len] = prop;
 }
 
+ACE_Thread_Mutex participants_done_lock;
+ACE_Condition_Thread_Mutex participants_done_cond(participants_done_lock);
+int participants_done = 0;
+
+void participants_done_callback()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(participants_done_lock);
+  ++participants_done;
+  participants_done_cond.signal();
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = EXIT_SUCCESS;
@@ -139,51 +150,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        EXIT_FAILURE);
     }
 
-    // Register TypeSupport (Messenger::Message)
-    Messenger::MessageTypeSupport_var mts =
-      new Messenger::MessageTypeSupportImpl();
-
-    if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: register_type failed!\n")),
-                       EXIT_FAILURE);
-    }
-
-    // Create Topic
-    CORBA::String_var type_name = mts->get_type_name();
-    DDS::Topic_var topic =
-      participant->create_topic("Movie Discussion List",
-                                type_name.in(),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(topic.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_topic failed!\n")),
-                       EXIT_FAILURE);
-    }
-
-    // Create Publisher
-    DDS::PublisherQos publisher_qos;
-    participant->get_default_publisher_qos(publisher_qos);
-    publisher_qos.partition.name.length(1);
-    publisher_qos.partition.name[0] = "OCI";
-
-    DDS::Publisher_var pub =
-      participant->create_publisher(publisher_qos,
-                                    DDS::PublisherListener::_nil(),
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(pub.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                       EXIT_FAILURE);
-    }
-
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
@@ -196,7 +162,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Publisher");
+    ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Publisher", no_ice, ipv6, participants_done_callback);
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
@@ -210,68 +176,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    // Create Subscriber
-    // Register Type (Messenger::Message)
-    Messenger::MessageTypeSupport_var sub_ts =
-      new Messenger::MessageTypeSupportImpl();
-
-    if (sub_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), EXIT_FAILURE);
-    }
-
-    // Create Subscriber
     // Create Subscriber DomainParticipant
     DDS::DomainParticipant_var sub_participant = dpf->create_participant(4,
                                                                      part_qos,
                                                                      DDS::DomainParticipantListener::_nil(),
                                                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    // Create Topic (Movie Discussion List)
-    CORBA::String_var sub_type_name = sub_ts->get_type_name();
-    DDS::Topic_var sub_topic =
-      participant->create_topic("Movie Discussion List",
-                                type_name.in(),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(sub_topic.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), EXIT_FAILURE);
-    }
-
-    if (CORBA::is_nil(sub_participant.in())) {
+  if (CORBA::is_nil(sub_participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: subscriber create_participant failed!\n")),
+                        ACE_TEXT(" ERROR: subsriber create_participant failed!\n")),
                        EXIT_FAILURE);
     }
-
-    DDS::SubscriberQos subscriber_qos;
-    sub_participant->get_default_subscriber_qos(subscriber_qos);
-    subscriber_qos.partition.name.length(1);
-    subscriber_qos.partition.name[0] = "OCI";
-
-    DDS::Subscriber_var sub =
-      sub_participant->create_subscriber(subscriber_qos,
-                                     DDS::SubscriberListener::_nil(),
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    // Since the application is only interested in BIT location
-    // data and is not passing messages between publisher and
-    // subscriber, binding a transport config to the second
-    // participant subscriber is not necessary.
-    // OpenDDS::DCPS::TransportRegistry::instance()->bind_config("subscriber_config", sub);
-
-    if (CORBA::is_nil(sub.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
-    }
-
     // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var sub_bit_subscriber = sub_participant->get_builtin_subscriber();
 
@@ -284,8 +200,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    ParticipantLocationListenerImpl* sub_listener = new ParticipantLocationListenerImpl("Subscriber");
-    DDS::DataReaderListener_var sub_listener_var(listener);
+    ParticipantLocationListenerImpl* sub_listener = new ParticipantLocationListenerImpl("Subscriber", no_ice, ipv6, participants_done_callback);
+    DDS::DataReaderListener_var sub_listener_var(sub_listener);
 
     retcode =
       sub_loc_dr->set_listener(sub_listener,
@@ -298,18 +214,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    // All participants are sending SPDP at a one second interval so 10 seconds should be adequate.
-    ACE_OS::sleep(10);
+    while (participants_done != 2) {
+      participants_done_cond.wait();
+    }
 
     // check that all locations received
-    if (!listener->check(no_ice, ipv6)) {
+    if (!listener->check()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l main()")
                  ACE_TEXT(" ERROR: Check for all publisher locations failed\n")));
       status = EXIT_FAILURE;
     }
 
-    if (!sub_listener->check(no_ice, ipv6)) {
+    if (!sub_listener->check()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l main()")
                  ACE_TEXT(" ERROR: Check for all subscriber locations failed\n")));
@@ -327,8 +244,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     sub_participant->delete_contained_entities();
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" domain participant factory deleting participant\n")));
+               ACE_TEXT(" domain participant factory deleting participants\n")));
     dpf->delete_participant(participant.in());
+    dpf->delete_participant(sub_participant.in());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" shutdown service participant\n")));

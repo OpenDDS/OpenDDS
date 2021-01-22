@@ -11,8 +11,15 @@
 #include <string>
 
 // Implementation skeleton constructor
-ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const std::string& id) :
-  id_(id)
+ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const std::string& id,
+                                                                 bool noice,
+                                                                 bool ipv6,
+                                                                 callback_t done_callback)
+  : id_(id)
+  , no_ice_(noice)
+  , ipv6_(ipv6)
+  , done_callback_(done_callback)
+  , done_(false)
 {
 }
 
@@ -85,6 +92,12 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
       std::pair<LocationMapType::iterator, bool> p = location_map.insert(std::make_pair(guid, 0));
       p.first->second |= participant.location;
     }
+
+    if (!done_ && check(false)) {
+      done_ = true;
+      std::cout << "== " << id_ << " Participant received all expected locations" << std::endl;
+      done_callback_();
+    }
   }
 }
 
@@ -136,41 +149,45 @@ void ParticipantLocationListenerImpl::on_sample_lost(
     << "on_sample_lost" << std::endl;
 }
 
-bool ParticipantLocationListenerImpl::check(bool no_ice, bool ipv6)
+bool ParticipantLocationListenerImpl::check(bool print_results)
 {
   const unsigned long expected =
     OpenDDS::DCPS::LOCATION_LOCAL
-    | (ipv6 ? OpenDDS::DCPS::LOCATION_RELAY6 : OpenDDS::DCPS::LOCATION_RELAY)
+    | (ipv6_ ? OpenDDS::DCPS::LOCATION_RELAY6 : OpenDDS::DCPS::LOCATION_RELAY)
 #ifdef ACE_HAS_IPV6
     | OpenDDS::DCPS::LOCATION_LOCAL6
-    | (!no_ice ? OpenDDS::DCPS::LOCATION_ICE6 : 0)
+    | (!no_ice_ ? OpenDDS::DCPS::LOCATION_ICE6 : 0)
 #else
-    | (!no_ice && !ipv6? OpenDDS::DCPS::LOCATION_ICE : 0)
+    | (!no_ice_ && !ipv6_? OpenDDS::DCPS::LOCATION_ICE : 0)
 #endif
     ;
 
-  std::cout << id_ << " expecting "
-            << " LOCAL"
-            << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
-            << ((expected & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+  if (print_results) {
+    std::cout << id_ << " expecting "
+              << " LOCAL"
+              << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
+              << ((expected & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
 #ifdef ACE_HAS_IPV6
-            << ((expected & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
+              << ((expected & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
 #endif
-            << ((expected & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
-            << ((expected & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
-            << std::endl;
+              << ((expected & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
+              << ((expected & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
+              << std::endl;
+  }
 
   bool found = false;
   for (LocationMapType::const_iterator pos = location_map.begin(), limit = location_map.end();
        pos != limit; ++ pos) {
-    std::cout << id_ << " " << pos->first
-              << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL) ? " LOCAL" : "")
-              << ((pos->second & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
-              << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
-              << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
-              << ((pos->second & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
-              << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
-              << std::endl;
+    if (print_results) {
+      std::cout << id_ << " " << pos->first
+                << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL) ? " LOCAL" : "")
+                << ((pos->second & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
+                << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+                << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL6) ? " LOCAL6" : "")
+                << ((pos->second & OpenDDS::DCPS::LOCATION_ICE6) ? " ICE6" : "")
+                << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY6) ? " RELAY6" : "")
+                << std::endl;
+    }
     found = found || pos->second == expected;
   }
   return found;
