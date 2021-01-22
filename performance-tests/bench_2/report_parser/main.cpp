@@ -156,7 +156,118 @@ bool parse_arguments(int argc, ACE_TCHAR* argv[]) {
   return true;
 }
 
+void output_gnuplot_header() {
+  const bool show_postfix = report.node_reports.length() > 1;
+
+  // A gnuplot data file header comment line begins with # character.
+  outputFileStream << "#";
+
+  // Write header line.
+  for (unsigned int node_index = 0; node_index < report.node_reports.length(); node_index++) {
+    if (node_index > 0) outputFileStream << " ";
+    outputFileStream << "cpu_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
+    outputFileStream << " cpu_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
+    outputFileStream << " mem_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
+    outputFileStream << " mem_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
+    outputFileStream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
+    outputFileStream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
+  }
+
+  outputFileStream << std::endl;
+}
+
+void output_gnuplot_data() {
+  Bench::SimpleStatBlock consolidated_cpu_percent_stats;
+  Bench::SimpleStatBlock consolidated_mem_percent_stats;
+  Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
+
+  // Determine the biggest buffer size.
+  size_t biggest_buffer_size = 0;
+
+  for (unsigned int node_index = 0; node_index < report.node_reports.length(); node_index++) {
+    const Bench::TestController::NodeReport& nc_report = report.node_reports[node_index];
+
+    Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
+    Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
+    Bench::ConstPropertyStatBlock virtual_mem_percent(nc_report.properties, "virtual_mem_percent");
+
+    consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
+    consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
+    consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
+
+    if (consolidated_cpu_percent_stats.median_buffer_.size() > biggest_buffer_size)
+      biggest_buffer_size = consolidated_cpu_percent_stats.median_buffer_.size();
+
+    if (consolidated_cpu_percent_stats.timestamp_buffer_.size() > biggest_buffer_size)
+      biggest_buffer_size = consolidated_cpu_percent_stats.timestamp_buffer_.size();
+
+    if (consolidated_mem_percent_stats.median_buffer_.size() > biggest_buffer_size)
+      biggest_buffer_size = consolidated_mem_percent_stats.median_buffer_.size();
+
+    if (consolidated_mem_percent_stats.timestamp_buffer_.size() > biggest_buffer_size)
+      biggest_buffer_size = consolidated_mem_percent_stats.timestamp_buffer_.size();
+
+    if (consolidated_virtual_mem_percent_stats.median_buffer_.size() > biggest_buffer_size)
+      biggest_buffer_size = consolidated_virtual_mem_percent_stats.median_buffer_.size();
+
+    if (consolidated_virtual_mem_percent_stats.timestamp_buffer_.size() > biggest_buffer_size)
+      biggest_buffer_size = consolidated_virtual_mem_percent_stats.timestamp_buffer_.size();
+  }
+
+  for (unsigned int index = 0; index < biggest_buffer_size; index++) {
+    for (unsigned int node_index = 0; node_index < report.node_reports.length(); node_index++) {
+      const Bench::TestController::NodeReport& nc_report = report.node_reports[node_index];
+
+      Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
+      Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
+      Bench::ConstPropertyStatBlock virtual_mem_percent(nc_report.properties, "virtual_mem_percent");
+
+      consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
+      consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
+      consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
+
+      const size_t cpu_percent_median_count = consolidated_cpu_percent_stats.median_buffer_.size();
+      const size_t cpu_percent_timestamp_count = consolidated_cpu_percent_stats.timestamp_buffer_.size();
+
+      const size_t mem_percent_median_count = consolidated_mem_percent_stats.median_buffer_.size();
+      const size_t mem_percent_timestamp_count = consolidated_mem_percent_stats.timestamp_buffer_.size();
+
+      const size_t virtual_mem_percent_median_count = consolidated_virtual_mem_percent_stats.median_buffer_.size();
+      const size_t virtual_mem_percent_timestamp_count = consolidated_virtual_mem_percent_stats.timestamp_buffer_.size();
+
+      if (index < cpu_percent_median_count)
+        outputFileStream << consolidated_cpu_percent_stats.median_buffer_[index] << " ";
+
+      if (index < cpu_percent_timestamp_count)
+        outputFileStream << consolidated_cpu_percent_stats.timestamp_buffer_[index] << " ";
+
+      if (index < mem_percent_median_count)
+        outputFileStream << consolidated_mem_percent_stats.median_buffer_[index] << " ";
+
+      if (index < mem_percent_timestamp_count)
+        outputFileStream << consolidated_mem_percent_stats.timestamp_buffer_[index] << " ";
+
+      if (index < virtual_mem_percent_median_count)
+        outputFileStream << consolidated_virtual_mem_percent_stats.median_buffer_[index] << " ";
+
+      if (index < virtual_mem_percent_timestamp_count)
+        outputFileStream << consolidated_virtual_mem_percent_stats.timestamp_buffer_[index];
+
+      if (node_index + 1 < report.node_reports.length())
+        outputFileStream << " ";
+    }
+
+    outputFileStream << std::endl;
+  }
+}
+
 int parse_time_series_to_gnuplot_format() {
+  if (report.node_reports.length() > 0) {
+    output_gnuplot_header();
+    output_gnuplot_data();
+
+    return EXIT_SUCCESS;
+  }
   return EXIT_FAILURE;
 }
 
