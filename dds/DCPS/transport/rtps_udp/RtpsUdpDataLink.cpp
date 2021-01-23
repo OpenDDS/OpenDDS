@@ -644,7 +644,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
       RtpsWriter_rch writer = rw->second;
       g.release();
-      writer->update_max_sn(max_sn);
+      writer->update_max_sn(remote_id, max_sn);
       writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable));
       enable_heartbeat = true;
     }
@@ -1075,6 +1075,9 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     }
   }
 
+  make_leader_lagger(element->subscription_id(), previous_max_sn);
+  check_leader_lagger();
+
   TransportSendElement* tse = dynamic_cast<TransportSendElement*>(element);
   TransportCustomizedElement* tce =
     dynamic_cast<TransportCustomizedElement*>(element);
@@ -1095,8 +1098,6 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
       RtpsSampleHeader::populate_data_control_submessages(
         subm, *tsce, requires_inline_qos);
-      make_leader_lagger(element->subscription_id(), previous_max_sn);
-      check_leader_lagger();
       record_directed(element->subscription_id(), seq);
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples_i(tsce->header(), msg->cont());
@@ -1120,8 +1121,6 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
-    make_leader_lagger(element->subscription_id(), previous_max_sn);
-    check_leader_lagger();
     record_directed(element->subscription_id(), seq);
     durable = dsle->get_header().historic_sample_;
 
@@ -1132,8 +1131,6 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
-    make_leader_lagger(element->subscription_id(), previous_max_sn);
-    check_leader_lagger();
     record_directed(element->subscription_id(), seq);
     durable = dsle->get_header().historic_sample_;
 
@@ -3964,9 +3961,13 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo_rch& ri) const
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::update_max_sn(SequenceNumber seq)
+RtpsUdpDataLink::RtpsWriter::update_max_sn(const RepoId& reader, SequenceNumber seq)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+  SequenceNumber previous_max_sn = max_sn_;
   max_sn_ = std::max(max_sn_, seq);
+  make_leader_lagger(reader, previous_max_sn);
+  check_leader_lagger();
 }
 
 void
