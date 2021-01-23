@@ -5,9 +5,33 @@
  * See: http://www.opendds.org/license.html
  */
 
-#define DDS_MAJOR_VERSION 3
-#define DDS_MINOR_VERSION 16
-#define DDS_MICRO_VERSION 0
+#define OPENDDS_MAJOR_VERSION 3
+#define OPENDDS_MINOR_VERSION 16
+#define OPENDDS_MICRO_VERSION 0
 #define OPENDDS_VERSION_METADATA "dev"
 #define OPENDDS_IS_RELEASE 0
-#define DDS_VERSION "3.16"
+#define OPENDDS_VERSION "3.16"
+
+#define OPENDDS_VERSION_AT_LEAST(MAJOR, MINOR, MICRO) (\
+  (OPENDDS_MAJOR_VERSION > (MAJOR)) || \
+  (OPENDDS_MAJOR_VERSION == (MAJOR) && OPENDDS_MINOR_VERSION >= (MINOR)) || \
+  (OPENDDS_MAJOR_VERSION == (MAJOR) && OPENDDS_MINOR_VERSION == (MINOR) && \
+    (OPENDDS_MICRO_VERSION >= (MICRO)) \
+  ) \
+)
+
+#define OPENDDS_VERSION_EXACTLY(MAJOR, MINOR, MICRO) (OPENDDS_MAJOR_VERSION == (MAJOR) && \
+  OPENDDS_MINOR_VERSION == (MINOR) && OPENDDS_MICRO_VERSION == (MICRO))
+
+#define OPENDDS_VERSION_LESS_THAN(MAJOR, MINOR, MICRO) \
+  !OPENDDS_VERSION_AT_LEAST((MAJOR), (MINOR), (MICRO))
+
+// NOTE: These are decprecated
+// lint.pl ignores nonprefixed_public_macros on next line
+#define DDS_MAJOR_VERSION (OPENDDS_MAJOR_VERSION)
+// lint.pl ignores nonprefixed_public_macros on next line
+#define DDS_MAJOR_VERSION (OPENDDS_MAJOR_VERSION)
+// lint.pl ignores nonprefixed_public_macros on next line
+#define DDS_MICRO_VERSION (OPENDDS_MICRO_VERSION)
+// lint.pl ignores nonprefixed_public_macros on next line
+#define DDS_VERSION (OPENDDS_VERSION)

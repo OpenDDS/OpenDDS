@@ -1,8 +1,8 @@
 #include <dds/rc_common.h>
 
 1 VERSIONINFO
- FILEVERSION DDS_MAJOR_VERSION,DDS_MINOR_VERSION,DDS_MICRO_VERSION,0
- PRODUCTVERSION DDS_MAJOR_VERSION,DDS_MINOR_VERSION,DDS_MICRO_VERSION,0
+ FILEVERSION OPENDDS_MAJOR_VERSION,OPENDDS_MINOR_VERSION,OPENDDS_MICRO_VERSION,0
+ PRODUCTVERSION OPENDDS_MAJOR_VERSION,OPENDDS_MINOR_VERSION,OPENDDS_MICRO_VERSION,0
  FILEFLAGSMASK 0x3fL
  FILEFLAGS OPENDDS_RC_FILEFLAGS
  FILEOS 0x4L
@@ -14,13 +14,13 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "FileDescription", "OpenDDS Java Bindings (opendds.org)\0"
-            VALUE "FileVersion", DDS_VERSION "\0"
+            VALUE "FileVersion", OPENDDS_VERSION "\0"
             VALUE "InternalName", "OpenDDS_DCPS_Java\0"
             VALUE "LegalCopyright", "See the LICENSE file\0"
             VALUE "LegalTrademarks", "See the LICENSE file\0"
             VALUE "OriginalFilename", "OpenDDS_DCPS_Java.DLL\0"
             VALUE "ProductName", "OpenDDS\0"
-            VALUE "ProductVersion", DDS_VERSION "\0"
+            VALUE "ProductVersion", OPENDDS_VERSION "\0"
         END
     END
     BLOCK "VarFileInfo"

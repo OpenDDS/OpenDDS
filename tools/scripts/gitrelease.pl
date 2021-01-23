@@ -555,7 +555,7 @@ sub remedy_git_status_clean {
   my $settings = shift();
   my $post_release = shift() || 0;
   my $version = $settings->{version};
-  system("git diff") == 0 or die "Could not execute: git diff";
+  system("git diff HEAD") == 0 or die "Could not execute: git diff HEAD";
   print "Would you like to add and commit these changes [y/n]? ";
   return 0 if (!yes_no());
   if (!$post_release) {
@@ -565,10 +565,10 @@ sub remedy_git_status_clean {
   system("git add -u") == 0 or die "Could not execute: git add -u";
   my $message;
   if ($post_release) {
-    $message = "OpenDDS Release $version";
+    $message = "OpenDDS Post Release $version";
   }
   else {
-    $message = "OpenDDS Post Release $version";
+    $message = "OpenDDS Release $version";
   }
   system("git commit -m '" . $message . "'") == 0 or die "Could not execute: git commit -m";
   return 1;
@@ -798,6 +798,7 @@ EOF
 }
 ############################################################################
 
+# This section deals with the AUTHORS file
 # See $DDS_ROOT/.mailmap file for how to add individual corrections
 
 my $github_email_re = qr/^(?:\d+\+)?(.*)\@users.noreply.github.com$/;
@@ -895,7 +896,7 @@ sub verify_authors {
   my $settings = shift();
   @global_authors = get_authors() if (!@global_authors);
 
-  my $tmp_authors_path = "$settings->{workspace}/AUTHORS";
+  my $tmp_authors_path = "$settings->{workspace}/temp_authors";
   open(my $file, '>', $tmp_authors_path) or die ("Could not open $tmp_authors_path: $!");
   foreach my $author (@global_authors) {
     print $file "$author->{name} <$author->{email}>\n";
@@ -1054,17 +1055,17 @@ sub verify_update_version_h_file {
 
   my $status = open(VERSION_H, 'dds/Version.h') or die("Opening: $!");
   while (<VERSION_H>) {
-    if ($_ =~ /^#define DDS_MAJOR_VERSION $parsed_version->{major}$/) {
+    if ($_ =~ /^#define OPENDDS_MAJOR_VERSION $parsed_version->{major}$/) {
       ++$matched_major;
-    } elsif ($_ =~ /^#define DDS_MINOR_VERSION $parsed_version->{minor}$/) {
+    } elsif ($_ =~ /^#define OPENDDS_MINOR_VERSION $parsed_version->{minor}$/) {
       ++$matched_minor;
-    } elsif ($_ =~ /^#define DDS_MICRO_VERSION $parsed_version->{micro}$/) {
+    } elsif ($_ =~ /^#define OPENDDS_MICRO_VERSION $parsed_version->{micro}$/) {
       ++$matched_micro;
     } elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
       ++$matched_metadata;
     } elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
       ++$matched_release;
-    } elsif ($_ =~ /^#define DDS_VERSION "$metaversion"$/) {
+    } elsif ($_ =~ /^#define OPENDDS_VERSION "$metaversion"$/) {
       ++$matched_version;
     }
   }
@@ -1101,25 +1102,25 @@ sub remedy_update_version_h_file {
   my $corrected_release = 0;
   my $corrected_version = 0;
 
-  my $major_line = "#define DDS_MAJOR_VERSION $parsed_version->{major}";
-  my $minor_line = "#define DDS_MINOR_VERSION $parsed_version->{minor}";
-  my $micro_line = "#define DDS_MICRO_VERSION $parsed_version->{micro}";
+  my $major_line = "#define OPENDDS_MAJOR_VERSION $parsed_version->{major}";
+  my $minor_line = "#define OPENDDS_MINOR_VERSION $parsed_version->{minor}";
+  my $micro_line = "#define OPENDDS_MICRO_VERSION $parsed_version->{micro}";
   my $metadata_line = "#define OPENDDS_VERSION_METADATA \"$parsed_version->{metadata}\"";
   my $release_line = "#define OPENDDS_IS_RELEASE $release";
-  my $version_line = "#define DDS_VERSION \"$version\"";
+  my $version_line = "#define OPENDDS_VERSION \"$version\"";
 
   open(VERSION_H, "+< dds/Version.h") or die "Opening: $!";
 
   my $out = "";
 
   while (<VERSION_H>) {
-    if (s/^#define DDS_MAJOR_VERSION .*$/$major_line/) {
+    if (s/^#define OPENDDS_MAJOR_VERSION .*$/$major_line/) {
       ++$corrected_major;
     }
-    elsif (s/^#define DDS_MINOR_VERSION .*$/$minor_line/) {
+    elsif (s/^#define OPENDDS_MINOR_VERSION .*$/$minor_line/) {
       ++$corrected_minor;
     }
-    elsif (s/^#define DDS_MICRO_VERSION .*$/$micro_line/) {
+    elsif (s/^#define OPENDDS_MICRO_VERSION .*$/$micro_line/) {
       ++$corrected_micro;
     }
     elsif (s/^#define OPENDDS_VERSION_METADATA .*$/$metadata_line/) {
@@ -1128,7 +1129,7 @@ sub remedy_update_version_h_file {
     elsif (s/^#define OPENDDS_IS_RELEASE .*$/$release_line/) {
       ++$corrected_release;
     }
-    elsif (s/^#define DDS_VERSION .*$/$version_line/) {
+    elsif (s/^#define OPENDDS_VERSION .*$/$version_line/) {
       ++$corrected_version;
     }
     $out .= $_;
@@ -2124,11 +2125,19 @@ if (%parsed_version) {
   if (!%parsed_next_version) {
     die "Invalid next version: $next_version\nStopped";
   }
-  $next_version = $parsed_version{string_with_metadata};
+  $next_version = $parsed_next_version{string_with_metadata};
 }
-else {
+elsif (!$print_help) {
   die "Invalid version: $version\nStopped";
 }
+
+if (!$skip_ftp && !$print_help) {
+  die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
+    if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
+}
+
+my $release_timestamp = POSIX::strftime($release_timestamp_fmt, gmtime);
+$release_timestamp =~ s/  / /g; # Single digit days of the month result in an extra space
 
 my %global_settings = (
     list         => $print_list,
@@ -2156,7 +2165,7 @@ my %global_settings = (
     zip_dox      => "${base_name}-doxygen.zip",
     devguide_ver => "${base_name}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
-    timestamp    => POSIX::strftime($release_timestamp_fmt, gmtime),
+    timestamp    => $release_timestamp,
     git_url      => "git\@github.com:${github_user}/${repo_name}.git",
     github_repo  => $repo_name,
     github_token => $ENV{GITHUB_TOKEN},
@@ -2402,7 +2411,7 @@ my @release_steps  = (
   {
     name => 'Create Release Flag File',
     verify => sub{verify_release_flag_file(@_)},
-    message => sub{ return "Release flag file needs to be created."},
+    message => sub{return "Release flag file needs to be created."},
     remedy => sub{touch_file("$_[0]->{release_flag_file_path}"); return 0;},
     post_release => 1,
   },
