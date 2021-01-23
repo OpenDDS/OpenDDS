@@ -30,7 +30,7 @@
 // lint.pl ignores nonprefixed_public_macros on next line
 #define DDS_MAJOR_VERSION (OPENDDS_MAJOR_VERSION)
 // lint.pl ignores nonprefixed_public_macros on next line
-#define DDS_MAJOR_VERSION (OPENDDS_MAJOR_VERSION)
+#define DDS_MINOR_VERSION (OPENDDS_MINOR_VERSION)
 // lint.pl ignores nonprefixed_public_macros on next line
 #define DDS_MICRO_VERSION (OPENDDS_MICRO_VERSION)
 // lint.pl ignores nonprefixed_public_macros on next line

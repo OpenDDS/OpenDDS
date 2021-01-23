@@ -56,17 +56,17 @@ IDL2JNI_DEP = $(IDL2JNI)
 # with different minor or major or beta versions to fail.
 #
 ifeq (cmd,$(findstring cmd,$(SHELL)))
-  OPENDDS_MAJOR_VERSION := $(shell awk "/OPENDDS_MAJOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
-  OPENDDS_MINOR_VERSION := $(shell awk "/OPENDDS_MINOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
-  OPENDDS_MICRO_VERSION := $(shell awk "/OPENDDS_MICRO_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_MAJOR_VERSION := $(shell awk "/define OPENDDS_MAJOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_MINOR_VERSION := $(shell awk "/define OPENDDS_MINOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_MICRO_VERSION := $(shell awk "/define OPENDDS_MICRO_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
   OPENDDS_VERSION_METADATA := \
     $(shell awk "/OPENDDS_VERSION_METADATA/ { print substr($$3, 2, length($$3) - 2) }" ${DDS_ROOT}/dds/Version.h)
 else
-  OPENDDS_MAJOR_VERSION := $(shell awk '/OPENDDS_MAJOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
-  OPENDDS_MINOR_VERSION := $(shell awk '/OPENDDS_MINOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
-  OPENDDS_MICRO_VERSION := $(shell awk '/OPENDDS_MICRO_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_MAJOR_VERSION := $(shell awk '/define OPENDDS_MAJOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_MINOR_VERSION := $(shell awk '/define OPENDDS_MINOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_MICRO_VERSION := $(shell awk '/define OPENDDS_MICRO_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
   OPENDDS_VERSION_METADATA := \
-    $(shell awk '/OPENDDS_VERSION_METADATA/ { print substr($$3, 2, length($$3) - 2)}' ${DDS_ROOT}/dds/Version.h)
+    $(shell awk '/define OPENDDS_VERSION_METADATA/ { print substr($$3, 2, length($$3) - 2)}' ${DDS_ROOT}/dds/Version.h)
 endif
 
 ifdef OPENDDS_VERSION_METADATA
