@@ -54,7 +54,7 @@ private:
   TypeMap minimal_type_map_;
 
   // For dependencies of local types
-  typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
+  typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifierWithSizeSeq) TypeIdentifierWithSizeSeqMap;
   TypeIdentifierWithSizeSeqMap type_dependencies_map_;
 
   TypeObject to_empty_;
