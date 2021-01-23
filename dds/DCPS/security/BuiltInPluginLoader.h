@@ -29,8 +29,8 @@ public:
   virtual int init(int argc, ACE_TCHAR* argv[]);
 };
 
-ACE_STATIC_SVC_DECLARE_EXPORT(DdsSecurity, BuiltInPluginLoader)
-ACE_FACTORY_DECLARE(DdsSecurity, BuiltInPluginLoader)
+ACE_STATIC_SVC_DECLARE_EXPORT(OpenDDS_Security, BuiltInPluginLoader)
+ACE_FACTORY_DECLARE(OpenDDS_Security, BuiltInPluginLoader)
 
 } // namespace Security
 } // namespace OpenDDS

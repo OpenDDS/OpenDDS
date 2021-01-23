@@ -43,7 +43,7 @@ BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   return 0;
 }
 
-ACE_FACTORY_DEFINE(DdsSecurity, BuiltInPluginLoader);
+ACE_FACTORY_DEFINE(OpenDDS_Security, BuiltInPluginLoader);
 ACE_STATIC_SVC_DEFINE(
   BuiltInPluginLoader,
   ACE_TEXT("OpenDDS_Security"),
