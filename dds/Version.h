@@ -26,7 +26,7 @@
 #define OPENDDS_VERSION_LESS_THAN(MAJOR, MINOR, MICRO) \
   !OPENDDS_VERSION_AT_LEAST((MAJOR), (MINOR), (MICRO))
 
-// NOTE: These are decprecated
+// NOTE: These are deprecated
 // lint.pl ignores nonprefixed_public_macros on next line
 #define DDS_MAJOR_VERSION (OPENDDS_MAJOR_VERSION)
 // lint.pl ignores nonprefixed_public_macros on next line
