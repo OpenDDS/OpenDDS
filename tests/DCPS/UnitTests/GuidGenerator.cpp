@@ -63,6 +63,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     guid.guidPrefix[ 9] = 10;
     guid.guidPrefix[10] = 11;
     guid.guidPrefix[11] = 12;
+    guid.entityId.entityKey[0] = guid.entityId.entityKey[1] = guid.entityId.entityKey[2] = 0;
+    guid.entityId.entityKind = 0;
     TEST_CHECK(GuidConverter(guid).uniqueId() == "0102030405060708090a0b0c");
 
     guid.guidPrefix[2] = 233;
