@@ -317,7 +317,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       for (CORBA::ULong i = 0; i < partdata.length(); ++i)
       {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x \n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x\n",
           partdata[i].key.value[0], partdata[i].key.value[1], partdata[i].key.value[2]));
 
         CORBA::ULong cur_len = partdata[i].user_data.value.length ();
@@ -444,7 +444,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
-          "type_name=%C \n",
+          "type_name=%C\n",
           topicdata[i].key.value[0], topicdata[i].key.value[1], topicdata[i].key.value[2],
           topicdata[i].name.in (), topicdata[i].type_name.in ()));
 
@@ -461,12 +461,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (num_topics_with_data == num_topics)
       {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic changeable qos test PASSED. \n"));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic changeable qos test PASSED.\n"));
       }
       else
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  Topic changeable qos test FAILED. \n"),
+          "(%P|%t) monitor:  Topic changeable qos test FAILED.\n"),
           1);
       }
 
@@ -524,12 +524,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             1);
         }
 
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x. \n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x.\n",
             pubdata[i].key.value[0], pubdata[i].key.value[1], pubdata[i].key.value[2]));
 
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %C \n", pubdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %C \n", pubdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW group data %C \n", pubdata[i].group_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %C\n", pubdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %C\n", pubdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW group data %C\n", pubdata[i].group_data.value.get_buffer()));
 
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DW_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
@@ -550,12 +550,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (num_dws_with_data == len)
       {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter changeable qos test PASSED. \n"));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter changeable qos test PASSED.\n"));
       }
       else
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor: DataWriter changeable qos test FAILED. \n"),
+          "(%P|%t) monitor: DataWriter changeable qos test FAILED.\n"),
           1);
       }
 
@@ -615,12 +615,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             1);
         }
 
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x \n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x\n",
           subdata[i].key.value[0], subdata[i].key.value[1], subdata[i].key.value[2]));
 
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR user data %C \n", subdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR topic data %C \n", subdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR group data %C \n", subdata[i].group_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR user data %C\n", subdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR topic data %C\n", subdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR group data %C\n", subdata[i].group_data.value.get_buffer()));
 
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
@@ -641,12 +641,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (num_drs_with_data == len)
       {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader changeable qos test PASSED. \n"));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader changeable qos test PASSED.\n"));
       }
       else
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor: DataReader changeable qos test FAILED. \n"),
+          "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"),
           1);
       }
 

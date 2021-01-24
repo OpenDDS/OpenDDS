@@ -1,5 +1,5 @@
-#ifndef DDS_SECURITY_UTILS_H
-#define DDS_SECURITY_UTILS_H
+#ifndef OPENDDS_DCPS_SECURITY_COMMONUTILITIES_H
+#define OPENDDS_DCPS_SECURITY_COMMONUTILITIES_H
 
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"

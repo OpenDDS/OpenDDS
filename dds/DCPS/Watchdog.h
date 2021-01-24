@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_WATCHDOG_H
-#define OPENDDS_WATCHDOG_H
+#ifndef OPENDDS_DCPS_WATCHDOG_H
+#define OPENDDS_DCPS_WATCHDOG_H
 
 #include "ace/config-all.h"
 
@@ -14,8 +14,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/TimeDuration.h"
+#include "ReactorInterceptor.h"
+#include "TimeDuration.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

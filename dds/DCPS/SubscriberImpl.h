@@ -5,17 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SUBSCRIBER_H
-#define OPENDDS_DCPS_SUBSCRIBER_H
+#ifndef OPENDDS_DCPS_SUBSCRIBERIMPL_H
+#define OPENDDS_DCPS_SUBSCRIBERIMPL_H
 
-#include "dds/DCPS/DataReaderCallbacks.h"
+#include "DataReaderCallbacks.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
 #include "DataCollector_T.h"
 #include "DataReaderImpl.h"
 #include "ace/Recursive_Thread_Mutex.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

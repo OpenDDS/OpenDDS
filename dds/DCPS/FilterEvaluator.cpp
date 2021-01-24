@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "dds/DCPS/Definitions.h"
+#include "Definitions.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -15,7 +15,7 @@
 #include "FilterExpressionGrammar.h"
 #include "AstNodeWrapper.h"
 #include "Definitions.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "SafetyProfileStreams.h"
 
 #include <ace/ACE.h>
 

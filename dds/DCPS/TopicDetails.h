@@ -3,13 +3,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_TOPICDETAILS_H
-#define OPENDDS_DDS_DCPS_TOPICDETAILS_H
+#ifndef OPENDDS_DCPS_TOPICDETAILS_H
+#define OPENDDS_DCPS_TOPICDETAILS_H
 
-#include "dds/DCPS/TopicCallbacks.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/Definitions.h"
+#include "TopicCallbacks.h"
+#include "GuidUtils.h"
+#include "debug.h"
+#include "Definitions.h"
 #include "XTypes/TypeObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

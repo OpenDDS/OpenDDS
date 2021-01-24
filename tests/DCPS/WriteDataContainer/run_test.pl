@@ -23,7 +23,7 @@ $test->process("WriteDataContainerTest", "WriteDataContainerTest", $parameters);
 $test->start_process("WriteDataContainerTest");
 $result = $test->finish(60);
 if ($result != 0) {
-    print STDERR "ERROR: main returned $result \n";
+    print STDERR "ERROR: main returned $result\n";
     $status = 1;
 }
 exit $status;

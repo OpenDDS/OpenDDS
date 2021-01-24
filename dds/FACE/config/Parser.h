@@ -1,5 +1,5 @@
-#ifndef FACE_CONFIG_PARSER_H
-#define FACE_CONFIG_PARSER_H
+#ifndef OPENDDS_FACE_CONFIG_PARSER_H
+#define OPENDDS_FACE_CONFIG_PARSER_H
 
 #include "FACE/OpenDDS_FACE_Export.h"
 #include "QosSettings.h"

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tests/DCPS/Instances/KeyedDataTypeSupportImpl.h"
-#include "tests/DCPS/Instances/NoKeyDataTypeSupportImpl.h"
+#include "KeyedDataTypeSupportImpl.h"
+#include "NoKeyDataTypeSupportImpl.h"
 #include "TestException.h"
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"

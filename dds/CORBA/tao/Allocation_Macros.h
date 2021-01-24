@@ -1,5 +1,5 @@
-#ifndef Allocation_Macros_h
-#define Allocation_Macros_h
+#ifndef OPENDDS_CORBA_TAO_ALLOCATION_MACROS_H
+#define OPENDDS_CORBA_TAO_ALLOCATION_MACROS_H
 
 #include "ace/Malloc_Base.h"
 

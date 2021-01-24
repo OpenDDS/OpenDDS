@@ -75,7 +75,7 @@ Reader::read (const SampleInfoMap& si_map,
               ::DDS::InstanceStateMask is)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) Reader::read \n")));
+    ACE_TEXT("(%P|%t) Reader::read\n")));
 
   const int factor = 20;
   const int timeout_sec = 10 ;

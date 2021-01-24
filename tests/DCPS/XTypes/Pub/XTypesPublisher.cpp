@@ -237,7 +237,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
   }
 
@@ -256,12 +256,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
 
-  ACE_OS::sleep(ACE_Time_Value(7, 0));
+  DDS::StatusCondition_var condition = expect_to_match ? dw->get_statuscondition() : topic->get_statuscondition();
+  condition->set_enabled_statuses(expect_to_match ? DDS::PUBLICATION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
 
-  failed = !check_inconsistent_topic_status(topic);
+  DDS::ConditionSeq conditions;
+  DDS::Duration_t timeout = { 10, 0 };
+  if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
+      expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
+    failed = 1;
+  }
+
+  ws->detach_condition(condition);
+
+  if (!failed) {
+    failed = !check_inconsistent_topic_status(topic);
+  }
 
   if (failed) {
-    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
   } else if (expect_to_match) {
     if (type == "PlainCdrStruct") {
       write_plain_cdr_struct(dw);

@@ -5,6 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_VERSION_H
+#define OPENDDS_VERSION_H
+
 #define OPENDDS_MAJOR_VERSION 3
 #define OPENDDS_MINOR_VERSION 16
 #define OPENDDS_MICRO_VERSION 0
@@ -35,3 +38,5 @@
 #define DDS_MICRO_VERSION (OPENDDS_MICRO_VERSION)
 // lint.pl ignores nonprefixed_public_macros on next line
 #define DDS_VERSION (OPENDDS_VERSION)
+
+#endif // OPENDDS_VERSION_H

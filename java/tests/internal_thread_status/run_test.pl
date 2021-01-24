@@ -49,13 +49,13 @@ $PubTest->Spawn();
 
 my $PubTestResult = $PubTest->WaitKill (20);
 if ($PubTestResult != 0) {
-    print STDERR "ERROR: test publisher returned $PubTestResult \n";
+    print STDERR "ERROR: test publisher returned $PubTestResult\n";
     $status = 1;
 }
 
 my $SubTestResult = $SubTest->WaitKill (10);
 if ($SubTestResult != 0) {
-    print STDERR "ERROR: test subscriber returned $SubTestResult \n";
+    print STDERR "ERROR: test subscriber returned $SubTestResult\n";
     $status = 1;
 }
 

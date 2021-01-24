@@ -1,8 +1,8 @@
 #ifndef OPENDDS_FACE_SEQUENCE_HEADER
 #define OPENDDS_FACE_SEQUENCE_HEADER
 
-#include "FACE/types.hpp"
-#include "FACE/StringManager.h"
+#include "types.hpp"
+#include "StringManager.h"
 
 #include "dds/DCPS/SafetyProfilePool.h"
 #include "dds/DCPS/Serializer.h"

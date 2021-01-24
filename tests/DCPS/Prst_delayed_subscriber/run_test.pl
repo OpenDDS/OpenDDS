@@ -123,7 +123,7 @@ print "Spawning first subscriber.\n";
 print $Subscriber->CommandLine() . "\n";
 $SubscriberResult = $Subscriber->SpawnWaitKill (30);
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 print "First Subscriber complete.\n";
@@ -147,14 +147,14 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 print "Spawning second subscriber.\n";
 $SubscriberResult = $Subscriber->SpawnWaitKill (60);
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 print "Second Subscriber complete.\n";
 
 $PublisherResult = $Publisher->WaitKill (15);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
 }
 print "Publisher killed.\n";

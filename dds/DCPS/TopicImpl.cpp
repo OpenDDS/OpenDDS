@@ -77,7 +77,7 @@ DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
-                          ACE_TEXT("failed on compatibility check. \n")),
+                          ACE_TEXT("failed on compatibility check.\n")),
                          DDS::RETCODE_ERROR);
       }
     }

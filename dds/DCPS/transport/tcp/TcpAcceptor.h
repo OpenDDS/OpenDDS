@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPACCEPTOR_H
-#define OPENDDS_TCPACCEPTOR_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPACCEPTOR_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPACCEPTOR_H
 
 #include "TcpTransport_rch.h"
 #include "TcpConnection.h"

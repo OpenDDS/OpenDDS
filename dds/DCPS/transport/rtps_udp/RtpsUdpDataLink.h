@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSUDPDATALINK_H
-#define DCPS_RTPSUDPDATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H
 
 #include "Rtps_Udp_Export.h"
 
@@ -428,7 +428,7 @@ private:
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
-    void update_max_sn(SequenceNumber seq);
+    void update_max_sn(const RepoId& reader, SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     RemoveResult remove_sample(const DataSampleElement* sample);

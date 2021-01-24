@@ -80,7 +80,7 @@ OwnershipManager::set_instance_map(const char* type_name,
 {
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) OwnershipManager::set_instance_map ")
-               ACE_TEXT("instance map %X is created by reader %X \n"),
+               ACE_TEXT("instance map %X is created by reader %X\n"),
                instance_map.in(), reader));
   }
 

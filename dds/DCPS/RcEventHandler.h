@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RCEVENTHANDLER_H
-#define OPENDDS_RCEVENTHANDLER_H
+#ifndef OPENDDS_DCPS_RCEVENTHANDLER_H
+#define OPENDDS_DCPS_RCEVENTHANDLER_H
 
 #include "ace/Event_Handler.h"
 #include "dds/Versioned_Namespace.h"

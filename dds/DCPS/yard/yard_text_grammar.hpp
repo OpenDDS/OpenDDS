@@ -5,8 +5,8 @@
 // Each type in this file represents a separate PEG grammar production
 // (parsing rule).
 
-#ifndef YARD_TEXT_GRAMMAR_HPP
-#define YARD_TEXT_GRAMMAR_HPP
+#ifndef OPENDDS_DCPS_YARD_YARD_TEXT_GRAMMAR_HPP
+#define OPENDDS_DCPS_YARD_YARD_TEXT_GRAMMAR_HPP
 
 namespace yard
 {
@@ -292,4 +292,4 @@ namespace text_grammar
 } // text_grammar
 } // yard
 
-#endif // #ifndef YARD_TEXT_GRAMMAR_HPP
+#endif // OPENDDS_DCPS_YARD_YARD_TEXT_GRAMMAR_HPP

@@ -26,8 +26,8 @@
 #include "GroupRakeData.h"
 #include "MultiTopicDataReaderBase.h"
 #include "Util.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
+#include "transport/framework/DataLinkSet.h"
 #include "DCPS_Utils.h"
 
 #include "tao/debug.h"
@@ -645,7 +645,7 @@ SubscriberImpl::set_qos(
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
-                            ACE_TEXT("failed. \n")),
+                            ACE_TEXT("failed.\n")),
                            DDS::RETCODE_ERROR);
         }
 

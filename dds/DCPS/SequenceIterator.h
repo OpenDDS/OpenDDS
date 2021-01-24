@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef DDS_DCPS_ITERATOR_ADAPTOR_H
-#define DDS_DCPS_ITERATOR_ADAPTOR_H
+#ifndef OPENDDS_DCPS_SEQUENCEITERATOR_H
+#define OPENDDS_DCPS_SEQUENCEITERATOR_H
 
 #include "dds/Versioned_Namespace.h"
 

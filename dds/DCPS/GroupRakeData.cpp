@@ -6,10 +6,10 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "dds/DCPS/GroupRakeData.h"
-#include "dds/DCPS/SubscriptionInstance.h"
-#include "dds/DCPS/DataReaderImpl.h"
-#include "dds/DCPS/QueryConditionImpl.h"
+#include "GroupRakeData.h"
+#include "SubscriptionInstance.h"
+#include "DataReaderImpl.h"
+#include "QueryConditionImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

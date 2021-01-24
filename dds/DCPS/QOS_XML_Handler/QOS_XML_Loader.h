@@ -5,19 +5,19 @@
  * Starting point for QOS XML parsing library.
  *
  */
-#ifndef QOS_XML_LOADER_H
-#define QOS_XML_LOADER_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h"
-#include "dds/DCPS/QOS_XML_Handler/XML_File_Intf.h"
+#include "OpenDDS_XML_QOS_Handler_Export.h"
+#include "XML_File_Intf.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-  class XML_QOS_Handler_Export QOS_XML_Loader
+  class OpenDDS_XML_QOS_Handler_Export QOS_XML_Loader
   {
   public:
     QOS_XML_Loader (void);

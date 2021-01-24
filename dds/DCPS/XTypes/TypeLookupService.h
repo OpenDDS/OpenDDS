@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
-#define OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H
+#ifndef OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
+#define OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 
 #include "TypeObject.h"
 
@@ -54,7 +54,7 @@ private:
   TypeMap minimal_type_map_;
 
   // For dependencies of local types
-  typedef std::map<TypeIdentifier, TypeIdentifierWithSizeSeq> TypeIdentifierWithSizeSeqMap;
+  typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifierWithSizeSeq) TypeIdentifierWithSizeSeqMap;
   TypeIdentifierWithSizeSeqMap type_dependencies_map_;
 
   TypeObject to_empty_;
@@ -68,4 +68,4 @@ typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 
-#endif /* ifndef OPENDDS_DCPS_TYPE_LOOKUP_SERVICE_H */
+#endif /* ifndef OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H */

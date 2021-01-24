@@ -1,5 +1,5 @@
-#ifndef OPENDDS_FACE_TSS_H
-#define OPENDDS_FACE_TSS_H
+#ifndef OPENDDS_FACE_FACETSS_H
+#define OPENDDS_FACE_FACETSS_H
 
 #include "FACE/TS.hpp"
 #include "dds/DCPS/PoolAllocator.h"

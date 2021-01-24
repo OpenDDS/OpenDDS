@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef DDS_DCPS_AUTHENTICATION_LOCAL_CREDENTIAL_DATA_H
-#define DDS_DCPS_AUTHENTICATION_LOCAL_CREDENTIAL_DATA_H
+#ifndef OPENDDS_DCPS_SECURITY_AUTHENTICATION_LOCALAUTHCREDENTIALDATA_H
+#define OPENDDS_DCPS_SECURITY_AUTHENTICATION_LOCALAUTHCREDENTIALDATA_H
 
 #include <string>
 
@@ -22,7 +22,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-class DdsSecurity_Export CredentialHash
+class OpenDDS_Security_Export CredentialHash
 {
 public:
   CredentialHash(const SSL::Certificate& cid, const SSL::DiffieHellman& dh, const DDS::OctetSeq& cpdata, const DDS::OctetSeq& cperm)
@@ -39,7 +39,7 @@ private:
   const DDS::OctetSeq& permissions_data_;
 };
 
-class DdsSecurity_Export LocalAuthCredentialData : public DCPS::RcObject {
+class OpenDDS_Security_Export LocalAuthCredentialData : public DCPS::RcObject {
 public:
   typedef DCPS::RcHandle<LocalAuthCredentialData> shared_ptr;
 

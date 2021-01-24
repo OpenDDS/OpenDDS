@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/RTPS/GuidGenerator.h"
+#include "GuidGenerator.h"
 
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/TimeTypes.h"

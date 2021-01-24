@@ -10,7 +10,7 @@
 
 #include "TestUtils_Export.h"
 
-#include "tests/Utils/DDSTopicFacade.h"
+#include "DDSTopicFacade.h"
 
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"

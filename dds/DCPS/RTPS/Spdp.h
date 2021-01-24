@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_SPDP_H
-#define OPENDDS_RTPS_SPDP_H
+#ifndef OPENDDS_DCPS_RTPS_SPDP_H
+#define OPENDDS_DCPS_RTPS_SPDP_H
 
 #include "Sedp.h"
 #include "rtps_export.h"

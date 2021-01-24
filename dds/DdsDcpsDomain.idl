@@ -5,13 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DOMAIN_IDL
-#define OPENDDS_DCPS_DOMAIN_IDL
+#ifndef OPENDDS_DDSDCPSDOMAIN_IDL
+#define OPENDDS_DDSDCPSDOMAIN_IDL
 
-#include "dds/DdsDcpsInfrastructure.idl"
-#include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/DdsDcpsTopic.idl>
+#include <dds/DdsDcpsPublication.idl>
+#include <dds/DdsDcpsSubscription.idl>
 
 #pragma ciao lem "dds/DdsDcpsDomainE.idl"
 

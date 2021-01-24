@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_PRINTER_HEADER
-#define OPENDDS_DCPS_PRINTER_HEADER
+#ifndef OPENDDS_DCPS_PRINTER_H
+#define OPENDDS_DCPS_PRINTER_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
@@ -101,4 +101,4 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // ifndef OPENDDS_SAFETY_PROFILE
 
-#endif // ifndef OPENDDS_DCPS_PRINTER_HEADER
+#endif // ifndef OPENDDS_DCPS_PRINTER_H

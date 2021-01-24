@@ -1,5 +1,5 @@
-#include "dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h"
-#include "dds/DCPS/QOS_XML_Handler/XML_File_Intf.h"
+#include "QOS_XML_Loader.h"
+#include "XML_File_Intf.h"
 #include "ace/Tokenizer_T.h"
 #include "dds/DCPS/debug.h"
 

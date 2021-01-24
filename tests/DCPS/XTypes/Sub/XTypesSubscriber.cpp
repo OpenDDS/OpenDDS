@@ -24,7 +24,7 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
   std::set<int> instances;
 
   ConditionSeq active;
-  const Duration_t max_wait = { 5, 0 };
+  const Duration_t max_wait = { 10, 0 };
   ReturnCode_t ret = ws->wait(active, max_wait);
 
   if (ret == RETCODE_TIMEOUT) {
@@ -255,7 +255,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
   }
 
@@ -275,27 +275,42 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
     DEFAULT_STATUS_MASK);
 
-  ACE_OS::sleep(ACE_Time_Value(7, 0));
+  DDS::StatusCondition_var condition = expect_to_match ? dr->get_statuscondition() : topic->get_statuscondition();
+  condition->set_enabled_statuses(expect_to_match ? DDS::SUBSCRIPTION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
 
-  failed = !check_inconsistent_topic_status(topic);
+  DDS::ConditionSeq conditions;
+  DDS::Duration_t timeout = { 10, 0 };
+  if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
+      expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
+    failed = 1;
+  }
+
+  ws->detach_condition(condition);
+
+  if (!failed) {
+    failed = !check_inconsistent_topic_status(topic);
+  }
 
   if (failed) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %s\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
   } else if (expect_to_match) {
     if (type == "PlainCdrStruct") {
-      failed = !(read_plain_cdr_struct(dr) == RETCODE_OK);
+      failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStruct") {
-      failed = !(read_appendable_struct(dr) == RETCODE_OK);
+      failed = (read_appendable_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStructNoXTypes") {
-      failed = !(read_appendable_struct_no_xtypes(dr) == RETCODE_OK);
+      failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
     } else if (type == "FinalStructSub") {
-      failed = !(read_final_struct(dr) == RETCODE_OK);
+      failed = (read_final_struct(dr) != RETCODE_OK);
     } else if (type == "MutableStruct") {
-      failed = !(read_mutable_struct(dr) == RETCODE_OK);
+      failed = (read_mutable_struct(dr) != RETCODE_OK);
     } else if (type == "MutableUnion") {
-      failed = !(read_mutable_union(dr) == RETCODE_OK);
+      failed = (read_mutable_union(dr) != RETCODE_OK);
     } else if (type == "Trim20Struct") {
-      failed = !(read_trim20_struct(dr) == RETCODE_OK);
+      failed = (read_trim20_struct(dr) != RETCODE_OK);
     }
   }
 

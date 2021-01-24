@@ -3,11 +3,11 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SUBJECT_NAME_H
-#define OPENDDS_SECURITY_SUBJECT_NAME_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_SUBJECTNAME_H
+#define OPENDDS_DCPS_SECURITY_SSL_SUBJECTNAME_H
 
-#include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/security/DdsSecurity_Export.h"
+#include <dds/Versioned_Namespace.h>
+#include <dds/DCPS/security/OpenDDS_Security_Export.h>
 
 #include <string>
 #include <map>
@@ -18,7 +18,7 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-class DdsSecurity_Export SubjectName {
+class OpenDDS_Security_Export SubjectName {
 public:
   SubjectName();
   explicit SubjectName(const char*, bool permissive = false);

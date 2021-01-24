@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_ACCESS_GOVERNANCE_H
-#define OPENDDS_ACCESS_GOVERNANCE_H
+#ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROL_GOVERNANCE_H
+#define OPENDDS_DCPS_SECURITY_ACCESSCONTROL_GOVERNANCE_H
 
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DdsSecurityCoreC.h"

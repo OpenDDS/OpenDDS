@@ -17,9 +17,9 @@
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/DataLinkSet.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
 #include "tao/debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -466,7 +466,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-              ACE_TEXT("failed. \n")),
+              ACE_TEXT("failed.\n")),
               DDS::RETCODE_ERROR);
         }
 
@@ -511,7 +511,7 @@ PublisherImpl::suspend_publications()
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::suspend_publications, ")
-        ACE_TEXT(" Entity is not enabled. \n")),
+        ACE_TEXT(" Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -540,7 +540,7 @@ PublisherImpl::resume_publications()
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::resume_publications, ")
-        ACE_TEXT(" Entity is not enabled. \n")),
+        ACE_TEXT(" Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
 

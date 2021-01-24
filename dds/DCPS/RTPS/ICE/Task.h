@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_ICE_TASK_H
-#define OPENDDS_RTPS_ICE_TASK_H
+#ifndef OPENDDS_DCPS_RTPS_ICE_TASK_H
+#define OPENDDS_DCPS_RTPS_ICE_TASK_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

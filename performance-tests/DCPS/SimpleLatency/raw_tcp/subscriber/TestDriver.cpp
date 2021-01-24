@@ -213,7 +213,7 @@ TestDriver::run_i()
       && errno != ENOTSUP)
   {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) TcpSubscriber failed to set the receive buffer size to %d errno %m \n",
+               "(%P|%t) TcpSubscriber failed to set the receive buffer size to %d errno %m\n",
                rcv_size));
   }
 #  endif /* !ACE_LACKS_SOCKET_BUFSIZ */

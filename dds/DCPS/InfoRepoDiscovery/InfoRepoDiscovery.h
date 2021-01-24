@@ -5,14 +5,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
-#define OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
 
 #include "dds/DCPS/Discovery.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
-#include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
+#include "DataReaderRemoteC.h"
+#include "InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 #include "dds/DCPS/XTypes/TypeObject.h"
 #include "dds/DCPS/TypeSupportImpl.h"

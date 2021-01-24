@@ -6,7 +6,7 @@
 #include "BuiltInPlugins.h"
 #include "BuiltInPluginLoader.h"
 
-#include "ace/Service_Config.h"
+#include <ace/Service_Config.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -17,7 +17,7 @@ BuiltinPluginsInitializer::BuiltinPluginsInitializer()
 {
   ACE_Service_Config::process_directive(ace_svc_desc_BuiltInPluginLoader);
 
-#if (DDSSECURITY_HAS_DLL == 0)
+#if (OPENDDS_SECURITY_HAS_DLL == 0)
   ACE_Service_Config::process_directive(ACE_TEXT("static OpenDDS_Security"));
 #endif
 }
