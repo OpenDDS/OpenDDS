@@ -147,7 +147,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   // read durable data from dr
   if (!Utils::waitForSample(dr)) return false;
 #ifdef ACE_HAS_CPP11
-  if (takeSamples(dr, bind(greater<CORBA::Long>(), _1, 98)) != 1) {
+  if (takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 98)) != 1) {
 #else
   if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 98)) != 1) {
 #endif
@@ -203,7 +203,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (!Utils::waitForSample(dr)) return false;
 
 #ifdef ACE_HAS_CPP11
-  size_t taken = takeSamples(dr, bind(greater<CORBA::Long>(), _1, 1));
+  size_t taken = takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 1));
 #else
   size_t taken = takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
 #endif
@@ -211,7 +211,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     cout << "INFO: partial read on DataReader \"dr\"\n";
     if (!Utils::waitForSample(dr)) return false;
 #ifdef ACE_HAS_CPP11
-    taken += takeSamples(dr, bind(greater<CORBA::Long>(), _1, 1));
+    taken += takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 1));
 #else
     taken += takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
 #endif
@@ -225,7 +225,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (!Utils::waitForSample(sub2_dr2)) return false;
 
 #ifdef ACE_HAS_CPP11
-  if (takeSamples(sub2_dr2, bind(greater<CORBA::Long>(), _1, 2)) != 1) {
+  if (takeSamples(sub2_dr2, bind(greater<CORBA::Long>(), placeholders::_1, 2)) != 1) {
 #else
   if (takeSamples(sub2_dr2, bind2nd(greater<CORBA::Long>(), 2)) != 1) {
 #endif

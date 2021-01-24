@@ -77,7 +77,9 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
                                              StaticParticipant& participant)
   : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
   , registry_(registry)
+#ifndef DDS_HAS_MINIMUM_BIT
   , participant_(participant)
+#endif
 {
   type_lookup_init(TheServiceParticipant->interceptor());
 }
