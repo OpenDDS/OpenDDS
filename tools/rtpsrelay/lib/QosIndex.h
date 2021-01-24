@@ -141,7 +141,7 @@ public:
   void erase(WriterPtr writer)
   {
     const auto pos = writers_.find(writer);
-    for (const auto reader : pos->second) {
+    for (const auto& reader : pos->second) {
       readers_[reader].erase(writer);
     }
     writers_.erase(writer);
@@ -167,7 +167,7 @@ public:
   void erase(ReaderPtr reader)
   {
     const auto pos = readers_.find(reader);
-    for (const auto writer : pos->second) {
+    for (const auto& writer : pos->second) {
       writers_[writer].erase(reader);
     }
     readers_.erase(reader);
@@ -191,7 +191,7 @@ public:
   {
     const auto pos = writers_.find(writer);
     if (pos != writers_.end()) {
-      for (const auto reader : pos->second) {
+      for (const auto& reader : pos->second) {
         to.insert(reader->participant_guid());
       }
     }
@@ -209,7 +209,7 @@ public:
   {
     const auto pos = readers_.find(reader);
     if (pos != readers_.end()) {
-      for (const auto writer : pos->second) {
+      for (const auto& writer : pos->second) {
         to.insert(writer->participant_guid());
       }
     }

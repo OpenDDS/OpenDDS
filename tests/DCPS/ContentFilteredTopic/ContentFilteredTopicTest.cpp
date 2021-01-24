@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <functional>
 
 #if defined __GNUC__ && __GNUC__ == 4 && __GNUC_MINOR__ <= 1
 # define INT64_LITERAL_SUFFIX(X) X ## ll
@@ -145,7 +146,11 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   // read durable data from dr
   if (!Utils::waitForSample(dr)) return false;
+#ifdef ACE_HAS_CPP11
   if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 98)) != 1) {
+#else
+  if (takeSamples(dr, bind(greater<CORBA::Long>(), _1, 98)) != 1) {
+#endif
     cout << "ERROR: take() should have returned a valid durable sample (99)"
          << endl;
     return false;
@@ -197,11 +202,19 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   if (!Utils::waitForSample(dr)) return false;
 
+#ifdef ACE_HAS_CPP11
   size_t taken = takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+#else
+  size_t taken = takeSamples(dr, bind(greater<CORBA::Long>(), _1, 1));
+#endif
   if (taken == 1) {
     cout << "INFO: partial read on DataReader \"dr\"\n";
     if (!Utils::waitForSample(dr)) return false;
+#ifdef ACE_HAS_CPP11
     taken += takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+#else
+    taken += takeSamples(dr, bind(greater<CORBA::Long>(), _1, 1));
+#endif
   }
 
   if (taken != 2) {
@@ -211,7 +224,11 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   if (!Utils::waitForSample(sub2_dr2)) return false;
 
+#ifdef ACE_HAS_CPP11
   if (takeSamples(sub2_dr2, bind2nd(greater<CORBA::Long>(), 2)) != 1) {
+#else
+  if (takeSamples(sub2_dr2, bind(greater<CORBA::Long>(), _1, 2)) != 1) {
+#endif
     cout << "ERROR: take() should have returned one valid sample" << endl;
     return false;
   }
