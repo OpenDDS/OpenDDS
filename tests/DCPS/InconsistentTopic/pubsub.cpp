@@ -214,7 +214,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         test_error = true;
       }
       if (sub_status.total_count_change != 0) {
-        cerr << "ERROR: dr2 total_count_change should be 0 but is " << sub_status.total_count << endl;
+        cerr << "ERROR: dr2 total_count_change should be 0 but is " << sub_status.total_count_change << endl;
         test_error = true;
       }
 
