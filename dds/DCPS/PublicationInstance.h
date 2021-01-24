@@ -11,11 +11,11 @@
 #include "dcps_export.h"
 #include "InstanceDataSampleList.h"
 #include "DataSampleElement.h"
-#include "dds/DCPS/PoolAllocationBase.h"
+#include "PoolAllocationBase.h"
 #include "ace/Synch_Traits.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "RcObject.h"
+#include "unique_ptr.h"
+#include "TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

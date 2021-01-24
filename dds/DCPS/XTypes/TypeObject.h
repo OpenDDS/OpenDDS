@@ -3,13 +3,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_OBJECT_H
-#define OPENDDS_DCPS_TYPE_OBJECT_H
+#ifndef OPENDDS_DCPS_XTYPES_TYPE_OBJECT_H
+#define OPENDDS_DCPS_XTYPES_TYPE_OBJECT_H
 
 #include "External.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/Serializer.h"
+
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/Serializer.h>
 
 #include <ace/CDR_Base.h>
 
@@ -2518,4 +2519,4 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* OPENDDS_DCPS_TYPE_OBJECT_H */
+#endif  /* OPENDDS_DCPS_XTYPES_TYPE_OBJECT_H */

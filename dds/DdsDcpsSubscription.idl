@@ -5,11 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SUBSCRIPTION_IDL
-#define OPENDDS_DCPS_SUBSCRIPTION_IDL
+#ifndef OPENDDS_DDSDCPSSUBSCRIPTION_IDL
+#define OPENDDS_DDSDCPSSUBSCRIPTION_IDL
 
-#include "dds/DdsDcpsInfrastructure.idl"
-#include "dds/DdsDcpsDataReaderSeq.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/DdsDcpsDataReaderSeq.idl>
 
 #pragma ciao lem "dds/DdsDcpsSubscriptionE.idl"
 

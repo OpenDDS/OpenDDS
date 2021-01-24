@@ -11,12 +11,12 @@
 #include "dcps_export.h"
 #include "ace/Time_Value.h"
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/RepoIdTypes.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "Definitions.h"
+#include "GuidUtils.h"
+#include "PoolAllocator.h"
+#include "ReactorInterceptor.h"
+#include "RepoIdTypes.h"
+#include "TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

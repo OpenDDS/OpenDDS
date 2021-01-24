@@ -1,16 +1,16 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "StaticDiscovery.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "debug.h"
+#include "ConfigUtils.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "SubscriberImpl.h"
+#include "BuiltInTopicUtils.h"
+#include "Registered_Data_Types.h"
+#include "Qos_Helper.h"
+#include "DataWriterImpl.h"
+#include "transport/framework/TransportRegistry.h"
 
 #include <ctype.h>
 

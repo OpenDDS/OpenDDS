@@ -64,7 +64,7 @@ void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) Writer::start \n")));
+    ACE_TEXT("(%P|%t) Writer::start\n")));
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
@@ -77,7 +77,7 @@ void
 Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end \n")));
+             ACE_TEXT("(%P|%t) Writer::end\n")));
   wait ();
 }
 

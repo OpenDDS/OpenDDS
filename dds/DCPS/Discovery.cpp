@@ -12,7 +12,7 @@
 #include "Registered_Data_Types.h"
 #include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
 
 #ifndef DDS_HAS_MINIMUM_BIT

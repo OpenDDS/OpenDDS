@@ -124,13 +124,13 @@ $Subscriber->Spawn();
 
 $SubscriberResult = $Subscriber->WaitKill(300);
 if ($SubscriberResult != 0) {
-  print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+  print STDERR "ERROR: subscriber returned $SubscriberResult\n";
   $status = 1;
 }
 
 $PublisherResult = $Publisher->WaitKill (15);
 if ($PublisherResult != 0) {
-  print STDERR "ERROR: publisher returned $PublisherResult \n";
+  print STDERR "ERROR: publisher returned $PublisherResult\n";
   $status = 1;
 }
 

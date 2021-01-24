@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_SHMEMLOADER_H
-#define OPENDDS_SHMEMLOADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEMLOADER_H
+#define OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEMLOADER_H
 
 #include "Shmem_Export.h"
 

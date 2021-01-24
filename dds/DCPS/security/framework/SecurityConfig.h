@@ -5,28 +5,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SECURTIY_CONFIG_H
-#define OPENDDS_DCPS_SECURTIY_CONFIG_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
+
+#include "SecurityConfigPropertyList.h"
+#ifdef OPENDDS_SECURITY
+#  include "HandleRegistry.h"
+#endif
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/Utility.h>
+#endif
+
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
+#endif
+#include <dds/DdsDcpsCoreC.h>
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
+#  pragma once
 #endif
-
-#include "dds/DCPS/dcps_export.h"
-
-#ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/Utility.h"
-#include "HandleRegistry.h"
-#endif
-
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
-
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

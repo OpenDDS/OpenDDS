@@ -8,7 +8,7 @@
 
 #include "dds/Versioned_Namespace.h"
 
-#include "dds/DCPS/dcps_export.h"
+#include "dcps_export.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {

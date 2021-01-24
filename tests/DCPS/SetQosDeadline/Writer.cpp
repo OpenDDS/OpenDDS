@@ -37,7 +37,7 @@ void
 Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end \n")));
+             ACE_TEXT("(%P|%t) Writer::end\n")));
   wait ();
 }
 
@@ -101,7 +101,7 @@ Writer::svc ()
          << e << endl;
   }
 
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t) Done writing. \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) Done writing.\n"));
 
   return 0;
 }

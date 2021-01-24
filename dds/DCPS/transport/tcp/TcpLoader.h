@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TCP_LOADER_H
-#define TCP_LOADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPLOADER_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPLOADER_H
 #include /**/ "ace/pre.h"
 
 #include "Tcp_export.h"

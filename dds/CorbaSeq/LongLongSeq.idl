@@ -21,8 +21,8 @@
  */
 // ================================================================
 
-#ifndef OPENDDS_CORBA_LONGLONG_SEQ_IDL
-#define OPENDDS_CORBA_LONGLONG_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_LONGLONGSEQ_IDL
+#define OPENDDS_CORBASEQ_LONGLONGSEQ_IDL
 
 #pragma prefix "omg.org"
 

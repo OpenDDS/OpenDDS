@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tools/dissector/sample_manager.h"
+#include "sample_manager.h"
 #include "ws_common.h"
 
 #include <ace/Basic_Types.h>

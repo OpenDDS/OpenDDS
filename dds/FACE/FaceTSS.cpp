@@ -354,7 +354,7 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     if (!readers.count(connection_id) || transaction_id == 0) {
       if (OpenDDS::DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) receive_header - INVALID_PARAM - "
-          "could not find reader for connection_id: %d OR transaction id[%d] == 0 \n",
+          "could not find reader for connection_id: %d OR transaction id[%d] == 0\n",
           connection_id,
           transaction_id));
       }
@@ -364,7 +364,7 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
 
     if (message_size < 0 || (unsigned)message_size < sizeof(FACE::TS::MessageHeader)) {
       if (OpenDDS::DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) receive_header - INVALID_PARAM - message_size: %d is < %d \n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) receive_header - INVALID_PARAM - message_size: %d is < %d\n",
           message_size,
           sizeof(FACE::TS::MessageHeader)));
       }
@@ -430,7 +430,7 @@ namespace {
       return;
     }
     if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found existing participant for domainId: %d \n", domainId));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found existing participant for domainId: %d\n", domainId));
     }
     dp = temp_dp;
   }

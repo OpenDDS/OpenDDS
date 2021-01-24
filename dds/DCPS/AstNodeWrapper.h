@@ -7,8 +7,8 @@
 #ifndef OPENDDS_DCPS_ASTNODEWRAPPER_H
 #define OPENDDS_DCPS_ASTNODEWRAPPER_H
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "Definitions.h"
+#include "PoolAllocator.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 

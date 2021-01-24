@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_BESTEFFORTSESSION_H
-#define DCPS_BESTEFFORTSESSION_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_BESTEFFORTSESSION_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_BESTEFFORTSESSION_H
 
 #include "Multicast_Export.h"
 

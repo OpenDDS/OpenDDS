@@ -6,8 +6,8 @@
  */
 
 #ifdef OPENDDS_SECURITY
-#ifndef OPENDDS_RTPS_STUN_H
-#define OPENDDS_RTPS_STUN_H
+#ifndef OPENDDS_DCPS_RTPS_ICE_STUN_H
+#define OPENDDS_DCPS_RTPS_ICE_STUN_H
 
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"

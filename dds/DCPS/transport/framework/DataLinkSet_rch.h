@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATALINKSET_RCH_H
-#define OPENDDS_DCPS_DATALINKSET_RCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINKSET_RCH_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINKSET_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
 

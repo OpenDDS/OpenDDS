@@ -11,9 +11,9 @@
 #ifndef OPENDDS_NO_QUERY_CONDITION
 
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DCPS/ReadConditionImpl.h"
-#include "dds/DCPS/FilterEvaluator.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "ReadConditionImpl.h"
+#include "FilterEvaluator.h"
+#include "PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

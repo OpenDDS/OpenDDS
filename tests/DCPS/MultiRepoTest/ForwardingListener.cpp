@@ -162,7 +162,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_subscription_matched Repo[ %C] \n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_subscription_matched Repo[ %C]\n"),
       this->repo_.c_str()
     ));
   }
@@ -176,7 +176,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_rejected Repo[ %C] \n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_rejected Repo[ %C]\n"),
       this->repo_.c_str()
     ));
   }
@@ -202,7 +202,7 @@ void ForwardingListenerImpl::on_subscription_matched (
 
     } else if( CORBA::is_nil( this->dataWriter_.in())) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] - bit bucket reached. \n"),
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] - bit bucket reached.\n"),
         this->repo_.c_str()
       ));
       // The bit bucket is done processing when the answer is received.
@@ -216,7 +216,7 @@ void ForwardingListenerImpl::on_subscription_matched (
       // Signal that we are done once we receive a disconnect message.
       // We use the data_source member as a command value.
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] - termination command received. \n"),
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] - termination command received.\n"),
         this->repo_.c_str()
       ));
       ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
@@ -263,7 +263,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_lost Repo[ %C] \n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_lost Repo[ %C]\n"),
       this->repo_.c_str()
     ));
   }

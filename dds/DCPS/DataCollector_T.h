@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DATA_COLLECTOR_H
-#define DATA_COLLECTOR_H
+#ifndef OPENDDS_DCPS_DATACOLLECTOR_T_H
+#define OPENDDS_DCPS_DATACOLLECTOR_T_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"
@@ -16,8 +16,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "PoolAllocator.h"
+#include "SafetyProfileStreams.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

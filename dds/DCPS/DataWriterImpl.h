@@ -5,17 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAWRITER_H
-#define OPENDDS_DCPS_DATAWRITER_H
+#ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
+#define OPENDDS_DCPS_DATAWRITERIMPL_H
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DCPS/DataWriterCallbacks.h"
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/MessageTracker.h"
-#include "dds/DCPS/DataBlockLockPool.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "DataWriterCallbacks.h"
+#include "transport/framework/TransportSendListener.h"
+#include "transport/framework/TransportClient.h"
+#include "MessageTracker.h"
+#include "DataBlockLockPool.h"
+#include "PoolAllocator.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"

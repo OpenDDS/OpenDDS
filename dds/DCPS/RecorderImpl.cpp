@@ -161,7 +161,7 @@ void RecorderImpl::init(
   if (DCPS_debug_level >= 1) {
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::init \n")));
+               ACE_TEXT("(%P|%t) RecorderImpl::init\n")));
   }
 
 
@@ -349,7 +349,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       //   GuidConverter converter(writer_id);
       //   ACE_DEBUG((LM_DEBUG,
       //              "(%P|%t) RecorderImpl::add_association: "
-      //              "inserted writer %C.return %d \n",
+      //              "inserted writer %C.return %d\n",
       //              OPENDDS_STRING(converter).c_str(), bpair.second));
       //
       //   WriterMapType::iterator iter = writers_.find(writer_id);
@@ -526,7 +526,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
                OPENDDS_STRING(reader_converter).c_str(),
                OPENDDS_STRING(writer_converter).c_str(),
@@ -591,7 +591,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
                OPENDDS_STRING(reader_converter).c_str(),
                OPENDDS_STRING(writer_converter).c_str(),
@@ -863,7 +863,7 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) RecorderImpl::set_qos, ")
-                          ACE_TEXT("qos not updated. \n")),
+                          ACE_TEXT("qos not updated.\n")),
                          DDS::RETCODE_ERROR);
       }
     }

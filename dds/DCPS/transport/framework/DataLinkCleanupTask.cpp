@@ -9,7 +9,7 @@
 
 #include "DataLinkCleanupTask.h"
 
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "EntryExit.h"
 
 OpenDDS::DCPS::DataLinkCleanupTask::DataLinkCleanupTask()
 {

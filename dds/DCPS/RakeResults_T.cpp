@@ -7,11 +7,11 @@
 #ifndef RAKERESULTS_T_CPP
 #define RAKERESULTS_T_CPP
 
-#include "dds/DCPS/RakeResults_T.h"
-#include "dds/DCPS/SubscriptionInstance.h"
-#include "dds/DCPS/DataReaderImpl.h"
-#include "dds/DCPS/QueryConditionImpl.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "RakeResults_T.h"
+#include "SubscriptionInstance.h"
+#include "DataReaderImpl.h"
+#include "QueryConditionImpl.h"
+#include "PoolAllocator.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

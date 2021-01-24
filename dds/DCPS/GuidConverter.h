@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_GUIDCONVERTER_H
-#define DCPS_GUIDCONVERTER_H
+#ifndef OPENDDS_DCPS_GUIDCONVERTER_H
+#define OPENDDS_DCPS_GUIDCONVERTER_H
 
 #include "dcps_export.h"
 #include "Definitions.h"

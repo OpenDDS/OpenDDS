@@ -5,15 +5,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DCPSINFO_IDL
-#define OPENDDS_DCPS_DCPSINFO_IDL
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_INFO_IDL
+#define OPENDDS_DCPS_INFOREPODISCOVERY_INFO_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
-#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl"
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl"
+#include "DataWriterRemote.idl"
+#include "DataReaderRemote.idl"
 
 module OpenDDS {
   module DCPS {

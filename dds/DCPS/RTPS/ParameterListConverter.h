@@ -4,8 +4,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef PARAMETER_LIST_CONVERTER_H
-#define PARAMETER_LIST_CONVERTER_H
+#ifndef OPENDDS_DCPS_RTPS_PARAMETERLISTCONVERTER_H
+#define OPENDDS_DCPS_RTPS_PARAMETERLISTCONVERTER_H
 
 #include "rtps_export.h"
 #include "RtpsCoreC.h"

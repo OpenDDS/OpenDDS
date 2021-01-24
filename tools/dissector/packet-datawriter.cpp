@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tools/dissector/packet-datawriter.h"
+#include "packet-datawriter.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 #include "ace/Basic_Types.h"

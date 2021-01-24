@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RECEIVEDDATASTRATEGY_H
-#define DCPS_RECEIVEDDATASTRATEGY_H
+#ifndef OPENDDS_DCPS_RECEIVEDDATASTRATEGY_H
+#define OPENDDS_DCPS_RECEIVEDDATASTRATEGY_H
 
 #include "CoherentChangeControl.h"
 #include "PoolAllocationBase.h"

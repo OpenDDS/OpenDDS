@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_DATALINKWATCHDOG_T_H
-#define DCPS_DATALINKWATCHDOG_T_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINKWATCHDOG_T_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINKWATCHDOG_T_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"

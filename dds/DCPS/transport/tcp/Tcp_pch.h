@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef SIMPLETCP_PCH_H
-#define SIMPLETCP_PCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCP_PCH_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCP_PCH_H
 
 #ifdef USING_PCH
 

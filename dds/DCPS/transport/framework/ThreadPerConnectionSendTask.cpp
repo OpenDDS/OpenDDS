@@ -12,7 +12,7 @@
 #include "DataLink.h"
 #include "ThreadPerConRemoveVisitor.h"
 #include "DirectPriorityMapper.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "EntryExit.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 

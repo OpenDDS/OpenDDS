@@ -100,7 +100,7 @@ void
 Writer::test1 ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::test1 \n")));
+              ACE_TEXT("(%P|%t) Writer::test1\n")));
 
   try
   {
@@ -136,7 +136,7 @@ void
 Writer::test2 ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::test2 \n")));
+              ACE_TEXT("(%P|%t) Writer::test2\n")));
 
   try
   {
@@ -181,7 +181,7 @@ void
 Writer::test3 ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::test3 \n")));
+              ACE_TEXT("(%P|%t) Writer::test3\n")));
 
   try
   {
@@ -232,7 +232,7 @@ void
 Writer::test4 ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::test4 \n")));
+              ACE_TEXT("(%P|%t) Writer::test4\n")));
 
   try
   {
@@ -256,7 +256,7 @@ void
 Writer::test5 ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::test5 \n")));
+              ACE_TEXT("(%P|%t) Writer::test5\n")));
 
   try
   {
@@ -281,7 +281,7 @@ void
 Writer::test6 ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::test6 \n")));
+              ACE_TEXT("(%P|%t) Writer::test6\n")));
 
   try
   {

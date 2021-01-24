@@ -1,5 +1,5 @@
-#ifndef dds_DCPS_PoolAllocationBase_h
-#define dds_DCPS_PoolAllocationBase_h
+#ifndef OPENDDS_DCPS_POOLALLOCATIONBASE_H
+#define OPENDDS_DCPS_POOLALLOCATIONBASE_H
 
 #include <new>
 #include "SafetyProfilePool.h"

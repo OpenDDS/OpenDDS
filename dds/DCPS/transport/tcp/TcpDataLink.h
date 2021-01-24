@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPDATALINK_H
-#define OPENDDS_TCPDATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPDATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPDATALINK_H
 
 #include "TcpConnection_rch.h"
 #include "TcpTransport.h"

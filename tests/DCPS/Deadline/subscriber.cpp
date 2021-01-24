@@ -249,7 +249,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(SLEEP_DURATION.value());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: now verify missed ")
-                           ACE_TEXT("deadline status \n")));
+                           ACE_TEXT("deadline status\n")));
 
       DDS::RequestedDeadlineMissedStatus deadline_status1;
       if (dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
@@ -266,7 +266,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed ")
-                            ACE_TEXT("deadline status \n")));
+                            ACE_TEXT("deadline status\n")));
 
       Messenger::Message message;
       message.subject_id = 99;
@@ -344,7 +344,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(no_miss_period.value());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: now verify missed ")
-                           ACE_TEXT("deadline status \n")));
+                           ACE_TEXT("deadline status\n")));
 
       if ((dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
         || (dr2->get_requested_deadline_missed_status(deadline_status2) != ::DDS::RETCODE_OK))
@@ -354,7 +354,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed ")
-                           ACE_TEXT("deadline status \n")));
+                           ACE_TEXT("deadline status\n")));
 
       if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)

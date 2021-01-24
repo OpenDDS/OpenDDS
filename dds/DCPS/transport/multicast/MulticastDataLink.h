@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTDATALINK_H
-#define DCPS_MULTICASTDATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTDATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTDATALINK_H
 
 #include "Multicast_Export.h"
 

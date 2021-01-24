@@ -10,9 +10,9 @@
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
-#include "dds/DCPS/TopicDescriptionImpl.h"
-#include "dds/DCPS/FilterEvaluator.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "TopicDescriptionImpl.h"
+#include "FilterEvaluator.h"
+#include "PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

@@ -1,5 +1,5 @@
-#ifndef dds_DCPS_SafetyProfileSequencVar_h
-#define dds_DCPS_SafetyProfileSequencVar_h
+#ifndef OPENDDS_DCPS_SAFETYPROFILESEQUENCEVAR_H
+#define OPENDDS_DCPS_SAFETYPROFILESEQUENCEVAR_H
 
 
 namespace OpenDDS {
