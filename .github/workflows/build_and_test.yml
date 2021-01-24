@@ -3294,7 +3294,482 @@ jobs:
 
   # Windows 2016 - No Debug, No Inline
 
-  windows-2016_no-debug_no-inline_ACE_TAO:
+#  windows-2016_no-debug_no-inline_ACE_TAO:
+#
+#    runs-on: windows-2016
+#
+#    steps:
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: get ACE_TAO commit
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        export ACE_COMMIT=$(git rev-parse HEAD)
+#        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+#    - name: Cache Artifact
+#      id: cache-artifact
+#      uses: actions/cache@v2
+#      with:
+#        path: ${{ github.job }}.tar.xz
+#        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+#    - name: install openssl-windows & xerces-c
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      uses: lukka/run-vcpkg@v6
+#      with:
+#        vcpkgGitCommitId: ec6fe06
+#        vcpkgArguments: --recurse openssl-windows xerces-c
+#        vcpkgTriplet: x64-windows
+#    - name: checkout MPC
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: set up msvc env
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      uses: ilammy/msvc-dev-cmd@v1.5.0
+#    - name: configure OpenDDS
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        configure --no-debug --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+#    - name: build ACE & TAO
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd ACE_TAO\ACE
+#        msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
+#        cd ..\TAO
+#        msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
+#    - name: create ACE_TAO tar.xz artifact
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+#        find . -iname "*\.obj" | xargs rm
+#        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+#        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+#        xz -3 ../../${{ github.job }}.tar
+#    - name: upload ACE_TAO artifact
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_artifact
+#        path: ${{ github.job }}.tar.xz
+#
+#  windows-2016_no-debug_no-inline_security_build:
+#
+#    runs-on: windows-2016
+#
+#    needs: windows-2016_no-debug_no-inline_ACE_TAO
+#
+#    steps:
+#    - name: install openssl-windows & xerces-c
+#      uses: lukka/run-vcpkg@v6
+#      with:
+#        vcpkgGitCommitId: ec6fe06
+#        vcpkgArguments: --recurse openssl-windows xerces-c
+#        vcpkgTriplet: x64-windows
+#        vcpkgDirectory: 'C:\vcpkg'
+#    - name: Clean Up VCPKG
+#      shell: bash
+#      run: |
+#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
+#    - name: checkout MPC
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+#    - name: Move ACE and MPC to C Drive
+#      shell: bash
+#      run: |
+#        mv OpenDDS/ACE_TAO /c/
+#        mv MPC /c/
+#        echo $VCPKG_ROOT
+#    - uses: ammaraskar/msvc-problem-matcher@0.1
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1.5.0
+#    - name: configure OpenDDS
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows" --openssl="C:\vcpkg\installed\x64-windows"
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
+#    - name: build OpenDDS
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+#    - name: create OpenDDS tar.xz artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        rm -rf ACE_TAO
+#        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+#        tar cvf ../${{ github.job }}.tar setenv.cmd
+#        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+#        xz -3 ../${{ github.job }}.tar
+#    - name: upload OpenDDS artifact
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_artifact
+#        path: ${{ github.job }}.tar.xz
+#
+#  windows-2016_no-debug_no-inline_security_test:
+#
+#    runs-on: windows-2016
+#
+#    needs: windows-2016_no-debug_no-inline_security_build
+#
+#    steps:
+#    - name: install openssl-windows & xerces-c
+#      uses: lukka/run-vcpkg@v6
+#      with:
+#        vcpkgGitCommitId: ec6fe06
+#        vcpkgArguments: --recurse openssl-windows xerces-c
+#        vcpkgTriplet: x64-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: windows-2016_no-debug_no-inline_security_build_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ windows-2016_no-debug_no-inline_security_build.tar.xz
+#        rm -f windows-2016_no-debug_no-inline_security_build.tar.xz
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$DBS_GHW\\OpenDDS"/>
+#        <variable name="root" value="$DBS_GHW\\OpenDDS\\${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="gcc"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests\\security\\security_tests.lst"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        cat config.xml
+#    - name: run OpenDDS tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#
+#  windows-2016_no-debug_no-inline_java_no-bit_build:
+#
+#    runs-on: windows-2016
+#
+#    needs: windows-2016_no-debug_no-inline_ACE_TAO
+#
+#    steps:
+#    - name: install xerces-c
+#      uses: lukka/run-vcpkg@v6
+#      with:
+#        vcpkgGitCommitId: ec6fe06
+#        vcpkgArguments: --recurse xerces-c
+#        vcpkgTriplet: x64-windows
+#        vcpkgDirectory: 'C:\vcpkg'
+#    - name: Clean Up VCPKG
+#      shell: bash
+#      run: |
+#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
+#    - name: checkout MPC
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+#    - name: Move ACE and MPC to C Drive
+#      shell: bash
+#      run: |
+#        mv OpenDDS/ACE_TAO /c/
+#        mv MPC /c/
+#        echo $VCPKG_ROOT
+#    - uses: ammaraskar/msvc-problem-matcher@0.1
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1.5.0
+#    - name: configure OpenDDS
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows"
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
+#    - name: build OpenDDS
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+#    - name: create OpenDDS tar.xz artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        rm -rf ACE_TAO
+#        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+#        tar cvf ../${{ github.job }}.tar setenv.cmd
+#        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+#        xz -3 ../${{ github.job }}.tar
+#    - name: upload OpenDDS artifact
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_artifact
+#        path: ${{ github.job }}.tar.xz
+#
+#  windows-2016_no-debug_no-inline_java_no-bit_test:
+#
+#    runs-on: windows-2016
+#
+#    needs: windows-2016_no-debug_no-inline_java_no-bit_build
+#
+#    steps:
+#    - name: install xerces-c
+#      uses: lukka/run-vcpkg@v6
+#      with:
+#        vcpkgGitCommitId: ec6fe06
+#        vcpkgArguments: --recurse xerces-c
+#        vcpkgTriplet: x64-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v2.3.4
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+#        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: windows-2016_no-debug_no-inline_java_no-bit_build_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ windows-2016_no-debug_no-inline_java_no-bit_build.tar.xz
+#        rm -f windows-2016_no-debug_no-inline_java_no-bit_build.tar.xz
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        tools\scripts\show_build_config.pl
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$DBS_GHW\\OpenDDS\\${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$DBS_GHW\\OpenDDS"/>
+#        <variable name="root" value="$DBS_GHW\\OpenDDS\\${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="gcc"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        cat config.xml
+#    - name: run OpenDDS tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  # Windows 2016 - x86, No Debug, No Inline
+
+  windows-2016_x86_no-debug_no-inline_ACE_TAO:
 
     runs-on: windows-2016
 
@@ -3328,7 +3803,7 @@ jobs:
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgTriplet: x86-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2.3.4
@@ -3338,12 +3813,14 @@ jobs:
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1.5.0
+      with:
+        arch: x86
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-debug --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --no-debug --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -3351,9 +3828,9 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ACE_TAO\ACE
-        msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
+        msbuild -p:Configuration=Debug,Platform=Win32 -m ace.sln
         cd ..\TAO
-        msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
+        msbuild -p:Configuration=Debug,Platform=Win32 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -3370,11 +3847,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  windows-2016_no-debug_no-inline_security_build:
+  windows-2016_x86_no-debug_no-inline_security_build:
 
     runs-on: windows-2016
 
-    needs: windows-2016_no-debug_no-inline_ACE_TAO
+    needs: windows-2016_x86_no-debug_no-inline_ACE_TAO
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -3382,7 +3859,7 @@ jobs:
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgTriplet: x86-windows
         vcpkgDirectory: 'C:\vcpkg'
     - name: Clean Up VCPKG
       shell: bash
@@ -3407,14 +3884,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+        name: windows-2016_x86_no-debug_no-inline_ACE_TAO_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
-        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+        tar xvfJ windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
+        rm -f windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -3425,11 +3902,13 @@ jobs:
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
+      with:
+        arch: x86
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows" --openssl="C:\vcpkg\installed\x64-windows"
+        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x86-windows" --openssl="C:\vcpkg\installed\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
@@ -3441,7 +3920,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+        msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -3457,11 +3936,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  windows-2016_no-debug_no-inline_security_test:
+  windows-2016_x86_no-debug_no-inline_security_test:
 
     runs-on: windows-2016
 
-    needs: windows-2016_no-debug_no-inline_security_build
+    needs: windows-2016_x86_no-debug_no-inline_security_build
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -3469,7 +3948,7 @@ jobs:
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgTriplet: x86-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3494,25 +3973,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+        name: windows-2016_x86_no-debug_no-inline_ACE_TAO_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
-        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+        tar xvfJ windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
+        rm -f windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows-2016_no-debug_no-inline_security_build_artifact
+        name: windows-2016_x86_no-debug_no-inline_security_build_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ windows-2016_no-debug_no-inline_security_build.tar.xz
-        rm -f windows-2016_no-debug_no-inline_security_build.tar.xz
+        tar xvfJ windows-2016_x86_no-debug_no-inline_security_build.tar.xz
+        rm -f windows-2016_x86_no-debug_no-inline_security_build.tar.xz
     - name: check build configuration
       shell: cmd
       run: |
@@ -3568,11 +4047,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  windows-2016_no-debug_no-inline_java_no-bit_build:
+  windows-2016_x86_no-debug_no-inline_java_no-bit_build:
 
     runs-on: windows-2016
 
-    needs: windows-2016_no-debug_no-inline_ACE_TAO
+    needs: windows-2016_x86_no-debug_no-inline_ACE_TAO
 
     steps:
     - name: install xerces-c
@@ -3580,7 +4059,7 @@ jobs:
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgTriplet: x86-windows
         vcpkgDirectory: 'C:\vcpkg'
     - name: Clean Up VCPKG
       shell: bash
@@ -3605,14 +4084,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+        name: windows-2016_x86_no-debug_no-inline_ACE_TAO_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
-        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+        tar xvfJ windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
+        rm -f windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -3623,11 +4102,13 @@ jobs:
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
+      with:
+        arch: x86
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows"
+        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
@@ -3639,7 +4120,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+        msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -3655,11 +4136,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  windows-2016_no-debug_no-inline_java_no-bit_test:
+  windows-2016_x86_no-debug_no-inline_java_no-bit_test:
 
     runs-on: windows-2016
 
-    needs: windows-2016_no-debug_no-inline_java_no-bit_build
+    needs: windows-2016_x86_no-debug_no-inline_java_no-bit_build
 
     steps:
     - name: install xerces-c
@@ -3667,7 +4148,7 @@ jobs:
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgTriplet: x86-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3692,26 +4173,26 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows-2016_no-debug_no-inline_ACE_TAO_artifact
+        name: windows-2016_x86_no-debug_no-inline_ACE_TAO_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
-        rm -f windows-2016_no-debug_no-inline_ACE_TAO.tar.xz
+        tar xvfJ windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
+        rm -f windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: windows-2016_no-debug_no-inline_java_no-bit_build_artifact
+        name: windows-2016_x86_no-debug_no-inline_java_no-bit_build_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ windows-2016_no-debug_no-inline_java_no-bit_build.tar.xz
-        rm -f windows-2016_no-debug_no-inline_java_no-bit_build.tar.xz
+        tar xvfJ windows-2016_x86_no-debug_no-inline_java_no-bit_build.tar.xz
+        rm -f windows-2016_x86_no-debug_no-inline_java_no-bit_build.tar.xz
     - name: check build configuration
       shell: cmd
       run: |
