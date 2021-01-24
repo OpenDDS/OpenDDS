@@ -629,7 +629,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
                      ACE_TEXT("GUID_UNKNOWN. Can not bind entity to a domain template instance.\n")));
           throw Transport::UnableToCreate();
         }
-        OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueId();
+        OPENDDS_STRING transport_inst_name = GuidConverter(guid).uniqueParticipantId();
         OPENDDS_STRING transport_config_name;
 
         if (cfg_name.c_str() != 0) {
