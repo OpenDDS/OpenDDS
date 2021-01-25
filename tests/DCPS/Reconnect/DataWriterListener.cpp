@@ -65,7 +65,7 @@ void DataWriterListenerImpl::on_publication_disconnected (
   {
     cout << "on_publication_disconnected reader " << status.subscription_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t) on_publication_disconnected reader %d \n", status.subscription_handles[i]));
+    //  "(%P|%t) on_publication_disconnected reader %d\n", status.subscription_handles[i]));
   }
 }
 
@@ -79,7 +79,7 @@ void DataWriterListenerImpl::on_publication_reconnected (
   {
     cout << "on_publication_reconnected reader " << status.subscription_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t) on_publication_reconnected reader %d \n", status.subscription_handles[i]));
+    //  "(%P|%t) on_publication_reconnected reader %d\n", status.subscription_handles[i]));
   }
 }
 
@@ -95,6 +95,6 @@ void DataWriterListenerImpl::on_publication_lost (
   {
     cout << "on_publication_lost reader " << status.subscription_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t) on_publication_lost reader %d \n", status.subscription_handles[i]));
+    //  "(%P|%t) on_publication_lost reader %d\n", status.subscription_handles[i]));
   }
 }

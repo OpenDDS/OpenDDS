@@ -2,8 +2,8 @@
  * Common Definitions for Windows Resource Compiler (rc) Files in OpenDDS
  */
 
-#ifndef OPENDDS_RC_COMMON_HEADER
-#define OPENDDS_RC_COMMON_HEADER
+#ifndef OPENDDS_RC_COMMON_H
+#define OPENDDS_RC_COMMON_H
 
 #include "Version.h"
 

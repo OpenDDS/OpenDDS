@@ -26,9 +26,9 @@ die "ERROR: DDS_ROOT not set. Set DDS_ROOT to the OpenDDS installation directior
 my $from = "$ENV{'DDS_ROOT'}/performance-tests/bench_2";
 my $dest;
 GetOptions ("dest=s" => \$dest)
-  or die("USAGE: perl install_bench.pl --dest /path/to/bench/root \n");
+  or die("USAGE: perl install_bench.pl --dest /path/to/bench/root\n");
 
-die("USAGE: perl install_bench.pl --dest /path/to/bench/root \n") unless defined $dest;
+die("USAGE: perl install_bench.pl --dest /path/to/bench/root\n") unless defined $dest;
 
 # Create destination directories if they don't exist
 

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef COMPARATOR_H
-#define COMPARATOR_H
+#ifndef OPENDDS_DCPS_COMPARATOR_T_H
+#define OPENDDS_DCPS_COMPARATOR_T_H
 
 #include /**/ "ace/pre.h"
 

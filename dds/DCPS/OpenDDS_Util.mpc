@@ -1,4 +1,5 @@
 project: acelib, dds_macros, install {
+  requires += no_opendds_safety_profile
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   includes += $(DDS_ROOT) $(DDS_ROOT)/dds
@@ -24,4 +25,7 @@ project: acelib, dds_macros, install {
     XTypes/TypeObject.cpp
   }
 
+  verbatim(gnuace, local, 1) {
+    idl_stubs: all
+  }
 }

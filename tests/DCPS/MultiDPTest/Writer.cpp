@@ -68,7 +68,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer, int writer_id)
 
 void Writer::start()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
   // Launch num_instances_per_writer threads.
   // Each thread writes one instance which uses the thread id as the
   // key value.
@@ -81,7 +81,7 @@ void Writer::start()
 
 void Writer::end()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end\n")));
   wait();
 }
 

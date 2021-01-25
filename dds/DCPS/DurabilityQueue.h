@@ -5,13 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DURABILITY_QUEUE_H
-#define OPENDDS_DURABILITY_QUEUE_H
+#ifndef OPENDDS_DCPS_DURABILITYQUEUE_H
+#define OPENDDS_DCPS_DURABILITYQUEUE_H
 
 #include <ace/Unbounded_Queue.h>
 
 #include <algorithm>
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

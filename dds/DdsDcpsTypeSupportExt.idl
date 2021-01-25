@@ -3,13 +3,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_SUPPORT_IDL
-#define OPENDDS_DCPS_TYPE_SUPPORT_IDL
+#ifndef OPENDDS_DDSDCPSTYPESUPPORTEXT_IDL
+#define OPENDDS_DDSDCPSTYPESUPPORTEXT_IDL
 
-#include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
-
+#include <dds/DdsDcpsTopic.idl>
+#include <dds/DdsDcpsPublication.idl>
+#include <dds/DdsDcpsSubscription.idl>
 
 module OpenDDS {
   module DCPS {

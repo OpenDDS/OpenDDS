@@ -123,7 +123,7 @@ void DataReaderListenerImpl::on_subscription_disconnected (
   {
     cout << "on_subscription_disconnected writer " << status.publication_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t) on_subscription_disconnected  writer %d \n", status.publication_handles[i]));
+    //  "(%P|%t) on_subscription_disconnected  writer %d\n", status.publication_handles[i]));
   }
 }
 
@@ -137,7 +137,7 @@ void DataReaderListenerImpl::on_subscription_reconnected (
   {
     cout << "on_subscription_reconnected writer " << status.publication_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t) on_subscription_reconnected  writer %d \n", status.publication_handles[i]));
+    //  "(%P|%t) on_subscription_reconnected  writer %d\n", status.publication_handles[i]));
   }
 }
 
@@ -153,7 +153,7 @@ void DataReaderListenerImpl::on_subscription_lost (
   {
     cout << "on_subscription_lost writer " << status.publication_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t) on_subscription_lost  writer %d \n", status.publication_handles[i]));
+    //  "(%P|%t) on_subscription_lost  writer %d\n", status.publication_handles[i]));
   }
 }
 
@@ -162,5 +162,5 @@ void DataReaderListenerImpl::on_budget_exceeded (
   ::DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::BudgetExceededStatus&)
 {
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded\n"));
 }

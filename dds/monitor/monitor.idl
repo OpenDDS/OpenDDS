@@ -1,6 +1,9 @@
+#ifndef OPENDDS_MONITOR_MONITOR_IDL
+#define OPENDDS_MONITOR_MONITOR_IDL
 
-#include "dds/DdsDcpsInfrastructure.idl"
-#include "dds/DdsDcpsGuid.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/DdsDcpsGuid.idl>
+
 #include <tao/ULongSeq.pidl>
 
 module OpenDDS {
@@ -248,3 +251,5 @@ module OpenDDS {
   };
 
 };
+
+#endif // OPENDDS_MONITOR_MONITOR_IDL

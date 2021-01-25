@@ -1,9 +1,9 @@
 project(OpenDDS_Security): dcpslib, dcps_rtps, dds_openssl, ace_xml_utils, install, dds_versioning_idl_defaults {
-  idlflags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h -SS
-  dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h
+  idlflags += -Wb,export_macro=OpenDDS_Security_Export -Wb,export_include=OpenDDS_Security_Export.h -SS
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Security_Export -Wb,export_include=OpenDDS_Security_Export.h
   requires += no_opendds_safety_profile
   avoids += no_opendds_security
-  dynamicflags = DDSSECURITY_BUILD_DLL
+  dynamicflags = OPENDDS_SECURITY_BUILD_DLL
 
   IDL_Files {
     CryptoBuiltIn.idl

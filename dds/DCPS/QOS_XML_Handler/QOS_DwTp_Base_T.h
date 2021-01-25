@@ -13,8 +13,8 @@
  * an ::dds::datawriterQos. These are the XML representatives.
  *
  */
-#ifndef QOS_DWTP_BASE_T_H_
-#define QOS_DWTP_BASE_T_H_
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_DWTP_BASE_T_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_DWTP_BASE_T_H
 
 #include "QOS_DwDrTp_Base_T.h"
 
@@ -36,6 +36,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include "dds/DCPS/QOS_XML_Handler/QOS_DwTp_Base_T.cpp"
+#include "QOS_DwTp_Base_T.cpp"
 
 #endif /* QOS_DWTP_BASE_T_H_ */

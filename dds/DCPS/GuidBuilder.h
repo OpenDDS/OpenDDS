@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_GUIDBUILDER_H
-#define DCPS_GUIDBUILDER_H
+#ifndef OPENDDS_DCPS_GUIDBUILDER_H
+#define OPENDDS_DCPS_GUIDBUILDER_H
 
 #include "dds/DdsDcpsGuidC.h"
 

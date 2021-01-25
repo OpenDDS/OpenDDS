@@ -11,10 +11,10 @@
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include "dds/DdsDcpsSubscriptionExtC.h"
-#include "dds/DCPS/ZeroCopySeq_T.h"
-#include "dds/DCPS/MultiTopicImpl.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/unique_ptr.h"
+#include "ZeroCopySeq_T.h"
+#include "MultiTopicImpl.h"
+#include "PoolAllocator.h"
+#include "unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

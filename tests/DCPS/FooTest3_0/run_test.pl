@@ -68,7 +68,7 @@ elsif ($ARGV[0] eq '') { # register test
     # default register test: 1 register and 2 writes.
 }
 else {
-    print STDERR "ERROR: invalid parameter $ARGV[0] \n";
+    print STDERR "ERROR: invalid parameter $ARGV[0]\n";
     exit 1;
 }
 

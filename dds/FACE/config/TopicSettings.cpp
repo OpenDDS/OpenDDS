@@ -23,7 +23,7 @@ TopicSettings::set(const char* name, const char* value)
     // type_name_ is sized to TYPE_NAME_LEN
     if (std::strlen(value) >= sizeof(type_name_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Type name %C exceeds allowable length,"
-        "must be < %d \n"), value, TYPE_NAME_LEN));
+        "must be < %d\n"), value, TYPE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(type_name_, value, sizeof(type_name_));

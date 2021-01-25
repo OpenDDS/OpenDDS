@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_STATUSCONDITIONIMPL_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/ConditionImpl.h"
+#include "ConditionImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

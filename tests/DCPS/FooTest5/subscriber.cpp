@@ -217,12 +217,12 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
       // Attach the subscriber to the transport.
       if (attach_to_udp)
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp\n")));
           TheTransportRegistry->bind_config("udp", sub.in());
         }
       else if (attach_to_multicast)
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast\n")));
           TheTransportRegistry->bind_config("multicast", sub.in());
         }
       else if (attach_to_rtps)
@@ -237,7 +237,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         }
       else
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp\n")));
           TheTransportRegistry->bind_config("tcp", sub.in());
         }
 
@@ -558,7 +558,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (results.test_passed (expected) == false)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Verify received samples - not passed \n")));
+                      ACE_TEXT("(%P|%t) Verify received samples - not passed\n")));
           status = 1;
         }
 

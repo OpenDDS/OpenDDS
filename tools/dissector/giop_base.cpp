@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tools/dissector/giop_base.h"
-#include "tools/dissector/ws_common.h"
+#include "giop_base.h"
+#include "ws_common.h"
 
 
 #include "dds/DCPS/GuidConverter.h"

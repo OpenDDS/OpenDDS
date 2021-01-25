@@ -8,7 +8,7 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include "RepoIdGenerator.h"
-#include "dds/DCPS/RepoIdBuilder.h"
+#include "RepoIdBuilder.h"
 #include "ace/Log_Msg.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

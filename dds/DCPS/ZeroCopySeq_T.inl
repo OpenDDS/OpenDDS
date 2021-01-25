@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/ReceivedDataElementList.h"
+#include "ReceivedDataElementList.h"
 #include "ace/Truncate.h"
 
 #include <utility>

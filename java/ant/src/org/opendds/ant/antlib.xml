@@ -22,9 +22,9 @@
                 <filterchain>
                     <deletecharacters chars="&quot;"/>
                     <tokenfilter>
-                        <replacestring from="#define DDS_MAJOR_VERSION" to="opendds.version.major"/>
-                        <replacestring from="#define DDS_MINOR_VERSION" to="opendds.version.minor"/>
-                        <replacestring from="#define DDS_VERSION" to="opendds.version"/>
+                        <replacestring from="#define OPENDDS_MAJOR_VERSION" to="opendds.version.major"/>
+                        <replacestring from="#define OPENDDS_MINOR_VERSION" to="opendds.version.minor"/>
+                        <replacestring from="#define OPENDDS_VERSION" to="opendds.version"/>
                     </tokenfilter>
                 </filterchain>
             </loadproperties>

@@ -1,16 +1,16 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "StaticDiscovery.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "debug.h"
+#include "ConfigUtils.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "SubscriberImpl.h"
+#include "BuiltInTopicUtils.h"
+#include "Registered_Data_Types.h"
+#include "Qos_Helper.h"
+#include "DataWriterImpl.h"
+#include "transport/framework/TransportRegistry.h"
 
 #include <ctype.h>
 
@@ -486,20 +486,9 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
       reader_pos != registry_.reader_map.end()) {
     DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
     if (dwr) {
-#ifdef __SUNPRO_CC
-      ReaderAssociation ra;
-      ra.readerTransInfo = reader_pos->second.trans_info;
-      ra.readerId = readerid;
-      ra.subQos = reader_pos->second.subscriber_qos;
-      ra.readerQos = reader_pos->second.qos;
-      ra.filterClassName = "";
-      ra.filterExpression = "";
-      ra.exprParams = 0;
-#else
       const ReaderAssociation ra =
-        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos};
-
-#endif
+        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
+         "", "", DDS::StringSeq(), DDS::OctetSeq()};
       dwr->add_association(writerid, ra, true);
     }
   }
@@ -533,16 +522,8 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
       writer_pos != registry_.writer_map.end()) {
     DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
     if (drr) {
-#ifdef __SUNPRO_CC
-      WriterAssociation wa;
-      wa.writerTransInfo = writer_pos->second.trans_info;
-      wa.writerId = writerid;
-      wa.pubQos = writer_pos->second.publisher_qos;
-      wa.writerQos = writer_pos->second.qos;
-#else
       const WriterAssociation wa =
-        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
-#endif
+        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq()};
       drr->add_association(readerid, wa, false);
     }
   }

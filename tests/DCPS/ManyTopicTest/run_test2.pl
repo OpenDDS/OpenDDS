@@ -128,25 +128,25 @@ $Subscriber3->Spawn ();
 $PublisherResult = $Publisher->WaitKill (300);
 
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
 }
 
 $Subscriber1Result = $Subscriber1->WaitKill (30);
 if ($Subscriber1Result != 0) {
-    print STDERR "ERROR: subscriber 1 returned $Subscriber1Result \n";
+    print STDERR "ERROR: subscriber 1 returned $Subscriber1Result\n";
     $status = 1;
 }
 
 $Subscriber2Result = $Subscriber2->WaitKill (10);
 if ($Subscriber2Result != 0) {
-    print STDERR "ERROR: subscriber 2 returned $Subscriber2Result \n";
+    print STDERR "ERROR: subscriber 2 returned $Subscriber2Result\n";
     $status = 1;
 }
 
 $Subscriber3Result = $Subscriber3->WaitKill (10);
 if ($Subscriber3Result != 0) {
-    print STDERR "ERROR: subscriber 3 returned $Subscriber3Result \n";
+    print STDERR "ERROR: subscriber 3 returned $Subscriber3Result\n";
     $status = 1;
 }
 

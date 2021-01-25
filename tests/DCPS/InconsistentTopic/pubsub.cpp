@@ -18,7 +18,6 @@
 using namespace Messenger;
 using namespace std;
 
-
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try
     {
@@ -48,7 +47,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       CORBA::String_var type_name1 = mts1->get_type_name();
-
       DDS::Topic_var topic1 = p1->create_topic(topic,
                           type_name1.in(),
                           TOPIC_QOS_DEFAULT,
@@ -82,7 +80,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       CORBA::String_var type_name2 = mts2->get_type_name();
-
       DDS::Topic_var topic2 =
         p2->create_topic(topic,
                          type_name2.in(),
@@ -96,7 +93,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
       // At this point the participants and topics exist but have not
       // been discovered since there are no readers or writers.
-
       DDS::Publisher_var pub1 =
         p1->create_publisher(PUBLISHER_QOS_DEFAULT,
                               DDS::PublisherListener::_nil(),
@@ -113,6 +109,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       if (CORBA::is_nil(dw1.in())) {
         cerr << "ERROR: create_datawriter failed." << endl;
         exit(1);
+      }
+
+      // At this point dw1 should not have a publication matched
+      DDS::PublicationMatchedStatus pub_status;
+      DDS::ReturnCode_t retcode = dw1->get_publication_matched_status(pub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve publication matched status from dw1." << endl;
+        exit(1);
+      }
+      if (pub_status.total_count != 0) {
+        cerr << "ERROR: dw1 total_count should be 0 but is " << pub_status.total_count << endl;
+        test_error = true;
+      }
+      if (pub_status.total_count_change != 0) {
+        cerr << "ERROR: dw1 total_count_change should be 0 but is " << pub_status.total_count_change << endl;
+        test_error = true;
       }
 
       DDS::Subscriber_var sub2 =
@@ -133,8 +145,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      //Wait for p2 to see p1's datawriter.
-
+      // Wait for p2 to see p1's datawriter.
       for (;;) {
         DDS::PublicationBuiltinTopicDataSeq pub_data;
         DDS::SampleInfoSeq infos;
@@ -148,11 +159,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       // Wait for p1 to see p2's datareader.
-
       for (;;) {
         DDS::SubscriptionBuiltinTopicDataSeq sub_data;
         DDS::SampleInfoSeq infos;
-        DDS::ReturnCode_t ret = bit_dr1->read(sub_data, infos, 1, DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+        const DDS::ReturnCode_t ret = bit_dr1->read(sub_data, infos, 1, DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
         if (ret == DDS::RETCODE_OK) {
           break;
         } else {
@@ -162,9 +172,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       // At this point, p2 should have an inconsistent topic and so will p1
-
       DDS::InconsistentTopicStatus status;
-      DDS::ReturnCode_t retcode;
 
       retcode = topic1->get_inconsistent_topic_status(status);
       if (retcode != DDS::RETCODE_OK) {
@@ -191,6 +199,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
       if (status.total_count_change != 1) {
         cerr << "ERROR: participant 2 total_count_change should be 1 but is " << status.total_count_change << endl;
+        test_error = true;
+      }
+
+      // At this moment there should be no subscription matched
+      DDS::SubscriptionMatchedStatus sub_status;
+      retcode = dr2->get_subscription_matched_status(sub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve subscription matched status from dr2." << endl;
+        exit(1);
+      }
+      if (sub_status.total_count != 0) {
+        cerr << "ERROR: dr2 total_count should be 0 but is " << sub_status.total_count << endl;
+        test_error = true;
+      }
+      if (sub_status.total_count_change != 0) {
+        cerr << "ERROR: dr2 total_count_change should be 0 but is " << sub_status.total_count_change << endl;
+        test_error = true;
+      }
+
+      // At this moment there should be no publication matched
+      retcode = dw1->get_publication_matched_status(pub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve publication matched status from dw1." << endl;
+        exit(1);
+      }
+      if (pub_status.total_count != 0) {
+        cerr << "ERROR: dw1 total_count should be 0 but is " << pub_status.total_count << endl;
+        test_error = true;
+      }
+      if (pub_status.total_count_change != 0) {
+        cerr << "ERROR: dw1 total_count_change should be 0 but is " << pub_status.total_count_change << endl;
         test_error = true;
       }
 

@@ -11,7 +11,7 @@
 #ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dcps_export.h"
-#include "dds/DCPS/JobQueue.h"
+#include "JobQueue.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

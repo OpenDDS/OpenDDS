@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPSUDPINST_RCH_H
-#define OPENDDS_RTPSUDPINST_RCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPINST_RCH_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPINST_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
 

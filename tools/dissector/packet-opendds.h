@@ -24,12 +24,12 @@ extern "C" {
   //#include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
-#include "tools/dissector/dissector_export.h"
+#include "dissector_export.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
-#include "tools/dissector/ws_common.h"
+#include "ws_common.h"
 
 extern "C" {
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 4, 0)

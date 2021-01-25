@@ -13,8 +13,8 @@
  * an ::dds::subscriberQos. These are the XML representatives.
  *
  */
-#ifndef QOS_PUBSUB_T_H_
-#define QOS_PUBSUB_T_H_
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_PUBSUB_T_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_PUBSUB_T_H
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,6 +31,6 @@ public:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include "dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.cpp"
+#include "QOS_PubSub_T.cpp"
 
 #endif /* QOS_PUBSUB_T_H_ */

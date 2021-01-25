@@ -294,6 +294,12 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
   Classification fld_cls = classify(actual_type);
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   string def_val;
+  std::string pre = " = ";
+  std::string post;
+  if (is_union) {
+    pre = "(";
+    post = ")";
+  }
   if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
     return indent + "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
@@ -323,16 +329,25 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
   } else if (fld_cls & (CL_PRIMITIVE | CL_FIXED)) {
     AST_PredefinedType* pt = dynamic_cast<AST_PredefinedType*>(actual_type);
     if (pt && (pt->pt() == AST_PredefinedType::PT_longdouble)) {
-      def_val = use_cxx11 ? "0.0L" : "ACE_CDR_LONG_DOUBLE_INITIALIZER";
+      if (use_cxx11) {
+        def_val = "0.0L";
+      } else {
+        string temp_val = "ACE_CDR::LongDouble val = ACE_CDR_LONG_DOUBLE_INITIALIZER";
+        if (is_union) {
+          def_val = "val";
+          return indent + temp_val + ";\n" +
+            indent + name + pre + def_val + post + ";\n";
+        } else {
+          def_val = "ACE_CDR_LONG_DOUBLE_ASSIGNMENT(" + name + ", val)";
+          return indent + "{\n"
+            "  " + indent + temp_val + ";\n"
+            "  " + indent + def_val + ";\n" +
+            indent + "}\n";
+        }
+      }
     } else {
       def_val =  "0";
     }
-  }
-  std::string pre = " = ";
-  std::string post;
-  if (is_union) {
-    pre = "(";
-    post = ")";
   }
   return indent + name + pre + def_val + post + ";\n";
 }

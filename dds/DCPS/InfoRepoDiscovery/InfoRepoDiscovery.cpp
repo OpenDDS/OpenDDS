@@ -6,10 +6,10 @@
  */
 #include "InfoRepoDiscovery.h"
 
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h"
-#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
-#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h"
-#include "dds/DCPS/InfoRepoDiscovery/FailoverListener.h"
+#include "DataReaderRemoteImpl.h"
+#include "DataWriterRemoteC.h"
+#include "DataWriterRemoteImpl.h"
+#include "FailoverListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"

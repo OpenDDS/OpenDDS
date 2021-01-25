@@ -244,7 +244,7 @@ bool ThreadStatus::update(const String& thread_key)
 {
   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
   const SystemTimePoint now = SystemTimePoint::now();
-  map[thread_key] = {now};
+  map[thread_key] = Thread(now);
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
       "update for thread \"%C\"\n @ %d",

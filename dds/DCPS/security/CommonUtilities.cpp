@@ -1,4 +1,4 @@
-#include "dds/DCPS/security/CommonUtilities.h"
+#include "CommonUtilities.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
 #include <string>

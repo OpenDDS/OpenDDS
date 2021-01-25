@@ -29,7 +29,7 @@ $test->process("main", "main", $parameters);
 $test->start_process("main");
 my $result = $test->finish(60);
 if ($result != 0) {
-    print STDERR "ERROR: main returned $result \n";
+    print STDERR "ERROR: main returned $result\n";
     $status = 1;
 }
 

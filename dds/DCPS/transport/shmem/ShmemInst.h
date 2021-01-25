@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_SHMEMINST_H
-#define OPENDDS_SHMEMINST_H
+#ifndef OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEMINST_H
+#define OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEMINST_H
 
 #include "Shmem_Export.h"
 #include "ShmemTransport.h"

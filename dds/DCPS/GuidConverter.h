@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_GUIDCONVERTER_H
-#define DCPS_GUIDCONVERTER_H
+#ifndef OPENDDS_DCPS_GUIDCONVERTER_H
+#define OPENDDS_DCPS_GUIDCONVERTER_H
 
 #include "dcps_export.h"
 #include "Definitions.h"
@@ -103,7 +103,7 @@ public:
   operator std::wstring() const;
 #endif
 
-  OPENDDS_STRING uniqueId() const;
+  OPENDDS_STRING uniqueParticipantId() const;
 
 protected:
   const GUID_t guid_;

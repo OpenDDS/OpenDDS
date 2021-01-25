@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportControlElement.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportControlElement.inl"

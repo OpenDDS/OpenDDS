@@ -66,7 +66,7 @@ $Test->Spawn();
 
 my $TestResult = $Test->WaitKill(300);
 if ($TestResult != 0) {
-  print STDERR "ERROR: test returned $TestResult \n";
+  print STDERR "ERROR: test returned $TestResult\n";
   $status = 1;
 }
 

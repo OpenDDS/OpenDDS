@@ -272,7 +272,7 @@ sub usage {
   my $ver;
   open VER, 'dds/Version.h' or die "ERROR: can't open dds/Version.h, stopped";
   while (<VER>) {
-    $ver = $1 if /#define DDS_VERSION "([^"]+)"/;
+    $ver = $1 if /#define OPENDDS_VERSION "([^"]+)"/;
   }
   close VER;
   print <<"EOT";

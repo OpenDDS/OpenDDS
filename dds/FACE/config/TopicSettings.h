@@ -1,5 +1,5 @@
-#ifndef OPENDDS_TOPIC_SETTINGS_H
-#define OPENDDS_TOPIC_SETTINGS_H
+#ifndef OPENDDS_FACE_CONFIG_TOPICSETTINGS_H
+#define OPENDDS_FACE_CONFIG_TOPICSETTINGS_H
 
 #include "FACE/TS_common.hpp"
 #include "dds/DCPS/PoolAllocator.h"

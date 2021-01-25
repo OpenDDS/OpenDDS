@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_ACCESS_GOVERNANCE_H
-#define OPENDDS_ACCESS_GOVERNANCE_H
+#ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROL_GOVERNANCE_H
+#define OPENDDS_DCPS_SECURITY_ACCESSCONTROL_GOVERNANCE_H
 
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DdsSecurityCoreC.h"
@@ -24,6 +24,7 @@ public:
   typedef DCPS::RcHandle<Governance> shared_ptr;
 
   struct TopicAccessRule {
+    TopicAccessRule();
     std::string topic_expression;
     DDS::Security::TopicSecurityAttributes topic_attrs;
     std::string metadata_protection_kind;

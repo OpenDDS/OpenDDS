@@ -26,10 +26,10 @@ int read(::DDS::DataReader_ptr reader)
     DDS::ReturnCode_t const status = foo_dr->read_next_sample(foo, si);
     if (status == ::DDS::RETCODE_OK) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) reader %X foo.x = %f foo.y = %f, foo.data_source = %d \n"),
+        ACE_TEXT("(%P|%t) reader %X foo.x = %f foo.y = %f, foo.data_source = %d\n"),
         reader, foo.x, foo.y, foo.data_source));
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d \n"),
+        ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d\n"),
         si.sample_rank));
     } else if (status == ::DDS::RETCODE_NO_DATA) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -93,7 +93,7 @@ void DataReaderListenerImpl::on_subscription_matched(::DDS::DataReader_ptr reade
   ACE_UNUSED_ARG(status);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(::DDS::DataReader_ptr reader,
@@ -103,7 +103,7 @@ void DataReaderListenerImpl::on_sample_rejected(::DDS::DataReader_ptr reader,
   ACE_UNUSED_ARG(status);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
 }
 
 void DataReaderListenerImpl::on_data_available(::DDS::DataReader_ptr reader)
@@ -128,5 +128,5 @@ void DataReaderListenerImpl::on_sample_lost(::DDS::DataReader_ptr reader,
   ACE_UNUSED_ARG(status);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
 }

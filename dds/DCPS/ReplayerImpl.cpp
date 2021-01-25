@@ -32,10 +32,10 @@
 
 #include "Util.h"
 
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "transport/framework/TransportSendElement.h"
+#include "transport/framework/TransportCustomizedElement.h"
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
@@ -226,7 +226,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                          ACE_TEXT("qos not updated. \n")),
+                          ACE_TEXT("qos not updated.\n")),
                          DDS::RETCODE_ERROR);
       }
     }
@@ -380,7 +380,7 @@ ReplayerImpl::enable()
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::enable, ")
-               ACE_TEXT("add_publication returned invalid id. \n")));
+               ACE_TEXT("add_publication returned invalid id.\n")));
     return DDS::RETCODE_ERROR;
   }
 

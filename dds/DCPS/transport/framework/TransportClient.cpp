@@ -486,7 +486,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           GuidConverter local(tc->repo_id_);
           GuidConverter remote(data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
-                              "result of initiate_connect_i (local: %C to remote: %C) was not success \n",
+                              "result of initiate_connect_i (local: %C to remote: %C) was not success\n",
                               OPENDDS_STRING(local).c_str(),
                               OPENDDS_STRING(remote).c_str()), 0);
         }
@@ -688,7 +688,7 @@ TransportClient::disassociate(const RepoId& peerId)
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
-                 ACE_TEXT("about to release_reservations for link[%@] \n"),
+                 ACE_TEXT("about to release_reservations for link[%@]\n"),
                  link.in()));
     }
 

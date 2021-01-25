@@ -5,34 +5,21 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Get_Opt.h>
+#include "InternalThreadStatusListenerImpl.h"
+#include "MessengerTypeSupportImpl.h"
+
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
-#include "MessengerTypeSupportImpl.h"
-
-#include <dds/DCPS/BuiltInTopicUtils.h>
-
-#include "tests/Utils/StatusMatching.h"
-
-#include "InternalThreadStatusListenerImpl.h"
+#include <ace/Get_Opt.h>
 
 #include <iostream>
 

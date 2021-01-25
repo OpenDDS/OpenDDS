@@ -5,10 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SECURITY_CFG_PROPERTY_LIST_H
-#define OPENDDS_DCPS_SECURITY_CFG_PROPERTY_LIST_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIGPROPERTYLIST_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIGPROPERTYLIST_H
 
-#include "dds/DCPS/PoolAllocator.h"
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/Versioned_Namespace.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

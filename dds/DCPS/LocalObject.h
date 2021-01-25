@@ -10,8 +10,8 @@
 
 #include "tao/LocalObject.h"
 #include "tao/Version.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/RcObject.h"
+#include "PoolAllocationBase.h"
+#include "RcObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
