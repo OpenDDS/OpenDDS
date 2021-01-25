@@ -66,6 +66,7 @@ using Builder::ZERO;
 using Bench::get_option_argument;
 
 const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
+const size_t DEFAULT_THREAD_POOL_SIZE = 4u;
 
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
   typedef std::multiset<std::pair<double, size_t> > WMMS;
@@ -237,6 +238,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     max_decimal_places = max_decimal_places_prop->value.ull_prop();
   }
 
+  uint64_t action_thread_pool_size = DEFAULT_THREAD_POOL_SIZE;
+  Builder::ConstPropertyIndex action_thread_pool_size_prop =
+    get_property(config.properties, "action_thread_pool_size", Builder::PVK_ULL);
+  if (action_thread_pool_size_prop) {
+    action_thread_pool_size = action_thread_pool_size_prop->value.ull_prop();
+  }
+
   size_t redirect_ace_log = 1;
   Builder::ConstPropertyIndex redirect_ace_log_prop =
     get_property(config.properties, "redirect_ace_log", Builder::PVK_ULL);
@@ -286,9 +294,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Bench::WorkerReport worker_report{};
   Builder::ProcessReport& process_report = worker_report.process_report;
 
-  const size_t THREAD_POOL_SIZE = 4;
+  const size_t thread_pool_size = static_cast<size_t>(action_thread_pool_size);
   std::vector<std::shared_ptr<std::thread> > thread_pool;
-  for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+  for (size_t i = 0; i < thread_pool_size; ++i) {
     thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor->proactor_run_event_loop(); }));
   }
 
@@ -389,7 +397,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     Log::log() << "Process tests stopped." << std::endl << std::endl;
 
     proactor->proactor_end_event_loop();
-    for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+    for (size_t i = 0; i < thread_pool_size; ++i) {
       thread_pool[i]->join();
     }
     thread_pool.clear();
@@ -406,7 +414,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
     proactor->proactor_end_event_loop();
-    for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+    for (size_t i = 0; i < thread_pool_size; ++i) {
       thread_pool[i]->join();
     }
     thread_pool.clear();
@@ -415,7 +423,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   } catch (...) {
     std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
     proactor->proactor_end_event_loop();
-    for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+    for (size_t i = 0; i < thread_pool_size; ++i) {
       thread_pool[i]->join();
     }
     thread_pool.clear();
