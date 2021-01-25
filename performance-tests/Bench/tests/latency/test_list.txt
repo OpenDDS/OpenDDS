@@ -1,4 +1,0 @@
-# group		client	server
-
-1 bastok lumoria
-
