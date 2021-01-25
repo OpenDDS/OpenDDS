@@ -21,7 +21,7 @@ sub get_output {
 
   my $tsidl = $file;
   $tsidl =~ s/\.idl$/TypeSupport.idl/;
-  push(@out, $dir . basename($tsidl));
+  push(@out, basename($tsidl));
 
   my $deps;
   if ($flags =~ /-Wb,java/) {

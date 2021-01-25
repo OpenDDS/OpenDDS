@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UDPRECEIVESTRATEGY_H
-#define DCPS_UDPRECEIVESTRATEGY_H
+#ifndef OPENDDS_DCPS_TRANSPORT_UDP_UDPRECEIVESTRATEGY_H
+#define OPENDDS_DCPS_TRANSPORT_UDP_UDPRECEIVESTRATEGY_H
 
 #include "Udp_Export.h"
 

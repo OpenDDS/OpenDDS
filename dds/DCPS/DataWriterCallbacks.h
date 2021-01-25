@@ -8,9 +8,9 @@
 #ifndef OPENDDS_DCPS_DATAWRITERCALLBACKS_H
 #define OPENDDS_DCPS_DATAWRITERCALLBACKS_H
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/DiscoveryListener.h"
-#include "dds/DCPS/RcObject.h"
+#include "Definitions.h"
+#include "DiscoveryListener.h"
+#include "RcObject.h"
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */

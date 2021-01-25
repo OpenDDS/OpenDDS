@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_BASICQUEUE_T_H
-#define OPENDDS_DCPS_BASICQUEUE_T_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_BASICQUEUE_T_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_BASICQUEUE_T_H
 
 #include <deque>
 #include <algorithm>

@@ -27,7 +27,7 @@ elsif ($ARGV[0] eq 'instance') {
   $testcase = "-q 0";
 }
 elsif ($ARGV[0] ne '') {
-  print STDERR "ERROR: invalid parameter $ARGV[0] \n";
+  print STDERR "ERROR: invalid parameter $ARGV[0]\n";
   exit 1;
 }
 
@@ -62,14 +62,14 @@ $Subscriber->Spawn ();
 
 $PublisherResult = $Publisher->WaitKill (60);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
 }
 
 
 $SubscriberResult = $Subscriber->WaitKill (60);
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 

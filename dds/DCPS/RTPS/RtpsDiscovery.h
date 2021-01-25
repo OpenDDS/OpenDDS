@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_RTPSDISCOVERY_H
-#define OPENDDS_RTPS_RTPSDISCOVERY_H
+#ifndef OPENDDS_DCPS_RTPS_RTPSDISCOVERY_H
+#define OPENDDS_DCPS_RTPS_RTPSDISCOVERY_H
 
 
 #include "GuidGenerator.h"

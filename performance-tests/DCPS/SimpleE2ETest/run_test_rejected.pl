@@ -70,13 +70,13 @@ $Subscriber->Spawn ();
 $PublisherResult = $Publisher->WaitKill (60);
 
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
 }
 $SubscriberResult = $Subscriber->WaitKill (60);
 
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 

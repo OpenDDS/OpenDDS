@@ -138,7 +138,7 @@ $test->start_process("relay");
 
 my $result = $test->finish(300);
 if ($result != 0) {
-    print STDERR "ERROR: test returned $result \n";
+    print STDERR "ERROR: test returned $result\n";
     $status = 1;
 }
 

@@ -867,6 +867,10 @@ Spdp::data_received(const DataSubmessage& data,
   ParticipantData_t pdata;
 
   pdata.participantProxy.domainId = domain_;
+  pdata.associated_endpoints = 0;
+#ifdef OPENDDS_SECURITY
+  pdata.extended_associated_endpoints = 0;
+#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
@@ -3992,13 +3996,13 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 
 const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) const
 {
-  DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
+  DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
 }
 
 ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
 {
-  DiscoveredParticipantIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
+  DiscoveredParticipantIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
 }
 

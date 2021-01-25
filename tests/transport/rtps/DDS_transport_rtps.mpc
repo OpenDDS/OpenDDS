@@ -1,25 +1,15 @@
-project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp, ../TestMsg/TestMsg {
 
   exename = publisher
-
-  after += opendds_tests_transport_testmsg
-  libs += opendds_tests_transport_testmsg
-  libpaths += $(TEST_ROOT)/tests/transport/TestMsg
-  includes += $(TEST_ROOT)/tests/transport/TestMsg
 
   Source_Files {
     publisher.cpp
   }
 }
 
-project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp, ../TestMsg/TestMsg {
 
   exename = subscriber
-
-  after += opendds_tests_transport_testmsg
-  libs += opendds_tests_transport_testmsg
-  libpaths += $(TEST_ROOT)/tests/transport/TestMsg
-  includes += $(TEST_ROOT)/tests/transport/TestMsg
 
   Source_Files {
     subscriber.cpp

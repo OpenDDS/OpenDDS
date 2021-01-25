@@ -33,6 +33,10 @@ namespace DCPS {
 
 struct OpenDDS_Dcps_Export ThreadStatus {
   struct Thread {
+    Thread() {}
+    explicit Thread(const SystemTimePoint& time)
+      : timestamp(time)
+    {}
     SystemTimePoint timestamp;
     // TODO(iguessthislldo): Add Participant GUID
   };

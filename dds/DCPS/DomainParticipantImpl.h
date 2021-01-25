@@ -28,7 +28,7 @@
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include <dds/DCPS/GuidUtils.h>
+#include "GuidUtils.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>

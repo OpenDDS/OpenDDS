@@ -7,17 +7,28 @@
 
 #include "dds/DCPS/RTPS/ICE/Stun.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
-#include "tools/rtpsrelay/utility.h"
 
 #include "ace/ACE.h"
-#include "ace/SOCK_Dgram.h"
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Arg_Shifter.h"
+#include "ace/Log_Msg.h"
+#include "ace/SOCK_Dgram.h"
 
+#include <array>
 #include <cstdlib>
 #include <iostream>
 
 #ifdef OPENDDS_SECURITY
+
+std::string addr_to_string(const ACE_INET_Addr& a_addr)
+{
+  std::array<ACE_TCHAR, 256> as_string;
+  if (a_addr.addr_to_string(as_string.data(), as_string.size()) != 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: addr_to_string failed to convert address to string")));
+    return "";
+  }
+  return ACE_TEXT_ALWAYS_CHAR(as_string.data());
+}
 
 void generate_transaction_id(OpenDDS::STUN::Message& message)
 {
@@ -323,7 +334,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     for (int i = 0; i < server_port_count; ++i) {
       ACE_INET_Addr server_addr(server_addr_base);
       server_addr.set_port_number(server_addr.get_port_number() + i);
-      std::string name = "pinging server at " + RtpsRelay::addr_to_string(server_addr);
+      const std::string name = "pinging server at " + addr_to_string(server_addr);
       test_success(status, socket, server_addr, name.c_str());
     }
     return status;
@@ -343,7 +354,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   return status;
 }
 #else
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   ACE_ERROR((LM_ERROR, "ERROR: No IETF STUN support in this build\n"));
   return EXIT_FAILURE;

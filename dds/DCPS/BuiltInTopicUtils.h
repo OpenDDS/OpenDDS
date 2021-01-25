@@ -5,16 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef BUILTINTOPICUTILS_H
-#define BUILTINTOPICUTILS_H
+#ifndef OPENDDS_DCPS_BUILTINTOPICUTILS_H
+#define OPENDDS_DCPS_BUILTINTOPICUTILS_H
 
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsCoreC.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DdsDcpsCoreC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -159,7 +160,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: instance_handle_to_repo_id,")
-                        ACE_TEXT(" timeout. \n")),
+                        ACE_TEXT(" timeout.\n")),
                        DDS::RETCODE_ERROR);
       return DDS::RETCODE_TIMEOUT;
     }
@@ -228,4 +229,4 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType*)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* BUILTINTOPICUTILS_H  */
+#endif /* OPENDDS_DCPS_BUILTINTOPICUTILS_H  */

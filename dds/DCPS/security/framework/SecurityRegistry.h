@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SECURITYREGISTRY_H
-#define OPENDDS_DCPS_SECURITYREGISTRY_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYREGISTRY_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYREGISTRY_H
 
 #include "SecurityPluginInst_rch.h"
 #include "SecurityConfig_rch.h"

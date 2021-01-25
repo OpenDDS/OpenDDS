@@ -23,7 +23,7 @@ extern "C" {
 #include <epan/dissectors/packet-tcp.h>
 } // extern "C"
 
-#include "tools/dissector/dissector_export.h"
+#include "dissector_export.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"

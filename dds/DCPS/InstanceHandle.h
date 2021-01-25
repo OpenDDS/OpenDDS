@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_INSTANCEHANDLE_H
-#define DCPS_INSTANCEHANDLE_H
+#ifndef OPENDDS_DCPS_INSTANCEHANDLE_H
+#define OPENDDS_DCPS_INSTANCEHANDLE_H
 
 #ifdef ACE_HAS_CPP11
 #  include <atomic>

@@ -5,10 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_PUBLICATION_IDL
-#define OPENDDS_DCPS_PUBLICATION_IDL
+#ifndef OPENDDS_DDSDCPSPUBLICATION_IDL
+#define OPENDDS_DDSDCPSPUBLICATION_IDL
 
-#include "dds/DdsDcpsInfrastructure.idl"
+#include <dds/DdsDcpsInfrastructure.idl>
 
 #pragma ciao lem "dds/DdsDcpsPublicationE.idl"
 

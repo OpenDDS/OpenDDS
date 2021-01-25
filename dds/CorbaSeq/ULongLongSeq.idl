@@ -9,8 +9,8 @@
  *   This file is used to generate the code in ULongLongSeqC.*
  */
 
-#ifndef OPENDDS_CORBA_ULONGLONG_SEQ_IDL
-#define OPENDDS_CORBA_ULONGLONG_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_ULONGLONGSEQ_IDL
+#define OPENDDS_CORBASEQ_ULONGLONGSEQ_IDL
 
 #pragma prefix "omg.org"
 

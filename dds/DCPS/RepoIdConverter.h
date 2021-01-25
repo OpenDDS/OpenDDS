@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_REPOIDCONVERTER_H
-#define DCPS_REPOIDCONVERTER_H
+#ifndef OPENDDS_DCPS_REPOIDCONVERTER_H
+#define OPENDDS_DCPS_REPOIDCONVERTER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

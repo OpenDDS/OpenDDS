@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_REACTORSYNCH_H
-#define OPENDDS_DCPS_REACTORSYNCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_REACTORSYNCH_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_REACTORSYNCH_H
 
 #include "ThreadSynch.h"
 #include "ScheduleOutputHandler.h"

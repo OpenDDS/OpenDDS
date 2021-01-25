@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
-#define DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
+#ifndef OPENDDS_DCPS_DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
+#define OPENDDS_DCPS_DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
 
 #include "debug.h"
 #include "ace/Malloc_Allocator.h"

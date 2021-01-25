@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATALINK_H
-#define OPENDDS_DCPS_DATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINK_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
@@ -23,7 +23,7 @@
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "QueueTaskBase_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/TimeTypes.h"
 

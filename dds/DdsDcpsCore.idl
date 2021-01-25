@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_CORE_IDL
-#define OPENDDS_DCPS_CORE_IDL
+#ifndef OPENDDS_DDSDCPSCORE_IDL
+#define OPENDDS_DDSDCPSCORE_IDL
 
 // The includes below are needed to deal with compilers that
 // have ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT

@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h"  ////Only the _pch include should start with DCPS/
 #include "SafetyProfilePool.h"
-#include "dds/DCPS/debug.h"
+#include "debug.h"
 #include <stdexcept>
 
 #ifdef OPENDDS_SAFETY_PROFILE

@@ -82,19 +82,19 @@ $Node3->Spawn ();
 
 $Node1Result = $Node1->WaitKill (60);
 if ($Node1Result != 0) {
-    print STDERR "ERROR: node 1 returned $Node1Result \n";
+    print STDERR "ERROR: node 1 returned $Node1Result\n";
     $status = 1;
 }
 
 $Node2Result = $Node2->WaitKill (15);
 if ($Node2Result != 0) {
-    print STDERR "ERROR: node 2 returned $Node2Result \n";
+    print STDERR "ERROR: node 2 returned $Node2Result\n";
     $status = 1;
 }
 
 $Node3Result = $Node3->WaitKill (15);
 if ($Node3Result != 0) {
-    print STDERR "ERROR: node 3 returned $Node3Result \n";
+    print STDERR "ERROR: node 3 returned $Node3Result\n";
     $status = 1;
 }
 

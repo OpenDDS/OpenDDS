@@ -9,8 +9,8 @@
 //
 // Parse trees are created automatically by inserting Store<T> productions into a grammar.
 
-#ifndef YARD_TREE_HPP
-#define YARD_TREE_HPP
+#ifndef OPENDDS_DCPS_YARD_YARD_TREE_HPP
+#define OPENDDS_DCPS_YARD_YARD_TREE_HPP
 
 #include <typeinfo>
 
@@ -341,4 +341,4 @@ namespace yard
     };
 }
 
-#endif
+#endif // OPENDDS_DCPS_YARD_YARD_TREE_HPP

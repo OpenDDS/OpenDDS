@@ -3,13 +3,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_OBJECT_H
-#define OPENDDS_DCPS_TYPE_OBJECT_H
+#ifndef OPENDDS_DCPS_XTYPES_TYPE_OBJECT_H
+#define OPENDDS_DCPS_XTYPES_TYPE_OBJECT_H
 
 #include "External.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/Serializer.h"
+
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/Serializer.h>
 
 #include <ace/CDR_Base.h>
 
@@ -256,7 +257,9 @@ namespace XTypes {
     EquivalenceKind kind;
     EquivalenceHash hash;
 
-    TypeObjectHashId() {}
+    TypeObjectHashId()
+      : kind(0)
+    {}
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
                      const EquivalenceHashWrapper& a_hash)
@@ -338,7 +341,9 @@ namespace XTypes {
   struct StringSTypeDefn {
     SBound bound;
 
-    StringSTypeDefn() {}
+    StringSTypeDefn()
+      : bound(0)
+    {}
 
     explicit StringSTypeDefn(const SBound a_bound)
       : bound(a_bound)
@@ -354,7 +359,9 @@ namespace XTypes {
   struct StringLTypeDefn {
     LBound bound;
 
-    StringLTypeDefn() {}
+    StringLTypeDefn()
+      : bound(0)
+    {}
 
     explicit StringLTypeDefn(const LBound a_bound)
       : bound(a_bound)
@@ -371,7 +378,8 @@ namespace XTypes {
     CollectionElementFlag element_flags;
 
     PlainCollectionHeader()
-      : element_flags(0)
+      : equiv_kind(0)
+      , element_flags(0)
     {}
 
     PlainCollectionHeader(const EquivalenceKind& a_equiv_kind,
@@ -469,7 +477,9 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapSTypeDefn() {}
+    PlainMapSTypeDefn()
+      : key_flags(0)
+    {}
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
                       const SBound& a_bound,
@@ -910,7 +920,9 @@ namespace XTypes {
     StructMemberFlag member_flags;
     TypeIdentifier member_type_id;
 
-    CommonStructMember() {}
+    CommonStructMember()
+      : member_flags(0)
+    {}
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
                         const TypeIdentifier& a_member_type_id)
@@ -1084,7 +1096,9 @@ namespace XTypes {
     UnionDiscriminatorFlag member_flags;
     TypeIdentifier type_id;
 
-    CommonDiscriminatorMember() {}
+    CommonDiscriminatorMember()
+      : member_flags(0)
+    {}
 
     CommonDiscriminatorMember(const UnionDiscriminatorFlag& a_member_flags,
                               const TypeIdentifier& a_type_id)
@@ -1138,7 +1152,9 @@ namespace XTypes {
     MinimalDiscriminatorMember discriminator;
     MinimalUnionMemberSeq member_seq;
 
-    MinimalUnionType() {}
+    MinimalUnionType()
+      : union_flags(0)
+    {}
 
     MinimalUnionType(const UnionTypeFlag& a_union_flags,
                      const MinimalUnionHeader& a_header,
@@ -1395,7 +1411,9 @@ namespace XTypes {
     ACE_CDR::Long value;
     EnumeratedLiteralFlag flags;
 
-    CommonEnumeratedLiteral() {}
+    CommonEnumeratedLiteral()
+      : flags(0)
+    {}
 
     CommonEnumeratedLiteral(const ACE_CDR::Long& a_value,
                             const EnumeratedLiteralFlag a_flags)
@@ -2501,4 +2519,4 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* OPENDDS_DCPS_TYPE_OBJECT_H */
+#endif  /* OPENDDS_DCPS_XTYPES_TYPE_OBJECT_H */

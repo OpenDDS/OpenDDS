@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DURABILITY_ARRAY_H
-#define OPENDDS_DURABILITY_ARRAY_H
+#ifndef OPENDDS_DCPS_DURABILITYARRAY_H
+#define OPENDDS_DCPS_DURABILITYARRAY_H
 
 #include <ace/Array_Base.h>
 

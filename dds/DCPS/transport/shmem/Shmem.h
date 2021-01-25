@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_SHMEM_H
-#define OPENDDS_SHMEM_H
+#ifndef OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEM_H
+#define OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEM_H
 
 #include "Shmem_Export.h"
 #include "dds/Versioned_Namespace.h"

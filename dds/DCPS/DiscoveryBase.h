@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_DISCOVERYBASE_H
-#define OPENDDS_DDS_DCPS_DISCOVERYBASE_H
+#ifndef OPENDDS_DCPS_DISCOVERYBASE_H
+#define OPENDDS_DCPS_DISCOVERYBASE_H
 
 #include "TopicDetails.h"
 #include "BuiltInTopicUtils.h"
@@ -1156,7 +1156,7 @@ namespace OpenDDS {
         }
       };
 
-      typedef std::map<MatchingPair, MatchingData> MatchingDataMap;
+      typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
       typedef typename MatchingDataMap::iterator MatchingDataIter;
       MatchingDataMap matching_data_buffer_;
       typedef PmfSporadicTask<EndpointManager> EndpointManagerSporadic;

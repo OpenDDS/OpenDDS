@@ -8,12 +8,12 @@
 #ifndef OPENDDS_DCPS_FILTER_EVALUATOR_H
 #define OPENDDS_DCPS_FILTER_EVALUATOR_H
 
-#include "dds/DCPS/Definitions.h"
+#include "Definitions.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 #include "Comparator_T.h"
 #include "RcObject.h"
 

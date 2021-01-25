@@ -5,14 +5,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATALINKCLEANUP_H
-#define OPENDDS_DCPS_DATALINKCLEANUP_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINKCLEANUPTASK_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINKCLEANUPTASK_H
 
 #include /**/ "ace/pre.h"
 
-#include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
-#include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/transport/framework/DataLink_rch.h"
+#include "QueueTaskBase_T.h"
+#include "DataLink.h"
+#include "DataLink_rch.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

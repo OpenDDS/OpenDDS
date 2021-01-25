@@ -9,11 +9,14 @@ on:
       - completed
 
 jobs:
-  download_and_publish:
+  get_names:
     runs-on: ubuntu-20.04
     if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
+    outputs:
+      names: ${{ steps.names-script.outputs.result }}
     steps:
-      - name: 'Download Autobuild Artifacts'
+      - name: 'Inspect Autobuild Artifacts'
+        id: names-script
         uses: actions/github-script@v3.1.0
         with:
           script: |
@@ -25,130 +28,56 @@ jobs:
             var matchArtifacts = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name.indexOf("_autobuild_output") > -1;
             });
-            var fs = require('fs');
+            var result = new Array(matchArtifacts.length);
             for (var i = 0; i < matchArtifacts.length; i++) {
-              var download = await github.actions.downloadArtifact({
-                 owner: context.repo.owner,
-                 repo: context.repo.repo,
-                 artifact_id: matchArtifacts[i].id,
-                 archive_format: 'zip',
-              });
-              fs.writeFileSync('${{ github.workspace }}/' + matchArtifacts[i].name + '.zip', Buffer.from(download.data));
+              result[i] = matchArtifacts[i].name.substring( 0, matchArtifacts[i].name.indexOf( "_autobuild_output"));
             }
+            return result;
+
+  download_and_publish:
+    needs: get_names
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        name: ${{ fromJSON(needs.get_names.outputs.names) }}
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
+    steps:
+      - name: 'Download Autobuild Artifact'
+        uses: actions/github-script@v3.1.0
+        with:
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{ github.event.workflow_run.id }},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name.indexOf('${{ matrix.name }}') > -1;
+            })[0];
+            var fs = require('fs');
+            var download = await github.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            fs.writeFileSync('${{ github.workspace }}/' + matchArtifact.name + '.zip', Buffer.from(download.data));
 
       - name: 'Setup'
         shell: bash
         run: |
-          echo "mkdir \${1} && cp \${1}.zip \${1} && cd \${1} && unzip \${1}.zip" > helper.sh
-          chmod +x helper.sh
-          ls -1 *.zip | sed 's/\(.*\)\.zip$/\1/g' | xargs -I {} ./helper.sh {}
-          export PR_SHA=$(cat */SHA | sort -u | head -n 1)
-          echo "PR_SHA=$PR_SHA" >> $GITHUB_ENV
+          mkdir ${{ matrix.name }}_autobuild_output
+          mv ${{ matrix.name }}_autobuild_output.zip ${{ matrix.name }}_autobuild_output
+          cd ${{ matrix.name }}_autobuild_output
+          unzip ${{ matrix.name }}_autobuild_output.zip
+          export TRIGGERING_COMMIT=$(cat ./SHA)
+          echo "TRIGGERING_COMMIT=$TRIGGERING_COMMIT" >> $GITHUB_ENV
 
       - name: 'Publish Unit Test Results'
         uses: simpsont-oci/action-junit-report@v1.2.1
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: ubuntu-20_04_defaults_security"
-          report_paths: ubuntu-20_04_defaults_security_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: ubuntu-20_04_defaults_java_no-bit"
-          report_paths: ubuntu-20_04_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: ubuntu-18_04_defaults_security"
-          report_paths: ubuntu-18_04_defaults_security_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: ubuntu-18_04_defaults_java_no-bit"
-          report_paths: ubuntu-18_04_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: ubuntu-16_04_defaults_security"
-          report_paths: ubuntu-16_04_defaults_security_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: ubuntu-16_04_defaults_java_no-bit"
-          report_paths: ubuntu-16_04_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: windows-2019_defaults_security"
-          report_paths: windows-2019_defaults_security_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: windows-2019_defaults_java_no-bit"
-          report_paths: windows-2019_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: windows-2016_no_debug_no_inline_security"
-          report_paths: windows-2016_no_debug_no_inline_security_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: windows-2016_no_debug_no_inline_java_no-bit"
-          report_paths: windows-2016_no_debug_no_inline_java_no-bit_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: macos-10_15_defaults_security"
-          report_paths: macos-10_15_defaults_security_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
-
-      - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: "Test Results: macos-10_15_defaults_java_no-bit"
-          report_paths: macos-10_15_defaults_java_no-bit_autobuild_output/Tests_JUnit.xml
-          commit: ${{ env.PR_SHA }}
+          check_name: "Test Results: ${{ matrix.name }}"
+          report_paths: ${{ matrix.name }}_autobuild_output/Tests_JUnit.xml
+          commit: ${{ env.TRIGGERING_COMMIT }}

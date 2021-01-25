@@ -46,6 +46,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         // sizeof(wchar_t) > 2 and one of the value in the array could not fit into 16 bits.
         std::fill(message.wchars, message.wchars+sizeof(message.wchars)/sizeof(wchar_t), L'0');
 
+        for (size_t i = 0; i < sizeof message.greeks / sizeof message.greeks[0]; ++i) {
+          message.greeks[i] = delta;
+        }
+
         for (int i = 0; i < 10; i++) {
           DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
           ++message.count;

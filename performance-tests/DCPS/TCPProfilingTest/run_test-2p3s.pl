@@ -86,14 +86,14 @@ $Pub2->Spawn ();
 
 $Pub1Result = $Pub1->WaitKill (1200);
 if ($Pub1Result != 0) {
-    print STDERR "ERROR: publisher 1 returned $Pub1Result \n";
+    print STDERR "ERROR: publisher 1 returned $Pub1Result\n";
     $status = 1;
 }
 
 
 $Pub2Result = $Pub2->WaitKill (1200);
 if ($Pub2Result != 0) {
-    print STDERR "ERROR: publisher 2 returned $Pub2Result \n";
+    print STDERR "ERROR: publisher 2 returned $Pub2Result\n";
     $status = 1;
 }
 
@@ -108,14 +108,14 @@ if ($Sub1Result != 0) {
 
 $Sub2Result = $Sub2->WaitKill (1200);
 if ($Sub2Result != 0) {
-    print STDERR "ERROR: subscriber 2 returned $Sub2Result \n";
+    print STDERR "ERROR: subscriber 2 returned $Sub2Result\n";
     $status = 1;
 }
 
 
 $Sub3Result = $Sub3->WaitKill (1200);
 if ($Sub3Result != 0) {
-    print STDERR "ERROR: subscriber 3 returned $Sub3Result \n";
+    print STDERR "ERROR: subscriber 3 returned $Sub3Result\n";
     $status = 1;
 }
 

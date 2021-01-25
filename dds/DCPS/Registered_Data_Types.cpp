@@ -9,7 +9,7 @@
 
 #include "Registered_Data_Types.h"
 
-#include "dds/DCPS/Util.h"
+#include "Util.h"
 #include "dds/DdsDcpsDomainC.h"
 
 #include "ace/Singleton.h"

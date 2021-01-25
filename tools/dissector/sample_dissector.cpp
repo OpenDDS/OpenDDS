@@ -5,9 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tools/dissector/sample_dissector.h"
-#include "tools/dissector/sample_manager.h"
-#include "tools/dissector/ws_common.h"
+#include "sample_dissector.h"
+#include "sample_manager.h"
+#include "ws_common.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -89,7 +89,7 @@ namespace OpenDDS
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
-      char* data, size_t size, bool swap_bytes, Encoding::Alignment align
+      char* data, size_t size, bool swap_bytes, Encoding::Alignment
     ) :
       block(data, size),
       serializer(&block, Encoding::KIND_UNALIGNED_CDR, swap_bytes)

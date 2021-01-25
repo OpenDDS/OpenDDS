@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORT_CLIENT_H
-#define OPENDDS_DCPS_TRANSPORT_CLIENT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTCLIENT_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTCLIENT_H
 
 #include "TransportConfig_rch.h"
 #include "TransportImpl.h"

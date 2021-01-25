@@ -29,7 +29,7 @@ my $TEST = new PerlDDS::Process_Java ('TransportConfigTest', $test_opts);
 
 my $TestResult = $TEST->SpawnWaitKill (300);
 if ($TestResult != 0) {
-    print STDERR "ERROR: test returned $TestResult \n";
+    print STDERR "ERROR: test returned $TestResult\n";
     $status = 1;
 }
 

@@ -80,19 +80,19 @@ $Subscriber->Spawn ();
 
 $Publisher1Result = $Publisher1->WaitKill (1200);
 if ($Publisher1Result != 0) {
-    print STDERR "ERROR: publisher returned $Publisher1Result \n";
+    print STDERR "ERROR: publisher returned $Publisher1Result\n";
     $status = 1;
 }
 
 $Publisher2Result = $Publisher2->WaitKill (1200);
 if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher returned $Publisher2Result \n";
+    print STDERR "ERROR: publisher returned $Publisher2Result\n";
     $status = 1;
 }
 
 $SubscriberResult = $Subscriber->WaitKill (1200);
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 

@@ -20,8 +20,8 @@
  */
 // ================================================================
 
-#ifndef OPENDDS_CORBA_USHORT_SEQ_IDL
-#define OPENDDS_CORBA_USHORT_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_USHORTSEQ_IDL
+#define OPENDDS_CORBASEQ_USHORTSEQ_IDL
 
 #pragma prefix "omg.org"
 

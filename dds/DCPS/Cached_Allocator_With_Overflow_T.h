@@ -5,18 +5,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
-#define CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
+#ifndef OPENDDS_DCPS_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
+#define OPENDDS_DCPS_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
 
 #include "debug.h"
-#include "ace/Malloc_Allocator.h"
-#include "ace/Malloc_T.h"
-#include "ace/Free_List.h"
-#include "ace/Guard_T.h"
-#include "ace/Atomic_Op.h"
-
-#include "dds/DCPS/SafetyProfilePool.h"
+#include "SafetyProfilePool.h"
 #include "PoolAllocationBase.h"
+
+#include <ace/Malloc_Allocator.h>
+#include <ace/Malloc_T.h>
+#include <ace/Free_List.h>
+#include <ace/Guard_T.h>
+#include <ace/Atomic_Op.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -233,4 +233,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* CACHED_ALLOCATOR_WITH_OVERFLOW_T_H */
+#endif /* OPENDDS_DCPS_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H */

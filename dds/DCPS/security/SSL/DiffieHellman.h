@@ -3,12 +3,14 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
-#define OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_DIFFIEHELLMAN_H
+#define OPENDDS_DCPS_SECURITY_SSL_DIFFIEHELLMAN_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/unique_ptr.h"
+#include <dds/DCPS/security/OpenDDS_Security_Export.h>
+#include <dds/DCPS/unique_ptr.h>
+
 #include "dds/DdsDcpsCoreC.h"
+
 #include <openssl/evp.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -17,7 +19,7 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-class DdsSecurity_Export DHAlgorithm {
+class OpenDDS_Security_Export DHAlgorithm {
 public:
   typedef DCPS::unique_ptr<DHAlgorithm> unique_ptr;
 
@@ -49,7 +51,7 @@ public:
   DDS::OctetSeq shared_secret_;
 };
 
-class DdsSecurity_Export DH_2048_MODP_256_PRIME : public DHAlgorithm {
+class OpenDDS_Security_Export DH_2048_MODP_256_PRIME : public DHAlgorithm {
 public:
   DH_2048_MODP_256_PRIME();
   ~DH_2048_MODP_256_PRIME();
@@ -72,7 +74,7 @@ public:
   const char* kagree_algo() const { return "DH+MODP-2048-256"; }
 };
 
-class DdsSecurity_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm {
+class OpenDDS_Security_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm {
 public:
   ECDH_PRIME_256_V1_CEUM();
   ~ECDH_PRIME_256_V1_CEUM();
@@ -95,7 +97,7 @@ public:
   const char* kagree_algo() const { return "ECDH+prime256v1-CEUM"; }
 };
 
-class DdsSecurity_Export DiffieHellman {
+class OpenDDS_Security_Export DiffieHellman {
 public:
   typedef DCPS::unique_ptr<DiffieHellman> unique_ptr;
 

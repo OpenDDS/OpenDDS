@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTSESSION_H
-#define DCPS_MULTICASTSESSION_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTSESSION_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTSESSION_H
 
 #include "Multicast_Export.h"
 

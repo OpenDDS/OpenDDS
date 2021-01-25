@@ -58,7 +58,7 @@ void DataWriterListenerImpl::on_publication_matched (
   test_valid_ = true;
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_publication_matched \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_publication_matched\n")));
 }
 
 void DataWriterListenerImpl::on_publication_disconnected (

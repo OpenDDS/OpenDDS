@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DW_MONITOR_IMPL_H
-#define OPENDDS_DCPS_DW_MONITOR_IMPL_H
+#ifndef OPENDDS_MONITOR_DWMONITORIMPL_H
+#define OPENDDS_MONITOR_DWMONITORIMPL_H
 
 #include "monitor_export.h"
 #include "dds/DCPS/MonitorFactory.h"
