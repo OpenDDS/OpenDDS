@@ -3353,7 +3353,12 @@ RtpsUdpDataLink::RtpsWriter::make_lagger_leader(const ReaderInfo_rch& reader,
   const SequenceNumber max_sn = expected_max_sn(reader);
 
   snris_erase(lagging_readers_, previous_acked_sn, reader);
-  snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
+  snris_insert(acked_sn >= max_sn ? leading_readers_ : lagging_readers_, reader);
+#ifdef OPENDDS_SECURITY
+  if (is_pvs_writer_ && acked_sn > max_sn) {
+    reader->max_pvs_sn_ = acked_sn;
+  }
+#endif
 }
 
 bool
