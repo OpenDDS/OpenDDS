@@ -33,6 +33,9 @@ public:
 #endif
   {
     ACE_UNUSED_ARG(subscriber);
+#ifndef DDS_HAS_MINIMUM_BIT
+    ACE_UNUSED_ARG(check_bits);
+#endif
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %C\n", id.c_str()));
   }
 

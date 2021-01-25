@@ -2,6 +2,8 @@
 # This module contains a few miscellaneous functions and some
 # startup ARGV processing that is used by all tests.
 
+use lib "$ENV{ACE_ROOT}/bin";
+use lib "$ENV{DDS_ROOT}/bin";
 use PerlACE::Run_Test;
 use PerlDDS::Process;
 use PerlDDS::ProcessFactory;

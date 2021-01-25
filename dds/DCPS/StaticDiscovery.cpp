@@ -81,7 +81,7 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
   , participant_(participant)
 #endif
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(participant);
 #endif
   type_lookup_init(TheServiceParticipant->interceptor());
