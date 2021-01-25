@@ -4036,6 +4036,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
+        set PERL5LIB=%ACE_ROOT%\bin
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
@@ -4238,6 +4239,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
+        set PERL5LIB=%ACE_ROOT%\bin
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
