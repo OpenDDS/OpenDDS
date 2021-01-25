@@ -147,8 +147,7 @@ void update_stats_for_tags(std::unordered_map<std::string, uint64_t>& stats,
     if (input_tags.find(tag) != input_tags.end()) {
       if (stats.find(tag) == stats.end()) {
         stats[tag] = prop->value.ull_prop();
-      }
-      else {
+      } else {
         stats[tag] += prop->value.ull_prop();
       }
     }
