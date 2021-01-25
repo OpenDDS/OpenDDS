@@ -45,10 +45,16 @@ if ($no_ice_opt && $ipv6_opt) {
     $pub_sub_ini = 'rtps_ipv6.ini';
 }
 
+my $relay_security_opts = "-IdentityCA ../../security/certs/identity/identity_ca_cert.pem" .
+  " -PermissionsCA ../../security/certs/permissions/permissions_ca_cert.pem" .
+  " -IdentityCertificate ../../security/certs/identity/test_participant_01_cert.pem" .
+  " -IdentityKey ../../security/certs/identity/test_participant_01_private_key.pem" .
+  " -Governance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
+
 if ($ipv6_opt) {
-    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 4 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 ");
+    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 $relay_security_opts");
 } else {
-    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 4 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
+    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
 }
 
 $test->process("ParticipantLocationTest", "ParticipantLocationTest", "$no_ice_opt $ipv6_opt -ORBDebugLevel 1 -DCPSConfigFile ". $pub_sub_ini);

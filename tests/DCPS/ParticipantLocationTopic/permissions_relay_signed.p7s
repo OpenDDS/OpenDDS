@@ -1,39 +1,42 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----DB1946ACFE2A7765C59E0C84B2A443E1"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----E81795F17E230A8B69CC1080FEBB5DA3"
 
 This is an S/MIME signed message
 
-------DB1946ACFE2A7765C59E0C84B2A443E1
+------E81795F17E230A8B69CC1080FEBB5DA3
 Content-Type: text/plain
 
-<?xml version="1.0" encoding="UTF-8"?>
-<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../schema/omg_shared_ca_governance.xsd">
-  <domain_access_rules>
-    <domain_rule>
-      <domains>
-        <id>42</id>
-      </domains>
-      <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants>
-      <enable_join_access_control>TRUE</enable_join_access_control>
-      <discovery_protection_kind>ENCRYPT</discovery_protection_kind>
-      <liveliness_protection_kind>NONE</liveliness_protection_kind>
-      <rtps_protection_kind>SIGN</rtps_protection_kind>
-      <topic_access_rules>
-        <topic_rule>
-          <topic_expression>*</topic_expression>
-          <enable_discovery_protection>TRUE</enable_discovery_protection>
-          <enable_liveliness_protection>TRUE</enable_liveliness_protection>
-          <enable_read_access_control>FALSE</enable_read_access_control>
-          <enable_write_access_control>FALSE</enable_write_access_control>
-          <metadata_protection_kind>NONE</metadata_protection_kind>
-          <data_protection_kind>NONE</data_protection_kind>
-        </topic_rule>
-      </topic_access_rules>
-    </domain_rule>
-  </domain_access_rules>
+<?xml version="1.0" encoding="utf-8"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+  <permissions>
+    <grant name="ShapesPermissionTOC">
+      <subject_name>/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=Ozzie Ozmann</subject_name>
+      <validity>
+        <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+        <not_before>2015-09-15T01:00:00</not_before>
+        <not_after>2025-09-15T01:00:00</not_after>
+      </validity>
+      <allow_rule>
+        <domains>
+          <id>42</id>
+        </domains>
+        <publish>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </publish>
+        <subscribe>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </subscribe>
+      </allow_rule>
+      <default>DENY</default>
+    </grant>
+  </permissions>
 </dds>
 
-------DB1946ACFE2A7765C59E0C84B2A443E1
+------E81795F17E230A8B69CC1080FEBB5DA3
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -66,17 +69,17 @@ Y3QgQ29tcHV0aW5nIChUZXN0IFBlcm1pc3Npb25zIENBKTEvMC0GA1UEAwwmT2Jq
 ZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxJzAlBgkqhkiG9w0B
 CQEWGGluZm9Ab2JqZWN0Y29tcHV0aW5nLmNvbQIJAKSOim/ArjfyMAkGBSsOAwIa
 BQCgggEHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8X
-DTE5MDkyNjAyMDYzNVowIwYJKoZIhvcNAQkEMRYEFF9RDHobdKlu/AlhhutXw9nI
-iffjMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
+DTE5MDkxOTIwMDgzNlowIwYJKoZIhvcNAQkEMRYEFIwxaHhG/u2ufH+ryuCwAegZ
+OOGfMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
 BggqhQMHAQECAjAKBggqhQMHAQECAzAIBgYqhQMCAhUwCwYJYIZIAWUDBAEWMAsG
 CWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcN
 AwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwDQYJKoZIhvcNAQEBBQAEggEA
-Iyw1tuqWjuGq8nLuuaKKbacFkV9B+40q0jF9jmRCK6gz3kezVsji/gs83QSJdMcQ
-HlF7Q6uEVeKCbUDHpD/mFEupFgIBaKejx2Si3giPrQTvK9MbNBUUxAk6gGF4iCdO
-kMmIPQZUI0jsFMJhVTc0vWKhpW2aEjG5b/WZ7rP69ocWjLDzwbMbECz7YbcVX+e8
-eHSqbFAxUCjqJPpG+XaV5Db9mFgQX7Ndg9TH9beEXLyAJBIdkLXFbe7HyIDLH7PV
-Vv0YOANE+mTzNejqiFpxNUMaaZEmqkSf++nfg7DIodeTEAzoNrnfT1IuK7Dg6fGW
-TGgxwit7Cm0J4p9U1qIOEw==
+bxzVJzJQvKB7mkPlmON/W6oRi5ML4hpn2HBYmhDCVI0LFp5eNWzG5hwPUnYJi0bC
+GcWEsngEKwZfD4BgHp+XoNbFAypZo4zZShkUemlq1eg+buyMhVOmskBM/3qH9qHn
+6hLJrC5UNVL7hBpEEvrJ1XZphTmi4QkZ+D1xET0O5yStPjgUgAiGbMaCvNNB0xcH
+X4oM71qfpMLl8ag3psb5By35MGARv+o+rYYUJDmEGhSBVGh/i6ZBiQsZa0d8idPP
+uafCfRRGeBgtqM7Gk57okmezafbc/ypmODEM69rIkasxX9vq3ix3+KpvSNOjA5kL
+vQMhsNTqco7aUiyIJGEr1Q==
 
-------DB1946ACFE2A7765C59E0C84B2A443E1--
+------E81795F17E230A8B69CC1080FEBB5DA3--
 

@@ -10,7 +10,7 @@
       </validity>
       <allow_rule>
         <domains>
-          <id>4</id>
+          <id>42</id>
         </domains>
         <publish>
           <topics>

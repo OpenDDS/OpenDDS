@@ -1,39 +1,42 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----DB1946ACFE2A7765C59E0C84B2A443E1"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----571723475B638E630C0D9530A13685A9"
 
 This is an S/MIME signed message
 
-------DB1946ACFE2A7765C59E0C84B2A443E1
+------571723475B638E630C0D9530A13685A9
 Content-Type: text/plain
 
-<?xml version="1.0" encoding="UTF-8"?>
-<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../schema/omg_shared_ca_governance.xsd">
-  <domain_access_rules>
-    <domain_rule>
-      <domains>
-        <id>42</id>
-      </domains>
-      <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants>
-      <enable_join_access_control>TRUE</enable_join_access_control>
-      <discovery_protection_kind>ENCRYPT</discovery_protection_kind>
-      <liveliness_protection_kind>NONE</liveliness_protection_kind>
-      <rtps_protection_kind>SIGN</rtps_protection_kind>
-      <topic_access_rules>
-        <topic_rule>
-          <topic_expression>*</topic_expression>
-          <enable_discovery_protection>TRUE</enable_discovery_protection>
-          <enable_liveliness_protection>TRUE</enable_liveliness_protection>
-          <enable_read_access_control>FALSE</enable_read_access_control>
-          <enable_write_access_control>FALSE</enable_write_access_control>
-          <metadata_protection_kind>NONE</metadata_protection_kind>
-          <data_protection_kind>NONE</data_protection_kind>
-        </topic_rule>
-      </topic_access_rules>
-    </domain_rule>
-  </domain_access_rules>
+<?xml version="1.0" encoding="utf-8"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+  <permissions>
+    <grant name="ShapesPermissionTOC">
+      <subject_name>/C=US/ST=California/O=Super Swanky Ski and Snow Shop/CN=Tahoe Joe</subject_name>
+      <validity>
+        <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+        <not_before>2015-09-15T01:00:00</not_before>
+        <not_after>2025-09-15T01:00:00</not_after>
+      </validity>
+      <allow_rule>
+        <domains>
+          <id>42</id>
+        </domains>
+        <publish>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </publish>
+        <subscribe>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </subscribe>
+      </allow_rule>
+      <default>DENY</default>
+    </grant>
+  </permissions>
 </dds>
 
-------DB1946ACFE2A7765C59E0C84B2A443E1
+------571723475B638E630C0D9530A13685A9
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -66,17 +69,17 @@ Y3QgQ29tcHV0aW5nIChUZXN0IFBlcm1pc3Npb25zIENBKTEvMC0GA1UEAwwmT2Jq
 ZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxJzAlBgkqhkiG9w0B
 CQEWGGluZm9Ab2JqZWN0Y29tcHV0aW5nLmNvbQIJAKSOim/ArjfyMAkGBSsOAwIa
 BQCgggEHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8X
-DTE5MDkyNjAyMDYzNVowIwYJKoZIhvcNAQkEMRYEFF9RDHobdKlu/AlhhutXw9nI
-iffjMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
+DTE5MDkxOTIxNTUxNlowIwYJKoZIhvcNAQkEMRYEFIDdSwoXKwnFuzl3E3EPToim
+yqhzMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
 BggqhQMHAQECAjAKBggqhQMHAQECAzAIBgYqhQMCAhUwCwYJYIZIAWUDBAEWMAsG
 CWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcN
 AwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwDQYJKoZIhvcNAQEBBQAEggEA
-Iyw1tuqWjuGq8nLuuaKKbacFkV9B+40q0jF9jmRCK6gz3kezVsji/gs83QSJdMcQ
-HlF7Q6uEVeKCbUDHpD/mFEupFgIBaKejx2Si3giPrQTvK9MbNBUUxAk6gGF4iCdO
-kMmIPQZUI0jsFMJhVTc0vWKhpW2aEjG5b/WZ7rP69ocWjLDzwbMbECz7YbcVX+e8
-eHSqbFAxUCjqJPpG+XaV5Db9mFgQX7Ndg9TH9beEXLyAJBIdkLXFbe7HyIDLH7PV
-Vv0YOANE+mTzNejqiFpxNUMaaZEmqkSf++nfg7DIodeTEAzoNrnfT1IuK7Dg6fGW
-TGgxwit7Cm0J4p9U1qIOEw==
+ezVkUojjqsGsMXvmECrjfl+06R4JHowHBkVcIh6Hl4yf3atQlufGF85eD2w4vTIy
+DigGUBpaEYluhvT+DHuq4MQH/m2zudj2pvH6dv/5X1JEG7Pj7a2Mole/H0kkGOg/
+0S1/gz5RNnPxfwFOkl2ndE8ZWszZUEWtsT42lVlcsT0pvgTkLvWScSeDDyVnFB/S
+AuIpa4M3647r/z2r//iLeo79H+D6TCPDSihcrtLNKUfNR3BYF7mPjROomLLxZ0Hm
+9vUpoGBKRYi0trKOQMN+hIUyrTlIzgiEhvUVYzC0cVkHGM9TDjb5aIIcoG8vKoA0
+g4u4avwRav0YNb62mS0Y0g==
 
-------DB1946ACFE2A7765C59E0C84B2A443E1--
+------571723475B638E630C0D9530A13685A9--
 
