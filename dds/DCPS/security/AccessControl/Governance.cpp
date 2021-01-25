@@ -21,6 +21,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+Governance::TopicAccessRule::TopicAccessRule()
+{
+  topic_attrs.is_read_protected = false;
+  topic_attrs.is_write_protected = false;
+  topic_attrs.is_discovery_protected = false;
+  topic_attrs.is_liveliness_protected = false;
+}
+
 Governance::Governance()
 {
 }

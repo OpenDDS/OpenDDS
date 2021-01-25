@@ -1903,7 +1903,7 @@ DomainParticipantImpl::get_id() const
 OPENDDS_STRING
 DomainParticipantImpl::get_unique_id()
 {
-  return GuidConverter(dp_id_).uniqueId();
+  return GuidConverter(dp_id_).uniqueParticipantId();
 }
 
 

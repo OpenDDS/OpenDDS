@@ -24,6 +24,7 @@ public:
   typedef DCPS::RcHandle<Governance> shared_ptr;
 
   struct TopicAccessRule {
+    TopicAccessRule();
     std::string topic_expression;
     DDS::Security::TopicSecurityAttributes topic_attrs;
     std::string metadata_protection_kind;

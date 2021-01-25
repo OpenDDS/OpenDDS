@@ -103,7 +103,7 @@ public:
   operator std::wstring() const;
 #endif
 
-  OPENDDS_STRING uniqueId() const;
+  OPENDDS_STRING uniqueParticipantId() const;
 
 protected:
   const GUID_t guid_;

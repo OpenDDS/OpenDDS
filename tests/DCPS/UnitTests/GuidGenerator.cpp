@@ -63,12 +63,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     guid.guidPrefix[ 9] = 10;
     guid.guidPrefix[10] = 11;
     guid.guidPrefix[11] = 12;
-    TEST_CHECK(GuidConverter(guid).uniqueId() == "0102030405060708090a0b0c");
+    guid.entityId.entityKey[0] = guid.entityId.entityKey[1] = guid.entityId.entityKey[2] = 0;
+    guid.entityId.entityKind = 0;
+    TEST_CHECK(GuidConverter(guid).uniqueParticipantId() == "0102030405060708090a0b0c");
 
     guid.guidPrefix[2] = 233;
     guid.guidPrefix[4] = 244;
     guid.guidPrefix[6] = 255;
-    TEST_CHECK(GuidConverter(guid).uniqueId() == "0102e904f406ff08090a0b0c");
+    TEST_CHECK(GuidConverter(guid).uniqueParticipantId() == "0102e904f406ff08090a0b0c");
   }
 
   return 0;

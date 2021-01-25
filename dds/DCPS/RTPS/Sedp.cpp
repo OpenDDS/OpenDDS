@@ -346,12 +346,12 @@ Sedp::init(const RepoId& guid,
   char domainStr[16];
   ACE_OS::snprintf(domainStr, 16, "%d", domainId);
 
-  OPENDDS_STRING key = DCPS::GuidConverter(guid).uniqueId();
+  const OPENDDS_STRING key = DCPS::GuidConverter(guid).uniqueParticipantId();
 
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                       OPENDDS_STRING("_SEDPTransportInst_") + key.c_str() + domainStr,
+                       OPENDDS_STRING("_SEDPTransportInst_") + key + domainStr,
                        "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
