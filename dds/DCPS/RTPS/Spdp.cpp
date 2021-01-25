@@ -617,7 +617,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
+#ifndef DDS_HAS_MINIMUM_BIT
   const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
+#endif
 
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -920,6 +922,8 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter&
       }
     }
   }
+#else
+  ACE_UNUSED_ARG(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   // notify Sedp of association
