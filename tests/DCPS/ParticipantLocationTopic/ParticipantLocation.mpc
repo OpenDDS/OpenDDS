@@ -1,4 +1,4 @@
-project(ParticipantLocationTopic): dcpsexe, dcps_test, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+project(ParticipantLocationTopic): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11, opendds_optional_security {
 
   exename   = ParticipantLocationTest
   requires += built_in_topics
