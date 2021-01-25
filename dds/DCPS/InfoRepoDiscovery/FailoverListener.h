@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef FAILOVERLISTENER_T_H
-#define FAILOVERLISTENER_T_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_FAILOVERLISTENER_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_FAILOVERLISTENER_H
 
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/Definitions.h"

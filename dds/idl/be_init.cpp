@@ -20,7 +20,7 @@
 void
 BE_version()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("OpenDDS version ") ACE_TEXT(DDS_VERSION)
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("OpenDDS version ") ACE_TEXT(OPENDDS_VERSION)
              ACE_TEXT("\n")));
 }
 
@@ -38,9 +38,9 @@ BE_post_init(char*[], long)
 {
   std::ostringstream version;
   version << "-D__OPENDDS_IDL=0x"
-          << std::setw(2) << std::setfill('0') << DDS_MAJOR_VERSION
-          << std::setw(2) << std::setfill('0') << DDS_MINOR_VERSION
-          << std::setw(2) << std::setfill('0') << DDS_MICRO_VERSION;
+          << std::setw(2) << std::setfill('0') << OPENDDS_MAJOR_VERSION
+          << std::setw(2) << std::setfill('0') << OPENDDS_MINOR_VERSION
+          << std::setw(2) << std::setfill('0') << OPENDDS_MICRO_VERSION;
   DRV_cpp_putarg(version.str().c_str());
 
 #ifdef ACE_HAS_CDR_FIXED

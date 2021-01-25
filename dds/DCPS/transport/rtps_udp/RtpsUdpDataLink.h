@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSUDPDATALINK_H
-#define DCPS_RTPSUDPDATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H
 
 #include "Rtps_Udp_Export.h"
 
@@ -411,12 +411,24 @@ private:
     bool is_pvs_writer() const { return false; }
 #endif
 
+    SequenceNumber non_durable_first_sn() const
+    {
+      return (send_buff_ && !send_buff_->empty()) ? send_buff_->low() : (max_sn_ + 1);
+    }
+    void initialize_heartbeat(MetaSubmessage& meta_submessage);
+    void gather_preassociation_heartbeat_i(MetaSubmessageVec& meta_submessages,
+                                           MetaSubmessage& meta_submessage,
+                                           const ReaderInfo_rch& reader);
+    void gather_directed_heartbeat_i(MetaSubmessageVec& meta_submessages,
+                                     MetaSubmessage& meta_submessage,
+                                     const ReaderInfo_rch& reader);
+
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
-    void update_max_sn(SequenceNumber seq);
+    void update_max_sn(const RepoId& reader, SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     RemoveResult remove_sample(const DataSampleElement* sample);
@@ -527,6 +539,9 @@ private:
 
   private:
     void gather_preassociation_ack_nacks_i(MetaSubmessageVec& meta_submessages);
+    void gather_preassociation_ack_nack_i(MetaSubmessageVec& meta_submessages,
+                                          const WriterInfo_rch& writer);
+
     void gather_ack_nacks_i(const WriterInfo_rch& writer,
                             const RtpsUdpDataLink_rch& link,
                             bool heartbeat_was_non_final,

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTINST_H
-#define OPENDDS_DCPS_TRANSPORTINST_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTINST_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTINST_H
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

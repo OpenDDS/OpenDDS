@@ -5,14 +5,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_MONITOR_FACTORY_BASE_H
-#define OPENDDS_DCPS_MONITOR_FACTORY_BASE_H
+#ifndef OPENDDS_DCPS_MONITORFACTORY_H
+#define OPENDDS_DCPS_MONITORFACTORY_H
 
 #include "ace/Service_Object.h"
 #include "ace/Service_Config.h"
 #include "tao/corba.h"
 #include "dcps_export.h"
-#include "dds/DCPS/PublicationInstance.h"
+#include "PublicationInstance.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

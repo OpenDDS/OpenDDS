@@ -1,4 +1,4 @@
-project: dcps_test, dcps_rtps, dcps_rtps_udp {
+project: dcpsexe, dcps_test, dcps_rtps, dcps_rtps_udp, dcps_transports_for_test {
   exename = *
   TypeSupport_Files {
     DataRepresentation.idl

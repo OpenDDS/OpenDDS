@@ -65,7 +65,7 @@ void AlertDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           {
             ACE_ERROR((LM_ERROR,
               "ERROR: AlertDataReaderListenerImpl::on_data_available"
-              " Received SYSTEM_SHUTDOWN message and expected/got last alive_count %d/%d \n",
+              " Received SYSTEM_SHUTDOWN message and expected/got last alive_count %d/%d\n",
               expected_status_.alive_count, last_status_.alive_count));
             error_occurred_ = true;
           }
@@ -92,7 +92,7 @@ void AlertDataReaderListenerImpl::on_requested_deadline_missed (
     const DDS::RequestedDeadlineMissedStatus &)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_requested_deadline_missed \n")));
+    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_requested_deadline_missed\n")));
 }
 
 void AlertDataReaderListenerImpl::on_requested_incompatible_qos (
@@ -100,7 +100,7 @@ void AlertDataReaderListenerImpl::on_requested_incompatible_qos (
     const DDS::RequestedIncompatibleQosStatus &)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_requested_incompatible_qos \n")));
+    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_requested_incompatible_qos\n")));
 }
 
 void AlertDataReaderListenerImpl::on_liveliness_changed (
@@ -138,7 +138,7 @@ void AlertDataReaderListenerImpl::on_subscription_matched (
     const DDS::SubscriptionMatchedStatus &)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_subscription_matched \n")));
+    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_subscription_matched\n")));
 }
 
 void AlertDataReaderListenerImpl::on_sample_rejected(
@@ -146,7 +146,7 @@ void AlertDataReaderListenerImpl::on_sample_rejected(
     const DDS::SampleRejectedStatus&)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_sample_rejected \n")));
+    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_sample_rejected\n")));
 }
 
 void AlertDataReaderListenerImpl::on_sample_lost(
@@ -154,5 +154,5 @@ void AlertDataReaderListenerImpl::on_sample_lost(
   const DDS::SampleLostStatus&)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_sample_lost \n")));
+    ACE_TEXT("(%P|%t) AlertDataReaderListenerImpl::on_sample_lost\n")));
 }

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DEFINITION_H
-#define OPENDDS_DCPS_DEFINITION_H
+#ifndef OPENDDS_DCPS_DEFINITIONS_H
+#define OPENDDS_DCPS_DEFINITIONS_H
 
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ace/Message_Block.h"

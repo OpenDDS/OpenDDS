@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICAST_H
-#define DCPS_MULTICAST_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICAST_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICAST_H
 
 #include "Multicast_Export.h"
 #include "dds/Versioned_Namespace.h"

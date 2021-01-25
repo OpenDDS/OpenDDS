@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPCONNECTION_H
-#define OPENDDS_TCPCONNECTION_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPCONNECTION_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPCONNECTION_H
 
 #include "TcpInst_rch.h"
 #ifdef __BORLANDC__

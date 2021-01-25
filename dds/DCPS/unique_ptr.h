@@ -1,5 +1,5 @@
-#ifndef UNIQUE_PTR_H_18C6F30C
-#define UNIQUE_PTR_H_18C6F30C
+#ifndef OPENDDS_DCPS_UNIQUE_PTR_H
+#define OPENDDS_DCPS_UNIQUE_PTR_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

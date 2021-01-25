@@ -1,5 +1,5 @@
-#ifndef OPENDDS_QOS_SETTINGS_H
-#define OPENDDS_QOS_SETTINGS_H
+#ifndef OPENDDS_FACE_CONFIG_QOSSETTINGS_H
+#define OPENDDS_FACE_CONFIG_QOSSETTINGS_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"

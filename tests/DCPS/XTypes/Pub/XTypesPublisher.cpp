@@ -137,33 +137,6 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
   }
 }
 
-template<typename T>
-void get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_name,
-  Topic_var& topic, const std::string& registered_type_name)
-{
-  ts->register_type(dp, registered_type_name.c_str());
-  CORBA::String_var type_name = (registered_type_name.empty() ? ts->get_type_name() : registered_type_name.c_str());
-  topic = dp->create_topic(topic_name.c_str(), type_name,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-}
-
-
-bool check_inconsistent_topic_status(Topic_var topic)
-{
-  DDS::InconsistentTopicStatus status;
-  DDS::ReturnCode_t retcode;
-
-  retcode = topic->get_inconsistent_topic_status(status);
-  if (retcode != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
-    return false;
-  } else if (status.total_count != (expect_to_match ? 0 : 1)) {
-    ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
-    return false;
-  }
-  return true;
-}
-
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -217,56 +190,62 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "FinalStructPub") {
     FinalStructPubTypeSupport_var ts = new FinalStructPubTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedFinalStruct") {
     ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructNoXTypes") {
     AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AdditionalPrefixFieldStruct") {
     AdditionalPrefixFieldStructTypeSupport_var ts = new AdditionalPrefixFieldStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AdditionalPostfixFieldStruct") {
     AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedMutableStruct") {
     ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedIdMutableStruct") {
     ModifiedIdMutableStructTypeSupport_var ts = new ModifiedIdMutableStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedTypeMutableStruct") {
     ModifiedTypeMutableStructTypeSupport_var ts = new ModifiedTypeMutableStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedNameMutableStruct") {
     ModifiedNameMutableStructTypeSupport_var ts = new ModifiedNameMutableStructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedMutableUnion") {
     ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedDiscMutableUnion") {
     ModifiedDiscMutableUnionTypeSupport_var ts = new ModifiedDiscMutableUnionTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedTypeMutableUnion") {
     ModifiedTypeMutableUnionTypeSupport_var ts = new ModifiedTypeMutableUnionTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "ModifiedNameMutableUnion") {
     ModifiedNameMutableUnionTypeSupport_var ts = new ModifiedNameMutableUnionTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "Trim64Struct") {
     Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructWithDependency") {
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
-    get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Type %s is not supported\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
   }
+
+  if (failed) {
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Writer starting at %T\n"));
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
@@ -277,12 +256,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
 
-  ACE_OS::sleep(ACE_Time_Value(7, 0));
+  DDS::StatusCondition_var condition = expect_to_match ? dw->get_statuscondition() : topic->get_statuscondition();
+  condition->set_enabled_statuses(expect_to_match ? DDS::PUBLICATION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
 
-  failed = !check_inconsistent_topic_status(topic);
+  DDS::ConditionSeq conditions;
+  DDS::Duration_t timeout = { 10, 0 };
+  if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
+      expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
+    failed = 1;
+  }
+
+  ws->detach_condition(condition);
+
+  if (!failed) {
+    failed = !check_inconsistent_topic_status(topic);
+  }
 
   if (failed) {
-    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %s\n", type.c_str()));
+    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
   } else if (expect_to_match) {
     if (type == "PlainCdrStruct") {
       write_plain_cdr_struct(dw);

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef ZEROCOPYALLOCATOR_H
-#define ZEROCOPYALLOCATOR_H
+#ifndef OPENDDS_DCPS_ZEROCOPYALLOCATOR_T_H
+#define OPENDDS_DCPS_ZEROCOPYALLOCATOR_T_H
 
 #include /**/ "ace/pre.h"
 #include "ace/Malloc_Base.h"          /* Need ACE_Allocator */
@@ -72,11 +72,11 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
-#include "dds/DCPS/ZeroCopyAllocator_T.inl"
+#include "ZeroCopyAllocator_T.inl"
 #endif /* __ACE_INLINE__ */
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
-#include "dds/DCPS/ZeroCopyAllocator_T.cpp"
+#include "ZeroCopyAllocator_T.cpp"
 #endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
 #if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)

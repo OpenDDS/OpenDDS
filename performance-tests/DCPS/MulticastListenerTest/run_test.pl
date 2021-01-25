@@ -142,7 +142,7 @@ my $wait_to_kill = 1200;
 for ($i = 0; $i < $num_writers; $i++) {
     my $PubResult = $pubs[$i]->WaitKill ($wait_to_kill);
     if ($PubResult != 0) {
-        print STDERR "ERROR: publisher $i returned $PubResult \n";
+        print STDERR "ERROR: publisher $i returned $PubResult\n";
         $status = 1;
         $wait_to_kill = 0;
     }
@@ -151,7 +151,7 @@ for ($i = 0; $i < $num_writers; $i++) {
 for ($i = 0; $i < $num_readers; $i++) {
     my $SubResult = $subs[$i]->WaitKill ($wait_to_kill);
     if ($SubResult != 0) {
-        print STDERR "ERROR: subscriber $i returned $SubResult \n";
+        print STDERR "ERROR: subscriber $i returned $SubResult\n";
         $status = 1;
         $wait_to_kill = 0;
     }

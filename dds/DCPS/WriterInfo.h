@@ -11,7 +11,7 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsCoreC.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 #include "RcObject.h"
 #include "Definitions.h"
 #include "CoherentChangeControl.h"

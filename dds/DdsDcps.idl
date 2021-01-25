@@ -5,9 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_IDL
-#define OPENDDS_DCPS_IDL
+#ifndef OPENDDS_DDSDCPS_IDL
+#define OPENDDS_DDSDCPS_IDL
 
-#include "dds/DdsDcpsDomain.idl"
+#include <dds/DdsDcpsDomain.idl>
 
 #endif /* OPENDDS_DCPS_IDL */

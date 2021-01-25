@@ -142,7 +142,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
   }
 
   void DataReaderListenerImpl::on_sample_rejected(
@@ -154,7 +154,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
   }
 
   void DataReaderListenerImpl::on_data_available(
@@ -221,7 +221,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
   }
 
   void DataReaderListenerImpl::on_subscription_disconnected (
@@ -233,7 +233,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_disconnected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_disconnected\n")));
   }
 
   void DataReaderListenerImpl::on_subscription_reconnected (
@@ -245,7 +245,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_reconnected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_reconnected\n")));
   }
 
   void DataReaderListenerImpl::on_subscription_lost (
@@ -257,7 +257,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
   }
 
   void DataReaderListenerImpl::on_budget_exceeded (
@@ -265,5 +265,5 @@ void DataReaderListenerImpl::on_subscription_matched (
     const ::OpenDDS::DCPS::BudgetExceededStatus&
     )
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded\n"));
   }

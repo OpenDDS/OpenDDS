@@ -26,7 +26,7 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
     if (status == ::DDS::RETCODE_OK)
     {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderListenerImpl::read %X foo.x = %f foo.y = %f, foo.data_source = %d \n"),
+        ACE_TEXT("(%P|%t) DataReaderListenerImpl::read %X foo.x = %f foo.y = %f, foo.data_source = %d\n"),
         reader, foo.x, foo.y, foo.data_source));
     }
     else if (status == ::DDS::RETCODE_NO_DATA)
@@ -127,7 +127,7 @@ void DataReaderListenerImpl::on_subscription_matched (
   ACE_UNUSED_ARG(status) ;
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")
   ));
 }
 
@@ -140,7 +140,7 @@ void DataReaderListenerImpl::on_sample_rejected(
   ACE_UNUSED_ARG(status) ;
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")
   ));
 }
 
@@ -183,6 +183,6 @@ void DataReaderListenerImpl::on_sample_lost(
   ACE_UNUSED_ARG(status) ;
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")
   ));
 }

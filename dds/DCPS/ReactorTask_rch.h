@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_REACTORTASK_RCH_H
 #define OPENDDS_DCPS_REACTORTASK_RCH_H
 
-#include "dds/DCPS/RcHandle_T.h"
+#include "RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

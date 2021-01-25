@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_GUIDUTILS_H
-#define OPENDDS_DDS_DCPS_GUIDUTILS_H
+#ifndef OPENDDS_DCPS_GUIDUTILS_H
+#define OPENDDS_DCPS_GUIDUTILS_H
 
 #include "dcps_export.h"
 #include "PoolAllocator.h"

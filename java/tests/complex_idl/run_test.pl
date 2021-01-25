@@ -49,7 +49,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 $TEST->Spawn ();
 my $TestResult = $TEST->WaitKill (300);
 if ($TestResult != 0) {
-    print STDERR "ERROR: test returned $TestResult \n";
+    print STDERR "ERROR: test returned $TestResult\n";
     $status = 1;
 }
 

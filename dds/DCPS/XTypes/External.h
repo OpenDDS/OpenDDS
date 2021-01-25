@@ -3,10 +3,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_EXTERNAL_H
-#define OPENDDS_DCPS_TYPE_EXTERNAL_H
+#ifndef OPENDDS_DCPS_XTYPES_EXTERNAL_H
+#define OPENDDS_DCPS_XTYPES_EXTERNAL_H
 
-#include "dds/DCPS/unique_ptr.h"
+#include <dds/DCPS/unique_ptr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -91,9 +91,9 @@ External<T>& External<T>::operator=(const T& value)
   return *this;
 }
 
-}
-}
+} // namespace OpenDDS
+} // namespace XTypes
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
+#endif // OPENDDS_DCPS_XTYPES_EXTERNAL_H

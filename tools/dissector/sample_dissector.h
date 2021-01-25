@@ -29,7 +29,7 @@ extern "C" {
 
 #include <ace/Message_Block.h>
 
-#include "tools/dissector/dissector_export.h"
+#include "dissector_export.h"
 #include "ws_common.h"
 
 #include "FACE/Fixed.h"

@@ -12,10 +12,10 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/ZeroCopySeq_T.h"
+#include "ZeroCopySeq_T.h"
 
 #if !defined (__ACE_INLINE__)
-#include "dds/DCPS/ZeroCopySeq_T.inl"
+#include "ZeroCopySeq_T.inl"
 #endif /* __//ACE_INLINE__ */
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL

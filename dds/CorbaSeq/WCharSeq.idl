@@ -21,8 +21,8 @@
  *          WCharSeq.pidl
  */
 
-#ifndef OPENDDS_CORBA_WCHAR_SEQ_IDL
-#define OPENDDS_CORBA_WCHAR_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_WCHARSEQ_IDL
+#define OPENDDS_CORBASEQ_WCHARSEQ_IDL
 
 #pragma prefix "omg.org"
 

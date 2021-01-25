@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_REQUESTED_DEADLINE_WATCHDOG_H
-#define OPENDDS_REQUESTED_DEADLINE_WATCHDOG_H
+#ifndef OPENDDS_DCPS_REQUESTEDDEADLINEWATCHDOG_H
+#define OPENDDS_DCPS_REQUESTEDDEADLINEWATCHDOG_H
 
 #include "dds/DdsDcpsSubscriptionC.h"
 
@@ -14,8 +14,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/Watchdog.h"
-#include "dds/DCPS/SubscriptionInstance.h"
+#include "Watchdog.h"
+#include "SubscriptionInstance.h"
 
 #include "ace/Reverse_Lock_T.h"
 

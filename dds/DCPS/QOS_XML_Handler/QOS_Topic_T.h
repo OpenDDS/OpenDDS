@@ -5,8 +5,8 @@
  * Starting point for parsing the Topic QOS settings.
  *
  */
-#ifndef QOS_TOPIC_T_H_
-#define QOS_TOPIC_T_H_
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_TOPIC_T_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_TOPIC_T_H
 
 #include "QOS_DwDrTp_Base_T.h"
 
@@ -28,6 +28,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include "dds/DCPS/QOS_XML_Handler/QOS_Topic_T.cpp"
+#include "QOS_Topic_T.cpp"
 
 #endif /* QOS_TOPIC_T_H_ */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef OPENDDS_CORBA_OCTET_SEQ_IDL
-#define OPENDDS_CORBA_OCTET_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_OCTETSEQ_IDL
+#define OPENDDS_CORBASEQ_OCTETSEQ_IDL
 
 #pragma prefix "omg.org"
 

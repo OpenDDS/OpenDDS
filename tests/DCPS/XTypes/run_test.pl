@@ -65,6 +65,7 @@ my %params = (
                                 key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini"},
 );
 
+my $status = 0;
 
 sub run_test {
   my @test_args;
@@ -94,17 +95,23 @@ sub run_test {
   push(@writer_args, @test_args);
   $test->process("writer_$test_name_param", './Pub/xtypes_publisher', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
+
+  $status |= $test->wait_kill("reader_$test_name_param", 30);
+  $status |= $test->wait_kill("writer_$test_name_param", 30);
 }
 
 
 if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test ($v, $k);
-    sleep(7);
   }
 }
 else {
   run_test ($params{$test_name}, $test_name);
+}
+
+if ($status) {
+  print STDERR "ERROR: test failed\n";
 }
 
 exit $test->finish(60);

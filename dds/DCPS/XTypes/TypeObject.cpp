@@ -9,7 +9,6 @@
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Hash.h"
 
-#include <cassert>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -287,7 +287,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       GuidConverter converter(writer_id);
       ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_association: "
-          "inserted writer %C.return %d \n",
+          "inserted writer %C.return %d\n",
           OPENDDS_STRING(converter).c_str(), bpair.second));
 
       WriterMapType::iterator iter = writers_.find(writer_id);
@@ -475,7 +475,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
-        ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+        ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
         is_bit_,
         OPENDDS_STRING(reader_converter).c_str(),
         OPENDDS_STRING(writer_converter).c_str(),
@@ -541,7 +541,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
-        ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+        ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
         is_bit_,
         OPENDDS_STRING(reader_converter).c_str(),
         OPENDDS_STRING(writer_converter).c_str(),
@@ -886,7 +886,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
-                            ACE_TEXT("qos not updated. \n")),
+                            ACE_TEXT("qos not updated.\n")),
                             DDS::RETCODE_ERROR);
         }
       }
@@ -1083,7 +1083,7 @@ DataReaderImpl::get_matched_publications(
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::get_matched_publications: ")
-        ACE_TEXT(" Entity is not enabled. \n")),
+        ACE_TEXT(" Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1116,7 +1116,7 @@ DataReaderImpl::get_matched_publication_data(
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::")
         ACE_TEXT("get_matched_publication_data: ")
-        ACE_TEXT("Entity is not enabled. \n")),
+        ACE_TEXT("Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1456,7 +1456,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
-          ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
+          ACE_TEXT("instance %d is_new_instance %d filtered %d\n"),
           OPENDDS_STRING(reader_converter).c_str(),
           OPENDDS_STRING(writer_converter).c_str(),
           instance ? instance->instance_handle_ : 0,
@@ -1933,7 +1933,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
       // so it is not a failure.
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-                 ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
+                 ACE_TEXT(" %p.\n"), ACE_TEXT("cancel_timer")));
     }
 
     timer_was_reset = true;
@@ -2005,7 +2005,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     if (liveliness_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-          ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
+          ACE_TEXT(" %p.\n"), ACE_TEXT("schedule_timer")));
     }
   }
 }
@@ -2914,7 +2914,7 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
           GuidConverter writer_converter(pub_id);
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::update_ownership_strength - ")
-              ACE_TEXT("local %C update remote %C strength from %d to %d \n"),
+              ACE_TEXT("local %C update remote %C strength from %d to %d\n"),
               OPENDDS_STRING(reader_converter).c_str(),
               OPENDDS_STRING(writer_converter).c_str(),
               iter->second->writer_qos_.ownership_strength, ownership_strength));
@@ -2971,7 +2971,7 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
     GuidConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::accept_coherent()")
-        ACE_TEXT(" reader %C writer %C publisher %C \n"),
+        ACE_TEXT(" reader %C writer %C publisher %C\n"),
         OPENDDS_STRING(reader).c_str(),
         OPENDDS_STRING(writer).c_str(),
         OPENDDS_STRING(publisher).c_str()));
@@ -2997,7 +2997,7 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
     GuidConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::reject_coherent()")
-        ACE_TEXT(" reader %C writer %C publisher %C \n"),
+        ACE_TEXT(" reader %C writer %C publisher %C\n"),
         OPENDDS_STRING(reader).c_str(),
         OPENDDS_STRING(writer).c_str(),
         OPENDDS_STRING(publisher).c_str()));

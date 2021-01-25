@@ -8,10 +8,10 @@
  * please report this to the XSC project at
  * https://github.com/DOCGroup/XSC
  */
-#ifndef DDS_QOS_HPP
-#define DDS_QOS_HPP
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
+#define OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
 
-#include "XML_QOS_Handler_Export.h"
+#include "OpenDDS_XML_QOS_Handler_Export.h"
 // Forward declarations.
 namespace dds
 {
@@ -75,7 +75,7 @@ namespace dds
 
 namespace dds
 {
-  class XML_QOS_Handler_Export destinationOrderKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export destinationOrderKind : public ::XSCRT::Type
   {
     public:
     explicit destinationOrderKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -93,10 +93,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (destinationOrderKind const& a, destinationOrderKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (destinationOrderKind const& a, destinationOrderKind const& b);
 
     private:
@@ -105,12 +105,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (destinationOrderKind const &a, destinationOrderKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (destinationOrderKind const &a, destinationOrderKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (destinationOrderKind const &a, destinationOrderKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (destinationOrderKind const &a, destinationOrderKind const &b);
 
 
-  class XML_QOS_Handler_Export durabilityKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export durabilityKind : public ::XSCRT::Type
   {
     public:
     explicit durabilityKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -130,10 +130,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (durabilityKind const& a, durabilityKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (durabilityKind const& a, durabilityKind const& b);
 
     private:
@@ -142,12 +142,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (durabilityKind const &a, durabilityKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (durabilityKind const &a, durabilityKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (durabilityKind const &a, durabilityKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (durabilityKind const &a, durabilityKind const &b);
 
 
-  class XML_QOS_Handler_Export historyKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export historyKind : public ::XSCRT::Type
   {
     public:
     explicit historyKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -165,10 +165,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (historyKind const& a, historyKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (historyKind const& a, historyKind const& b);
 
     private:
@@ -177,12 +177,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (historyKind const &a, historyKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (historyKind const &a, historyKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (historyKind const &a, historyKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (historyKind const &a, historyKind const &b);
 
 
-  class XML_QOS_Handler_Export livelinessKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export livelinessKind : public ::XSCRT::Type
   {
     public:
     explicit livelinessKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -201,10 +201,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (livelinessKind const& a, livelinessKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (livelinessKind const& a, livelinessKind const& b);
 
     private:
@@ -213,12 +213,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (livelinessKind const &a, livelinessKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (livelinessKind const &a, livelinessKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (livelinessKind const &a, livelinessKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (livelinessKind const &a, livelinessKind const &b);
 
 
-  class XML_QOS_Handler_Export presentationAccessScopeKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export presentationAccessScopeKind : public ::XSCRT::Type
   {
     public:
     explicit presentationAccessScopeKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -237,10 +237,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (presentationAccessScopeKind const& a, presentationAccessScopeKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (presentationAccessScopeKind const& a, presentationAccessScopeKind const& b);
 
     private:
@@ -249,12 +249,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (presentationAccessScopeKind const &a, presentationAccessScopeKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (presentationAccessScopeKind const &a, presentationAccessScopeKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (presentationAccessScopeKind const &a, presentationAccessScopeKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (presentationAccessScopeKind const &a, presentationAccessScopeKind const &b);
 
 
-  class XML_QOS_Handler_Export reliabilityKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export reliabilityKind : public ::XSCRT::Type
   {
     public:
     explicit reliabilityKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -272,10 +272,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (reliabilityKind const& a, reliabilityKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (reliabilityKind const& a, reliabilityKind const& b);
 
     private:
@@ -284,12 +284,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (reliabilityKind const &a, reliabilityKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (reliabilityKind const &a, reliabilityKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (reliabilityKind const &a, reliabilityKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (reliabilityKind const &a, reliabilityKind const &b);
 
 
-  class XML_QOS_Handler_Export ownershipKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export ownershipKind : public ::XSCRT::Type
   {
     public:
     explicit ownershipKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
@@ -307,10 +307,10 @@ namespace dds
     Value
     integral () const;
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator== (ownershipKind const& a, ownershipKind const& b);
 
-    friend bool XML_QOS_Handler_Export
+    friend bool OpenDDS_XML_QOS_Handler_Export
     operator!= (ownershipKind const& a, ownershipKind const& b);
 
     private:
@@ -319,12 +319,12 @@ namespace dds
     Value v_;
   };
 
-  bool XML_QOS_Handler_Export operator== (ownershipKind const &a, ownershipKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (ownershipKind const &a, ownershipKind const &b);
 
-  bool XML_QOS_Handler_Export operator!= (ownershipKind const &a, ownershipKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (ownershipKind const &a, ownershipKind const &b);
 
 
-  class XML_QOS_Handler_Export duration : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export duration : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -360,7 +360,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export stringSeq : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export stringSeq : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -392,7 +392,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export deadlineQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export deadlineQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -418,7 +418,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export destinationOrderQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export destinationOrderQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -444,7 +444,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export durabilityQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export durabilityQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -470,7 +470,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export durabilityServiceQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export durabilityServiceQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -546,7 +546,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export entityFactoryQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export entityFactoryQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -572,7 +572,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export groupDataQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export groupDataQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -598,7 +598,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export historyQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export historyQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -634,7 +634,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export latencyBudgetQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export latencyBudgetQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -660,7 +660,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export lifespanQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export lifespanQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -686,7 +686,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export livelinessQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export livelinessQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -722,7 +722,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export ownershipQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export ownershipQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -748,7 +748,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export ownershipStrengthQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export ownershipStrengthQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -774,7 +774,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export partitionQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export partitionQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -800,7 +800,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export presentationQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export presentationQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -846,7 +846,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export readerDataLifecycleQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export readerDataLifecycleQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -882,7 +882,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export reliabilityQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export reliabilityQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -918,7 +918,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export resourceLimitsQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export resourceLimitsQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -984,7 +984,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export timeBasedFilterQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export timeBasedFilterQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1010,7 +1010,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export topicDataQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export topicDataQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1036,7 +1036,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export transportPriorityQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export transportPriorityQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1062,7 +1062,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export userDataQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export userDataQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1088,7 +1088,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export writerDataLifecycleQosPolicy : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export writerDataLifecycleQosPolicy : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1114,7 +1114,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export domainparticipantQos : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export domainparticipantQos : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1172,7 +1172,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export publisherQos : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export publisherQos : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1250,7 +1250,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export subscriberQos : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export subscriberQos : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1328,7 +1328,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export topicQos : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export topicQos : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1507,7 +1507,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export datareaderQos : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export datareaderQos : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1676,7 +1676,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export datawriterQos : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export datawriterQos : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -1875,7 +1875,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export qosProfile : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export qosProfile : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -2008,7 +2008,7 @@ namespace dds
   };
 
 
-  class XML_QOS_Handler_Export qosProfile_seq : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export qosProfile_seq : public ::XSCRT::Type
   {
     typedef ::XSCRT::Type Base;
 
@@ -2044,7 +2044,7 @@ namespace dds
 {
   namespace reader
   {
-    XML_QOS_Handler_Export
+    OpenDDS_XML_QOS_Handler_Export
     ::dds::qosProfile_seq
     dds (xercesc::DOMDocument const*);
   }

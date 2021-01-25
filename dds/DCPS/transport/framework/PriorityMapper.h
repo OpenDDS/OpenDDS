@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef PRIORITY_MAPPER_H
-#define PRIORITY_MAPPER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_PRIORITYMAPPER_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_PRIORITYMAPPER_H
 
 #include "dds/DCPS/dcps_export.h"
 

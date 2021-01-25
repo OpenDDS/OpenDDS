@@ -49,9 +49,9 @@ def get_version_prop(macro, is_int=True):
 metadata = get_version_prop('OPENDDS_VERSION_METADATA', False)
 if metadata:
     metadata = '-' + metadata
-version = get_version_prop('DDS_MAJOR_VERSION') \
-    + '.' + get_version_prop('DDS_MINOR_VERSION') \
-    + '.' + get_version_prop('DDS_MICRO_VERSION') + metadata
+version = get_version_prop('OPENDDS_MAJOR_VERSION') \
+    + '.' + get_version_prop('OPENDDS_MINOR_VERSION') \
+    + '.' + get_version_prop('OPENDDS_MICRO_VERSION') + metadata
 release = version
 is_release = bool(int(get_version_prop('OPENDDS_IS_RELEASE')))
 

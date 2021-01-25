@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTCONFIG_RCH_H
-#define OPENDDS_DCPS_TRANSPORTCONFIG_RCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTCONFIG_RCH_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTCONFIG_RCH_H
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -14,7 +14,7 @@
 #endif
 
 #include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/transport/framework/TransportConfig.h"
+#include "TransportConfig.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

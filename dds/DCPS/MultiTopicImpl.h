@@ -10,8 +10,8 @@
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
-#include "dds/DCPS/TopicDescriptionImpl.h"
-#include "dds/DCPS/FilterEvaluator.h"
+#include "TopicDescriptionImpl.h"
+#include "FilterEvaluator.h"
 
 #include "PoolAllocator.h"
 #include <utility>

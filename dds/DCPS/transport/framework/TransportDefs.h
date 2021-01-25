@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTDEFS_H
-#define OPENDDS_DCPS_TRANSPORTDEFS_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEFS_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEFS_H
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"

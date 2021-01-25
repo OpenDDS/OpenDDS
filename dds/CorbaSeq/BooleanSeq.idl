@@ -9,8 +9,8 @@
  *   This file is used to generate the code in BooleanSeqC.*
  */
 
-#ifndef OPENDDS_CORBA_BOOLEAN_SEQ_IDL
-#define OPENDDS_CORBA_BOOLEAN_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_BOOLEANSEQ_IDL
+#define OPENDDS_CORBASEQ_BOOLEANSEQ_IDL
 
 #pragma prefix "omg.org"
 

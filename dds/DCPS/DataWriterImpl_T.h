@@ -1,5 +1,5 @@
-#ifndef OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H
-#define OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H
+#ifndef OPENDDS_DCPS_DATAWRITERIMPL_T_H
+#define OPENDDS_DCPS_DATAWRITERIMPL_T_H
 
 #include "PublicationInstance.h"
 #include "DataWriterImpl.h"

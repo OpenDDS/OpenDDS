@@ -23,8 +23,8 @@
  *          DoubleSeq.pidl
  */
 
-#ifndef OPENDDS_CORBA_DOUBLE_SEQ_IDL
-#define OPENDDS_CORBA_DOUBLE_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_DOUBLESEQ_IDL
+#define OPENDDS_CORBASEQ_DOUBLESEQ_IDL
 
 #pragma prefix "omg.org"
 

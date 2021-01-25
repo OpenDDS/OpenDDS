@@ -3,17 +3,20 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_CERTIFICATE_H
-#define OPENDDS_SECURITY_SSL_CERTIFICATE_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_CERTIFICATE_H
+#define OPENDDS_DCPS_SECURITY_SSL_CERTIFICATE_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/unique_ptr.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsSecurityCoreC.h"
+#include <dds/DCPS/security/OpenDDS_Security_Export.h>
+#include <dds/DCPS/unique_ptr.h>
+
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsSecurityCoreC.h>
+
+#include <openssl/x509.h>
+
 #include <string>
 #include <vector>
 #include <iostream>
-#include <openssl/x509.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -23,16 +26,16 @@ namespace SSL {
 
 class verify_signature_impl;
 
-class DdsSecurity_Export Certificate {
+class OpenDDS_Security_Export Certificate {
 public:
   friend class verify_signature_impl;
 
   typedef DCPS::unique_ptr<Certificate> unique_ptr;
 
-  friend DdsSecurity_Export std::ostream& operator<<(std::ostream&,
+  friend OpenDDS_Security_Export std::ostream& operator<<(std::ostream&,
                                                      const Certificate&);
 
-  friend DdsSecurity_Export bool operator==(const Certificate& lhs,
+  friend OpenDDS_Security_Export bool operator==(const Certificate& lhs,
                                             const Certificate& rhs);
 
   explicit Certificate(const std::string& uri, const std::string& password = "");
@@ -118,9 +121,9 @@ public:
   std::string dsign_algo_;
 };
 
-DdsSecurity_Export std::ostream& operator<<(std::ostream&, const Certificate&);
+OpenDDS_Security_Export std::ostream& operator<<(std::ostream&, const Certificate&);
 
-DdsSecurity_Export bool operator==(const Certificate& lhs,
+OpenDDS_Security_Export bool operator==(const Certificate& lhs,
                                    const Certificate& rhs);
 }  // namespace SSL
 }  // namespace Security

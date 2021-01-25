@@ -387,6 +387,17 @@ sub new {
   return $self;
 }
 
+sub wait_kill {
+  my $self = shift;
+  my $name = shift;
+  my $wait_time = shift;
+  my $verbose = shift;
+
+  my $process = $self->{processes}->{process}->{$name}->{process};
+
+  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose);
+}
+
 sub default_transport {
   my $self = shift;
   my $transport = shift;

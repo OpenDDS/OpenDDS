@@ -7,21 +7,23 @@
 
 
 
-#ifndef DDS_DCPS_AUTHENTICATION_BUILTIN_IMPL_H
-#define DDS_DCPS_AUTHENTICATION_BUILTIN_IMPL_H
+#ifndef OPENDDS_DCPS_SECURITY_AUTHENTICATIONBUILTINIMPL_H
+#define OPENDDS_DCPS_SECURITY_AUTHENTICATIONBUILTINIMPL_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "ace/Thread_Mutex.h"
+#include "OpenDDS_Security_Export.h"
+#include "Authentication/LocalAuthCredentialData.h"
+#include "SSL/DiffieHellman.h"
+
+#include <dds/DdsSecurityCoreC.h>
+#include <dds/Versioned_Namespace.h>
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#include <ace/Thread_Mutex.h>
+
 #include <map>
 #include <string>
 #include <memory>
-
-#include "Authentication/LocalAuthCredentialData.h"
-#include "SSL/DiffieHellman.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -45,7 +47,7 @@ namespace Security {
 * the interface this class is implementing.
 *
 */
-class DdsSecurity_Export  AuthenticationBuiltInImpl
+class OpenDDS_Security_Export AuthenticationBuiltInImpl
   : public virtual DDS::Security::Authentication
 {
 public:

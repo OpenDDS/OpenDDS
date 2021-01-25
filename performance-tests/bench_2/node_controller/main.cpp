@@ -165,6 +165,7 @@ public:
     exit_status_ = exit_code ? exit_code : return_code;
 #else
     exit_status_ = return_code;
+    ACE_UNUSED_ARG(exit_code);
 #endif
     running_ = false;
   }

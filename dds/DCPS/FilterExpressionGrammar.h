@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_FILTER_EXPRESSION_GRAMMAR_H
 #define OPENDDS_DCPS_FILTER_EXPRESSION_GRAMMAR_H
 
-#include "dds/DCPS/Definitions.h"
+#include "Definitions.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 

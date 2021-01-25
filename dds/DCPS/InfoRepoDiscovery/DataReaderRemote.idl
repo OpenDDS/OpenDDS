@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADER_REMOTE_IDL
-#define OPENDDS_DCPS_DATAREADER_REMOTE_IDL
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_DATAREADERREMOTE_IDL
+#define OPENDDS_DCPS_INFOREPODISCOVERY_DATAREADERREMOTE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsSubscription.idl"

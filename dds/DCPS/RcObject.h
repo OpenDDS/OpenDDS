@@ -1,5 +1,5 @@
-#ifndef RCOBJECT_H_E92AD5BB
-#define RCOBJECT_H_E92AD5BB
+#ifndef OPENDDS_DCPS_RCOBJECT_H
+#define OPENDDS_DCPS_RCOBJECT_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -13,7 +13,7 @@
 #  include <ace/Atomic_Op.h>
 #endif
 #include "ace/Synch_Traits.h"
-#include "dds/DCPS/PoolAllocationBase.h"
+#include "PoolAllocationBase.h"
 #include "RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

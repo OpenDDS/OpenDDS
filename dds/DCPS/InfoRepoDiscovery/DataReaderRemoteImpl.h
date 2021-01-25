@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADERREMOTEIMPL_H
-#define OPENDDS_DCPS_DATAREADERREMOTEIMPL_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_DATAREADERREMOTEIMPL_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_DATAREADERREMOTEIMPL_H
 
 #include "InfoRepoDiscovery_Export.h"
 #include "DataReaderRemoteS.h"

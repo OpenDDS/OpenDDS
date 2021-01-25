@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef RTPS_RTPSCORE_IDL
-#define RTPS_RTPSCORE_IDL
+#ifndef OPENDDS_DCPS_RTPS_RTPSCORE_IDL
+#define OPENDDS_DCPS_RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"

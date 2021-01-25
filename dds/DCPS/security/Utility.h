@@ -5,14 +5,16 @@
 * See: http://www.OpenDDS.org/license.html
 */
 
-#ifndef DDS_DCPS_UTILITY_H
-#define DDS_DCPS_UTILITY_H
+#ifndef OPENDDS_DCPS_SECURITY_UTILITY_H
+#define OPENDDS_DCPS_SECURITY_UTILITY_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/SequenceIterator.h"
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
+#include "OpenDDS_Security_Export.h"
 #include "TokenReader.h"
+
+#include <dds/DCPS/SequenceIterator.h>
+#include <dds/Versioned_Namespace.h>
+
+#include <dds/DdsSecurityCoreC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -23,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-class DdsSecurity_Export Utility {
+class OpenDDS_Security_Export Utility {
 public:
   virtual ~Utility() {}
   virtual void generate_random_bytes(void* ptr, size_t size) = 0;

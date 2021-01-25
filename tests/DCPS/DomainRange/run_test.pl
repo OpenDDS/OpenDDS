@@ -23,8 +23,8 @@ sub runTest {
 
     print "*********************************\n";
     print "DomainRangeTest creates a single process with 1 DW and 4 DRs.\n\n";
-    print "Domains and transports are dynamically configured from the \n";
-    print "templates in config.ini. The DW in each domain sends 10 \n";
+    print "Domains and transports are dynamically configured from the\n";
+    print "templates in config.ini. The DW in each domain sends 10\n";
     print "messages to its DRs.\n";
     print "*********************************\n";
 

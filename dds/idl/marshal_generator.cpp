@@ -872,15 +872,18 @@ namespace {
       serialized_size.addArg("seq", wrapper.wrapped_type_name());
       serialized_size.endArgs();
 
-      marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
+      if ((elem_cls & CL_INTERFACE) == 0) {
+        marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
-      intro.join(be_global->impl_, "  ");
+        intro.join(be_global->impl_, "  ");
 
-      be_global->impl_ <<
-        "  primitive_serialized_size_ulong(encoding, size);\n"
-        "  if (" << check_empty << ") {\n"
-        "    return;\n"
-        "  }\n";
+        be_global->impl_ <<
+          "  primitive_serialized_size_ulong(encoding, size);\n"
+          "  if (" << check_empty << ") {\n"
+          "    return;\n"
+          "  }\n";
+      }
+
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
           "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
@@ -938,30 +941,33 @@ namespace {
       insertion.addArg("seq", wrapper.wrapped_type_name());
       insertion.endArgs();
 
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n"
-        "  ACE_UNUSED_ARG(encoding);\n";
-      marshal_generator::generate_dheader_code(
-        "    serialized_size(encoding, total_size, seq);\n"
-        "    if (!strm.write_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n", !primitive);
-
-      intro.join(be_global->impl_, "  ");
-
-      be_global->impl_ <<
-        "  const CORBA::ULong length = " << get_length << ";\n";
-      if (!seq->unbounded()) {
+      if ((elem_cls & CL_INTERFACE) == 0) {
         be_global->impl_ <<
-          "  if (length > " << bounded_arg(seq) << ") {\n"
-          "    return false;\n"
+          "  const Encoding& encoding = strm.encoding();\n"
+          "  ACE_UNUSED_ARG(encoding);\n";
+        marshal_generator::generate_dheader_code(
+          "    serialized_size(encoding, total_size, seq);\n"
+          "    if (!strm.write_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n", !primitive);
+
+        intro.join(be_global->impl_, "  ");
+
+        be_global->impl_ <<
+          "  const CORBA::ULong length = " << get_length << ";\n";
+        if (!seq->unbounded()) {
+          be_global->impl_ <<
+            "  if (length > " << bounded_arg(seq) << ") {\n"
+            "    return false;\n"
+            "  }\n";
+        }
+        be_global->impl_ <<
+          streamAndCheck("<< length") <<
+          "  if (length == 0) {\n"
+          "    return true;\n"
           "  }\n";
       }
-      be_global->impl_ <<
-        streamAndCheck("<< length") <<
-        "  if (length == 0) {\n"
-        "    return true;\n"
-        "  }\n";
+
       if (elem_cls & CL_PRIMITIVE) {
         AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
@@ -1016,20 +1022,23 @@ namespace {
       extraction.addArg("seq", wrapper.wrapped_type_name());
       extraction.endArgs();
 
-      be_global->impl_ <<
-        "  const Encoding& encoding = strm.encoding();\n"
-        "  ACE_UNUSED_ARG(encoding);\n";
-      marshal_generator::generate_dheader_code(
-        "    if (!strm.read_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n", !primitive);
+      if ((elem_cls & CL_INTERFACE) == 0) {
+        be_global->impl_ <<
+          "  const Encoding& encoding = strm.encoding();\n"
+          "  ACE_UNUSED_ARG(encoding);\n";
+        marshal_generator::generate_dheader_code(
+          "    if (!strm.read_delimiter(total_size)) {\n"
+          "      return false;\n"
+          "    }\n", !primitive);
 
-      if (!primitive) {
-        be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+        if (!primitive) {
+          be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+        }
+        be_global->impl_ <<
+          "  CORBA::ULong length;\n"
+          << streamAndCheck(">> length");
       }
-      be_global->impl_ <<
-        "  CORBA::ULong length;\n"
-        << streamAndCheck(">> length");
+
       AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
       string bound;
       if (!seq->unbounded()) {
@@ -1039,7 +1048,10 @@ namespace {
       //for an unbounded sequence this is just our length
       //for a bounded sequence this is our maximum
       //we save the old length so we know how far we need to read until
-      be_global->impl_ << "  CORBA::ULong new_length = length;\n";
+      if ((elem_cls & CL_INTERFACE) == 0) {
+        be_global->impl_ << "  CORBA::ULong new_length = length;\n";
+      }
+
       if (elem_cls & CL_PRIMITIVE) {
         // if we are a bounded primitive, we read to our max then return false
         if (!seq->unbounded()) {

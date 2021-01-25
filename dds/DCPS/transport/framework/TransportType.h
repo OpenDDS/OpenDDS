@@ -5,12 +5,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORT_TYPE_H
-#define OPENDDS_DCPS_TRANSPORT_TYPE_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTTYPE_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTTYPE_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/transport/framework/TransportInst.h"
+#include "TransportInst.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Synch_Traits.h"

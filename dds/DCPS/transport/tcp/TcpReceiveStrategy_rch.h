@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPRECEIVESTRATEGY_RCH_H
-#define OPENDDS_TCPRECEIVESTRATEGY_RCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPRECEIVESTRATEGY_RCH_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPRECEIVESTRATEGY_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/Versioned_Namespace.h"

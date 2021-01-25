@@ -33,10 +33,10 @@ int read (::DDS::DataReader_ptr reader)
       {
         num_reads++;
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) reader %X take foo.x = %f foo.y = %f, foo.data_source = %d, count = %d \n"),
+          ACE_TEXT("(%P|%t) reader %X take foo.x = %f foo.y = %f, foo.data_source = %d, count = %d\n"),
           reader, foo.x, foo.y, foo.data_source, num_reads.value()));
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d \n"), si.sample_rank));
+          ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d\n"), si.sample_rank));
 
         if (results.add (foo) == -1)
         {
@@ -139,7 +139,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
   }
 
   void DataReaderListenerImpl::on_sample_rejected(
@@ -151,7 +151,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
   }
 
   void DataReaderListenerImpl::on_data_available(
@@ -203,7 +203,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
   }
 
   void DataReaderListenerImpl::on_subscription_disconnected (
@@ -215,7 +215,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_disconnected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_disconnected\n")));
   }
 
   void DataReaderListenerImpl::on_subscription_reconnected (
@@ -227,7 +227,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_reconnected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_reconnected\n")));
   }
 
 
@@ -240,5 +240,5 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
   }

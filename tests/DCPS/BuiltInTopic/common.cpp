@@ -244,7 +244,7 @@ int write ()
 int read (int expect_success)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) read begins. \n")));
+    ACE_TEXT("(%P|%t) read begins.\n")));
 
   try
   {

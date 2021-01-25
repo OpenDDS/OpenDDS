@@ -48,7 +48,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
                "ERROR Timer for instance %X should be scheduled, but is %d\n",
                instance.in(), instance->deadline_timer_id_));
   } else if (DCPS_debug_level > 5) {
-    ACE_DEBUG((LM_INFO, "Timer for instance %X scheduled \n", instance.in()));
+    ACE_DEBUG((LM_INFO, "Timer for instance %X scheduled\n", instance.in()));
   }
 }
 
@@ -60,7 +60,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
     Watchdog::cancel_timer(instance->deadline_timer_id_);
     instance->deadline_timer_id_ = -1;
     if (DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_INFO, "Timer for instance %X cancelled \n", instance.in()));
+      ACE_DEBUG((LM_INFO, "Timer for instance %X cancelled\n", instance.in()));
     }
   }
 }
