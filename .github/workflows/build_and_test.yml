@@ -2523,7 +2523,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -2606,7 +2606,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -2709,7 +2709,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -2792,7 +2792,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -2973,7 +2973,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: build OpenDDS
 #      shell: cmd
 #      run: |
@@ -3056,7 +3056,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -3159,7 +3159,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: build OpenDDS
 #      shell: cmd
 #      run: |
@@ -3242,7 +3242,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -3435,7 +3435,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: build OpenDDS
 #      shell: cmd
 #      run: |
@@ -3518,7 +3518,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -3633,7 +3633,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: build OpenDDS
 #      shell: cmd
 #      run: |
@@ -3717,7 +3717,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -3914,7 +3914,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -3997,7 +3997,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -4005,6 +4005,7 @@ jobs:
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
+        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
         echo using commit $TRIGGERING_COMMIT for SHA
         echo $TRIGGERING_COMMIT >> ./SHA
         cat > config.xml <<EOF
@@ -4023,7 +4024,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests\\security\\security_tests.lst"/>
+        <command name="auto_run_tests" options="dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests\\security\\security_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4114,7 +4115,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -4198,7 +4199,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        tools\scripts\show_build_config.pl
+        perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
@@ -4206,6 +4207,7 @@ jobs:
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         export DBS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\\\\/g')
+        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
         echo using commit $TRIGGERING_COMMIT for SHA
         echo $TRIGGERING_COMMIT >> ./SHA
         cat > config.xml <<EOF
@@ -4224,7 +4226,7 @@ jobs:
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="dir=$DBS_GHW\\OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4389,7 +4391,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: build OpenDDS
 #      shell: cmd
 #      run: |
@@ -4473,7 +4475,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
@@ -4586,7 +4588,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: build OpenDDS
 #      shell: cmd
 #      run: |
@@ -4670,7 +4672,7 @@ jobs:
 #      run: |
 #        cd OpenDDS
 #        call setenv.cmd
-#        tools\scripts\show_build_config.pl
+#        perl tools\scripts\show_build_config.pl
 #    - name: create autobuild config
 #      shell: bash
 #      run: |
