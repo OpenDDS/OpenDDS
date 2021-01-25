@@ -10,6 +10,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 
@@ -323,6 +324,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
     }
+
+    TheTransportRegistry->bind_config("subscriber_config", sub);
 
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
