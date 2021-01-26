@@ -287,7 +287,7 @@ TEST(JsonValueWriter, write_int64)
 {
   {
     JsonValueWriter<> jvw;
-    jvw.write_int64(-9223372036854775808);
+    jvw.write_int64(-9223372036854775807 - 1);
     EXPECT_STREQ(jvw.buffer().GetString(), "-9223372036854775808");
   }
   {
@@ -338,7 +338,9 @@ TEST(JsonValueWriter, write_float64)
 TEST(JsonValueWriter, write_float128)
 {
   JsonValueWriter<> jvw;
-  jvw.write_float128(5.6);
+  ACE_CDR::LongDouble x;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(x, 5.6);
+  jvw.write_float128(x);
   EXPECT_STREQ(jvw.buffer().GetString(), "5.6");
 }
 

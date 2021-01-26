@@ -119,20 +119,22 @@ private:
     kEnd
   };
 
-  void peek()
+  TokenType peek()
   {
     if (token_type_ != kUnknown) {
-      return;
+      return token_type_;
     }
 
     if (reader_.IterativeParseComplete()) {
       token_type_ = kEnd;
-      return;
+      return token_type_;
     }
 
     if (!reader_.IterativeParseNext<rapidjson::kParseDefaultFlags>(input_stream_, *this)) {
       token_type_ = kError;
     }
+
+    return token_type_;
   }
 
   bool consume(TokenType expected)
@@ -174,8 +176,7 @@ bool JsonValueReader<InputStream>::end_struct()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper)
 {
-  peek();
-  if (token_type_ == kKey && helper.get_value(member_id, key_value_.c_str())) {
+  if (peek() == kKey && helper.get_value(member_id, key_value_.c_str())) {
     return consume(kKey);
   }
   return false;
@@ -204,8 +205,7 @@ bool JsonValueReader<InputStream>::end_union()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_discriminator()
 {
-  peek();
-  if (token_type_ == kKey && key_value_ == "$discriminator") {
+  if (peek() == kKey && key_value_ == "$discriminator") {
     return consume(kKey);
   }
   return false;
@@ -220,8 +220,7 @@ bool JsonValueReader<InputStream>::end_discriminator()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_union_member()
 {
-  peek();
-  if (token_type_ == kKey) {
+  if (peek() == kKey) {
     return consume(kKey);
   }
   return false;
@@ -283,8 +282,7 @@ bool JsonValueReader<InputStream>::end_element()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_boolean(ACE_CDR::Boolean& value)
 {
-  peek();
-  if (token_type_ == kBool) {
+  if (peek() == kBool) {
     value = bool_value_;
     return consume(kBool);
   }
@@ -294,8 +292,7 @@ bool JsonValueReader<InputStream>::read_boolean(ACE_CDR::Boolean& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 {
-  peek();
-  if (token_type_ == kUint) {
+  if (peek() == kUint) {
     value = uint_value_;
     return consume(kUint);
   }
@@ -305,22 +302,22 @@ bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Char& value)
 {
-  peek();
-  if (token_type_ == kInt) {
+  switch (peek()) {
+  case kInt:
     value = int_value_;
     return consume(kInt);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::Octet& value)
 {
-  peek();
-  if (token_type_ == kUint) {
+  if (peek() == kUint) {
     value = uint_value_;
     return consume(kUint);
   }
@@ -331,21 +328,22 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
 {
   peek();
-  if (token_type_ == kInt) {
+  switch (peek())  {
+  case kInt:
     value = int_value_;
     return consume(kInt);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 {
-  peek();
-  if (token_type_ == kUint) {
+  if (peek() == kUint) {
     value = uint_value_;
     return consume(kUint);
   }
@@ -355,22 +353,22 @@ bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
 {
-  peek();
-  if (token_type_ == kInt) {
+  switch (peek()) {
+  case kInt:
     value = int_value_;
     return consume(kInt);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint32(ACE_CDR::ULong& value)
 {
-  peek();
-  if (token_type_ == kUint) {
+  if (peek() == kUint) {
     value = uint_value_;
     return consume(kUint);
   }
@@ -380,113 +378,116 @@ bool JsonValueReader<InputStream>::read_uint32(ACE_CDR::ULong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
 {
-  peek();
-  if (token_type_ == kInt64) {
+  switch (peek()) {
+  case kInt64:
     value = int64_value_;
     return consume(kInt64);
-  } else if (token_type_ == kUint64) {
+  case kUint64:
     value = uint64_value_;
     return consume(kUint64);
-  } else if (token_type_ == kInt) {
+  case kInt:
     value = int_value_;
     return consume(kInt);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint64(ACE_CDR::ULongLong& value)
 {
-  peek();
-  if (token_type_ == kUint64) {
+  switch (peek()) {
+  case kUint64:
     value = uint64_value_;
     return consume(kUint64);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
 {
-  peek();
-  if (token_type_ == kDouble) {
+  switch (peek()) {
+  case kDouble:
     value = double_value_;
     return consume(kDouble);
-  } else if (token_type_ == kUint64) {
+  case kUint64:
     value = uint64_value_;
     return consume(kUint64);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
-  } else if (token_type_ == kInt64) {
+  case kInt64:
     value = int64_value_;
     return consume(kInt64);
-  } else if (token_type_ == kInt) {
+  case kInt:
     value = int_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float64(ACE_CDR::Double& value)
 {
-  peek();
-  if (token_type_ == kDouble) {
+  switch (peek()) {
+  case kDouble:
     value = double_value_;
     return consume(kDouble);
-  } else if (token_type_ == kUint64) {
+  case kUint64:
     value = uint64_value_;
     return consume(kUint64);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
-  } else if (token_type_ == kInt64) {
+  case kInt64:
     value = int64_value_;
     return consume(kInt64);
-  } else if (token_type_ == kInt) {
+  case kInt:
     value = int_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
 {
-  // TODO
-  peek();
-  if (token_type_ == kDouble) {
-    value = double_value_;
+  switch (peek()) {
+  case kDouble:
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, double_value_);
     return consume(kDouble);
-  } else if (token_type_ == kUint64) {
-    value = uint64_value_;
+  case kUint64:
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, uint64_value_);
     return consume(kUint64);
-  } else if (token_type_ == kUint) {
-    value = uint_value_;
+  case kUint:
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, uint_value_);
     return consume(kUint);
-  } else if (token_type_ == kInt64) {
-    value = int64_value_;
+  case kInt64:
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, int64_value_);
     return consume(kInt64);
-  } else if (token_type_ == kInt) {
-    value = int_value_;
+  case kInt:
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, int_value_);
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_fixed(OpenDDS::FaceTypes::Fixed& /*value*/)
 {
   // TODO
-  peek();
-  if (token_type_ == kString) {
+  if (peek() == kString) {
     return consume(kString);
   }
   return false;
@@ -495,36 +496,37 @@ bool JsonValueReader<InputStream>::read_fixed(OpenDDS::FaceTypes::Fixed& /*value
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char8(ACE_CDR::Char& value)
 {
-  peek();
-  if (token_type_ == kInt) {
+  switch (peek()) {
+  case kInt:
     value = int_value_;
     return consume(kInt);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
 {
-  peek();
-  if (token_type_ == kInt) {
+  switch (peek()) {
+  case kInt:
     value = int_value_;
     return consume(kInt);
-  } else if (token_type_ == kUint) {
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_string(std::string& value)
 {
-  peek();
-  if (token_type_ == kString) {
+  if (peek() == kString) {
     value = string_value_;
     return consume(kString);
   }
@@ -534,9 +536,8 @@ bool JsonValueReader<InputStream>::read_string(std::string& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_wstring(std::wstring& /*value*/)
 {
-  peek();
   // TODO
-  if (token_type_ == kString) {
+  if (peek() == kString) {
     //value = string_value_;
     return consume(kString);
   }
@@ -546,8 +547,7 @@ bool JsonValueReader<InputStream>::read_wstring(std::wstring& /*value*/)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const EnumHelper& helper)
 {
-  peek();
-  if (token_type_ == kString && helper.get_value(value, string_value_.c_str())) {
+  if (peek() == kString && helper.get_value(value, string_value_.c_str())) {
     return consume(kString);
   }
   return false;
