@@ -3436,7 +3436,6 @@ jobs:
 #      run: |
 #        mv OpenDDS/ACE_TAO /c/
 #        mv MPC /c/
-#        echo $VCPKG_ROOT
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
 #      uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3635,7 +3634,6 @@ jobs:
 #      run: |
 #        mv OpenDDS/ACE_TAO /c/
 #        mv MPC /c/
-#        echo $VCPKG_ROOT
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
 #      uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3915,7 +3913,6 @@ jobs:
       run: |
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
-        echo $VCPKG_ROOT
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3998,6 +3995,12 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
         rm -f windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
+        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+    - name: Move ACE and MPC to C Drive
+      shell: bash
+      run: |
+        mv OpenDDS/ACE_TAO /c/
+        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -4116,7 +4119,6 @@ jobs:
       run: |
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
-        echo $VCPKG_ROOT
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -4200,6 +4202,11 @@ jobs:
         tar xvfJ windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
         rm -f windows-2016_x86_no-debug_no-inline_ACE_TAO.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+    - name: Move ACE and MPC to C Drive
+      shell: bash
+      run: |
+        mv OpenDDS/ACE_TAO /c/
+        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
