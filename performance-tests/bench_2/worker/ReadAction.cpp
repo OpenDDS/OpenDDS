@@ -74,6 +74,10 @@ void ReadAction::start()
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     started_ = true;
+    read_condition_ = data_dr_->create_readcondition(DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    ws_ = new DDS::WaitSet();
+    ws_->attach_condition(stop_condition_);
+    ws_->attach_condition(read_condition_);
     proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
   }
 }
@@ -84,6 +88,9 @@ void ReadAction::stop()
   if (started_ && !stopped_) {
     stopped_ = true;
     proactor_.cancel_timer(*handler_);
+    ws_->detach_condition(stop_condition_);
+    ws_->detach_condition(read_condition_);
+    data_dr_->delete_readcondition(read_condition_);
     stop_condition_->set_trigger_value(true);
   }
 }
@@ -92,18 +99,9 @@ void ReadAction::do_read()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
-    DDS::WaitSet_var ws = new DDS::WaitSet();
-
-    DDS::ReadCondition_var dr_rc = data_dr_->create_readcondition(DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-    ws->attach_condition(dr_rc);
-    ws->attach_condition(stop_condition_);
-
     DDS::ConditionSeq active;
-    DDS::Duration_t infinite = {static_cast<CORBA::Long>(read_period_.sec()), static_cast<CORBA::ULong>(read_period_.usec() * 1000)};
-    DDS::ReturnCode_t ret = ws->wait(active, infinite);
-
-    ws->detach_condition(stop_condition_);
-    ws->detach_condition(dr_rc);
+    const DDS::Duration_t duration = {static_cast<CORBA::Long>(read_period_.sec()), static_cast<CORBA::ULong>(read_period_.usec() * 1000)};
+    DDS::ReturnCode_t ret = ws_->wait(active, duration);
 
     if (stopped_) {
       return;
@@ -111,7 +109,7 @@ void ReadAction::do_read()
 
     if (ret == DDS::RETCODE_OK) {
       for (CORBA::ULong i = 0; i < active.length(); ++i) {
-        if (active[i] == dr_rc) {
+        if (active[i] == read_condition_) {
           Bench::Data data;
           DDS::SampleInfo si;
           while ((ret = data_dr_->take_next_sample(data, si)) == DDS::RETCODE_OK) {
