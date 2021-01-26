@@ -23,7 +23,7 @@ use File::Copy "cp";
 die "ERROR: DDS_ROOT not set. Set DDS_ROOT to the OpenDDS installation directiory and rerun this script.\n"
     unless defined($ENV{'DDS_ROOT'});
 
-my $from = "$ENV{'DDS_ROOT'}/performance-tests/bench_2";
+my $from = "$ENV{'DDS_ROOT'}/performance-tests/bench";
 my $dest;
 GetOptions ("dest=s" => \$dest)
   or die("USAGE: perl install_bench.pl --dest /path/to/bench/root\n");

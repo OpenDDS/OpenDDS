@@ -4,7 +4,7 @@ project: dcps_rtps_udp {
   libs     += Bench_Idl
   expand(BENCH_ROOT) {
     $BENCH_ROOT
-    $(DDS_ROOT)/performance-tests/bench_2
+    $(DDS_ROOT)/performance-tests/bench
   }
   libpaths += $(BENCH_ROOT)/lib
   includes += $(BENCH_ROOT)/idl

@@ -15,7 +15,7 @@ project: dcpslib, dcps_rapidjson {
 
   expand(BENCH_BUILDER_ROOT) {
     $BENCH_BUILDER_ROOT
-    $(DDS_ROOT)/performance-tests/bench_2
+    $(DDS_ROOT)/performance-tests/bench
   }
 
   libout = $(BENCH_BUILDER_ROOT)/lib
