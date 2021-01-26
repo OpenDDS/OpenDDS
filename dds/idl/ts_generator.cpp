@@ -132,6 +132,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
   std::map<std::string, std::string> replacements;
   replacements["SCOPED"] = cxxName;
+  replacements["SCOPED_NOT_GLOBAL"] = dds_generator::scoped_helper(name, "::");
   replacements["TYPE"] = short_name;
   replacements["EXPORT"] = be_global->export_macro().c_str();
   replacements["SEQ"] = be_global->sequence_suffix().c_str();

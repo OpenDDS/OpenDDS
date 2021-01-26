@@ -47,6 +47,9 @@ std::string FieldInfo::scoped_type(AST_Type& field_type, const std::string& fiel
 std::string FieldInfo::underscore(const std::string& scoped)
 {
   std::string s = scoped;
+  if (s.find(scope_op) == 1) {
+    s = s.substr(3);
+  }
   for (std::size_t i = s.find(scope_op); i != s.npos; i = s.find(scope_op, i + 2)) {
     s.replace(i, 2, "_");
   }
