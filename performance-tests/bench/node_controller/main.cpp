@@ -445,7 +445,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cerr << "ERROR: BENCH_ROOT or DDS_ROOT must be defined" << std::endl;
       return 1;
     }
-    bench_root = join_path(dds_root, "performance-tests", "bench_2");
+    bench_root = join_path(dds_root, "performance-tests", "bench");
   }
 
   TheServiceParticipant->default_configuration_file(
@@ -487,7 +487,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
   } catch(const int value) {
-    std::cerr << "See DDS_ROOT/performance-tests/bench_2/README.md for usage" << std::endl;
+    std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
     return value;
   }
 
