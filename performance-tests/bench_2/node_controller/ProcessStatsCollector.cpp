@@ -167,6 +167,8 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
   }
   read_total_cpu_usage(last_time_);
   read_process_cpu_usage(process_id_, last_user_time_, last_sys_time_);
+#else
+  ACE_UNUSED_ARG(process_id);
 #endif
 }
 

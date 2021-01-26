@@ -14,7 +14,7 @@ namespace Builder {
   {
   public:
 
-    inline bool operator < (const ContentFilteredTopic_var_stub& t) const {
+    inline bool operator < (const ContentFilteredTopic_var_stub&) const {
       return true;
     }
   };

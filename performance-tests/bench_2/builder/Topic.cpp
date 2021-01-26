@@ -97,6 +97,8 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
 
     content_filtered_topics_map[content_filtered_topics_[i].cft_name.in()] = cft;
   }
+#else
+  ACE_UNUSED_ARG(content_filtered_topics_map);
 #endif
 
   // Bind Transport Config

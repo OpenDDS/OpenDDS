@@ -336,7 +336,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         auto psr = it->second.out_of_order_data_received_.present_sequence_ranges();
         for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
           if (new_writer) {
-            size_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
+            uint64_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
             out_of_order_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
@@ -362,7 +362,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         auto psr = it->second.duplicate_data_received_.present_sequence_ranges();
         for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
           if (new_writer) {
-            size_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
+            uint64_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
             duplicate_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
@@ -388,7 +388,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
           missing_data_count += static_cast<ptrdiff_t>(it2->second.getValue() - (it2->first.getValue() - 1)); // update count
           if (new_writer) {
-            size_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
+            uint64_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
             missing_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {

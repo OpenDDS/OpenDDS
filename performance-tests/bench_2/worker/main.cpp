@@ -245,7 +245,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::ConstPropertyIndex redirect_ace_log_prop =
     get_property(config.properties, "redirect_ace_log", Builder::PVK_ULL);
   if (redirect_ace_log_prop) {
-    redirect_ace_log = redirect_ace_log_prop->value.ull_prop();
+    redirect_ace_log = static_cast<size_t>(redirect_ace_log_prop->value.ull_prop());
   }
 
   if (redirect_ace_log && !log_file_path.empty()) {
