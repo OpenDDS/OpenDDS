@@ -22,6 +22,7 @@
 #include <cstdlib>
 
 const int num_messages = 40;
+const int message_length = 101340;
 extern bool reliable;
 extern bool wait_for_acks;
 
