@@ -3399,10 +3399,6 @@ jobs:
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
 #        vcpkgDirectory: 'C:\vcpkg'
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3597,10 +3593,6 @@ jobs:
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
 #        vcpkgDirectory: 'C:\vcpkg'
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3876,10 +3868,6 @@ jobs:
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
         vcpkgDirectory: 'C:\vcpkg'
-    - name: Clean Up VCPKG
-      shell: bash
-      run: |
-        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -4082,10 +4070,6 @@ jobs:
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
         vcpkgDirectory: 'C:\vcpkg'
-    - name: Clean Up VCPKG
-      shell: bash
-      run: |
-        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -4365,10 +4349,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -4563,10 +4543,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
