@@ -1,7 +1,6 @@
 #include "XTypes.h"
 #include "XTypesPubTypeSupportImpl.h"
 
-
 void write_plain_cdr_struct(const DataWriter_var& dw)
 {
   PlainCdrStructDataWriter_var pdw = PlainCdrStructDataWriter::_narrow(dw);
@@ -140,12 +139,10 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  DomainParticipant_var dp = dpf->create_participant(23,
-    PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-
   std::string type;
   std::string registered_type_name = "";
+
+  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
@@ -176,17 +173,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_match = false;
+    } else if (arg == ACE_TEXT("--enable_security")) {
+      security_enabled = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
     }
   }
 
+  DomainParticipant_var dp;
+  create_participant(dpf, dp);
+  if (CORBA::is_nil(dp.in())) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_participant() failed"));
+    return 1;
+  }
+
   bool failed = false;
 
   Topic_var topic;
+
   const std::string topic_name =
-    !registered_type_name.empty() ? registered_type_name + "_Topic" : type + "_Topic";
+    !registered_type_name.empty() ? registered_type_name : type;
 
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;

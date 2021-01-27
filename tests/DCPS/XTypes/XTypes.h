@@ -5,6 +5,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+#include <dds/DCPS/security/framework/Properties.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -17,6 +18,8 @@ bool verbose = false;
 bool expect_to_match = true;
 
 int key_value = -1;
+
+bool security_enabled = false;
 
 enum AdditionalFieldValue {
   FINAL_STRUCT_AF,
@@ -66,5 +69,35 @@ bool check_inconsistent_topic_status(Topic_var topic)
   return true;
 }
 
+void append(DDS::PropertySeq& props, const char* name, const char* value)
+{
+  const DDS::Property_t prop = { name, value, false /*propagate*/ };
+  const unsigned int len = props.length();
+  props.length(len + 1);
+  props[len] = prop;
+}
 
+void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp) {
+  DDS::DomainParticipantQos part_qos;
+
+  if (security_enabled) {
+    dpf->get_default_participant_qos(part_qos);
+
+    if (TheServiceParticipant->get_security()) {
+      using namespace DDS::Security::Properties;
+      DDS::PropertySeq& props = part_qos.property.value;
+
+      append(props, AuthIdentityCA, "file:../../security/certs/identity/identity_ca_cert.pem");
+      append(props, AuthIdentityCertificate, "file:../../security/certs/identity/test_participant_02_cert.pem");
+      append(props, AuthPrivateKey, "file:../../security/certs/identity/test_participant_02_private_key.pem");
+      append(props, AccessPermissionsCA, "file:../../security/certs/permissions/permissions_ca_cert.pem");
+      append(props, AccessGovernance, "file:../../security/attributes/governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+      append(props, AccessPermissions, "file:../../security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s");
+    }
+
+    dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
+  } else {
+    dp = dpf->create_participant(0, PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  }
+}
 #endif

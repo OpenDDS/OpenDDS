@@ -24,45 +24,49 @@ if ($verbose) {
 }
 
 my %params = (
+  "FinalStructMatch"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 2,
+                                r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},
+#  "AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 4,
+#                                r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},
   "PlainCdr"                => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "FinalStructMatch"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "FinalStructNoMatch"      => {reader_type => "FinalStructSub", writer_type => "ModifiedFinalStruct", expect_to_fail => 1, reg_type => "FinalStructT_F", key_val => 3,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "AppendableStructT", key_val => 4,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "AppendableNoMatch"       => {reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => 1, reg_type => "AppendableStructT_NoMatch", key_val => 5,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableStruct"           => {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct", expect_to_fail => 0, reg_type => "MutableStructT", key_val => 6,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableStructNoMatchId"  => {reader_type => "MutableStruct", writer_type => "ModifiedIdMutableStruct", expect_to_fail => 1, reg_type => "MutableStructT_NoMatchId", key_val => 7,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableStructNoMatchType"=> {reader_type => "MutableStruct", writer_type => "ModifiedTypeMutableStruct", expect_to_fail => 1, reg_type => "MutableStructT_NoMatchType", key_val => 8,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableStructNoMatchName"=> {reader_type => "MutableStruct", writer_type => "ModifiedNameMutableStruct", expect_to_fail => 1, reg_type => "MutableStructT_NoMatchName", key_val => 9,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableUnion"            => {reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion", expect_to_fail => 0, reg_type => "MutableUnionT", key_val => 10,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableUnionNoMatchDisc" => {reader_type => "MutableUnion", writer_type => "ModifiedDiscMutableUnion", expect_to_fail => 1, reg_type => "MutableUnionT_NoMatchDisc", key_val => 11,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableUnionNoMatchType" => {reader_type => "MutableUnion", writer_type => "ModifiedTypeMutableUnion", expect_to_fail => 1, reg_type => "MutableUnionT_NoMatchType", key_val => 12,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "MutableUnionNoMatchName" => {reader_type => "MutableUnion", writer_type => "ModifiedNameMutableUnion", expect_to_fail => 1, reg_type => "MutableUnionT_NoMatchName", key_val => 13,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "Tryconstruct"            => {reader_type => "Trim20Struct", writer_type => "Trim64Struct", expect_to_fail => 0, reg_type => "TryconstructT", key_val => 0,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "Dependency"              => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "DependencyT", key_val => 14,
-                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
+                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
 
   "Match_no_xtypes_nn"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_nn",
-                                key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc_no_xtypes.ini"},
+                                key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc_no_xtypes.ini", security => 0},
 
   "Match_no_xtypes_yn"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_yn",
-                                key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini"},
+                                key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini", security => 0},
 
   "Match_no_xtypes_ny"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_ny",
-                                key_val => 4, r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini"},
+                                key_val => 4, r_ini => "rtps_disc.ini", w_ini => "rtps_disc_no_xtypes.ini", security => 0},
 );
 
 my $status = 0;
@@ -84,6 +88,10 @@ sub run_test {
 
   if ($v->{key_val} >= 0) {
     push(@test_args, "--key_val $v->{key_val}");
+  }
+
+  if ($v->{security} > 0) {
+    push(@test_args, "--enable_security");
   }
 
   my @reader_args = ("-DCPSConfigFile $v->{r_ini} -ORBLogFile subscriber_$test_name_param.log --reader --type $v->{reader_type}");
