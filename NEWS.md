@@ -4,13 +4,42 @@
 OpenDDS 3.16 is currently in development, so this list might change.
 
 ### Additions:
-- TODO: Add your features here
+- XTypes (#1633)
+  - Initial implementation of the OMG DDS XTypes version 1.3 specification
+  - Allow different IDL definitions to be used in the same topics and for these
+    definitions to evolve while remaining compatibile
+  - Includes new RTPS discovery options, QoS fields, `opendds_idl` options, and
+    IDL annotations
+  - See the new "XTypes" chapter in the Developer's Guide for more information
+- Added new version macros to `dds/Version.h` (#2333)
+  - NOTE: Version macros starting with `DDS_` have been deprecated and will be
+    removed in OpenDDS 4.0.
+- Configure Script:
+  - Added `--doc-group3` option for using DOC Group ACE7/TAO3 (#2336)
+  - Added `--workspace` option for using a custom MPC workspace file (#2262)
+- Android:
+  - Support for adapting to network changes in Android apps targeting API 30+ (#2237)
+  - Support for building with the Android NDK directly (Only supported with
+    ACE7/TAO3) (#2296)
+  - See `docs/android.md` for more information
+- RTPS performance improvements (#2325)
 
 ### Fixes:
-- TODO: Add your fixes here
+- Fixed port in RTPS discovery `spdp_local_address` configuration being ignored (#2272)
+- Fixed Participant Location Built-in Topic Updates being ignored (#2255)
+- Fixed Internal Thread Status Built-in Topic Updates being ignored (#2247)
+  - NOTE: The IDL of the topic has changed.
 
 ### Notes:
-- TODO: Add your notes here
+- For the `rtps_udp` transport, the default encoding of DataWriters changed
+  from classic CDR to XCDR2. To maintain interoperability with pre-3.16 OpenDDS
+  and other DDS implementations, the first element of `representation.value` of
+  `DataWriterQos` must be set to `DDS::XCDR_DATA_REPRESENTATION` or the
+  non-OpenDDS 3.16 DataReader must be setup with
+  `DDS::XCDR2_DATA_REPRESENTATION` if supported. DataReaders will continue to
+  be interoperable and backwards compatible by default.
+- Removed `max_bundle_size` `rtps_udp` transport option (#2249)
+- Replaced old performance-tests/bench with new Bench 2 framework (#2340, #2346)
 
 ## Version 3.15 of OpenDDS
 OpenDDS 3.15 was released on Dec 22 2020.
