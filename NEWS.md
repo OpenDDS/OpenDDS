@@ -8,7 +8,7 @@ OpenDDS 3.16 is currently in development, so this list might change.
   - Initial implementation of the OMG DDS XTypes version 1.3 specification
   - Allows different IDL definitions to be used in the same topics and for
     these definitions to evolve while remaining compatibile
-  - Includes new RTPS discovery options, QoS fields, `opendds_idl` options, and
+  - Includes new RTPS discovery options, QoS policies, `opendds_idl` options, and
     IDL annotations
   - See the new "XTypes" chapter in the Developer's Guide for more information
 - Added new version macros to `dds/Version.h` (#2333)
@@ -35,9 +35,9 @@ OpenDDS 3.16 is currently in development, so this list might change.
   from classic CDR to XCDR2. To maintain interoperability with pre-3.16 OpenDDS
   and other DDS implementations, the first element of `representation.value` of
   `DataWriterQos` must be set to `DDS::XCDR_DATA_REPRESENTATION` or the
-  non-OpenDDS 3.16 DataReader must be setup with
+  non-OpenDDS 3.16 DataReader must be set up with
   `DDS::XCDR2_DATA_REPRESENTATION` if supported. DataReaders will continue to
-  be interoperable and backwards compatible by default.
+  be interoperable by default.
 - Removed `max_bundle_size` `rtps_udp` transport option (#2249)
 - Replaced old performance-tests/bench with new Bench 2 framework (#2340, #2346)
 
