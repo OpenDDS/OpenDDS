@@ -3398,7 +3398,7 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
-#        vcpkgDirectory: 'C:\vcpkg'
+#        vcpkgDirectory: 'C:/vcpkg'
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3592,7 +3592,7 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
-#        vcpkgDirectory: 'C:\vcpkg'
+#        vcpkgDirectory: 'C:/vcpkg'
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3867,7 +3867,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
-        vcpkgDirectory: 'C:\vcpkg'
+        vcpkgDirectory: 'C:/vcpkg'
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -4069,7 +4069,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
-        vcpkgDirectory: 'C:\vcpkg'
+        vcpkgDirectory: 'C:/vcpkg'
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
