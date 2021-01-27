@@ -356,7 +356,7 @@ namespace {
     }
     const std::string exception =
       "throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "found or its type is not supported (in struct " + clazz + ")\");\n";
+      "found or its type is not supported (in struct" + clazz + ")\");\n";
     be_global->impl_ <<
       "    return false;\n"
       "  }\n\n";

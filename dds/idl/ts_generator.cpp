@@ -166,7 +166,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
     "  typedef OpenDDS::DCPS::KeyOnly<const " << cxxName << "> KeyOnlyType;\n"
     "\n"
-    "  static const char* type_name() { return \"" << cxxName << "\"; }\n"
+    "  static const char* type_name() { return \"" << replacements["SCOPED_NOT_GLOBAL"] << "\"; }\n"
     "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
     "  static size_t key_count() { return " << key_count << "; }\n"
     "};\n"
