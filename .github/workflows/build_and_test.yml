@@ -3398,6 +3398,7 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
+#        vcpkgDirectory: 'C:\vcpkg'
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3431,7 +3432,6 @@ jobs:
 #      run: |
 #        mv OpenDDS/ACE_TAO /c/
 #        mv MPC /c/
-#        mv vcpkg /c/
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
 #      uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3592,6 +3592,7 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
+#        vcpkgDirectory: 'C:\vcpkg'
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3625,7 +3626,6 @@ jobs:
 #      run: |
 #        mv OpenDDS/ACE_TAO /c/
 #        mv MPC /c/
-#        mv vcpkg /c/
 #    - uses: ammaraskar/msvc-problem-matcher@0.1
 #    - name: set up msvc env
 #      uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -3867,6 +3867,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
+        vcpkgDirectory: 'C:\vcpkg'
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3900,7 +3901,6 @@ jobs:
       run: |
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
-        mv vcpkg /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
@@ -4069,6 +4069,7 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
+        vcpkgDirectory: 'C:\vcpkg'
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -4102,7 +4103,6 @@ jobs:
       run: |
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
-        mv vcpkg /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.5.0
