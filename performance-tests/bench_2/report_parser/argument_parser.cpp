@@ -81,13 +81,18 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
     std::cerr << "Output file not specified" << std::endl;
     return false;
   } else {
+    std::cout << "Opening input file: " << input_file_path << std::endl;
+
     std::ifstream ifs(input_file_path);
 
     if (ifs.is_open()) {
+      std::cout << "Reading input file" << std::endl;
+
       if (!json_2_idl(ifs, report)) {
         std::cerr << "Could not parse " << input_file_path << std::endl;
         return false;
       } else {
+        std::cout << "Opening output file: " << output_file_path << std::endl;
         output_file_stream.open(output_file_path);
         if (!output_file_stream.is_open()) {
           std::cerr << "Could not open output file " << output_file_path << std::endl;
