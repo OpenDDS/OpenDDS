@@ -205,7 +205,9 @@ public:
 
 private:
   const EndpointRegistry& registry_;
+#ifndef DDS_HAS_MINIMUM_BIT
   StaticParticipant& participant_;
+#endif
 };
 
 class StaticParticipant : public LocalParticipant<StaticEndpointManager> {

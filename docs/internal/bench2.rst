@@ -106,22 +106,22 @@ want to make sure the Bench 2 libraries are in your library path.
 Linux/Unix
 ----------
 
-Add ``${DDS_ROOT}/performance_tests/bench_2/lib`` to your ``LD_LIBRARY_PATH``
+Add ``${DDS_ROOT}/performance_tests/bench/lib`` to your ``LD_LIBRARY_PATH``
 
 Windows
 -------
 
-Add ``%DDS_ROOT%\performance_tests\bench_2\lib`` to your ``PATH``
+Add ``%DDS_ROOT%\performance_tests\bench\lib`` to your ``PATH``
 
 Assuming :envvar:`DDS_ROOT` is already set on your system (from the ``configure``
 script or from sourcing ``setenv.sh``), there are convenience scripts to do
-this for you in the ``bench_2`` directory (``set_bench_env[.sh/.cmd]``)
+this for you in the ``bench`` directory (``set_bench_env[.sh/.cmd]``)
 
 Running a Bench 2 CI Test
 =========================
 
 In the event that you’re debugging a failing Bench 2 CI test, you can use the
-run_test perl script found in the ``bench_2`` directory to execute the full
+run_test perl script found in the ``bench`` directory to execute the full
 scenario without first setting the environment as listed above, as the perl
 script sets it automatically before launching a single ``node_controller`` in
 the background and executing the test controller with the requested scenario.
@@ -142,7 +142,7 @@ Configuration Files
 *******************
 
 As a rule, Bench 2 uses JSON configuration files that directly map onto the C++
-Platform Specific Model (PSM) of the IDL found in ``bench_2/idl`` and the IDL
+Platform Specific Model (PSM) of the IDL found in ``bench/idl`` and the IDL
 used in the `DDS specification <https://www.omg.org/spec/DDS/About-DDS/>`_.
 This allows the test applications to easily convert between configuration files
 and C++ structures useful for the configuration of DDS entities.

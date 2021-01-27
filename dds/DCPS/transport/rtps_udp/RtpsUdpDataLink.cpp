@@ -3350,9 +3350,15 @@ RtpsUdpDataLink::RtpsWriter::make_lagger_leader(const ReaderInfo_rch& reader,
 {
   const SequenceNumber acked_sn = reader->acked_sn();
   if (previous_acked_sn == acked_sn) { return; }
+  const SequenceNumber previous_max_sn = expected_max_sn(reader);
+#ifdef OPENDDS_SECURITY
+  if (is_pvs_writer_ && acked_sn > previous_max_sn) {
+    reader->max_pvs_sn_ = acked_sn;
+  }
+#endif
   const SequenceNumber max_sn = expected_max_sn(reader);
 
-  snris_erase(lagging_readers_, previous_acked_sn, reader);
+  snris_erase(previous_acked_sn == previous_max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
   snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
 }
 

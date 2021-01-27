@@ -67,7 +67,7 @@ void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
 
   // All dependent TypeIdentifiers are expected to have an entry in the TypeObject cache.
   dependencies.length(static_cast<unsigned>(tmp.size()));
-  std::set<TypeIdentifier>::const_iterator iter = tmp.begin();
+  OPENDDS_SET(TypeIdentifier)::const_iterator iter = tmp.begin();
   for (unsigned i = 0; iter != tmp.end(); ++i, ++iter) {
     const TypeMap::const_iterator tobj_it = minimal_type_map_.find(*iter);
     if (tobj_it != minimal_type_map_.end()) {

@@ -2664,9 +2664,12 @@ namespace {
         "bool MarshalTraits<" << cxx << ">::from_message_block(" << cxx << "& stru, "
         "const ACE_Message_Block& mb)\n"
         "{\n"
-        "  stru." << octetSeqOnly << "." << set_len << "(static_cast<unsigned>(mb.length()));\n"
-        "  std::memcpy(" << buffer_pre << "stru." << octetSeqOnly << get_buffer
-          << ", mb.rd_ptr(), mb.length());\n"
+        "  stru." << octetSeqOnly << "." << set_len << "(static_cast<unsigned>(mb.total_length()));\n"
+        "  ACE_CDR::Octet* dst = " << buffer_pre << "stru." << octetSeqOnly << get_buffer << ";\n"
+        "  for (const ACE_Message_Block* m = &mb; m; m = m->cont()) {\n"
+        "    std::memcpy(dst, m->rd_ptr(), m->length());\n"
+        "    dst += m->length();\n"
+        "  }\n"
         "  return true;\n"
         "}\n\n";
 
