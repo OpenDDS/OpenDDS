@@ -20,12 +20,15 @@ namespace XTypes {
 
 // Set of pairs of members with each pair contains members from
 // two structure types that have the same member ID and name
+// (or have the same member ID if ignore_member_names is true)
 typedef std::pair<const MinimalStructMember*, const MinimalStructMember*> MemberPair;
 typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
-  explicit TypeAssignability(TypeLookupService_rch tls) : tl_service_(tls) {}
+  explicit TypeAssignability(TypeLookupService_rch tls, bool ignore_member_names = false)
+    : tl_service_(tls)
+    , ignore_member_names_(ignore_member_names) {}
 
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
   bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
@@ -89,12 +92,17 @@ private:
   bool get_struct_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
   bool get_union_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
 
-  XTypes::TypeLookupService_rch tl_service_;
-
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
     return tl_service_->get_type_objects(ti).minimal;
   }
+
+  XTypes::TypeLookupService_rch tl_service_;
+
+  // ignore_member_names boolean from TypeConsistencyEnforcementQosPolicy.
+  // In the future, we may need to consider other booleans as well:
+  // prevent_type_widening, ignore_sequence_bounds, ignore_string_bounds.
+  bool ignore_member_names_;
 };
 
 } // namepace XTypes

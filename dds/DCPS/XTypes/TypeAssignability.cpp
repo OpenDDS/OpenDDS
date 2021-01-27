@@ -363,9 +363,16 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
       MemberId id_b = tb.struct_type.member_seq[j].common.member_id;
       const NameHash& h_b = tb.struct_type.member_seq[j].detail.name_hash;
       ACE_CDR::ULong name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
-      if ((name_a == name_b && id_a != id_b) || (id_a == id_b && name_a != name_b)) {
-        return false;
-      } else if (name_a == name_b && id_a == id_b) {
+
+      if (!ignore_member_names_) {
+        if ((name_a == name_b && id_a != id_b) || (id_a == id_b && name_a != name_b)) {
+          return false;
+        } else if (name_a == name_b && id_a == id_b) {
+          matched_members.push_back(std::make_pair(&ta.struct_type.member_seq[i],
+                                                   &tb.struct_type.member_seq[j]));
+          break;
+        }
+      } else if (id_a == id_b) {
         matched_members.push_back(std::make_pair(&ta.struct_type.member_seq[i],
                                                  &tb.struct_type.member_seq[j]));
         break;
@@ -721,28 +728,30 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   }
 
   // Members with the same ID must have the same name, and vice versa
-  std::map<MemberId, ACE_CDR::ULong> id_to_name_a;
-  std::map<ACE_CDR::ULong, MemberId> name_to_id_a;
-  for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
-    MemberId id = ta.union_type.member_seq[i].common.member_id;
-    const NameHash& h = ta.union_type.member_seq[i].detail.name_hash;
-    ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
-    id_to_name_a[id] = name;
-    name_to_id_a[name] = id;
-  }
-
-  for (unsigned i = 0; i < tb.union_type.member_seq.length(); ++i) {
-    MemberId id = tb.union_type.member_seq[i].common.member_id;
-    const NameHash& h = tb.union_type.member_seq[i].detail.name_hash;
-    ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
-    if (id_to_name_a.find(id) != id_to_name_a.end() &&
-        id_to_name_a[id] != name) {
-      return false;
+  if (!ignore_member_names_) {
+    std::map<MemberId, ACE_CDR::ULong> id_to_name_a;
+    std::map<ACE_CDR::ULong, MemberId> name_to_id_a;
+    for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
+      MemberId id = ta.union_type.member_seq[i].common.member_id;
+      const NameHash& h = ta.union_type.member_seq[i].detail.name_hash;
+      ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      id_to_name_a[id] = name;
+      name_to_id_a[name] = id;
     }
 
-    if (name_to_id_a.find(name) != name_to_id_a.end() &&
-        name_to_id_a[name] != id) {
-      return false;
+    for (unsigned i = 0; i < tb.union_type.member_seq.length(); ++i) {
+      MemberId id = tb.union_type.member_seq[i].common.member_id;
+      const NameHash& h = tb.union_type.member_seq[i].detail.name_hash;
+      ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      if (id_to_name_a.find(id) != id_to_name_a.end() &&
+          id_to_name_a[id] != name) {
+        return false;
+      }
+
+      if (name_to_id_a.find(name) != name_to_id_a.end() &&
+          name_to_id_a[name] != id) {
+        return false;
+      }
     }
   }
 
