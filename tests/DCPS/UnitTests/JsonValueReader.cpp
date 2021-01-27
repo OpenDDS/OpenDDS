@@ -322,7 +322,7 @@ TEST(JsonValueReader, array_min)
 
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_int32(int32_value));
-  EXPECT_EQ(int32_value, -2147483648);
+  EXPECT_EQ(int32_value, -2147483647 - 1);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.begin_element());

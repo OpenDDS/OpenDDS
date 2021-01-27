@@ -416,19 +416,19 @@ bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
 {
   switch (peek()) {
   case kDouble:
-    value = double_value_;
+    value = ACE_CDR::Float(double_value_);
     return consume(kDouble);
   case kUint64:
-    value = uint64_value_;
+    value = ACE_CDR::Float(uint64_value_);
     return consume(kUint64);
   case kUint:
-    value = uint_value_;
+    value = ACE_CDR::Float(uint_value_);
     return consume(kUint);
   case kInt64:
-    value = int64_value_;
+    value = ACE_CDR::Float(int64_value_);
     return consume(kInt64);
   case kInt:
-    value = int_value_;
+    value = ACE_CDR::Float(int_value_);
     return consume(kUint);
   default:
     return false;
@@ -443,13 +443,13 @@ bool JsonValueReader<InputStream>::read_float64(ACE_CDR::Double& value)
     value = double_value_;
     return consume(kDouble);
   case kUint64:
-    value = uint64_value_;
+    value = ACE_CDR::Double(uint64_value_);
     return consume(kUint64);
   case kUint:
     value = uint_value_;
     return consume(kUint);
   case kInt64:
-    value = int64_value_;
+    value = ACE_CDR::Double(int64_value_);
     return consume(kInt64);
   case kInt:
     value = int_value_;
