@@ -47,7 +47,8 @@
           <li><a href="/support.html">Support</a></li>
           <li><a href="{{ site.data.opendds.mailing_lists_uri }}">Mailing lists</a></li>
           <li><a href="/faq.html">FAQ</a></li>
-          <li><a href="https://www.omgwiki.org/dds/">DDS Standard</a></li>
+          <li><a href="https://www.omg.org/spec/DDS/">DDS Standard</a></li>
+          <li><a href="https://www.dds-foundation.org/">DDS Foundation</a></li>
         </ul>
       </div>
 
@@ -68,7 +69,7 @@
             {% assign post_limit = 6 %}
             {% assign posts = site.categories.news %}
             {% for post in posts limit: post_limit %}
-              <li><a href="{{ post.url }}">{{ post.title }}</a></li>              
+              <li><a href="{{ post.url }}">{{ post.title }}</a></li>
             {% endfor %}
             {% if posts.size > post_limit %}
               <div class="more-news">
