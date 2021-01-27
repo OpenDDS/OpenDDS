@@ -62,9 +62,10 @@ To build the core OpenDDS native libraries for Android you will need:
    - Windows and Linux were tested, but macOS should work as well.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. [Building with the NDK directly](#using-the-ndk-directly)
-   requires r19 or higher. You can download it separately from android.com or
-   using the SDK Manager that comes with Android Studio. If you download the
-   NDK using the SDK Manager, this is located in `$SDK/ndk-bundle`.
+   requires ACE7/TAO3 and NDK r19 or higher. You can download it separately
+   from android.com or using the SDK Manager that comes with Android Studio. If
+   you download the NDK using the SDK Manager, this is located in
+   `$SDK/ndk-bundle`.
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
  - Windows users should see ["Building on Windows"](#building-on-windows) for
@@ -136,6 +137,8 @@ directly.
 
 ### Using the NDK Directly
 
+**Building with the NDK directly requires ACE7/TAO3 and NDK r19 or later.**
+
 OpenDDS can be configured and built with the Android NDK using the following
 commands.
 
@@ -144,7 +147,7 @@ commands.
 building OpenDDS.
 
 ```Shell
-./configure --target=android --macros=android_abi=$ABI --macros=android_api=$MIN_API --macros=android_ndk=$NDK
+./configure --doc-group3 --target=android --macros=android_abi=$ABI --macros=android_api=$MIN_API --macros=android_ndk=$NDK
 make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
@@ -167,7 +170,7 @@ run this command instead:
 ```
 
 The `--arch` argument for `make_standalone_toolchain.py` and
-`--macros=android_abi=<ARCH>` argument for the configure script must match
+`--macros=ANDROID_ABI=<ARCH>` argument for the configure script must match
 according to [this table](#abi-table).
 
 **NOTE**: If you need to configure OpenDDS with any optional dependencies the
@@ -175,7 +178,7 @@ according to [this table](#abi-table).
 building OpenDDS.
 
 ```Shell
-./configure --target=android --macros=android_abi=$ABI
+./configure --target=android --macros=ANDROID_ABI=$ABI
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
@@ -190,7 +193,7 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
   different from where you configured the host tools.
 
 ```Batch
-configure --target=android --macros=android_abi=%ABI% --host-tools=%HOST_DDS%
+configure --target=android --macros=ANDROID_ABI=%ABI% --host-tools=%HOST_DDS%
 set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
 make
 REM Pass -j/--jobs with an appropriate value or this'll take a while...
@@ -212,8 +215,10 @@ enabling OpenDDS to use Android Java APIs.
 
 #### `android_abi`
 
-The architecture to cross-target. This is optional as it defaults to
-`armeabi-v7a`. `ANDROID_ABI` is an alias of this. The valid options are:
+The architecture to cross-target. When using ACE6/TAO2 `ANDROID_ABI` must be
+used and this is optional as it defaults to `armeabi-v7a`. When using ACE7/ACE3
+either `ANDROID_ABI` or `android_abi` can be used, but it is required. The
+valid options are:
 
 <a id="abi-table"/>
 
