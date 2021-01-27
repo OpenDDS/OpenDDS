@@ -555,7 +555,10 @@ sub remedy_git_status_clean {
   my $settings = shift();
   my $post_release = shift() || 0;
   my $version = $settings->{version};
-  system("git diff HEAD") == 0 or die "Could not execute: git diff HEAD";
+
+  if (!run_command("git diff")) {
+    return 0;
+  }
   print "Would you like to add and commit these changes [y/n]? ";
   return 0 if (!yes_no());
   if (!$post_release) {
