@@ -34,7 +34,7 @@ namespace DCPS {
 template <typename InputStream = rapidjson::StringStream>
 class JsonValueReader
   : public ValueReader,
-    public rapidjson::BaseReaderHandler<rapidjson::UTF8<>> {
+    public rapidjson::BaseReaderHandler<rapidjson::UTF8<> > {
 public:
   explicit JsonValueReader(InputStream& input_stream)
     : token_type_(kUnknown)
@@ -90,13 +90,13 @@ public:
   bool Int64(int64_t i) { token_type_ = kInt64; int64_value_ = i; return true; }
   bool Uint64(uint64_t i) { token_type_ = kUint64; uint64_value_ = i; return true; }
   bool Double(double d) { token_type_ = kDouble; double_value_ = d; return true; }
-  bool RawNumber(const Ch* str, rapidjson::SizeType length, bool copy) { token_type_ = kRawNumber; return true; }
-  bool String(const Ch* str, rapidjson::SizeType length, bool copy) { token_type_ = kString; string_value_ = str; return true; }
+  bool RawNumber(const Ch* /* str */, rapidjson::SizeType /* length */, bool /* copy */) { token_type_ = kRawNumber; return true; }
+  bool String(const Ch* str, rapidjson::SizeType /* length */, bool /* copy */) { token_type_ = kString; string_value_ = str; return true; }
   bool StartObject() { token_type_ = kStartObject; return true; }
-  bool Key(const Ch* str, rapidjson::SizeType length, bool copy) { token_type_ = kKey; key_value_ = str; return true; }
+  bool Key(const Ch* str, rapidjson::SizeType /* length */, bool /* copy */) { token_type_ = kKey; key_value_ = str; return true; }
   bool EndObject(rapidjson::SizeType /* memberCount */) { token_type_ = kEndObject; return true; }
   bool StartArray() { token_type_ = kStartArray; return true; }
-  bool EndArray(rapidjson::SizeType elementCount) { token_type_ = kEndArray; return true; }
+  bool EndArray(rapidjson::SizeType /* elementCount */) { token_type_ = kEndArray; return true; }
 
 private:
   enum TokenType {
