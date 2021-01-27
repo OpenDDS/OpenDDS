@@ -2208,6 +2208,9 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     // beyond this point.
     status = 1;
   }
+#else
+  ACE_UNUSED_ARG(listen_address_given);
+  ACE_UNUSED_ARG(listen_str);
 #endif
 
   return status;
