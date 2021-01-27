@@ -6,8 +6,8 @@ OpenDDS 3.16 is currently in development, so this list might change.
 ### Additions:
 - XTypes (#1633)
   - Initial implementation of the OMG DDS XTypes version 1.3 specification
-  - Allow different IDL definitions to be used in the same topics and for these
-    definitions to evolve while remaining compatibile
+  - Allows different IDL definitions to be used in the same topics and for
+    these definitions to evolve while remaining compatibile
   - Includes new RTPS discovery options, QoS fields, `opendds_idl` options, and
     IDL annotations
   - See the new "XTypes" chapter in the Developer's Guide for more information
