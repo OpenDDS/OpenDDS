@@ -27,10 +27,15 @@ public:
     , expected_samples_(expected_samples)
     , received_samples_(0)
     , done_callback_(done_callback)
-    , subscriber_(subscriber)
-    , check_bits_(check_bits)
     , builtin_read_error_(false)
+#ifndef DDS_HAS_MINIMUM_BIT
+    , check_bits_(check_bits)
+#endif
   {
+    ACE_UNUSED_ARG(subscriber);
+#ifdef DDS_HAS_MINIMUM_BIT
+    ACE_UNUSED_ARG(check_bits);
+#endif
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %C\n", id.c_str()));
   }
 
@@ -78,11 +83,10 @@ private:
   const int expected_samples_;
   int received_samples_;
   callback_t done_callback_;
-  DDS::Subscriber_ptr subscriber_;
-  bool check_bits_;
   bool builtin_read_error_;
 #ifndef DDS_HAS_MINIMUM_BIT
-  DDS::DataReader_var     builtin_;
+  bool check_bits_;
+  DDS::DataReader_var builtin_;
 #endif /* DDS_HAS_MINIMUM_BIT */
 };
 

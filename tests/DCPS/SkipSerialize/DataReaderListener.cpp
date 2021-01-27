@@ -61,21 +61,15 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       if (si.valid_data) {
 
-        std::cout << "Message:" << std::endl;
-        for (CORBA::ULong i = 0; i < message.serialized_data.length(); i++)
-        {
-          std::cout << "         data[" << i << "] = " << message.serialized_data[i] << std::endl;
-        }
-
-        if (message.serialized_data.length() != 4) {
-          std::cout << "ERROR: Expected message.data to have a size of " << "0"
+        if (message.serialized_data.length() != message_length) {
+          std::cout << "ERROR: Expected message.data to have a size of " << message_length
                     << " but it is " << message.serialized_data.length() << "\n";
           valid_ = false;
         }
 
         for (CORBA::ULong j = 0; j < message.serialized_data.length(); ++j) {
-          if (message.serialized_data[j] != ('0'+j+1) ) {
-            std::cout << "ERROR: Bad data at index " << j << " value is " << ('0'+j+1) << "\n";
+          if (message.serialized_data[j] != '1') {
+            std::cout << "ERROR: Bad data at index " << j << " value is " << message.serialized_data[j] << "\n";
             valid_ = false;
             break;
           }
