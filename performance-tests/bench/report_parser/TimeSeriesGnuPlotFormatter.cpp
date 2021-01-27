@@ -1,4 +1,4 @@
-#include "time_series_gnuplot_formatter.h"
+#include "TimeSeriesGnuPlotFormatter.h"
 #include <PropertyStatBlock.h>
 
 using namespace Bench;

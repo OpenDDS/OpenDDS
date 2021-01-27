@@ -1,6 +1,6 @@
-#include "argument_parser.h"
-#include "time_series_gnuplot_formatter.h"
-#include "time_series_raw_formatter.h"
+#include "ArgumentParser.h"
+#include "TimeSeriesGnuPlotFormatter.h"
+#include "TimeSeriesRawFormatter.h"
 
 int parse_time_series(OutputFormat output_format, Report& report,
   std::ofstream& output_file_stream) {

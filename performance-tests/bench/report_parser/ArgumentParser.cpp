@@ -1,4 +1,4 @@
-#include "argument_parser.h"
+#include "ArgumentParser.h"
 #include <util.h>
 #include <json_conversion.h>
 #include <BenchTypeSupportImpl.h>
@@ -21,17 +21,8 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
 
         if (!ACE_OS::strcmp(argument, ACE_TEXT("--help"))
           || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
-          std::cout << usage << std::endl
-            << std::endl
-            << "OPTIONS:" << std::endl
-            << "--input-file <filename>      The report file to read" << std::endl
-            << "--output-file <filename>     The parsed file to generate" << std::endl
-            << "--output-type <type>         Specifies type of data to parse." << std::endl
-            << "     Options:" << std::endl
-            << "            time-series:     Parses out time-series data" << std::endl
-            << "--output-format <format>     Specifies format of output." << std::endl
-            << "     Options:" << std::endl
-            << "            gnuplot:         Formats output for plotting with gnuplot" << std::endl;
+          std::cout << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl;
+          show_usage();
           return false;
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--input-file"))) {
           input_file_path = option_argument;
@@ -64,11 +55,11 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
             return false;
           }
         } else {
-          show_option_error(argument);
+          show_option_error(ACE_TEXT_ALWAYS_CHAR(argument));
           return false;
         }
       }
-    } catch (int value) {
+    } catch (int) {
       show_usage_prompt();
       return false;
     }

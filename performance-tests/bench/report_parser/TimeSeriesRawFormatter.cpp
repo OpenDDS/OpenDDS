@@ -1,4 +1,4 @@
-#include "time_series_raw_formatter.h"
+#include "TimeSeriesRawFormatter.h"
 #include <PropertyStatBlock.h>
 
 int TimeSeriesRawFormatter::format(const Report& report, std::ofstream& output_file_stream) {
