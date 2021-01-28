@@ -38,6 +38,11 @@ if ($test->flag('no-suffix')) {
   $tc_opts .= " --override-bench-partition-suffix none";
 }
 
+if ($test->flag('json')) {
+  # This will result in an additional results file being written in json format
+  $tc_opts .= " --json";
+}
+
 my $flag_found = 1;
 if ($test->flag('disco')) {
   $tc_opts .= " ci_disco";
