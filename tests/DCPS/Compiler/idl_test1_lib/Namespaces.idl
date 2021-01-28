@@ -1,0 +1,5 @@
+// Define IDL names in the global namespace which are the same as identifiers in other namespaces
+
+struct OctetSeq {
+  boolean not_actually_a_sequence;
+};

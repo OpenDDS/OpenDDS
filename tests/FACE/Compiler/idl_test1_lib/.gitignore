@@ -8,3 +8,13 @@
 /FooDefTypeSupportImpl.cpp
 /FooDefTypeSupportImpl.h
 /FooDefTypeSupportS.h
+/Namespaces_TS.cpp
+/Namespaces_TS.hpp
+/NamespacesC.h
+/NamespacesTypeSupport.idl
+/NamespacesTypeSupportC.cpp
+/NamespacesTypeSupportC.h
+/NamespacesTypeSupportC.inl
+/NamespacesTypeSupportImpl.cpp
+/NamespacesTypeSupportImpl.h
+/NamespacesTypeSupportS.h

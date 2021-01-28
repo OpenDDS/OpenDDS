@@ -294,7 +294,11 @@ private:
 
 inline std::string scoped(UTL_ScopedName* sn)
 {
-  return dds_generator::scoped_helper(sn, "::");
+  // Add the leading scope operator here to make type names "fully-qualified" and avoid
+  // naming collisions with identifiers in OpenDDS::DCPS.
+  // The leading space allows this string to be used directly in a <>-delimeted template
+  // argument list while avoiding the <: digraph.
+  return " ::" + dds_generator::scoped_helper(sn, "::");
 }
 
 inline std::string module_scope(UTL_ScopedName* sn)
