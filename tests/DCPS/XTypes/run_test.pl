@@ -90,7 +90,7 @@ sub run_test {
     push(@test_args, "--key_val $v->{key_val}");
   }
 
-  if ($v->{security} > 0) {
+  if ($v->{security}) {
     push(@test_args, "--enable_security");
   }
 

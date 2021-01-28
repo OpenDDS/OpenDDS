@@ -19,7 +19,7 @@ bool expect_to_match = true;
 
 int key_value = -1;
 
-bool security_enabled = false;
+bool security_requested = false;
 
 enum AdditionalFieldValue {
   FINAL_STRUCT_AF,
@@ -80,7 +80,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value)
 void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp) {
   DDS::DomainParticipantQos part_qos;
 
-  if (security_enabled) {
+  if (security_requested) {
 #if defined(OPENDDS_SECURITY)
     dpf->get_default_participant_qos(part_qos);
 

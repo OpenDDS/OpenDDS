@@ -174,7 +174,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_match = false;
     } else if (arg == ACE_TEXT("--enable_security")) {
-      security_enabled = true;
+      security_requested = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -183,7 +183,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DomainParticipant_var dp;
   create_participant(dpf, dp);
-  if (CORBA::is_nil(dp.in())) {
+  if (!dp) {
     ACE_ERROR((LM_ERROR, "ERROR: create_participant() failed"));
     return 1;
   }
