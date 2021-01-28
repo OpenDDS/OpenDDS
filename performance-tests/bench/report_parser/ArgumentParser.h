@@ -2,6 +2,7 @@
 #define ARGUMENT_PARSER_HEADER
 
 #include "BenchTypeSupportImpl.h"
+
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 
 using namespace Bench::TestController;

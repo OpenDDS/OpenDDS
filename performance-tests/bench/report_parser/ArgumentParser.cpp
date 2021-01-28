@@ -1,13 +1,16 @@
 #include "ArgumentParser.h"
+
 #include <util.h>
 #include <json_conversion.h>
 #include <BenchTypeSupportImpl.h>
+
 #include <unordered_map>
 
 using namespace Bench;
 
 bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
-  OutputFormat& output_format, Report& report, std::ofstream& output_file_stream) {
+  OutputFormat& output_format, Report& report, std::ofstream& output_file_stream)
+{
   std::string input_file_path;
   std::string output_file_path;
 
@@ -21,7 +24,6 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
 
         if (!ACE_OS::strcmp(argument, ACE_TEXT("--help"))
           || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
-          std::cout << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl;
           show_usage();
           return false;
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--input-file"))) {
@@ -99,22 +101,26 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
   return true;
 }
 
-void ArgumentParser::show_usage_prompt() {
+void ArgumentParser::show_usage_prompt()
+{
   std::cerr << "Use -h or --help to see the full help message" << std::endl;
 }
 
-void ArgumentParser::show_option_error(std::string option) {
+void ArgumentParser::show_option_error(std::string option)
+{
   std::cerr << "Invalid option: " << option << std::endl;
   show_usage_prompt();
 }
 
-void ArgumentParser::show_option_argument_error(std::string option_argument) {
+void ArgumentParser::show_option_argument_error(std::string option_argument)
+{
   std::cerr << "Invalid option argument: " << option_argument << std::endl;
   show_usage_prompt();
 }
 
 void ArgumentParser::show_usage() {
   std::cout
+    << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl
     << "OPTIONS:" << std::endl
     << "--input-file <filename>      The report file to read" << std::endl
     << "--output-file <filename>     The parsed file to generate" << std::endl

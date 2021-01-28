@@ -1,9 +1,11 @@
 #include "TimeSeriesGnuPlotFormatter.h"
+
 #include <PropertyStatBlock.h>
 
 using namespace Bench;
 
-int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream) {
+int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream)
+{
   if (report.node_reports.length() > 0) {
     output_header(report, output_file_stream);
     output_data(report, output_file_stream);
@@ -12,7 +14,8 @@ int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& outp
   return EXIT_FAILURE;
 }
 
-void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstream& output_file_stream) {
+void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstream& output_file_stream)
+{
   const bool show_postfix = report.node_reports.length() > 1;
 
   // A gnuplot data file header comment line begins with # character.
@@ -36,7 +39,8 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
   output_file_stream << std::endl;
 }
 
-void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream& output_file_stream) {
+void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream& output_file_stream)
+{
   std::vector<Bench::SimpleStatBlock> cpu_percent_stats;
   std::vector<Bench::SimpleStatBlock> mem_percent_stats;
   std::vector<Bench::SimpleStatBlock> virtual_mem_percent_stats;

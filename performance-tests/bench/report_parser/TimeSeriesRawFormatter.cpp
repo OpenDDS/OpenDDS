@@ -1,7 +1,9 @@
 #include "TimeSeriesRawFormatter.h"
+
 #include <PropertyStatBlock.h>
 
-int TimeSeriesRawFormatter::format(const Report& report, std::ofstream& output_file_stream) {
+int TimeSeriesRawFormatter::format(const Report& report, std::ofstream& output_file_stream)
+{
   Bench::SimpleStatBlock consolidated_cpu_percent_stats;
   Bench::SimpleStatBlock consolidated_mem_percent_stats;
   Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
