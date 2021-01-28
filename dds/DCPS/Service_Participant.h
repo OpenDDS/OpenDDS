@@ -584,6 +584,9 @@ private:
 
   bool bit_enabled_;
 
+  /// Thread mutex used to grab type information
+  ACE_Thread_Mutex ti_lock_;
+
 #if defined(OPENDDS_SECURITY)
   bool security_enabled_;
 #endif
@@ -654,6 +657,9 @@ public:
 
   /// Pointer to the monitor object for this object
   unique_ptr<Monitor> monitor_;
+
+  ACE_Thread_Mutex* get_ti_lock();
+
 
 private:
   /// The FederationRecoveryDuration value in seconds.

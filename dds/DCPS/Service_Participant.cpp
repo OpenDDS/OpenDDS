@@ -2787,6 +2787,12 @@ Service_Participant::get_thread_statuses()
   return &thread_status_;
 }
 
+ACE_Thread_Mutex*
+Service_Participant::get_ti_lock()
+{
+  return &ti_lock_;
+}
+
 NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());

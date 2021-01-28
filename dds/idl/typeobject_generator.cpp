@@ -934,10 +934,15 @@ typeobject_generator::gen_epilogue()
     "}\n"
     "}\n";
 
+  be_global->add_include("dds/DCPS/Service_Participant.h");
   be_global->impl_ <<
     "const XTypes::TypeMap& get_minimal_type_map()\n"
     "{\n"
-    "  static const XTypes::TypeMap tm = get_minimal_type_map_private();\n"
+    "  static XTypes::TypeMap tm;\n"
+    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, *TheServiceParticipant->get_ti_lock(), tm);\n"
+    "  if (tm.empty()) {\n"
+    "    tm = get_minimal_type_map_private();\n"
+    "  }\n"
     "  return tm;\n"
     "}\n";
 }
