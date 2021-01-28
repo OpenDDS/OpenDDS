@@ -939,7 +939,7 @@ typeobject_generator::gen_epilogue()
     "const XTypes::TypeMap& get_minimal_type_map()\n"
     "{\n"
     "  static XTypes::TypeMap tm;\n"
-    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, *TheServiceParticipant->get_tm_lock(), tm);\n"
+    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_tm_lock(), tm);\n"
     "  if (tm.empty()) {\n"
     "    tm = get_minimal_type_map_private();\n"
     "  }\n"

@@ -2787,10 +2787,9 @@ Service_Participant::get_thread_statuses()
   return &thread_status_;
 }
 
-ACE_Thread_Mutex*
-Service_Participant::get_tm_lock()
+ACE_Thread_Mutex& Service_Participant::get_tm_lock()
 {
-  return &tm_lock_;
+  return tm_lock_;
 }
 
 NetworkConfigMonitor_rch Service_Participant::network_config_monitor()

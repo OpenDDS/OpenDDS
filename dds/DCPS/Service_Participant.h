@@ -584,7 +584,6 @@ private:
 
   bool bit_enabled_;
 
-
 #if defined(OPENDDS_SECURITY)
   bool security_enabled_;
 #endif
@@ -647,8 +646,8 @@ public:
   TimeDuration get_thread_status_interval();
   void set_thread_status_interval(TimeDuration interval);
 
-  // getter for tm_lock_ used to block get_minimal_type_map_private
-  ACE_Thread_Mutex* get_tm_lock();
+  /// getter for tm_lock_ used to block get_minimal_type_map_private
+  ACE_Thread_Mutex& get_tm_lock();
 
   ThreadStatus* get_thread_statuses();
 
@@ -658,8 +657,6 @@ public:
 
   /// Pointer to the monitor object for this object
   unique_ptr<Monitor> monitor_;
-
-
 
 private:
   /// The FederationRecoveryDuration value in seconds.
