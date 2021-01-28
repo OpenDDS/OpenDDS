@@ -3398,7 +3398,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
-#        vcpkgDirectory: 'C:/vcpkg'
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3439,7 +3438,7 @@ jobs:
 #      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows" --openssl="C:\vcpkg\installed\x64-windows"
+#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x64-windows" --openssl="%VCPKG_ROOT%\installed\x64-windows"
 #    - name: check build configuration
 #      shell: cmd
 #      run: |
@@ -3592,7 +3591,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
-#        vcpkgDirectory: 'C:/vcpkg'
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3633,7 +3631,7 @@ jobs:
 #      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows"
+#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x64-windows"
 #    - name: check build configuration
 #      shell: cmd
 #      run: |
