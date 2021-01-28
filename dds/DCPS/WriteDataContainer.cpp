@@ -1382,9 +1382,10 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
 
     case CvStatus_Error:
       if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_pending: "
           "error in wait_until\n"));
       }
+      loop = false;
       break;
     }
   }
