@@ -75,11 +75,10 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
   if (!be_global->no_default_gen()) {
-    if (!be_global->suppress_xtypes() && !java_ts_only) {
-      gen_target_.add_generator(&to_gen_);
-      gen_target_.add_generator(&value_reader_generator_);
-      gen_target_.add_generator(&value_writer_generator_);
-    }
+    gen_target_.add_generator(&to_gen_);
+    to_gen_.produce_output(!be_global->suppress_xtypes() && !java_ts_only);
+    gen_target_.add_generator(&value_reader_generator_);
+    gen_target_.add_generator(&value_writer_generator_);
     gen_target_.add_generator(&mar_gen_);
     gen_target_.add_generator(&key_gen_);
     gen_target_.add_generator(&ts_gen_);

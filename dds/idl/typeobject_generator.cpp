@@ -1738,6 +1738,10 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
 {
   strong_connect(node, "");
 
+  if (!produce_output_) {
+    return true;
+  }
+
   NamespaceGuard ng;
   const string clazz = tag_type(name);
 

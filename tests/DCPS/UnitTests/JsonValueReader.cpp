@@ -514,20 +514,24 @@ struct MyStruct {
   bool value;
 };
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
-  bool vread(ValueReader& reader, MyStruct& s) {
-    if (!reader.begin_struct()) return false;
-    MemberId member_id;
-    if (!reader.begin_struct_member(member_id, member_helper)) return false;
-    if (member_id != BOOL_MEMBER_ID)  return false;
-    if (!reader.read_boolean(s.value))  return false;
-    if (!reader.end_struct_member()) return false;
-    if (!reader.end_struct()) return false;
-    return true;
-  }
+
+bool vread(ValueReader& reader, MyStruct& s) {
+  if (!reader.begin_struct()) return false;
+  MemberId member_id;
+  if (!reader.begin_struct_member(member_id, member_helper)) return false;
+  if (member_id != BOOL_MEMBER_ID)  return false;
+  if (!reader.read_boolean(s.value))  return false;
+  if (!reader.end_struct_member()) return false;
+  if (!reader.end_struct()) return false;
+  return true;
+}
+
 }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 TEST(JsonValueReader, from_json)
 {
