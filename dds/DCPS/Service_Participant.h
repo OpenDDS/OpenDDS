@@ -725,7 +725,7 @@ private:
 
   ThreadStatus thread_status_;
 
-  /// Thread mutex used to grab type information
+  /// Thread mutex used to grab type map
   ACE_Thread_Mutex tm_lock_;
 
   /// Enable Monitor functionality
