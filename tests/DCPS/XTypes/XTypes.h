@@ -81,6 +81,7 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
   DDS::DomainParticipantQos part_qos;
 
   if (security_enabled) {
+#if defined(OPENDDS_SECURITY)
     dpf->get_default_participant_qos(part_qos);
 
     if (TheServiceParticipant->get_security()) {
@@ -96,6 +97,7 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
     }
 
     dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
+#endif
   } else {
     dp = dpf->create_participant(0, PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   }
