@@ -870,18 +870,19 @@ namespace OpenDDS {
     bool filtered = false;
     SubscriptionInstance_rch instance;
 
+    const DDS::Time_t now = timestamp.to_dds_time();
+    DataSampleHeader header;
+    header.source_timestamp_sec_ = now.sec;
+    header.source_timestamp_nanosec_ = now.nanosec;
+
     // Call store_instance_data() once or twice, depending on if we need to
     // process the INSTANCE_REGISTRATION.  In either case, store_instance_data()
     // owns the memory for the sample and it must come from the correct allocator.
     for (int i = 0; i < 2; ++i) {
       if (i == 0 && inst != DDS::HANDLE_NIL) continue;
 
-      DataSampleHeader header;
       const int msg = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       header.message_id_ = static_cast<char>(msg);
-      const DDS::Time_t now = timestamp.to_dds_time();
-      header.source_timestamp_sec_ = now.sec;
-      header.source_timestamp_nanosec_ = now.nanosec;
 
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
@@ -895,6 +896,14 @@ namespace OpenDDS {
       }
       notify_read_conditions();
     }
+
+    const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+    const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+    if (observer && vwd) {
+      Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, header.instance_state(), now, header.sequence_, &sample, *vwd);
+      observer->on_sample_received(this, s);
+    }
+
     return inst;
   }
 
