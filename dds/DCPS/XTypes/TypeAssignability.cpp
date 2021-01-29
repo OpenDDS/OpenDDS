@@ -203,9 +203,10 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
   return false;
 }
 
-bool TypeAssignability::equivalent(const TypeIdentifier&, const TypeIdentifier&)
+bool TypeAssignability::equivalent(const TypeIdentifier&, const TypeIdentifier&) const
 {
   // TODO: implement this
+  
 }
 
 /**

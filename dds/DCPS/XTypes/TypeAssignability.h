@@ -45,7 +45,7 @@ public:
   bool assignable(const TypeIdentifier& ta, const TypeObject& tb) const;
 
   // Check whether two types are equivalent, i.e., the same
-  bool equivalent(const TypeIdentifier& ta, const TypeIdentifier& tb);
+  bool equivalent(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
 
   void insert_entry(const TypeIdentifier& ti, const TypeObject& tobj)
   {

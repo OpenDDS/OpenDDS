@@ -1350,7 +1350,14 @@ namespace OpenDDS {
         DDS::SubscriberQos tempSubQos;
         ContentFilterProperty_t tempCfp;
 
-        // 1. collect details about the writer, which may be local or discovered
+        DiscoveredPublicationIter dpi = discovered_publications_.find(writer);
+        DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(reader);
+        if (dpi != discovered_publications_.end() && dsi != discovered_subscriptions_.end()) {
+          // This is a discovered/discovered match, nothing for us to do
+          return;
+        }
+
+        // 1. Collect details about the writer, which may be local or discovered
         const DDS::DataWriterQos* dwQos = 0;
         const DDS::PublisherQos* pubQos = 0;
         TransportLocatorSeq* wTls = 0;
@@ -1359,7 +1366,6 @@ namespace OpenDDS {
         OPENDDS_STRING topic_name;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
-        DiscoveredPublicationIter dpi;
         bool writer_local = false, already_matched = false;
         if (lpi != local_publications_.end()) {
           writer_local = true;
@@ -1371,17 +1377,48 @@ namespace OpenDDS {
           writer_type_info = &lpi->second.type_info_;
           topic_name = topic_names_[lpi->second.topic_id_];
 
-        } else if ((dpi = discovered_publications_.find(writer))
-                   != discovered_publications_.end()) {
+        } else if (dpi != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           wTransportContext = dpi->second.transport_context_;
           writer_type_info = &dpi->second.type_info_;
           topic_name = dpi->second.get_topic_name();
+
+          const DDS::PublicationBuiltinTopicData& bit =
+            dpi->second.writer_data_.ddsPublicationData;
+          tempDwQos.durability = bit.durability;
+          tempDwQos.durability_service = bit.durability_service;
+          tempDwQos.deadline = bit.deadline;
+          tempDwQos.latency_budget = bit.latency_budget;
+          tempDwQos.liveliness = bit.liveliness;
+          tempDwQos.reliability = bit.reliability;
+          tempDwQos.destination_order = bit.destination_order;
+          tempDwQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
+          tempDwQos.resource_limits =
+            TheServiceParticipant->initial_ResourceLimitsQosPolicy();
+          tempDwQos.transport_priority =
+            TheServiceParticipant->initial_TransportPriorityQosPolicy();
+          tempDwQos.lifespan = bit.lifespan;
+          tempDwQos.user_data = bit.user_data;
+          tempDwQos.ownership = bit.ownership;
+          tempDwQos.ownership_strength = bit.ownership_strength;
+          tempDwQos.writer_data_lifecycle =
+            TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
+          tempDwQos.representation = bit.representation;
+          dwQos = &tempDwQos;
+
+          tempPubQos.presentation = bit.presentation;
+          tempPubQos.partition = bit.partition;
+          tempPubQos.group_data = bit.group_data;
+          tempPubQos.entity_factory =
+            TheServiceParticipant->initial_EntityFactoryQosPolicy();
+          pubQos = &tempPubQos;
+
+          populate_transport_locator_sequence(wTls, dpi, writer);
         } else {
           return; // Possible and ok, since lock is released
         }
 
-        // 2. collect details about the reader, which may be local or discovered
+        // 2. Collect details about the reader, which may be local or discovered
         const DDS::DataReaderQos* drQos = 0;
         const DDS::SubscriberQos* subQos = 0;
         TransportLocatorSeq* rTls = 0;
@@ -1390,7 +1427,6 @@ namespace OpenDDS {
         XTypes::TypeInformation* reader_type_info = 0;
 
         const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-        DiscoveredSubscriptionIter dsi;
         bool reader_local = false;
         if (lsi != local_subscriptions_.end()) {
           reader_local = true;
@@ -1407,12 +1443,7 @@ namespace OpenDDS {
           if (!already_matched) {
             already_matched = lsi->second.matched_endpoints_.count(writer);
           }
-        } else if ((dsi = discovered_subscriptions_.find(reader))
-                   != discovered_subscriptions_.end()) {
-          if (!writer_local) {
-            // this is a discovered/discovered match, nothing for us to do
-            return;
-          }
+        } else if (dsi != discovered_subscriptions_.end()) {
           rTls = &dsi->second.reader_data_.readerProxy.allLocators;
 
           populate_transport_locator_sequence(rTls, dsi, reader);
@@ -1444,13 +1475,14 @@ namespace OpenDDS {
           tempSubQos.entity_factory =
             TheServiceParticipant->initial_EntityFactoryQosPolicy();
           subQos = &tempSubQos;
+
           cfProp = &dsi->second.reader_data_.contentFilterProperty;
           reader_type_info = &dsi->second.type_info_;
         } else {
           return; // Possible and ok, since lock is released
         }
 
-        // check consistency
+        // 3. Perform type consistency check
         bool consistent = false;
 
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
@@ -1462,17 +1494,18 @@ namespace OpenDDS {
         } else {
           const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
           const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
-          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {            
-            const DDS::DataRepresentationIdSeq repIds =
-              get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
-            for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-              Encoding::Kind encoding_kind;
-              if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-                if (encoding_kind == Encoding::KIND_XCDR1) {
+          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
+            if (!writer_local || !reader_local) {
+              const DDS::DataRepresentationIdSeq repIds =
+                get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
+              for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+                Encoding::Kind encoding_kind;
+                if (repr_to_encoding_kind(repIds[i], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
                   const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
 
-                  if (type_lookup_service_->extensibility(extensibility_mask, writer_local ? reader_type_id : writer_type_id)) {
-                    if (::OpenDDS::DCPS::DCPS_debug_level) {
+                  if (type_lookup_service_->extensibility(extensibility_mask,
+                                                          writer_local ? reader_type_id : writer_type_id)) {
+                    if (OpenDDS::DCPS::DCPS_debug_level) {
                       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                         ACE_TEXT("EndpointManager::match_continue: ")
                         ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
@@ -1482,7 +1515,7 @@ namespace OpenDDS {
               }
             }
 
-            TypeConsistencyAttributes type_consistency;
+            XTypes::TypeConsistencyAttributes type_consistency;
             type_consistency.ignore_sequence_bounds = drQos->type_consistency.ignore_sequence_bounds;
             type_consistency.ignore_string_bounds = drQos->type_consistency.ignore_string_bounds;
             type_consistency.ignore_member_names = drQos->type_consistency.ignore_member_names;
@@ -1521,46 +1554,11 @@ namespace OpenDDS {
             if (DCPS::DCPS_debug_level) {
               ACE_DEBUG((LM_WARNING,
                         ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
-                        ACE_TEXT("topic %C does not match data types (inconsistent)\n"),
+                        ACE_TEXT("Data types of topic %C does not match (inconsistent)\n"),
                         topic_name.c_str()));
             }
             return;
           }
-        }
-
-        // This is really part of step 1, but we're doing it here just in case we
-        // are in the discovered/discovered match and we don't need the QoS data.
-        if (!writer_local) {
-          const DDS::PublicationBuiltinTopicData& bit =
-            dpi->second.writer_data_.ddsPublicationData;
-          tempDwQos.durability = bit.durability;
-          tempDwQos.durability_service = bit.durability_service;
-          tempDwQos.deadline = bit.deadline;
-          tempDwQos.latency_budget = bit.latency_budget;
-          tempDwQos.liveliness = bit.liveliness;
-          tempDwQos.reliability = bit.reliability;
-          tempDwQos.destination_order = bit.destination_order;
-          tempDwQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
-          tempDwQos.resource_limits =
-            TheServiceParticipant->initial_ResourceLimitsQosPolicy();
-          tempDwQos.transport_priority =
-            TheServiceParticipant->initial_TransportPriorityQosPolicy();
-          tempDwQos.lifespan = bit.lifespan;
-          tempDwQos.user_data = bit.user_data;
-          tempDwQos.ownership = bit.ownership;
-          tempDwQos.ownership_strength = bit.ownership_strength;
-          tempDwQos.writer_data_lifecycle =
-            TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
-          tempDwQos.representation = bit.representation;
-          dwQos = &tempDwQos;
-          tempPubQos.presentation = bit.presentation;
-          tempPubQos.partition = bit.partition;
-          tempPubQos.group_data = bit.group_data;
-          tempPubQos.entity_factory =
-            TheServiceParticipant->initial_EntityFactoryQosPolicy();
-          pubQos = &tempPubQos;
-
-          populate_transport_locator_sequence(wTls, dpi, writer);
         }
 
         // Need to release lock, below, for callbacks into DCPS which could
@@ -1568,7 +1566,7 @@ namespace OpenDDS {
         // an ACE object which will be used below for unlocking.
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
-        // 3. check transport and QoS compatibility
+        // 4. Check transport and QoS compatibility
 
         // Copy entries from local publication and local subscription maps
         // prior to releasing lock
