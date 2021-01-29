@@ -2,5 +2,6 @@ project: dcps_test, googletest, msvc_bigobj {
   dcps_ts_flags += --no-default-nested
   TypeSupport_Files {
     xcdr.idl
+    xcdr2.idl
   }
 }

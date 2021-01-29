@@ -12,3 +12,16 @@
 /xcdrTypeSupportS.cpp
 /xcdrTypeSupportS.h
 /xcdr
+/xcdr2C.cpp
+/xcdr2C.h
+/xcdr2C.inl
+/xcdr2S.cpp
+/xcdr2S.h
+/xcdr2TypeSupport.idl
+/xcdr2TypeSupportC.cpp
+/xcdr2TypeSupportC.h
+/xcdr2TypeSupportC.inl
+/xcdr2TypeSupportImpl.cpp
+/xcdr2TypeSupportImpl.h
+/xcdr2TypeSupportS.cpp
+/xcdr2TypeSupportS.h
