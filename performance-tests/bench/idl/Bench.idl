@@ -177,6 +177,7 @@ module Bench {
 
     @topic
     struct Report {
+      string node_name;
       NodeId node_id;
       WorkerReports worker_reports;
       Builder::PropertySeq properties;
@@ -235,6 +236,7 @@ module Bench {
 
     typedef sequence<NodeController::WorkerId> WorkerIdSeq;
     struct NodeReport {
+      string node_name;
       NodeController::NodeId node_id;
       WorkerReportSeq worker_reports;
       Builder::StringSeq worker_logs;
