@@ -79,11 +79,10 @@ void append(DDS::PropertySeq& props, const char* name, const char* value)
 
 void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp) {
   DDS::DomainParticipantQos part_qos;
+  dpf->get_default_participant_qos(part_qos);
 
   if (security_requested) {
 #if defined(OPENDDS_SECURITY)
-    dpf->get_default_participant_qos(part_qos);
-
     if (TheServiceParticipant->get_security()) {
       using namespace DDS::Security::Properties;
       DDS::PropertySeq& props = part_qos.property.value;
@@ -95,11 +94,9 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
       append(props, AccessGovernance, "file:../../security/attributes/governance/governance_AU_UA_ND_NL_NR_signed.p7s");
       append(props, AccessPermissions, "file:../../security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s");
     }
-
-    dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
 #endif
-  } else {
-    dp = dpf->create_participant(0, PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   }
+
+  dp = dpf->create_participant(0, PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 }
 #endif
