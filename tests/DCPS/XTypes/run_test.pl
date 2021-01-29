@@ -29,10 +29,10 @@ my %params = (
   "AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 4,
                                 r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},
   "AppendableNoMatch"       => {reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct", expect_to_fail => 1, reg_type => "PD_OL_OA_OM_OD", key_val => 5,
-                                r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},								
+                                r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},
   "Dependency"              => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 14,
-                                r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},			
-								
+                                r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini", security => 1},
+
   "PlainCdr"                => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini", security => 0},
   "FinalStructMatch"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
