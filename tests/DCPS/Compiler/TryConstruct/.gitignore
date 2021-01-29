@@ -38,3 +38,16 @@ TryConstruct3TypeSupportImpl.h
 TryConstruct3TypeSupportS.cpp
 TryConstruct3TypeSupportS.h
 TryConstruct3TypeSupport.idl
+TryConstructBaseTypesC.cpp
+TryConstructBaseTypesC.h
+TryConstructBaseTypesC.inl
+TryConstructBaseTypesS.cpp
+TryConstructBaseTypesS.h
+TryConstructBaseTypesTypeSupportC.cpp
+TryConstructBaseTypesTypeSupportC.h
+TryConstructBaseTypesTypeSupportC.inl
+TryConstructBaseTypesTypeSupportImpl.cpp
+TryConstructBaseTypesTypeSupportImpl.h
+TryConstructBaseTypesTypeSupportS.cpp
+TryConstructBaseTypesTypeSupportS.h
+TryConstructBaseTypesTypeSupport.idl

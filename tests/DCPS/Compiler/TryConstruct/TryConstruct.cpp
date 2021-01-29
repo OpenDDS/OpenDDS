@@ -215,9 +215,9 @@ TEST(StructandSeq, USE_DEFAULT)
   sent.ns.upsu_ud.length(1);
   sent.ns.upsb_ud.length(1);
   sent.ns.esu_ud.length(1);
-  sent.ns.esu_ud[0] = idl3VALUE1;
+  sent.ns.esu_ud[0] = VALUE1;
   sent.ns.esb_ud.length(1);
-  sent.ns.esb_ud[0] = idl3VALUE1;
+  sent.ns.esb_ud[0] = VALUE1;
   sent.ns.strsu_ud.length(1);
   sent.ns.strsb_ud.length(1);
   sent.ns.wstrsu_ud.length(1);
@@ -234,7 +234,7 @@ TEST(StructandSeq, USE_DEFAULT)
   sent.ns.ns_ud.str64_ud = "WORLD";
   sent.ns.ns_ud.str64_t = "GOODBYE";
   for (ACE_INT16 i = 0; i < 10; ++i) sent.ns.sa_mud[i] = 0;
-  sent.ns.e_ud = idl3VALUE1;
+  sent.ns.e_ud = VALUE1;
   sent.ns.by_ud = 0x00;
   sent.ns.bo_ud = false;
   sent.ns.s_ud = 5;
@@ -248,7 +248,7 @@ TEST(StructandSeq, USE_DEFAULT)
   expected.ns.ns_ud.str64_ud = "";
   expected.ns.ns_ud.str64_t = "";
   for (ACE_INT16 i = 0; i < 10; ++i) expected.ns.sa_mud[i] = 0;
-  expected.ns.e_ud = idl3VALUE1;
+  expected.ns.e_ud = VALUE1;
   expected.ns.by_ud = 0x00;
   expected.ns.bo_ud = false;
   expected.ns.s_ud = 0;
@@ -326,11 +326,11 @@ TEST(StructandSeq, TRIM)
   }
   sent.esu_t.length(3);
   for (ACE_INT16 i = 0; i < 3; ++i) {
-    sent.esu_t[i] = idl3VALUE1;
+    sent.esu_t[i] = VALUE1;
   }
   sent.esb_t.length(3);
   for (ACE_INT16 i = 0; i < 3; ++i) {
-    sent.esb_t[i] = idl3VALUE1;
+    sent.esb_t[i] = VALUE1;
   }
   sent.strsu_t.length(3);
   for (ACE_INT16 i = 0; i < 3; ++i) {
@@ -709,7 +709,7 @@ TEST(AnonArray, TRIM)
         sent.AnonArrayArr[i][j] = "abcdefghijklmnopqrstuvwxyz";
       }
     }
-    idl2ShortSeqBound2 temp_seq;
+    ShortSeqBound2 temp_seq;
     temp_seq.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = i;
@@ -774,7 +774,7 @@ TEST(AnonArray, USE_DEFAULT)
         sent.AnonArrayArr[i][j] = "abcdefghijklmnopqrstuvwxyz";
       }
     }
-    idl2ShortSeqBound2 temp_seq;
+    ShortSeqBound2 temp_seq;
     temp_seq.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
       temp_seq[i] = i;
@@ -927,7 +927,7 @@ TEST(Union, DISCARD)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(idl2BExtra);
+    sent._d(BExtra);
     sent.s4(5);
     TryCon::DiscardDiscrimUnion actual;
     {
@@ -1079,10 +1079,10 @@ TEST(Union, USE_DEFAULT)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(idl2BExtra);
+    sent._d(BExtra);
     sent.s4(5);
     TryCon::DefaultDiscrimUnion expected;
-    expected._d(idl2VALUE1);
+    expected._d(VALUE1);
     expected.s1(0);
     TryCon::DefaultDiscrimUnion actual;
     {
