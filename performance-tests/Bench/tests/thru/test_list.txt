@@ -1,4 +1,0 @@
-# group		client	server
-
-  1		pollux.ociweb.com	castor.ociweb.com
-

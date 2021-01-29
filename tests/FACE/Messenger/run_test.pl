@@ -9,12 +9,6 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-if ($^O ne 'MSWin32' &&
-    (new PerlACE::ConfigList)->check_config('OPENDDS_SAFETY_PROFILE') &&
-    (new PerlACE::ConfigList)->check_config('SAFETY_BASE')) {
-    system('$DDS_ROOT/tools/scripts/analyze_operator_new.sh $ACE_ROOT/lib/libACE.so $DDS_ROOT/lib/libOpenDDS_Corba.so $DDS_ROOT/lib/libOpenDDS_Dcps.so $DDS_ROOT/lib/libOpenDDS_Rtps.so $DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so $DDS_ROOT/lib/libOpenDDS_FACE.so Idl/libFaceMessengerIdl.so Publisher/publisher Subscriber/subscriber | awk \'{ print "ERROR: Call to global operator new: " $2; }\'');
-}
-
 PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();
@@ -29,6 +23,12 @@ my $callback = '';
 
 if($test->flag('callback')) {
     $callback = 'callback';
+}
+
+if ($callback eq '' && $config eq 'face_config.ini' &&
+    (new PerlACE::ConfigList)->check_config('OPENDDS_SAFETY_PROFILE') &&
+    (new PerlACE::ConfigList)->check_config('SAFETY_BASE')) {
+    system('$DDS_ROOT/tools/scripts/analyze_operator_new.sh $ACE_ROOT/lib/libACE.so $DDS_ROOT/lib/libOpenDDS_Corba.so $DDS_ROOT/lib/libOpenDDS_Dcps.so $DDS_ROOT/lib/libOpenDDS_Rtps.so $DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so $DDS_ROOT/lib/libOpenDDS_FACE.so Idl/libFaceMessengerIdl.so Publisher/publisher Subscriber/subscriber | awk \'{ print "ERROR: Call to global operator new: " $2; }\'');
 }
 
 $test->enable_console_logging();

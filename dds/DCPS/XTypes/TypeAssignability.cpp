@@ -672,7 +672,7 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
     return false;
   }
 
-  std::set<ACE_CDR::Long> labels_set_a;
+  OPENDDS_SET(ACE_CDR::Long) labels_set_a;
   for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
     const UnionCaseLabelSeq& labels_a = ta.union_type.member_seq[i].common.label_seq;
     labels_set_a.insert(labels_a.members.begin(), labels_a.members.end());
@@ -734,8 +734,8 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
 
   // Members with the same ID must have the same name, and vice versa
   if (!ignore_member_names_) {
-    std::map<MemberId, ACE_CDR::ULong> id_to_name_a;
-    std::map<ACE_CDR::ULong, MemberId> name_to_id_a;
+    OPENDDS_MAP(MemberId, ACE_CDR::ULong) id_to_name_a;
+    OPENDDS_MAP(ACE_CDR::ULong, MemberId) name_to_id_a;
     for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
       MemberId id = ta.union_type.member_seq[i].common.member_id;
       const NameHash& h = ta.union_type.member_seq[i].detail.name_hash;
@@ -1091,7 +1091,7 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
 
   const size_t size_a = ta.enumerated_type.literal_seq.members.size();
   const size_t size_b = tb.enumerated_type.literal_seq.members.size();
-  std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_name_to_value;
+  OPENDDS_MAP(ACE_CDR::ULong, ACE_CDR::Long) ta_name_to_value;
   for (size_t i = 0; i < size_a; ++i) {
     const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
     ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
@@ -1125,7 +1125,7 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
       }
     }
 
-    std::map<ACE_CDR::ULong, ACE_CDR::ULong> ta_value_to_name;
+    OPENDDS_MAP(ACE_CDR::ULong, ACE_CDR::ULong) ta_value_to_name;
     for (size_t i = 0; i < size_a; ++i) {
       ACE_CDR::ULong value_a = ta.enumerated_type.literal_seq.members[i].common.value;
       const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;

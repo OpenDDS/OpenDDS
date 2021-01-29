@@ -2,7 +2,6 @@
 
 # OpenDDS
 
-[![Build Status](https://travis-ci.com/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.com/objectcomputing/OpenDDS)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4647c7248ac14e7bb60c142c626ba574)](https://www.codacy.com/app/OpenDDS/OpenDDS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=objectcomputing/OpenDDS&amp;utm_campaign=Badge_Grade)
 [![Azure DevOps](https://dev.azure.com/opendds/OpenDDS/_apis/build/status/objectcomputing.OpenDDS)](https://dev.azure.com/opendds/OpenDDS/_build/latest?definitionId=1)
@@ -13,8 +12,8 @@ as some other related specifications. These standards define a set of
 interfaces and protocols for developing distributed applications based on the
 publish-subscribe and distributed cache models. Although OpenDDS is itself
 developed in C++, Java and JMS bindings are provided so that Java applications
-can use OpenDDS.  OpenDDS also includes support for the DDS Security
-specification.
+can use OpenDDS.  OpenDDS also includes support for the DDS Security and XTypes
+specifications.
 
 OpenDDS is built on the [ACE](docs/dependencies.md#ace) abstraction layer to
 provide platform portability.  OpenDDS also leverages capabilities of

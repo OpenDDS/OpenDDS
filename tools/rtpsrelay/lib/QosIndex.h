@@ -141,7 +141,7 @@ public:
   void erase(WriterPtr writer)
   {
     const auto pos = writers_.find(writer);
-    for (const auto reader : pos->second) {
+    for (const auto& reader : pos->second) {
       readers_[reader].erase(writer);
     }
     writers_.erase(writer);
@@ -167,7 +167,7 @@ public:
   void erase(ReaderPtr reader)
   {
     const auto pos = readers_.find(reader);
-    for (const auto writer : pos->second) {
+    for (const auto& writer : pos->second) {
       writers_[writer].erase(reader);
     }
     readers_.erase(reader);
@@ -191,7 +191,7 @@ public:
   {
     const auto pos = writers_.find(writer);
     if (pos != writers_.end()) {
-      for (const auto reader : pos->second) {
+      for (const auto& reader : pos->second) {
         to.insert(reader->participant_guid());
       }
     }
@@ -209,7 +209,7 @@ public:
   {
     const auto pos = readers_.find(reader);
     if (pos != readers_.end()) {
-      for (const auto writer : pos->second) {
+      for (const auto& writer : pos->second) {
         to.insert(writer->participant_guid());
       }
     }
@@ -349,7 +349,7 @@ public:
 
   static void remove_from_literals(PatternPtr pattern)
   {
-    for (const auto literal : pattern->literals_) {
+    for (const auto& literal : pattern->literals_) {
       literal->erase(pattern);
     }
     pattern->literals_.clear();
@@ -360,10 +360,10 @@ public:
   {
     pattern->literals_.insert(literal);
     literal->insert(pattern);
-    for (const auto writer : pattern->writers_) {
+    for (const auto& writer : pattern->writers_) {
       literal->insert_pattern(writer, guids);
     }
-    for (const auto reader : pattern->readers_) {
+    for (const auto& reader : pattern->readers_) {
       literal->insert_pattern(reader, guids);
     }
   }
@@ -377,7 +377,7 @@ public:
               GuidSet& guids)
   {
     writers_.insert(writer);
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->insert_pattern(writer, guids);
     }
   }
@@ -386,14 +386,14 @@ public:
                 const WriterEntry& writer_entry,
                 GuidSet& guids)
   {
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->reinsert(writer, writer_entry, guids);
     }
   }
 
   void erase(WriterPtr writer)
   {
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->erase_pattern(writer);
     }
     writers_.erase(writer);
@@ -403,7 +403,7 @@ public:
               GuidSet& guids)
   {
     readers_.insert(reader);
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->insert_pattern(reader, guids);
     }
   }
@@ -412,14 +412,14 @@ public:
                 const ReaderEntry& reader_entry,
                 GuidSet& guids)
   {
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->reinsert(reader, reader_entry, guids);
     }
   }
 
   void erase(ReaderPtr reader)
   {
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->erase_pattern(reader);
     }
     readers_.erase(reader);
@@ -432,14 +432,14 @@ public:
 
   void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->get_readers(writer, readers);
     }
   }
 
   void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
-    for (const auto literal : literals_) {
+    for (const auto& literal : literals_) {
       literal->get_writers(reader, writers);
     }
   }
@@ -650,7 +650,7 @@ private:
 
     const auto& literal_atom = *begin;
 
-    for (const auto p : node->children_) {
+    for (const auto& p : node->children_) {
       const auto& pattern_atom = p.first;
       const auto next_node = p.second;
 
@@ -738,7 +738,7 @@ public:
         if (literal == nullptr) {
           literal = LiteralPtr(new LiteralType());
           NodeType::insert(node_, name, literal);
-          for (const auto pattern : NodeType::find_patterns(node_, name)) {
+          for (const auto& pattern : NodeType::find_patterns(node_, name)) {
             PatternType::insert(pattern, literal, guids);
           }
         }
@@ -748,7 +748,7 @@ public:
         if (pattern == nullptr) {
           pattern = PatternPtr(new PatternType());
           NodeType::insert(node_, name, pattern);
-          for (const auto literal : NodeType::find_literals(node_, name)) {
+          for (const auto& literal : NodeType::find_literals(node_, name)) {
             PatternType::insert(pattern, literal, guids);
           }
         }
@@ -819,7 +819,7 @@ public:
           if (literal == nullptr) {
             literal = LiteralPtr(new LiteralType());
             NodeType::insert(node_, name, literal);
-            for (const auto pattern : NodeType::find_patterns(node_, name)) {
+            for (const auto& pattern : NodeType::find_patterns(node_, name)) {
               PatternType::insert(pattern, literal, guids);
             }
           }
@@ -829,7 +829,7 @@ public:
           if (pattern == nullptr) {
             pattern = PatternPtr(new PatternType());
             NodeType::insert(node_, name, pattern);
-            for (const auto literal : NodeType::find_literals(node_, name)) {
+            for (const auto& literal : NodeType::find_literals(node_, name)) {
               PatternType::insert(pattern, literal, guids);
             }
           }
@@ -882,7 +882,7 @@ public:
         if (literal == nullptr) {
           literal = LiteralPtr(new LiteralType());
           NodeType::insert(node_, name, literal);
-          for (const auto pattern : NodeType::find_patterns(node_, name)) {
+          for (const auto& pattern : NodeType::find_patterns(node_, name)) {
             PatternType::insert(pattern, literal, guids);
           }
         }
@@ -892,7 +892,7 @@ public:
         if (pattern == nullptr) {
           pattern = PatternPtr(new PatternType());
           NodeType::insert(node_, name, pattern);
-          for (const auto literal : NodeType::find_literals(node_, name)) {
+          for (const auto& literal : NodeType::find_literals(node_, name)) {
             PatternType::insert(pattern, literal, guids);
           }
         }
@@ -964,7 +964,7 @@ public:
           if (literal == nullptr) {
             literal = LiteralPtr(new LiteralType());
             NodeType::insert(node_, name, literal);
-            for (const auto pattern : NodeType::find_patterns(node_, name)) {
+            for (const auto& pattern : NodeType::find_patterns(node_, name)) {
               PatternType::insert(pattern, literal, guids);
             }
           }
@@ -974,7 +974,7 @@ public:
           if (pattern == nullptr) {
             pattern = PatternPtr(new PatternType());
             NodeType::insert(node_, name, pattern);
-            for (const auto literal : NodeType::find_literals(node_, name)) {
+            for (const auto& literal : NodeType::find_literals(node_, name)) {
               PatternType::insert(pattern, literal, guids);
             }
           }

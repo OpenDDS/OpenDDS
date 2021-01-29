@@ -1806,7 +1806,7 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
       be_global->lang_header_ << type_name << "::"
         << to_string(enumerator->last_component()) << ";\n";
     } else {
-      be_global->lang_header_ << scoped(enumerator) << ";\n";
+      be_global->lang_header_ << dds_generator::scoped_helper(enumerator, "::") << ";\n";
     }
   } else {
     be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";

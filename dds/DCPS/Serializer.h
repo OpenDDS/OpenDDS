@@ -53,17 +53,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OctetSeq {
-public:
-  void length(size_t size) { data_.resize(size); }
-  size_t length() const { return data_.size(); }
-  const void* get_buffer() const { return data_.data(); }
-  void* get_buffer() { return const_cast<char*>(data_.data()); }
-
-private:
-  std::string data_;
-};
-
 enum Endianness {
   ENDIAN_BIG = 0,
   ENDIAN_LITTLE = 1,
