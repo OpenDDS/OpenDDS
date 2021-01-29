@@ -18,13 +18,15 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+typedef void (*callback_t)();
 
 class ParticipantLocationListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor
-  explicit ParticipantLocationListenerImpl(const std::string& id);
+  explicit ParticipantLocationListenerImpl(const std::string& id, bool no_ice,
+                                           bool ipv6, callback_t done_callback);
 
   //Destructor
   virtual ~ParticipantLocationListenerImpl();
@@ -56,13 +58,17 @@ public:
                               DDS::DataReader_ptr reader,
                               const DDS::SampleLostStatus& status);
 
-  bool check(bool no_ice, bool ipv6);
+  bool check(bool print_results = true);
 
   typedef std::map<OpenDDS::DCPS::RepoId, unsigned long, OpenDDS::DCPS::GUID_tKeyLessThan> LocationMapType;
   LocationMapType location_map;
 
 private:
   const std::string id_;
+  bool no_ice_;
+  bool ipv6_;
+  callback_t done_callback_;
+  bool done_;
 
 };
 

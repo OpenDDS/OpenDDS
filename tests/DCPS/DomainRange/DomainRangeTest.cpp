@@ -355,7 +355,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         -1);
       }
 
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task\n", writer_id.c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task %C\n", writer_id.c_str()));
       WriterTask task(writer_id, writer, TOTAL_READERS);
       task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
       task.wait();
