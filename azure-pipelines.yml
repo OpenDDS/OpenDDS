@@ -414,8 +414,14 @@ jobs:
       perl run_test.pl rtps
     condition: eq(variables['TEST_JAVA_MESSENGER'], 'true')
     displayName: Run rtps JAVA Messenger tests
-  - script: >
-      git clean -nd -e ext | cut -d ' ' -f 3 | xargs -I {} echo "##vso[task.logissue type=error]This file should be gitignored: '{}'"
+  - script: |
+      IFS=$'\n'
+      FILES=$(git clean -nd -e ext)
+      for f in $FILES; do
+        STATUS=1
+        echo "##vso[task.logissue type=error]" $f
+      done
+      exit $STATUS
     condition: eq(variables['TEST_GITIGNORE'], 'true')
     displayName: Check validity of .gitignore
 
