@@ -8,5 +8,7 @@ project(Compiler*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
   }
   TypeSupport_Files {
     ../TryConstruct.idl
+    ../TryConstruct2.idl
+    ../TryConstruct3.idl
   }
 }

@@ -6,5 +6,7 @@ project(*TryConstruct): dcps_test, googletest, msvc_bigobj{
   }
   TypeSupport_Files {
     TryConstruct.idl
+    TryConstruct2.idl
+    TryConstruct3.idl
   }
 }

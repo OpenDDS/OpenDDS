@@ -1,0 +1,199 @@
+//enum for use in struct, union, and sequence
+//due to issue 1900, enums in C++11 need an extra value beyond each case when used as a union discriminator
+enum idl3EnumType {idl3VALUE1, idl3VALUE2, idl3ValueExtra};
+
+//bounded string definitions
+typedef string<20> idl3str20;
+typedef wstring<20> idl3wstr20;
+typedef string<64> idl3str64;
+typedef wstring<64> idl3wstr64;
+
+//array for use in struct, union, and sequence
+typedef short idl3ShortArray[15];
+
+//nested struct for use in struct, union, and sequence
+@mutable
+struct idl3NestedStruct {
+  @try_construct(DISCARD) idl3str64 str64_d;
+  @try_construct(USE_DEFAULT) idl3str64 str64_ud;
+  @try_construct(TRIM) idl3str64 str64_t;
+};
+
+@mutable
+struct idl3NestedStructTrim {
+  @try_construct(DISCARD) idl3str20 str20_d;
+  @try_construct(USE_DEFAULT) idl3str20 str20_ud;
+  @try_construct(TRIM) idl3str20 str20_t;
+};
+
+//struct
+typedef sequence <idl3NestedStruct> idl3StructSeqUnbound;
+typedef sequence <idl3NestedStructTrim> idl3StructSeqUnboundTrim;
+typedef sequence <idl3NestedStruct, 2> idl3StructSeqBound;
+typedef sequence <idl3NestedStructTrim, 2> idl3StructSeqBoundTrim;
+typedef sequence <idl3NestedStruct, 3> idl3StructSeqBound2;
+
+//sequences
+//enum
+typedef sequence <idl3EnumType> idl3EnumSeqUnbound;
+typedef sequence <idl3EnumType, 2> idl3EnumSeqBound;
+typedef sequence <idl3EnumType, 3> idl3EnumSeqBound2;
+//primitives
+typedef sequence <short> idl3ShortSeqUnbound;
+typedef sequence <short, 2> idl3ShortSeqBound;
+typedef sequence <short, 3> idl3ShortSeqBound2;
+typedef sequence <unsigned short> idl3UnsignedShortSeqUnbound;
+typedef sequence <unsigned short, 2> idl3UnsignedShortSeqBound;
+typedef sequence <unsigned short, 3> idl3UnsignedShortSeqBound2;
+//string
+typedef sequence <idl3str64> idl3StringSeqUnbound;
+typedef sequence <idl3str64, 2> idl3StringSeqBound;
+typedef sequence <idl3str64, 3> idl3StringSeqBound2;
+//wstring
+typedef sequence <idl3wstr64> idl3WideStringSeqUnbound;
+typedef sequence <idl3wstr64, 2> idl3WideStringSeqBound;
+typedef sequence <idl3wstr64, 3> idl3WideStringSeqBound2;
+//array
+typedef sequence <idl3ShortArray> idl3ShortArraySeqUnbound;
+typedef sequence <idl3ShortArray, 2> idl3ShortArraySeqBound;
+typedef sequence <idl3ShortArray, 3> idl3ShortArraySeqBound2;
+//sequence
+typedef sequence <idl3ShortSeqUnbound> idl3SeqShortSeqUnboundUnbound;
+typedef sequence <idl3ShortSeqUnbound, 2> idl3SeqShortSeqUnboundBound;
+typedef sequence <idl3ShortSeqUnbound, 3> idl3SeqShortSeqUnboundBound2;
+typedef sequence <@try_construct(TRIM) idl3ShortSeqBound> idl3SeqShortSeqBoundUnbound;
+typedef sequence <idl3ShortSeqBound2> idl3SeqShortSeqBoundUnbound2;
+typedef sequence <@try_construct(TRIM) idl3ShortSeqBound, 2> idl3SeqShortSeqBoundBound;
+typedef sequence <idl3ShortSeqBound2, 3> idl3SeqShortSeqBoundBound2;
+
+//nested struct for use in struct, union, and sequence
+struct NestedStruct2 {
+  @try_construct(USE_DEFAULT) idl3wstr64 wstr64_ud;
+  @try_construct(USE_DEFAULT) idl3ShortSeqUnbound psu_ud;
+  @try_construct(USE_DEFAULT) idl3ShortSeqBound psb_ud;
+  @try_construct(USE_DEFAULT) idl3UnsignedShortSeqUnbound upsu_ud;
+  @try_construct(USE_DEFAULT) idl3UnsignedShortSeqBound upsb_ud;
+  @try_construct(USE_DEFAULT) idl3EnumSeqUnbound esu_ud;
+  @try_construct(USE_DEFAULT) idl3EnumSeqBound esb_ud;
+  @try_construct(USE_DEFAULT) idl3StringSeqUnbound strsu_ud;
+  @try_construct(USE_DEFAULT) idl3StringSeqBound strsb_ud;
+  @try_construct(USE_DEFAULT) idl3WideStringSeqUnbound wstrsu_ud;
+  @try_construct(USE_DEFAULT) idl3WideStringSeqBound wstrsb_ud;
+  @try_construct(USE_DEFAULT) idl3StructSeqUnbound ssu_ud;
+  @try_construct(USE_DEFAULT) idl3StructSeqBound ssb_ud;
+  @try_construct(USE_DEFAULT) idl3ShortArraySeqUnbound sasu_ud;
+  @try_construct(USE_DEFAULT) idl3ShortArraySeqBound sasb_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqUnboundUnbound sssuu_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqUnboundBound sssub_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqBoundUnbound sssbu_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqBoundBound sssbb_ud;
+  @try_construct(USE_DEFAULT) idl3NestedStruct ns_ud;
+  @try_construct(USE_DEFAULT) idl3ShortArray sa_mud;
+  @try_construct(USE_DEFAULT) idl3EnumType e_ud;
+  @try_construct(USE_DEFAULT) octet by_ud;
+  @try_construct(USE_DEFAULT) boolean bo_ud;
+  @try_construct(USE_DEFAULT) short s_ud;
+  @try_construct(USE_DEFAULT) unsigned short us_ud;
+  @try_construct(DISCARD) idl3str64 str64_d;
+  @try_construct(USE_DEFAULT) idl3str64 str64_ud;
+  @try_construct(TRIM) idl3str64 str64_t;
+};
+
+//nested struct for use in struct, union, and sequence
+struct NestedStruct3 {
+  @try_construct(USE_DEFAULT) idl3wstr64 wstr64_ud;
+  @try_construct(USE_DEFAULT) idl3ShortSeqUnbound psu_ud;
+  @try_construct(USE_DEFAULT) idl3ShortSeqBound psb_ud;
+  @try_construct(USE_DEFAULT) idl3UnsignedShortSeqUnbound upsu_ud;
+  @try_construct(USE_DEFAULT) idl3UnsignedShortSeqBound upsb_ud;
+  @try_construct(USE_DEFAULT) idl3EnumSeqUnbound esu_ud;
+  @try_construct(USE_DEFAULT) idl3EnumSeqBound esb_ud;
+  @try_construct(USE_DEFAULT) idl3StringSeqUnbound strsu_ud;
+  @try_construct(USE_DEFAULT) idl3StringSeqBound strsb_ud;
+  @try_construct(USE_DEFAULT) idl3WideStringSeqUnbound wstrsu_ud;
+  @try_construct(USE_DEFAULT) idl3WideStringSeqBound wstrsb_ud;
+  @try_construct(USE_DEFAULT) idl3StructSeqUnbound ssu_ud;
+  @try_construct(USE_DEFAULT) idl3StructSeqBound ssb_ud;
+  @try_construct(USE_DEFAULT) idl3ShortArraySeqUnbound sasu_ud;
+  @try_construct(USE_DEFAULT) idl3ShortArraySeqBound sasb_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqUnboundUnbound sssuu_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqUnboundBound sssub_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqBoundUnbound sssbu_ud;
+  @try_construct(USE_DEFAULT) idl3SeqShortSeqBoundBound sssbb_ud;
+  @try_construct(USE_DEFAULT) idl3NestedStruct ns_ud;
+  @try_construct(USE_DEFAULT) idl3ShortArray sa_mud;
+  @try_construct(USE_DEFAULT) idl3EnumType e_ud;
+  @try_construct(USE_DEFAULT) octet by_ud;
+  @try_construct(USE_DEFAULT) boolean bo_ud;
+  @try_construct(USE_DEFAULT) short s_ud;
+  @try_construct(USE_DEFAULT) unsigned short us_ud;
+  @try_construct(DISCARD) idl3str20 str20_d;
+  @try_construct(USE_DEFAULT) idl3str20 str20_ud;
+  @try_construct(TRIM) idl3str20 str20_t;
+};
+
+
+module TryCon {
+
+  @mutable
+  struct NestedStructTest1{
+    NestedStruct2 ns;
+  };
+
+  @mutable
+  struct NestedStructTest2{
+    @try_construct(USE_DEFAULT) NestedStruct3 ns;
+  };
+
+
+  @mutable
+  struct TrimStruct1 {
+    idl3str64 str64_t;
+    idl3wstr64 wstr64_t;
+    idl3ShortSeqUnbound psu_t;
+    idl3ShortSeqBound2 psb_t;
+    idl3UnsignedShortSeqUnbound upsu_t;
+    idl3UnsignedShortSeqBound2 upsb_t;
+    idl3EnumSeqUnbound esu_t;
+    idl3EnumSeqBound2 esb_t;
+    idl3StringSeqUnbound strsu_t;
+    idl3StringSeqBound2 strsb_t;
+    idl3WideStringSeqUnbound wstrsu_t;
+    idl3WideStringSeqBound2 wstrsb_t;
+    idl3StructSeqUnbound ssu_t;
+    idl3StructSeqBound2 ssb_t;
+    idl3ShortArraySeqUnbound sasu_t;
+    idl3ShortArraySeqBound2 sasb_t;
+    idl3SeqShortSeqUnboundUnbound sssuu_t;
+    idl3SeqShortSeqUnboundBound2 sssub_t;
+    idl3SeqShortSeqBoundUnbound2 sssbu_t;
+    idl3SeqShortSeqBoundBound2 sssbb_t;
+  };
+
+  @mutable
+  struct TrimStruct2 {
+    @try_construct(TRIM) idl3str20 str20_t;
+    @try_construct(TRIM) idl3wstr20 wstr20_t;
+    @try_construct(TRIM) idl3ShortSeqUnbound psu_t;
+    @try_construct(TRIM) idl3ShortSeqBound psb_t;
+    @try_construct(TRIM) idl3UnsignedShortSeqUnbound upsu_t;
+    @try_construct(TRIM) idl3UnsignedShortSeqBound upsb_t;
+    @try_construct(TRIM) idl3EnumSeqUnbound esu_t;
+    @try_construct(TRIM) idl3EnumSeqBound esb_t;
+    @try_construct(TRIM) idl3StringSeqUnbound strsu_t;
+    @try_construct(TRIM) idl3StringSeqBound strsb_t;
+    @try_construct(TRIM) idl3WideStringSeqUnbound wstrsu_t;
+    @try_construct(TRIM) idl3WideStringSeqBound wstrsb_t;
+    @try_construct(TRIM) idl3StructSeqUnboundTrim ssu_t;
+    @try_construct(TRIM) idl3StructSeqBoundTrim ssb_t;
+    @try_construct(TRIM) idl3ShortArraySeqUnbound sasu_t;
+    @try_construct(TRIM) idl3ShortArraySeqBound sasb_t;
+    //unbounded so no trim
+    idl3SeqShortSeqUnboundUnbound sssuu_t;
+    @try_construct(TRIM) idl3SeqShortSeqUnboundBound sssub_t;
+    //unbounded so no trim
+    idl3SeqShortSeqBoundUnbound sssbu_t;
+    @try_construct(TRIM) idl3SeqShortSeqBoundBound sssbb_t;
+  };
+
+};

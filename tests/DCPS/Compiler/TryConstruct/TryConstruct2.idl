@@ -1,0 +1,188 @@
+
+
+//enum for use in struct, union, and sequence
+//due to issue 1900, enums in C++11 need an extra value beyond each case when used as a union discriminator
+enum idl2EnumType {idl2VALUE1, idl2VALUE2, idl2ValueExtra};
+enum idl2EnumType2 {idl2B1, idl2B2, idl2B3, idl2B4, idl2BExtra};
+
+//bounded string definitions
+typedef string<20> idl2str20;
+typedef wstring<20> idl2wstr20;
+typedef string<64> idl2str64;
+typedef wstring<64> idl2wstr64;
+
+//array for use in struct, union, and sequence
+typedef idl2str64 idl2str64Array[10];
+typedef idl2str20 idl2str20Array[10];
+typedef idl2str20 idl2str20ArrayTrim @try_construct(TRIM) [10];
+
+//nested struct for use in struct, union, and sequence
+@mutable
+struct NestedStructDef2 {
+  @try_construct(DISCARD) idl2str64 str64_d;
+  @try_construct(USE_DEFAULT) idl2str64 str64_ud;
+  @try_construct(TRIM) idl2str64 str64_t;
+};
+
+@mutable
+struct NestedStructTrimDef2 {
+  @try_construct(DISCARD) idl2str20 str20_d;
+  @try_construct(USE_DEFAULT) idl2str20 str20_ud;
+  @try_construct(TRIM) idl2str20 str20_t;
+};
+
+typedef sequence <short, 2> idl2ShortSeqBound;
+typedef sequence <short, 3> idl2ShortSeqBound2;
+
+module TryCon {
+
+  @mutable
+  struct StringTest1 {
+    idl2str64 str64_d;
+    idl2str64 str64_ud;
+    idl2str64 str64_t;
+  };
+
+  @mutable
+  struct StringTest2 {
+    @try_construct(DISCARD) idl2str20 str20_d;
+    @try_construct(USE_DEFAULT) idl2str20 str20_ud;
+    @try_construct(TRIM) idl2str20 str20_t;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union BaseDiscrimUnion switch (idl2EnumType2) {
+    case idl2B1: short s1;
+    case idl2B2: short s2;
+    case idl2B3: short s3;
+    case idl2B4: short s4;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union DiscardDiscrimUnion switch (@try_construct(DISCARD) idl2EnumType) {
+    case idl2VALUE1: short s1;
+    case idl2VALUE2: short s2;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union DefaultDiscrimUnion switch (@try_construct(USE_DEFAULT) idl2EnumType) {
+    case idl2VALUE1: short s1;
+    case idl2VALUE2: short s2;
+  };
+
+    @mutable
+  struct DiscardStructString1 {
+    idl2str64 str64_d;
+  };
+
+  @mutable
+  struct DiscardStructString2 {
+    idl2str20 str20_d;
+  };
+
+  @mutable
+  struct DiscardStructWString1 {
+    idl2wstr64 wstr64_d;
+  };
+
+  @mutable
+  struct DiscardStructWString2 {
+    idl2wstr20 wstr20_d;
+  };
+
+  @mutable
+  struct DiscardStructStruct1 {
+    NestedStructDef2 ns;
+  };
+
+  @mutable
+  struct DiscardStructStruct2 {
+    NestedStructTrimDef2 ns;
+  };
+
+  @mutable
+  struct DiscardStructArray1 {
+    idl2str64Array sa;
+  };
+
+  @mutable
+  struct DiscardStructArray2 {
+    idl2str20Array sa;
+  };
+
+  typedef sequence <idl2str64> ss_64;
+  typedef sequence <idl2str20> ss_20;
+
+  @mutable
+  struct DiscardStructSequence1 {
+    ss_64 ss64;
+  };
+
+  @mutable
+  struct DiscardStructSequence2 {
+    ss_20 ss20;
+  };
+
+  @mutable
+  struct DiscardStructArrayAnon1 {
+    idl2str64 saa64[3];
+  };
+
+  @mutable
+  struct DiscardStructArrayAnon2 {
+    idl2str20 saa20[3];
+  };
+
+  @mutable
+  struct DiscardStructSequenceAnon1 {
+    sequence <idl2str64> ssa64;
+  };
+
+  @mutable
+  struct DiscardStructSequenceAnon2 {
+    sequence <idl2str20> ssa20;
+  };
+
+  @topic
+  @mutable
+  struct AnonArrStruct {
+    //string
+    idl2str64 AnonStringArr[3];
+    //wstring
+    idl2wstr64 AnonWideStringArr[3];
+    //array
+    idl2str64Array AnonArrayArr[3];
+    //sequence
+    idl2ShortSeqBound2 AnonArrShortSeqBound[3];
+  };
+
+  @topic
+  @mutable
+  struct AnonArrStructTrim {
+    //string
+    idl2str20 AnonStringArr @try_construct(TRIM) [3];
+    //wstring
+    idl2wstr20 AnonWideStringArr @try_construct(TRIM) [3];
+    //array
+    idl2str20ArrayTrim AnonArrayArr [3];
+    //sequence
+    idl2ShortSeqBound AnonArrShortSeqBound @try_construct(TRIM) [3];
+  };
+
+  @topic
+  @mutable
+  struct AnonArrStructUseDefault {
+    //string
+    idl2str20 AnonStringArr @try_construct(USE_DEFAULT) [3];
+    //wstring
+    idl2wstr20 AnonWideStringArr @try_construct(USE_DEFAULT) [3];
+    //array
+    idl2str20Array AnonArrayArr @try_construct(USE_DEFAULT) [3];
+    //sequence
+    idl2ShortSeqBound AnonArrShortSeqBound @try_construct(USE_DEFAULT) [3];
+  };
+
+};

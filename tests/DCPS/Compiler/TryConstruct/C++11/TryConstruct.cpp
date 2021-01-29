@@ -5,6 +5,8 @@
  * OR YOU WILL BREAK THE TEST
  ***/
 #include "TryConstructTypeSupportImpl.h"
+#include "TryConstruct2TypeSupportImpl.h"
+#include "TryConstruct3TypeSupportImpl.h"
 
 #include <dds/DCPS/XTypes/TypeObject.h>
 #include <gtest/gtest.h>
@@ -229,7 +231,7 @@ TEST(StructandSeq, USE_DEFAULT)
   sent.ns().ns_ud().str64_ud("WORLD");
   sent.ns().ns_ud().str64_t("GOODBYE");
   for (ACE_INT16 i = 0; i < 10; ++i) sent.ns().sa_mud()[i] = 0;
-  sent.ns().e_ud() = EnumType::VALUE1;
+  sent.ns().e_ud() = idl3EnumType::idl3VALUE1;
   sent.ns().by_ud() = 0x00;
   sent.ns().bo_ud() = false;
   sent.ns().s_ud() = 5;
@@ -243,7 +245,7 @@ TEST(StructandSeq, USE_DEFAULT)
   expected.ns().ns_ud().str64_ud("");
   expected.ns().ns_ud().str64_t("");
   for (ACE_INT16 i = 0; i < 10; ++i) expected.ns().sa_mud()[i] = 0;
-  expected.ns().e_ud() = EnumType::VALUE1;
+  expected.ns().e_ud() = idl3EnumType::idl3VALUE1;
   expected.ns().by_ud() = 0x00;
   expected.ns().bo_ud() = false;
   expected.ns().s_ud() = 0;
@@ -321,11 +323,11 @@ TEST(StructandSeq, TRIM)
   }
   sent.esu_t().resize(3);
   for (ACE_INT16 i = 0; i < 3; ++i) {
-    sent.esu_t()[i] = EnumType::VALUE1;
+    sent.esu_t()[i] = idl3EnumType::idl3VALUE1;
   }
   sent.esb_t().resize(3);
   for (ACE_INT16 i = 0; i < 3; ++i) {
-    sent.esb_t()[i] = EnumType::VALUE1;
+    sent.esb_t()[i] = idl3EnumType::idl3VALUE1;
   }
   sent.strsu_t().resize(3);
   for (ACE_INT16 i = 0; i < 3; ++i) {
@@ -922,7 +924,7 @@ TEST(Union, DISCARD)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(EnumType2::BExtra);
+    sent._d(idl2EnumType2::idl2BExtra);
     sent.s4(5);
     TryCon::DiscardDiscrimUnion actual;
     {
@@ -1074,10 +1076,10 @@ TEST(Union, USE_DEFAULT)
   }
   {
     TryCon::BaseDiscrimUnion sent;
-    sent._d(EnumType2::BExtra);
+    sent._d(idl2EnumType2::idl2BExtra);
     sent.s4(5);
     TryCon::DefaultDiscrimUnion expected;
-    expected._d(EnumType::VALUE1);
+    expected._d(idl2EnumType::idl2VALUE1);
     expected.s1(0);
     TryCon::DefaultDiscrimUnion actual;
     {
