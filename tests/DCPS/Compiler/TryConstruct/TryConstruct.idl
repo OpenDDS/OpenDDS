@@ -34,8 +34,6 @@ typedef str64 str64Array[10];
 typedef str20 str20Array[10];
 typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
 
-
-
 //sequences
 //enum
 typedef sequence <EnumType> EnumSeqUnbound;
@@ -68,7 +66,6 @@ typedef sequence <@try_construct(TRIM) ShortSeqBound> SeqShortSeqBoundUnbound;
 typedef sequence <ShortSeqBound2> SeqShortSeqBoundUnbound2;
 typedef sequence <@try_construct(TRIM) ShortSeqBound, 2> SeqShortSeqBoundBound;
 typedef sequence <ShortSeqBound2, 3> SeqShortSeqBoundBound2;
-
 
 //arrays
 //enum
@@ -162,7 +159,6 @@ typedef sequence <NestedStructTrim> StructSeqUnboundTrim;
 typedef sequence <NestedStruct, 2> StructSeqBound;
 typedef sequence <NestedStructTrim, 2> StructSeqBoundTrim;
 typedef sequence <NestedStruct, 3> StructSeqBound2;
-
 
 module TryCon {
 

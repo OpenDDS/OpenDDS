@@ -132,7 +132,6 @@ struct NestedStruct3 {
   @try_construct(TRIM) idl3str20 str20_t;
 };
 
-
 module TryCon {
 
   @mutable
@@ -144,7 +143,6 @@ module TryCon {
   struct NestedStructTest2{
     @try_construct(USE_DEFAULT) NestedStruct3 ns;
   };
-
 
   @mutable
   struct TrimStruct1 {
