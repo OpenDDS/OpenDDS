@@ -3398,11 +3398,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
-#        vcpkgDirectory: 'C:\vcpkg'
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3443,7 +3438,7 @@ jobs:
 #      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows" --openssl="C:\vcpkg\installed\x64-windows"
+#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x64-windows" --openssl="%VCPKG_ROOT%\installed\x64-windows"
 #    - name: check build configuration
 #      shell: cmd
 #      run: |
@@ -3596,11 +3591,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
-#        vcpkgDirectory: 'C:\vcpkg'
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -3641,7 +3631,7 @@ jobs:
 #      shell: cmd
 #      run: |
 #        cd OpenDDS
-#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x64-windows"
+#        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x64-windows"
 #    - name: check build configuration
 #      shell: cmd
 #      run: |
@@ -3875,11 +3865,6 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
-        vcpkgDirectory: 'C:\vcpkg'
-    - name: Clean Up VCPKG
-      shell: bash
-      run: |
-        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3922,7 +3907,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x86-windows" --openssl="C:\vcpkg\installed\x86-windows"
+        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
@@ -4081,11 +4066,6 @@ jobs:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
-        vcpkgDirectory: 'C:\vcpkg'
-    - name: Clean Up VCPKG
-      shell: bash
-      run: |
-        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -4128,7 +4108,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="C:\vcpkg\installed\x86-windows"
+        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
@@ -4365,10 +4345,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
 #        vcpkgTriplet: x64-windows
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
@@ -4563,10 +4539,6 @@ jobs:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
 #        vcpkgTriplet: x64-windows
-#    - name: Clean Up VCPKG
-#      shell: bash
-#      run: |
-#        rm -rf $VCPKG_ROOT/downloads $VCPKG_ROOT/buildtrees $VCPKG_ROOT/packages
 #    - name: checkout MPC
 #      uses: actions/checkout@v2.3.4
 #      with:
